@@ -1,0 +1,31 @@
+services:
+  nginx:
+    build: ./dockerfiles/nginx
+    volumes:
+      - .:/var/www/html/
+    ports:
+      - 80:80
+      - 443:443
+  php:
+    build: ./dockerfiles/php
+    volumes:
+      # - ./dockerfiles/php-fpm/php.ini:/usr/local/etc/php/php.ini
+       - .:/var/www/html/
+    expose:
+      - 9000
+  workspace:
+    build: ./dockerfiles/workspace
+    tty: true
+    volumes:
+      - .:/app/
+  database:
+    image: mysql:8.0.29
+    volumes:
+      - ./dockerfiles/mysql/data:/var/lib/mysql/
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: default
+      MYSQL_USER: default
+      MYSQL_PASSWORD: secret
