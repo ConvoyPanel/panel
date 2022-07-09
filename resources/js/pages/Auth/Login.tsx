@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FormEvent, useEffect } from 'react';
-import Button from '@/components/Button';
+import { Button } from '@mantine/core'
 import Checkbox from '@/components/Checkbox';
 import Guest from '@/components/layouts/Guest';
 import Input from '@/components/Input';
@@ -92,7 +92,7 @@ export default function Login({ status, canResetPassword }: Props) {
                         </Link>
                     )}
 
-                    <Button className="ml-4" processing={processing}>
+                    <Button type='submit' className="ml-4" loading={processing}>
                         Log in
                     </Button>
                 </div>
