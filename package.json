@@ -31,5 +31,8 @@
         "twin.macro": "^3.0.0-rc.3",
         "vite": "^2.9.11",
         "vite-plugin-babel-macros": "^1.0.6"
+    },
+    "dependencies": {
+        "@heroicons/react": "^1.0.6"
     }
 }
