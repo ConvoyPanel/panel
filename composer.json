@@ -11,7 +11,9 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^2.8",
         "laravel/tinker": "^2.7",
-        "tightenco/ziggy": "^1.0"
+        "mrkampf/proxmox-ve": "^0.4.1",
+        "tightenco/ziggy": "^1.0",
+        "webmozart/assert": "^1.11"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
