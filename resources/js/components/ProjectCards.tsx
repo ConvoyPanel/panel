@@ -56,3 +56,5 @@ const ProjectCards = ({ projects }: Props) => {
     </ul>
   )
 }
+
+export default ProjectCards
