@@ -33,6 +33,7 @@
         "vite-plugin-babel-macros": "^1.0.6"
     },
     "dependencies": {
-        "@heroicons/react": "^1.0.6"
+        "@heroicons/react": "^1.0.6",
+        "easy-peasy": "^5.0.4"
     }
 }

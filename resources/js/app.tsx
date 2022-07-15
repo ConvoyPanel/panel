@@ -8,6 +8,8 @@ import { createInertiaApp } from '@inertiajs/inertia-react'
 import { InertiaProgress } from '@inertiajs/progress'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { MantineProvider } from '@mantine/core'
+import { StoreProvider } from 'easy-peasy'
+import { store } from '@/state'
 
 const appName =
   window.document.getElementsByTagName('title')[0]?.innerText || 'Vineyard'
@@ -22,7 +24,9 @@ createInertiaApp({
   setup({ el, App, props }) {
     return render(
       <MantineProvider emotionOptions={{ key: 'mantine', prepend: false }}>
-        <App {...props} />
+        <StoreProvider store={store}>
+          <App {...props} />
+        </StoreProvider>
       </MantineProvider>,
       el
     )

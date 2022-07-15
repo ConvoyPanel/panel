@@ -15,7 +15,7 @@ export default function Dashboard({ auth, servers }: Props) {
     return {
         name: server.name,
         description: server.description,
-        link: `/servers/${server.id}`,
+        link: route('servers.show', server.id),
     }
   }), [servers])
 
