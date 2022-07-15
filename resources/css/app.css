@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.h1 {
+    @apply font-semibold text-xl text-gray-800 leading-tight
+}
+
+.h2-deemphasized {
+    @apply text-gray-500 text-xs font-medium uppercase tracking-wide
+}

@@ -28,7 +28,7 @@ const ProjectCards = ({ projects }: Props) => {
             {getInitials(project.name)}
           </div>
           <div className='flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate'>
-            <div className='flex-1 px-4 py-2 text-sm truncate'>
+            <div className={classNames(project.description ? 'py-2' : 'py-4','flex-1 px-4 text-sm truncate')}>
               <Link
                 href={project.link}
                 className='text-gray-900 font-medium hover:text-gray-600'
