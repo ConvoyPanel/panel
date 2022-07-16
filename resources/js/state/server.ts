@@ -17,10 +17,14 @@ export interface ServerData {
 
 export interface ServerStore {
   data?: ServerData
+  setServer: Action<ServerStore, ServerData | undefined>
 }
 
 const server: ServerStore = {
     data: undefined,
+    setServer: action((state, payload) => {
+        state.data = payload
+    })
 }
 
 export default server;
