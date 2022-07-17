@@ -39,9 +39,7 @@ const Show = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='h1'>{server.name}</h1>}
-      secondaryHeader={
-        <ServerNav id={server.id} />
-      }
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Overview`} />
 
@@ -51,7 +49,16 @@ const Show = ({ auth, server }: Props) => {
 
           <PowerActions />
 
-          {serverState ? <StatGraphs /> : <Loader />}
+          {serverState ? (
+            <StatGraphs />
+          ) : (
+            <div className='grid place-items-center h-[30vh] w-full'>
+              <div className='flex flex-col space-y-3 items-center'>
+                <Loader />
+                <h3 className='h3-deemphasized'>Connecting</h3>
+              </div>
+            </div>
+          )}
         </ServerContext.Provider>
       </Main>
     </Authenticated>
