@@ -34,29 +34,33 @@ const useServerState = (id: number) => {
   }, [])
 
   const updateServerStatus = async () => {
-    const {
-      data: {
-        data: { status, cpu, mem, maxmem, uptime },
-      },
-    } = await getStatus(id)
+    try {
+      const {
+        data: {
+          data: { status, cpu, mem, maxmem, uptime },
+        },
+      } = await getStatus(id)
 
-    const { time, unit } = convertTimeToSmallest(uptime)
+      const { time, unit } = convertTimeToSmallest(uptime)
 
-    setServer({
-      id,
-      state: status,
-      uptime: {
-        time,
-        unit,
-      },
-      cpu: Math.floor(cpu * 10000) / 100,
-      mem: formatBytes(mem),
-      maxmem: formatBytes(maxmem),
-      memUnparsed: {
-        mem,
-        maxmem,
-      },
-    })
+      setServer({
+        id,
+        state: status,
+        uptime: {
+          time,
+          unit,
+        },
+        cpu: Math.floor(cpu * 10000) / 100,
+        mem: formatBytes(mem),
+        maxmem: formatBytes(maxmem),
+        memUnparsed: {
+          mem,
+          maxmem,
+        },
+      })
+    } catch {
+      setServer(undefined)
+    }
   }
 
   return { serverState: server, updateServerStatus }

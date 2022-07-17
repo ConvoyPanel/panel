@@ -1,14 +1,16 @@
 import { colorState } from '@/api/server/getStatus'
+import { ServerContext } from '@/pages/servers/Show'
 import classNames from '@/util/classNames'
 import useServerState from '@/util/useServerState'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 
 interface Props {
   id: number
 }
 
 const ServerStatistics = ({ id }: Props) => {
-  const { serverState } = useServerState(id)
+  const serverContext = useContext(ServerContext)
+  const serverState = serverContext?.serverState
 
   interface Statistic {
     name: string
@@ -47,7 +49,7 @@ const ServerStatistics = ({ id }: Props) => {
   return (
     <div>
       <h3 className='h2-deemphasized'>Live Server Statistics</h3>
-      <dl className='mt-5 grid grid-cols-1 rounded-lg bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-3 md:divide-y-0 md:divide-x'>
+      <dl className='mt-3 grid grid-cols-1 rounded bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-3 md:divide-y-0 md:divide-x'>
         {stats.map((item) => (
           <div key={item.name} className='px-4 py-5 sm:p-6'>
             <dt className='text-base font-normal text-gray-900'>{item.name}</dt>

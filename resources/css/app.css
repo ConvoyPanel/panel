@@ -9,3 +9,7 @@
 .h2-deemphasized {
     @apply text-gray-500 text-xs font-medium uppercase tracking-wide
 }
+
+.p-card {
+    @apply px-4 py-5 sm:p-6
+}
