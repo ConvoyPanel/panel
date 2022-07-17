@@ -73,7 +73,6 @@ const useServerState = (id: number) => {
       } else {
         setServer(undefined)
         setErrorCount((count) => count + 1)
-        console.log('wow')
 
         if (errorCountRef.current > 1) {
           setIsErroring(true)

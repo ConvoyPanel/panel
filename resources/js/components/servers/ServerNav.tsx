@@ -9,8 +9,8 @@ interface Props {
 const ServerNav = ({ id }: Props) => {
   const routes = [
     'servers.show',
-    'servers.show.status',
-    'servers.show.status',
+    'servers.show.snapshots.index',
+    'servers.show.backups.index',
     'servers.show.status',
     'servers.show.settings.index',
   ]
