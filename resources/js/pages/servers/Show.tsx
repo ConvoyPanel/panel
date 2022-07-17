@@ -8,6 +8,7 @@ import { ServerData } from '@/state/server'
 import useServerState from '@/util/useServerState'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext, useEffect } from 'react'
+import StatGraphs from '@/components/servers/StatGraphs'
 
 interface Props extends DefaultProps {
   server: Server
@@ -15,7 +16,6 @@ interface Props extends DefaultProps {
 
 export interface ServerContextInterface {
   server: Server
-  serverState?: ServerData
 }
 
 export const ServerContext = createContext<ServerContextInterface | null>(null)
@@ -38,10 +38,12 @@ const Show = ({ auth, server }: Props) => {
       <Head title={`${server.name} — Overview`} />
 
       <Main>
-        <ServerContext.Provider value={{ server, serverState }}>
-          <ServerStatistics id={server.id} />
+        <ServerContext.Provider value={{ server }}>
+          <ServerStatistics />
 
           <PowerActions />
+
+          <StatGraphs />
         </ServerContext.Provider>
       </Main>
     </Authenticated>

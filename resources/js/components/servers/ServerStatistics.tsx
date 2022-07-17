@@ -4,13 +4,9 @@ import classNames from '@/util/classNames'
 import useServerState from '@/util/useServerState'
 import { useContext, useMemo } from 'react'
 
-interface Props {
-  id: number
-}
-
-const ServerStatistics = ({ id }: Props) => {
+const ServerStatistics = () => {
   const serverContext = useContext(ServerContext)
-  const serverState = serverContext?.serverState
+  const { serverState } = useServerState(serverContext?.server.id as number)
 
   interface Statistic {
     name: string
@@ -48,7 +44,7 @@ const ServerStatistics = ({ id }: Props) => {
 
   return (
     <div>
-      <h3 className='h2-deemphasized'>Live Server Statistics</h3>
+      <h3 className='h3-deemphasized'>Live Server Statistics</h3>
       <dl className='mt-3 grid grid-cols-1 rounded bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-3 md:divide-y-0 md:divide-x'>
         {stats.map((item) => (
           <div key={item.name} className='px-4 py-5 sm:p-6'>

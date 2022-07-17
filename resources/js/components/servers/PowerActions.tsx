@@ -1,17 +1,18 @@
 import updateState, { PowerAction } from '@/api/server/updateState'
 import { ServerContext } from '@/pages/servers/Show'
+import useServerState from '@/util/useServerState'
 import { Button, Paper } from '@mantine/core'
 import { useContext } from 'react'
 
 const PowerActions = () => {
   const serverContext = useContext(ServerContext)
-  const serverState = serverContext?.serverState
+  const { serverState } = useServerState(serverContext?.server.id as number)
 
   const postState = (state: PowerAction) => updateState(state, serverContext?.server.id as number)
 
   return (
     <div>
-      <h3 className='h2-deemphasized'>Power Actions</h3>
+      <h3 className='h3-deemphasized'>Power Actions</h3>
       <Paper shadow='xs' className='flex space-x-3 p-card mt-3'>
         <Button onClick={() => postState('start')} variant='default' disabled={!serverState || serverState?.state === 'running'}>Start</Button>
         <Button onClick={() => postState('reboot')} variant='default' disabled={serverState?.state !== 'running'}>Restart</Button>

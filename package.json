@@ -34,6 +34,10 @@
     },
     "dependencies": {
         "@heroicons/react": "^1.0.6",
-        "easy-peasy": "^5.0.4"
+        "chart.js": "^3.8.0",
+        "deepmerge-ts": "^4.2.1",
+        "easy-peasy": "^5.0.4",
+        "react-chartjs-2": "^4.2.0",
+        "ts-essentials": "^9.1.2"
     }
 }

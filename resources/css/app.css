@@ -6,8 +6,12 @@
     @apply font-semibold text-xl text-gray-800 leading-tight
 }
 
-.h2-deemphasized {
+.h3-deemphasized {
     @apply text-gray-500 text-xs font-medium uppercase tracking-wide
+}
+
+.h4 {
+    @apply font-bold text-sm
 }
 
 .p-card {

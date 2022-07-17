@@ -31,7 +31,7 @@ export default function Dashboard({ auth, servers }: Props) {
       <Head title='Dashboard' />
 
       <Main>
-        <h2 className='h2-deemphasized'>Your Servers</h2>
+        <h2 className='h3-deemphasized'>Your Servers</h2>
         <ProjectCards projects={formattedServers} />
       </Main>
     </Authenticated>
