@@ -49,7 +49,7 @@ export function formatBytes(
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
   const dm = decimals < 0 ? 0 : decimals
 
-  const i = customSize ? sizes.indexOf(customSize) :Math.floor(Math.log(bytes) / Math.log(k))
+  const i = customSize ? sizes.indexOf(customSize) : Math.floor(Math.log(bytes) / Math.log(k))
   const size = parseFloat((bytes / Math.pow(k, i)).toFixed(dm))
 
   return {

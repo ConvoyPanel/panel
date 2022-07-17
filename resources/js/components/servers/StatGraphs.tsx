@@ -23,7 +23,7 @@ const StatGraphs = () => {
     }
 
     cpu.push(serverState.cpu)
-    memory.push(formatBytes(serverState.mem.size, 0, serverState.maxmem.unit as Sizes).size)
+    memory.push(formatBytes(serverState.memUnparsed.mem, 2, serverState.maxmem.unit as Sizes).size)
   }, [serverState])
 
   return (
