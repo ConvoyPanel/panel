@@ -8,6 +8,10 @@ export interface MemUnparsed {
 
 export interface ServerData {
   id: number
+  uptime: {
+    time: number
+    unit: string
+  }
   state: ServerState
   cpu: number
   mem: FormattedBytes

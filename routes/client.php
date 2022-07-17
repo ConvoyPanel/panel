@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
-Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.show.'], function () {
-    Route::get('/', [ServerController::class, 'show']);
+Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.'], function () {
+    Route::get('/', [ServerController::class, 'show'])->name('show');
 
-    Route::get('/status', [StatusController::class, 'show'])->name('status');
+    Route::group(['as' => 'show.'], function () {
+        Route::get('/status', [StatusController::class, 'show'])->name('status');
+    });
 });

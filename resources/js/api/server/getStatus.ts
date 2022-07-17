@@ -9,41 +9,22 @@ import axios from 'axios'
 export const refreshTime: number = 2000 // milliseconds
 
 export interface FormattedBytes {
-  size: number;
-  unit: string;
+  size: number
+  unit: string
 }
 
 export type ServerState = 'querying' | 'stopped' | 'running' | 'error'
+export type ColorType = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'neutral'
 
 export interface iconStateInterface {
-  [key: string]: {
-    backgroundColor: string;
-    textColor: string;
-    //icon: any;
-  }
+  [key: string]: ColorType
 }
 
-export const iconState: iconStateInterface = {
-  querying: {
-    backgroundColor: 'bg-gray-200',
-    textColor: 'text-gray-700',
-    //icon: faClock,
-  },
-  stopped: {
-    backgroundColor: 'bg-red-200',
-    textColor: 'text-red-700',
-    //icon: faStop,
-  },
-  running: {
-    backgroundColor: 'bg-green-200',
-    textColor: 'text-green-700',
-    //icon: faPlay,
-  },
-  error: {
-    backgroundColor: 'bg-gray-200',
-    textColor: 'text-gray-700',
-    //icon: faExclamationCircle,
-  },
+export const colorState: iconStateInterface = {
+  querying: 'neutral',
+  stopped: 'danger',
+  running: 'success',
+  error: 'danger'
 }
 
 export function formatBytes(bytes: number, decimals = 2): FormattedBytes {
@@ -61,7 +42,32 @@ export function formatBytes(bytes: number, decimals = 2): FormattedBytes {
   }
 }
 
+export interface ServerStateInterface {
+  netout: number
+  netin: number
+  name: string
+  cpu: number
+  mem: number
+  disk: number
+  uptime: number
+  status: ServerState
+  ha: {
+    managed: number
+  }
+  diskwrite: number
+  diskread: number
+  cpus: number
+  qmpstatus: string
+  vmid: number
+  maxdisk: number
+  serial: number
+  maxmem: number
+}
+
+export interface ServerStateAxiosResponse {
+  data: ServerStateInterface
+}
+
 export default (id: number) => {
-  // @ts-ignore
-  return axios.get(route('servers.show.status', id), {hideProgress: true})
+  return axios.get<ServerStateAxiosResponse>(route('servers.show.status', id))
 }
