@@ -15,6 +15,8 @@ const Show = ({ auth, server}: Props) => {
     const { serverState, updateServerStatus } = useServerState(server.id)
 
     useEffect(() => {
+      updateServerStatus()
+
       const updateStateInterval = setInterval(updateServerStatus, 1000)
 
       return () => {
