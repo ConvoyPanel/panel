@@ -9,6 +9,7 @@ import useServerState from '@/util/useServerState'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext, useEffect } from 'react'
 import StatGraphs from '@/components/servers/StatGraphs'
+import { Loader } from '@mantine/core'
 
 interface Props extends DefaultProps {
   server: Server
@@ -35,7 +36,7 @@ const Show = ({ auth, server }: Props) => {
 
   return (
     <Authenticated auth={auth} header={<h1 className='h1'>{server.name}</h1>}>
-      <Head title={`${server.name} — Overview`} />
+      <Head title={`${server.name} - Overview`} />
 
       <Main>
         <ServerContext.Provider value={{ server }}>
@@ -43,7 +44,7 @@ const Show = ({ auth, server }: Props) => {
 
           <PowerActions />
 
-          <StatGraphs />
+          {serverState ? <StatGraphs /> : <Loader />}
         </ServerContext.Provider>
       </Main>
     </Authenticated>

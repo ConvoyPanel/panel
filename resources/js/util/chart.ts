@@ -153,14 +153,14 @@ function useChart(label: string, opts?: UseChartOptions) {
       })
     )
 
-  return { props: { data, options }, push, clear }
+  return { props: { data, options }, push, clear, setOptions }
 }
 
 function useChartTickLabel(
   label: string,
   max: number,
   tickLabel: string,
-  roundTo?: number
+  roundTo?: number,
 ) {
   return useChart(label, {
     sets: 1,

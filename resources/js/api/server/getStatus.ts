@@ -14,7 +14,16 @@ export interface FormattedBytes {
 }
 
 export type ServerState = 'querying' | 'stopped' | 'running' | 'error'
-export type ColorType = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'neutral'
+export type ColorType =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'danger'
+  | 'warning'
+  | 'info'
+  | 'light'
+  | 'dark'
+  | 'neutral'
 
 export interface iconStateInterface {
   [key: string]: ColorType
@@ -24,20 +33,27 @@ export const colorState: iconStateInterface = {
   querying: 'neutral',
   stopped: 'danger',
   running: 'success',
-  error: 'danger'
+  error: 'danger',
 }
 
-export function formatBytes(bytes: number, decimals = 2): FormattedBytes {
+export type Sizes = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB' | 'EB' | 'ZB' | 'YB'
+
+export function formatBytes(
+  bytes: number,
+  decimals = 2,
+  customSize: Sizes
+): FormattedBytes {
   if (bytes === 0) return { size: 0, unit: 'B' }
 
   const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const dm = decimals < 0 ? 0 : decimals
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const i = customSize ? sizes.indexOf(customSize) :Math.floor(Math.log(bytes) / Math.log(k))
+  const size = parseFloat((bytes / Math.pow(k, i)).toFixed(dm))
 
   return {
-    size: parseFloat((bytes / Math.pow(k, i)).toFixed(dm)),
+    size,
     unit: sizes[i],
   }
 }

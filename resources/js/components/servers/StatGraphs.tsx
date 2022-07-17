@@ -5,14 +5,14 @@ import { Line } from 'react-chartjs-2'
 import { useChartTickLabel } from '@/util/chart'
 import ChartBlock from '@/components/ChartBlock'
 import useServerState from '@/util/useServerState'
+import { formatBytes, Sizes } from '@/api/server/getStatus'
 
 const StatGraphs = () => {
   const serverContext = useContext(ServerContext)
   const { serverState } = useServerState(serverContext?.server.id as number)
 
   const cpu = useChartTickLabel('CPU', 100, '%', 2)
-  let memory = useChartTickLabel('Memory', 1, 'GB', 2)
-  const [initMemory, setInitMemory] = useState(false)
+  const memory = useChartTickLabel('Memory', serverState?.maxmem.size || 1, serverState?.maxmem.unit || 'GB', 2)
 
   useEffect(() => {
     if (!serverState) {
@@ -22,13 +22,8 @@ const StatGraphs = () => {
         return
     }
 
-    /* if (!initMemory) {
-        memory = useChartTickLabel('Memory', serverState.maxmem.size, serverState.maxmem.unit)
-        setInitMemory(true)
-    } */
-
     cpu.push(serverState.cpu)
-    memory.push(serverState.mem.size)
+    memory.push(formatBytes(serverState.mem.size, 0, serverState.maxmem.unit as Sizes).size)
   }, [serverState])
 
   return (
