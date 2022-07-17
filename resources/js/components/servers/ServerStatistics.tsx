@@ -16,12 +16,17 @@ const ServerStatistics = () => {
     color?: 'danger' | 'success' | 'warning' | 'neutral'
   }
 
+  // capitalize first letter in word
+  const capitalize = (word: string) => {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+  }
+
   const stats = useMemo<Statistic[]>(
     () => [
       {
         name: 'CPU',
         stat: `${serverState?.cpu || 0}%`,
-        caption: serverState?.state || 'connecting...',
+        caption: capitalize(serverState?.state || '') || 'Connecting...',
         color: colorState[
           serverState?.state || 'querying'
         ] as Statistic['color'],
