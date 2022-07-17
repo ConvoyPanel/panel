@@ -41,7 +41,7 @@ export type Sizes = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB' | 'EB' | 'ZB' | 'YB'
 export function formatBytes(
   bytes: number,
   decimals = 2,
-  customSize: Sizes
+  customSize?: Sizes
 ): FormattedBytes {
   if (bytes === 0) return { size: 0, unit: 'B' }
 

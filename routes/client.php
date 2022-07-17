@@ -19,6 +19,8 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
+
+            Route::patch('/basic-info', [SettingsController::class, 'updateBasicInfo'])->name('update-basic-info');
         });
     });
 });

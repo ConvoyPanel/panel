@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Servers\UpdateBasicInfoRequest;
 use App\Models\Server;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ServerController extends Controller
+class ServerController extends ApplicationApiController
 {
     public function show(Server $server)
     {

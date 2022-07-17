@@ -11,6 +11,7 @@ import { createContext, useEffect } from 'react'
 import StatGraphs from '@/components/servers/StatGraphs'
 import { Loader, Tabs } from '@mantine/core'
 import ServerNav from '@/components/servers/ServerNav'
+import ServerUnavailableModal from '@/components/servers/ServerUnavailableModal'
 
 interface Props extends DefaultProps {
   server: Server
@@ -23,7 +24,9 @@ export interface ServerContextInterface {
 export const ServerContext = createContext<ServerContextInterface | null>(null)
 
 const Show = ({ auth, server }: Props) => {
-  const { serverState, updateServerStatus } = useServerState(server.id)
+  const { serverState, updateServerStatus, isErroring } = useServerState(
+    server.id
+  )
 
   useEffect(() => {
     updateServerStatus()
@@ -45,6 +48,8 @@ const Show = ({ auth, server }: Props) => {
 
       <Main>
         <ServerContext.Provider value={{ server }}>
+          <ServerUnavailableModal opened={isErroring} />
+
           <ServerStatistics />
 
           <PowerActions />

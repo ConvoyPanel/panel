@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Server;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Requests\Servers\UpdateBasicInfoRequest;
 
 class SettingsController extends ApplicationApiController
 {
@@ -15,5 +16,12 @@ class SettingsController extends ApplicationApiController
         return Inertia::render('servers/settings/Index', [
             'server' => $server,
         ]);
+    }
+
+    public function updateBasicInfo(Server $server, UpdateBasicInfoRequest $request)
+    {
+        $server->update(['name' => $request->name]);
+
+        return $this->returnNoContent();
     }
 }

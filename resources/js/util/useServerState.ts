@@ -1,6 +1,6 @@
 import { createTypedHooks } from 'easy-peasy'
 import { ApplicationStore } from '@/state'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import getStatus, { formatBytes } from '@/api/server/getStatus'
 
 const { useStoreActions, useStoreState } = createTypedHooks<ApplicationStore>()
@@ -8,6 +8,13 @@ const { useStoreActions, useStoreState } = createTypedHooks<ApplicationStore>()
 const useServerState = (id: number) => {
   const server = useStoreState((state) => state.server.data)
   const setServer = useStoreActions((actions) => actions.server.setServer)
+  const [isErroring, setIsErroring] = useState(false)
+  const [errorCount, setErrorCount] = useState(0)
+  const errorCountRef = useRef(errorCount)
+
+  useEffect(() => {
+    errorCountRef.current = errorCount
+  }, [errorCount])
 
   const convertTimeToSmallest = (seconds: number) => {
     const units = [
@@ -23,7 +30,10 @@ const useServerState = (id: number) => {
       }
     }
 
-    return { time: seconds / (bestUnit[0] as number), unit: bestUnit[1] as string }
+    return {
+      time: seconds / (bestUnit[0] as number),
+      unit: bestUnit[1] as string,
+    }
   }
 
   // preflight check to make sure we have the right server
@@ -35,35 +45,51 @@ const useServerState = (id: number) => {
 
   const updateServerStatus = async () => {
     try {
-      const {
-        data: {
+      const { data } = await getStatus(id)
+
+      if ((data as unknown as string) !== '' && data.constructor === Object) {
+        const {
           data: { status, cpu, mem, maxmem, uptime },
-        },
-      } = await getStatus(id)
+        } = data
 
-      const { time, unit } = convertTimeToSmallest(uptime)
+        const { time, unit } = convertTimeToSmallest(uptime)
 
-      setServer({
-        id,
-        state: status,
-        uptime: {
-          time,
-          unit,
-        },
-        cpu: Math.floor(cpu * 10000) / 100,
-        mem: formatBytes(mem),
-        maxmem: formatBytes(maxmem),
-        memUnparsed: {
-          mem,
-          maxmem,
-        },
-      })
+        setServer({
+          id,
+          state: status,
+          uptime: {
+            time,
+            unit,
+          },
+          cpu: Math.floor(cpu * 10000) / 100,
+          mem: formatBytes(mem),
+          maxmem: formatBytes(maxmem),
+          memUnparsed: {
+            mem,
+            maxmem,
+          },
+        })
+        setErrorCount(0)
+      } else {
+        setServer(undefined)
+        setErrorCount((count) => count + 1)
+        console.log('wow')
+
+        if (errorCountRef.current > 1) {
+          setIsErroring(true)
+        }
+      }
     } catch {
       setServer(undefined)
+      setErrorCount((count) => count + 1)
+
+      if (errorCountRef.current > 1) {
+        setIsErroring(true)
+      }
     }
   }
 
-  return { serverState: server, updateServerStatus }
+  return { serverState: server, updateServerStatus, isErroring }
 }
 
 export default useServerState

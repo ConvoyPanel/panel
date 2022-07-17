@@ -3,6 +3,8 @@ import { Server } from '@/api/types/server'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
+import BasicSettings from '@/pages/servers/settings/modules/BasicSettings'
+import { ServerContext } from '@/pages/servers/Show'
 import { Head } from '@inertiajs/inertia-react'
 
 interface Props extends DefaultProps {
@@ -18,7 +20,13 @@ const Index = ({ auth, server }: Props) => {
     >
       <Head title={`${server.name} - Settings`} />
 
-      <Main></Main>
+      <Main>
+        <div className='grid md:grid-cols-4 w-full'>
+        <ServerContext.Provider value={{ server }}>
+          <BasicSettings />
+          </ServerContext.Provider>
+        </div>
+      </Main>
     </Authenticated>
   )
 }
