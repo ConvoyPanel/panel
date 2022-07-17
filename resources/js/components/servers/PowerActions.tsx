@@ -13,7 +13,7 @@ const PowerActions = () => {
   return (
     <div>
       <h3 className='h3-deemphasized'>Power Actions</h3>
-      <Paper shadow='xs' className='flex space-x-3 p-card mt-3'>
+      <Paper shadow='xs' className='!grid grid-cols-2 gap-3 md:gap-0 md:!flex md:space-x-3 p-card mt-3'>
         <Button onClick={() => postState('start')} variant='default' disabled={!serverState || serverState?.state === 'running'}>Start</Button>
         <Button onClick={() => postState('reboot')} variant='default' disabled={serverState?.state !== 'running'}>Restart</Button>
         <Button onClick={() => postState('kill')} color='red' variant='outline' disabled={!serverState || serverState?.state === 'stopped'}>

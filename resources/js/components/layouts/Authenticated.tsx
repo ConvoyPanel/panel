@@ -9,9 +9,10 @@ import { DefaultProps } from '@/api/types/default'
 interface Props extends DefaultProps {
   children?: React.ReactNode
   header?: React.ReactNode
+  secondaryHeader?: React.ReactNode
 }
 
-export default function Authenticated({ auth, header, children }: Props) {
+export default function Authenticated({ auth, header, secondaryHeader, children }: Props) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] =
     useState(false)
 
@@ -160,6 +161,8 @@ export default function Authenticated({ auth, header, children }: Props) {
           </div>
         </header>
       )}
+
+      {secondaryHeader}
 
       <main>{children}</main>
     </div>

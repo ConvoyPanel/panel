@@ -3,17 +3,28 @@
 @tailwind utilities;
 
 .h1 {
-    @apply font-semibold text-xl text-gray-800 leading-tight
+  @apply font-semibold text-xl text-gray-800 leading-tight;
 }
 
 .h3-deemphasized {
-    @apply text-gray-500 text-xs font-medium uppercase tracking-wide
+  @apply text-gray-500 text-xs font-medium uppercase tracking-wide;
 }
 
 .h4 {
-    @apply font-bold text-sm
+  @apply font-bold text-sm;
 }
 
 .p-card {
-    @apply px-4 py-5 sm:p-6
+  @apply px-4 py-5 sm:p-6;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
