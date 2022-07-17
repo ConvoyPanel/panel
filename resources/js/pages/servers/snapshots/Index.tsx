@@ -28,10 +28,10 @@ const SnapshotRow = ({ snapshot }: { snapshot: Snapshot }) => {
         <td>{snapshot.running ? 'Yes' : 'No'}</td>
         <td>
           <RoundedButton onClick={() => setShowDeleteModal(true)}>
-            <PlayIcon className='text-gray-600 w-5 h-5' />
+            <PlayIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
           </RoundedButton>
           <RoundedButton onClick={() => setShowDeleteModal(true)}>
-            <TrashIcon className='text-red-600 w-5 h-5' />
+            <TrashIcon className='text-gray-600 hover:text-red-600 w-[18px] h-[18px]' />
           </RoundedButton>
         </td>
       </tr>
