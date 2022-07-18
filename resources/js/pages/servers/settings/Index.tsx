@@ -15,13 +15,13 @@ const Index = ({ auth, server }: Props) => {
   return (
     <Authenticated
       auth={auth}
-      header={<h1 className='h1'>{server.name}</h1>}
+      header={<h1 className='server-title'>{server.name}</h1>}
       secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Settings`} />
 
       <Main>
-        <div className='grid md:grid-cols-4 w-full'>
+        <div className='grid sm:grid-cols-2 md:grid-cols-3 w-full'>
         <ServerContext.Provider value={{ server }}>
           <BasicSettings />
           </ServerContext.Provider>

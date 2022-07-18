@@ -38,6 +38,7 @@ const BasicSettings = () => {
           value={data.name}
           className='mt-1 block w-full'
           onChange={onHandleChange}
+          error={errors.name}
           required
         />
       }

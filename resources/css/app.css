@@ -6,6 +6,10 @@
   @apply font-semibold text-xl text-gray-800 leading-tight;
 }
 
+.server-title {
+  @apply font-semibold text-xl text-gray-800 leading-tight truncate;
+}
+
 .h3 {
   @apply text-lg font-bold
 }
