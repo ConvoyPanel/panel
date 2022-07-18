@@ -18,9 +18,10 @@ class SettingsController extends ApplicationApiController
 
     public function index(Server $server)
     {
+        $data = $this->cloudinitService->setServer($server)->fetchConfig();
         return Inertia::render('servers/settings/Index', [
             'server' => $server,
-            'config' => $this->removeExtraDataProperty($this->cloudinitService->setServer($server)->fetchConfig()),
+            'config' => $data ? $this->removeExtraDataProperty($data) : $this->cloudinitService->getServerInaccessibleConfig(),
         ]);
     }
 

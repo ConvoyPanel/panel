@@ -10,9 +10,14 @@ import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 const NetworkConfigSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
+  const existingNameservers = settingsContext?.config.nameserver.split(',')
+
   const { data, setData, put, processing, errors, reset } = useForm({
     hostname: settingsContext?.config.searchdomain,
-    nameservers: settingsContext?.config.nameserver.split(',') || ['', ''],
+    nameservers: [
+      existingNameservers ? existingNameservers[0] : '',
+      existingNameservers ? existingNameservers[1] : '',
+    ],
   })
 
   const submit = () => {
@@ -30,9 +35,8 @@ const NetworkConfigSettings = () => {
     }
   }, [processing])
 
-
   const setNameserver = (index: number, value: string) => {
-    const nameservers = [...data.nameservers as string[]]
+    const nameservers = [...(data.nameservers as string[])]
     nameservers[index] = value
     setData('nameservers', nameservers)
   }

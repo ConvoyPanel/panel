@@ -60,5 +60,10 @@ class CloudinitService extends ProxmoxService
         return $this->instance()->config()->post(['nameserver' => $nameserver]);
     }
 
+    public function getServerInaccessibleConfig()
+    {
+        return ['nameserver' => 'server inaccessible,server inaccessible', 'bios' => 'seabios', 'searchdomain' => 'server inaccessible'];
+    }
+
 
 }

@@ -15,9 +15,10 @@ class SecurityController extends ApplicationApiController
 
     public function index(Server $server)
     {
+        $data = $this->cloudinitService->setServer($server)->fetchConfig();
         return inertia('servers/security/Index', [
             'server' => $server,
-            'config' => $this->removeExtraDataProperty($this->cloudinitService->setServer($server)->fetchConfig()),
+            'config' => $this->removeExtraDataProperty($data ? $data : []),
         ]);
     }
 }
