@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers;
+namespace App\Http\Requests\Client\Servers\Security;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\Servers\Cloudinit\AuthenticationType;
 
-class UpdateBasicInfoRequest extends FormRequest
+class UpdatePasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,12 +21,13 @@ class UpdateBasicInfoRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function rules()
     {
         return [
-            'name' => 'min:1|max:40'
+            'type' => [new Enum(AuthenticationType::class), 'required'],
+            'password' => ['required', 'confirmed', 'max:255', 'min:10'],
         ];
     }
 }
