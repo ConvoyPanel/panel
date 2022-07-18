@@ -6,7 +6,7 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\SnapshotService;
-use App\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
+use App\Http\Requests\Servers\Snapshots\SnapshotRequest;
 
 class SnapshotController extends ApplicationApiController
 {
@@ -24,20 +24,19 @@ class SnapshotController extends ApplicationApiController
 
         return inertia('servers/snapshots/Index', [
             'server' => $server,
-            'snapshots' => array_reverse($data ? $data['data']: []),
+            'snapshots' => $data ? $data['data']: [],
         ]);
     }
 
-    public function create(Server $server, SnapshotRequest $request)
+    public function store(Server $server, SnapshotRequest $request)
     {
         $this->snapshotService->setServer($server)->doSnapshot($request->name);
 
         return $this->returnInertiaResponse($request, 'snapshot-created');
     }
 
-    public function delete(Server $server, SnapshotRequest $request)
+    public function destroy(Server $server, SnapshotRequest $request)
     {
-
         $this->snapshotService->setServer($server)->deleteSnapshot($request->name);
 
         return $this->returnNoContent();

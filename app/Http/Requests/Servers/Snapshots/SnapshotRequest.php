@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers\Snapshots;
+namespace App\Http\Requests\Servers\Snapshots;
 
 use Illuminate\Foundation\Http\FormRequest;
 

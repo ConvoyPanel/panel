@@ -23,6 +23,12 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/snapshots', 'as' => 'snapshots.'], function () {
             Route::get('/', [SnapshotController::class, 'index'])->name('index');
+
+            Route::post('/', [SnapshotController::class, 'store'])->name('store');
+
+            Route::post('/rollback', [SnapshotController::class, 'rollback'])->name('rollback');
+
+            Route::delete('/', [SnapshotController::class, 'destroy'])->name('destroy');
         });
 
         Route::group(['prefix' => '/backups', 'as' => 'backups.'], function () {
