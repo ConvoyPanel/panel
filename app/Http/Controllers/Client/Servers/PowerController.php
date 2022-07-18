@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client\Servers;
 
 use App\Http\Controllers\ApplicationApiController;
-use App\Http\Requests\Servers\SendPowerCommandRequest;
+use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use App\Models\Server;
 use App\Services\Servers\PowerService;
 

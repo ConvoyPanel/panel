@@ -6,7 +6,7 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\SnapshotService;
-use App\Http\Requests\Servers\Snapshots\SnapshotRequest;
+use App\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 
 class SnapshotController extends ApplicationApiController
 {

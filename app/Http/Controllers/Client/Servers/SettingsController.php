@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Server;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Http\Requests\Servers\UpdateBasicInfoRequest;
+use App\Http\Requests\Client\Servers\UpdateBasicInfoRequest;
 
 class SettingsController extends ApplicationApiController
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Servers;
+namespace App\Http\Requests\Client\Servers;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SendPowerCommandRequest extends FormRequest
+class UpdateBasicInfoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class SendPowerCommandRequest extends FormRequest
     public function rules()
     {
         return [
-            'action' => 'required|in:start,shutdown,kill,reboot'
+            'name' => 'min:1|max:40'
         ];
     }
 }
