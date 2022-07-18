@@ -1,4 +1,5 @@
 import FormBlock from '@/components/FormBlock'
+import { SettingsContext } from '@/pages/servers/settings/Index'
 import { ServerContext } from '@/pages/servers/Show'
 import { formDataHandler } from '@/util/helpers'
 import { Inertia } from '@inertiajs/inertia'
@@ -7,16 +8,16 @@ import { Button, Paper, TextInput } from '@mantine/core'
 import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 
 const BasicSettings = () => {
-  const serverContext = useContext(ServerContext)
+  const settingsContext = useContext(SettingsContext)
 
   const { data, setData, post, processing, errors, reset } = useForm({
     _method: 'patch',
-    name: serverContext?.server.name,
+    name: settingsContext?.server.name,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     post(
-      route('servers.show.settings.update-basic-info', serverContext?.server.id)
+      route('servers.show.settings.update-basic-info', settingsContext?.server.id)
     )
   }
 

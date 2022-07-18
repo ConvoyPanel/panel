@@ -8,6 +8,7 @@ export interface CloudinitConfig {
   nameserver: string
   smbios1: string
   ciuser: string
+  searchdomain: string
   boot: string
   net0: string
   serial0: string

@@ -11,8 +11,8 @@ const NetworkConfigSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
   const { data, setData, put, processing, errors, reset } = useForm({
-    hostname: '',
-    nameservers: ['', ''],
+    hostname: settingsContext?.config.searchdomain,
+    nameservers: settingsContext?.config.nameserver.split(',') || ['', ''],
   })
 
   const submit = () => {
@@ -30,16 +30,9 @@ const NetworkConfigSettings = () => {
     }
   }, [processing])
 
-  useEffect(() => {
-    if (!settingsContext) return
-
-    // merge settingsContext.config.nameserver.split(',') with data.nameservers but keep length 2
-    setData('hostname', settingsContext.config.name)
-    setData('nameservers', settingsContext.config.nameserver.split(','))
-  }, [settingsContext])
 
   const setNameserver = (index: number, value: string) => {
-    const nameservers = [...data.nameservers]
+    const nameservers = [...data.nameservers as string[]]
     nameservers[index] = value
     setData('nameservers', nameservers)
   }
