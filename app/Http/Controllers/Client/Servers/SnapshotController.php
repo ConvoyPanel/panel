@@ -16,7 +16,12 @@ class SnapshotController extends ApplicationApiController
 
     public function index(Server $server)
     {
-        $data = $this->snapshotService->setServer($server)->fetchSnapshots();
+        $data = $this->snapshotService->setServer(clone $server)->fetchSnapshots();
+
+        // use code below if clone is not in the line above
+        /* $filteredData = $server->toArray();
+        unset($filteredData['node']); */
+
         return inertia('servers/snapshots/Index', [
             'server' => $server,
             'snapshots' => array_reverse($data ? $data['data']: []),
