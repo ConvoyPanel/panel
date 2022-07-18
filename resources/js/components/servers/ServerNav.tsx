@@ -15,7 +15,7 @@ const ServerNav = ({ id }: Props) => {
     'servers.show.settings.index',
   ]
 
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState(routes.indexOf(route().current() as string))
   const onChange = (active: number, tabKey: string) => {
     setActive(routes.indexOf(tabKey))
     Inertia.visit(route(tabKey, id))
