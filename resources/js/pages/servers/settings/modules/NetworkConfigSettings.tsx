@@ -10,7 +10,7 @@ import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 const NetworkConfigSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
-  const existingNameservers = settingsContext?.config.nameserver.split(',')
+  const existingNameservers = settingsContext?.config.nameserver?.split(',')
 
   const { data, setData, put, processing, errors, reset } = useForm({
     hostname: settingsContext?.config.searchdomain,

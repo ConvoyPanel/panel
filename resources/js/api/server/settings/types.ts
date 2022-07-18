@@ -5,7 +5,7 @@ export interface CloudinitConfig {
   ipconfig0: string
   bootdisk: string
   ide2: string
-  nameserver: string
+  nameserver?: string
   smbios1: string
   ciuser: string
   searchdomain: string
