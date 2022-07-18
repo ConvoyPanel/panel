@@ -1,4 +1,6 @@
+import FormBlock from '@/components/FormBlock'
 import { ServerContext } from '@/pages/servers/Show'
+import { formDataHandler } from '@/util/helpers'
 import { Inertia } from '@inertiajs/inertia'
 import { useForm } from '@inertiajs/inertia-react'
 import { Button, Paper, TextInput } from '@mantine/core'
@@ -8,37 +10,28 @@ const BasicSettings = () => {
   const serverContext = useContext(ServerContext)
 
   const { data, setData, post, processing, errors, reset } = useForm({
-    '_method': 'patch',
+    _method: 'patch',
     name: serverContext?.server.name,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    post(route('servers.show.settings.update-basic-info', serverContext?.server.id))
+    post(
+      route('servers.show.settings.update-basic-info', serverContext?.server.id)
+    )
   }
 
   useEffect(() => {
     if (!processing) {
-        Inertia.reload({ only: ['server']})
+      Inertia.reload({ only: ['server'] })
     }
   }, [processing])
 
-  const onHandleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setData(
-      // @ts-ignore
-      event.target.name,
-      event.target.type === 'checkbox'
-        ? event.target.checked
-        : event.target.value
-    )
-  }
+  const onHandleChange = (event: ChangeEvent<HTMLInputElement>) => formDataHandler(event, setData)
 
   return (
-    <Paper shadow='xs' className='p-card w-full'>
-      <h3 className='h3'>Basic Settings</h3>
-
-      <form onSubmit={submit}>
+    <FormBlock
+      title='Basic Settings'
+      inputs={
         <TextInput
           label='Name'
           name='name'
@@ -47,14 +40,11 @@ const BasicSettings = () => {
           onChange={onHandleChange}
           required
         />
-
-        <div className='flex items-center justify-end mt-4'>
-          <Button type='submit' className='ml-4' loading={processing}>
-            Save
-          </Button>
-        </div>
-      </form>
-    </Paper>
+      }
+      defaultAction
+      onSubmit={submit}
+      processing={processing}
+    />
   )
 }
 
