@@ -20,7 +20,9 @@ export interface SettingsContextInterface {
   config: CloudinitConfig
 }
 
-export const SettingsContext = createContext<SettingsContextInterface | null>(null)
+export const SettingsContext = createContext<SettingsContextInterface | null>(
+  null
+)
 
 const Index = ({ auth, server, config }: Props) => {
   return (
@@ -32,6 +34,7 @@ const Index = ({ auth, server, config }: Props) => {
       <Head title={`${server.name} - Settings`} />
 
       <Main>
+        <h3 className='h3-deemphasized'>Settings</h3>
         <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
           <SettingsContext.Provider value={{ server, config }}>
             <BasicSettings />

@@ -19,7 +19,10 @@ const Index = ({ auth, server }: Props) => {
       <Head title={`${server.name} - Backups`} />
 
       <Main>
-        <h1>Backups are unavailable because the feature hasn't been implemented</h1>
+        <h3 className='h3-deemphasized'>Backups</h3>
+        <h1>
+          Backups are unavailable because the feature hasn't been implemented
+        </h1>
       </Main>
     </Authenticated>
   )

@@ -23,6 +23,8 @@ const Index = ({ auth, server, config }: Props) => {
       <Head title={`${server.name} - Security`} />
 
       <Main>
+
+      <h3 className='h3-deemphasized'>Security Settings</h3>
         <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
           <SettingsContext.Provider
             value={{ server, config }}
