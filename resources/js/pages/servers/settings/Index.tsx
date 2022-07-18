@@ -4,6 +4,7 @@ import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
 import BasicSettings from '@/pages/servers/settings/modules/BasicSettings'
+import BiosConfigSettings from '@/pages/servers/settings/modules/BiosConfigSettings'
 import { ServerContext } from '@/pages/servers/Show'
 import { Head } from '@inertiajs/inertia-react'
 
@@ -22,8 +23,9 @@ const Index = ({ auth, server }: Props) => {
 
       <Main>
         <div className='grid sm:grid-cols-2 md:grid-cols-3 w-full'>
-        <ServerContext.Provider value={{ server }}>
-          <BasicSettings />
+          <ServerContext.Provider value={{ server }}>
+            <BasicSettings />
+            <BiosConfigSettings />
           </ServerContext.Provider>
         </div>
       </Main>

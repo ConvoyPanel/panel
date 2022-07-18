@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Client\IndexController;
 use App\Http\Controllers\Client\Servers\BackupController;
+use App\Http\Controllers\Client\Servers\CloudinitController;
 use App\Http\Controllers\Client\Servers\PowerController;
 use App\Http\Controllers\Client\Servers\ServerController;
 use App\Http\Controllers\Client\Servers\StatusController;
@@ -39,6 +40,12 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
             Route::get('/', [SettingsController::class, 'index'])->name('index');
 
             Route::patch('/basic-info', [SettingsController::class, 'updateBasicInfo'])->name('update-basic-info');
+
+            Route::put('/update-password', [CloudinitController::class, 'updatePassword'])->name('update-password');
+
+            Route::put('/update-bios', [CloudinitController::class, 'updateBios'])->name('update-bios');
+
+            Route::put('/update-network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('update-network-config');
         });
     });
 });
