@@ -12,6 +12,8 @@ use App\Http\Controllers\Client\Servers\SnapshotController;
 
 Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
+Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
+
 Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.'], function () {
     Route::get('/', [ServerController::class, 'show'])->name('show');
 
