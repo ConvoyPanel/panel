@@ -4,6 +4,7 @@ use App\Http\Controllers\Client\IndexController;
 use App\Http\Controllers\Client\Servers\BackupController;
 use App\Http\Controllers\Client\Servers\CloudinitController;
 use App\Http\Controllers\Client\Servers\PowerController;
+use App\Http\Controllers\Client\Servers\SecurityController;
 use App\Http\Controllers\Client\Servers\ServerController;
 use App\Http\Controllers\Client\Servers\StatusController;
 use App\Http\Middleware\AuthenticateServerAccess;
@@ -34,6 +35,10 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/backups', 'as' => 'backups.'], function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');
+        });
+
+        Route::group(['prefix' => '/security', 'as' => 'security.'], function () {
+            Route::get('/', [SecurityController::class, 'index'])->name('index');
         });
 
         Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {

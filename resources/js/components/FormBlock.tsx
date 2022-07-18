@@ -25,21 +25,23 @@ const FormBlock = ({
   }
 
   return (
-    <Paper shadow='xs' className='p-card w-full'>
-      <h3 className='h3'>{title}</h3>
+    <div>
+      <Paper shadow='xs' className='p-card w-full'>
+        <h3 className='h3'>{title}</h3>
 
-      <form onSubmit={submit}>
-        {inputs}
-        <div className='flex items-center justify-end mt-4'>
-          {defaultAction && (
-            <Button type='submit' className='ml-4' loading={processing}>
-              Save
-            </Button>
-          )}
-          {actions}
-        </div>
-      </form>
-    </Paper>
+        <form className='h-full' onSubmit={submit}>
+          {inputs}
+          <div className='flex items-center justify-end mt-4 bottom-0'>
+            {defaultAction && (
+              <Button type='submit' className='ml-4' loading={processing}>
+                Save
+              </Button>
+            )}
+            {actions}
+          </div>
+        </form>
+      </Paper>
+    </div>
   )
 }
 

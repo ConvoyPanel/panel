@@ -1,46 +1,47 @@
 import FormBlock from '@/components/FormBlock'
-import { ServerContext } from '@/pages/servers/Show'
+import { SettingsContext } from '@/pages/servers/settings/Index'
 import { formDataHandler } from '@/util/helpers'
 import { Inertia } from '@inertiajs/inertia'
 import { useForm } from '@inertiajs/inertia-react'
-import { TextInput } from '@mantine/core'
+import { Radio, RadioGroup } from '@mantine/core'
 import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 
 const BiosConfigSettings = () => {
-  const serverContext = useContext(ServerContext)
+  const settingsContext = useContext(SettingsContext)
 
   const { data, setData, post, processing, errors, reset } = useForm({
     _method: 'put',
-    name: serverContext?.server.name,
+    type: settingsContext?.config.bios,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     post(
-      route('servers.show.settings.update-basic-info', serverContext?.server.id)
+      route('servers.show.settings.update-bios', settingsContext?.server.id)
     )
   }
 
   useEffect(() => {
     if (!processing) {
-      Inertia.reload({ only: ['server'] })
+      Inertia.reload({ only: ['settings'] })
     }
   }, [processing])
-
-  const onHandleChange = (event: ChangeEvent<HTMLInputElement>) => formDataHandler(event, setData)
+  //const onHandleChange = (event: ChangeEvent<HTMLInputElement>) => formDataHandler(event, setData)
 
   return (
     <FormBlock
-      title='Basic Settings'
+      title='BIOS Configuration'
       inputs={
-        <TextInput
-          label='Name'
-          name='name'
-          value={data.name}
-          className='mt-1 block w-full'
-          onChange={onHandleChange}
-          error={errors.name}
-          required
-        />
+        <>
+          <RadioGroup
+            value={data.type}
+            error={errors.type}
+            //@ts-ignore
+            onChange={(value) => setData('type', value)}
+          >
+            <Radio label='SeaBIOS' value='seabios'/>
+            <Radio label='OVMF' value='ovmf'/>
+          </RadioGroup>
+        </>
       }
       defaultAction
       onSubmit={submit}

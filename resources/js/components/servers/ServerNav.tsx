@@ -11,7 +11,7 @@ const ServerNav = ({ id }: Props) => {
     'servers.show',
     'servers.show.snapshots.index',
     'servers.show.backups.index',
-    'servers.show.status',
+    'servers.show.security.index',
     'servers.show.settings.index',
   ]
 

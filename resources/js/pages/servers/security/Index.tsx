@@ -4,23 +4,14 @@ import { Server } from '@/api/types/server'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
-import BasicSettings from '@/pages/servers/settings/modules/BasicSettings'
-import BiosConfigSettings from '@/pages/servers/settings/modules/BiosConfigSettings'
-import NetworkConfigSettings from '@/pages/servers/settings/modules/NetworkConfigSettings'
+import PasswordConfigSettings from '@/pages/servers/security/modules/PasswordConfigSettings'
+import { SettingsContext } from '@/pages/servers/settings/Index'
 import { Head } from '@inertiajs/inertia-react'
-import { createContext } from 'react'
 
 interface Props extends DefaultProps {
   server: Server
   config: CloudinitConfig
 }
-
-export interface SettingsContextInterface {
-  server: Server
-  config: CloudinitConfig
-}
-
-export const SettingsContext = createContext<SettingsContextInterface | null>(null)
 
 const Index = ({ auth, server, config }: Props) => {
   return (
@@ -29,14 +20,14 @@ const Index = ({ auth, server, config }: Props) => {
       header={<h1 className='server-title'>{server.name}</h1>}
       secondaryHeader={<ServerNav id={server.id} />}
     >
-      <Head title={`${server.name} - Settings`} />
+      <Head title={`${server.name} - Security`} />
 
       <Main>
         <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
-          <SettingsContext.Provider value={{ server, config }}>
-            <BasicSettings />
-            <BiosConfigSettings />
-            <NetworkConfigSettings />
+          <SettingsContext.Provider
+            value={{ server, config }}
+          >
+            <PasswordConfigSettings />
           </SettingsContext.Provider>
         </div>
       </Main>

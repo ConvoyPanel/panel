@@ -18,7 +18,7 @@ class CloudinitService extends ProxmoxService
     {
         return $this->instance()->config()->get();
     }
-    
+
     /**
      * @param string $password
      * @param array $params
@@ -47,7 +47,7 @@ class CloudinitService extends ProxmoxService
      */
     public function changeHostname(string $hostname)
     {
-        return $this->instance()->config()->post(['seachdomain' => $hostname]);
+        return $this->instance()->config()->post(['searchdomain' => $hostname]);
     }
 
     /**
