@@ -22,7 +22,7 @@ const Index = ({ auth, server }: Props) => {
       <Head title={`${server.name} - Settings`} />
 
       <Main>
-        <div className='grid sm:grid-cols-2 md:grid-cols-3 w-full'>
+        <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
           <ServerContext.Provider value={{ server }}>
             <BasicSettings />
             <BiosConfigSettings />

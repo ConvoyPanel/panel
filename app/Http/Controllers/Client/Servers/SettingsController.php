@@ -20,7 +20,7 @@ class SettingsController extends ApplicationApiController
     {
         return Inertia::render('servers/settings/Index', [
             'server' => $server,
-            'config' => $this->cloudinitService->setServer($server)->fetchConfig(),
+            'config' => $this->removeExtraDataProperty($this->cloudinitService->setServer($server)->fetchConfig()),
         ]);
     }
 

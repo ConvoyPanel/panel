@@ -25,4 +25,9 @@ class ApplicationApiController extends Controller
             ? $this->returnNoContent()
             : back()->with('status', $message);
     }
+
+    protected function removeExtraDataProperty(Array $attributes)
+    {
+        return $attributes ? $attributes['data'] : [];
+    }
 }
