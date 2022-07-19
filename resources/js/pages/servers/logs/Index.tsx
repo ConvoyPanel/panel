@@ -4,6 +4,7 @@ import { Server } from '@/api/types/server'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
+import classNames from '@/util/classNames'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
 import { CheckIcon } from '@heroicons/react/solid'
 import { Head } from '@inertiajs/inertia-react'
@@ -52,7 +53,7 @@ const Index = ({ auth, server }: Props) => {
               {data &&
                 data.data?.map((log) => (
                   <>
-                    <tr key={log.upid}>
+                    <tr className={classNames(log.status !== 'OK' ? '!bg-red-100 hover:!bg-red-200' : '')} key={log.upid}>
                       <td>{log.type}</td>
                       <td>{calculateTime(log.starttime)}</td>
                       <td>{calculateTime(log.endtime)}</td>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "182e89777d40cd2a03a643df75cc762b",
+    "content-hash": "6d9a2b95ecaf4a3057002fb1d471034f",
     "packages": [
         {
             "name": "brick/math",
@@ -2082,12 +2082,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Performave/proxmox.git",
-                "reference": "7a29286eebb494729e6d5db153245c9ee9314dc0"
+                "reference": "0f9bd99a797d090ad4f1d3d3b8f9ca903f3ca1d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Performave/proxmox/zipball/7a29286eebb494729e6d5db153245c9ee9314dc0",
-                "reference": "7a29286eebb494729e6d5db153245c9ee9314dc0",
+                "url": "https://api.github.com/repos/Performave/proxmox/zipball/0f9bd99a797d090ad4f1d3d3b8f9ca903f3ca1d4",
+                "reference": "0f9bd99a797d090ad4f1d3d3b8f9ca903f3ca1d4",
                 "shasum": ""
             },
             "require": {
@@ -2142,7 +2142,7 @@
                 "issues": "https://github.com/MrKampf/proxmoxVE/issues",
                 "source": "https://github.com/MrKampf/proxmoxVE"
             },
-            "time": "2022-07-19T18:40:25+00:00"
+            "time": "2022-07-19T19:28:26+00:00"
         },
         {
             "name": "phpoption/phpoption",
