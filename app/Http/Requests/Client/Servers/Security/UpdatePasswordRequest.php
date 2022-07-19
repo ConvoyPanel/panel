@@ -27,7 +27,7 @@ class UpdatePasswordRequest extends FormRequest
     {
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
-            'password' => ['required', 'confirmed', 'max:255', 'min:10'],
+            'password' => ['required', 'confirmed', 'min:10'],
         ];
     }
 }

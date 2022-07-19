@@ -10,14 +10,15 @@ import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 const PasswordConfigSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
-  const { data, setData, put, processing, errors, reset } = useForm({
+  const { data, setData, post, processing, errors, reset } = useForm({
+    '_method': 'PUT',
     type: 'sshkeys',
     password: '',
     password_confirmation: '',
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
-    put(
+    post(
       route('servers.show.settings.update-password', settingsContext?.server.id)
     )
   }
