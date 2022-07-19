@@ -51,6 +51,8 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
     snapshot?.snaptime || 0
   )
 
+  const minutesString = minutes < 10 ? `0${minutes}` : minutes
+
   return (
     <>
       <Modal
@@ -111,7 +113,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
             <CheckIcon className='text-green-600 w-[18px] h-[18px]' />
           )}
         </td>
-        <td>{`${hours}:${minutes} ${month} ${day}, ${year}`}</td>
+        <td>{`${hours}:${minutesString} ${month} ${day}, ${year}`}</td>
         <td>
           <RoundedButton onClick={() => setShowRollbackModal(true)}>
             <PlayIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
@@ -223,7 +225,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
               </tbody>
             </Table>
 
-            {snapshots.length === 1 && (
+            {snapshots.length <= 1 && (
               <div className='flex flex-col justify-center items-center text-center h-[60vh]'>
                 <ArchiveIcon
                   className='mx-auto h-12 w-12 text-gray-400'

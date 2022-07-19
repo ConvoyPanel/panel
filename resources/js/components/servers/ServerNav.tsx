@@ -11,6 +11,7 @@ const ServerNav = ({ id }: Props) => {
     'servers.show',
     'servers.show.snapshots.index',
     'servers.show.backups.index',
+    'servers.show.logs.index',
     'servers.show.security.index',
     'servers.show.settings.index',
   ]
@@ -46,8 +47,9 @@ const ServerNav = ({ id }: Props) => {
           <Tabs.Tab label='Overview' tabKey={routes[0]}></Tabs.Tab>
           <Tabs.Tab label='Snapshots' tabKey={routes[1]}></Tabs.Tab>
           <Tabs.Tab label='Backups' tabKey={routes[2]}></Tabs.Tab>
-          <Tabs.Tab label='Security' tabKey={routes[3]}></Tabs.Tab>
-          <Tabs.Tab label='Settings' tabKey={routes[4]}></Tabs.Tab>
+          <Tabs.Tab label='Logs' tabKey={routes[3]}></Tabs.Tab>
+          <Tabs.Tab label='Security' tabKey={routes[4]}></Tabs.Tab>
+          <Tabs.Tab label='Settings' tabKey={routes[5]}></Tabs.Tab>
         </Tabs>
       </div>
     </div>

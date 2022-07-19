@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1266d2456a3992c23c6abfedd735fb14",
+    "content-hash": "182e89777d40cd2a03a643df75cc762b",
     "packages": [
         {
             "name": "brick/math",
@@ -1772,67 +1772,6 @@
             "time": "2022-06-09T08:59:12+00:00"
         },
         {
-            "name": "mrkampf/proxmox-ve",
-            "version": "0.4.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MrKampf/proxmoxVE.git",
-                "reference": "1fc3f479d13d9f4837356050cb381fe392076d43"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MrKampf/proxmoxVE/zipball/1fc3f479d13d9f4837356050cb381fe392076d43",
-                "reference": "1fc3f479d13d9f4837356050cb381fe392076d43",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "*",
-                "lib-curl": "*",
-                "php": "^8.0|7.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Proxmox": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "MrKampf",
-                    "email": "hello@mrkampf.com",
-                    "homepage": "https://mrkampf.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "GitCom",
-                    "email": "info@gitcom.cloud",
-                    "homepage": "https://www.gitcom.cloud",
-                    "role": "Developer / Hosting"
-                }
-            ],
-            "description": "Proxmox VE API Client",
-            "keywords": [
-                "KVM",
-                "OpenVZ",
-                "Proxmox",
-                "Virtualization",
-                "api",
-                "php",
-                "php 7",
-                "php 8"
-            ],
-            "support": {
-                "issues": "https://github.com/MrKampf/proxmoxVE/issues",
-                "source": "https://github.com/MrKampf/proxmoxVE"
-            },
-            "time": "2022-01-06T14:55:02+00:00"
-        },
-        {
             "name": "nesbot/carbon",
             "version": "2.59.1",
             "source": {
@@ -2136,6 +2075,74 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v4.14.0"
             },
             "time": "2022-05-31T20:59:12+00:00"
+        },
+        {
+            "name": "performave/proxmox",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Performave/proxmox.git",
+                "reference": "7a29286eebb494729e6d5db153245c9ee9314dc0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Performave/proxmox/zipball/7a29286eebb494729e6d5db153245c9ee9314dc0",
+                "reference": "7a29286eebb494729e6d5db153245c9ee9314dc0",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "*",
+                "lib-curl": "*",
+                "php": "^8.0|7.4|^8.1"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Proxmox": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Eric Wang",
+                    "email": "eric@performave.com",
+                    "homepage": "https://performave.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "MrKampf",
+                    "email": "hello@mrkampf.com",
+                    "homepage": "https://mrkampf.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "GitCom",
+                    "email": "info@gitcom.cloud",
+                    "homepage": "https://www.gitcom.cloud",
+                    "role": "Developer / Hosting"
+                }
+            ],
+            "description": "Proxmox VE API Client",
+            "keywords": [
+                "KVM",
+                "OpenVZ",
+                "Proxmox",
+                "Virtualization",
+                "api",
+                "php",
+                "php 7",
+                "php 8"
+            ],
+            "support": {
+                "issues": "https://github.com/MrKampf/proxmoxVE/issues",
+                "source": "https://github.com/MrKampf/proxmoxVE"
+            },
+            "time": "2022-07-19T18:40:25+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -5730,6 +5737,74 @@
             "time": "2022-06-24T13:56:11+00:00"
         },
         {
+            "name": "laravel/telescope",
+            "version": "v4.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/telescope.git",
+                "reference": "93d6a2f7b7e39407389a505abdfeceda09709f71"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/telescope/zipball/93d6a2f7b7e39407389a505abdfeceda09709f71",
+                "reference": "93d6a2f7b7e39407389a505abdfeceda09709f71",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "laravel/framework": "^8.37|^9.0",
+                "php": "^7.3|^8.0",
+                "symfony/var-dumper": "^5.0|^6.0"
+            },
+            "require-dev": {
+                "ext-gd": "*",
+                "guzzlehttp/guzzle": "^6.0|^7.0",
+                "orchestra/testbench": "^6.0|^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Telescope\\TelescopeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Telescope\\": "src/",
+                    "Laravel\\Telescope\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                },
+                {
+                    "name": "Mohamed Said",
+                    "email": "mohamed@laravel.com"
+                }
+            ],
+            "description": "An elegant debug assistant for the Laravel framework.",
+            "keywords": [
+                "debugging",
+                "laravel",
+                "monitoring"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/telescope/issues",
+                "source": "https://github.com/laravel/telescope/tree/v4.9.1"
+            },
+            "time": "2022-07-18T14:49:11+00:00"
+        },
+        {
             "name": "mockery/mockery",
             "version": "1.5.0",
             "source": {
@@ -8019,7 +8094,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "performave/proxmox": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

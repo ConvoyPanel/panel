@@ -10,9 +10,12 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { MantineProvider } from '@mantine/core'
 import { StoreProvider } from 'easy-peasy'
 import { store } from '@/state'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-const appName =
+export const appName =
   window.document.getElementsByTagName('title')[0]?.innerText || 'Vineyard'
+
+export const queryClient = new QueryClient()
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
@@ -25,7 +28,9 @@ createInertiaApp({
     return render(
       <MantineProvider emotionOptions={{ key: 'mantine', prepend: false }}>
         <StoreProvider store={store}>
-          <App {...props} />
+          <QueryClientProvider client={queryClient}>
+            <App {...props} />
+          </QueryClientProvider>
         </StoreProvider>
       </MantineProvider>,
       el

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Client\IndexController;
 use App\Http\Controllers\Client\Servers\BackupController;
 use App\Http\Controllers\Client\Servers\CloudinitController;
+use App\Http\Controllers\Client\Servers\LogsController;
 use App\Http\Controllers\Client\Servers\PowerController;
 use App\Http\Controllers\Client\Servers\SecurityController;
 use App\Http\Controllers\Client\Servers\ServerController;
@@ -35,6 +36,11 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/backups', 'as' => 'backups.'], function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');
+        });
+
+        Route::group(['prefix' => '/logs', 'as' => 'logs.'], function () {
+            Route::get('/', [LogsController::class, 'index'])->name('index');
+            Route::get('/json', [LogsController::class, 'getLogs'])->name('get-logs');
         });
 
         Route::group(['prefix' => '/security', 'as' => 'security.'], function () {
