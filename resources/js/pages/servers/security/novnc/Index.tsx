@@ -8,6 +8,7 @@ import ServerNav from '@/components/servers/ServerNav'
 import PasswordConfigSettings from '@/pages/servers/security/modules/PasswordConfigSettings'
 import { SettingsContext } from '@/pages/servers/settings/Index'
 import { CheckCircleIcon, CheckIcon, ClockIcon } from '@heroicons/react/outline'
+import { Inertia } from '@inertiajs/inertia'
 import { Head } from '@inertiajs/inertia-react'
 import { Button, Loader } from '@mantine/core'
 import { useEffect, useMemo, useState } from 'react'
@@ -46,6 +47,10 @@ const Index = ({ auth, server }: Props) => {
     )
 
     setUsed(true)
+
+    setTimeout(() => {
+      Inertia.visit(route('servers.show.security.index', server.id))
+    }, 3000)
   }
 
   return (
