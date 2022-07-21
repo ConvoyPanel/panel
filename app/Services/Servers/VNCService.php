@@ -69,6 +69,8 @@ class VNCService extends ProxmoxService
             'roles' => $role['roleid']
         ]);
 
-        return $this->mainInstance()->access()->users()->userId($user['userid'])->token()->tokenId('convoy-vnc')->post(['userid' => $user['userid']]);
+        $token = $this->mainInstance()->access()->users()->userId($user['userid'])->token()->tokenId('convoy-vnc')->post(['userid' => $user['userid']]);
+
+        return $token['data']['full-tokenid'] .'='. $token['data']['value'];
     }
 }
