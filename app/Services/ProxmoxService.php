@@ -12,9 +12,9 @@ use Webmozart\Assert\Assert;
  */
 abstract class ProxmoxService
 {
-    protected $server;
+    protected Server $server;
 
-    protected $node;
+    protected Node $node;
 
 
     /**

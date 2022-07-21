@@ -5,29 +5,11 @@ namespace App\Services\Servers;
 use App\Services\ProxmoxService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Proxmox\PVE;
 
 class VNCService extends ProxmoxService
 {
-    public function createRole()
-    {
-        $vnc_role = [
-            "roleid" => "VNC",
-            "privs" => "VM.Console"
-        ];
-        return $this->proxmox()->access()->roles()->post($vnc_role);
-    }
-
-    public function createUser()
-    {
-        $user = [
-            "enable" => "1",
-            "userid" => "test",
-            "email" => "",
-            "password" => ""
-        ];
-        return $this->proxmox()->access()->users()->post($user);
-    }
-
+    // deprecated
     public function getSessionCredentials()
     {
         return $this->instance()->vncproxy()->post();
@@ -36,10 +18,10 @@ class VNCService extends ProxmoxService
     public function getSessionEndpoint()
     {
 
-        return $this->instance()->getPve()->getApiURL() . $this->instance()->vncwebsocket()->getWebsocketEndpoint();
+        return $this->instance()->getPve()->getApiURL();
     }
 
-    public function temp()
+    public function getTemporaryVncCredentials()
     {
         $expirationDate = Carbon::now();
         $expirationDate->addDay();
@@ -64,10 +46,20 @@ class VNCService extends ProxmoxService
         $this->mainInstance()->access()->roles()->post($role);
 
         $this->mainInstance()->access()->acl()->put([
-            'path' => '/vms/' . '100',
+            'path' => '/vms/' . $this->server->vmid,
             'users' => $user['userid'],
             'roles' => $role['roleid']
         ]);
+
+        $node = $this->server->node;
+
+        /* $userFaker = new PVE(...[
+            $node->hostname,
+            ,
+            $node->password,
+            intval($node->port),
+            $node->auth_type,
+        ]); */
 
         $token = $this->mainInstance()->access()->users()->userId($user['userid'])->token()->tokenId('convoy-vnc')->post(['userid' => $user['userid']]);
 

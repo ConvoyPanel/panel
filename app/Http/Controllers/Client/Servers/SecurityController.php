@@ -34,15 +34,19 @@ class SecurityController extends ApplicationApiController
 
     public function getVncCredentials(Server $server)
     {
-        $data = $this->vncService->setServer($server)->getSessionCredentials();
+        $data = $this->vncService->setServer($server)->getTemporaryVncCredentials();
 
-        if (!$data)
-        {
+        if (!$data) {
             throw new ServiceUnavailableHttpException();
         }
 
 
 
-        return array_merge($this->removeExtraDataProperty($data), ['endpoint' => $this->vncService->setServer($server)->getSessionEndpoint()]);
+        return array_merge([
+            'node_id' => $server->node->cluster,
+            'vmid' => $server->vmid,
+            'token' => $data,
+            'endpoint' => 'https://' . $server->node->hostname . ':' . $server->node->port . '/novnc/novnc.html',
+        ]);
     }
 }

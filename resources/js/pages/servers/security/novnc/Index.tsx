@@ -7,36 +7,43 @@ import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
 import PasswordConfigSettings from '@/pages/servers/security/modules/PasswordConfigSettings'
 import { SettingsContext } from '@/pages/servers/settings/Index'
+import { CheckCircleIcon, CheckIcon } from '@heroicons/react/outline'
 import { Head } from '@inertiajs/inertia-react'
-import { Loader } from '@mantine/core'
+import { Button, Loader } from '@mantine/core'
 import { useEffect, useMemo, useState } from 'react'
-import { VncScreen } from 'react-vnc'
 
 interface Props extends DefaultProps {
   server: Server
 }
 
 const Index = ({ auth, server }: Props) => {
-  const [credentials, setCredentials] = useState<VncCredentials | undefined>()
+  const [processing, setProcessing] = useState(true)
+  const [credentials, setCredentials] = useState<VncCredentials>()
+
   useEffect(() => {
     const main = async () => {
       const { data } = await getCredentials(server.id)
 
       setCredentials(data)
 
-      console.log(data.endpoint)
+      setProcessing(false)
     }
     main()
   }, [])
 
-  const endpoint = useMemo(( ) => {
-    if (!credentials) return ''
+  const launchPopup = () => {
+    if (!credentials) return
 
-    const link = credentials.endpoint.replace(/^http/, 'ws').replace(/^https/, 'wss').slice(0, -1)
-    const url = `${link}?port=${encodeURIComponent(credentials.port)}&vncticket=${encodeURIComponent(credentials.ticket)}`
-
-    return url
-  }, [credentials])
+    window.open(
+      `${credentials.endpoint}?novnc=1&token=${encodeURIComponent(
+        credentials.token
+      )}&console=qemu&virtualization=qemu&node=${encodeURIComponent(
+        credentials.node_id
+      )}&vmid=${credentials.vmid}`,
+      'Server Terminal | Convoy',
+      'width=800,height=600,resizable=yes,scrollbars=yes'
+    )
+  }
 
   return (
     <Authenticated
@@ -48,21 +55,23 @@ const Index = ({ auth, server }: Props) => {
 
       <Main>
         <h3 className='h3-deemphasized'>NoVNC Terminal</h3>
-        {credentials && <VncScreen
-        url={endpoint}
-        scaleViewport
-        background="#000000"
-        style={{
-          width: '75vw',
-          height: '75vh',
-        }}
-        />}
-        {!credentials && <div className='grid place-items-center w-full h-[30vh]'>
-            <div className='flex flex-col items-center space-y-3'>
+        <div className='grid place-items-center w-full h-[30vh]'>
+          <div className='flex flex-col items-center space-y-3'>
+            {!processing && (
+              <>
+                <CheckCircleIcon className='text-green-600 w-14 h-14' />
+                <h3 className='h3-deemphasized'>Session Authorized</h3>
+                <Button onClick={launchPopup}>Launch noVNC in popup</Button>
+              </>
+            )}
+            {processing && (
+              <>
                 <Loader />
                 <h3 className='h3-deemphasized'>Connecting</h3>
-            </div>
-        </div>}
+              </>
+            )}
+          </div>
+        </div>
       </Main>
     </Authenticated>
   )
