@@ -26,13 +26,15 @@ class VNCService extends ProxmoxService
         $expirationDate = Carbon::now();
         $expirationDate->addDay();
 
+        $generatedUserId =  'convoy-' . Str::random(50);
+
         $user = [
             "enable" => '1',
             // IF YOU EDIT THIS BELOW. WATCH OUT! PROXMOX HAS A USERID LENGTH LIMIT. TEST BEFORE YOU COMMIT!!!
-            "userid" => 'convoy-' . Str::random(50) . '@pam',
+            "userid" => $generatedUserId . '@pve',
             // below fields doesn't work because it tries to change the password of an existing user
             //"email" => "",
-            //"password" => Str::random(12),
+            "password" => Str::random(60),
             'expire' => $expirationDate->timestamp,
         ];
 
@@ -51,18 +53,10 @@ class VNCService extends ProxmoxService
             'roles' => $role['roleid']
         ]);
 
-        $node = $this->server->node;
+        // uses api token (doesn't work)
+        //$token = $this->mainInstance()->access()->users()->userId($user['userid'])->token()->tokenId('convoy-vnc')->post(['userid' => $user['userid']]);
+        $token = $this->mainInstance()->access()->ticket()->post(['username' => $user['userid'], 'password' => $user['password']])['data']['ticket'];
 
-        /* $userFaker = new PVE(...[
-            $node->hostname,
-            ,
-            $node->password,
-            intval($node->port),
-            $node->auth_type,
-        ]); */
-
-        $token = $this->mainInstance()->access()->users()->userId($user['userid'])->token()->tokenId('convoy-vnc')->post(['userid' => $user['userid']]);
-
-        return $token['data']['full-tokenid'] .'='. $token['data']['value'];
+        return $token;
     }
 }

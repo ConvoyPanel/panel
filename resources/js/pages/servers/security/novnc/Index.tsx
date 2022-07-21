@@ -7,7 +7,7 @@ import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
 import PasswordConfigSettings from '@/pages/servers/security/modules/PasswordConfigSettings'
 import { SettingsContext } from '@/pages/servers/settings/Index'
-import { CheckCircleIcon, CheckIcon } from '@heroicons/react/outline'
+import { CheckCircleIcon, CheckIcon, ClockIcon } from '@heroicons/react/outline'
 import { Head } from '@inertiajs/inertia-react'
 import { Button, Loader } from '@mantine/core'
 import { useEffect, useMemo, useState } from 'react'
@@ -19,6 +19,7 @@ interface Props extends DefaultProps {
 const Index = ({ auth, server }: Props) => {
   const [processing, setProcessing] = useState(true)
   const [credentials, setCredentials] = useState<VncCredentials>()
+  const [used, setUsed] = useState(false)
 
   useEffect(() => {
     const main = async () => {
@@ -43,6 +44,8 @@ const Index = ({ auth, server }: Props) => {
       'Server Terminal | Convoy',
       'width=800,height=600,resizable=yes,scrollbars=yes'
     )
+
+    setUsed(true)
   }
 
   return (
@@ -59,9 +62,21 @@ const Index = ({ auth, server }: Props) => {
           <div className='flex flex-col items-center space-y-3'>
             {!processing && (
               <>
-                <CheckCircleIcon className='text-green-600 w-14 h-14' />
-                <h3 className='h3-deemphasized'>Session Authorized</h3>
-                <Button onClick={launchPopup}>Launch noVNC in popup</Button>
+                {!used && (
+                  <>
+                    <CheckCircleIcon className='text-green-600 w-14 h-14' />
+                    <h3 className='h3-deemphasized'>Session Authorized</h3>
+                  </>
+                )}
+                {used && <>
+                  <>
+                    <ClockIcon className='text-yellow-600 w-14 h-14' />
+                    <h3 className='h3-deemphasized'>Session Active</h3>
+                  </>
+                </>}
+                <Button disabled={used} onClick={launchPopup}>
+                  Launch noVNC in popup
+                </Button>
               </>
             )}
             {processing && (
