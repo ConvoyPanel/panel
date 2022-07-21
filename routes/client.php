@@ -45,6 +45,12 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/security', 'as' => 'security.'], function () {
             Route::get('/', [SecurityController::class, 'index'])->name('index');
+
+            Route::group(['prefix' => '/vnc', 'as' => 'vnc.'], function () {
+                Route::get('/', [SecurityController::class, 'showVnc'])->name('index');
+
+                Route::get('/credentials', [SecurityController::class, 'getVncCredentials'])->name('get-credentials');
+            });
         });
 
         Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {

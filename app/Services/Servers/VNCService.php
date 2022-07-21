@@ -27,4 +27,15 @@ class VNCService extends ProxmoxService
         ];
         return $this->proxmox()->access()->users()->post($user);
     }
+
+    public function getSessionCredentials()
+    {
+        return $this->instance()->vncproxy()->post();
+    }
+
+    public function getSessionEndpoint()
+    {
+
+        return $this->instance()->getPve()->getApiURL() . $this->instance()->vncwebsocket()->getWebsocketEndpoint();
+    }
 }

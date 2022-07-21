@@ -39,6 +39,7 @@
         "deepmerge-ts": "^4.2.1",
         "easy-peasy": "^5.0.4",
         "react-chartjs-2": "^4.2.0",
+        "react-vnc": "^0.5.1",
         "ts-essentials": "^9.1.2"
     }
 }

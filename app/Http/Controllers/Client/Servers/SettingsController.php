@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Services\Servers\CloudinitService;
 use Inertia\Inertia;
 use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
+use App\Services\Servers\VNCService;
 
 class SettingsController extends ApplicationApiController
 {

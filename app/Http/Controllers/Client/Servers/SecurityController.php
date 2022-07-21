@@ -6,10 +6,13 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
+use App\Services\Servers\VNCService;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class SecurityController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService)
+    public function __construct(private CloudinitService $cloudinitService, private VNCService $vncService)
     {
     }
 
@@ -20,5 +23,26 @@ class SecurityController extends ApplicationApiController
             'server' => $server,
             'config' => $this->removeExtraDataProperty($data ? $data : []),
         ]);
+    }
+
+    public function showVnc(Server $server)
+    {
+        return Inertia::render('servers/security/novnc/Index', [
+            'server' => $server,
+        ]);
+    }
+
+    public function getVncCredentials(Server $server)
+    {
+        $data = $this->vncService->setServer($server)->getSessionCredentials();
+
+        if (!$data)
+        {
+            throw new ServiceUnavailableHttpException();
+        }
+
+
+
+        return array_merge($this->removeExtraDataProperty($data), ['endpoint' => $this->vncService->setServer($server)->getSessionEndpoint()]);
     }
 }
