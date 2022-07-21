@@ -5,6 +5,7 @@ import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
 import PasswordConfigSettings from '@/pages/servers/security/modules/PasswordConfigSettings'
+import VncRedirectSettings from '@/pages/servers/security/modules/VncRedirectSettings'
 import { SettingsContext } from '@/pages/servers/settings/Index'
 import { Head } from '@inertiajs/inertia-react'
 
@@ -30,6 +31,7 @@ const Index = ({ auth, server, config }: Props) => {
             value={{ server, config }}
           >
             <PasswordConfigSettings />
+            <VncRedirectSettings />
           </SettingsContext.Provider>
         </div>
       </Main>
