@@ -19,6 +19,12 @@ class CloudinitService extends ProxmoxService
         return $this->instance()->config()->get();
     }
 
+    // dumps YAML formatted config (I know, it's terrible)
+    public function dumpConfig()
+    {
+        return $this->instance()->cloudinit()->dump()->get(['type' => 'network']);
+    }
+
     /**
      * @param string $password
      * @param array $params
