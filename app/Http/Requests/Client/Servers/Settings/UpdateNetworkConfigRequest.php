@@ -26,7 +26,7 @@ class UpdateNetworkConfigRequest extends FormRequest
     public function rules()
     {
         return [
-            'hostname' => ['required', new Hostname],
+            'hostname' => [new Hostname, 'nullable'],
             'nameservers' => ['array', 'nullable'],
             'nameservers.*' => ['string', new Domain, 'nullable'],
         ];
