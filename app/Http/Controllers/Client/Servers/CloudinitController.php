@@ -38,7 +38,11 @@ class CloudinitController extends ApplicationApiController
 
     public function updateNetworkConfig(Server $server, UpdateNetworkConfigRequest $request)
     {
-        $this->cloudinitService->setServer($server)->changeHostname($request->hostname);
+        if ($request->hostname !== null)
+        {
+            $this->cloudinitService->setServer($server)->changeHostname($request->hostname);
+        }
+
         $this->cloudinitService->setServer($server)->changeNameserver(implode(',', $request->nameservers));
 
         return $this->returnInertiaResponse($request, 'network-config-updated');
