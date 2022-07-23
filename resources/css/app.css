@@ -11,7 +11,7 @@
 }
 
 .h3 {
-  @apply text-lg font-bold
+  @apply text-lg font-bold;
 }
 
 .h3-deemphasized {
@@ -23,11 +23,19 @@
 }
 
 .p-desc {
-  @apply text-sm text-gray-600
+  @apply text-sm text-gray-600;
 }
 
 .p-card {
   @apply px-4 py-5 sm:p-6;
+}
+
+.dt {
+  @apply text-gray-500 text-xs font-medium uppercase tracking-wide;
+}
+
+.dd {
+  @apply text-black mt-1 font-medium
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

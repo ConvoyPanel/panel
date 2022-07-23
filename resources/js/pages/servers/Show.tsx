@@ -12,6 +12,7 @@ import StatGraphs from '@/components/servers/StatGraphs'
 import { Loader, Tabs } from '@mantine/core'
 import ServerNav from '@/components/servers/ServerNav'
 import ServerUnavailableModal from '@/components/servers/ServerUnavailableModal'
+import ServerResources from '@/components/servers/ServerResources'
 
 interface Props extends DefaultProps {
   server: Server
@@ -53,6 +54,8 @@ const Show = ({ auth, server }: Props) => {
           <ServerStatistics />
 
           <PowerActions />
+
+          <ServerResources />
 
           {serverState ? (
             <StatGraphs />

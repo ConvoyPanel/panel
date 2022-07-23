@@ -9,6 +9,7 @@ export interface Server {
     vnc_password?: string
     cloud_init_enabled: boolean
     is_os_template: boolean
+    ip_address: string
     updated_at: string
     created_at: string
 }
