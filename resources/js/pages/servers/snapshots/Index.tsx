@@ -1,6 +1,6 @@
 import { Snapshot } from '@/api/server/snapshots/types'
 import { DefaultProps } from '@/api/types/default'
-import { Server } from '@/api/types/server'
+import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'

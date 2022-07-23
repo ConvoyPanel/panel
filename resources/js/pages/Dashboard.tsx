@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import Authenticated from '@/components/layouts/Authenticated'
 import { Head } from '@inertiajs/inertia-react'
 import { DefaultProps } from '@/api/types/default'
-import { Server } from '@/api/types/server'
+import { Server } from '@/api/server/types'
 import Main from '@/components/Main'
 import ProjectCards from '@/components/ProjectCards'
 

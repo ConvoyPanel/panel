@@ -11,37 +11,10 @@ use App\Services\ProxmoxService;
  */
 class BackupService extends ProxmoxService
 {
-    private function instance(Server $server, $cluster)
+    public function getBackups()
     {
-        return $this->proxmox($server, $cluster)->qemu()->vmid($server->vmid)->snapshot();
-    }
+        $data = $this->nodeInstance()->storage()->zone('local')->content()->get(['content' => 'backup', 'vmid' => $this->server->vmid]);
 
-    /**
-     * @param string $name
-     * @param array $params
-     * @return mixed
-     */
-    public function doSnapshot(string $name, $server, $cluster = [])
-    {
-        return $this->instance($server, $cluster)->post(['snapname' => $name]);
-    }
-
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    public function fetchSnapshots($server, $cluster = [])
-    {
-        return $this->instance($server, $cluster)->get();
-    }
-
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    public function rollbackSnapshot(string $name, $server, $cluster = [])
-    {
-        // return $this->proxmox($server, $cluster)->qemu()->vmid($server->vmid)->snapshot()->snapname($name)->delete();
-        return $this->instance($server, $cluster)->snapname($name)->postRollback();
+        return $data ? $data['data'] : [];
     }
 }

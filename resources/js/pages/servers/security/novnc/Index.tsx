@@ -1,7 +1,7 @@
 import { CloudinitConfig } from '@/api/server/settings/types'
 import getCredentials, { VncCredentials } from '@/api/server/vnc/getCredentials'
 import { DefaultProps } from '@/api/types/default'
-import { Server } from '@/api/types/server'
+import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
