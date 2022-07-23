@@ -11,7 +11,7 @@
     "php": "^8.0.2",
     "guzzlehttp/guzzle": "^7.2",
     "inertiajs/inertia-laravel": "^0.5.4",
-    "laravel/framework": "^9.19",
+    "laravel/framework": "9.21",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
     "performave/proxmox": "dev-master",
