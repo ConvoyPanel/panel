@@ -11,15 +11,19 @@ import { DuplicateIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
 import { formatBytes } from '@/api/server/getStatus'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
 import RoundedButton from '@/components/RoundedButton'
+import { Inertia } from '@inertiajs/inertia'
+import deleteBackup from '@/api/server/backups/deleteBackup'
+import rollbackBackup from '@/api/server/backups/rollbackBackup'
 
 interface BackupRowProps {
+  serverId: number
   backup: Backup
 }
 
-const BackupRow = ({ backup }: BackupRowProps) => {
+const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRollbackModal, setShowRollbackModal] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -33,9 +37,31 @@ const BackupRow = ({ backup }: BackupRowProps) => {
 
   const size = formatBytes(backup.size)
 
-  const handleDelete = async () => {}
+  const handleDelete = async () => {
+    setProcessing(true)
+    await deleteBackup(backup.volid, serverId)
+    setProcessing(false)
+    setShowDeleteModal(false)
+    Inertia.reload({ only: ['backups'] })
+  }
 
-  const handleRollback = async () => {}
+  const handleRollback = async () => {
+    setProcessing(true)
+    await rollbackBackup(backup.volid, serverId)
+    setProcessing(false)
+    setShowRollbackModal(false)
+    Inertia.reload({ only: ['backups'] })
+  }
+
+  /* useEffect(() => {
+    const updateInterval = setInterval(() => {
+      Inertia.reload({ only: ['backups'] })
+    }, 3000)
+
+    return () => {
+      clearInterval(updateInterval)
+    }
+  }, []) */
 
   return (
     <>
@@ -67,7 +93,9 @@ const BackupRow = ({ backup }: BackupRowProps) => {
         centered
       >
         <p className='p-desc'>
-          Are you sure you want to rollback your virtual machine to this backup? You will LOSE ALL UNSAVED DATA that are not in this backup (e.g. files in your current VM state).
+          Are you sure you want to rollback your virtual machine to this backup?
+          You will LOSE ALL UNSAVED DATA that are not in this backup (e.g. files
+          in your current VM state).
         </p>
 
         <Button
@@ -204,7 +232,7 @@ const Index = ({ auth, server, backups }: Props) => {
               </thead>
               <tbody>
                 {backups.map((backup) => (
-                  <BackupRow backup={backup} />
+                  <BackupRow serverId={server.id} backup={backup} />
                 ))}
               </tbody>
             </Table>

@@ -41,6 +41,8 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
             Route::post('/', [BackupController::class, 'createBackup'])->name('store');
 
+            Route::delete('/', [BackupController::class, 'destroyBackup'])->name('destroy');
+
             Route::post('/rollback', [BackupController::class, 'rollback'])->name('rollback');
         });
 

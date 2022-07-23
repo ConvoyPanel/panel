@@ -35,4 +35,9 @@ class BackupController extends ApplicationApiController
     {
         return $this->backupService->setServer($server)->rollback($request->archive);
     }
+
+    public function destroyBackup(Server $server, RollbackBackupRequest $request)
+    {
+        return $this->backupService->setServer($server)->deleteBackup($request->archive);
+    }
 }

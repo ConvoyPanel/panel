@@ -39,4 +39,9 @@ class BackupService extends ProxmoxService
             'archive' => $archive,
         ]);
     }
+
+    public function deleteBackup(string $archive)
+    {
+        return $this->nodeInstance()->storage()->zone('local')->content()->volume($archive)->delete();
+    }
 }
