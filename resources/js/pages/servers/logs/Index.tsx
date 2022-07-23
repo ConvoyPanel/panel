@@ -10,6 +10,7 @@ import { CheckIcon } from '@heroicons/react/solid'
 import { Head } from '@inertiajs/inertia-react'
 import { Paper, Table } from '@mantine/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import LoadingState from '@/components/LoadingState'
 
 interface Props extends DefaultProps {
   server: Server
@@ -53,17 +54,32 @@ const Index = ({ auth, server }: Props) => {
               {data &&
                 data.data?.map((log) => (
                   <>
-                    <tr className={classNames(log.status !== 'OK' ? '!bg-red-100 hover:!bg-red-200' : '')} key={log.upid}>
+                    <tr
+                      className={classNames(
+                        log.status !== 'OK'
+                          ? '!bg-red-100 hover:!bg-red-200'
+                          : ''
+                      )}
+                      key={log.upid}
+                    >
                       <td>{log.type}</td>
                       <td>{calculateTime(log.starttime)}</td>
                       <td>{calculateTime(log.endtime)}</td>
-                      <td>{log.status === 'OK' ? <CheckIcon className='text-green-600 w-[18px] h-[18px]' /> : log.status}</td>
+                      <td>
+                        {log.status === 'OK' ? (
+                          <CheckIcon className='text-green-600 w-[18px] h-[18px]' />
+                        ) : (
+                          log.status
+                        )}
+                      </td>
                       <td></td>
                     </tr>
                   </>
                 ))}
             </tbody>
           </Table>
+
+          {status === 'loading' && <LoadingState title='Fetching logs' />}
         </Paper>
       </Main>
     </Authenticated>

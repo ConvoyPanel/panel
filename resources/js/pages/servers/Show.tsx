@@ -13,6 +13,7 @@ import { Loader, Tabs } from '@mantine/core'
 import ServerNav from '@/components/servers/ServerNav'
 import ServerUnavailableModal from '@/components/servers/ServerUnavailableModal'
 import ServerResources from '@/components/servers/ServerResources'
+import LoadingState from '@/components/LoadingState'
 
 interface Props extends DefaultProps {
   server: Server
@@ -60,12 +61,7 @@ const Show = ({ auth, server }: Props) => {
           {serverState ? (
             <StatGraphs />
           ) : (
-            <div className='grid place-items-center h-[30vh] w-full'>
-              <div className='flex flex-col space-y-3 items-center'>
-                <Loader />
-                <h3 className='h3-deemphasized'>Connecting</h3>
-              </div>
-            </div>
+            <LoadingState />
           )}
         </ServerContext.Provider>
       </Main>

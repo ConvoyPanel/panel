@@ -17,4 +17,26 @@ class BackupService extends ProxmoxService
 
         return $data ? $data['data'] : [];
     }
+
+    // @param $mode snapshot | suspend | stop
+    // @param $compression none | lzo | gzip | zstd
+    public function createBackup(string $mode, string $compression)
+    {
+        return $this->nodeInstance()->vzdump()->post([
+            'vmid' => $this->server->vmid,
+            'storage' => 'local',
+            'mode' => $mode,
+            'remove' => 0,
+            'compress' => $compression,
+        ]);
+    }
+
+    public function rollback(string $archive)
+    {
+        return $this->nodeInstance()->qemu()->post([
+            'vmid' => $this->server->vmid,
+            'force' => 1,
+            'archive' => $archive,
+        ]);
+    }
 }

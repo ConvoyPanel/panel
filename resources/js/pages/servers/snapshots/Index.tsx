@@ -4,7 +4,12 @@ import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
-import { CheckIcon, PlayIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid'
+import {
+  CheckIcon,
+  PlayIcon,
+  PlusIcon,
+  TrashIcon,
+} from '@heroicons/react/solid'
 import { Head } from '@inertiajs/inertia-react'
 import { Button, Modal, Paper, Table, TextInput } from '@mantine/core'
 import { ComponentProps, useMemo, useState } from 'react'
@@ -15,6 +20,7 @@ import dateTimeCalculator from '@/util/dateTimeCalculator'
 import createSnapshot from '@/api/server/snapshots/createSnapshot'
 import rollbackSnapshot from '@/api/server/snapshots/rollbackSnapshot'
 import { ArchiveIcon } from '@heroicons/react/outline'
+import EmptyState from '@/components/EmptyState'
 
 interface SnapshotProps {
   server: Server
@@ -174,27 +180,35 @@ const Index = ({ auth, server, snapshots }: Props) => {
           title={`Take a new snapshot`}
           centered
         >
-          <TextInput
-            label='Name'
-            name='name'
-            value={name}
-            styles={{
-              required: { display: 'none' },
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleCreate()
             }}
-            className='mt-1 block w-full'
-            autoFocus
-            onChange={(e) => setName(e.target.value.replace(/\s+/g, '-'))}
-            error={error}
-            required
-          />
-          <Button
-            loading={processing}
-            className='mt-3'
-            fullWidth
-            onClick={() => handleCreate()}
           >
-            Create
-          </Button>
+            <TextInput
+              label='Name'
+              name='name'
+              value={name}
+              styles={{
+                required: { display: 'none' },
+              }}
+              className='mt-1 block w-full'
+              autoFocus
+              onChange={(e) => setName(e.target.value.replace(/\s+/g, '-'))}
+              error={error}
+              required
+            />
+            <Button
+              type='submit'
+              loading={processing}
+              className='mt-3'
+              fullWidth
+              onClick={() => handleCreate()}
+            >
+              Create
+            </Button>
+          </form>
         </Modal>
         <div>
           <h3 className='h3-deemphasized'>Snapshots</h3>
@@ -226,27 +240,13 @@ const Index = ({ auth, server, snapshots }: Props) => {
             </Table>
 
             {snapshots.length <= 1 && (
-              <div className='flex flex-col justify-center items-center text-center h-[60vh]'>
-                <ArchiveIcon
-                  className='mx-auto h-12 w-12 text-gray-400'
-                  aria-hidden='true'
-                />
-                <h3 className='mt-2 text-sm font-medium text-gray-900'>
-                  No Snapshots
-                </h3>
-                <p className='mt-1 text-sm text-gray-500'>
-                  Get started by creating a new snapshot.
-                </p>
-                <div className='mt-6'>
-                  <Button type='button' onClick={() => setShowCreateModal(true)}>
-                    <PlusIcon
-                      className='-ml-1 mr-2 h-5 w-5'
-                      aria-hidden='true'
-                    />
-                    New Snapshot
-                  </Button>
-                </div>
-              </div>
+              <EmptyState
+                icon={ArchiveIcon}
+                title='No Snapshots'
+                description='Get started by creating a new snapshot.'
+                action='New Snapshot'
+                onClick={() => setShowCreateModal(true)}
+              />
             )}
           </Paper>
         </div>

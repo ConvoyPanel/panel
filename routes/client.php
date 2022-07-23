@@ -38,6 +38,10 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
 
         Route::group(['prefix' => '/backups', 'as' => 'backups.'], function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');
+
+            Route::post('/', [BackupController::class, 'createBackup'])->name('store');
+
+            Route::post('/rollback', [BackupController::class, 'rollback'])->name('rollback');
         });
 
         Route::group(['prefix' => '/logs', 'as' => 'logs.'], function () {
