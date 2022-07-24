@@ -1,5 +1,5 @@
 import { CloudinitConfig } from '@/api/server/settings/types'
-import { DefaultProps } from '@/api/types/default'
+import { AuthInterface, DefaultProps } from '@/api/types/default'
 import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
@@ -19,6 +19,7 @@ interface Props extends DefaultProps {
 export interface SettingsContextInterface {
   server: Server
   config: CloudinitConfig
+  auth: AuthInterface
 }
 
 export const SettingsContext = createContext<SettingsContextInterface | null>(
@@ -37,7 +38,7 @@ const Index = ({ auth, server, config }: Props) => {
       <Main>
         <h3 className='h3-deemphasized'>Settings</h3>
         <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
-          <SettingsContext.Provider value={{ server, config }}>
+          <SettingsContext.Provider value={{ server, config, auth }}>
             <BasicSettings />
             <BiosConfigSettings />
             <NetworkConfigSettings />

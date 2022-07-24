@@ -24,7 +24,7 @@ class ReinstallServerRequest extends FormRequest
     public function rules()
     {
         return [
-            'template_id' => 'number|exists:servers'
+            'template_id' => 'exists:servers,id'
         ];
     }
 }

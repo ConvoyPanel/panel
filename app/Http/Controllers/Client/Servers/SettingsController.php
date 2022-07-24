@@ -43,7 +43,7 @@ class SettingsController extends ApplicationApiController
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
     {
-        if (!$server->is_template)
+        if (!Server::find($request->template_id)->is_template)
         {
             throw new UnauthorizedHttpException('', 'template_id not marked as template server');
         }
