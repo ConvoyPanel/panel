@@ -56,7 +56,7 @@ const ReinstallSettings = () => {
       }
       actions={
         <Button color='red' type='submit' className='ml-4' loading={processing}>
-          Reinstall
+          Rebuild
         </Button>
       }
       onSubmit={submit}
