@@ -10,6 +10,7 @@ use App\Http\Requests\Client\Servers\Settings\UpdateNetworkConfigRequest;
 use App\Enums\Servers\Cloudinit\AuthenticationType;
 use App\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
 use App\Enums\Servers\Cloudinit\BiosType;
+use Illuminate\Validation\ValidationException;
 
 class CloudinitController extends ApplicationApiController
 {
@@ -24,7 +25,21 @@ class CloudinitController extends ApplicationApiController
 
     public function updatePassword(Server $server, UpdatePasswordRequest $request)
     {
-        $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+        $response = $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+
+        if ($response === null)
+        {
+            if (AuthenticationType::from($request->type) === AuthenticationType::KEY)
+            {
+                throw ValidationException::withMessages([
+                    'password' => 'The public key is invalid.'
+                ]);
+            } else {
+                throw ValidationException::withMessages([
+                    'password' => 'The password was rejected by the server for an unknown reason.'
+                ]);
+            }
+        }
 
         return $this->returnInertiaResponse($request, 'password-updated');
     }

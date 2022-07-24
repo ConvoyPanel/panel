@@ -34,7 +34,7 @@ class CloudinitService extends ProxmoxService
     {
         if (AuthenticationType::KEY === $type)
         {
-            return dd($this->instance()->config()->post([$type->value => rawurlencode($password)]));
+            return $this->instance()->config()->post([$type->value => rawurlencode($password)]);
         } else {
             return $this->instance()->config()->post([$type->value => $password]);
         }
