@@ -32,7 +32,13 @@ class CloudinitService extends ProxmoxService
      */
     public function changePassword(string $password, AuthenticationType $type)
     {
-        return $this->instance()->config()->post([$type->value => $password]);
+        if (AuthenticationType::KEY === $type)
+        {
+            return dd($this->instance()->config()->post([$type->value => rawurlencode($password)]));
+        } else {
+            return $this->instance()->config()->post([$type->value => $password]);
+        }
+
     }
 
     /**

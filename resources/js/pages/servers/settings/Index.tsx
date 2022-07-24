@@ -9,6 +9,7 @@ import BiosConfigSettings from '@/pages/servers/settings/modules/BiosConfigSetti
 import NetworkConfigSettings from '@/pages/servers/settings/modules/NetworkConfigSettings'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext } from 'react'
+import ReinstallSettings from '@/pages/servers/settings/modules/ReinstallSettings'
 
 interface Props extends DefaultProps {
   server: Server
@@ -40,6 +41,7 @@ const Index = ({ auth, server, config }: Props) => {
             <BasicSettings />
             <BiosConfigSettings />
             <NetworkConfigSettings />
+            <ReinstallSettings />
           </SettingsContext.Provider>
         </div>
       </Main>

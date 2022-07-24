@@ -17,6 +17,8 @@ Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
 Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
 
+Route::get('/servers/templates', [SettingsController::class, 'getTemplates'])->name('servers.get-templates');
+
 Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.'], function () {
     Route::get('/', [ServerController::class, 'show'])->name('show');
 
@@ -71,6 +73,8 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
             Route::put('/update-bios', [CloudinitController::class, 'updateBios'])->name('update-bios');
 
             Route::put('/update-network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('update-network-config');
+
+            Route::post('/reinstall', [SettingsController::class, 'reinstall'])->name('reinstall');
         });
     });
 });

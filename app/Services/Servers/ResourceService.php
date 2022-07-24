@@ -12,14 +12,34 @@ use App\Services\ProxmoxService;
  */
 class ResourceService extends ProxmoxService
 {
+    private InformationResourceService $resourceService;
+
+    public function __construct()
+    {
+        $this->resourceService = new InformationResourceService;
+    }
+
     public function getResources()
     {
-        $resourceService = new InformationResourceService;
-
-        $allResources = $resourceService->setServer($this->server)->getResourceList();
+        $allResources = $this->resourceService->setServer($this->server)->getResourceList();
 
         $resources = array_search('qemu/'.$this->server->vmid, array_column($allResources, 'id'));
 
         return $allResources[$resources];
+    }
+
+    public function setMemory(int $bytes)
+    {
+        return $this->instance()->config()->put(['memory' => $bytes]);
+    }
+
+    public function setCores(int $cores, int $sockets)
+    {
+        return $this->instance()->config()->put(['cores' => $cores, 'sockets' => $sockets]);
+    }
+
+    public function increaseDisk(int $bytes, string $disk)
+    {
+        return $this->instance()->resize()->put(['disk' => $disk, 'size' => '+' . $bytes . 'B']);
     }
 }

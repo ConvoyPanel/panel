@@ -69,7 +69,7 @@ abstract class ProxmoxService
             $this->node->password,
             intval($this->node->port),
             $this->node->auth_type,
-            //true
+            true
         ];
 
         $proxmox = new PVE(...$node);
