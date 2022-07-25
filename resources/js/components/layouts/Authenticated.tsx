@@ -30,7 +30,12 @@ export default function Authenticated({
   }
 
   const routes = {
-    admin: [{ name: 'Dashboard', route: 'admin.dashboard' }],
+    admin: [
+      { name: 'Dashboard', route: 'admin.dashboard' },
+      { name: 'Nodes', route: 'admin.nodes.index' },
+      { name: 'Servers', route: 'admin.servers.index' },
+      { name: 'Users', route: 'admin.users.index' },
+    ],
     client: [{ name: 'Dashboard', route: 'dashboard' }],
   }
 
@@ -88,17 +93,25 @@ export default function Authenticated({
                       </div>
                     }
                   >
-                    { (auth.user.root_admin && route().current('admin.*')) ?
-                      <Menu.Item onClick={() => Inertia.visit(route('dashboard'))}>
+                    {auth.user.root_admin && route().current('admin.*') ? (
+                      <Menu.Item
+                        onClick={() => Inertia.visit(route('dashboard'))}
+                      >
                         Switch to Client
-                      </Menu.Item> : ''
-                    }
+                      </Menu.Item>
+                    ) : (
+                      ''
+                    )}
 
-                    { auth.user.root_admin && !route().current('admin.*') ?
-                      <Menu.Item onClick={() => Inertia.visit(route('admin.dashboard'))}>
+                    {auth.user.root_admin && !route().current('admin.*') ? (
+                      <Menu.Item
+                        onClick={() => Inertia.visit(route('admin.dashboard'))}
+                      >
                         Switch to Admin
-                      </Menu.Item> : ''
-                    }
+                      </Menu.Item>
+                    ) : (
+                      ''
+                    )}
 
                     <Menu.Item onClick={logout} color='red'>
                       Log Out
@@ -183,6 +196,20 @@ export default function Authenticated({
               </div>
 
               <div className='mt-3 space-y-1'>
+                {auth.user.root_admin && route().current('admin.*') ? (
+                  <ResponsiveNavLink href={route('dashboard')}>
+                    Switch to Client
+                  </ResponsiveNavLink>
+                ) : (
+                  ''
+                )}
+                {auth.user.root_admin && !route().current('admin.*') ? (
+                  <ResponsiveNavLink href={route('admin.dashboard')}>
+                    Switch to Admin
+                  </ResponsiveNavLink>
+                ) : (
+                  ''
+                )}
                 <ResponsiveNavLink
                   method='post'
                   href={route('logout')}

@@ -14,14 +14,14 @@ export default function Index({ auth }: Props) {
       auth={auth}
       header={
         <h1 className='h1'>
-          Dashboard
+          Servers
         </h1>
       }
     >
-      <Head title='Admin Dashboard' />
+      <Head title='Servers' />
 
       <Main>
-        <h2 className='h3-deemphasized'>Admin</h2>
+        <h2 className='h3-deemphasized'>Servers</h2>
       </Main>
     </Authenticated>
   )
