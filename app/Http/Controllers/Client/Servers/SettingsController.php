@@ -10,13 +10,16 @@ use Illuminate\Http\Request;
 use App\Services\Servers\CloudinitService;
 use Inertia\Inertia;
 use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
+use App\Models\Node;
+use App\Models\Template;
+use App\Services\Nodes\TemplateService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\VNCService;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService, private InstallService $installService)
+    public function __construct(private TemplateService $templateService, private CloudinitService $cloudinitService, private InstallService $installService)
     {
     }
 
@@ -36,19 +39,14 @@ class SettingsController extends ApplicationApiController
         return $this->returnNoContent();
     }
 
-    public function getTemplates()
+    public function getTemplates(Server $server)
     {
-        return Server::where(['is_template' => true, 'make_template_visible' => true])->get(['id', 'vmid', 'name']);
+        return $this->templateService->setServer($server)->listTemplates();
     }
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
     {
-        if (!Server::find($request->template_id)->is_template)
-        {
-            throw new UnauthorizedHttpException('', 'template_id not marked as template server');
-        }
-
-        $this->installService->setServer($server)->reinstall(Server::find($request->template_id));
+        $this->installService->setServer($server)->reinstall(Template::find($request->template_id)->server);
 
         return $this->returnNoContent();
     }

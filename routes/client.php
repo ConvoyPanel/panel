@@ -17,10 +17,10 @@ Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
 Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
 
-Route::get('/servers/templates', [SettingsController::class, 'getTemplates'])->name('servers.get-templates');
-
 Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.'], function () {
     Route::get('/', [ServerController::class, 'show'])->name('show');
+
+    Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('get-templates');
 
     Route::group(['as' => 'show.'], function () {
         Route::get('/status', [StatusController::class, 'show'])->name('status');

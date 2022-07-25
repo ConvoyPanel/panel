@@ -2,10 +2,14 @@ import axios from 'axios'
 
 export interface ServerTemplate {
     id: number
-    name: string
-    vmid: number
+    server_id: number
+    server: {
+        id: number
+        vmid: number
+        name: string
+    }
 }
 
-export default () => {
-    return axios.get<ServerTemplate[]>(route('servers.get-templates'))
+export default (serverId: number) => {
+    return axios.get<ServerTemplate[]>(route('servers.get-templates', serverId))
 }

@@ -23,7 +23,7 @@ const ReinstallSettings = () => {
   const [showModal, setShowModal] = useState(false)
   const [confirmOne, setConfirmOne] = useState('')
   const confirmText = useMemo(() => {
-    return `My name is ${settingsContext!.auth.user.name} and I want to reinstall this server. I will lose all my data and settings unless I backed it up. I want this now.`
+    return `${settingsContext!.auth.user.name} will lose all data on this server.`
   }, [settingsContext])
   const isConfirmed = useMemo(() => {
     return confirmOne === confirmText
@@ -32,7 +32,7 @@ const ReinstallSettings = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>()
 
   const { data, status } = useQuery(['templates'], async () => {
-    const { data } = await getTemplates()
+    const { data } = await getTemplates(settingsContext!.server.id)
     return data
   })
 
@@ -40,7 +40,7 @@ const ReinstallSettings = () => {
     if (status === 'success') {
       return data.map((template) => ({
         value: template.id as unknown as string,
-        label: template.name,
+        label: template.server.name,
       }))
     }
 

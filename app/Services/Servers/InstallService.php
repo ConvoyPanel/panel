@@ -38,6 +38,7 @@ class InstallService extends ProxmoxService
         $instantiatedResourceService = (clone $this->resourceService)->setServer($originalServer);
         $originalDisks = $instantiatedResourceService->getDisks();
         $originalResources = $instantiatedResourceService->getResources();
+        $originalBootOrder = $instantiatedResourceService->getBootOrder();
         $templateDisks = (clone $this->resourceService)->setServer($template)->getDisks();
 
         $originalSpecifications = [
@@ -93,6 +94,10 @@ class InstallService extends ProxmoxService
                 $instantiatedResourceService->createDisk($bytes, $disk['disk']);
             }
         }
+
+        // set boot $order
+
+        $instantiatedResourceService->setBootOrder($originalBootOrder['raw']);
 
         // apply the changes
         $this->powerService->setServer($originalServer)->kill();

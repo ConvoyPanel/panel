@@ -29,6 +29,7 @@ class ResourceService extends ProxmoxService
         return $allResources[$resources];
     }
 
+    // uses the /pending endpoint
     public function getConfig()
     {
         return $this->removeDataProperty($this->instance()->pending()->get());
@@ -54,6 +55,25 @@ class ResourceService extends ProxmoxService
         return $this->instance()->config()->post([$disk => 'local:' . ($bytes / 1024 / 1024 / 1024) . ',format=' . $format]);
     }
 
+    public function getBootOrder()
+    {
+        $configs = $this->getConfig();
+        $rawBootOrder = $configs[array_search('boot', array_column($configs, 'key'))];
+
+        $splitEquals = explode('=', $rawBootOrder['value']);
+
+        if (array_key_exists(1, $splitEquals)) {
+            return ['raw' => $rawBootOrder['value'], 'parsed' => explode(',', $splitEquals[1])];
+        }
+
+        return ['raw' => $rawBootOrder['value'], 'parsed' => []];
+    }
+
+    public function setBootOrder(string $order)
+    {
+        return $this->instance()->config()->put(['boot' => $order]);
+    }
+
     public function parseDisk(array $disk): array
     {
         $parsedDisk = [
@@ -73,7 +93,6 @@ class ResourceService extends ProxmoxService
         } catch (Exception $e) {
             return $parsedDisk;
         }
-
     }
 
 
