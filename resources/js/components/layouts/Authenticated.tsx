@@ -6,6 +6,9 @@ import ResponsiveNavLink from '@/components/ResponsiveNavLink'
 import { Link } from '@inertiajs/inertia-react'
 import { DefaultProps } from '@/api/types/default'
 import SessionExpiredModal from '@/components/SessionExpiredModal'
+import { Menu } from '@mantine/core'
+import { ChevronDownIcon } from '@heroicons/react/solid'
+import { Inertia } from '@inertiajs/inertia'
 
 interface Props extends DefaultProps {
   children?: React.ReactNode
@@ -22,6 +25,15 @@ export default function Authenticated({
   const [showingNavigationDropdown, setShowingNavigationDropdown] =
     useState(false)
 
+  const logout = () => {
+    Inertia.post(route('logout'))
+  }
+
+  const routes = {
+    admin: [{ name: 'Dashboard', route: 'admin.dashboard' }],
+    client: [{ name: 'Dashboard', route: 'dashboard' }],
+  }
+
   return (
     <>
       <SessionExpiredModal />
@@ -37,52 +49,61 @@ export default function Authenticated({
                 </div>
 
                 <div className='hidden space-x-8 sm:-my-px sm:ml-10 sm:flex'>
-                  <NavLink
-                    href={route('dashboard')}
-                    active={route().current('dashboard') as boolean}
-                  >
-                    Dashboard
-                  </NavLink>
+                  {route().current('admin.*') &&
+                    routes.admin.map((link) => (
+                      <NavLink
+                        href={route(link.route)}
+                        active={route().current(link.route) as boolean}
+                      >
+                        {link.name}
+                      </NavLink>
+                    ))}
+                  {!route().current('admin.*') &&
+                    routes.client.map((link) => (
+                      <NavLink
+                        href={route(link.route)}
+                        active={route().current(link.route) as boolean}
+                      >
+                        {link.name}
+                      </NavLink>
+                    ))}
                 </div>
               </div>
 
               <div className='hidden sm:flex sm:items-center sm:ml-6'>
                 <div className='ml-3 relative'>
-                  <Dropdown>
-                    <Dropdown.Trigger>
-                      <span className='inline-flex rounded-md'>
-                        <button
-                          type='button'
-                          className='inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150'
-                        >
-                          {auth.user.name}
-
-                          <svg
-                            className='ml-2 -mr-0.5 h-4 w-4'
-                            xmlns='http://www.w3.org/2000/svg'
-                            viewBox='0 0 20 20'
-                            fill='currentColor'
+                  <Menu
+                    control={
+                      <div>
+                        <span className='inline-flex rounded-md'>
+                          <button
+                            type='button'
+                            className='inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150'
                           >
-                            <path
-                              fillRule='evenodd'
-                              d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </Dropdown.Trigger>
+                            {auth.user.name}
 
-                    <Dropdown.Content>
-                      <Dropdown.Link
-                        href={route('logout')}
-                        method='post'
-                        as='button'
-                      >
-                        Log Out
-                      </Dropdown.Link>
-                    </Dropdown.Content>
-                  </Dropdown>
+                            <ChevronDownIcon className='ml-2 -mr-0.5 h-4 w-' />
+                          </button>
+                        </span>
+                      </div>
+                    }
+                  >
+                    { (auth.user.root_admin && route().current('admin.*')) ?
+                      <Menu.Item onClick={() => Inertia.visit(route('dashboard'))}>
+                        Switch to Client
+                      </Menu.Item> : ''
+                    }
+
+                    { auth.user.root_admin && !route().current('admin.*') ?
+                      <Menu.Item onClick={() => Inertia.visit(route('admin.dashboard'))}>
+                        Switch to Admin
+                      </Menu.Item> : ''
+                    }
+
+                    <Menu.Item onClick={logout} color='red'>
+                      Log Out
+                    </Menu.Item>
+                  </Menu>
                 </div>
               </div>
 
@@ -131,12 +152,24 @@ export default function Authenticated({
             }
           >
             <div className='pt-2 pb-3 space-y-1'>
-              <ResponsiveNavLink
-                href={route('dashboard')}
-                active={route().current('dashboard') as boolean}
-              >
-                Dashboard
-              </ResponsiveNavLink>
+              {route().current('admin.*') &&
+                routes.admin.map((link) => (
+                  <ResponsiveNavLink
+                    href={route(link.route)}
+                    active={route().current(link.route) as boolean}
+                  >
+                    {link.name}
+                  </ResponsiveNavLink>
+                ))}
+              {!route().current('admin.*') &&
+                routes.client.map((link) => (
+                  <ResponsiveNavLink
+                    href={route(link.route)}
+                    active={route().current(link.route) as boolean}
+                  >
+                    {link.name}
+                  </ResponsiveNavLink>
+                ))}
             </div>
 
             <div className='pt-4 pb-1 border-t border-gray-200'>
