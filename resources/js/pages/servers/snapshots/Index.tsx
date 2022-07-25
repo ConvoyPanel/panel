@@ -218,7 +218,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
                 New Snapshot
               </Button>
             </div>
-            <Table striped highlightOnHover>
+            <Table className='mt-3' striped highlightOnHover>
               <thead>
                 <tr>
                   <th>Name</th>

@@ -10,6 +10,10 @@
   @apply font-semibold text-xl text-gray-800 leading-tight truncate;
 }
 
+.h3-emphasized {
+  @apply text-4xl font-bold;
+}
+
 .h3 {
   @apply text-lg font-bold;
 }

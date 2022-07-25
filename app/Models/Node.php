@@ -13,6 +13,10 @@ class Node extends Model
         'name', 'hostname', 'username', 'password', 'port', 'auth_type', 'latency', 'last_pinged'
     ];
 
+    protected $hidden = [
+        'username', 'password',
+    ];
+
     public function servers()
     {
         return $this->hasMany(Server::class);

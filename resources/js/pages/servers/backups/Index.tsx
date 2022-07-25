@@ -220,7 +220,7 @@ const Index = ({ auth, server, backups }: Props) => {
                 New Backup
               </Button>
             </div>
-            <Table striped highlightOnHover>
+            <Table className='mt-3' striped highlightOnHover>
               <thead>
                 <tr>
                   <th>Name</th>
