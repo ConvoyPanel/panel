@@ -14,14 +14,17 @@ class TemplateService extends ProxmoxService
 {
     public function listTemplates(bool $showVisibleOnly = false)
     {
-        if ($showVisibleOnly)
-        {
-            return Template::where('visible', true)->with(['server' => function ($query) {
-                $query->where('node_id', $this->node->id)->select(['id', 'vmid', 'name']);
+        if ($showVisibleOnly) {
+            return Template::where('visible', true)->whereHas('server', function ($q) {
+                $q->where('node_id', $this->node->id);
+            })->with(['server' => function ($query) {
+                $query->select(['id', 'vmid', 'name']);
             }])->get(['id', 'server_id'])->toArray();
         } else {
-            return Template::with(['server' => function ($query) {
-                $query->where('node_id', $this->node->id)->select(['id', 'vmid', 'name']);
+            return Template::whereHas('server', function ($q) {
+                $q->where('node_id', $this->node->id);
+            })->with(['server' => function ($query) {
+                $query->select(['id', 'vmid', 'name']);
             }])->get(['id', 'server_id'])->toArray();
         }
     }
