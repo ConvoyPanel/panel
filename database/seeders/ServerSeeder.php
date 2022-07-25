@@ -16,6 +16,6 @@ class ServerSeeder extends Seeder
      */
     public function run()
     {
-        Server::factory()->count(10)->create(['user_id' => User::factory()->create(), 'node_id' => Node::factory()->create(), 'cloud_init_enabled' => false]);
+        Server::factory()->count(10)->create(['user_id' => User::factory()->create(), 'node_id' => Node::factory()->create()]);
     }
 }
