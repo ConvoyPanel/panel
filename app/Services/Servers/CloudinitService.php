@@ -20,9 +20,9 @@ class CloudinitService extends ProxmoxService
     }
 
     // dumps YAML formatted config (I know, it's terrible)
-    public function dumpConfig()
+    public function dumpConfig(string $type = 'network')
     {
-        return $this->instance()->cloudinit()->dump()->get(['type' => 'network']);
+        return $this->removeDataProperty($this->instance()->cloudinit()->dump()->get(['type' => $type]));
     }
 
     /**

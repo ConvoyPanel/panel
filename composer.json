@@ -15,6 +15,7 @@
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
     "performave/proxmox": "dev-master",
+    "symfony/yaml": "^6.1",
     "tightenco/ziggy": "^1.0",
     "webmozart/assert": "^1.11"
   },

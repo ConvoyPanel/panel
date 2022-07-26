@@ -11,6 +11,7 @@ use App\Enums\Servers\Cloudinit\AuthenticationType;
 use App\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
 use App\Enums\Servers\Cloudinit\BiosType;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Yaml\Yaml;
 
 class CloudinitController extends ApplicationApiController
 {
@@ -27,10 +28,8 @@ class CloudinitController extends ApplicationApiController
     {
         $response = $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
 
-        if ($response === null)
-        {
-            if (AuthenticationType::from($request->type) === AuthenticationType::KEY)
-            {
+        if ($response === null) {
+            if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
                 throw ValidationException::withMessages([
                     'password' => 'The public key is invalid.'
                 ]);
@@ -44,6 +43,14 @@ class CloudinitController extends ApplicationApiController
         return $this->returnInertiaResponse($request, 'password-updated');
     }
 
+    public function dumpConfig(Server $server)
+    {
+        $config = $this->cloudinitService->setServer($server)->dumpConfig();
+
+
+        return Yaml::parse($config);
+    }
+
     public function updateBios(Server $server, UpdateBiosTypeRequest $request)
     {
         $this->cloudinitService->setServer($server)->changeBIOS(BiosType::from($request->type));
@@ -53,8 +60,7 @@ class CloudinitController extends ApplicationApiController
 
     public function updateNetworkConfig(Server $server, UpdateNetworkConfigRequest $request)
     {
-        if ($request->hostname !== null)
-        {
+        if ($request->hostname !== null) {
             $this->cloudinitService->setServer($server)->changeHostname($request->hostname);
         }
 

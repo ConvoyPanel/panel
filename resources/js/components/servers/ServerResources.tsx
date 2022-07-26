@@ -1,38 +1,56 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import getResources from '@/api/server/getResources'
 import { ServerContext } from '@/pages/servers/Show'
-import { useContext } from 'react'
-import { Paper, Skeleton } from '@mantine/core'
+import { useContext, useMemo } from 'react'
+import { Code, Paper, Skeleton } from '@mantine/core'
 import { formatBytes } from '@/api/server/getStatus'
+import getCloudinitDump from '@/api/server/settings/getCloudinitDump'
 
 const ServerResources = () => {
   const serverContext = useContext(ServerContext)
 
-  const { data, status } = useQuery(['resources'], async () => {
+  const { data: resourceData, status: resourceStatus } = useQuery(['resources'], async () => {
     const { data } = await getResources(serverContext!.server.id)
     return data
   })
 
-  const memory = formatBytes(data?.maxmem || 0)
-  const disk = formatBytes(data?.maxdisk || 0)
-  const diskWritten = formatBytes(data?.diskwrite || 0)
-  const diskRead = formatBytes(data?.diskread || 0)
-  const networkIn = formatBytes(data?.netin || 0)
-  const networkOut = formatBytes(data?.netout || 0)
+  const { data: dumpData, status: dumpStatus } = useQuery(['dump'], async () => {
+    const { data } = await getCloudinitDump(serverContext!.server.id)
+    return data
+  })
+
+  const addresses = useMemo(() => {
+    if (dumpStatus !== 'success') return;
+
+    // find config that has the property subnets
+    const config = dumpData.config.find(c => c?.subnets !== undefined)
+
+    if (!config) return undefined
+
+    return config!.subnets!.map(subnet => subnet['address'])
+
+  }, [dumpData, dumpStatus])
+
+  const memory = formatBytes(resourceData?.maxmem || 0)
+  const disk = formatBytes(resourceData?.maxdisk || 0)
+  const diskWritten = formatBytes(resourceData?.diskwrite || 0)
+  const diskRead = formatBytes(resourceData?.diskread || 0)
+  const networkIn = formatBytes(resourceData?.netin || 0)
+  const networkOut = formatBytes(resourceData?.netout || 0)
 
   return (
     <div>
       <h3 className='h3-deemphasized'>Specifications</h3>
       <Paper shadow='xs' className='p-card mt-3 flex flex-col space-y-3'>
-        {status === 'success' && (
+        {resourceStatus === 'success' && (
           <>
             <dl>
               <dt className='dt'>IP Address</dt>
-              <dd className='dd'>{serverContext?.server.ip_address ? serverContext?.server.ip_address : 'Unavailable'}</dd>
+              <dd className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 dd'>{addresses ? addresses.map(address => <Code>{address}</Code>) : 'Unavailable'}</dd>
             </dl>
             <dl>
               <dt className='dt'>vCores</dt>
-              <dd className='dd'>{data.maxcpu}</dd>
+              <dd className='dd'>{resourceData!.maxcpu}</dd>
             </dl>
             <dl>
               <dt className='dt'>Memory</dt>
@@ -76,7 +94,7 @@ const ServerResources = () => {
             </div>
           </>
         )}
-        {status !== 'success' && (
+        {resourceStatus !== 'success' && (
           <>
             <dl>
               <dt className='dt'>vCores</dt>

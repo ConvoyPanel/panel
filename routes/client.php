@@ -75,6 +75,8 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServe
             Route::put('/update-network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('update-network-config');
 
             Route::post('/reinstall', [SettingsController::class, 'reinstall'])->name('reinstall');
+
+            Route::get('/cloudinit/dump', [CloudinitController::class, 'dumpConfig'])->name('cloudinit.dump-config');
         });
     });
 });
