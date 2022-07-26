@@ -8,6 +8,8 @@ import { Node } from '@/api/nodes/types'
 import EmptyState from '@/components/EmptyState'
 import { ServerIcon } from '@heroicons/react/outline'
 import { Inertia } from '@inertiajs/inertia'
+import RoundedButton from '@/components/RoundedButton'
+import { PencilIcon } from '@heroicons/react/solid'
 
 interface Props extends DefaultProps {
   nodes: Node[]
@@ -41,7 +43,11 @@ export default function Index({ auth, nodes }: Props) {
                   <td>{node.name}</td>
                   <td>{node.cluster}</td>
                   <td>{`${node.hostname}:${node.port}`}</td>
-                  <td></td>
+                  <td>
+                    <RoundedButton>
+                      <PencilIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
+                    </RoundedButton>
+                  </td>
                 </tr>
               ))}
             </tbody>
