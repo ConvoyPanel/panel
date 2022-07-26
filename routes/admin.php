@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\IndexController;
+use App\Http\Controllers\Admin\Nodes\AddressController;
 use App\Http\Controllers\Admin\Nodes\NodeController;
+use App\Http\Controllers\Admin\Nodes\SettingsController;
 use App\Http\Controllers\Admin\Servers\ServerController;
 use App\Http\Controllers\Admin\Users\UserController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +17,21 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
         Route::get('/create', [NodeController::class, 'create'])->name('create');
 
         Route::post('/', [NodeController::class, 'store'])->name('store');
+
+        Route::group(['prefix' => '/{node}'], function () {
+            Route::get('/', [NodeController::class, 'show'])->name('show');
+
+            Route::group(['as' => 'show.'], function () {
+                Route::group(['prefix' => '/addresses', 'as' => 'addresses.'], function () {
+                    Route::get('/', [AddressController::class, 'index'])->name('index');
+                });
+
+                Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
+                    Route::get('/', [SettingsController::class, 'index'])->name('index');
+                });
+
+            });
+        });
     });
 
     Route::group(['prefix' => '/servers', 'as' => 'servers.'], function () {

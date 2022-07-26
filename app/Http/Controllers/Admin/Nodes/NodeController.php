@@ -24,6 +24,13 @@ class NodeController extends ApplicationApiController
         return Inertia::render('admin/nodes/Create');
     }
 
+    public function show(Node $node)
+    {
+        return Inertia::render('admin/nodes/Show', [
+            'node' => $node
+        ]);
+    }
+
     public function store(StoreNodeRequest $request)
     {
         $message = 'Unable to connect to server.';

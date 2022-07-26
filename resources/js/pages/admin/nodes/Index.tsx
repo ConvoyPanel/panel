@@ -45,7 +45,7 @@ export default function Index({ auth, nodes }: Props) {
                   <td>{`${node.hostname}:${node.port}`}</td>
                   <td>
                     <RoundedButton>
-                      <PencilIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
+                      <PencilIcon onClick={() => Inertia.visit(route('admin.nodes.show', node.id))} className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
                     </RoundedButton>
                   </td>
                 </tr>
