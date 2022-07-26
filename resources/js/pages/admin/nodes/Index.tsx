@@ -39,7 +39,7 @@ export default function Index({ auth, nodes }: Props) {
             </thead>
             <tbody>
               {nodes.map((node) => (
-                <tr>
+                <tr key={node.id}>
                   <td>{node.name}</td>
                   <td>{node.cluster}</td>
                   <td>{`${node.hostname}:${node.port}`}</td>

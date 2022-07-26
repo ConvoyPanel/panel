@@ -25,4 +25,9 @@ class Server extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(IPAddress::class);
+    }
 }

@@ -12,7 +12,8 @@ class AddressController extends Controller
     public function index(Node $node)
     {
         return Inertia::render('admin/nodes/addresses/Index', [
-            'node' => $node
+            'node' => $node,
+            'addresses' => $node->addresses,
         ]);
     }
 }

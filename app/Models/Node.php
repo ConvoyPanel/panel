@@ -21,4 +21,9 @@ class Node extends Model
     {
         return $this->hasMany(Server::class);
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(IPAddress::class);
+    }
 }
