@@ -79,7 +79,7 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
       </Modal>
       <tr key={address.id}>
         <td>{address.address}</td>
-        <td>{address.subnet_mask}</td>
+        <td>/{address.subnet_mask}</td>
         <td>{address.gateway}</td>
         <td>{address.type === 'ip' ? 'IPv4' : 'IPv6'}</td>
         <td>{address.server_id ? address.server_id : 'Unlinked'}</td>

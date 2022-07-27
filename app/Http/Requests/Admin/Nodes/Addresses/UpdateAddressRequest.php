@@ -29,7 +29,7 @@ class UpdateAddressRequest extends FormRequest
             'server_id' => 'exists:servers,id|nullable',
             'node_id' => 'required|exists:nodes,id',
             'address' => 'ip',
-            'subnet_mask' => 'ip',
+            'subnet_mask' => 'numeric|required',
             'gateway' => 'ip',
             'type' => [new Enum(AddressType::class), 'required'],
         ];

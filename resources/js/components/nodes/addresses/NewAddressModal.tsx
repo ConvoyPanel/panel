@@ -126,8 +126,9 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             required
           />
           <TextInput
-            label='Subnet Mask'
+            label='Subnet Mask (/xx)'
             name='subnet_mask'
+            placeholder='xx'
             value={data.subnet_mask}
             autoFocus
             onChange={onHandleChange}
