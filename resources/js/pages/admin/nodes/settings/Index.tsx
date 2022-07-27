@@ -31,6 +31,7 @@ const Index = ({ auth, node }: Props) => {
       <Head title={`${node.name} - Settings`} />
 
       <Main>
+        <h3 className='h3-deemphasized'>Settings</h3>
         <SettingsContext.Provider value={{ node, auth }}>
           <div className='settings-grid'>
             <div className='settings-column'>
