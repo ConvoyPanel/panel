@@ -6,6 +6,7 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Models\Node;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -63,5 +64,10 @@ class NodeController extends ApplicationApiController
                 'auth_type' => $message
             ]);
         }
+    }
+
+    public function search(Request $request)
+    {
+        return Node::search($request->search)->get();
     }
 }

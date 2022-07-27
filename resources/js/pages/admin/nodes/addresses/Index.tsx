@@ -5,16 +5,43 @@ import EmptyState from '@/components/EmptyState'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import NodeNav from '@/components/nodes/NodeNav'
+import { formDataHandler } from '@/util/helpers'
 import { LinkIcon } from '@heroicons/react/outline'
-import { Head } from '@inertiajs/inertia-react'
-import { Button, Paper, Table } from '@mantine/core'
+import { Head, useForm } from '@inertiajs/inertia-react'
+import { Button, Modal, Paper, Table, TextInput } from '@mantine/core'
+import { ChangeEvent, useState } from 'react'
 
 interface Props extends DefaultProps {
   node: Node
   addresses: Address[]
 }
 
+interface FormData {
+  server_id?: number
+  node_id?: number
+  address: string
+  subnet_mask: string
+  gateway: string
+  type: 'ip' | 'ip6'
+}
+
 const Index = ({ auth, node, addresses }: Props) => {
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  const { data, setData, post, processing, errors, reset } = useForm<FormData>({
+    server_id: undefined,
+    node_id: undefined,
+    address: '',
+    subnet_mask: '',
+    gateway: '',
+    type: 'ip',
+  })
+
+  const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
+    formDataHandler(event, setData)
+
+  const handleCreate = async () => {}
+
   return (
     <Authenticated
       auth={auth}
@@ -24,10 +51,49 @@ const Index = ({ auth, node, addresses }: Props) => {
       <Head title={`${node.name} - Addresses`} />
 
       <Main>
+        <Modal
+          opened={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          title={`Import a new address`}
+          centered
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleCreate()
+            }}
+          >
+
+            {/* <TextInput
+              label='Name'
+              name='name'
+              value={data.name}
+              styles={{
+                required: { display: 'none' },
+              }}
+              className='mt-1 block w-full'
+              autoFocus
+              onChange={onHandleChange}
+              error={errors.name}
+              required
+            /> */}
+            <Button
+              type='submit'
+              loading={processing}
+              className='mt-3'
+              fullWidth
+              onClick={() => handleCreate()}
+            >
+              Create
+            </Button>
+          </form>
+        </Modal>
         <h3 className='h3-deemphasized'>IP Addresses</h3>
         <Paper shadow='xs' className='p-card w-full'>
           <div className='flex justify-end'>
-            <Button>New Address</Button>
+            <Button onClick={() => setShowCreateModal(true)}>
+              New Address
+            </Button>
           </div>
           <Table className='mt-3' striped highlightOnHover>
             <thead>
@@ -59,7 +125,7 @@ const Index = ({ auth, node, addresses }: Props) => {
               title='No Addresses'
               description='Get started by creating a new address.'
               action='New Address'
-              onClick={() => {}}
+              onClick={() => setShowCreateModal(true)}
             />
           )}
         </Paper>

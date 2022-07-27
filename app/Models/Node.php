@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Node extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'name', 'hostname', 'username', 'password', 'port', 'auth_type', 'latency', 'last_pinged'
@@ -25,5 +26,12 @@ class Node extends Model
     public function addresses()
     {
         return $this->hasMany(IPAddress::class);
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->name
+        ];
     }
 }
