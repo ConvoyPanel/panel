@@ -37,12 +37,18 @@ const Index = ({ auth, server, config }: Props) => {
 
       <Main>
         <h3 className='h3-deemphasized'>Settings</h3>
-        <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-3 w-full'>
+        <div className='settings-grid'>
           <SettingsContext.Provider value={{ server, config, auth }}>
-            <BasicSettings />
-            <BiosConfigSettings />
-            <NetworkConfigSettings />
-            <ReinstallSettings />
+            <div className='settings-column'>
+              <BasicSettings />
+              <ReinstallSettings />
+            </div>
+            <div className='settings-column'>
+              <BiosConfigSettings />
+            </div>
+            <div className='settings-column'>
+              <NetworkConfigSettings />
+            </div>
           </SettingsContext.Provider>
         </div>
       </Main>

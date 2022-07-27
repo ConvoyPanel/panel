@@ -184,7 +184,7 @@ const Index = ({ auth, server, backups }: Props) => {
               handleCreate()
             }}
           >
-            <div className='flex flex-col space-y-1'>
+            <div className='flex flex-col space-y-3'>
               <Select
                 label='Mode'
                 value={data.mode}

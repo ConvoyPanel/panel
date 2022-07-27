@@ -52,3 +52,11 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.settings-grid {
+  @apply grid md:grid-cols-3 gap-3 w-full
+}
+
+.settings-column {
+  @apply flex flex-col space-y-3 w-full
+}

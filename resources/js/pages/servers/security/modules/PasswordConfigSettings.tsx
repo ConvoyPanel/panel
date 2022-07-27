@@ -35,7 +35,7 @@ const PasswordConfigSettings = () => {
     <FormBlock
       title='Auth Configuration'
       inputs={
-        <>
+        <div className='flex flex-col space-y-3'>
           <RadioGroup
             value={data.type}
             error={errors.type}
@@ -51,7 +51,7 @@ const PasswordConfigSettings = () => {
             name='password'
             type='password'
             value={data.password}
-            className='mt-1 block w-full'
+            className='block w-full'
             onChange={onHandleChange}
             error={errors.password}
 
@@ -62,12 +62,12 @@ const PasswordConfigSettings = () => {
             name='password_confirmation'
             type='password'
             value={data.password_confirmation}
-            className='mt-1 block w-full'
+            className='block w-full'
             onChange={onHandleChange}
             error={errors.password_confirmation}
 
           />
-        </>
+        </div>
       }
       defaultAction
       onSubmit={submit}

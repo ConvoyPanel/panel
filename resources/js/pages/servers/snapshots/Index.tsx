@@ -192,7 +192,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
               styles={{
                 required: { display: 'none' },
               }}
-              className='mt-1 block w-full'
+              className='block w-full'
               autoFocus
               onChange={(e) => setName(e.target.value.replace(/\s+/g, '-'))}
               error={error}

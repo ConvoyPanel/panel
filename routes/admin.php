@@ -23,6 +23,10 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
         Route::group(['prefix' => '/{node}'], function () {
             Route::get('/', [NodeController::class, 'show'])->name('show');
 
+            Route::delete('/', [NodeController::class, 'destroy'])->name('destroy');
+
+            Route::put('/', [NodeController::class, 'update'])->name('update');
+
             Route::group(['as' => 'show.'], function () {
                 Route::group(['prefix' => '/addresses', 'as' => 'addresses.'], function () {
                     Route::get('/', [AddressController::class, 'index'])->name('index');

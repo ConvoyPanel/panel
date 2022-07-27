@@ -45,12 +45,12 @@ const NetworkConfigSettings = () => {
     <FormBlock
       title='Network Configuration'
       inputs={
-        <>
+        <div className='flex flex-col space-y-3'>
           <TextInput
             label='Hostname'
             name='name'
             value={data.hostname}
-            className='mt-1 block w-full'
+            className='block w-full'
             //@ts-ignore
             onChange={(e) => setData('hostname', e.target.value)}
             error={errors.hostname}
@@ -59,7 +59,7 @@ const NetworkConfigSettings = () => {
             label='Nameserver 1'
             name='name'
             value={data.nameservers[0]}
-            className='mt-1 block w-full'
+            className='block w-full'
             onChange={(e) => setNameserver(0, e.target.value)}
             error={errors.nameservers ? errors.nameservers[0] : null}
           />
@@ -67,11 +67,11 @@ const NetworkConfigSettings = () => {
             label='Nameserver 2'
             name='name'
             value={data.nameservers[1]}
-            className='mt-1 block w-full'
+            className='block w-full'
             onChange={(e) => setNameserver(1, e.target.value)}
             error={errors.nameservers ? errors.nameservers[1] : null}
           />
-        </>
+        </div>
       }
       defaultAction
       onSubmit={submit}

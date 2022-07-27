@@ -10,18 +10,24 @@ import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 const VncRedirectSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
-  const submit = (e: FormEvent<HTMLFormElement>) => {
-  }
+  const submit = (e: FormEvent<HTMLFormElement>) => {}
 
   const redirect = () => {
-    Inertia.visit(route('servers.show.security.vnc.index', settingsContext?.server.id))
+    Inertia.visit(
+      route('servers.show.security.vnc.index', settingsContext?.server.id)
+    )
   }
 
   return (
     <FormBlock
       title='NoVNC Terminal'
-      inputs={
-            <Button onClick={redirect} className='mt-3'>Start Session</Button>
+      inputs={<>
+        <p className='p-desc'>Remotely access your server terminal from the web.</p>
+      </>}
+      actions={
+        <Button onClick={redirect}>
+          Start Session
+        </Button>
       }
       onSubmit={submit}
       processing={false}

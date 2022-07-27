@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Models\Node;
 use App\Models\User;
@@ -69,5 +70,48 @@ class NodeController extends ApplicationApiController
     public function search(Request $request)
     {
         return Node::search($request->search)->get();
+    }
+
+    public function update(Node $node, UpdateNodeRequest $request)
+    {
+        if (isset($request->username) && isset($request->password))
+        {
+            $node->update($request->safe()->all());
+
+            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+        }
+
+        if (isset($request->username))
+        {
+            $node->update($request->safe()->except(['password']));
+
+            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+        }
+
+        if (isset($request->password))
+        {
+            $node->update($request->safe()->except(['username']));
+
+            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+        }
+
+        if (!isset($request->username) && !isset($request->password))
+        {
+            $node->update($request->safe()->except(['username', 'password']));
+
+            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+        }
+
+        // fallback
+        $node->update($request->safe()->all());
+
+        return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+    }
+
+    public function destroy(Node $node)
+    {
+        $node->delete();
+
+        return redirect()->route('admin.nodes.index');
     }
 }
