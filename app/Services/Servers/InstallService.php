@@ -142,6 +142,9 @@ class InstallService extends ProxmoxService
             }
         }
 
+        // update cloudinit ip
+        $instantiatedCloudinitService->updateIpConfig($originalResources['ipconfig']);
+
         // apply the changes
         $this->powerService->setServer($originalServer)->kill();
 
