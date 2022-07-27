@@ -21,6 +21,7 @@ import createSnapshot from '@/api/server/snapshots/createSnapshot'
 import rollbackSnapshot from '@/api/server/snapshots/rollbackSnapshot'
 import { ArchiveIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
+import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface SnapshotProps {
   server: Server
@@ -124,9 +125,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
           <RoundedButton onClick={() => setShowRollbackModal(true)}>
             <PlayIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
           </RoundedButton>
-          <RoundedButton onClick={() => setShowDeleteModal(true)}>
-            <TrashIcon className='text-gray-600 hover:text-red-600 w-[18px] h-[18px]' />
-          </RoundedButton>
+          <DeleteButton onClick={() => setShowDeleteModal(true)} />
         </td>
       </tr>
     </>

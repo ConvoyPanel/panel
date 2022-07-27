@@ -17,6 +17,7 @@ import RoundedButton from '@/components/RoundedButton'
 import { Inertia } from '@inertiajs/inertia'
 import deleteBackup from '@/api/server/backups/deleteBackup'
 import rollbackBackup from '@/api/server/backups/rollbackBackup'
+import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface BackupRowProps {
   serverId: number
@@ -120,9 +121,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
           <RoundedButton onClick={() => setShowRollbackModal(true)}>
             <PlayIcon className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
           </RoundedButton>
-          <RoundedButton onClick={() => setShowDeleteModal(true)}>
-            <TrashIcon className='text-gray-600 hover:text-red-600 w-[18px] h-[18px]' />
-          </RoundedButton>
+          <DeleteButton onClick={() => setShowDeleteModal(true)} />
         </td>
       </tr>
     </>

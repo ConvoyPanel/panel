@@ -10,6 +10,7 @@ import { ServerIcon } from '@heroicons/react/outline'
 import { Inertia } from '@inertiajs/inertia'
 import RoundedButton from '@/components/RoundedButton'
 import { PencilIcon } from '@heroicons/react/solid'
+import EditButton from '@/components/elements/tables/EditButton'
 
 interface Props extends DefaultProps {
   nodes: Node[]
@@ -44,9 +45,11 @@ export default function Index({ auth, nodes }: Props) {
                   <td>{node.cluster}</td>
                   <td>{`${node.hostname}:${node.port}`}</td>
                   <td>
-                    <RoundedButton>
-                      <PencilIcon onClick={() => Inertia.visit(route('admin.nodes.show', node.id))} className='text-gray-600 hover:text-blue-600 w-[18px] h-[18px]' />
-                    </RoundedButton>
+                    <EditButton
+                      onClick={() =>
+                        Inertia.visit(route('admin.nodes.show', node.id))
+                      }
+                    />
                   </td>
                 </tr>
               ))}
