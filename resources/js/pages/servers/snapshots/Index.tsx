@@ -217,26 +217,29 @@ const Index = ({ auth, server, snapshots }: Props) => {
                 New Snapshot
               </Button>
             </div>
-            <Table className='mt-3' striped highlightOnHover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Active</th>
-                  <th>Date</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {snapshots.map((snapshot) => (
-                  <SnapshotRow
-                    server={server}
-                    currentSnapshot={currentSnapshot}
-                    snapshot={snapshot}
-                  />
-                ))}
-              </tbody>
-            </Table>
+
+            <div className='overflow-auto'>
+              <Table className='mt-3' striped highlightOnHover>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Active</th>
+                    <th>Date</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {snapshots.map((snapshot) => (
+                    <SnapshotRow
+                      server={server}
+                      currentSnapshot={currentSnapshot}
+                      snapshot={snapshot}
+                    />
+                  ))}
+                </tbody>
+              </Table>
+            </div>
 
             {snapshots.length <= 1 && (
               <EmptyState

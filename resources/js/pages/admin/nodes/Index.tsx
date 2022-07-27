@@ -29,32 +29,35 @@ export default function Index({ auth, nodes }: Props) {
               Import Node
             </Button>
           </div>
-          <Table className='mt-3' striped highlightOnHover>
-            <thead>
-              <tr>
-                <th>Display Name</th>
-                <th>Cluster</th>
-                <th>Address</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {nodes.map((node) => (
-                <tr key={node.id}>
-                  <td>{node.name}</td>
-                  <td>{node.cluster}</td>
-                  <td>{`${node.hostname}:${node.port}`}</td>
-                  <td>
-                    <EditButton
-                      onClick={() =>
-                        Inertia.visit(route('admin.nodes.show', node.id))
-                      }
-                    />
-                  </td>
+
+          <div className='overflow-auto'>
+            <Table className='mt-3' striped highlightOnHover>
+              <thead>
+                <tr>
+                  <th>Display Name</th>
+                  <th>Cluster</th>
+                  <th>Address</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {nodes.map((node) => (
+                  <tr key={node.id}>
+                    <td>{node.name}</td>
+                    <td>{node.cluster}</td>
+                    <td>{`${node.hostname}:${node.port}`}</td>
+                    <td>
+                      <EditButton
+                        onClick={() =>
+                          Inertia.visit(route('admin.nodes.show', node.id))
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
 
           {nodes.length === 0 && (
             <EmptyState

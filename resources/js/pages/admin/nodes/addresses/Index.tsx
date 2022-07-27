@@ -31,25 +31,31 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const { processing, delete: processDelete } = useForm({
-    id: address.id
+    id: address.id,
   })
 
   const handleDelete = async () => {
-    processDelete(route('admin.nodes.show.addresses.destroy', {
-      node: node.id,
-      address: address.id
-    }), {
-      onSuccess: () => {
-        setShowDeleteModal(false)
+    processDelete(
+      route('admin.nodes.show.addresses.destroy', {
+        node: node.id,
+        address: address.id,
+      }),
+      {
+        onSuccess: () => {
+          setShowDeleteModal(false)
+        },
       }
-    })
+    )
   }
-
-
 
   return (
     <>
-      <EditAddressModal node={node} address={address} open={showEditModal} setOpen={setShowEditModal} />
+      <EditAddressModal
+        node={node}
+        address={address}
+        open={showEditModal}
+        setOpen={setShowEditModal}
+      />
       <Modal
         opened={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -57,7 +63,8 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
         centered
       >
         <p className='p-desc'>
-          Are you sure you want to delete this address? This action will only delete it from the database but not from the node/server.
+          Are you sure you want to delete this address? This action will only
+          delete it from the database but not from the node/server.
         </p>
 
         <Button
@@ -118,23 +125,25 @@ const Index = ({ auth, node, addresses }: Props) => {
               New Address
             </Button>
           </div>
-          <Table className='mt-3' striped highlightOnHover>
-            <thead>
-              <tr>
-                <th>Address</th>
-                <th>Subnet Mask</th>
-                <th>Gateway</th>
-                <th>Type</th>
-                <th>Linked Server</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {addresses.map((address) => (
-                <AddressRow key={address.id} node={node} address={address} />
-              ))}
-            </tbody>
-          </Table>
+          <div className='overflow-auto'>
+            <Table className='mt-3' striped highlightOnHover>
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Subnet Mask</th>
+                  <th>Gateway</th>
+                  <th>Type</th>
+                  <th>Linked Server</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {addresses.map((address) => (
+                  <AddressRow key={address.id} node={node} address={address} />
+                ))}
+              </tbody>
+            </Table>
+          </div>
           {addresses.length === 0 && (
             <EmptyState
               icon={LinkIcon}

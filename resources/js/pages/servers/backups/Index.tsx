@@ -219,22 +219,25 @@ const Index = ({ auth, server, backups }: Props) => {
                 New Backup
               </Button>
             </div>
-            <Table className='mt-3' striped highlightOnHover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Date</th>
-                  <th>Format</th>
-                  <th>Size</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {backups.map((backup) => (
-                  <BackupRow serverId={server.id} backup={backup} />
-                ))}
-              </tbody>
-            </Table>
+
+            <div className='overflow-auto'>
+              <Table className='mt-3' striped highlightOnHover>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Format</th>
+                    <th>Size</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {backups.map((backup) => (
+                    <BackupRow serverId={server.id} backup={backup} />
+                  ))}
+                </tbody>
+              </Table>
+            </div>
 
             {backups.length === 0 && (
               <EmptyState
