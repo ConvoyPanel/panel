@@ -13,11 +13,15 @@ class InstallService extends ProxmoxService
 {
     private PowerService $powerService;
     private ResourceService $resourceService;
+    private NetworkService $networkService;
+    private CloudinitService $cloudinitService;
 
     public function __construct()
     {
         $this->powerService = new PowerService();
         $this->resourceService = new ResourceService();
+        $this->networkService = new NetworkService();
+        $this->cloudinitService = new CloudinitService();
     }
 
     public function install(int $newid, string $target)
@@ -36,15 +40,43 @@ class InstallService extends ProxmoxService
     {
         $originalServer = clone $this->server;
         $instantiatedResourceService = (clone $this->resourceService)->setServer($originalServer);
-        $originalDisks = $instantiatedResourceService->getDisks();
-        $originalResources = $instantiatedResourceService->getResources();
-        $originalBootOrder = $instantiatedResourceService->getBootOrder();
-        $templateDisks = (clone $this->resourceService)->setServer($template)->getDisks();
+        $instantiatedNetworkService = (clone $this->networkService)->setServer($originalServer);
+        $instantiatedCloudinitService = (clone $this->cloudinitService)->setServer($originalServer);
+
+        $ipconfigResponse = $instantiatedCloudinitService->getIpConfig();
+
+        $originalResources = [
+            'disks' => $instantiatedResourceService->getDisks(),
+            'resources' => $instantiatedResourceService->getResources(),
+            'bootOrder' => $instantiatedResourceService->getBootOrder(),
+            'ipconfig' => array_key_exists('pending', $ipconfigResponse) ? $ipconfigResponse['pending'] : $ipconfigResponse['value'],
+            'ipsets' => [],
+        ];
 
         $originalSpecifications = [
-            'cores' => $originalResources['maxcpu'],
-            'memory' => $originalResources['maxmem'] / 1024 / 1024,
+            'cores' => $originalResources['resources']['maxcpu'],
+            'memory' => $originalResources['resources']['maxmem'] / 1024 / 1024,
         ];
+
+        // get all ipsets (underscore indicates it must not be referenced elsewhere because it's temporary)
+        $_ipSets = array_column($instantiatedNetworkService->getIpSets(), 'name');
+
+        foreach ($_ipSets as $ipSet) {
+            $lockedIps = array_column($instantiatedNetworkService->getLockedIps($ipSet), 'cidr');
+
+            array_push($originalResources['ipsets'], [
+                'name' => $ipSet,
+                'addresses' => $lockedIps,
+            ]);
+        }
+
+
+        $templateDisks = (clone $this->resourceService)->setServer($template)->getDisks();
+
+
+
+        // get all the IPsets
+
 
         (clone $this->powerService)->setServer($originalServer)->kill();
 
@@ -67,7 +99,7 @@ class InstallService extends ProxmoxService
         }
 
 
-        foreach ($originalDisks as $disk) {
+        foreach ($originalResources['disks'] as $disk) {
             $existingDisk = array_search($disk['disk'], array_column($newDisks, 'disk'));
 /*
             if (!$existingDisk)
@@ -97,7 +129,18 @@ class InstallService extends ProxmoxService
 
         // set boot $order
 
-        $instantiatedResourceService->setBootOrder($originalBootOrder['raw']);
+        $instantiatedResourceService->setBootOrder($originalResources['bootOrder']['raw']);
+
+        // set IP sets
+        foreach ($originalResources['ipsets'] as $ipSet)
+        {
+            $instantiatedNetworkService->createIpSet($ipSet['name']);
+
+            foreach ($ipSet['addresses'] as $address)
+            {
+                $instantiatedNetworkService->lockIp($ipSet['name'], $address);
+            }
+        }
 
         // apply the changes
         $this->powerService->setServer($originalServer)->kill();

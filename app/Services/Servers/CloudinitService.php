@@ -87,6 +87,13 @@ class CloudinitService extends ProxmoxService
         return null;
     }
 
+    public function updateIpConfig(string $ipConfig)
+    {
+        return $this->instance()->config()->put([
+            'ipconfig0' => $ipConfig,
+        ]);
+    }
+
     public function getServerInaccessibleConfig()
     {
         return ['nameserver' => 'server inaccessible,server inaccessible', 'bios' => 'seabios', 'searchdomain' => 'server inaccessible'];

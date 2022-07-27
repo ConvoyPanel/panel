@@ -80,7 +80,7 @@ abstract class ProxmoxService
     public function removeDataProperty(mixed $data, bool $returnNullIfEmpty = false)
     {
         if (gettype($data) === 'array') {
-            return $data['data'] ? $data['data'] : $data;
+            return array_key_exists('data', $data) ? $data['data'] : $data;
         } else {
             return $returnNullIfEmpty ? null : [];
         }
