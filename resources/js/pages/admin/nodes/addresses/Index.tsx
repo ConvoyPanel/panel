@@ -8,29 +8,81 @@ import Main from '@/components/Main'
 import NodeNav from '@/components/nodes/NodeNav'
 import { LinkIcon } from '@heroicons/react/outline'
 import { Head, useForm } from '@inertiajs/inertia-react'
-import {
-  Button,
-  Paper,
-  Table,
-} from '@mantine/core'
-import {  useState } from 'react'
+import { Button, Modal, Paper, Table } from '@mantine/core'
+import { useState } from 'react'
 import getSearchNodes from '@/api/admin/nodes/searchNodes'
 import NewAddressModal from '@/components/nodes/addresses/NewAddressModal'
+import EditButton from '@/components/elements/tables/EditButton'
+import DeleteButton from '@/components/elements/tables/DeleteButton'
+import EditAddressModal from '@/components/nodes/addresses/EditAddressModal'
 
 interface Props extends DefaultProps {
   node: Node
   addresses: Address[]
 }
 
-const AddressRow = ({ address }: { address: Address }) => {
-  return <tr key={address.id}>
-    <td>{address.address}</td>
-    <td>{address.subnet_mask}</td>
-    <td>{address.gateway}</td>
-    <td>{address.type === 'ip' ? 'IPv4' : 'IPv6'}</td>
-    <td>{address.server_id ? address.server_id : 'Unlinked'}</td>
-    <td></td>
-  </tr>
+interface AddressRowProps {
+  address: Address
+  node: Node
+}
+
+const AddressRow = ({ address, node }: AddressRowProps) => {
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const { processing, delete: processDelete } = useForm({
+    id: address.id
+  })
+
+  const handleDelete = async () => {
+    processDelete(route('admin.nodes.show.addresses.destroy', {
+      node: node.id,
+      address: address.id
+    }), {
+      onSuccess: () => {
+        setShowDeleteModal(false)
+      }
+    })
+  }
+
+
+
+  return (
+    <>
+      <EditAddressModal node={node} address={address} open={showEditModal} setOpen={setShowEditModal} />
+      <Modal
+        opened={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title={`Delete ${address.address}?`}
+        centered
+      >
+        <p className='p-desc'>
+          Are you sure you want to delete this address? This action will only delete it from the database but not from the node/server.
+        </p>
+
+        <Button
+          loading={processing}
+          color='red'
+          className='mt-3'
+          fullWidth
+          onClick={() => handleDelete()}
+        >
+          Delete
+        </Button>
+      </Modal>
+      <tr key={address.id}>
+        <td>{address.address}</td>
+        <td>{address.subnet_mask}</td>
+        <td>{address.gateway}</td>
+        <td>{address.type === 'ip' ? 'IPv4' : 'IPv6'}</td>
+        <td>{address.server_id ? address.server_id : 'Unlinked'}</td>
+        <td>
+          <EditButton onClick={() => setShowEditModal(true)} />
+          <DeleteButton onClick={() => setShowDeleteModal(true)} />
+        </td>
+      </tr>
+    </>
+  )
 }
 
 const Index = ({ auth, node, addresses }: Props) => {
@@ -54,7 +106,11 @@ const Index = ({ auth, node, addresses }: Props) => {
       <Head title={`${node.name} - Addresses`} />
 
       <Main>
-        <NewAddressModal node={node} showCreateModal={showCreateModal} setShowCreateModal={setShowCreateModal} />
+        <NewAddressModal
+          node={node}
+          open={showCreateModal}
+          setOpen={setShowCreateModal}
+        />
         <h3 className='h3-deemphasized'>IP Addresses</h3>
         <Paper shadow='xs' className='p-card w-full'>
           <div className='flex justify-end'>
@@ -75,7 +131,7 @@ const Index = ({ auth, node, addresses }: Props) => {
             </thead>
             <tbody>
               {addresses.map((address) => (
-                <AddressRow key={address.id} address={address} />
+                <AddressRow key={address.id} node={node} address={address} />
               ))}
             </tbody>
           </Table>

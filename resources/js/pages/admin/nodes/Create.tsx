@@ -51,7 +51,7 @@ const Create = ({ auth }: Props) => {
   }
 
   return (
-    <Authenticated auth={auth} header={<h1 className='h1'>Import Node</h1>}>
+    <Authenticated auth={auth} header={<h1 className='h1'>Import Node from 'convoy/nodes'</h1>}>
       <Head title={`Import Node`} />
 
       <Main>
@@ -61,9 +61,9 @@ const Create = ({ auth }: Props) => {
         >
           <ArrowLeftIcon className='w-3 h-3' /> <span>Back</span>
         </Link>
-        <h3 className='h3-emphasized'>Create a deployment.</h3>
+        <h3 className='h3-emphasized'>Import a node.</h3>
         <p className='p-desc'>
-          Please follow the steps to configure your node and deploy it.
+          Please follow the steps to configure your node and create it.
         </p>
         <div className='flex flex-col !mt-9 space-y-3'>
           <Paper shadow='xs' className='p-card w-full relative overflow-hidden'>

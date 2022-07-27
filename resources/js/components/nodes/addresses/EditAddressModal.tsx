@@ -13,6 +13,7 @@ import { debounce } from 'lodash'
 import SelectItem from '@/components/SelectItem'
 import { Node } from '@/api/admin/nodes/types'
 import getSearchServers from '@/api/admin/servers/searchServers'
+import { Address } from '@/api/admin/nodes/addresses/types'
 
 export interface FormData {
   server_id?: number
@@ -20,31 +21,39 @@ export interface FormData {
   address: string
   subnet_mask: string
   gateway: string
-  type: 'ip' | 'ip6'
+  type: string
 }
 
 export interface Props {
-    node: Node,
-    open: boolean,
-    setOpen: (show: boolean) => void
-
+  node: Node
+  address: Address
+  open: boolean
+  setOpen: (show: boolean) => void
 }
 
-const NewAddressModal = ({node, open, setOpen}: Props) => {
-  const { data, setData, post, processing, errors, reset } = useForm<FormData>({
-    server_id: undefined,
+const EditAddressModal = ({
+  node,
+  address,
+  open,
+  setOpen,
+}: Props) => {
+  const { data, setData, put, processing, errors, reset } = useForm<FormData>({
+    server_id: address.server_id,
     node_id: node.id,
-    address: '',
-    subnet_mask: '',
-    gateway: '',
-    type: 'ip',
+    address: address.address,
+    subnet_mask: address.subnet_mask,
+    gateway: address.gateway,
+    type: address.type,
   })
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
     formDataHandler(event, setData)
 
   const handleCreate = async () => {
-    post(route('admin.nodes.show.addresses.store', node.id), {
+    put(route('admin.nodes.show.addresses.update', {
+      node: node.id,
+      address: address.id,
+    }), {
       onSuccess: () => {
         reset()
         setOpen(false)
@@ -82,7 +91,7 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
     <Modal
       opened={open}
       onClose={() => setOpen(false)}
-      title={`Import a new address`}
+      title={`Edit address ${address.address}`}
       centered
     >
       <form
@@ -99,8 +108,8 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             itemComponent={SelectItem}
             clearable
             nothingFound='No options'
-            value={data.server_id?.toString()}
             onSearchChange={searchServers}
+            value={data.server_id?.toString()}
             onChange={(e) => setData('server_id', parseInt(e as string))}
             description="Can leave empty. This option doesn't automatically assign the address to a server but marks it as linked."
             data={servers}
@@ -151,11 +160,11 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
           fullWidth
           onClick={() => handleCreate()}
         >
-          Create
+          Update
         </Button>
       </form>
     </Modal>
   )
 }
 
-export default NewAddressModal
+export default EditAddressModal

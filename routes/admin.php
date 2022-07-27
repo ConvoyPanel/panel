@@ -28,6 +28,13 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
                     Route::get('/', [AddressController::class, 'index'])->name('index');
 
                     Route::post('/', [AddressController::class, 'store'])->name('store');
+
+                    Route::group(['prefix' => '/{address}'], function () {
+
+                        Route::put('/', [AddressController::class, 'update'])->name('update');
+
+                        Route::delete('/', [AddressController::class, 'destroy'])->name('destroy');
+                    });
                 });
 
                 Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
