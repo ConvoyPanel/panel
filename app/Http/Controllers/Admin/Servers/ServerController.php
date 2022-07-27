@@ -16,6 +16,6 @@ class ServerController extends Controller
 
     public function search(Request $request)
     {
-        return Server::search($request->query)->get();
+        return Server::search($request->search)->get();
     }
 }
