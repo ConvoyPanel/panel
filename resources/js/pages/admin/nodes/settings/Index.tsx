@@ -1,4 +1,4 @@
-import { Node } from '@/api/nodes/types'
+import { Node } from '@/api/admin/nodes/types'
 import { DefaultProps } from '@/api/types/default'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'

@@ -5,11 +5,6 @@ export interface Server {
     vmid: number
     name: string
     description?: string
-    vnc_username?: string
-    vnc_password?: string
-    cloud_init_enabled: boolean
-    is_os_template: boolean
-    ip_address: string
     updated_at: string
     created_at: string
 }

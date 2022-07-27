@@ -27,7 +27,7 @@ class StoreAddressRequest extends FormRequest
     {
         return [
             'server_id' => 'exists:servers,id|nullable',
-            'node_id' => 'exists:nodes,id',
+            'node_id' => 'required|exists:nodes,id',
             'address' => 'ip',
             'subnet_mask' => 'ip',
             'gateway' => 'ip',

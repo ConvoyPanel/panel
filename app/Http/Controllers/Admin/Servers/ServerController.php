@@ -16,6 +16,6 @@ class ServerController extends Controller
 
     public function search(Request $request)
     {
-        return Server::search($request->search)->get();
+        return Server::search($request->search)->get()->load(['node:id,name']);
     }
 }

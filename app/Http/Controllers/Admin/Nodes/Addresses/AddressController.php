@@ -22,8 +22,8 @@ class AddressController extends ApplicationApiController
 
     public function store(Node $node, StoreAddressRequest $request)
     {
-        dd(IPAddress::create($request->validated()));
+        IPAddress::create($request->validated());
 
-        return redirect()->route('admin.');
+        return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
     }
 }
