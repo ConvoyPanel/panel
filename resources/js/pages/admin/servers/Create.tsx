@@ -15,6 +15,7 @@ import {
   Tooltip,
   SegmentedControl,
   Select,
+  Checkbox,
 } from '@mantine/core'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
@@ -36,6 +37,7 @@ interface FormData {
   user_id?: number
   vmid?: number
   template_id?: number
+  is_template: boolean
 }
 
 const Create = ({ auth }: Props) => {
@@ -46,6 +48,7 @@ const Create = ({ auth }: Props) => {
     user_id: undefined,
     vmid: undefined,
     template_id: undefined,
+    is_template: false
   })
 
   const [deploymentType, setDeploymentType] = useState('new')
@@ -230,6 +233,10 @@ const Create = ({ auth }: Props) => {
               ) : (
                 ''
               )}
+
+              {deploymentType === 'existing' &&
+                <Checkbox checked={data.is_template}  onChange={(e) => setData('is_template', e.target.checked)} label='Mark as template' />
+              }
 
               <Button
                 className='!mt-9'
