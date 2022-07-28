@@ -19,12 +19,12 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
         Route::post('/', [NodeController::class, 'store'])->name('store');
 
-        Route::put('/', [NodeController::class, 'update'])->name('update');
-
         Route::get('/search', [NodeController::class, 'search'])->name('search');
 
         Route::group(['prefix' => '/{node}'], function () {
             Route::get('/', [NodeController::class, 'show'])->name('show');
+
+            Route::put('/', [NodeController::class, 'update'])->name('update');
 
             Route::delete('/', [NodeController::class, 'destroy'])->name('destroy');
 
