@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
-class IsServerInstalling
+class CheckServerInstalling
 {
     /**
      * Handle an incoming request.

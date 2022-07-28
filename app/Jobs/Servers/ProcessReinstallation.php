@@ -2,6 +2,9 @@
 
 namespace App\Jobs\Servers;
 
+use App\Models\Server;
+use App\Models\Template;
+use App\Services\Servers\InstallService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +21,7 @@ class ProcessReinstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(protected $serverId, protected $templateId)
     {
         //
     }
@@ -30,6 +33,13 @@ class ProcessReinstallation implements ShouldQueue
      */
     public function handle()
     {
-        //
+        $server = Server::find($this->serverId);
+        $template = Template::find($this->templateId)->server;
+
+        $server->update(['is_installing' => true]);
+
+        (new InstallService)->setServer($server)->reinstall($template);
+
+        $server->update(['is_installing' => false]);
     }
 }

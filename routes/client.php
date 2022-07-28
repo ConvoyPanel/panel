@@ -12,17 +12,21 @@ use App\Http\Middleware\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\Servers\SettingsController;
 use App\Http\Controllers\Client\Servers\SnapshotController;
+use App\Http\Middleware\CheckServerInstalling;
+use App\Http\Middleware\CheckServerNotInstalling;
 
 Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
 Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
 
-Route::group(['prefix' => '/servers/{server}', 'middleware' => AuthenticateServerAccess::class, 'as' => 'servers.'], function () {
+Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServerAccess::class, CheckServerInstalling::class], 'as' => 'servers.'], function () {
     Route::get('/', [ServerController::class, 'show'])->name('show');
 
     Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('get-templates');
 
     Route::group(['as' => 'show.'], function () {
+        Route::get('/installing', [ServerController::class, 'showIsInstallingPage'])->middleware(CheckServerNotInstalling::class)->withoutMiddleware(CheckServerInstalling::class)->name('installing.index');
+
         Route::get('/status', [StatusController::class, 'show'])->name('status');
         Route::post('/status', [PowerController::class, 'sendCommand'])->name('status.update');
 

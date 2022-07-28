@@ -18,4 +18,11 @@ class ServerController extends ApplicationApiController
             'server' => $server->toArray(),
         ]);
     }
+
+    public function showIsInstallingPage(Server $server)
+    {
+        return Inertia::render('servers/Installing', [
+            'server' => $server->toArray(),
+        ]);
+    }
 }

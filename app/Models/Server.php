@@ -14,7 +14,8 @@ class Server extends Model
         'name',
         'user_id',
         'node_id',
-        'vmid'
+        'vmid',
+        'is_installing'
     ];
 
     public function node()

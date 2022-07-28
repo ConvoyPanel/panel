@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Services\Servers\CloudinitService;
 use Inertia\Inertia;
 use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
+use App\Jobs\Servers\ProcessReinstallation;
 use App\Models\Node;
 use App\Models\Template;
 use App\Services\Nodes\TemplateService;
@@ -46,8 +47,8 @@ class SettingsController extends ApplicationApiController
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
     {
-        $this->installService->setServer($server)->reinstall(Template::find($request->template_id)->server);
+        ProcessReinstallation::dispatch($server->id, $request->template_id);
 
-        return $this->returnNoContent();
+        return redirect()->route('servers.show.installing.index', [$server->id]);
     }
 }
