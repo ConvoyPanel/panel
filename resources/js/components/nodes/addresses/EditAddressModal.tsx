@@ -19,7 +19,7 @@ export interface FormData {
   server_id?: number
   node_id?: number
   address: string
-  subnet_mask: string
+  cidr: string
   gateway: string
   type: string
 }
@@ -41,7 +41,7 @@ const EditAddressModal = ({
     server_id: address.server_id,
     node_id: node.id,
     address: address.address,
-    subnet_mask: address.subnet_mask,
+    cidr: address.cidr,
     gateway: address.gateway,
     type: address.type,
   })
@@ -135,19 +135,17 @@ const EditAddressModal = ({
             required
           />
           <TextInput
-            label='Subnet Mask'
-            name='subnet_mask'
-            value={data.subnet_mask}
-            autoFocus
+            label='CIDR'
+            name='cidr'
+            value={data.cidr}
             onChange={onHandleChange}
-            error={errors.subnet_mask}
+            error={errors.cidr}
             required
           />
           <TextInput
             label='Gateway'
             name='gateway'
             value={data.gateway}
-            autoFocus
             onChange={onHandleChange}
             error={errors.gateway}
             required

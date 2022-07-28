@@ -18,7 +18,7 @@ export interface FormData {
   server_id?: number
   node_id?: number
   address: string
-  subnet_mask: string
+  cidr: string
   gateway: string
   type: 'ip' | 'ip6'
 }
@@ -35,7 +35,7 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
     server_id: undefined,
     node_id: node.id,
     address: '',
-    subnet_mask: '',
+    cidr: '',
     gateway: '',
     type: 'ip',
   })
@@ -126,20 +126,18 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             required
           />
           <TextInput
-            label='Subnet Mask (/xx)'
-            name='subnet_mask'
+            label='CIDR (/xx)'
+            name='cidr'
             placeholder='xx'
-            value={data.subnet_mask}
-            autoFocus
+            value={data.cidr}
             onChange={onHandleChange}
-            error={errors.subnet_mask}
+            error={errors.cidr}
             required
           />
           <TextInput
             label='Gateway'
             name='gateway'
             value={data.gateway}
-            autoFocus
             onChange={onHandleChange}
             error={errors.gateway}
             required
