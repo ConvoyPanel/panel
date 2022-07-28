@@ -33,6 +33,11 @@ class Server extends Model
         return $this->hasMany(IPAddress::class);
     }
 
+    public function template()
+    {
+        return $this->hasOne(Template::class);
+    }
+
     public function toSearchableArray()
     {
         return [

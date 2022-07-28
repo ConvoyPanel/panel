@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Nodes\NodeController;
 use App\Http\Controllers\Admin\Nodes\SettingsController;
 use App\Http\Controllers\Admin\Servers\ServerController;
 use App\Http\Controllers\Admin\Users\UserController;
+use App\Http\Controllers\Admin\Servers\Settings;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
@@ -51,7 +52,19 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
     Route::group(['prefix' => '/servers', 'as' => 'servers.'], function () {
         Route::get('/', [ServerController::class, 'index'])->name('index');
 
+        Route::get('/create', [ServerController::class, 'create'])->name('create');
+
         Route::get('/search', [ServerController::class, 'search'])->name('search');
+
+        Route::group(['prefix' => '/{server}'], function () {
+            Route::get('/', [ServerController::class, 'show'])->name('show');
+
+            Route::group(['as' => 'show.'], function () {
+                Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
+                    Route::get('/', [Settings\SettingsController::class, 'index'])->name('index');
+                });
+            });
+        });
     });
 
     Route::group(['prefix' => '/users', 'as' => 'users.'], function () {

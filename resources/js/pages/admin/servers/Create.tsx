@@ -22,8 +22,6 @@ import { Inertia } from '@inertiajs/inertia'
 interface Props extends DefaultProps {
 }
 
-const VncCommands = `wget -qO- https://github.com/Performave/convoy-novnc/archive/refs/heads/main.zip | unzip`
-
 const Create = ({ auth }: Props) => {
   const { data, setData, post, processing, errors, reset } = useForm({
     name: '',
@@ -50,36 +48,23 @@ const Create = ({ auth }: Props) => {
   }
 
   return (
-    <Authenticated auth={auth} header={<h1 className='h1'>Import Node from 'convoy/nodes'</h1>}>
+    <Authenticated auth={auth} header={<h1 className='h1'>New Server</h1>}>
       <Head title={`Import Node`} />
 
       <Main>
         <Link
           className='flex items-center space-x-2 p-desc'
-          href={route('admin.nodes.index')}
+          href={route('admin.servers.index')}
         >
           <ArrowLeftIcon className='w-3 h-3' /> <span>Back</span>
         </Link>
-        <h3 className='h3-emphasized'>Import a node.</h3>
+        <h3 className='h3-emphasized'>Create a server.</h3>
         <p className='p-desc'>
-          Please follow the steps to configure your node and create it.
+          Please follow the steps to configure your server and create it.
         </p>
         <div className='flex flex-col !mt-9 space-y-3'>
           <Paper shadow='xs' className='p-card w-full relative overflow-hidden'>
-            {deployed && (
-              <>
-                <div className='grid place-items-center absolute inset-0 z-[7]'>
-                  <div className='flex flex-col items-center space-y-3'>
-                    <CheckCircleIcon className='text-green-400 w-14 h-14' />
-                    <h3 className='!text-white h3-deemphasized'>
-                      Successfully Deployed
-                    </h3>
-                  </div>
-                </div>
-                <Overlay opacity={0.6} color='#000' zIndex={5}></Overlay>
-              </>
-            )}
-            <h3 className='h3 '>Configure Node</h3>
+            <h3 className='h3 '>Configure Server</h3>
             <form className='mt-3 space-y-3' onSubmit={submit}>
               <TextInput
                 label='Display Name'
@@ -156,19 +141,7 @@ const Create = ({ auth }: Props) => {
               </Button>
             </form>
           </Paper>
-          <Paper shadow='xs' className='p-card w-full space-y-3'>
-            <h3 className='h3'>Configure VNC Service</h3>
 
-            <p className='p-desc'>
-              Install the noVNC broker to allow clients to connect their
-              servers. Without this, clients will not be able to manage their
-              servers from the web.{' '}
-              <span className='font-bold'>
-                Run this command on the node you're deploying on.
-              </span>
-            </p>
-            <Code block>{VncCommands}</Code>
-          </Paper>
           <Paper shadow='xs' className='p-card w-full space-y-3'>
             <h3 className='h3'>Add Server Templates</h3>
 
@@ -177,13 +150,6 @@ const Create = ({ auth }: Props) => {
             </p>
           </Paper>
 
-          <div className='grid place-items-center h-[30vh] w-full'>
-            <div className='flex flex-col space-y-3 items-center'>
-              <CheckCircleIcon className='text-green-600 w-14 h-14' />
-              <h3 className='h3-deemphasized'>You're all set!</h3>
-              <Button onClick={() => Inertia.visit(route('admin.nodes.index')) }>View All Nodes</Button>
-            </div>
-          </div>
         </div>
       </Main>
     </Authenticated>
