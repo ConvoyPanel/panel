@@ -6,6 +6,7 @@ import Main from '@/components/Main'
 import NodeNav from '@/components/nodes/NodeNav'
 import ServerNav from '@/components/servers/admin/ServerNav'
 import { Head } from '@inertiajs/inertia-react'
+import { Button, Paper } from '@mantine/core'
 
 interface Props extends DefaultProps {
     server: Server
@@ -21,6 +22,10 @@ const Show = ({ auth, server }: Props) => {
       <Head title={`${server.name} - Overview`} />
 
       <Main>
+        <h3 className='h3-deemphasized'>Overview</h3>
+        <Paper shadow='xs' className='p-card'>
+          <Button href={route('servers.show', server.id)} target='_blank' component='a'>Enter server management</Button>
+        </Paper>
       </Main>
     </Authenticated>
   )
