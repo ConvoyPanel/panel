@@ -72,11 +72,11 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServ
 
             Route::patch('/basic-info', [SettingsController::class, 'updateBasicInfo'])->name('update-basic-info');
 
-            Route::put('/update-password', [CloudinitController::class, 'updatePassword'])->name('update-password');
+            Route::put('/password', [CloudinitController::class, 'updatePassword'])->name('update-password');
 
-            Route::put('/update-bios', [CloudinitController::class, 'updateBios'])->name('update-bios');
+            Route::put('/bios', [CloudinitController::class, 'updateBios'])->name('update-bios');
 
-            Route::put('/update-network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('update-network-config');
+            Route::put('/network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('update-network-config');
 
             Route::post('/reinstall', [SettingsController::class, 'reinstall'])->name('reinstall');
 

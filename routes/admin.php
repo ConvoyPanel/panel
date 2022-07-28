@@ -26,8 +26,6 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
             Route::delete('/', [NodeController::class, 'destroy'])->name('destroy');
 
-            Route::put('/', [NodeController::class, 'update'])->name('update');
-
             Route::group(['as' => 'show.'], function () {
                 Route::group(['prefix' => '/addresses', 'as' => 'addresses.'], function () {
                     Route::get('/', [AddressController::class, 'index'])->name('index');
@@ -44,6 +42,8 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
                 Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
                     Route::get('/', [SettingsController::class, 'index'])->name('index');
+
+                    Route::put('/basic-settings', [NodeController::class, 'update'])->name('update');
                 });
             });
         });
@@ -64,6 +64,9 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
             Route::group(['as' => 'show.'], function () {
                 Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
                     Route::get('/', [Settings\SettingsController::class, 'index'])->name('index');
+
+
+                    Route::put('/basic-info', [Settings\SettingsController::class, 'updateBasicInfo'])->name('update-basic-info');
                 });
             });
         });
