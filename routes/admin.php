@@ -61,10 +61,11 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
         Route::group(['prefix' => '/{server}'], function () {
             Route::get('/', [ServerController::class, 'show'])->name('show');
 
+            Route::delete('/', [ServerController::class, 'destroy'])->name('destroy');
+
             Route::group(['as' => 'show.'], function () {
                 Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
                     Route::get('/', [Settings\SettingsController::class, 'index'])->name('index');
-
 
                     Route::put('/basic-info', [Settings\SettingsController::class, 'updateBasicInfo'])->name('update-basic-info');
                 });

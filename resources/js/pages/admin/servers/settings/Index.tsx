@@ -7,6 +7,7 @@ import Main from '@/components/Main'
 import NodeNav from '@/components/nodes/NodeNav'
 import ServerNav from '@/components/servers/admin/ServerNav'
 import BasicSettings from '@/pages/admin/servers/settings/modules/BasicSettings'
+import DeleteSettings from '@/pages/admin/servers/settings/modules/DeleteSettings'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext } from 'react'
 
@@ -44,6 +45,7 @@ const Index = ({ auth, server }: Props) => {
               <BasicSettings />
             </div>
             <div className='settings-column'>
+              <DeleteSettings />
             </div>
           </div>
         </SettingsContext.Provider>
