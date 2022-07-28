@@ -8,10 +8,10 @@ export interface Server extends DefaultServer {
   }
 }
 
-export default (query: string) => {
+export default (search: string) => {
   return axios.get<Server[]>(
     route('admin.servers.search', {
-      query,
+      search,
     })
   )
 }
