@@ -38,6 +38,7 @@ interface FormData {
   vmid?: number
   template_id?: number
   is_template: boolean
+  is_visible: boolean
 }
 
 const Create = ({ auth }: Props) => {
@@ -48,7 +49,8 @@ const Create = ({ auth }: Props) => {
     user_id: undefined,
     vmid: undefined,
     template_id: undefined,
-    is_template: false
+    is_template: false,
+    is_visible: false,
   })
 
   const [deploymentType, setDeploymentType] = useState('new')
@@ -112,8 +114,7 @@ const Create = ({ auth }: Props) => {
   const { data: templateData, status } = useQuery(
     ['templates', data.node_id],
     async () => {
-      if (!data.node_id)
-      {
+      if (!data.node_id) {
         return []
       }
 
@@ -234,9 +235,23 @@ const Create = ({ auth }: Props) => {
                 ''
               )}
 
-              {deploymentType === 'existing' &&
-                <Checkbox checked={data.is_template}  onChange={(e) => setData('is_template', e.target.checked)} label='Mark as template' />
-              }
+              {deploymentType === 'existing' && (
+                <Checkbox
+                  checked={data.is_template}
+                  onChange={(e) => setData('is_template', e.target.checked)}
+                  label='Mark as template'
+                />
+              )}
+
+              {deploymentType === 'existing' && data.is_template ? (
+                <Checkbox
+                  checked={data.is_visible}
+                  onChange={(e) => setData('is_visible', e.target.checked)}
+                  label='Make template visible'
+                />
+              ) : (
+                ''
+              )}
 
               <Button
                 className='!mt-9'

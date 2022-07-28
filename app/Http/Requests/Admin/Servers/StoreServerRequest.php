@@ -30,7 +30,8 @@ class StoreServerRequest extends FormRequest
             'user_id' => 'exists:users,id|required',
             'vmid' => 'numeric|required_if:type,existing',
             'template_id' => 'exists:templates,id|required_if:type,new',
-            'is_template' => 'boolean|required_if:type,existing'
+            'is_template' => 'boolean|required_if:type,existing',
+            'is_visible' => 'boolean|required_with:is_template'
         ];
     }
 }

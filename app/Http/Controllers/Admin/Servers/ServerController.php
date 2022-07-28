@@ -43,6 +43,14 @@ class ServerController extends Controller
         {
             $server = Server::create($request->validated());
 
+            if ($request->is_template === true)
+            {
+                Template::create([
+                    'server_id' => $server->id,
+                    'visible' => $request->is_visible ? $request->is_visible : false
+                ]);
+            }
+
             return redirect()->route('admin.servers.show', [$server->id]);
         }
 

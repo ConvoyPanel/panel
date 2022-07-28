@@ -11,7 +11,7 @@ import EditButton from '@/components/elements/tables/EditButton'
 import EmptyState from '@/components/EmptyState'
 import { ServerIcon } from '@heroicons/react/outline'
 import { Template } from '@/api/admin/servers/templates/types'
-import { CheckIcon } from '@heroicons/react/solid'
+import { CheckIcon, EyeIcon } from '@heroicons/react/solid'
 
 interface Server extends DefaultServer {
   template?: Template
@@ -63,7 +63,7 @@ export default function Index({ auth, servers }: Props) {
                     <td>{server.vmid}</td>
                     <td>{server.node.name}</td>
                     <td>{server.owner.email}</td>
-                    <td>{server.template ? <CheckIcon className='text-green-600 w-[18px] h-[18px]' /> : ''}</td>
+                    <td>{server.template && <CheckIcon className='text-green-600 w-[18px] h-[18px]' />} {server?.template?.visible ? <EyeIcon className='text-blue-600 inline-block w-[18px] h-[18px]' /> : ''}</td>
                     <td>
                       <EditButton
                         onClick={() =>
