@@ -16,7 +16,7 @@ import {
   SegmentedControl,
   Select,
 } from '@mantine/core'
-import { ChangeEvent, FormEvent, useCallback, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
 import { CheckCircleIcon } from '@heroicons/react/outline'
 import { Inertia } from '@inertiajs/inertia'
@@ -24,10 +24,13 @@ import { debounce } from 'lodash'
 import getSearchNodes from '@/api/admin/nodes/searchNodes'
 import SelectItem from '@/components/SelectItem'
 import getSearchUsers from '@/api/admin/users/searchUsers'
+import { useQuery } from '@tanstack/react-query'
+import getTemplates from '@/api/server/settings/getTemplates'
 
 interface Props extends DefaultProps {}
 
 interface FormData {
+  type: string
   name: string
   node_id?: number
   user_id?: number
@@ -37,6 +40,7 @@ interface FormData {
 
 const Create = ({ auth }: Props) => {
   const { data, setData, post, processing, errors, reset } = useForm<FormData>({
+    type: 'new',
     name: '',
     node_id: undefined,
     user_id: undefined,
@@ -51,7 +55,7 @@ const Create = ({ auth }: Props) => {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    post(route('admin.nodes.store'))
+    post(route('admin.servers.store'))
   }
 
   const [nodes, setNodes] = useState<
@@ -102,6 +106,30 @@ const Create = ({ auth }: Props) => {
     []
   )
 
+  const { data: templateData, status } = useQuery(
+    ['templates', data.node_id],
+    async () => {
+      if (!data.node_id)
+      {
+        return []
+      }
+
+      const { data: resData } = await getTemplates(data.node_id)
+      return resData
+    }
+  )
+
+  const templates = useMemo(() => {
+    if (status === 'success') {
+      return templateData.map((template) => ({
+        value: template.id as unknown as string,
+        label: template.server.name,
+      }))
+    }
+
+    return []
+  }, [data, status])
+
   return (
     <Authenticated auth={auth} header={<h1 className='h1'>New Server</h1>}>
       <Head title={`Import Node`} />
@@ -122,7 +150,10 @@ const Create = ({ auth }: Props) => {
             <h3 className='h3 '>Configure Server</h3>
             <SegmentedControl
               value={deploymentType}
-              onChange={setDeploymentType}
+              onChange={(e) => {
+                setDeploymentType(e)
+                setData('type', e)
+              }}
               data={[
                 { label: 'New', value: 'new' },
 
@@ -170,7 +201,7 @@ const Create = ({ auth }: Props) => {
                 required
               />
 
-              <TextInput
+              <NumberInput
                 label='VMID'
                 name='vmid'
                 placeholder={
@@ -180,10 +211,25 @@ const Create = ({ auth }: Props) => {
                 }
                 value={data.vmid}
                 className='mt-1 block w-full'
-                onChange={onHandleChange}
+                onChange={(e) => setData('vmid', e)}
                 error={errors.vmid}
                 required={deploymentType === 'existing'}
               />
+
+              {deploymentType === 'new' && data.node_id ? (
+                <Select
+                  label='Template'
+                  value={data.template_id as unknown as string}
+                  onChange={(e) =>
+                    setData('template_id', parseInt(e as string))
+                  }
+                  data={templates}
+                  error={errors.template_id}
+                  required
+                />
+              ) : (
+                ''
+              )}
 
               <Button
                 className='!mt-9'
@@ -195,14 +241,6 @@ const Create = ({ auth }: Props) => {
               </Button>
             </form>
           </Paper>
-
-          {/* <Paper shadow='xs' className='p-card w-full space-y-3'>
-            <h3 className='h3'>Add Server Templates</h3>
-
-            <p className='p-desc'>
-              Server templates are unavailable at the moment.
-            </p>
-          </Paper> */}
         </div>
       </Main>
     </Authenticated>

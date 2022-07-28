@@ -54,6 +54,8 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
         Route::get('/create', [ServerController::class, 'create'])->name('create');
 
+        Route::post('/', [ServerController::class, 'store'])->name('store');
+
         Route::get('/search', [ServerController::class, 'search'])->name('search');
 
         Route::group(['prefix' => '/{server}'], function () {
