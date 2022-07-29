@@ -56,7 +56,7 @@ class ServerController extends Controller
 
         if ($request->type === 'new')
         {
-            $vmid = $request->vmid ? $request->vmid : random_int(1000,99999);
+            $vmid = $request->vmid ? $request->vmid : random_int(1000,999999999);
             $server = Server::create(array_merge($request->validated(), ['vmid' => $vmid]));
 
             ProcessInstallation::dispatch($request->template_id, $server->id, $server->node->cluster, $vmid);
