@@ -47,7 +47,6 @@ class CloudinitController extends ApplicationApiController
     {
         $config = $this->cloudinitService->setServer($server)->dumpConfig();
 
-
         return Yaml::parse($config);
     }
 
