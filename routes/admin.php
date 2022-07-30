@@ -32,6 +32,8 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
                 Route::group(['prefix' => '/addresses', 'as' => 'addresses.'], function () {
                     Route::get('/', [AddressController::class, 'index'])->name('index');
 
+                    Route::get('/search', [AddressController::class, 'search'])->name('search');
+
                     Route::post('/', [AddressController::class, 'store'])->name('store');
 
                     Route::group(['prefix' => '/{address}'], function () {

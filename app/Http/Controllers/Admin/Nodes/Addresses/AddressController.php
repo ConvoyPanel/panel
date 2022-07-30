@@ -10,6 +10,8 @@ use App\Models\IPAddress;
 use App\Models\Node;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\AllowedInclude;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends ApplicationApiController
 {
@@ -40,5 +42,11 @@ class AddressController extends ApplicationApiController
         $address->delete();
 
         return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
+    }
+
+    public function search(Node $node)
+    {
+        return QueryBuilder::for(IPAddress::class)
+            ->allowedFilters(['address', 'cidr', 'gateway', 'type'])->where('node_id', $node->id)->get();
     }
 }
