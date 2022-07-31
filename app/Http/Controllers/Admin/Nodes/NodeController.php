@@ -78,40 +78,40 @@ class NodeController extends ApplicationApiController
         {
             $node->update($request->safe()->all());
 
-            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+            return redirect()->route('admin.nodes.show.settings', [$node->id]);
         }
 
         if (isset($request->username))
         {
             $node->update($request->safe()->except(['password']));
 
-            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+            return redirect()->route('admin.nodes.show.settings', [$node->id]);
         }
 
         if (isset($request->password))
         {
             $node->update($request->safe()->except(['username']));
 
-            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+            return redirect()->route('admin.nodes.show.settings', [$node->id]);
         }
 
         if (!isset($request->username) && !isset($request->password))
         {
             $node->update($request->safe()->except(['username', 'password']));
 
-            return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+            return redirect()->route('admin.nodes.show.settings', [$node->id]);
         }
 
         // fallback
         $node->update($request->safe()->all());
 
-        return redirect()->route('admin.nodes.show.settings.index', [$node->id]);
+        return redirect()->route('admin.nodes.show.settings', [$node->id]);
     }
 
     public function destroy(Node $node)
     {
         $node->delete();
 
-        return redirect()->route('admin.nodes.index');
+        return redirect()->route('admin.nodes');
     }
 }

@@ -44,7 +44,7 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
     formDataHandler(event, setData)
 
   const handleCreate = async () => {
-    post(route('admin.nodes.show.addresses.store', node.id), {
+    post(route('admin.nodes.show.addresses', node.id), {
       onSuccess: () => {
         reset()
         setOpen(false)

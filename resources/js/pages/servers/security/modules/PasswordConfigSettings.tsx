@@ -19,7 +19,7 @@ const PasswordConfigSettings = () => {
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     post(
-      route('servers.settings.password', settingsContext?.server.id)
+      route('servers.show.settings.password', settingsContext?.server.id)
     )
   }
 

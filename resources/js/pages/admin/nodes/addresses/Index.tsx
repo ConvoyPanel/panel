@@ -36,7 +36,7 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
 
   const handleDelete = async () => {
     processDelete(
-      route('admin.nodes.show.addresses.destroy', {
+      route('admin.nodes.show.addresses', {
         node: node.id,
         address: address.id,
       }),

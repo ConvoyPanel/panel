@@ -101,7 +101,7 @@ class ServerController extends Controller
 
         $server->delete();
 
-        return redirect()->route('admin.servers.index');
+        return redirect()->route('admin.servers');
     }
 
     public function search(Request $request)

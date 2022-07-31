@@ -32,9 +32,9 @@ export default function Authenticated({
   const routes = {
     admin: [
       { name: 'Dashboard', route: 'admin.dashboard' },
-      { name: 'Nodes', route: 'admin.nodes.index' },
-      { name: 'Servers', route: 'admin.servers.index' },
-      { name: 'Users', route: 'admin.users.index' },
+      { name: 'Nodes', route: 'admin.nodes' },
+      { name: 'Servers', route: 'admin.servers' },
+      { name: 'Users', route: 'admin.users' },
     ],
     client: [{ name: 'Dashboard', route: 'dashboard' }],
   }
@@ -59,6 +59,7 @@ export default function Authenticated({
                       <NavLink
                         href={route(link.route)}
                         active={route().current(link.route) as boolean}
+                        key={link.route}
                       >
                         {link.name}
                       </NavLink>
@@ -68,6 +69,7 @@ export default function Authenticated({
                       <NavLink
                         href={route(link.route)}
                         active={route().current(link.route) as boolean}
+                        key={link.route}
                       >
                         {link.name}
                       </NavLink>
@@ -170,6 +172,7 @@ export default function Authenticated({
                   <ResponsiveNavLink
                     href={route(link.route)}
                     active={route().current(link.route) as boolean}
+                    key={link.route}
                   >
                     {link.name}
                   </ResponsiveNavLink>
@@ -179,6 +182,7 @@ export default function Authenticated({
                   <ResponsiveNavLink
                     href={route(link.route)}
                     active={route().current(link.route) as boolean}
+                    key={link.route}
                   >
                     {link.name}
                   </ResponsiveNavLink>

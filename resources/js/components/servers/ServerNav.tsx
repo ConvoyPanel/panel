@@ -9,11 +9,11 @@ interface Props {
 const ServerNav = ({ id }: Props) => {
   const routes = [
     'servers.show',
-    'servers.snapshots',
-    'servers.backups',
-    'servers.logs',
-    'servers.security',
-    'servers.settings',
+    'servers.show.snapshots',
+    'servers.show.backups',
+    'servers.show.logs',
+    'servers.show.security',
+    'servers.show.settings',
   ]
 
   const [active, setActive] = useState(routes.indexOf(route().current() as string))

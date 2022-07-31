@@ -235,6 +235,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
                       server={server}
                       currentSnapshot={currentSnapshot}
                       snapshot={snapshot}
+                      key={snapshot.digest}
                     />
                   ))}
                 </tbody>

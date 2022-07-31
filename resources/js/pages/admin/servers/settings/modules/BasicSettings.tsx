@@ -33,7 +33,7 @@ const BasicSettings = () => {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     put(
       route(
-        'admin.servers.show.settings.update-basic-info',
+        'admin.servers.show.settings.basic-info',
         settingsContext?.server.id
       )
     )

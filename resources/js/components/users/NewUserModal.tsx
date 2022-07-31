@@ -21,7 +21,7 @@ const NewUserModal = ({ open, setOpen }: Props) => {
 
   const handleCreate = () => {
     post(
-      route('admin.users.store', {
+      route('admin.users', {
         onSuccess: () => setOpen(false),
       })
     )

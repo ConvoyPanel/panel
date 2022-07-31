@@ -32,6 +32,6 @@ class SettingsController extends Controller
             $user->update($request->safe()->except(['password']));
         }
 
-        return redirect()->route('admin.users.show.settings.index', [$user->id]);
+        return redirect()->route('admin.users.show.settings', [$user->id]);
     }
 }

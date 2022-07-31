@@ -56,7 +56,7 @@ const Create = ({ auth }: Props) => {
       <Main>
         <Link
           className='flex items-center space-x-2 p-desc'
-          href={route('admin.nodes.index')}
+          href={route('admin.nodes')}
         >
           <ArrowLeftIcon className='w-3 h-3' /> <span>Back</span>
         </Link>
@@ -181,7 +181,7 @@ const Create = ({ auth }: Props) => {
             <div className='flex flex-col space-y-3 items-center'>
               <CheckCircleIcon className='text-green-600 w-14 h-14' />
               <h3 className='h3-deemphasized'>You're all set!</h3>
-              <Button onClick={() => Inertia.visit(route('admin.nodes.index')) }>View All Nodes</Button>
+              <Button onClick={() => Inertia.visit(route('admin.nodes')) }>View All Nodes</Button>
             </div>
           </div>
         </div>

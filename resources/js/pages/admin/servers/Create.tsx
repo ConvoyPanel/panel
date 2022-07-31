@@ -190,7 +190,7 @@ const Create = ({ auth }: Props) => {
       <Main>
         <Link
           className='flex items-center space-x-2 p-desc'
-          href={route('admin.servers.index')}
+          href={route('admin.servers')}
         >
           <ArrowLeftIcon className='w-3 h-3' /> <span>Back</span>
         </Link>

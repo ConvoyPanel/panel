@@ -19,5 +19,5 @@ export interface Log {
 }
 
 export default (serverId: number) => {
-  return axios.get(route('servers.logs.json', serverId))
+  return axios.get(route('servers.show.logs.json', serverId))
 }

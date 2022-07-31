@@ -50,7 +50,7 @@ const EditAddressModal = ({
     formDataHandler(event, setData)
 
   const handleCreate = async () => {
-    put(route('admin.nodes.show.addresses.update', {
+    put(route('admin.nodes.show.addresses.show', {
       node: node.id,
       address: address.id,
     }), {

@@ -41,6 +41,6 @@ class SettingsController extends Controller
 
         $server->update($request->validated());
 
-        return redirect()->route('admin.servers.show.settings.index', [$server->id]);
+        return redirect()->route('admin.servers.show.settings', [$server->id]);
     }
 }

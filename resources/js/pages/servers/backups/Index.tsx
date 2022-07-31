@@ -145,7 +145,7 @@ const Index = ({ auth, server, backups }: Props) => {
     formDataHandler(event, setData)
 
   const handleCreate = () => {
-    post(route('servers.backups', server.id))
+    post(route('servers.show.backups', server.id))
 
     setShowCreateModal(false)
   }

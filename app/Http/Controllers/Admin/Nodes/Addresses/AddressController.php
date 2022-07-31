@@ -27,21 +27,21 @@ class AddressController extends ApplicationApiController
     {
         IPAddress::create($request->validated());
 
-        return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
+        return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
         $address->update($request->validated());
 
-        return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
+        return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }
 
     public function destroy(Node $node, IPAddress $address)
     {
         $address->delete();
 
-        return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
+        return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }
 
     public function search(Node $node, Request $request)

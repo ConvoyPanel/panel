@@ -17,7 +17,7 @@ const DeleteSettings = () => {
   }
 
   const handleDelete = () => {
-    deleteNode(route('admin.nodes.destroy', settingsContext?.node.id))
+    deleteNode(route('admin.nodes.show.addresses.show', settingsContext?.node.id))
   }
 
   return (

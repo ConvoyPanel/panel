@@ -36,7 +36,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::middleware([ForceJsonResponse::class, 'api', AuthorizeProprietaryToken::class])
-                ->prefix('api/application')
+                ->prefix('/api/application')
                 ->group(base_path('routes/api-application.php'));
 
             Route::middleware('web')
@@ -46,6 +46,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/client.php'));
 
             Route::middleware(['web', 'auth', AdminAuthenticate::class])
+                ->prefix('/admin')
                 ->group(base_path('routes/admin.php'));
         });
     }

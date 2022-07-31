@@ -18,7 +18,7 @@ const BasicSettings = () => {
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
-    put(route('admin.users.show.settings.update', settingsContext?.user.id))
+    put(route('admin.users.show.settings', settingsContext?.user.id))
   }
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>

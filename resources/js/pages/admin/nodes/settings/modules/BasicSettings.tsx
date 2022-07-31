@@ -21,7 +21,7 @@ const BasicSettings = () => {
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
-    put(route('admin.nodes.show.settings.update', settingsContext?.node.id))
+    put(route('admin.nodes.show.settings.basic-info', settingsContext?.node.id))
   }
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>

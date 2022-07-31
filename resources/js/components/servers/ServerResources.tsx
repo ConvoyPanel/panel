@@ -46,7 +46,7 @@ const ServerResources = () => {
           <>
             <dl>
               <dt className='dt'>IP Address</dt>
-              <dd className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 dd'>{addresses ? addresses.map(address => <Code>{address}</Code>) : 'Unavailable'}</dd>
+              <dd className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 dd'>{addresses ? addresses.map(address => <Code key={address}>{address}</Code>) : 'Unavailable'}</dd>
             </dl>
             <dl>
               <dt className='dt'>vCores</dt>

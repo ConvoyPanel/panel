@@ -16,7 +16,7 @@ const DeleteSettings = () => {
   }
 
   const handleDelete = () => {
-    deleteUser(route('admin.users.destroy', settingsContext?.user.id))
+    deleteUser(route('admin.users.show', settingsContext?.user.id))
   }
 
   return (

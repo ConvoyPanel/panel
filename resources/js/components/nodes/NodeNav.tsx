@@ -9,8 +9,8 @@ interface Props {
 const NodeNav = ({ id }: Props) => {
   const routes = [
     'admin.nodes.show',
-    'admin.nodes.show.addresses.index',
-    'admin.nodes.show.settings.index',
+    'admin.nodes.show.addresses',
+    'admin.nodes.show.settings',
   ]
 
   const [active, setActive] = useState(routes.indexOf(route().current() as string))

@@ -9,7 +9,7 @@ interface Props {
 const UserNav = ({ id }: Props) => {
   const routes = [
     'admin.users.show',
-    'admin.users.show.settings.index',
+    'admin.users.show.settings',
   ]
 
   const [active, setActive] = useState(routes.indexOf(route().current() as string))

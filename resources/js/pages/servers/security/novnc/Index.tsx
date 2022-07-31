@@ -49,7 +49,7 @@ const Index = ({ auth, server }: Props) => {
     setUsed(true)
 
     setTimeout(() => {
-      Inertia.visit(route('servers.security', server.id))
+      Inertia.visit(route('servers.show.security', server.id))
     }, 3000)
   }
 
