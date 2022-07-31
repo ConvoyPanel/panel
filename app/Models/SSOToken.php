@@ -10,4 +10,8 @@ class SSOToken extends Model
     use HasFactory;
 
     protected $table = 'sso_tokens';
+
+    protected $fillable = [
+        'user_id', 'token', 'used',
+    ];
 }

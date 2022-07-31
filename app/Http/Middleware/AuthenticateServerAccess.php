@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\Server;
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthenticateServerAccess
 {
@@ -29,7 +29,7 @@ class AuthenticateServerAccess
 
         if ($user->id !== $server->user_id && !$user->root_admin)
         {
-            throw new UnauthorizedHttpException('Server not found');
+            throw new NotFoundHttpException('Server not found'); // user shouldn't know that it exists
         }
 
         return $next($request);

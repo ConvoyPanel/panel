@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AuthorizeTokenRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\SSOToken;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -38,6 +43,32 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);
+    }
+
+    public function authorizeToken(Request $request)
+    {
+        $SSOToken = SSOToken::where('token', $request->token)->first();
+
+        if (!isset($SSOToken))
+        {
+            return throw new NotFoundHttpException('Token doesn\'t exist');
+        }
+
+        // expire tokens if they're past a specific time
+        $diff = Carbon::parse($SSOToken->created_at)->diffInMinutes(Carbon::now());
+
+        if ($diff > 2 || $SSOToken->used)
+        {
+            return throw new UnauthorizedHttpException('', 'Token expired');
+        }
+
+        Auth::loginUsingId($SSOToken->user_id);
+
+        $request->session()->regenerate();
+
+        $SSOToken->update(['used' => true]);
+
+        return redirect()->route('dashboard');
     }
 
     /**

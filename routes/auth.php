@@ -21,6 +21,8 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
+    Route::get('/sso/authorize', [AuthenticatedSessionController::class, 'authorizeToken']);
+
 
 
 /*     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
