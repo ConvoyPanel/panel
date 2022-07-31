@@ -270,9 +270,13 @@ const Create = ({ auth }: Props) => {
                   onChange={(e) => setData('addresses', e)}
                   onSearchChange={searchIps}
                   searchable
+                  styles={{
+                    searchInput: {
+                      boxShadow: 'none !important'
+                    }
+                  }}
                   data={ips}
                   error={errors.addresses}
-                  required
                 />
               ) : (
                 ''
