@@ -15,7 +15,7 @@ use App\Http\Controllers\Client\Servers\SnapshotController;
 use App\Http\Middleware\CheckServerInstalling;
 use App\Http\Middleware\CheckServerNotInstalling;
 
-Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
+Route::get('/', [IndexController::class, 'index'])->name('dashboard');
 
 Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
 
