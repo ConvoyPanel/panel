@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\AuthorizeProprietaryToken;
+use App\Http\Middleware\ForceJsonResponse;
 use App\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -33,9 +35,9 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+            Route::middleware(['api', AuthorizeProprietaryToken::class, ForceJsonResponse::class])
+                ->prefix('api/application')
+                ->group(base_path('routes/api-application.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
@@ -43,8 +45,8 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware(['web', 'auth'])
                 ->group(base_path('routes/client.php'));
 
-                Route::middleware(['web', 'auth', AdminAuthenticate::class])
-                    ->group(base_path('routes/admin.php'));
+            Route::middleware(['web', 'auth', AdminAuthenticate::class])
+                ->group(base_path('routes/admin.php'));
         });
     }
 
