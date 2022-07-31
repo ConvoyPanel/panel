@@ -13,7 +13,7 @@ import { store } from '@/state'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 export const appName =
-  window.document.getElementsByTagName('title')[0]?.innerText || 'Vineyard'
+  window.document.getElementsByTagName('title')[0]?.innerText || 'Convoy'
 
 export const queryClient = new QueryClient()
 

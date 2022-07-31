@@ -10,7 +10,7 @@ export default function Guest({ children }: Props) {
         <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <Link href="/">
-                    <h1 className='text-3xl font-bold'>Vineyard</h1>
+                    <h1 className='text-3xl font-bold'>Convoy</h1>
                 </Link>
             </div>
 
