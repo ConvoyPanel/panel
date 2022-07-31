@@ -35,7 +35,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware(['api', AuthorizeProprietaryToken::class, ForceJsonResponse::class])
+            Route::middleware([ForceJsonResponse::class, 'api', AuthorizeProprietaryToken::class])
                 ->prefix('api/application')
                 ->group(base_path('routes/api-application.php'));
 
