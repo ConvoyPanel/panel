@@ -154,6 +154,12 @@ const Create = ({ auth }: Props) => {
     []
   )
 
+  useEffect(() => {
+    if (data.node_id) {
+      searchIps('')
+    }
+  }, [data])
+
   const { data: templateData, status } = useQuery(
     ['templates', data.node_id],
     async () => {
