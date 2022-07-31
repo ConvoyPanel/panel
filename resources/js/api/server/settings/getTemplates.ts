@@ -11,5 +11,5 @@ export interface ServerTemplate {
 }
 
 export default (serverId: number) => {
-    return axios.get<ServerTemplate[]>(route('servers.get-templates', serverId))
+    return axios.get<ServerTemplate[]>(route('servers.templates', serverId))
 }

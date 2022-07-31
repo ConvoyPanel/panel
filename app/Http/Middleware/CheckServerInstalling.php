@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\Server;
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class CheckServerInstalling
 {
@@ -30,9 +30,9 @@ class CheckServerInstalling
         {
             if ($request->wantsJson())
             {
-                throw new UnauthorizedHttpException('Server is installing');
+                throw new AccessDeniedHttpException('Server is installing');
             } else {
-                return redirect()->route('servers.show.installing.index', $server->id);
+                return redirect()->route('servers.installing', $server->id);
             }
         }
 

@@ -17,8 +17,58 @@ use App\Http\Middleware\CheckServerNotInstalling;
 
 Route::get('/', [IndexController::class, 'index'])->name('dashboard');
 
-Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('verify-auth-state');
+Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('auth-state');
 
+
+Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServerAccess::class, CheckServerInstalling::class]], function () {
+    Route::get('/', [ServerController::class, 'show'])->name('servers.show');
+    Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('servers.templates');
+    Route::get('/installing', [ServerController::class, 'showIsInstallingPage'])->middleware(CheckServerNotInstalling::class)->withoutMiddleware(CheckServerInstalling::class)->name('servers.installing');
+
+    Route::get('/status', [StatusController::class, 'show'])->name('servers.status');
+    Route::post('/status', [PowerController::class, 'sendCommand']);
+
+    Route::get('/resources', [StatusController::class, 'getResources'])->name('servers.resources');
+
+    Route::prefix('/snapshots')->group(function () {
+        Route::get('/', [SnapshotController::class, 'index'])->name('servers.snapshots');
+        Route::post('/', [SnapshotController::class, 'store']);
+        Route::delete('/', [SnapshotController::class, 'destroy']);
+        Route::post('/rollback', [SnapshotController::class, 'rollback'])->name('servers.snapshots.rollback');
+    });
+
+    Route::prefix('/backups')->group(function() {
+        Route::get('/', [BackupController::class, 'index'])->name('servers.backups');
+        Route::post('/', [BackupController::class, 'createBackup']);
+        Route::delete('/', [BackupController::class, 'destroyBackup']);
+        Route::post('/rollback', [BackupController::class, 'rollback'])->name('servers.backups.rollback');
+    });
+
+    Route::prefix('/logs')->group(function() {
+        Route::get('/', [LogsController::class, 'index'])->name('servers.logs');
+        Route::get('/json', [LogsController::class, 'getLogs'])->name('servers.logs.json');
+    });
+
+    Route::prefix('/security')->group(function() {
+        Route::get('/', [SecurityController::class, 'index'])->name('servers.security');
+
+        Route::prefix('/vnc')->group(function() {
+            Route::get('/', [SecurityController::class, 'showVnc'])->name('servers.security.vnc');
+            Route::get('/credentials', [SecurityController::class, 'getVncCredentials'])->name('servers.security.vnc.credentials');
+        });
+    });
+
+    Route::prefix('/settings')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('servers.settings');
+        Route::patch('/basic-info', [SettingsController::class, 'updateBasicInfo'])->name('servers.settings.basic-info');
+        Route::put('/password', [CloudinitController::class, 'updatePassword'])->name('servers.settings.password');
+        Route::put('/bios', [CloudinitController::class, 'updateBios'])->name('servers.settings.bios');
+        Route::put('/network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('servers.settings.network-config');
+        Route::post('/reinstall', [SettingsController::class, 'reinstall'])->name('servers.settings.reinstall');
+        Route::get('/cloudinit/dump', [CloudinitController::class, 'dumpConfig'])->name('servers.settings.cloudinit.config');
+    });
+});
+/*
 Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServerAccess::class, CheckServerInstalling::class], 'as' => 'servers.'], function () {
     Route::get('/', [ServerController::class, 'show'])->name('show');
 
@@ -84,3 +134,4 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServ
         });
     });
 });
+ */

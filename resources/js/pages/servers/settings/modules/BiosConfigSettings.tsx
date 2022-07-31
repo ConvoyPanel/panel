@@ -16,7 +16,7 @@ const BiosConfigSettings = () => {
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     post(
-      route('servers.show.settings.update-bios', settingsContext?.server.id)
+      route('servers.settings.bios', settingsContext?.server.id)
     )
   }
 

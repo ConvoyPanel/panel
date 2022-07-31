@@ -5,13 +5,23 @@ import Main from '@/components/Main'
 import { Head } from '@inertiajs/inertia-react'
 import { Paper } from '@mantine/core'
 import LoadingState from '@/components/LoadingState'
+import { useEffect } from 'react'
+import { Inertia } from '@inertiajs/inertia'
 
 interface Props extends DefaultProps {
   server: Server
 }
 
 const Installing = ({ auth, server }: Props) => {
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      Inertia.reload()
+    }, 3000)
 
+    return () => {
+      clearInterval(refreshInterval)
+    }
+  }, [])
   return (
     <Authenticated
       auth={auth}

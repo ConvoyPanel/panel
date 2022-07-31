@@ -61,7 +61,6 @@ const ReinstallSettings = () => {
       settingsContext!.server.id
     )
     setProcessing(false)
-    Inertia.visit(route('dashboard'))
   }
 
   return (

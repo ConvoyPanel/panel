@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios'
 
 export default async () => {
   try {
-    const response = await axios.get(route('verify-auth-state'))
+    const response = await axios.get(route('auth-state'))
 
     if (response.status === 200) {
       return true

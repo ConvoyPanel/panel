@@ -23,7 +23,7 @@ const NetworkConfigSettings = () => {
   const submit = () => {
     put(
       route(
-        'servers.show.settings.update-network-config',
+        'servers.settings.network-config',
         settingsContext?.server.id
       )
     )

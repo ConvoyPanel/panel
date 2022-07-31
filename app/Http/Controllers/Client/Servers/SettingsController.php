@@ -49,6 +49,6 @@ class SettingsController extends ApplicationApiController
     {
         ProcessReinstallation::dispatch($server->id, $request->template_id);
 
-        return redirect()->route('servers.show.installing.index', [$server->id]);
+        return redirect()->route('servers.installing', [$server->id]);
     }
 }

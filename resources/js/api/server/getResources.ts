@@ -22,5 +22,5 @@ export interface Resources {
 }
 
 export default (id: number) => {
-  return axios.get<Resources>(route('servers.show.get-resources', id))
+  return axios.get<Resources>(route('servers.resources', id))
 }

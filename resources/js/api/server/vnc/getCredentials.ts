@@ -19,5 +19,5 @@ export interface VncCredentials {
 }
 
 export default (serverId: number) => {
-    return axios.get<VncCredentials>(route('servers.show.security.vnc.get-credentials', { id: serverId }))
+    return axios.get<VncCredentials>(route('servers.security.vnc.credentials', { id: serverId }))
 }

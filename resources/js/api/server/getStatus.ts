@@ -85,5 +85,5 @@ export interface ServerStateAxiosResponse {
 }
 
 export default (id: number) => {
-  return axios.get<ServerStateAxiosResponse>(route('servers.show.status', id))
+  return axios.get<ServerStateAxiosResponse>(route('servers.status', id))
 }

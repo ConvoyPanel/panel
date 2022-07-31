@@ -23,5 +23,5 @@ export interface CloudinitDump {
 }
 
 export default (serverId: number) => {
-    return axios.get<CloudinitDump>(route('servers.show.settings.cloudinit.dump-config', serverId))
+    return axios.get<CloudinitDump>(route('servers.settings.cloudinit.config', serverId))
 }
