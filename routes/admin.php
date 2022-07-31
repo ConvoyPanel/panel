@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Nodes\SettingsController;
 use App\Http\Controllers\Admin\Servers\ServerController;
 use App\Http\Controllers\Admin\Users\UserController;
 use App\Http\Controllers\Admin\Servers\Settings;
+use App\Http\Controllers\Admin\Users;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
@@ -23,8 +24,6 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
         Route::group(['prefix' => '/{node}'], function () {
             Route::get('/', [NodeController::class, 'show'])->name('show');
-
-            Route::put('/', [NodeController::class, 'update'])->name('update');
 
             Route::delete('/', [NodeController::class, 'destroy'])->name('destroy');
 
@@ -79,6 +78,23 @@ Route::group(['prefix' => '/admin', 'as' => 'admin.'], function () {
 
     Route::group(['prefix' => '/users', 'as' => 'users.'], function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
+
+        Route::post('/', [UserController::class, 'store'])->name('store');
+
+        Route::group(['prefix' => '/{user}'], function () {
+            Route::get('/', [UserController::class, 'show'])->name('show');
+
+            Route::delete('/', [UserController::class, 'destroy'])->name('destroy');
+
+            Route::group(['prefix' => '/show', 'as' => 'show.'], function () {
+                Route::group(['prefix' => '/settings', 'as' => 'settings.'], function () {
+                    Route::get('/', [Users\Settings\SettingsController::class, 'index'])->name('index');
+
+                    Route::put('/', [Users\Settings\SettingsController::class, 'update'])->name('update');
+
+                });
+            });
+        });
 
         Route::get('/search', [UserController::class, 'search'])->name('search');
     });
