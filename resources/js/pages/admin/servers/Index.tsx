@@ -39,7 +39,9 @@ export default function Index({ auth, servers }: Props) {
         <h2 className='h3-deemphasized'>Servers</h2>
         <Paper shadow='xs' className='p-card w-full'>
           <div className='flex justify-end'>
-            <Button onClick={() => Inertia.visit(route('admin.servers.create'))}>
+            <Button
+              onClick={() => Inertia.visit(route('admin.servers.create'))}
+            >
               New Server
             </Button>
           </div>
@@ -63,7 +65,20 @@ export default function Index({ auth, servers }: Props) {
                     <td>{server.vmid}</td>
                     <td>{server.node.name}</td>
                     <td>{server.owner.email}</td>
-                    <td>{server.template && <CheckIcon className='text-green-600 w-[18px] h-[18px]' />} {server?.template?.visible ? <EyeIcon className='text-blue-600 inline-block w-[18px] h-[18px]' /> : ''}</td>
+                    <td>
+                      {' '}
+                      <div className='flex space-x-1'>
+                        {' '}
+                        {server.template && (
+                          <CheckIcon className='text-green-600 w-[18px] h-[18px]' />
+                        )}{' '}
+                        {server?.template?.visible ? (
+                          <EyeIcon className='text-blue-600 inline-block w-[18px] h-[18px]' />
+                        ) : (
+                          ''
+                        )}
+                      </div>
+                    </td>
                     <td>
                       <EditButton
                         onClick={() =>

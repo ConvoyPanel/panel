@@ -87,11 +87,40 @@ class CloudinitService extends ProxmoxService
         return null;
     }
 
-    public function updateIpConfig(string $ipConfig)
+    public function updateIpConfig(string|array $ipConfig)
     {
-        return $this->instance()->config()->put([
-            'ipconfig0' => $ipConfig,
-        ]);
+        if (gettype($ipConfig) === 'string')
+        {
+            return $this->instance()->config()->put([
+                'ipconfig0' => $ipConfig,
+            ]);
+        }
+
+        if (gettype($ipConfig) === 'array')
+        {
+            $addresses = $ipConfig;
+
+            $payload = '';
+
+            if (isset($addresses['ip']) && isset($addresses['ip6']))
+            {
+                $payload = "ip={$addresses['ip']['cidr']},gw={$addresses['ip']['gateway']},ip6={$addresses['ip6']['cidr']},gw6={$addresses['ip6']['gateway']}";
+            }
+
+            if (isset($addresses['ip']) && !isset($addresses['ip6']))
+            {
+                $payload = "ip={$addresses['ip']['cidr']},gw={$addresses['ip']['gateway']}";
+            }
+
+            if (isset($addresses['ip6']) && !isset($addresses['ip']))
+            {
+                $payload = "ip6={$addresses['ip6']['cidr']},gw6={$addresses['ip6']['gateway']}";
+            }
+
+            return $this->instance()->config()->put([
+                'ipconfig0' => $payload,
+            ]);
+        }
     }
 
     public function getServerInaccessibleConfig()

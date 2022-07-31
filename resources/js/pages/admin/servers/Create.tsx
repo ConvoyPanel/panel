@@ -16,8 +16,17 @@ import {
   SegmentedControl,
   Select,
   Checkbox,
+  MultiSelect,
 } from '@mantine/core'
-import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { formDataHandler } from '@/util/helpers'
 import { CheckCircleIcon } from '@heroicons/react/outline'
 import { Inertia } from '@inertiajs/inertia'
@@ -27,6 +36,7 @@ import SelectItem from '@/components/SelectItem'
 import getSearchUsers from '@/api/admin/users/searchUsers'
 import { useQuery } from '@tanstack/react-query'
 import getTemplates from '@/api/server/settings/getTemplates'
+import getSearchAddresses from '@/api/admin/nodes/addresses/searchAddresses'
 
 interface Props extends DefaultProps {}
 
@@ -39,6 +49,7 @@ interface FormData {
   template_id?: number
   is_template: boolean
   is_visible: boolean
+  addresses: string[]
 }
 
 const Create = ({ auth }: Props) => {
@@ -51,7 +62,13 @@ const Create = ({ auth }: Props) => {
     template_id: undefined,
     is_template: false,
     is_visible: false,
+    addresses: [],
   })
+
+  const dataRef = useRef(data)
+  useEffect(() => {
+    dataRef.current = data
+  }, [data])
 
   const [deploymentType, setDeploymentType] = useState('new')
 
@@ -104,6 +121,32 @@ const Create = ({ auth }: Props) => {
             label: user.name,
             value: user.id.toString(),
             description: user.email,
+          }
+        })
+      )
+    }, 500),
+    []
+  )
+
+  const [ips, setIps] = useState<
+    {
+      label: string
+      value: string
+    }[]
+  >([])
+
+  const searchIps = useCallback(
+    debounce(async (query: string) => {
+      const { data: res } = await getSearchAddresses(
+        query,
+        dataRef.current.node_id as number,
+        true
+      )
+      setIps(
+        res.map((ip) => {
+          return {
+            label: ip.address,
+            value: ip.id.toString(),
           }
         })
       )
@@ -219,6 +262,21 @@ const Create = ({ auth }: Props) => {
                 error={errors.vmid}
                 required={deploymentType === 'existing'}
               />
+
+              {deploymentType === 'new' && data.node_id ? (
+                <MultiSelect
+                  label='IP Addresses'
+                  value={data.addresses}
+                  onChange={(e) => setData('addresses', e)}
+                  onSearchChange={searchIps}
+                  searchable
+                  data={ips}
+                  error={errors.addresses}
+                  required
+                />
+              ) : (
+                ''
+              )}
 
               {deploymentType === 'new' && data.node_id ? (
                 <Select

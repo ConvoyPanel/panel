@@ -4,7 +4,9 @@ namespace App\Jobs\Servers;
 
 use App\Models\Server;
 use App\Models\Template;
+use App\Services\Servers\CloudinitService;
 use App\Services\Servers\InstallService;
+use App\Services\Servers\NetworkService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,7 +23,7 @@ class ProcessInstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $templateId, protected int $serverId, protected string $target, protected int $vmid)
+    public function __construct(protected int $templateId, protected int $serverId, protected string $target, protected int $vmid, protected array $addresses)
     {
         //
     }
@@ -38,6 +40,28 @@ class ProcessInstallation implements ShouldQueue
         $server->update(['is_installing' => true]);
 
         (new InstallService)->setServer(Template::find($this->templateId)->server)->install($this->vmid, $this->target);
+
+        if (isset($this->addresses))
+        {
+            $networkService = new NetworkService;
+            $cloudinitService = new CloudinitService;
+
+            $networkService->setServer($server);
+            $cloudinitService->setServer($server);
+
+            $networkService->clearIpSets(); // to prevent any bugs
+
+            $cloudinitService->updateIpConfig($this->addresses);
+
+            $parsedAddresses = array_column($this->addresses, 'cidr');
+
+            foreach ($parsedAddresses as &$parsedAddress)
+            {
+                $parsedAddress = explode('/', $parsedAddress)[0];
+            }
+
+            $networkService->lockIps($parsedAddresses);
+        }
 
         $server->update(['is_installing' => false]);
     }

@@ -44,9 +44,16 @@ class AddressController extends ApplicationApiController
         return redirect()->route('admin.nodes.show.addresses.index', [$node->id]);
     }
 
-    public function search(Node $node)
+    public function search(Node $node, Request $request)
     {
-        return QueryBuilder::for(IPAddress::class)
-            ->allowedFilters(['address', 'cidr', 'gateway', 'type'])->where('node_id', $node->id)->get();
+        $builder = QueryBuilder::for(IPAddress::class)
+            ->allowedFilters(['server_id', 'address', 'cidr', 'gateway', 'type'])->where('node_id', $node->id);
+
+        if ($request->show_available_ips)
+        {
+            return $builder->where('server_id', null)->get();
+        }
+
+        return $builder->get();
     }
 }
