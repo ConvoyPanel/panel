@@ -52,7 +52,7 @@ Route::group(['prefix' => '/servers'], function () {
 
 /*
 |--------------------------------------------------------------------------
-| Server Controller Routes
+| Node Controller Routes
 |--------------------------------------------------------------------------
 |
 | Endpoint: /api/application/servers

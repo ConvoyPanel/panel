@@ -14,17 +14,18 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends ApplicationApiController
 {
-    public function index(Request $request)
+    public function index(Node $node, Request $request)
     {
         $addresses = QueryBuilder::for(IPAddress::query())
             ->allowedFilters(['server_id', 'node_id', 'address', 'cidr', 'gateway', 'type'])
             ->allowedSorts(['id', 'server_id', 'node_id'])
+            ->where('node_id', $node->id)
             ->paginate($request->query('per_page') ?? 50);
 
         return $addresses;
     }
 
-    public function show(IPAddress $address)
+    public function show(Node $node, IPAddress $address)
     {
         return $this->returnContent([
             'data' => $address,
