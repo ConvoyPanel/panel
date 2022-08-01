@@ -43,6 +43,7 @@ Route::group(['prefix' => '/servers'], function () {
 
     Route::group(['prefix' => '/{server}'], function () {
         Route::get('/', [ServerController::class, 'show']);
+        Route::post('/', [ServerController::class, 'store']);
         Route::delete('/', [ServerController::class, 'destroy']);
         Route::get('/specifications', [ServerController::class, 'getSpecifications']);
         Route::patch('/specifications', [ServerController::class, 'updateSpecifications']);
@@ -62,8 +63,14 @@ Route::group(['prefix' => '/nodes'], function () {
     Route::get('/', [NodeController::class, 'index']);
 
     Route::group(['prefix' => '/{node}'], function () {
+        Route::get('/', [NodeController::class, 'show']);
         Route::get('/addresses', [AddressController::class, 'index']);
 
-
+        Route::group(['prefix' => '/{address}'], function () {
+            Route::get('/', [AddressController::class, 'show']);
+            Route::post('/', [AddressController::class, 'store']);
+            Route::delete('/', [AddressController::class, 'destroy']);
+            Route::put('/', [AddressController::class, 'update']);
+        });
     });
 });

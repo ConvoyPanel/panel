@@ -10,6 +10,9 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Server;
 use Laravel\Scout\Searchable;
 
+/**
+ * @mixin \Eloquent
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, Searchable;
@@ -45,11 +48,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function servers()
     {
         return $this->hasMany(Server::class);
     }
 
+    /**
+     * @return array
+     */
     public function toSearchableArray()
     {
         return [

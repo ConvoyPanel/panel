@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Application\Nodes;
 
+use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Node;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class NodeController extends Controller
+class NodeController extends ApplicationApiController
 {
     public function index(Request $request)
     {
@@ -17,5 +18,12 @@ class NodeController extends Controller
             ->paginate($request->query('per_page') ?? 50);
 
         return $nodes;
+    }
+
+    public function show(Node $node)
+    {
+        return $this->returnContent([
+            'data' => $node,
+        ]);
     }
 }

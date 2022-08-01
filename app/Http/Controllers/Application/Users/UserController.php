@@ -12,8 +12,15 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\QueryBuilder;
 
+/**
+ *
+ */
 class UserController extends ApplicationApiController
 {
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
     public function index(Request $request)
     {
         $users = QueryBuilder::for(User::query())
@@ -24,6 +31,10 @@ class UserController extends ApplicationApiController
         return $users;
     }
 
+    /**
+     * @param User $user
+     * @return Response
+     */
     public function show(User $user)
     {
         return new Response([
@@ -32,6 +43,10 @@ class UserController extends ApplicationApiController
     }
 
 
+    /**
+     * @param StoreUserRequest $request
+     * @return Response
+     */
     public function store(StoreUserRequest $request)
     {
         $user = User::create([
@@ -47,6 +62,10 @@ class UserController extends ApplicationApiController
         ]);
     }
 
+    /**
+     * @param User $user
+     * @return Response
+     */
     public function destroy(User $user)
     {
         $user->delete();
@@ -56,6 +75,11 @@ class UserController extends ApplicationApiController
         ]);
     }
 
+    /**
+     * @param User $user
+     * @param UpdateUserRequest $request
+     * @return Response
+     */
     public function update(User $user, UpdateUserRequest $request)
     {
         if (isset($request->password)) {

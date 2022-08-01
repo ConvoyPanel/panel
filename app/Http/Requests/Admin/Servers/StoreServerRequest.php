@@ -4,6 +4,9 @@ namespace App\Http\Requests\Admin\Servers;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property mixed $type
+ */
 class StoreServerRequest extends FormRequest
 {
     /**
