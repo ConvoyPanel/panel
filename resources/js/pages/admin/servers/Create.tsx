@@ -77,7 +77,7 @@ const Create = ({ auth }: Props) => {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    post(route('admin.servers.store'))
+    post(route('admin.servers'))
   }
 
   const [nodes, setNodes] = useState<

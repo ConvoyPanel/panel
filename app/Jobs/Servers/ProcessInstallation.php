@@ -51,16 +51,19 @@ class ProcessInstallation implements ShouldQueue
 
             $networkService->clearIpSets(); // to prevent any bugs
 
-            $cloudinitService->updateIpConfig($this->addresses);
-
-            $parsedAddresses = array_column($this->addresses, 'cidr');
+            $parsedAddresses = $this->addresses;
 
             foreach ($parsedAddresses as &$parsedAddress)
             {
-                $parsedAddress = explode('/', $parsedAddress)[0];
+                $parsedAddress = [
+                    'cidr' => "{$parsedAddress['address']}/{$parsedAddress['cidr']}",
+                    'gateway' => $parsedAddress['gateway'],
+                ];
             }
 
-            $networkService->lockIps($parsedAddresses);
+            $cloudinitService->updateIpConfig($parsedAddresses);
+
+            $networkService->lockIps(array_column($this->addresses, 'address'));
         }
 
         $server->update(['is_installing' => false]);

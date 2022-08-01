@@ -8,6 +8,7 @@ use App\Jobs\Servers\ProcessInstallation;
 use App\Models\IPAddress;
 use App\Models\Server;
 use App\Models\Template;
+use App\Services\Servers\CreationService;
 use App\Services\Servers\InstallService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +16,7 @@ use Inertia\Inertia;
 
 class ServerController extends Controller
 {
-    public function __construct(private InstallService $installService)
+    public function __construct(private InstallService $installService, private CreationService $creationService)
     {
     }
 
@@ -40,57 +41,9 @@ class ServerController extends Controller
 
     public function store(StoreServerRequest $request)
     {
-        if ($request->type === 'existing') {
-            $server = Server::create($request->validated());
+        $server = $this->creationService->handle($request->type, $request->validated(), $request->is_template, $request->is_visible);
 
-            if ($request->is_template === true) {
-                Template::create([
-                    'server_id' => $server->id,
-                    'visible' => $request->is_visible ? $request->is_visible : false
-                ]);
-            }
-
-            return redirect()->route('admin.servers.show', [$server->id]);
-        }
-
-        if ($request->type === 'new') {
-            $addresses = [
-                'ip' => null,
-                'ip6' => null
-            ];
-
-            // now time to fetch IPs
-            if (isset($request->addresses)) {
-                foreach ($request->addresses as $_address) {
-                    $address = IPAddress::find($_address);
-
-                    if (isset($addresses[$address->type])) {
-                        throw throw ValidationException::withMessages([
-                            'addresses' => 'You cannot set multiple IPv4 or IPv6 addresses'
-                        ]);
-                    }
-
-                    $addresses[$address->type] = [
-                        'cidr' => "{$address->address}/{$address->cidr}",
-                        'gateway' => $address->gateway,
-                    ];
-                }
-            }
-
-            $vmid = $request->vmid ? $request->vmid : random_int(1000, 999999999);
-            $server = Server::create(array_merge($request->validated(), ['vmid' => $vmid]));
-
-            // if nothing errors, we'll iterate again and this time set those IPs as locked
-            if (isset($request->addresses)) {
-                foreach ($request->addresses as $_address) {
-                    IPAddress::find($_address)->update(['server_id' => $server->id]);
-                }
-            }
-
-            ProcessInstallation::dispatch($request->template_id, $server->id, $server->node->cluster, $vmid, $addresses);
-
-            return redirect()->route('admin.servers.show', [$server->id]);
-        }
+        return redirect()->route('admin.servers.show', [$server->id]);
     }
 
     public function destroy(Server $server, Request $request)

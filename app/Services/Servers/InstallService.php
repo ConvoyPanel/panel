@@ -49,7 +49,7 @@ class InstallService extends ProxmoxService
             'disks' => $instantiatedResourceService->getDisks(),
             'resources' => $instantiatedResourceService->getResources(),
             'bootOrder' => $instantiatedResourceService->getBootOrder(),
-            'ipconfig' => array_key_exists('pending', $ipconfigResponse) ? $ipconfigResponse['pending'] : $ipconfigResponse['value'],
+            'ipconfig' => $ipconfigResponse['pending'] ?? $ipconfigResponse['value'] ?? [],
             'ipsets' => [],
         ];
 
@@ -98,34 +98,7 @@ class InstallService extends ProxmoxService
             } while (count($newDisks) === 0);
         }
 
-
-        foreach ($originalResources['disks'] as $disk) {
-            $existingDisk = array_search($disk['disk'], array_column($newDisks, 'disk'));
-/*
-            if (!$existingDisk)
-            {
-                dd([$newDisks, $originalDisks, $existingDisk, array_column($newDisks, 'disk'),  array_search('woww',  array_column($newDisks, 'disk'))]);
-            } */
-
-            if ($existingDisk !== false) {
-                // If disk exists, we'll update the size instead of creating a new disk
-
-                // Find the size of the template VM disk and subtract it from the size of the original VM's disk to get the total size to increment in bytes
-                $differenceInBytes = $this->convertToBytes($disk['size']) - $this->convertToBytes($newDisks[$existingDisk]['size']);
-
-                //dd([$newDisks, $originalDisks, $disk, $existingDisk]);
-
-                $instantiatedResourceService->increaseDisk($differenceInBytes, $disk['disk']);
-            } else {
-                // If the disk doesn't exist, we can just create it
-
-                $bytes = $this->convertToBytes($disk['size']);
-
-                //dd([$newDisks, $originalDisks, $disk, $existingDisk]);
-
-                $instantiatedResourceService->createDisk($bytes, $disk['disk']);
-            }
-        }
+        $instantiatedResourceService->updateDisks($originalResources['disks'], $newDisks);
 
         // set boot $order
 

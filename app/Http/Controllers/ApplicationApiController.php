@@ -10,12 +10,12 @@ class ApplicationApiController extends Controller
 {
     protected function returnNoContent(): Response
     {
-        return (new Response('', Response::HTTP_NO_CONTENT))->header('X-Inertia', true);
+        return (new Response('', Response::HTTP_NO_CONTENT));
     }
 
     protected function returnContent($payload, $code = Response::HTTP_OK): Response
     {
-        return (new Response($payload, $code))->header('X-Inertia', true);
+        return (new Response($payload, $code));
     }
 
     // This can only be used if you are returning a success message after completing an action

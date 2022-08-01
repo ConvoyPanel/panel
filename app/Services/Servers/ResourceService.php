@@ -3,6 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Models\Server;
+use App\Services\Helpers\ConversionService;
 use App\Services\Nodes\Information\ResourceService as InformationResourceService;
 use App\Services\ProxmoxService;
 use Exception;
@@ -14,10 +15,14 @@ use Exception;
 class ResourceService extends ProxmoxService
 {
     private InformationResourceService $resourceService;
+    private CloudinitService $cloudinitService;
+    private ConversionService $conversionService;
 
     public function __construct()
     {
         $this->resourceService = new InformationResourceService;
+        $this->cloudinitService = new CloudinitService;
+        $this->conversionService = new ConversionService;
     }
 
     public function getResources()
@@ -102,6 +107,22 @@ class ResourceService extends ProxmoxService
         return (substr($string, 0, $len) === $startString);
     }
 
+    public function getSpecifications()
+    {
+        $resourceList = $this->getResources();
+
+        $specifications = [
+            'node' => $resourceList['node'],
+            'cores' => $resourceList['maxcpu'],
+            'memory' => $resourceList['maxmem'],
+            'disk' => $resourceList['maxdisk'],
+            'disks' => $this->getDisks(),
+            'ipconfig' => $this->cloudinitService->setServer($this->server)->getIpConfig(),
+        ];
+
+        return $specifications;
+    }
+
     // $showNonprimaryDisks if true, will show disks with NULL sizes and Cloudinit disks
     public function getDisks(bool $showNonprimaryDisks = false)
     {
@@ -139,5 +160,36 @@ class ResourceService extends ProxmoxService
         }
 
         return $disks;
+    }
+
+    public function updateDisks(array $newDisks, array $existingDisks)
+    {
+        foreach ($newDisks as $disk) {
+            $existingDisk = array_search($disk['disk'], array_column($existingDisks, 'disk'));
+/*
+            if (!$existingDisk)
+            {
+                dd([$newDisks, $originalDisks, $existingDisk, array_column($newDisks, 'disk'),  array_search('woww',  array_column($newDisks, 'disk'))]);
+            } */
+
+            if ($existingDisk !== false) {
+                // If disk exists, we'll update the size instead of creating a new disk
+
+                // Find the size of the template VM disk and subtract it from the size of the original VM's disk to get the total size to increment in bytes
+                $differenceInBytes = $this->conversionService->convertToBytes($disk['size']) - $this->conversionService->convertToBytes($existingDisks[$existingDisk]['size']);
+
+                //dd([$newDisks, $originalDisks, $disk, $existingDisk]);
+
+                $this->increaseDisk($differenceInBytes, $disk['disk']);
+            } else {
+                // If the disk doesn't exist, we can just create it
+
+                $bytes = $this->conversionService->convertToBytes($disk['size']);
+
+                //dd([$newDisks, $originalDisks, $disk, $existingDisk]);
+
+                $this->createDisk($bytes, $disk['disk']);
+            }
+        }
     }
 }
