@@ -37,7 +37,7 @@ class ProcessInstallation implements ShouldQueue
     {
         $server = Server::find($this->serverId);
 
-        $server->update(['is_installing' => true]);
+        $server->update(['installing' => true]);
 
         (new InstallService)->setServer(Template::find($this->templateId)->server)->install($this->vmid, $this->target);
 
@@ -66,6 +66,6 @@ class ProcessInstallation implements ShouldQueue
             $networkService->lockIps(array_column($this->addresses, 'address'));
         }
 
-        $server->update(['is_installing' => false]);
+        $server->update(['installing' => false]);
     }
 }

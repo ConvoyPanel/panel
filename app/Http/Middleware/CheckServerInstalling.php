@@ -26,7 +26,7 @@ class CheckServerInstalling
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($server->is_installing)
+        if ($server->installing)
         {
             if ($request->wantsJson())
             {

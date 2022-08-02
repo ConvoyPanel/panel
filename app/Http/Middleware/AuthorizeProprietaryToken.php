@@ -20,7 +20,7 @@ class AuthorizeProprietaryToken
     {
         $secret = $request->header('Authorization');
 
-        if ($secret !== Config::get('external.secret'))
+        if ($secret !== config('external.secret'))
         {
             return new Response([
                 'message' => 'Unauthorized'

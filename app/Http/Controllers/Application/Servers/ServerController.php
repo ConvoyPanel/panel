@@ -9,6 +9,7 @@ use App\Http\Requests\Application\Servers\UpdateServerRequest;
 use App\Http\Requests\Application\Servers\UpdateSpecificationsRequest;
 use App\Models\Server;
 use App\Services\Servers\CreationService;
+use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
 use App\Services\Servers\ResourceService;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private CreationService $creationService, private ResourceService $resourceService, private NetworkService $networkService)
+    public function __construct(private CreationService $creationService, private ResourceService $resourceService, private NetworkService $networkService, private InstallService $installService)
     {
 
     }
@@ -24,7 +25,7 @@ class ServerController extends ApplicationApiController
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
-            ->allowedFilters(['user_id', 'node_id', 'vmid', 'name', 'description', 'is_installing'])
+            ->allowedFilters(['user_id', 'node_id', 'vmid', 'name', 'description', 'installing'])
             ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
@@ -82,24 +83,20 @@ class ServerController extends ApplicationApiController
     {
         $this->resourceService->setServer($server);
 
-        if ($request->cores)
-        {
+        if ($request->cores) {
             $this->resourceService->setCores($request->cores);
         }
 
-        if ($request->memory)
-        {
+        if ($request->memory) {
             $this->resourceService->setMemory($request->memory);
         }
 
-        if ($request->disks)
-        {
+        if ($request->disks) {
             $existingDisks = $this->resourceService->getDisks();
             $this->resourceService->updateDisks($request->disks, $existingDisks);
         }
 
-        if ($request->lockIps)
-        {
+        if ($request->lockIps) {
             $this->networkService->lockIps($request->lockIps);
         }
 

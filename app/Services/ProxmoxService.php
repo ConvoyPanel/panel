@@ -69,7 +69,7 @@ abstract class ProxmoxService
             $this->node->password,
             intval($this->node->port),
             $this->node->auth_type,
-           // true
+           //true
         ];
 
         $proxmox = new PVE(...$node);
@@ -80,7 +80,7 @@ abstract class ProxmoxService
     public function removeDataProperty(mixed $data, bool $returnNullIfEmpty = false)
     {
         if (gettype($data) === 'array') {
-            return array_key_exists('data', $data) ? $data['data'] : $data;
+            return  $data['data'] ?? $data;
         } else {
             return $returnNullIfEmpty ? null : [];
         }

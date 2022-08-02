@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('servers', function (Blueprint $table) {
-            $table->boolean('installing')->after('make_template_visible')->default(false);
+            $table->dropColumn('installing');
+            $table->boolean('installing')->after('description')->default(false);
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('servers', function (Blueprint $table) {
             $table->dropColumn('installing');
+            $table->boolean('installing')->after('description')->default(false);
         });
     }
 };

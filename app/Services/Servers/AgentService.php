@@ -13,7 +13,6 @@ class AgentService extends ProxmoxService
 {
     /**
      * @param string $command
-     * @param array $params
      * @return mixed
      */
     public function executeCommand(string $command)
@@ -22,12 +21,10 @@ class AgentService extends ProxmoxService
     }
 
     /**
-     * @param string $command
-     * @param array $params
      * @return mixed
      */
     public function getOSInfo()
     {
-        return $this->instance()->agent()->getOsinfo();
+        return $this->instance()->agent()->getOsinfo()->get();
     }
 }
