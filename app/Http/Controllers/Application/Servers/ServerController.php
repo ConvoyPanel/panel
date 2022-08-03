@@ -27,7 +27,7 @@ class ServerController extends ApplicationApiController
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
-            ->allowedFilters(['user_id', 'node_id', 'vmid', 'name', 'description', 'installing'])
+            ->allowedFilters(['user_id', 'node_id', 'vmid', 'name', 'description', 'is_installing'])
             ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
