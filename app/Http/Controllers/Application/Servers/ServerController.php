@@ -12,6 +12,8 @@ use App\Services\Servers\CreationService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
 use App\Services\Servers\ResourceService;
+use App\Transformers\Application\ServerTransformer;
+use App\Transformers\Application\SpecificationTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -29,24 +31,19 @@ class ServerController extends ApplicationApiController
             ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
-        return $servers;
+        return fractal($servers, new ServerTransformer())->respond();
     }
 
     public function store(StoreServerRequest $request)
     {
         $server = $this->creationService->handle($request->type, $request->validated(), $request->is_template, $request->is_visible);
 
-        return $this->returnContent([
-            'data' => $server,
-            'message' => 'Created server'
-        ]);
+        return fractal($server, new ServerTransformer())->respond();
     }
 
     public function show(Server $server)
     {
-        return $this->returnContent([
-            'data' => $server
-        ]);
+        return fractal($server, new ServerTransformer())->respond();
     }
 
     public function destroy(Server $server, Request $request)
@@ -57,26 +54,21 @@ class ServerController extends ApplicationApiController
 
         $server->delete();
 
-        return $this->returnContent([
-            'message' => 'Deleted server'
-        ]);
+        return $this->returnNoContent();
     }
 
     public function update(Server $server, UpdateServerRequest $request)
     {
         $server = $server->update($request->validated());
 
-        return $this->returnContent([
-            'data' => $server,
-            'message' => 'Updated server'
-        ]);
+        return fractal($server, new ServerTransformer())->respond();
     }
 
     public function getSpecifications(Server $server)
     {
-        return $this->returnContent([
-            'data' => $this->resourceService->setServer($server)->getSpecifications()
-        ]);
+        $data = $this->resourceService->setServer($server)->getSpecifications();
+        
+        return fractal()->item($data)->transformWith(new SpecificationTransformer());
     }
 
     public function updateSpecifications(Server $server, UpdateSpecificationsRequest $request)

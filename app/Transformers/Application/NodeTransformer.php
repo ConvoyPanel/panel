@@ -2,10 +2,10 @@
 
 namespace App\Transformers\Application;
 
-use App\Models\Server;
+use App\Models\Node;
 use League\Fractal\TransformerAbstract;
 
-class ServerTransformer extends TransformerAbstract
+class NodeTransformer extends TransformerAbstract
 {
     /**
      * List of resources to automatically include
@@ -15,7 +15,7 @@ class ServerTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-
+    
     /**
      * List of resources possible to include
      *
@@ -24,21 +24,22 @@ class ServerTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-
+    
     /**
      * A Fractal transformer.
      *
      * @return array
      */
-    public function transform(Server $server)
+    public function transform(Node $node)
     {
         return [
-            'id' => $server->id,
-            'vmid' => $server->vmid,
-            'installing' => $server->installing,
-            'name' => $server->name,
-            'user' => $server->user_id,
-            'node' => $server->node_id,
+            'id' => $node->id,
+            'name' => $node->name,
+            'cluster' => $node->cluster,
+            'hostname' => $node->hostname,
+            'port' => (int) $node->port,
+            'auth_type' => $node->auth_type,
+            'latency_in_ms' => $node->latency,
         ];
     }
 }

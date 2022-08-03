@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Application\Users\StoreUserRequest;
 use App\Http\Requests\Application\Users\UpdateUserRequest;
 use App\Models\User;
+use App\Transformers\Application\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -19,33 +20,31 @@ class UserController extends ApplicationApiController
 {
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $users = QueryBuilder::for(User::query())
             ->allowedFilters(['name', 'email', 'root_admin'])
             ->allowedSorts(['id'])
             ->paginate($request->query('per_page') ?? 50);
 
-        return $users;
+        return fractal($users, new UserTransformer())->respond();
     }
 
     /**
      * @param User $user
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(User $user)
     {
-        return new Response([
-            'data' => $user
-        ]);
+        return fractal($user, new UserTransformer())->respond();
     }
 
 
     /**
      * @param StoreUserRequest $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreUserRequest $request)
     {
@@ -56,10 +55,7 @@ class UserController extends ApplicationApiController
             'root_admin' => $request->root_admin
         ]);
 
-        return $this->returnContent([
-            'data' => $user,
-            'message' => 'User created',
-        ]);
+        return fractal($user, new UserTransformer())->respond();
     }
 
     /**
@@ -70,15 +66,13 @@ class UserController extends ApplicationApiController
     {
         $user->delete();
 
-        return $this->returnContent([
-            'message' => 'User deleted'
-        ]);
+        return $this->returnNoContent();
     }
 
     /**
      * @param User $user
      * @param UpdateUserRequest $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(User $user, UpdateUserRequest $request)
     {
@@ -93,9 +87,6 @@ class UserController extends ApplicationApiController
             $user->update($request->safe()->except(['password']));
         }
 
-        return $this->returnContent([
-            'data' => $user,
-            'message' => 'User updated',
-        ]);
+        return fractal($user, new UserTransformer())->respond();
     }
 }
