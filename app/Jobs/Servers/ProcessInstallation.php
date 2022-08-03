@@ -51,13 +51,14 @@ class ProcessInstallation implements ShouldQueue
 
             $networkService->clearIpSets(); // to prevent any bugs
 
-            $parsedAddresses = $this->addresses;
+            $parsedAddresses = [];
 
-            foreach ($parsedAddresses as &$parsedAddress)
+            foreach ($this->addresses as $address)
             {
-                $parsedAddress = [
-                    'cidr' => "{$parsedAddress['address']}/{$parsedAddress['cidr']}",
-                    'gateway' => $parsedAddress['gateway'],
+                if (empty($address)) continue;
+                $parsedAddresses[] = [
+                    'cidr' => "{$address['address']}/{$address['cidr']}",
+                    'gateway' => $address['gateway'],
                 ];
             }
 

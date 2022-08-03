@@ -2,10 +2,11 @@
 
 namespace App\Transformers\Application;
 
-use App\Models\Server;
+use App\Models\Template;
+use Illuminate\Support\Arr;
 use League\Fractal\TransformerAbstract;
 
-class ServerTransformer extends TransformerAbstract
+class TemplateTransformer extends TransformerAbstract
 {
     /**
      * List of resources to automatically include
@@ -15,7 +16,7 @@ class ServerTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-
+    
     /**
      * List of resources possible to include
      *
@@ -24,21 +25,17 @@ class ServerTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-
+    
     /**
      * A Fractal transformer.
      *
      * @return array
      */
-    public function transform(Server $server)
+    public function transform(array $template)
     {
         return [
-            'id' => $server->id,
-            'vmid' => $server->vmid,
-            'installing' => $server->installing,
-            'name' => $server->name,
-            'user_id' => $server->user_id,
-            'node_id' => $server->node_id,
+            'id' => Arr::get($template, 'id'),
+            'server_id' => Arr::get($template, 'server_id'),
         ];
     }
 }

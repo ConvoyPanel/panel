@@ -8,6 +8,7 @@ use App\Http\Requests\Application\Nodes\Addresses\StoreAddressRequest;
 use App\Http\Requests\Application\Nodes\Addresses\UpdateAddressRequest;
 use App\Models\IPAddress;
 use App\Models\Node;
+use App\Transformers\Application\AddressTransformer;
 use Illuminate\Http\Request;
 use PharIo\Manifest\Application;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -22,42 +23,32 @@ class AddressController extends ApplicationApiController
             ->where('node_id', $node->id)
             ->paginate($request->query('per_page') ?? 50);
 
-        return $addresses;
+        return fractal($addresses, new AddressTransformer())->respond();
     }
 
     public function show(Node $node, IPAddress $address)
     {
-        return $this->returnContent([
-            'data' => $address,
-        ]);
+        return fractal($address, new AddressTransformer())->respond();
     }
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
         $address = $address->update($request->validated());
 
-        return $this->returnContent([
-            'message' => 'Updated address',
-            'data' => $address,
-        ]);
+        return fractal($address, new AddressTransformer())->respond();
     }
 
     public function store(Node $node, StoreAddressRequest $request)
     {
         $address = IPAddress::create($request->validated());
 
-        return $this->returnContent([
-            'message' => 'Created address',
-            'data' => $address,
-        ]);
+        return fractal($address, new AddressTransformer())->respond();
     }
 
     public function destroy(Node $node, IPAddress $address)
     {
         $address->delete();
 
-        return $this->returnContent([
-            'message' => 'Deleted address',
-        ]);
+        return $this->returnNoContent();
     }
 }

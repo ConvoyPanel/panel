@@ -2,10 +2,10 @@
 
 namespace App\Transformers\Application;
 
-use App\Models\Server;
+use App\Models\IPAddress;
 use League\Fractal\TransformerAbstract;
 
-class ServerTransformer extends TransformerAbstract
+class AddressTransformer extends TransformerAbstract
 {
     /**
      * List of resources to automatically include
@@ -15,7 +15,7 @@ class ServerTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-
+    
     /**
      * List of resources possible to include
      *
@@ -24,21 +24,21 @@ class ServerTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-
+    
     /**
      * A Fractal transformer.
      *
      * @return array
      */
-    public function transform(Server $server)
+    public function transform(IPAddress $address)
     {
         return [
-            'id' => $server->id,
-            'vmid' => $server->vmid,
-            'installing' => $server->installing,
-            'name' => $server->name,
-            'user_id' => $server->user_id,
-            'node_id' => $server->node_id,
+            'id' => $address->id,
+            'address' => $address->address,
+            'cidr' => $address->cidr,
+            'gateway' => $address->gateway,
+            'node_id' => $address->node_id,
+            'server_id' => $address->server_id,
         ];
     }
 }

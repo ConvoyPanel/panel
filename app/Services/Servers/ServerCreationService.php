@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
  * Class CreationService
  * @package App\Services\Servers
  */
-class CreationService extends ProxmoxService
+class ServerCreationService extends ProxmoxService
 {
-    public function handle(string $type, array $serverData, bool $isTemplate = false, bool $isTemplateVisible = false)
+    public function handle(string $type, array $serverData, ?bool $isTemplate = false, ?bool $isTemplateVisible = false)
     {
         if ($type === 'existing') {
             $server = Server::create($serverData);
@@ -31,6 +31,14 @@ class CreationService extends ProxmoxService
         }
 
         if ($type === 'new') {
+            // verify template is on the same node as the server being created
+            $template = Template::findOrFail($serverData['template_id']);
+            if ($template->server->node->id != $serverData['node_id']) {
+                throw ValidationException::withMessages([
+                    'template_id' => 'Template doesn\'t exist on selected node'
+                ]);
+            }
+
             $addresses = [
                 'ip' => null,
                 'ip6' => null
@@ -69,5 +77,7 @@ class CreationService extends ProxmoxService
 
             return $server;
         }
+
+        return [];
     }
 }

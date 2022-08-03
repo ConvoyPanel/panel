@@ -8,7 +8,7 @@ use App\Jobs\Servers\ProcessInstallation;
 use App\Models\IPAddress;
 use App\Models\Server;
 use App\Models\Template;
-use App\Services\Servers\CreationService;
+use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 class ServerController extends Controller
 {
-    public function __construct(private InstallService $installService, private CreationService $creationService)
+    public function __construct(private InstallService $installService, private ServerCreationService $creationService)
     {
     }
 

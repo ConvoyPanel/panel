@@ -5,6 +5,7 @@ use App\Http\Controllers\Application\Nodes\NodeController;
 use App\Http\Controllers\Application\Servers\ServerController;
 use App\Http\Controllers\Application\Users\SecurityController;
 use App\Http\Controllers\Application\Users\UserController;
+use App\Http\Controllers\Application\Nodes\Templates\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,12 +66,17 @@ Route::group(['prefix' => '/nodes'], function () {
     Route::group(['prefix' => '/{node}'], function () {
         Route::get('/', [NodeController::class, 'show']);
         Route::get('/addresses', [AddressController::class, 'index']);
+        Route::get('/templates', [TemplateController::class, 'index']);
 
-        Route::group(['prefix' => '/{address}'], function () {
+        Route::group(['prefix' => '/addresses/{address}'], function () {
             Route::get('/', [AddressController::class, 'show']);
             Route::post('/', [AddressController::class, 'store']);
             Route::delete('/', [AddressController::class, 'destroy']);
             Route::put('/', [AddressController::class, 'update']);
+        });
+
+        Route::group(['prefix' => '/templates/{template}'], function () {
+            Route::get('/', [TemplateController::class, 'show']);
         });
     });
 });

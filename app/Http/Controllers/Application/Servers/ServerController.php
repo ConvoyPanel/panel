@@ -8,7 +8,7 @@ use App\Http\Requests\Application\Servers\StoreServerRequest;
 use App\Http\Requests\Application\Servers\UpdateServerRequest;
 use App\Http\Requests\Application\Servers\UpdateSpecificationsRequest;
 use App\Models\Server;
-use App\Services\Servers\CreationService;
+use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
 use App\Services\Servers\ResourceService;
@@ -19,7 +19,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private CreationService $creationService, private ResourceService $resourceService, private NetworkService $networkService, private InstallService $installService)
+    public function __construct(private ServerCreationService $creationService, private ResourceService $resourceService, private NetworkService $networkService, private InstallService $installService)
     {
 
     }
@@ -67,7 +67,7 @@ class ServerController extends ApplicationApiController
     public function getSpecifications(Server $server)
     {
         $data = $this->resourceService->setServer($server)->getSpecifications();
-        
+
         return fractal()->item($data)->transformWith(new SpecificationTransformer());
     }
 
