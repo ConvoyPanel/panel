@@ -8,12 +8,12 @@ use Webmozart\Assert\Assert;
 use App\Models\Server;
 use Illuminate\Contracts\Foundation\Application;
 
-abstract class DaemonRepository
+abstract class ProxmoxRepository
 {
     /**
      * @var Application
      */
-    protected $app;
+    //protected $app;
 
     /**
      * @var Server|null
@@ -28,10 +28,10 @@ abstract class DaemonRepository
     /**
      * BaseWingsRepository constructor.
      */
-    public function __construct(Application $application)
-    {
-        $this->app = $application;
-    }
+    //public function __construct(Application $application)
+    //{
+     //   $this->app = $application;
+    //}
 
     /**
      * Set the server model this request is stemming from.
@@ -67,11 +67,11 @@ abstract class DaemonRepository
         Assert::isInstanceOf($this->node, Node::class);
 
         return new Client([
-            'base_uri' => $this->node->getConnectionAddress(),
-            'timeout' => config('pterodactyl.guzzle.timeout'),
-            'connect_timeout' => config('pterodactyl.guzzle.connect_timeout'),
+            'base_uri' => "https://{$this->node->hostname}:{$this->node->port}",
+            'timeout' => config('convoy.guzzle.timeout'),
+            'connect_timeout' => config('convoy.guzzle.connect_timeout'),
             'headers' => array_merge($headers, [
-                'Authorization' => 'Bearer ' . $this->node->getDecryptedKey(),
+                'Authorization' => "PVEAPIToken={$this->node->token_id}={$this->node->secret}",
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ]),

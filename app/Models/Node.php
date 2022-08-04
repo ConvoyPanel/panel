@@ -11,7 +11,7 @@ class Node extends Model
     use HasFactory, Searchable;
 
     protected $fillable = [
-        'name', 'hostname', 'username', 'password', 'port', 'auth_type', 'latency', 'last_pinged'
+        'name', 'hostname', 'username', 'password', 'token_id', 'secret', 'port', 'auth_type', 'latency', 'last_pinged'
     ];
 
     protected $hidden = [
