@@ -24,6 +24,7 @@ class ProxmoxPowerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        return $response;
+        $data = json_decode($response->getBody(), true);
+        return $data['data'] ?? $data;
     }
 }
