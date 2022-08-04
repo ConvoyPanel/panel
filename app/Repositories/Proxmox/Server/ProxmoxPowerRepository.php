@@ -15,7 +15,11 @@ class ProxmoxPowerRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $action));
+            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $action), [
+                'json' => [
+                    'timeout' => 30,
+                ]
+            ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }
