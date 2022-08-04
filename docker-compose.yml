@@ -1,6 +1,7 @@
 services:
   nginx:
     build: ./dockerfiles/nginx
+    restart: unless-stopped
     volumes:
       - .:/var/www/html/
     ports:
@@ -8,6 +9,7 @@ services:
       - 443:443
   php:
     build: ./dockerfiles/php
+    restart: unless-stopped
     volumes:
       # - ./dockerfiles/php-fpm/php.ini:/usr/local/etc/php/php.ini
        - .:/var/www/html/
@@ -23,13 +25,24 @@ services:
       - 5173:5173
     volumes:
       - .:/app/
-  redis:
+  redis: # consider mounting a volume for production because the saved data will be deleted when the container is deleted
     image: redis:7.0.4-alpine3.16
-    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel notice --requirepass ${REDIS_PASSWORD}
     ports:
       - 6379:6379
+  php-worker:
+    build: ./dockerfiles/php-worker
+    #tty: true #for debugging
+    restart: unless-stopped
+    #command: php artisan queue:work
+    working_dir: /var/www/html/
+    volumes:
+      - .:/var/www/html/
+
   database:
     image: mysql:8.0.29
+    restart: unless-stopped
     volumes:
       - ./dockerfiles/mysql/data:/var/lib/mysql/
     ports:
