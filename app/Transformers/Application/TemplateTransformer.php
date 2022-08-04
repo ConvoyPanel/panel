@@ -36,6 +36,7 @@ class TemplateTransformer extends TransformerAbstract
         return [
             'id' => Arr::get($template, 'id'),
             'server_id' => Arr::get($template, 'server_id'),
+            'name' => Arr::get($template, 'server')['name'],
         ];
     }
 }
