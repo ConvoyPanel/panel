@@ -2311,12 +2311,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Performave/proxmox.git",
-                "reference": "b47a316904522c829d9c2e4a9a13d03543f7d520"
+                "reference": "33ee4e72e6805aa8a85c19c07dd308439cb61480"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Performave/proxmox/zipball/b47a316904522c829d9c2e4a9a13d03543f7d520",
-                "reference": "b47a316904522c829d9c2e4a9a13d03543f7d520",
+                "url": "https://api.github.com/repos/Performave/proxmox/zipball/33ee4e72e6805aa8a85c19c07dd308439cb61480",
+                "reference": "33ee4e72e6805aa8a85c19c07dd308439cb61480",
                 "shasum": ""
             },
             "require": {
@@ -2371,7 +2371,7 @@
                 "issues": "https://github.com/MrKampf/proxmoxVE/issues",
                 "source": "https://github.com/MrKampf/proxmoxVE"
             },
-            "time": "2022-07-29T02:17:39+00:00"
+            "time": "2022-08-04T21:28:16+00:00"
         },
         {
             "name": "phpoption/phpoption",
