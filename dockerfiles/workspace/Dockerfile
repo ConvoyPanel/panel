@@ -8,7 +8,7 @@ RUN apt-get -y install software-properties-common curl sudo
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 RUN apt-get install -y nodejs
-
+RUN docker-php-ext-install pdo_mysql
 RUN pecl install redis \
             && docker-php-ext-enable redis.so
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
