@@ -92,8 +92,8 @@ class ServerController extends ApplicationApiController
             $this->networkService->lockIps($request->lockIps);
         }
 
-        return $this->returnContent([
-            'message' => 'Updated specifications'
-        ]);
+        $data = $this->resourceService->setServer($server)->getSpecifications();
+
+        return fractal()->item($data)->transformWith(new SpecificationTransformer());
     }
 }
