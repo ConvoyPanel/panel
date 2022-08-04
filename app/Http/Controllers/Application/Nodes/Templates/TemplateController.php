@@ -25,6 +25,8 @@ class TemplateController extends Controller
 
     public function show(Node $node, Template $template)
     {
-        return fractal($template, new TemplateTransformer())->respond();
+        $template->load('server');
+
+        return fractal()->item($template->toArray())->transformWith(new TemplateTransformer())->respond();
     }
 }
