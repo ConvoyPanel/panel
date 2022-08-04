@@ -23,7 +23,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException();
         }
 
-        $data = json_decode($response->getBody()->__toString());
-        return $data;
+        $data = json_decode($response->getBody(), true);
+        return $data['data'] ?? $data;
     }
 }

@@ -67,7 +67,8 @@ abstract class ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
 
         return new Client([
-            'base_uri' => "https://{$this->node->hostname}:{$this->node->port}",
+            'verify' => false,
+            'base_uri' => "https://{$this->node->hostname}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
             'headers' => array_merge($headers, [
