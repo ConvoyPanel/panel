@@ -48,9 +48,9 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
 
         if ($rawConfig)
         {
-            $configs = explode(',', Arr::get($rawConfig, 'value'));
+            $properties = explode(',', Arr::get($rawConfig, 'value'));
 
-            Arr::map($configs, function ($value) use (&$config) {
+            Arr::map($properties, function ($value) use (&$config) {
                  $property = explode('=', $value);
 
                  if ($property[0] === 'ip')
