@@ -21,7 +21,7 @@ class CloudinitService extends ProxmoxService
     /**
      * @var ProxmoxCloudinitRepository
      */
-    protected ProxmoxCloudinitRepository $cloudinitRepository;
+    private ProxmoxCloudinitRepository $cloudinitRepository;
 
     /**
      *
