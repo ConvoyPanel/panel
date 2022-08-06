@@ -10,8 +10,15 @@ use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
+/**
+ *
+ */
 class ProxmoxCloudinitRepository extends ProxmoxRepository
 {
+    /**
+     * @return mixed
+     * @throws ProxmoxConnectionException
+     */
     public function getConfig()
     {
         Assert::isInstanceOf($this->server, Server::class);
@@ -26,52 +33,19 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
         return $data['data'] ?? $data;
     }
 
-    public function getIpConfig()
+    public function update(array $params = [])
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/pending', $this->node->cluster, $this->server->vmid));
+            $response = $this->getHttpClient()->put(sprintf('/api2/json/nodes/%s/qemu/%s/config', $this->node->cluster, $this->server->vmid), [
+                'json' => $params
+            ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }
 
-        $json = json_decode($response->getBody(), true);
-        $data = $json['data'] ?? $json;
-
-        $config = [
-            'ipv4' => null,
-            'ipv6' => null,
-        ];
-
-        $rawConfig = collect($data)->where('key', 'ipconfig0')->first();
-
-        if ($rawConfig)
-        {
-            $properties = explode(',', Arr::get($rawConfig, 'value'));
-
-            Arr::map($properties, function ($value) use (&$config) {
-                 $property = explode('=', $value);
-
-                 if ($property[0] === 'ip')
-                 {
-                     $cidr = explode('/', $property[1]);
-                     $config['ipv4']['address'] = $cidr[0];
-                     $config['ipv4']['cidr'] = $cidr[1];
-                 }
-                if ($property[0] === 'ip6')
-                {
-                    $cidr = explode('/', $property[1]);
-                    $config['ipv6']['address'] = $cidr[0];
-                    $config['ipv6']['cidr'] = $cidr[1];
-                }
-                if ($property[0] === 'gw')
-                     $config['ipv4']['gateway'] = $property[1];
-                if ($property[0] === 'gw6')
-                    $config['ipv6']['gateway'] = $property[1];
-            });
-        }
-
-        return $config;
+        $data = json_decode($response->getBody(), true);
+        return $data['data'] ?? $data;
     }
 }

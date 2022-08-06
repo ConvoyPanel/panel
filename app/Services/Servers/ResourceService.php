@@ -117,7 +117,7 @@ class ResourceService extends ProxmoxService
             'memory' => $resourceList['maxmem'],
             'disk' => $resourceList['maxdisk'],
             'disks' => $this->getDisks(),
-            'ipconfig' => $this->cloudinitService->setServer($this->server)->getIpConfig(),
+            'ipconfig' => $this->cloudinitService->setServer($this->server)->getIpConfig(true),
         ];
 
         return $specifications;

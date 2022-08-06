@@ -2,10 +2,15 @@
 
 namespace App\Services\Servers;
 
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Services\ProxmoxService;
 use App\Enums\Servers\Cloudinit\AuthenticationType;
 use App\Enums\Servers\Cloudinit\BiosType;
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
+use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
@@ -13,6 +18,12 @@ use App\Enums\Servers\Cloudinit\BiosType;
  */
 class CloudinitService extends ProxmoxService
 {
+    protected ProxmoxCloudinitRepository $cloudinitRepository;
+
+    public function __construct()
+    {
+        $this->cloudinitRepository = new ProxmoxCloudinitRepository();
+    }
 
     public function fetchConfig()
     {
@@ -72,53 +83,37 @@ class CloudinitService extends ProxmoxService
         return $this->instance()->config()->post(['nameserver' => $nameserver]);
     }
 
-    public function getIpConfig() : ?array
+    public function updateIpConfig(string|array $config)
     {
-        $resourceService = new ResourceService();
-        $configs = $resourceService->setServer($this->server)->getConfig();
+        $this->cloudinitRepository->setServer($this->server);
 
-        $index = array_search('ipconfig0', array_column($configs, 'key'));
-
-        if ($index !== false)
+        if (gettype($config) === 'string')
         {
-            return $configs[$index];
-        }
-
-        return null;
-    }
-
-    public function updateIpConfig(string|array $ipConfig)
-    {
-        if (gettype($ipConfig) === 'string')
-        {
-            return $this->instance()->config()->put([
-                'ipconfig0' => $ipConfig,
+            return $this->cloudinitRepository->update([
+                'ipconfig0' => $config,
             ]);
         }
 
-        if (gettype($ipConfig) === 'array')
+        if (gettype($config) === 'array')
         {
-            $addresses = $ipConfig;
+            $payload = [];
 
-            $payload = '';
-
-            if (isset($addresses['ip']) && isset($addresses['ip6']))
+            if (isset($config['ipv4']))
             {
-                $payload = "ip={$addresses['ip']['cidr']},gw={$addresses['ip']['gateway']},ip6={$addresses['ip6']['cidr']},gw6={$addresses['ip6']['gateway']}";
+                $ipv4 = $config['ipv4'];
+                $payload[] = "ip={$ipv4['address']}/{$ipv4['cidr']}";
+                $payload[] = 'gw=' . $ipv4['gateway'];
             }
 
-            if (isset($addresses['ip']) && !isset($addresses['ip6']))
+            if (isset($config['ipv6']))
             {
-                $payload = "ip={$addresses['ip']['cidr']},gw={$addresses['ip']['gateway']}";
+                $ipv6 = $config['ipv6'];
+                $payload[] = "ip6={$ipv6['address']}/{$ipv6['cidr']}";
+                $payload[] = 'gw6=' . $ipv6['gateway'];
             }
 
-            if (isset($addresses['ip6']) && !isset($addresses['ip']))
-            {
-                $payload = "ip6={$addresses['ip6']['cidr']},gw6={$addresses['ip6']['gateway']}";
-            }
-
-            return $this->instance()->config()->put([
-                'ipconfig0' => $payload,
+            return $this->cloudinitRepository->update([
+                'ipconfig0' => Arr::join($payload, ','),
             ]);
         }
     }
