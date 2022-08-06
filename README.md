@@ -1,1 +1,1 @@
-docs coming soon
+Documentation can be found here: https://docs.convoypanel.com
