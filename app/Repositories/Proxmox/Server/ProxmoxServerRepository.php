@@ -26,4 +26,20 @@ class ProxmoxServerRepository extends ProxmoxRepository
         $data = json_decode($response->getBody(), true);
         return $data['data'] ?? $data;
     }
+
+    public function getResources()
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        try {
+            $response = $this->getHttpClient()->get('/api2/json/cluster/resources');
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException($e);
+        }
+
+        $json = json_decode($response->getBody(), true);
+        $data = $json['data'] ?? $json;
+
+        return collect($data)->where('vmid', $this->server->vmid)->firstOrFail();
+    }
 }

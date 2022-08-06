@@ -18,22 +18,17 @@ use Webmozart\Assert\Assert;
  */
 class CloudinitService extends ProxmoxService
 {
+    /**
+     * @var ProxmoxCloudinitRepository
+     */
     protected ProxmoxCloudinitRepository $cloudinitRepository;
 
+    /**
+     *
+     */
     public function __construct()
     {
         $this->cloudinitRepository = new ProxmoxCloudinitRepository();
-    }
-
-    public function fetchConfig()
-    {
-        return $this->instance()->config()->get();
-    }
-
-    // dumps YAML formatted config (I know, it's terrible)
-    public function dumpConfig(string $type = 'network')
-    {
-        return $this->removeDataProperty($this->instance()->cloudinit()->dump()->get(['type' => $type]));
     }
 
     /**
@@ -43,13 +38,14 @@ class CloudinitService extends ProxmoxService
      */
     public function changePassword(string $password, AuthenticationType $type)
     {
+        $this->cloudinitRepository->setServer($this->server);
+
         if (AuthenticationType::KEY === $type)
         {
-            return $this->instance()->config()->post([$type->value => rawurlencode($password)]);
+            return $this->cloudinitRepository->update([$type->value => rawurlencode($password)]);
         } else {
-            return $this->instance()->config()->post([$type->value => $password]);
+            return $this->cloudinitRepository->update([$type->value => $password]);
         }
-
     }
 
     /**
@@ -58,9 +54,14 @@ class CloudinitService extends ProxmoxService
      * @return mixed
      */
     // Generally needed for Windows VM's with over 2TB disk, still WIP since I still need to add EFI disk
+    /**
+     * @param BiosType $type
+     * @return mixed
+     * @throws ProxmoxConnectionException
+     */
     public function changeBIOS(BiosType $type)
     {
-        return $this->instance()->config()->post(['bios' => $type->value]);
+        return $this->cloudinitRepository->setServer($this->server)->update(['bios' => $type->value]);
     }
 
     /**
@@ -70,7 +71,7 @@ class CloudinitService extends ProxmoxService
      */
     public function changeHostname(string $hostname)
     {
-        return $this->instance()->config()->post(['searchdomain' => $hostname]);
+        return $this->cloudinitRepository->setServer($this->server)->update(['searchdomain' => $hostname]);
     }
 
     /**
@@ -80,9 +81,54 @@ class CloudinitService extends ProxmoxService
      */
     public function changeNameserver(string $nameserver)
     {
-        return $this->instance()->config()->post(['nameserver' => $nameserver]);
+        return $this->cloudinitRepository->setServer($this->server)->update(['nameserver' => $nameserver]);
     }
 
+    public function getIpConfig(): array
+    {
+        $data = $this->cloudinitRepository->setServer($this->server)->getConfig();
+
+        $config = [
+            'ipv4' => null,
+            'ipv6' => null,
+        ];
+
+        $rawConfig = collect($data)->where('key', 'ipconfig0')->first();
+
+        if ($rawConfig)
+        {
+            $configs = explode(',', Arr::get($rawConfig, 'value'));
+
+            Arr::map($configs, function ($value) use (&$config) {
+                $property = explode('=', $value);
+
+                if ($property[0] === 'ip')
+                {
+                    $cidr = explode('/', $property[1]);
+                    $config['ipv4']['address'] = $cidr[0];
+                    $config['ipv4']['cidr'] = $cidr[1];
+                }
+                if ($property[0] === 'ip6')
+                {
+                    $cidr = explode('/', $property[1]);
+                    $config['ipv6']['address'] = $cidr[0];
+                    $config['ipv6']['cidr'] = $cidr[1];
+                }
+                if ($property[0] === 'gw')
+                    $config['ipv4']['gateway'] = $property[1];
+                if ($property[0] === 'gw6')
+                    $config['ipv6']['gateway'] = $property[1];
+            });
+        }
+
+        return $config;
+    }
+
+    /**
+     * @param string|array $config
+     * @return mixed|void
+     * @throws ProxmoxConnectionException
+     */
     public function updateIpConfig(string|array $config)
     {
         $this->cloudinitRepository->setServer($this->server);
@@ -117,11 +163,4 @@ class CloudinitService extends ProxmoxService
             ]);
         }
     }
-
-    public function getServerInaccessibleConfig()
-    {
-        return ['nameserver' => 'server inaccessible,server inaccessible', 'bios' => 'seabios', 'searchdomain' => 'server inaccessible'];
-    }
-
-
 }
