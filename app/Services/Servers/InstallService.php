@@ -97,7 +97,6 @@ class InstallService extends ProxmoxService
         if (Arr::get($intermissionDetails, 'locked')) {
             do {
                 $intermissionDetails = $this->detailService->getDetails();
-                print 'waiting';
             } while (Arr::get($intermissionDetails, 'locked'));
         }
 
@@ -106,7 +105,6 @@ class InstallService extends ProxmoxService
             'cpu' => Arr::get($details, 'limits.cpu'),
             'memory' => Arr::get($details, 'limits.memory'),
         ]);
-        print 'updated specs';
 
         /* 5. Configure the disks */
         $templateDetails = $this->detailService->getDetails();
@@ -115,15 +113,12 @@ class InstallService extends ProxmoxService
         $primaryDisk = collect(Arr::get($details, 'configuration.disks'))->where('disk', Arr::first(Arr::get($details, 'configuration.boot_order')))->first();
         $templatePrimaryDisk = collect(Arr::get($templateDetails, 'configuration.disks'))->where('disk', Arr::first(Arr::get($templateDetails, 'configuration.boot_order')))->first();
 
-        print 'get disks';
         if ($primaryDisk !== null && $templatePrimaryDisk !== null)
         {
             // If there's no primary disk, then we don't have to do any resizing. Easy!
 
             $diff = $this->allocationService->convertToBytes($primaryDisk['size']) - $this->allocationService->convertToBytes($templatePrimaryDisk['size']);
             $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
-
-            echo 'updated disks';
         }
 
         /* 6. Configure the IPs */
@@ -132,10 +127,7 @@ class InstallService extends ProxmoxService
             'ipv6' => $this->server->addresses()->where('type', 'ip6')->first(['address' ,'cidr', 'gateway']),
         ];
 
-        echo 'get ips';
-
         $this->cloudinitService->updateIpConfig($ipconfig);
-        echo 'updated cloudinit';
         $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
 
         /* 7. Kill the server to guarantee configurations are active */
