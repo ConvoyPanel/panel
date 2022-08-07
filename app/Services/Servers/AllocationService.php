@@ -17,19 +17,76 @@ class AllocationService extends ProxmoxService
         $this->repository = new ProxmoxAllocationRepository;
     }
 
-    public function getDisks()
+    public function createDisk(int $bytes, string $disk, string $format = 'qcow2')
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+        Assert::inArray($format, $this->repository->diskFormats, 'Invalid disk format');
+        Assert::inArray($disk, $this->repository->validDisks, 'Invalid disk type');
+
+        return $this->repository->setServer($this->server)->update([
+            $disk => 'local:' . ($bytes / 11073741824) . ',format=' . $format
+        ]);
+    }
+
+    public function resizeDisk(int $bytes, string $disk)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $this->repository->setServer($this->server);
+        return $this->repository->setServer($this->server)->resizeDisk($bytes, $disk);
+    }
 
-        $disks = array_values(array_filter($this->repository->getAllocations(), function ($disk) {
+    public function getDisks(): array
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        $disks = array_values(array_filter($this->repository->setServer($this->server)->getAllocations(), function ($disk) {
             return in_array($disk['key'], $this->repository->validDisks);
         }));
 
         return Arr::map($disks, function ($value) {
             return $this->formatDisk($value);
         });
+    }
+
+    public function getBootOrder(bool $filterNonLocalDisks = false): array
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        $raw = collect($this->repository->setServer($this->server)->getAllocations())->where('key', 'boot')->firstOrFail();
+
+        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', Arr::get($raw, 'value')))), function ($disk) {
+            return !ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+        }));
+
+        if ($filterNonLocalDisks)
+            return array_values(array_filter($disks, function ($disk) {
+                return in_array($disk, $this->repository->validDisks);
+            }));
+
+        return $disks;
+    }
+
+    public function setBootOrder(array $disks)
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        return $this->repository->setServer($this->server)->update([
+            'boot' => count($disks) > 0 ? 'order=' . Arr::join($disks, ';') : ''
+        ]);
+    }
+
+    public function updateSpecifications(array $specs)
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        $payload = [];
+
+        if (Arr::exists($specs, 'cores'))
+            $payload['cores'] = Arr::get($specs, 'cpu');
+        if (Arr::exists($specs, 'memory'))
+            $payload['memory'] = Arr::get($specs, 'memory');
+
+        return $this->repository->setServer($this->server)->update($payload);
     }
 
     public function formatDisk(array $rawDisk): array
