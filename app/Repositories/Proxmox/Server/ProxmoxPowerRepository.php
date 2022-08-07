@@ -10,9 +10,20 @@ use Webmozart\Assert\Assert;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {
+    public $actions = [
+        'reboot',
+        'reset',
+        'resume',
+        'shutdown',
+        'start',
+        'stop',
+        'suspend'
+    ];
+
     public function send(string $action)
     {
         Assert::isInstanceOf($this->server, Server::class);
+        Assert::inArray($action, $this->actions, 'Invalid action');
 
         try {
             $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $action), [
@@ -24,7 +35,6 @@ class ProxmoxPowerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        $data = json_decode($response->getBody(), true);
-        return $data['data'] ?? $data;
+        return $this->getData($response);
     }
 }

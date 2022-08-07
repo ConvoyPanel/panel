@@ -4,6 +4,7 @@ namespace App\Repositories\Proxmox;
 
 use GuzzleHttp\Client;
 use App\Models\Node;
+use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
 use App\Models\Server;
 use Illuminate\Contracts\Foundation\Application;
@@ -57,6 +58,17 @@ abstract class ProxmoxRepository
         $this->node = $node;
 
         return $this;
+    }
+
+    /**
+     * Removes the extra data property from the Proxmox API response
+     *
+     * @return mixed
+     */
+    public function getData(ResponseInterface $response)
+    {
+        $json = json_decode($response->getBody(), true);
+        return $json['data'] ?? $json;
     }
 
     /**

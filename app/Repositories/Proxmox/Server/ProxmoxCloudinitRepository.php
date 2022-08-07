@@ -29,8 +29,7 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        $data = json_decode($response->getBody(), true);
-        return $data['data'] ?? $data;
+        return $this->getData($response);
     }
 
     public function update(array $params = [])
@@ -45,7 +44,6 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        $data = json_decode($response->getBody(), true);
-        return $data['data'] ?? $data;
+        return $this->getData($response);
     }
 }

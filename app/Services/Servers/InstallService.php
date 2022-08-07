@@ -3,7 +3,12 @@
 namespace App\Services\Servers;
 
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\ProxmoxService;
+use Illuminate\Support\Arr;
+use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
@@ -15,28 +20,129 @@ class InstallService extends ProxmoxService
     private ResourceService $resourceService;
     private NetworkService $networkService;
     private CloudinitService $cloudinitService;
+    private ServerDetailService $detailService;
+    private ProxmoxServerRepository $serverRepository;
+    private ProxmoxAllocationRepository $allocationRepository;
+    private AllocationService $allocationService;
+    private ProxmoxPowerRepository $powerRepository;
 
     public function __construct()
     {
-        $this->powerService = new PowerService();
-        $this->resourceService = new ResourceService();
-        $this->networkService = new NetworkService();
-        $this->cloudinitService = new CloudinitService();
+        $this->powerService = new PowerService;
+        $this->resourceService = new ResourceService;
+        $this->networkService = new NetworkService;
+        $this->cloudinitService = new CloudinitService;
+        $this->detailService = new ServerDetailService;
+        $this->serverRepository = new ProxmoxServerRepository;
+        $this->allocationRepository = new ProxmoxAllocationRepository;
+        $this->allocationService = new AllocationService;
+        $this->powerRepository = new ProxmoxPowerRepository;
     }
 
+    /*
+    * @deprecated This function is redundant and is just a proxy to another function
+    */
     public function install(int $newid, string $target)
     {
+        Assert::isInstanceOf($this->server, Server::class);
+
         return $this->instance()->clone()->post(['newid' => $newid, 'target' => $target, 'full' => true]);
     }
 
-    public function delete(bool $destroyUnreferencedDisks = true, bool $purgeJobConfigurations = true)
+    /*
+    * @deprecated This function is redundant and is just a proxy to another function
+    */
+    public function delete(bool $destroyUnreferencedDisks = true, bool $purgeJobConfigurations = true, bool $skiplock = true)
     {
-        $this->powerService->setServer($this->server)->kill();
+        Assert::isInstanceOf($this->server, Server::class);
 
-        return $this->instance()->delete(['destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations]);
+        return $this->serverRepository->setServer($this->server)->delete($destroyUnreferencedDisks, $purgeJobConfigurations, $skiplock);
     }
 
     public function reinstall(Server $template)
+    {
+        /*
+         * Procedure
+         *
+         * 1. Get the server details
+         * 2. Delete the server
+         * 3. Clone the template
+         * 4. Configure the specifications
+         * 5. Configure the disks
+         * 6. Configure the IPs
+         * 7. Kill the server to guarantee configurations are active
+         */
+
+        Assert::isInstanceOf($this->server, Server::class);
+        $this->detailService->setServer($this->server);
+        $this->serverRepository->setServer($this->server);
+        $this->allocationService->setServer($this->server);
+        $this->allocationRepository->setServer($this->server);
+        $this->cloudinitService->setServer($this->server);
+        $this->networkService->setServer($this->server);
+        $this->powerRepository->setServer($this->server);
+
+        /* 1. Get the server details */
+        $details = $this->detailService->getDetails();
+
+        /* 2. Delete the server */
+        $this->serverRepository->delete();
+
+        /* 3. Clone the template */
+        $this->serverRepository->create($template->vmid);
+
+        // Wait until cloning is complete
+        $intermissionDetails = $this->detailService->getDetails();
+
+        if (Arr::get($intermissionDetails, 'locked')) {
+            do {
+                $intermissionDetails = $this->detailService->getDetails();
+                print 'waiting';
+            } while (Arr::get($intermissionDetails, 'locked'));
+        }
+
+        /* 4. Configure the specifications */
+        $this->allocationService->updateSpecifications([
+            'cpu' => Arr::get($details, 'limits.cpu'),
+            'memory' => Arr::get($details, 'limits.memory'),
+        ]);
+        print 'updated specs';
+
+        /* 5. Configure the disks */
+        $templateDetails = $this->detailService->getDetails();
+
+        // Assume the first entry in the boot disks will be the one to resize. All other disks will be dynamically resized/recreated, but this behavior guarantees that a hosting provider can set the disk size no matter the disk type
+        $primaryDisk = collect(Arr::get($details, 'configuration.disks'))->where('disk', Arr::first(Arr::get($details, 'configuration.boot_order')))->first();
+        $templatePrimaryDisk = collect(Arr::get($templateDetails, 'configuration.disks'))->where('disk', Arr::first(Arr::get($templateDetails, 'configuration.boot_order')))->first();
+
+        print 'get disks';
+        if ($primaryDisk !== null && $templatePrimaryDisk !== null)
+        {
+            // If there's no primary disk, then we don't have to do any resizing. Easy!
+
+            $diff = $this->allocationService->convertToBytes($primaryDisk['size']) - $this->allocationService->convertToBytes($templatePrimaryDisk['size']);
+            $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
+
+            echo 'updated disks';
+        }
+
+        /* 6. Configure the IPs */
+        $ipconfig = [
+            'ipv4' => $this->server->addresses()->where('type', 'ip')->first(['address' ,'cidr', 'gateway']),
+            'ipv6' => $this->server->addresses()->where('type', 'ip6')->first(['address' ,'cidr', 'gateway']),
+        ];
+
+        echo 'get ips';
+
+        $this->cloudinitService->updateIpConfig($ipconfig);
+        echo 'updated cloudinit';
+        $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
+
+        /* 7. Kill the server to guarantee configurations are active */
+        $this->powerRepository->send('stop');
+    }
+
+    public function oldreinstall(Server $template)
     {
         $originalServer = clone $this->server;
         $instantiatedResourceService = (clone $this->resourceService)->setServer($originalServer);
@@ -59,7 +165,7 @@ class InstallService extends ProxmoxService
         ];
 
         // get all ipsets (underscore indicates it must not be referenced elsewhere because it's temporary)
-        $_ipSets = array_column($instantiatedNetworkService->getIpSets(), 'name');
+        $_ipSets = array_column($instantiatedNetworkService->getIpsets(), 'name');
 
         foreach ($_ipSets as $ipSet) {
             $lockedIps = array_column($instantiatedNetworkService->getLockedIps($ipSet), 'cidr');
@@ -107,7 +213,7 @@ class InstallService extends ProxmoxService
         // set IP sets
         foreach ($originalResources['ipsets'] as $ipSet)
         {
-            $instantiatedNetworkService->createIpSet($ipSet['name']);
+            $instantiatedNetworkService->createIpset($ipSet['name']);
 
             foreach ($ipSet['addresses'] as $address)
             {

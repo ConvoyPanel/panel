@@ -5,6 +5,7 @@ namespace App\Services\Servers;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
+use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -12,11 +13,13 @@ class ServerDetailService extends ProxmoxService
 {
     private ProxmoxAllocationRepository $repository;
     private AllocationService $allocationService;
+    private CloudinitService $cloudinitService;
 
     public function __construct()
     {
         $this->repository = new ProxmoxAllocationRepository;
         $this->allocationService = new AllocationService;
+        $this->cloudinitService  = new CloudinitService;
     }
 
     public function getDetails()
@@ -25,6 +28,7 @@ class ServerDetailService extends ProxmoxService
 
         $this->repository->setServer($this->server);
         $this->allocationService->setServer($this->server);
+        $this->cloudinitService->setServer($this->server);
 
         $config = Arr::keyBy($this->repository->getAllocations(), 'key');
         $resources = $this->repository->getResources();
@@ -32,6 +36,7 @@ class ServerDetailService extends ProxmoxService
         $details = [
             'vmid' => $this->server->vmid,
             'status' => Arr::get($resources, 'status'),
+            'locked' => Arr::get($resources, 'lock', false),
             'usage' => [
               'uptime' => Arr::get($resources, 'uptime'),
               'network' => [
@@ -44,13 +49,15 @@ class ServerDetailService extends ProxmoxService
                 ],
             ],
             'limits' => [
-                'cpu' => Arr::get($config, 'cores'),
-                'memory' => Arr::get($config, 'memory'),
+                'cpu' => Arr::get($resources, 'maxcpu'),
+                'memory' => Arr::get($config, 'memory.value'),
                 'disk' => Arr::get($resources, 'maxdisk'),
             ],
             'configuration' => [
                 'boot_order' => $this->allocationService->getBootOrder(),
                 'disks' => $this->allocationService->getDisks(),
+                'template' => Arr::get($resources, 'template'),
+                'addresses' => $this->cloudinitService->getIpConfig(),
             ],
             'node' => $this->server->node->cluster,
         ];

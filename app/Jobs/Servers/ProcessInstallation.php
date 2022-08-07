@@ -56,7 +56,7 @@ class ProcessInstallation implements ShouldQueue
             $networkService->setServer($server);
             $cloudinitService->setServer($server);
 
-            $networkService->clearIpSets(); // to prevent any bugs
+            $networkService->clearIpsets(); // to prevent any bugs
 
             $parsedAddresses = [];
 

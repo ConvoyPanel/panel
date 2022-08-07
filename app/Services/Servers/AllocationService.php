@@ -28,6 +28,9 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
+    /*
+    * @deprecated This function is redundant and is just a proxy to another function
+    */
     public function resizeDisk(int $bytes, string $disk)
     {
         Assert::isInstanceOf($this->server, Server::class);
@@ -81,7 +84,7 @@ class AllocationService extends ProxmoxService
 
         $payload = [];
 
-        if (Arr::exists($specs, 'cores'))
+        if (Arr::exists($specs, 'cpu'))
             $payload['cores'] = Arr::get($specs, 'cpu');
         if (Arr::exists($specs, 'memory'))
             $payload['memory'] = Arr::get($specs, 'memory');

@@ -24,19 +24,18 @@ class ProxmoxServerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException();
         }
 
-        $data = json_decode($response->getBody(), true);
-        return $data['data'] ?? $data;
+        return $this->getData($response);
     }
 
-    public function create(int $template, int $targetVmid, array $params = [])
+    public function create(int $template, array $params = [])
     {
-        Assert::isInstanceOf($this->node, Node::class);
+        Assert::isInstanceOf($this->server, Server::class);
 
         try {
             $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/clone', $this->node->cluster, $template), [
                 'json' => array_merge([
                     'target' => $this->node->cluster,
-                    'newid' => $targetVmid,
+                    'newid' => $this->server->vmid,
                     'full' => true,
                 ], $params)
             ]);
@@ -44,7 +43,21 @@ class ProxmoxServerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        $json = json_decode($response->getBody(), true);
-        return $json['data'] ?? $json;
+        return $this->getData($response);
+    }
+
+    public function delete(bool $destroyUnreferencedDisks = true, bool $purgeJobConfigurations = true, bool $skipLock = true)
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        try {
+            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/qemu/%s', $this->node->cluster, $this->server->vmid), [
+                'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
+            ]);
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException();
+        }
+
+        return $this->getData($response);
     }
 }

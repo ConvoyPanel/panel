@@ -59,6 +59,9 @@ abstract class ProxmoxService
         return $this->proxmox();
     }
 
+    /*
+    * @deprecated This library will be replaced with an in-house solution
+    */
     public function proxmox()
     {
         Assert::isInstanceOf($this->node, Node::class);
