@@ -18,7 +18,7 @@ class TemplateController extends Controller
 
     public function index(Node $node)
     {
-        $data = $this->templateService->setNode($node)->listTemplates();
+        $data = $this->templateService->setNode($node)->getTemplates();
 
         return fractal()->collection($data)->transformWith(new TemplateTransformer())->respond();
     }

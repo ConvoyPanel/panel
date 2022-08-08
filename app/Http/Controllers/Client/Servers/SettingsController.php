@@ -42,7 +42,7 @@ class SettingsController extends ApplicationApiController
 
     public function getTemplates(Server $server)
     {
-        return $this->templateService->setServer($server)->listTemplates(true);
+        return $this->templateService->setServer($server)->getTemplates(true);
     }
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
