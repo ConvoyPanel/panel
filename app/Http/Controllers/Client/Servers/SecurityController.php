@@ -6,13 +6,13 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
-use App\Services\Servers\VNCService;
+use App\Services\Servers\VncService;
 use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class SecurityController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService, private VNCService $vncService)
+    public function __construct(private CloudinitService $cloudinitService, private VncService $vncService)
     {
     }
 

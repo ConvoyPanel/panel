@@ -15,7 +15,7 @@ use App\Models\Node;
 use App\Models\Template;
 use App\Services\Nodes\TemplateService;
 use App\Services\Servers\InstallService;
-use App\Services\Servers\VNCService;
+use App\Services\Servers\VncService;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SettingsController extends ApplicationApiController

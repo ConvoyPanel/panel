@@ -16,8 +16,6 @@ use Webmozart\Assert\Assert;
  */
 class InstallService extends ProxmoxService
 {
-    private PowerService $powerService;
-    private ResourceService $resourceService;
     private NetworkService $networkService;
     private CloudinitService $cloudinitService;
     private ServerDetailService $detailService;
@@ -28,8 +26,6 @@ class InstallService extends ProxmoxService
 
     public function __construct()
     {
-        $this->powerService = new PowerService;
-        $this->resourceService = new ResourceService;
         $this->networkService = new NetworkService;
         $this->cloudinitService = new CloudinitService;
         $this->detailService = new ServerDetailService;
@@ -37,26 +33,6 @@ class InstallService extends ProxmoxService
         $this->allocationRepository = new ProxmoxAllocationRepository;
         $this->allocationService = new AllocationService;
         $this->powerRepository = new ProxmoxPowerRepository;
-    }
-
-    /*
-    * @deprecated This function is redundant and is just a proxy to another function
-    */
-    public function install(int $newid, string $target)
-    {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        return $this->instance()->clone()->post(['newid' => $newid, 'target' => $target, 'full' => true]);
-    }
-
-    /*
-    * @deprecated This function is redundant and is just a proxy to another function
-    */
-    public function delete(bool $destroyUnreferencedDisks = true, bool $purgeJobConfigurations = true, bool $skiplock = true)
-    {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        return $this->serverRepository->setServer($this->server)->delete($destroyUnreferencedDisks, $purgeJobConfigurations, $skiplock);
     }
 
     public function reinstall(Server $template)
@@ -132,94 +108,6 @@ class InstallService extends ProxmoxService
 
         /* 7. Kill the server to guarantee configurations are active */
         $this->powerRepository->send('stop');
-    }
-
-    public function oldreinstall(Server $template)
-    {
-        $originalServer = clone $this->server;
-        $instantiatedResourceService = (clone $this->resourceService)->setServer($originalServer);
-        $instantiatedNetworkService = (clone $this->networkService)->setServer($originalServer);
-        $instantiatedCloudinitService = (clone $this->cloudinitService)->setServer($originalServer);
-
-        $ipconfigResponse = $instantiatedCloudinitService->getIpConfig();
-
-        $originalResources = [
-            'disks' => $instantiatedResourceService->getDisks(),
-            'resources' => $instantiatedResourceService->getResources(),
-            'bootOrder' => $instantiatedResourceService->getBootOrder(),
-            'ipconfig' => $ipconfigResponse['pending'] ?? $ipconfigResponse['value'] ?? [],
-            'ipsets' => [],
-        ];
-
-        $originalSpecifications = [
-            'cores' => $originalResources['resources']['maxcpu'],
-            'memory' => $originalResources['resources']['maxmem'] / 1024 / 1024,
-        ];
-
-        // get all ipsets (underscore indicates it must not be referenced elsewhere because it's temporary)
-        $_ipSets = array_column($instantiatedNetworkService->getIpsets(), 'name');
-
-        foreach ($_ipSets as $ipSet) {
-            $lockedIps = array_column($instantiatedNetworkService->getLockedIps($ipSet), 'cidr');
-
-            array_push($originalResources['ipsets'], [
-                'name' => $ipSet,
-                'addresses' => $lockedIps,
-            ]);
-        }
-
-
-        $templateDisks = (clone $this->resourceService)->setServer($template)->getDisks();
-
-
-
-        // get all the IPsets
-
-
-        (clone $this->powerService)->setServer($originalServer)->kill();
-
-        $this->delete();
-
-        $this->setServer($template)->install($originalServer->vmid, $this->node->cluster);
-
-        $instantiatedResourceService->setCores($originalSpecifications['cores']);
-        $instantiatedResourceService->setMemory($originalSpecifications['memory']);
-
-        // time to migrate the disks
-
-        $newDisks = [];
-
-        // If the template has no disks. I don't want to get stuck in an infinite loop waiting for a disk to appear.
-        if (count($templateDisks) > 0) {
-            do {
-                $newDisks = $instantiatedResourceService->getDisks();
-            } while (count($newDisks) === 0);
-        }
-
-        $instantiatedResourceService->updateDisks($originalResources['disks'], $newDisks);
-
-        // set boot $order
-
-        $instantiatedResourceService->setBootOrder($originalResources['bootOrder']['raw']);
-
-        // set IP sets
-        foreach ($originalResources['ipsets'] as $ipSet)
-        {
-            $instantiatedNetworkService->createIpset($ipSet['name']);
-
-            foreach ($ipSet['addresses'] as $address)
-            {
-                $instantiatedNetworkService->lockIp($ipSet['name'], $address);
-            }
-        }
-
-        // update cloudinit ip
-        $instantiatedCloudinitService->updateIpConfig($originalResources['ipconfig']);
-
-        // apply the changes
-        $this->powerService->setServer($originalServer)->kill();
-
-        return true;
     }
 
     public function convertToBytes(string $from): ?int

@@ -43,43 +43,6 @@ abstract class ProxmoxService
         return $this;
     }
 
-    public function instance()
-    {
-        //$this->proxmox()->nodes()->node($this->node->cluster)->tasks()->get(['']);
-        return $this->proxmox()->nodes()->node($this->node->cluster)->qemu()->vmid($this->server->vmid);
-    }
-
-    public function nodeInstance()
-    {
-        return $this->proxmox()->nodes()->node($this->node->cluster);
-    }
-
-    public function mainInstance()
-    {
-        return $this->proxmox();
-    }
-
-    /*
-    * @deprecated This library will be replaced with an in-house solution
-    */
-    public function proxmox()
-    {
-        Assert::isInstanceOf($this->node, Node::class);
-
-        $node = [
-            $this->node->hostname,
-            $this->node->username,
-            $this->node->password,
-            intval($this->node->port),
-            $this->node->auth_type,
-           //true
-        ];
-
-        $proxmox = new PVE(...$node);
-
-        return $proxmox;
-    }
-
     public function removeDataProperty(mixed $data, bool $returnNullIfEmpty = false)
     {
         if (gettype($data) === 'array') {

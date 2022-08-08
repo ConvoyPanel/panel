@@ -74,7 +74,7 @@ abstract class ProxmoxRepository
     /**
      * Return an instance of the Guzzle HTTP Client to be used for requests.
      */
-    public function getHttpClient(array $headers = []): Client
+    public function getHttpClient(array $headers = [], bool $authorize = true): Client
     {
         Assert::isInstanceOf($this->node, Node::class);
 
@@ -84,7 +84,7 @@ abstract class ProxmoxRepository
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
             'headers' => array_merge($headers, [
-                'Authorization' => "PVEAPIToken={$this->node->token_id}={$this->node->secret}",
+                'Authorization' => $authorize ? "PVEAPIToken={$this->node->token_id}={$this->node->secret}" : null,
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ]),

@@ -60,4 +60,21 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         return $this->getData($response);
     }
+
+    public function addUser(string $userid, string $roleid)
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        try {
+            $response = $this->getHttpClient()->put('/api2/json/access/acl', [
+                'path' => '/vms/' . $this->server->vmid,
+                'users' => $userid,
+                'roles' => $roleid,
+            ]);
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException();
+        }
+
+        return $this->getData($response);
+    }
 }
