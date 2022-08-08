@@ -52,7 +52,9 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         try {
             $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/qemu/%s', $this->node->cluster, $this->server->vmid), [
-                'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
+                'json' => [
+                    'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
+                ]
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -67,12 +69,14 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         try {
             $response = $this->getHttpClient()->put('/api2/json/access/acl', [
-                'path' => '/vms/' . $this->server->vmid,
-                'users' => $userid,
-                'roles' => $roleid,
+                'json' => [
+                    'path' => '/vms/' . $this->server->vmid,
+                    'users' => $userid,
+                    'roles' => $roleid,
+                ]
             ]);
         } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException();
+            throw new ProxmoxConnectionException($e);
         }
 
         return $this->getData($response);

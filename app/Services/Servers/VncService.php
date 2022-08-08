@@ -27,16 +27,15 @@ class VncService extends ProxmoxService
 
         $user = $this->accessRepository->createUser();
 
+
         try {
-            $role = $this->accessRepository->createRole('convoy-vnc', 'VM.Console');
+            $this->accessRepository->createRole('convoy-vnc', 'VM.Console');
+        } catch (Exception $e) {}
 
-            $this->serverRepository->addUser(
-                $user['userid'],
-                $role['roleid']
-            );
-        } catch (Exception $e) {
-
-        }
+        $this->serverRepository->addUser(
+            $user['userid'],
+            'convoy-vnc'
+        );
 
         $token = $this->accessRepository->getTicket(Arr::first(explode('@', $user['userid'])), $user['password']);
 
