@@ -55,7 +55,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
                 'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
             ]);
         } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException();
+            throw new ProxmoxConnectionException($e);
         }
 
         return $this->getData($response);

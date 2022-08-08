@@ -52,6 +52,10 @@ class ServerDetailService extends ProxmoxService
                 'cpu' => Arr::get($resources, 'maxcpu'),
                 'memory' => Arr::get($config, 'memory.value'),
                 'disk' => Arr::get($resources, 'maxdisk'),
+                'addresses' => [
+                    'ipv4' => $this->server->addresses()->where('type', 'ip')->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                    'ipv6' => $this->server->addresses()->where('type', 'ip6')->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                ]
             ],
             'configuration' => [
                 'boot_order' => $this->allocationService->getBootOrder(),

@@ -93,11 +93,11 @@ class CloudinitService extends ProxmoxService
             'ipv6' => null,
         ];
 
-        $rawConfig = collect($data)->where('key', 'ipconfig0')->first();
+        $rawConfig = Arr::get($data, 'ipconfig0');
 
         if ($rawConfig)
         {
-            $configs = explode(',', Arr::get($rawConfig, 'value'));
+            $configs = explode(',', $rawConfig);
 
             Arr::map($configs, function ($value) use (&$config) {
                 $property = explode('=', $value);
