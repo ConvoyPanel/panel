@@ -29,17 +29,19 @@ const ReinstallSettings = () => {
     return confirmOne === confirmText
   }, [confirmOne, confirmText])
 
-  const [selectedTemplate, setSelectedTemplate] = useState<string>()
-
   const { data, status } = useQuery(['templates'], async () => {
     const { data } = await getTemplates(settingsContext!.server.id)
     return data
   })
 
+  const { post, data: formData, processing, setData } = useForm({
+    template_id: '',
+  })
+
   const templates = useMemo(() => {
     if (status === 'success') {
       return data.map((template) => ({
-        value: template.id as unknown as string,
+        value: template.id.toString(),
         label: template.server.name,
       }))
     }
@@ -47,20 +49,13 @@ const ReinstallSettings = () => {
     return []
   }, [data, status])
 
-  const [processing, setProcessing] = useState(false)
-
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setShowModal(true)
   }
 
   const handleReinstall = async () => {
-    setProcessing(true)
-    await reinstallServer(
-      selectedTemplate as unknown as number,
-      settingsContext!.server.id
-    )
-    setProcessing(false)
+    post(route('servers.show.settings.reinstall', settingsContext?.server.id))
   }
 
   return (
@@ -107,15 +102,14 @@ const ReinstallSettings = () => {
           </Modal>
           <Select
             label='Template'
-            value={selectedTemplate as unknown as string}
-            onChange={(e) => setSelectedTemplate(e as string)}
+            value={formData.template_id}
+            onChange={(e) => setData('template_id', e as string)}
             data={templates}
-            //error={errors.compression}
           />
         </>
       }
       actions={
-        <Button color='red' type='submit' className='ml-4' disabled={selectedTemplate === undefined} loading={processing}>
+        <Button color='red' type='submit' className='ml-4' disabled={formData.template_id === undefined} loading={processing}>
           Rebuild
         </Button>
       }

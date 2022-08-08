@@ -52,9 +52,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         try {
             $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/qemu/%s', $this->node->cluster, $this->server->vmid), [
-                'json' => [
-                    'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
-                ]
+                'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

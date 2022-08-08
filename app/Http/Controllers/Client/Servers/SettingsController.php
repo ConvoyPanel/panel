@@ -13,6 +13,7 @@ use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
 use App\Jobs\Servers\ProcessReinstallation;
 use App\Models\Node;
 use App\Models\Template;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Services\Nodes\TemplateService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\VncService;
@@ -20,16 +21,15 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private TemplateService $templateService, private CloudinitService $cloudinitService, private InstallService $installService)
+    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository)
     {
     }
 
     public function index(Server $server)
     {
-        $data = $this->cloudinitService->setServer($server)->fetchConfig();
         return Inertia::render('servers/settings/Index', [
             'server' => $server,
-            'config' => $data ? $this->removeExtraDataProperty($data) : $this->cloudinitService->getServerInaccessibleConfig(),
+            'config' => $this->repository->setServer($server)->getConfig(),
         ]);
     }
 

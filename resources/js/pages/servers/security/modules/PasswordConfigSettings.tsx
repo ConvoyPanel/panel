@@ -33,7 +33,7 @@ const PasswordConfigSettings = () => {
 
   return (
     <FormBlock
-      title='Auth Configuration'
+      title='Authentication'
       inputs={
         <div className='flex flex-col space-y-3'>
           <RadioGroup

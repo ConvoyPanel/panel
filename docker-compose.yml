@@ -33,9 +33,8 @@ services:
       - 6379:6379
   php-worker:
     build: ./dockerfiles/php-worker
-    #tty: true #for debugging
+    tty: true
     restart: unless-stopped
-    #command: php artisan queue:work
     working_dir: /var/www/html/
     volumes:
       - .:/var/www/html/
