@@ -19,7 +19,7 @@ const PowerActions = () => {
         <Button onClick={() => postState('kill')} color='red' variant='outline' disabled={!serverState || serverState?.state === 'stopped'}>
           Kill
         </Button>
-        <Button onClick={() => postState('shutdown')} color='red' disabled={serverState?.state !== 'running'}>Stop</Button>
+        <Button onClick={() => postState('shutdown')} color='red' disabled={serverState?.state !== 'running'}>Shutdown</Button>
       </Paper>
     </div>
   )

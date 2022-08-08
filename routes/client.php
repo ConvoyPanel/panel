@@ -36,8 +36,7 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServ
     Route::get('/status', [StatusController::class, 'show'])->name('servers.show.status');
     Route::post('/status', [PowerController::class, 'sendCommand']);
 
-    // @deprecated
-    //Route::get('/resources', [StatusController::class, 'getResources'])->name('servers.show.resources');
+    Route::get('/details', [ServerController::class, 'getDetails'])->name('servers.show.details');
 
     /*
     |--------------------------------------------------------------------------

@@ -1,26 +1,45 @@
+import { Address } from '@/api/admin/nodes/addresses/types'
+import { ServerState } from '@/api/server/getStatus'
 import axios from 'axios'
 
-export interface Resources {
-  diskwrite: number
-  netout: number
-  maxdisk: number
-  disk: number
-  cpu: number
-  template: number
-  name: string
-  uptime: number
-  id: string
-  maxmem: number
-  diskread: number
-  netin: number
-  mem: number
-  node: string
-  vmid: number
-  status: string
-  type: string
-  maxcpu: number
+export interface Disk {
+  disk: string
+  size: string
+  pending: boolean
+}
+
+export interface Details {
+  vmid: number,
+  status: ServerState,
+  locked: boolean|string,
+  usage: {
+    uptime: number,
+    network: {
+      in: number,
+      out: number,
+    }
+    disk: {
+      read: number,
+      write: number,
+    }
+  }
+  limits: {
+    cpu: number,
+    memory: number,
+    disk: number,
+    addresses: {
+      ipv4?: Pick<Address, 'cidr' | 'gateway' | 'address'>
+      ipv6?: Pick<Address, 'cidr' | 'gateway' | 'address'>
+    }
+  }
+  configuration: {
+    boot_order: string[]
+    disks: Disk[]
+    template: boolean
+    addresses: Pick<Address, 'cidr' | 'gateway' | 'address'>
+  }
 }
 
 export default (id: number) => {
-  return axios.get<Resources>(route('servers.show.resources', id))
+  return axios.get<Details>(route('servers.show.details', id))
 }

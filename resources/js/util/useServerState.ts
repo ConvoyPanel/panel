@@ -45,40 +45,27 @@ const useServerState = (id: number) => {
 
   const updateServerStatus = async () => {
     try {
-      const { data } = await getStatus(id)
+      const { data: { status, cpu, mem, maxmem, uptime } } = await getStatus(id)
 
-      if ((data as unknown as string) !== '' && data.constructor === Object) {
-        const {
-          data: { status, cpu, mem, maxmem, uptime },
-        } = data
+      const { time, unit } = convertTimeToSmallest(uptime)
 
-        const { time, unit } = convertTimeToSmallest(uptime)
-
-        setServer({
-          id,
-          state: status,
-          uptime: {
-            time,
-            unit,
-          },
-          cpu: Math.floor(cpu * 10000) / 100,
-          mem: formatBytes(mem),
-          maxmem: formatBytes(maxmem),
-          memUnparsed: {
-            mem,
-            maxmem,
-          },
-        })
-        setErrorCount(0)
-      } else {
-        setServer(undefined)
-        setErrorCount((count) => count + 1)
-
-        if (errorCountRef.current > 1) {
-          setIsErroring(true)
-        }
-      }
-    } catch {
+      setServer({
+        id,
+        state: status,
+        uptime: {
+          time,
+          unit,
+        },
+        cpu: Math.floor(cpu * 10000) / 100,
+        mem: formatBytes(mem),
+        maxmem: formatBytes(maxmem),
+        memUnparsed: {
+          mem,
+          maxmem,
+        },
+      })
+      setErrorCount(0)
+    } catch (e) {
       setServer(undefined)
       setErrorCount((count) => count + 1)
 

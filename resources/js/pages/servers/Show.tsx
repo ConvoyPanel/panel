@@ -10,7 +10,7 @@ import { createContext, useEffect } from 'react'
 import StatGraphs from '@/components/servers/StatGraphs'
 import ServerNav from '@/components/servers/ServerNav'
 import ServerUnavailableModal from '@/components/servers/ServerUnavailableModal'
-import ServerResources from '@/components/servers/ServerResources'
+import ServerDetails from '@/components/servers/ServerDetails'
 import LoadingState from '@/components/LoadingState'
 
 interface Props extends DefaultProps {
@@ -54,7 +54,7 @@ const Show = ({ auth, server }: Props) => {
 
           <PowerActions />
 
-          <ServerResources />
+          <ServerDetails />
 
           {serverState ? (
             <StatGraphs />
