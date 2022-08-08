@@ -27,7 +27,6 @@ class VncService extends ProxmoxService
 
         $user = $this->accessRepository->createUser();
 
-
         try {
             $this->accessRepository->createRole('convoy-vnc', 'VM.Console');
         } catch (Exception $e) {}
