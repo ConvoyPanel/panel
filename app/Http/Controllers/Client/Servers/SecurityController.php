@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\VncService;
 use Inertia\Inertia;
@@ -12,16 +13,15 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class SecurityController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService, private VncService $vncService)
+    public function __construct(private ProxmoxCloudinitRepository $repository, private VncService $vncService)
     {
     }
 
     public function index(Server $server)
     {
-        $data = $this->cloudinitService->setServer($server)->fetchConfig();
         return inertia('servers/security/Index', [
             'server' => $server,
-            'config' => $this->removeExtraDataProperty($data ? $data : []),
+            'config' => $this->repository->setServer($server)->getConfig(),
         ]);
     }
 
@@ -39,8 +39,6 @@ class SecurityController extends ApplicationApiController
         if (!$data) {
             throw new ServiceUnavailableHttpException();
         }
-
-
 
         return array_merge([
             'node_id' => $server->node->cluster,

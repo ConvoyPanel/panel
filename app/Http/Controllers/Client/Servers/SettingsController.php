@@ -47,6 +47,8 @@ class SettingsController extends ApplicationApiController
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
     {
+        $server->update(['installing' => true]);
+
         ProcessReinstallation::dispatch($server->id, $request->template_id);
 
         return redirect()->route('servers.show.installing', [$server->id]);

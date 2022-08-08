@@ -38,7 +38,7 @@ abstract class ProxmoxService
      */
     public function setNode(Node $node)
     {
-        $this->node = clone $node;
+        $this->node = $node;
 
         return $this;
     }

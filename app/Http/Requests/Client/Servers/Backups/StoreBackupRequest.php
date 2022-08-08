@@ -25,7 +25,7 @@ class StoreBackupRequest extends FormRequest
     {
         return [
             'mode' => 'required|in:snapshot,suspend,stop',
-            'compression' => 'required|in:none,lzo,gzip,zstd',
+            'compressionType' => 'required|in:none,lzo,gzip,zstd',
         ];
     }
 }

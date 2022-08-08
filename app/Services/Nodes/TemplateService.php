@@ -7,10 +7,6 @@ use App\Models\Template;
 use App\Services\ProxmoxService;
 use Webmozart\Assert\Assert;
 
-/**
- * Class SnapshotService
- * @package App\Services\Servers
- */
 class TemplateService extends ProxmoxService
 {
     public function getTemplates(bool $showVisibleOnly = false)

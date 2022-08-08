@@ -66,9 +66,9 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServ
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [BackupController::class, 'index'])->name('servers.show.backups');
-        Route::post('/', [BackupController::class, 'createBackup']);
-        Route::delete('/', [BackupController::class, 'destroyBackup']);
-        Route::post('/rollback', [BackupController::class, 'rollback'])->name('servers.show.backups.rollback');
+        Route::post('/', [BackupController::class, 'store']);
+        Route::delete('/', [BackupController::class, 'destroy']);
+        Route::post('/rollback', [BackupController::class, 'restore'])->name('servers.show.backups.rollback');
     });
 
     /*

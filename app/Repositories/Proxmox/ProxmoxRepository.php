@@ -41,7 +41,7 @@ abstract class ProxmoxRepository
      */
     public function setServer(Server $server): static
     {
-        $this->server = $server;
+        $this->server = clone $server;
 
         $this->setNode($this->server->node);
 

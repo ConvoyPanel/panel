@@ -4,48 +4,44 @@ namespace App\Http\Controllers\Client\Servers;
 
 use App\Http\Controllers\ApplicationApiController;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\SnapshotService;
 use App\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 
 class SnapshotController extends ApplicationApiController
 {
-    public function __construct(private SnapshotService $snapshotService, private CloudinitService $cloudinitService)
+    public function __construct(private ProxmoxSnapshotRepository $repository)
     {
     }
 
     public function index(Server $server)
     {
-        $data = $this->snapshotService->setServer($server)->fetchSnapshots();
-
-        // use code below if clone is not in the line above
-        /* $filteredData = $server->toArray();
-        unset($filteredData['node']); */
-
         return inertia('servers/snapshots/Index', [
             'server' => $server,
-            'snapshots' => $data ? $data['data']: [],
+            'snapshots' => $this->repository->setServer($server)->getSnapshots(),
         ]);
     }
 
+
     public function store(Server $server, SnapshotRequest $request)
     {
-        $this->snapshotService->setServer($server)->doSnapshot($request->name);
+        $this->repository->setServer($server)->create($request->name);
 
-        return $this->returnInertiaResponse($request, 'snapshot-created');
+        return back();
     }
 
     public function destroy(Server $server, SnapshotRequest $request)
     {
-        $this->snapshotService->setServer($server)->deleteSnapshot($request->name);
+        $this->repository->setServer($server)->delete($request->name);
 
-        return $this->returnNoContent();
+        return back();
     }
 
     public function rollback(Server $server, SnapshotRequest $request)
     {
-        $this->snapshotService->setServer($server)->rollbackSnapshot($request->name);
+        $this->repository->setServer($server)->restore($request->name);
 
-        return $this->returnNoContent();
+        return back();
     }
 }

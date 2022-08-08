@@ -7,13 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
 use App\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use App\Services\Servers\BackupService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(private BackupService $backupService)
+    public function __construct(private ProxmoxBackupRepository $repository)
     {
 
     }
@@ -22,22 +23,28 @@ class BackupController extends ApplicationApiController
     {
         return Inertia::render('servers/backups/Index', [
             'server' => $server,
-            'backups' => $this->backupService->setServer($server)->getBackups(),
+            'backups' => $this->repository->setServer($server)->getBackups(),
         ]);
     }
 
-    public function createBackup(Server $server, StoreBackupRequest $request)
+    public function store(Server $server, StoreBackupRequest $request)
     {
-        return $this->returnInertiaResponse($request, 'backup-created', $this->backupService->setServer($server)->createBackup($request->mode, $request->compression));
+        $this->repository->setServer($server)->backup($request->mode, $request->compressionType);
+
+        return back();
     }
 
-    public function rollback(Server $server, RollbackBackupRequest $request)
+    public function restore(Server $server, RollbackBackupRequest $request)
     {
-        return $this->backupService->setServer($server)->rollback($request->archive);
+        $this->repository->setServer($server)->restore($request->archive);
+
+        return back();
     }
 
-    public function destroyBackup(Server $server, RollbackBackupRequest $request)
+    public function destroy(Server $server, RollbackBackupRequest $request)
     {
-        return $this->backupService->setServer($server)->deleteBackup($request->archive);
+        $this->repository->setServer($server)->delete($request->archive);
+
+        return back();
     }
 }

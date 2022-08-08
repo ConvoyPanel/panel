@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Services\Servers\LogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class LogsController extends ApplicationApiController
 {
-    public function __construct(private LogService $logService)
+    public function __construct(private ProxmoxActivityRepository $repository)
     {
 
     }
@@ -25,8 +26,6 @@ class LogsController extends ApplicationApiController
 
     public function getLogs(Server $server)
     {
-        $data = $this->logService->setServer($server)->fetchLogs();
-
-        return $data ? $data : [];
+        return $this->repository->setServer($server)->getLogs();
     }
 }

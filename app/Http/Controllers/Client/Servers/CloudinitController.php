@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client\Servers;
 
 use App\Http\Controllers\ApplicationApiController;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Services\Servers\CloudinitService;
 use App\Http\Requests\Client\Servers\Security\UpdatePasswordRequest;
 use App\Http\Requests\Client\Servers\Settings\UpdateNetworkConfigRequest;
@@ -12,23 +13,24 @@ use App\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
 use App\Enums\Servers\Cloudinit\BiosType;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Yaml\Yaml;
+use Exception;
 
 class CloudinitController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService)
+    public function __construct(private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository)
     {
     }
 
-    public function fetchConfig(Server $server)
+    public function getConfig(Server $server)
     {
-        return $this->returnContent($this->cloudinitService->setServer($server)->fetchConfig());
+        return $this->repository->setServer($server)->getConfig();
     }
 
     public function updatePassword(Server $server, UpdatePasswordRequest $request)
     {
-        $response = $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
-
-        if ($response === null) {
+        try {
+            $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+        } catch (Exception $e) {
             if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
                 throw ValidationException::withMessages([
                     'password' => 'The public key is invalid.'
@@ -40,21 +42,14 @@ class CloudinitController extends ApplicationApiController
             }
         }
 
-        return $this->returnInertiaResponse($request, 'password-updated');
-    }
-
-    public function dumpConfig(Server $server)
-    {
-        $config = $this->cloudinitService->setServer($server)->dumpConfig();
-
-        return Yaml::parse($config);
+        return back();
     }
 
     public function updateBios(Server $server, UpdateBiosTypeRequest $request)
     {
         $this->cloudinitService->setServer($server)->changeBIOS(BiosType::from($request->type));
 
-        return $this->returnInertiaResponse($request, 'bios-updated');
+        return back();
     }
 
     public function updateNetworkConfig(Server $server, UpdateNetworkConfigRequest $request)
@@ -65,6 +60,6 @@ class CloudinitController extends ApplicationApiController
 
         $this->cloudinitService->setServer($server)->changeNameserver(implode(',', $request->nameservers));
 
-        return $this->returnInertiaResponse($request, 'network-config-updated');
+        return back();
     }
 }
