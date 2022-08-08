@@ -50,7 +50,7 @@ class ServerDetailService extends ProxmoxService
             ],
             'limits' => [
                 'cpu' => Arr::get($resources, 'maxcpu'),
-                'memory' => Arr::get($config, 'memory.value'),
+                'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
                 'disk' => Arr::get($resources, 'maxdisk'),
                 'addresses' => [
                     'ipv4' => $this->server->addresses()->where('type', 'ip')->first(['address' ,'cidr', 'gateway'])?->toArray(),
