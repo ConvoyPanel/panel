@@ -23,7 +23,7 @@ const ReinstallSettings = () => {
   const [showModal, setShowModal] = useState(false)
   const [confirmOne, setConfirmOne] = useState('')
   const confirmText = useMemo(() => {
-    return `${settingsContext!.auth.user.name} will lose all data on this server.`
+    return `${settingsContext!.auth.user.name} will lose all data on this server`
   }, [settingsContext])
   const isConfirmed = useMemo(() => {
     return confirmOne === confirmText
