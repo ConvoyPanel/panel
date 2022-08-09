@@ -81,6 +81,7 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
         <td>{address.address}</td>
         <td>/{address.cidr}</td>
         <td>{address.gateway}</td>
+        <td>{address.mac_address}</td>
         <td>{address.type === 'ipv4' ? 'IPv4' : 'IPv6'}</td>
         <td>{address.server_id ? address.server_id : 'Unlinked'}</td>
         <td>
@@ -132,6 +133,7 @@ const Index = ({ auth, node, addresses }: Props) => {
                   <th>Address</th>
                   <th>CIDR</th>
                   <th>Gateway</th>
+                  <th>Mac Address</th>
                   <th>Type</th>
                   <th>Linked Server</th>
                   <th></th>

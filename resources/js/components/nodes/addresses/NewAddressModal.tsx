@@ -20,6 +20,7 @@ export interface FormData {
   address: string
   cidr: string
   gateway: string
+  mac_address?: string
   type: 'ipv4' | 'ipv6'
 }
 
@@ -37,6 +38,7 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
     address: '',
     cidr: '',
     gateway: '',
+    mac_address: '',
     type: 'ipv4',
   })
 
@@ -142,6 +144,15 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             error={errors.gateway}
             required
           />
+          {data.type === 'ipv4' && (
+            <TextInput
+              label='Mac Address'
+              name='mac_address'
+              value={data.mac_address}
+              onChange={onHandleChange}
+              error={errors.mac_address}
+            />
+          )}
         </div>
         <Button
           type='submit'

@@ -54,7 +54,7 @@ class ServerDetailService extends ProxmoxService
                 'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
                 'disk' => Arr::get($resources, 'maxdisk'),
                 'addresses' => [
-                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->first(['address' ,'cidr', 'gateway', 'mac_address'])?->toArray(),
                     'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
                 ]
             ],

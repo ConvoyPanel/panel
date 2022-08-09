@@ -22,7 +22,7 @@ const ServerDetails = () => {
 
   return (
     <div>
-      <h3 className='h3-deemphasized'>Specifications</h3>
+      <h3 className='h3-deemphasized'>Details</h3>
       <Paper shadow='xs' className='p-card mt-3 flex flex-col space-y-3'>
         {status === 'success' && (
           <>
@@ -35,6 +35,9 @@ const ServerDetails = () => {
                 {data.limits.addresses.ipv6 && (
                   <Code>{data.limits.addresses.ipv6?.address}</Code>
                 )}
+                {!data.limits.addresses.ipv6 && !data.limits.addresses.ipv4
+                  ? 'Unavailable'
+                  : ''}
               </dd>
             </dl>
             <dl>

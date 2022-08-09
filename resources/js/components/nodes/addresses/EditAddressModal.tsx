@@ -21,6 +21,7 @@ export interface FormData {
   address: string
   cidr: string
   gateway: string
+  mac_address?: string
   type: string
 }
 
@@ -31,18 +32,14 @@ export interface Props {
   setOpen: (show: boolean) => void
 }
 
-const EditAddressModal = ({
-  node,
-  address,
-  open,
-  setOpen,
-}: Props) => {
+const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
   const { data, setData, put, processing, errors, reset } = useForm<FormData>({
     server_id: address.server_id,
     node_id: node.id,
     address: address.address,
     cidr: address.cidr,
     gateway: address.gateway,
+    mac_address: address.mac_address,
     type: address.type,
   })
 
@@ -50,15 +47,18 @@ const EditAddressModal = ({
     formDataHandler(event, setData)
 
   const handleCreate = async () => {
-    put(route('admin.nodes.show.addresses.show', {
-      node: node.id,
-      address: address.id,
-    }), {
-      onSuccess: () => {
-        reset()
-        setOpen(false)
-      },
-    })
+    put(
+      route('admin.nodes.show.addresses.show', {
+        node: node.id,
+        address: address.id,
+      }),
+      {
+        onSuccess: () => {
+          reset()
+          setOpen(false)
+        },
+      }
+    )
   }
 
   const [servers, setServers] = useState<
@@ -150,6 +150,15 @@ const EditAddressModal = ({
             error={errors.gateway}
             required
           />
+          {data.type === 'ipv4' && (
+            <TextInput
+              label='Mac Address'
+              name='mac_address'
+              value={data.mac_address}
+              onChange={onHandleChange}
+              error={errors.mac_address}
+            />
+          )}
         </div>
         <Button
           type='submit'

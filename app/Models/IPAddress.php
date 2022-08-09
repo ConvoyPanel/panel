@@ -11,7 +11,7 @@ class IPAddress extends Model
 
     protected $table = 'ip_addresses';
 
-    protected $fillable = ['server_id', 'node_id', 'address', 'cidr', 'gateway', 'type'];
+    protected $fillable = ['server_id', 'node_id', 'address', 'cidr', 'gateway', 'mac_address', 'type'];
 
     public function node()
     {

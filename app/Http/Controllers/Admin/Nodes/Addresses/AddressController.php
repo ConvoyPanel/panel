@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Nodes\Addresses;
 
+use App\Enums\Network\AddressType;
 use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
@@ -25,14 +26,24 @@ class AddressController extends ApplicationApiController
 
     public function store(Node $node, StoreAddressRequest $request)
     {
-        IPAddress::create($request->validated());
+        if (AddressType::from($request->type) === AddressType::IPV4)
+        {
+            IPAddress::create($request->validated());
+        } else {
+            IPAddress::create($request->safe()->except(['mac_address']));
+        }
 
         return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
-        $address->update($request->validated());
+        if (AddressType::from($request->type) === AddressType::IPV4)
+        {
+            $address->update($request->validated());
+        } else {
+            $address->update($request->safe()->except(['mac_address']));
+        }
 
         return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }

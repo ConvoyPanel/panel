@@ -99,7 +99,7 @@ class CloudinitService extends ProxmoxService
         {
             $configs = explode(',', $rawConfig);
 
-            Arr::map($configs, function ($value) use (&$config) {
+            Arr::map($configs, function ($value) use (&$config, $data) {
                 $property = explode('=', $value);
 
                 if ($property[0] === 'ip')
@@ -107,6 +107,11 @@ class CloudinitService extends ProxmoxService
                     $cidr = explode('/', $property[1]);
                     $config['ipv4']['address'] = $cidr[0];
                     $config['ipv4']['cidr'] = $cidr[1];
+
+                    $matches = [];
+                    preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($data, 'net0', ''), $matches);
+
+                    $config['ipv4']['mac_address'] = $matches[0] ?? null;
                 }
                 if ($property[0] === 'ip6')
                 {

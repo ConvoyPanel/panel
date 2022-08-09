@@ -73,6 +73,9 @@ class ServerCreationService extends ProxmoxService
                         'cidr' => $address->cidr,
                         'gateway' => $address->gateway,
                     ];
+
+                    if ($type === AddressType::IPV4->value)
+                        $addresses[$type]['mac_address'] = $address->mac_address;
                 });
 
 

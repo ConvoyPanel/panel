@@ -10,6 +10,7 @@ use App\Models\Server;
 use App\Models\Template;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -74,10 +75,12 @@ class ServerController extends Controller
         return redirect()->route('admin.servers.show', [$server->id]);
     }
 
-    public function destroy(Server $server, Request $request)
+    public function destroy(Server $server)
     {
-        if ($request->purge === true) {
+        try {
             $this->installService->setServer($server)->delete();
+        } catch (Exception $e) {
+
         }
 
         $server->delete();
