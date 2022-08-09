@@ -61,7 +61,7 @@ class ServerController extends Controller
                 'disks' => [
                     [
                         'disk' => 'default',
-                        'size' => Arr::get($data, 'disk') / 1048576,
+                        'size' => Arr::get($data, 'disk'),
                     ]
                 ],
                 'template' => Arr::get($data, 'is_template', false),

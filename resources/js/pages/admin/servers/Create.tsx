@@ -67,8 +67,8 @@ const Create = ({ auth }: Props) => {
     is_visible: false,
     addresses: [],
     cpu: 1,
-    memory: 1048576,
-    disk: 1048576,
+    memory: 1073741824,
+    disk: 1073741824,
   })
 
   const dataRef = useRef(data)
@@ -313,17 +313,17 @@ const Create = ({ auth }: Props) => {
                   <NumberInput
                     label='Memory (GB)'
                     name='memory'
-                    value={data.memory / 1048576}
+                    value={data.memory / 1073741824}
                     className='block w-full'
-                    onChange={(e) => setData('memory', e as number * 1048576)}
+                    onChange={(e) => setData('memory', e as number * 1073741824)}
                     error={errors.memory}
                   />
                   <NumberInput
                     label='Disk (GB)'
                     name='disk'
-                    value={data.disk / 1048576}
+                    value={data.disk / 1073741824}
                     className='block w-full'
-                    onChange={(e) => setData('disk', e as number * 1048576)}
+                    onChange={(e) => setData('disk', e as number * 1073741824)}
                     error={errors.disk}
                   />
                 </div>

@@ -49,7 +49,7 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
                 'json' => $params
             ]);
         } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException();
+            throw new ProxmoxConnectionException($e);
         }
 
         return $this->getData($response);

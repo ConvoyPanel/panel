@@ -128,7 +128,9 @@ class InstallService extends ProxmoxService
         {
             // If there's no primary disk, then we don't have to do any resizing. Easy!
             $diff = $this->allocationService->convertToBytes($primaryDisk['size']) - $this->allocationService->convertToBytes($templatePrimaryDisk['size']);
-            $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
+
+            if ($diff > 0)
+                $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
         }
 
         /* 5. Kill the server to guarantee configurations are active */
