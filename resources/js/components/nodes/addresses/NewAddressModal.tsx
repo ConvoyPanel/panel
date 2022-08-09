@@ -20,7 +20,7 @@ export interface FormData {
   address: string
   cidr: string
   gateway: string
-  type: 'ip' | 'ip6'
+  type: 'ipv4' | 'ipv6'
 }
 
 export interface Props {
@@ -37,7 +37,7 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
     address: '',
     cidr: '',
     gateway: '',
-    type: 'ip',
+    type: 'ipv4',
   })
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
@@ -113,8 +113,8 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             //@ts-ignore
             onChange={(value) => setData('type', value)}
           >
-            <Radio label='IPv4' value='ip' />
-            <Radio label='IPv6' value='ip6' />
+            <Radio label='IPv4' value='ipv4' />
+            <Radio label='IPv6' value='ipv6' />
           </RadioGroup>
           <TextInput
             label='IP Address'

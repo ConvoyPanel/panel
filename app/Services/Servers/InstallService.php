@@ -93,6 +93,7 @@ class InstallService extends ProxmoxService
         $this->cloudinitService->setServer($this->server);
         $this->networkService->setServer($this->server);
         $this->powerRepository->setServer($this->server);
+        $this->serverRepository->setServer($this->server);
 
         /* 1. Clone the template */
         $this->serverRepository->create($template->server->vmid);

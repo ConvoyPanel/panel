@@ -2,6 +2,7 @@
 
 namespace App\Services\Servers;
 
+use App\Enums\Network\AddressType;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
@@ -53,8 +54,8 @@ class ServerDetailService extends ProxmoxService
                 'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
                 'disk' => Arr::get($resources, 'maxdisk'),
                 'addresses' => [
-                    'ipv4' => $this->server->addresses()->where('type', 'ip')->first(['address' ,'cidr', 'gateway'])?->toArray(),
-                    'ipv6' => $this->server->addresses()->where('type', 'ip6')->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                    'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
                 ]
             ],
             'configuration' => [

@@ -81,7 +81,7 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
         <td>{address.address}</td>
         <td>/{address.cidr}</td>
         <td>{address.gateway}</td>
-        <td>{address.type === 'ip' ? 'IPv4' : 'IPv6'}</td>
+        <td>{address.type === 'ipv4' ? 'IPv4' : 'IPv6'}</td>
         <td>{address.server_id ? address.server_id : 'Unlinked'}</td>
         <td>
           <EditButton onClick={() => setShowEditModal(true)} />

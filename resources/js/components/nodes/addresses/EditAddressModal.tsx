@@ -122,8 +122,8 @@ const EditAddressModal = ({
             //@ts-ignore
             onChange={(value) => setData('type', value)}
           >
-            <Radio label='IPv4' value='ip' />
-            <Radio label='IPv6' value='ip6' />
+            <Radio label='IPv4' value='ipv4' />
+            <Radio label='IPv6' value='ipv6' />
           </RadioGroup>
           <TextInput
             label='IP Address'
