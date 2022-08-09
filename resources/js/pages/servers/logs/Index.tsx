@@ -1,4 +1,4 @@
-import getLogs, { Logs } from '@/api/server/logs/getLogs'
+import getLogs from '@/api/server/logs/getLogs'
 import { DefaultProps } from '@/api/types/default'
 import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
@@ -17,7 +17,7 @@ interface Props extends DefaultProps {
 }
 
 const Index = ({ auth, server }: Props) => {
-  const { data, status } = useQuery<Logs>(['logs'], async () => {
+  const { data, status } = useQuery(['logs'], async () => {
     const { data } = await getLogs(server.id)
     return data
   })
@@ -52,7 +52,7 @@ const Index = ({ auth, server }: Props) => {
             </thead>
             <tbody>
               {data &&
-                data.data?.map((log) => (
+                data?.map((log) => (
                   <>
                     <tr
                       className={classNames(

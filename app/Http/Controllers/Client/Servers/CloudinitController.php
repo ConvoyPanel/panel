@@ -29,11 +29,16 @@ class CloudinitController extends ApplicationApiController
     public function updatePassword(Server $server, UpdatePasswordRequest $request)
     {
         try {
-            $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+            if (AuthenticationType::from($request->type) === AuthenticationType::KEY)
+            {
+                $this->cloudinitService->setServer($server)->changePassword($request->contents, AuthenticationType::from($request->type));
+            } else {
+                $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+            }
         } catch (Exception $e) {
             if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
                 throw ValidationException::withMessages([
-                    'password' => 'The public key is invalid.'
+                    'contents' => 'The public key is invalid.'
                 ]);
             } else {
                 throw ValidationException::withMessages([

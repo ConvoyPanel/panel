@@ -1,10 +1,5 @@
 import axios from 'axios'
 
-export interface Logs {
-  total: number
-  data?: Log[]
-}
-
 export interface Log {
   pstart: number
   id: string
@@ -19,5 +14,5 @@ export interface Log {
 }
 
 export default (serverId: number) => {
-  return axios.get(route('servers.show.logs.json', serverId))
+  return axios.get<Log[]>(route('servers.show.logs.json', serverId))
 }

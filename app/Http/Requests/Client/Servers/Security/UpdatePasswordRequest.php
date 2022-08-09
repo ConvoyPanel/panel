@@ -25,9 +25,15 @@ class UpdatePasswordRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'type' => [new Enum(AuthenticationType::class), 'required'],
-            'password' => ['required', 'confirmed', 'min:10'],
         ];
+
+        if ($this->request->get('type') === 'sshkeys')
+            $rules['contents'] = ['required_if:type,sshkeys'];
+        if ($this->request->get('type') === 'cipassword')
+            $rules['password'] = ['confirmed', 'min:10', 'required_if:type,cipassword'];
+
+        return $rules;
     }
 }

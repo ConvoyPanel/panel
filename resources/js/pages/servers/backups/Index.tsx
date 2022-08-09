@@ -138,7 +138,7 @@ const Index = ({ auth, server, backups }: Props) => {
 
   const { data, setData, post, processing, errors, reset } = useForm({
     mode: 'snapshot',
-    compression: 'zstd',
+    compressionType: 'zstd',
   })
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
@@ -194,10 +194,10 @@ const Index = ({ auth, server, backups }: Props) => {
               />
               <Select
                 label='Compression'
-                value={data.compression}
-                onChange={(e) => setData('compression', e!)}
+                value={data.compressionType}
+                onChange={(e) => setData('compressionType', e!)}
                 data={compressionTypes}
-                error={errors.compression}
+                error={errors.compressionType}
               />
             </div>
             <Button

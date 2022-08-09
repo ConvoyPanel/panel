@@ -87,7 +87,7 @@ class AllocationService extends ProxmoxService
         if (Arr::exists($specs, 'cpu'))
             $payload['cores'] = Arr::get($specs, 'cpu');
         if (Arr::exists($specs, 'memory'))
-            $payload['memory'] = Arr::get($specs, 'memory');
+            $payload['memory'] = Arr::get($specs, 'memory') / 1048576;
 
         return $this->repository->setServer($this->server)->update($payload);
     }

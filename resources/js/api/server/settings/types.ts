@@ -1,7 +1,8 @@
 export interface CloudinitConfig {
   unused0: string
   memory: number
-  cipassword: string
+  cipassword?: string
+  sshkeys?: string
   ipconfig0: string
   bootdisk: string
   ide2: string
