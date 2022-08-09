@@ -26,17 +26,30 @@ class StoreServerRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'type' => 'in:new,existing|required',
             'name' => 'min:1|max:40',
             'node_id' => 'exists:nodes,id|required',
             'user_id' => 'exists:users,id|required',
             'vmid' => 'numeric|required_if:type,existing',
-            'template_id' => 'exists:templates,id|required_if:type,new',
-            'is_template' => 'boolean|required_if:type,existing',
-            'is_visible' => 'boolean|required_with:is_template',
             'addresses' => 'array|max:2',
             'addresses.*' => 'exists:ip_addresses,id'
         ];
+
+        if ($this->request->get('type') === 'new')
+        {
+            $rules['template_id'] = 'exists:templates,id|required';
+            $rules['cpu'] = 'numeric|min:1|required';
+            $rules['memory'] = 'numeric|min:1|required';
+            $rules['disk'] = 'numeric|min:1|required';
+        }
+
+        if ($this->request->get('type') === 'existing')
+        {
+            $rules['is_template'] = 'boolean|required';
+            $rules['is_visible'] = 'boolean|required_with:is_template';
+        }
+
+        return $rules;
     }
 }

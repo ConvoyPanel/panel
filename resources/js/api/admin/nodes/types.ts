@@ -4,7 +4,6 @@ export interface Node {
     cluster: string
     hostname: string
     port: number
-    auth_type: string
     latency?: number
     last_pinged?: string
     created_at: string

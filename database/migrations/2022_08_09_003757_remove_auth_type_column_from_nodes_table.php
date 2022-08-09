@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            //
+            $table->dropColumn('auth_type');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            //
+            $table->string('auth_type')->after('port');
         });
     }
 };

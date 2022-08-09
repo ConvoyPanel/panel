@@ -50,6 +50,9 @@ interface FormData {
   is_template: boolean
   is_visible: boolean
   addresses: string[]
+  cpu: number
+  memory: number
+  disk: number
 }
 
 const Create = ({ auth }: Props) => {
@@ -63,14 +66,15 @@ const Create = ({ auth }: Props) => {
     is_template: false,
     is_visible: false,
     addresses: [],
+    cpu: 1,
+    memory: 1048576,
+    disk: 1048576,
   })
 
   const dataRef = useRef(data)
   useEffect(() => {
     dataRef.current = data
   }, [data])
-
-  const [deploymentType, setDeploymentType] = useState('new')
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
     formDataHandler(event, setData)
@@ -202,14 +206,10 @@ const Create = ({ auth }: Props) => {
           <Paper shadow='xs' className='p-card w-full space-y-3'>
             <h3 className='h3 '>Configure Server</h3>
             <SegmentedControl
-              value={deploymentType}
-              onChange={(e) => {
-                setDeploymentType(e)
-                setData('type', e)
-              }}
+              value={data.type}
+              onChange={(e) => setData('type', e)}
               data={[
                 { label: 'New', value: 'new' },
-
                 { label: 'Existing', value: 'existing' },
               ]}
             />
@@ -258,52 +258,78 @@ const Create = ({ auth }: Props) => {
                 label='VMID'
                 name='vmid'
                 placeholder={
-                  deploymentType === 'new'
+                  data.type === 'new'
                     ? 'Leave blank to auto-generate'
                     : 'Enter VMID'
                 }
                 value={data.vmid}
-                className='mt-1 block w-full'
+                className='block w-full'
                 onChange={(e) => setData('vmid', e)}
                 error={errors.vmid}
-                required={deploymentType === 'existing'}
+                required={data.type === 'existing'}
               />
 
-              {deploymentType === 'new' && data.node_id ? (
-                <MultiSelect
-                  label='IP Addresses'
-                  value={data.addresses}
-                  onChange={(e) => setData('addresses', e)}
-                  onSearchChange={searchIps}
-                  searchable
-                  styles={{
-                    searchInput: {
-                      boxShadow: 'none !important'
+              {data.type === 'new' && data.node_id ? (
+                <>
+                  <MultiSelect
+                    label='IP Addresses'
+                    value={data.addresses}
+                    onChange={(e) => setData('addresses', e)}
+                    onSearchChange={searchIps}
+                    searchable
+                    styles={{
+                      searchInput: {
+                        boxShadow: 'none !important',
+                      },
+                    }}
+                    data={ips}
+                    error={errors.addresses}
+                  />
+                  <Select
+                    label='Template'
+                    value={data.template_id as unknown as string}
+                    onChange={(e) =>
+                      setData('template_id', parseInt(e as string))
                     }
-                  }}
-                  data={ips}
-                  error={errors.addresses}
-                />
+                    data={templates}
+                    error={errors.template_id}
+                    required
+                  />
+                </>
               ) : (
                 ''
               )}
 
-              {deploymentType === 'new' && data.node_id ? (
-                <Select
-                  label='Template'
-                  value={data.template_id as unknown as string}
-                  onChange={(e) =>
-                    setData('template_id', parseInt(e as string))
-                  }
-                  data={templates}
-                  error={errors.template_id}
-                  required
-                />
-              ) : (
-                ''
+              {data.type === 'new' && (
+                <div className='grid sm:grid-cols-3 sm:gap-3 space-y-3 sm:space-y-0'>
+                  <NumberInput
+                    label='CPU'
+                    name='cpu'
+                    value={data.cpu}
+                    className='block w-full'
+                    onChange={(e) => setData('cpu', e as number)}
+                    error={errors.cpu}
+                  />
+                  <NumberInput
+                    label='Memory (GB)'
+                    name='memory'
+                    value={data.memory / 1048576}
+                    className='block w-full'
+                    onChange={(e) => setData('memory', e as number * 1048576)}
+                    error={errors.memory}
+                  />
+                  <NumberInput
+                    label='Disk (GB)'
+                    name='disk'
+                    value={data.disk / 1048576}
+                    className='block w-full'
+                    onChange={(e) => setData('disk', e as number * 1048576)}
+                    error={errors.disk}
+                  />
+                </div>
               )}
 
-              {deploymentType === 'existing' && (
+              {data.type === 'existing' && (
                 <Checkbox
                   checked={data.is_template}
                   onChange={(e) => setData('is_template', e.target.checked)}
@@ -311,7 +337,7 @@ const Create = ({ auth }: Props) => {
                 />
               )}
 
-              {deploymentType === 'existing' && data.is_template ? (
+              {data.type === 'existing' && data.is_template ? (
                 <Checkbox
                   checked={data.is_visible}
                   onChange={(e) => setData('is_visible', e.target.checked)}

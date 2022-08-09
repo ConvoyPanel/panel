@@ -14,10 +14,9 @@ const BasicSettings = () => {
     name: settingsContext?.node.name,
     cluster: settingsContext?.node.cluster,
     hostname: settingsContext?.node.hostname,
-    username: '',
-    password: '',
+    token_id: '',
+    secret: '',
     port: settingsContext?.node.port,
-    auth_type: settingsContext?.node.auth_type,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -70,21 +69,21 @@ const BasicSettings = () => {
             required
           />
           <TextInput
-            label='Username'
-            name='username'
-            placeholder='New username'
-            value={data.username}
+            label='Token ID'
+            name='token_id'
+            placeholder='New token ID'
+            value={data.token_id}
             onChange={onHandleChange}
-            error={errors.username}
+            error={errors.token_id}
           />
           <TextInput
-            label='Password'
-            name='password'
+            label='Secret'
+            name='secret'
             type='password'
-            placeholder='New password'
-            value={data.password}
+            placeholder='New secret'
+            value={data.secret}
             onChange={onHandleChange}
-            error={errors.password}
+            error={errors.secret}
           />
         </div>
       }

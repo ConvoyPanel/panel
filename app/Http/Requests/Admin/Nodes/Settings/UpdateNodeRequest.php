@@ -30,10 +30,9 @@ class UpdateNodeRequest extends FormRequest
             'name' => 'string|required',
             'cluster' => 'string|required',
             'hostname' => [new Hostname, 'required'],
-            'username' => 'string|nullable',
-            'password' => 'string|nullable',
+            'token_id' => 'string',
+            'secret' => 'string',
             'port' => 'integer|required',
-            'auth_type' => [new Enum(AuthenticationType::class), 'required']
         ];
     }
 }

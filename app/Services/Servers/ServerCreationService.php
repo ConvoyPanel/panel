@@ -2,35 +2,56 @@
 
 namespace App\Services\Servers;
 
+use App\Exceptions\Service\Server\InvalidTemplateException;
 use App\Jobs\Servers\ProcessInstallation;
 use App\Models\IPAddress;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\ProxmoxService;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Class CreationService
+ * Class ServerCreationService
  * @package App\Services\Servers
  */
 class ServerCreationService extends ProxmoxService
 {
-    public function handle(string $type, array $serverData, ?bool $isTemplate = false, ?bool $isTemplateVisible = false)
+    public function handle(array $deployment)
     {
-        if ($type === 'existing') {
-            $server = Server::create($serverData);
+        if(Arr::get($deployment, 'type') === 'existing')
+        {
+            $server = Server::create([
+                'name' => Arr::get($deployment, 'name'),
+                'user_id' => Arr::get($deployment, 'user_id'),
+                'node_id' => Arr::get($deployment, 'node_id'),
+                'vmid' => Arr::get($deployment, 'vmid'),
+            ]);
 
-            if ($isTemplate === true) {
+            if (Arr::get($deployment, 'configuration.template'))
+            {
                 Template::create([
                     'server_id' => $server->id,
-                    'visible' => $isTemplateVisible ? $isTemplateVisible : false
+                    'visible' => Arr::get($deployment, 'configuration.visible', false)
                 ]);
             }
 
             return $server;
         }
 
-        if ($type === 'new') {
+        if(Arr::get($deployment, 'type') === 'new')
+        {
+            $template = Template::findOrFail(Arr::get($deployment, 'template_id'));
+
+            if ($template->server->node->id !== intval(Arr::get($deployment, 'node_id')))
+            {
+                throw new InvalidTemplateException('This template is accessible to the specified node');
+            }
+
+
+        }
+
+        /* if ($type === 'new') {
             // verify template is on the same node as the server being created
             $template = Template::findOrFail($serverData['template_id']);
             if ($template->server->node->id != $serverData['node_id']) {
@@ -78,6 +99,6 @@ class ServerCreationService extends ProxmoxService
             return $server;
         }
 
-        return [];
+        return []; */
     }
 }

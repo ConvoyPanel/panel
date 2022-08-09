@@ -11,6 +11,7 @@ use App\Models\Template;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -41,7 +42,34 @@ class ServerController extends Controller
 
     public function store(StoreServerRequest $request)
     {
-        $server = $this->creationService->handle($request->type, $request->validated(), $request->is_template, $request->is_visible);
+        $data = $request->validated();
+
+        $deployment = [
+            'type' => Arr::get($data, 'type'),
+            'user_id' => Arr::get($data, 'user_id'),
+            'node_id' => Arr::get($data, 'node_id'),
+            'template_id' => Arr::get($data, 'template_id'),
+            'name' => Arr::get($data, 'name'),
+            'vmid' => Arr::get($data, 'vmid'),
+            'limits' => [
+                'cpu' => Arr::get($data, 'cpu'),
+                'memory' => Arr::get($data, 'memory'),
+                'addresses' => Arr::get($data, 'addresses')
+            ],
+            'configuration' => [
+                'boot_order' => ['default'],
+                'disks' => [
+                    [
+                        'disk' => 'default',
+                        'size' => Arr::get($data, 'disk') / 1048576,
+                    ]
+                ],
+                'template' => Arr::get($data, 'is_template', false),
+                'visible' => Arr::get($data, 'is_visible', false),
+            ],
+        ];
+
+        $server = $this->creationService->handle($deployment);
 
         return redirect()->route('admin.servers.show', [$server->id]);
     }

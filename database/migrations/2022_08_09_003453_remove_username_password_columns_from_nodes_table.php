@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            //
+            $table->dropColumn(['username', 'password']);
         });
     }
 
@@ -26,7 +26,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            //
+            $table->string('username')->after('hostname');
+            $table->string('password')->after('username');
         });
     }
 };

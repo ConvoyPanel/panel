@@ -30,10 +30,9 @@ class StoreNodeRequest extends FormRequest
             'name' => 'string|required',
             'cluster' => 'string|required',
             'hostname' => [new Hostname, 'required'],
-            'username' => 'string|required',
-            'password' => 'string|required',
+            'token_id' => 'string|required',
+            'secret' => 'string|required',
             'port' => 'integer|required',
-            'auth_type' => [new Enum(AuthenticationType::class), 'required']
         ];
     }
 }
