@@ -65,8 +65,8 @@ class ServerCreationService extends ProxmoxService
                 'vmid' => Arr::get($deployment, 'vmid') ?? random_int(100, 999999999),
             ]);
 
-            if (Arr::get($deployment, 'limits.addresses'))
-                Arr::map(Arr::get($deployment, 'limits.addresses'), function ($address_id) use ($server) {
+            if (Arr::get($deployment, 'limits.address_ids'))
+                Arr::map(Arr::get($deployment, 'limits.address_ids'), function ($address_id) use ($server) {
                     IPAddress::find($address_id)->update(['server_id' => $server->id]);
                 });
 
