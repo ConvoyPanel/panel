@@ -73,7 +73,7 @@ class NetworkService extends ProxmoxService
             'ipv6' => null,
         ];
 
-            Arr::map($addressIds, function ($address_id) use ($addresses) {
+            Arr::map($addressIds, function ($address_id) use (&$addresses) {
                 $address = IPAddress::find($address_id);
                 $type = AddressType::from($address->type)->value;
 

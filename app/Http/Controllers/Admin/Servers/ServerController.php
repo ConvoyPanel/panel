@@ -55,7 +55,7 @@ class ServerController extends Controller
             'limits' => [
                 'cpu' => Arr::get($data, 'cpu'),
                 'memory' => Arr::get($data, 'memory'),
-                'addresses' => Arr::get($data, 'addresses')
+                'address_ids' => Arr::get($data, 'addresses')
             ],
             'configuration' => [
                 'boot_order' => ['default'],

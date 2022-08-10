@@ -56,9 +56,7 @@ class ServerCreationService extends ProxmoxService
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
 
-            $addresses = $this->networkService->convertFromEloquent(Arr::get($deployment, 'limits.addresses', []));
-
-            dd($addresses);
+            $addresses = $this->networkService->convertFromEloquent(Arr::get($deployment, 'limits.address_ids', []));
 
             $server = Server::create([
                 'name' => Arr::get($deployment, 'name'),
