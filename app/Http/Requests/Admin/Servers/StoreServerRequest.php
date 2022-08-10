@@ -40,7 +40,7 @@ class StoreServerRequest extends FormRequest
         {
             $rules['template_id'] = 'exists:templates,id|required';
             $rules['cpu'] = 'numeric|min:1|required';
-            $rules['memory'] = 'numeric|min:1|required';
+            $rules['memory'] = 'numeric|min:16777216|required';
             $rules['disk'] = 'numeric|min:1|required';
         }
 

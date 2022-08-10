@@ -9,7 +9,9 @@ use App\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use App\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
 use App\Models\IPAddress;
 use App\Models\Node;
+use App\Models\Server;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -26,6 +28,18 @@ class AddressController extends ApplicationApiController
 
     public function store(Node $node, StoreAddressRequest $request)
     {
+        if ($request->server_id)
+        {
+            $existingAddress = Server::find($request->server_id)->addresses()->where('type', AddressType::from($request->type)->value)->first();
+
+            if ($existingAddress !== null && $existingAddress->server_id !== $request->server_id)
+            {
+                throw ValidationException::withMessages([
+                    'server_id' => "This server already has an {$request->type} address."
+                ]);
+            }
+        }
+
         if (AddressType::from($request->type) === AddressType::IPV4)
         {
             IPAddress::create($request->validated());
@@ -38,6 +52,18 @@ class AddressController extends ApplicationApiController
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
+        if ($request->server_id)
+        {
+            $existingAddress = Server::find($request->server_id)->addresses()->where('type', AddressType::from($request->type)->value)->first();
+
+            if ($existingAddress !== null && $existingAddress->server_id === $request->server_id && $existingAddress->id !== $address->id)
+            {
+                throw ValidationException::withMessages([
+                    'server_id' => "This server already has an {$request->type} address."
+                ]);
+            }
+        }
+
         if (AddressType::from($request->type) === AddressType::IPV4)
         {
             $address->update($request->validated());
