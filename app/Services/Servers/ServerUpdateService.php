@@ -76,5 +76,7 @@ class ServerUpdateService extends ProxmoxService
 
         /* 5. Kill the server to guarantee configurations are active */
         $this->powerRepository->send('stop');
+
+        return $this->detailService->getDetails();
     }
 }

@@ -46,8 +46,8 @@ Route::group(['prefix' => '/servers'], function () {
         Route::get('/', [ServerController::class, 'show']);
         Route::post('/', [ServerController::class, 'store']);
         Route::delete('/', [ServerController::class, 'destroy']);
-        Route::get('/specifications', [ServerController::class, 'getSpecifications']);
-        Route::patch('/specifications', [ServerController::class, 'updateSpecifications']);
+        Route::get('/details', [ServerController::class, 'getDetails']);
+        Route::patch('/details', [ServerController::class, 'updateDetails']);
     });
 });
 

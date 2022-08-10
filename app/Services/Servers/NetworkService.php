@@ -2,9 +2,13 @@
 
 namespace App\Services\Servers;
 
+use App\Enums\Network\AddressType;
+use App\Models\IPAddress;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Webmozart\Assert\Assert;
 
 class NetworkService extends ProxmoxService
@@ -52,5 +56,47 @@ class NetworkService extends ProxmoxService
         {
             $this->allocationRepository->lockIp($ipsetName, $address);
         }
+    }
+
+    public function updateMacAddress(string $address)
+    {
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address}"]);
+    }
+
+    /**
+     * @param array<int, int> $addressIds
+     */
+    public function convertFromEloquent(array $addressIds): array
+    {
+        $addresses = [
+            'ipv4' => null,
+            'ipv6' => null,
+        ];
+
+            Arr::map($addressIds, function ($address_id) use ($addresses) {
+                $address = IPAddress::find($address_id);
+                $type = AddressType::from($address->type)->value;
+
+                if (isset($addresses[$type]))
+                    throw ValidationException::withMessages([
+                        'addresses' => 'You cannot set multiple IPv4 or IPv6 addresses'
+                    ]);
+
+                if (isset($address->server_id))
+                    throw ValidationException::withMessages([
+                        'addresses' => 'This address is actively being used',
+                    ]);
+
+                $addresses[$type] = [
+                    'address' => $address->address,
+                    'cidr' => $address->cidr,
+                    'gateway' => $address->gateway,
+                ];
+
+                if ($type === AddressType::IPV4->value)
+                    $addresses[$type]['mac_address'] = $address->mac_address;
+            });
+
+        return $addresses;
     }
 }

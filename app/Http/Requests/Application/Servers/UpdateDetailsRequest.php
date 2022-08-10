@@ -4,7 +4,7 @@ namespace App\Http\Requests\Application\Servers;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateSpecificationsRequest extends FormRequest
+class UpdateDetailsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +24,11 @@ class UpdateSpecificationsRequest extends FormRequest
     public function rules()
     {
         return [
-            'cores' => 'numeric',
-            'memory' => 'numeric',
-            'disks' => 'array',
-            'disks.*.disk' => 'string|required',
-            'disks.*.size' => 'string|required',
-            'ipconfig' => 'string',
-            'lockIps' => 'array',
-            'lockIps.*' => 'ip|required',
+            'limits' => 'sometimes|array|required',
+            'limits.cpu' => 'sometimes|numeric|min:1|required',
+            'limits.memory' => 'sometimes|numeric|min:1|required',
+            'limits.disk' => 'sometimes|numeric|min:1|required',
+            'limits.address_ids' => 'sometimes|numeric|exists:ip_addresses,id|required'
         ];
     }
 }

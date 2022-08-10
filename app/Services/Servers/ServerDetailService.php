@@ -64,7 +64,7 @@ class ServerDetailService extends ProxmoxService
                 'template' => Arr::get($resources, 'template'),
                 'addresses' => $this->cloudinitService->getIpConfig(),
             ],
-            'node' => $this->server->node->cluster,
+            'node_id' => $this->server->node->id,
         ];
 
         return $details;

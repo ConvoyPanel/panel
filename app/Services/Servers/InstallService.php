@@ -24,6 +24,7 @@ class InstallService extends ProxmoxService
     private ProxmoxAllocationRepository $allocationRepository;
     private AllocationService $allocationService;
     private ProxmoxPowerRepository $powerRepository;
+    private ServerUpdateService $updateService;
 
     public function __construct()
     {
@@ -34,6 +35,7 @@ class InstallService extends ProxmoxService
         $this->allocationRepository = new ProxmoxAllocationRepository;
         $this->allocationService = new AllocationService;
         $this->powerRepository = new ProxmoxPowerRepository;
+        $this->updateService = new ServerUpdateService;
     }
 
     public function delete()
@@ -94,6 +96,7 @@ class InstallService extends ProxmoxService
         $this->networkService->setServer($this->server);
         $this->powerRepository->setServer($this->server);
         $this->serverRepository->setServer($this->server);
+        $this->updateService->setServer($this->server);
 
         /* 1. Clone the template */
         $this->serverRepository->create($template->server->vmid);
@@ -107,34 +110,7 @@ class InstallService extends ProxmoxService
             } while (Arr::get($intermissionDetails, 'locked'));
         }
 
-        /* 2. Configure the specifications */
-        $this->allocationService->updateSpecifications([
-            'cpu' => Arr::get($details, 'limits.cpu'),
-            'memory' => Arr::get($details, 'limits.memory'),
-        ]);
-
-        /* 3. Configure the IPs */
-        $this->cloudinitService->updateIpConfig(Arr::get($details, 'limits.addresses'));
-        $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
-
-        /* 4. Configure the disks */
-        $templateDetails = $this->detailService->getDetails();
-
-        // Assume the first entry in the boot disks will be the one to resize. All other disks will be dynamically resized/recreated, but this behavior guarantees that a hosting provider can set the disk size no matter the disk type
-        $primaryDisk = collect(Arr::get($details, 'configuration.disks'))->where('disk', Arr::first(Arr::get($details, 'configuration.boot_order')))->first();
-        $templatePrimaryDisk = collect(Arr::get($templateDetails, 'configuration.disks'))->where('disk', Arr::first(Arr::get($templateDetails, 'configuration.boot_order')))->first();
-
-        if ($primaryDisk !== null && $templatePrimaryDisk !== null)
-        {
-            // If there's no primary disk, then we don't have to do any resizing. Easy!
-            $diff = $this->allocationService->convertToBytes($primaryDisk['size']) - $this->allocationService->convertToBytes($templatePrimaryDisk['size']);
-
-            if ($diff > 0)
-                $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
-        }
-
-        /* 5. Kill the server to guarantee configurations are active */
-        $this->powerRepository->send('stop');
+        $this->updateService->handle($details);
 
         return $this->detailService->getDetails();
     }

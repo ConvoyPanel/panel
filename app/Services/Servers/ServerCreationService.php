@@ -11,6 +11,7 @@ use App\Models\Template;
 use App\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Proxmox\Api\Nodes\Node\Network;
 use Webmozart\Assert\Assert;
 
 /**
@@ -19,6 +20,13 @@ use Webmozart\Assert\Assert;
  */
 class ServerCreationService extends ProxmoxService
 {
+    private NetworkService $networkService;
+
+    public function __construct()
+    {
+        $this->networkService = new NetworkService;
+    }
+
     public function handle(array $deployment)
     {
         Assert::inArray(Arr::get($deployment, 'type'), ['existing', 'new']);
@@ -48,36 +56,9 @@ class ServerCreationService extends ProxmoxService
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
 
-            $addresses = [
-                'ipv4' => null,
-                'ipv6' => null,
-            ];
+            $addresses = $this->networkService->convertFromEloquent(Arr::get($deployment, 'limits.addresses', []));
 
-            if (Arr::get($deployment, 'limits.addresses'))
-                Arr::map(Arr::get($deployment, 'limits.addresses'), function ($address_id) use ($addresses) {
-                    $address = IPAddress::find($address_id);
-                    $type = AddressType::from($address->type)->value;
-
-                    if (isset($addresses[$type]))
-                        throw ValidationException::withMessages([
-                            'addresses' => 'You cannot set multiple IPv4 or IPv6 addresses'
-                        ]);
-
-                    if (isset($address->server_id))
-                        throw ValidationException::withMessages([
-                            'addresses' => 'This address is actively being used',
-                        ]);
-
-                    $addresses[$type] = [
-                        'address' => $address->address,
-                        'cidr' => $address->cidr,
-                        'gateway' => $address->gateway,
-                    ];
-
-                    if ($type === AddressType::IPV4->value)
-                        $addresses[$type]['mac_address'] = $address->mac_address;
-                });
-
+            dd($addresses);
 
             $server = Server::create([
                 'name' => Arr::get($deployment, 'name'),
