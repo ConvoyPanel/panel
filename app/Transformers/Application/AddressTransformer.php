@@ -44,7 +44,7 @@ class AddressTransformer extends TransformerAbstract
 
         if ($address->type === AddressType::IPV4->value)
         {
-            $properties['mac_address'] = 'mac_address|nullable';
+            $properties['mac_address'] = $address->mac_address;
         }
 
         return $properties;
