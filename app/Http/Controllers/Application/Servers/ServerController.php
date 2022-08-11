@@ -12,15 +12,19 @@ use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
 use App\Services\Servers\ResourceService;
+use App\Services\Servers\ServerDetailService;
 use App\Services\Servers\ServerUpdateService;
 use App\Transformers\Application\ServerTransformer;
 use App\Transformers\Application\SpecificationTransformer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Proxmox\Api\Nodes\Node\Network;
 use Spatie\QueryBuilder\QueryBuilder;
+use Exception;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerCreationService $creationService, private ServerUpdateService $updateService)
+    public function __construct(private ServerCreationService $creationService, private NetworkService $networkService, private ServerDetailService $detailService, private ServerUpdateService $updateService, private InstallService $installService)
     {
 
     }
@@ -49,8 +53,13 @@ class ServerController extends ApplicationApiController
 
     public function destroy(Server $server, Request $request)
     {
-        if ($request->purge === true) {
-            $this->installService->setServer($server)->delete();
+        if ($request->no_purge)
+        {
+            try {
+                $this->installService->setServer($server)->delete();
+            } catch (Exception $e) {
+
+            }
         }
 
         $server->delete();
@@ -65,13 +74,34 @@ class ServerController extends ApplicationApiController
         return fractal($server, new ServerTransformer())->respond();
     }
 
-    public function getSpecifications(Server $server)
+    public function getDetails(Server $server)
     {
-        return;
+        return $this->detailService->setServer($server)->getDetails();
     }
 
-    public function updateSpecifications(Server $server, UpdateDetailsRequest $request)
+    public function updateDetails(Server $server, UpdateDetailsRequest $request)
     {
+        $data = $request->validated();
 
+        $deployment = [
+            'limits' => [
+                'cpu' => Arr::get($data, 'limits.cpu'),
+                'memory' => Arr::get($data, 'limits.memory'),
+                'address_ids' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', []))
+            ],
+            'configuration' => [
+                'boot_order' => ['default'],
+                'disks' => [
+                    [
+                        'disk' => 'default',
+                        'size' => Arr::get($data, 'limits.disk'),
+                    ]
+                ],
+            ],
+        ];
+
+        $this->updateService->setServer($server)->handle($deployment);
+
+        return $this->detailService->setServer($server)->getDetails();
     }
 }

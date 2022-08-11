@@ -7,6 +7,7 @@ use App\Models\IPAddress;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Webmozart\Assert\Assert;
@@ -26,8 +27,7 @@ class NetworkService extends ProxmoxService
 
         $addresses = array_column($this->allocationRepository->getLockedIps($name), 'cidr');
 
-        foreach ($addresses as $address)
-        {
+        foreach ($addresses as $address) {
             $this->allocationRepository->unlockIp($name, $address);
         }
 
@@ -40,8 +40,7 @@ class NetworkService extends ProxmoxService
 
         $ipSets = array_column($this->allocationRepository->getIpsets(), 'name');
 
-        foreach ($ipSets as $ipSet)
-        {
+        foreach ($ipSets as $ipSet) {
             $this->deleteIpset($ipSet);
         }
     }
@@ -52,8 +51,7 @@ class NetworkService extends ProxmoxService
 
         $this->allocationRepository->createIpset($ipsetName);
 
-        foreach ($addresses as $address)
-        {
+        foreach ($addresses as $address) {
             $this->allocationRepository->lockIp($ipsetName, $address);
         }
     }
@@ -61,6 +59,18 @@ class NetworkService extends ProxmoxService
     public function updateMacAddress(string $address)
     {
         return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address}"]);
+    }
+
+    public function validateForDuplicates(int $server_id, string $type, int|null $address_id = null)
+    {
+        $existingAddress = Server::find($server_id)->addresses()->where('type', AddressType::from($type)->value)->first();
+
+        if ($existingAddress !== null && $existingAddress->server_id === $server_id && $existingAddress->id !== $address_id)
+        {
+            throw ValidationException::withMessages([
+                'server_id' => "This server already has an {$type} address."
+            ]);
+        }
     }
 
     /**

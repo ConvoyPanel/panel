@@ -75,12 +75,15 @@ class ServerController extends Controller
         return redirect()->route('admin.servers.show', [$server->id]);
     }
 
-    public function destroy(Server $server)
+    public function destroy(Server $server, Request $request)
     {
-        try {
-            $this->installService->setServer($server)->delete();
-        } catch (Exception $e) {
+        if ($request->no_purge)
+        {
+            try {
+                $this->installService->setServer($server)->delete();
+            } catch (Exception $e) {
 
+            }
         }
 
         $server->delete();

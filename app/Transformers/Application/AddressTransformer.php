@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Application;
 
+use App\Enums\Network\AddressType;
 use App\Models\IPAddress;
 use League\Fractal\TransformerAbstract;
 
@@ -32,7 +33,7 @@ class AddressTransformer extends TransformerAbstract
      */
     public function transform(IPAddress $address)
     {
-        return [
+        $properties = [
             'id' => $address->id,
             'address' => $address->address,
             'cidr' => $address->cidr,
@@ -40,5 +41,12 @@ class AddressTransformer extends TransformerAbstract
             'node_id' => $address->node_id,
             'server_id' => $address->server_id,
         ];
+
+        if ($address->type === AddressType::IPV4->value)
+        {
+            $properties['mac_address'] = 'mac_address|nullable';
+        }
+
+        return $properties;
     }
 }

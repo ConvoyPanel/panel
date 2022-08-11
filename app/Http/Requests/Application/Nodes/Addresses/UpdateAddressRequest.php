@@ -34,10 +34,11 @@ class UpdateAddressRequest extends FormRequest
         return [
             'server_id' => 'exists:servers,id|nullable',
             'node_id' => 'required|exists:nodes,id',
+            'type' => [new Enum(AddressType::class), 'required'],
             'address' => 'ip',
             'cidr' => 'numeric|required',
             'gateway' => 'ip',
-            'type' => [new Enum(AddressType::class), 'required'],
+            'mac_address' => 'mac_address|nullable',
         ];
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
 use App\Models\IPAddress;
 use App\Models\Node;
 use App\Models\Server;
+use App\Services\Servers\NetworkService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -18,6 +19,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends ApplicationApiController
 {
+    public function __construct(private NetworkService $service)
+    {
+
+    }
+
     public function index(Node $node)
     {
         return Inertia::render('admin/nodes/addresses/Index', [
@@ -30,14 +36,7 @@ class AddressController extends ApplicationApiController
     {
         if ($request->server_id)
         {
-            $existingAddress = Server::find($request->server_id)->addresses()->where('type', AddressType::from($request->type)->value)->first();
-
-            if ($existingAddress !== null && $existingAddress->server_id !== $request->server_id)
-            {
-                throw ValidationException::withMessages([
-                    'server_id' => "This server already has an {$request->type} address."
-                ]);
-            }
+            $this->service->validateForDuplicates($request->server_id, $request->type);
         }
 
         if (AddressType::from($request->type) === AddressType::IPV4)
@@ -54,14 +53,7 @@ class AddressController extends ApplicationApiController
     {
         if ($request->server_id)
         {
-            $existingAddress = Server::find($request->server_id)->addresses()->where('type', AddressType::from($request->type)->value)->first();
-
-            if ($existingAddress !== null && $existingAddress->server_id === $request->server_id && $existingAddress->id !== $address->id)
-            {
-                throw ValidationException::withMessages([
-                    'server_id' => "This server already has an {$request->type} address."
-                ]);
-            }
+            $this->service->validateForDuplicates($request->server_id, $request->type, $address->id);
         }
 
         if (AddressType::from($request->type) === AddressType::IPV4)
