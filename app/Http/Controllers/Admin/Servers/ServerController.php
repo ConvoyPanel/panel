@@ -77,7 +77,7 @@ class ServerController extends Controller
 
     public function destroy(Server $server, Request $request)
     {
-        if ($request->no_purge)
+        if (empty($request->no_purge))
         {
             try {
                 $this->installService->setServer($server)->delete();
