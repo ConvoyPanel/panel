@@ -38,8 +38,6 @@ class NodeTransformer extends TransformerAbstract
             'cluster' => $node->cluster,
             'hostname' => $node->hostname,
             'port' => (int) $node->port,
-            'auth_type' => $node->auth_type,
-            'latency_in_ms' => $node->latency,
         ];
     }
 }
