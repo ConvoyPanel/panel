@@ -11,6 +11,7 @@ const DeleteSettings = () => {
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const { data, setData, delete: deleteServer, processing, errors } = useForm({
+    'no_purge': false,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -35,6 +36,13 @@ const DeleteSettings = () => {
             <p className='p-desc'>
               Are you sure you want to delete this server? This action cannot be undone.
             </p>
+
+
+            <Checkbox
+              checked={data.no_purge}
+              onChange={(e) => setData('no_purge', e.target.checked)}
+              label='Do not purge virtual machine'
+            />
 
             <Button
               loading={processing}
