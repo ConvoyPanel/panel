@@ -15,8 +15,6 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
 import RoundedButton from '@/components/RoundedButton'
 import { Inertia } from '@inertiajs/inertia'
-import deleteBackup from '@/api/server/backups/deleteBackup'
-import rollbackBackup from '@/api/server/backups/rollbackBackup'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface BackupRowProps {
@@ -27,7 +25,10 @@ interface BackupRowProps {
 const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRollbackModal, setShowRollbackModal] = useState(false)
-  const [processing, setProcessing] = useState(false)
+  const { delete: deleteBackup, processing: processingDelete } = useForm({})
+  const { post: rollbackBackup, processing: processingRollback } = useForm({
+    archive: backup.volid
+  })
 
   const calculateTime = (time: number) => {
     const { hours, minutes, month, day, year } = dateTimeCalculator(time)
@@ -39,30 +40,17 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   const size = formatBytes(backup.size)
 
   const handleDelete = async () => {
-    setProcessing(true)
-    await deleteBackup(backup.volid, serverId)
-    setProcessing(false)
-    setShowDeleteModal(false)
-    Inertia.reload({ only: ['backups'] })
+    deleteBackup(route('servers.show.backups', { archive: backup.volid, server: serverId }), {
+      onSuccess: () => setShowDeleteModal(false)
+    })
   }
 
   const handleRollback = async () => {
-    setProcessing(true)
-    await rollbackBackup(backup.volid, serverId)
-    setProcessing(false)
-    setShowRollbackModal(false)
-    Inertia.reload({ only: ['backups'] })
+    await rollbackBackup(route('servers.show.backups.rollback', serverId), {
+      onSuccess: () => setShowRollbackModal(false)
+    })
+
   }
-
-  /* useEffect(() => {
-    const updateInterval = setInterval(() => {
-      Inertia.reload({ only: ['backups'] })
-    }, 3000)
-
-    return () => {
-      clearInterval(updateInterval)
-    }
-  }, []) */
 
   return (
     <>
@@ -78,7 +66,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
         </p>
 
         <Button
-          loading={processing}
+          loading={processingDelete}
           color='red'
           className='mt-3'
           fullWidth
@@ -100,7 +88,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
         </p>
 
         <Button
-          loading={processing}
+          loading={processingRollback}
           color='primary'
           className='mt-3'
           fullWidth

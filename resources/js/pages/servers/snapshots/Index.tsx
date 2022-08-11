@@ -10,15 +10,12 @@ import {
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/solid'
-import { Head } from '@inertiajs/inertia-react'
+import { Head, useForm } from '@inertiajs/inertia-react'
 import { Button, Modal, Paper, Table, TextInput } from '@mantine/core'
-import { ComponentProps, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import RoundedButton from '@/components/RoundedButton'
-import deleteSnapshot from '@/api/server/snapshots/deleteSnapshot'
 import { Inertia } from '@inertiajs/inertia'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
-import createSnapshot from '@/api/server/snapshots/createSnapshot'
-import rollbackSnapshot from '@/api/server/snapshots/rollbackSnapshot'
 import { ArchiveIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
@@ -32,22 +29,19 @@ interface SnapshotProps {
 const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRollbackModal, setShowRollbackModal] = useState(false)
-  const [processing, setProcessing] = useState(false)
+  const { delete: deleteSnapshot, processing: processingDelete } = useForm({})
+  const { post: rollbackSnapshot, processing: processingRollback } = useForm({})
 
   const handleDelete = async () => {
-    setProcessing(true)
-    await deleteSnapshot(snapshot.name, server.id)
-    setProcessing(false)
-    setShowDeleteModal(false)
-    Inertia.reload({ only: ['snapshots'] })
+    deleteSnapshot(route('servers.show.snapshots', { name: snapshot.name, server: server.id }), {
+      onSuccess: () => setShowDeleteModal(false)
+    })
   }
 
   const handleRollback = async () => {
-    setProcessing(true)
-    await rollbackSnapshot(snapshot.name, server.id)
-    setProcessing(false)
-    setShowRollbackModal(false)
-    Inertia.reload({ only: ['snapshots'] })
+    rollbackSnapshot(route('servers.show.snapshots.rollback', { server: server.id }), {
+      onSuccess: () => setShowRollbackModal(false)
+    })
   }
 
   if (snapshot.snaptime === undefined && snapshot.running !== undefined) {
@@ -74,7 +68,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
         </p>
 
         <Button
-          loading={processing}
+          loading={processingDelete}
           color='red'
           className='mt-3'
           fullWidth
@@ -103,7 +97,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
         </p>
 
         <Button
-          loading={processing}
+          loading={processingRollback}
           color='primary'
           className='mt-3'
           fullWidth
@@ -139,23 +133,14 @@ interface Props extends DefaultProps {
 
 const Index = ({ auth, server, snapshots }: Props) => {
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [processing, setProcessing] = useState(false)
-  const [name, setName] = useState('')
-  const [error, setError] = useState('')
+  const { post, errors, processing, data, setData } = useForm({
+    name: '',
+  })
 
   const handleCreate = async () => {
-    setProcessing(true)
-
-    try {
-      await createSnapshot(name, server.id)
-      setName('')
-      setShowCreateModal(false)
-      Inertia.reload({ only: ['snapshots'] })
-    } catch (error: any) {
-      setError(error.response.data.message)
-    }
-
-    setProcessing(false)
+      await post(route('servers.show.snapshots', { server: server.id }), {
+        onSuccess: () => setShowCreateModal(false),
+      })
   }
 
   const currentSnapshot = useMemo(() => {
@@ -188,14 +173,14 @@ const Index = ({ auth, server, snapshots }: Props) => {
             <TextInput
               label='Name'
               name='name'
-              value={name}
+              value={data.name}
               styles={{
                 required: { display: 'none' },
               }}
               className='block w-full'
               autoFocus
-              onChange={(e) => setName(e.target.value.replace(/\s+/g, '-'))}
-              error={error}
+              onChange={(e) => setData('name', e.target.value.replace(/\s+/g, '-'))}
+              error={errors.name}
               required
             />
             <Button
