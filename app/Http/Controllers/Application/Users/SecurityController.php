@@ -17,8 +17,6 @@ class SecurityController extends ApplicationApiController
             'token' => hash('sha256', Str::random(50))
         ]);
 
-        return $this->returnContent([
-            'data' => $SSOToken->token,
-        ]);
+        return $SSOToken->toArray();
     }
 }
