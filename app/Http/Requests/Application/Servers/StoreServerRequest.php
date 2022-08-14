@@ -34,11 +34,11 @@ class StoreServerRequest extends FormRequest
         {
             $rules['template_id'] = 'exists:templates,id|required';
             $rules['vmid'] = 'sometimes|numeric|min:100|max:999999999|required';
-            $rules['limits'] = 'sometimes|array|required';
-            $rules['limits.cpu'] = 'sometimes|numeric|min:1|required';
-            $rules['limits.memory'] = 'sometimes|numeric|min:16777216|required';
-            $rules['limits.disk'] = 'sometimes|numeric|min:1|required';
-            $rules['limits.address_ids'] = 'sometimes|numeric|exists:ip_addresses,id|required';
+            $rules['limits'] = 'array|required';
+            $rules['limits.cpu'] = 'numeric|min:1|required';
+            $rules['limits.memory'] = 'numeric|min:16777216|required';
+            $rules['limits.disk'] = 'numeric|min:1|required';
+            $rules['limits.address_ids'] = 'numeric|exists:ip_addresses,id|required';
         }
 
         if ($this->request->get('type') === 'existing')
