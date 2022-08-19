@@ -8,6 +8,7 @@ use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\ProxmoxService;
+use Exception;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -71,6 +72,17 @@ class InstallService extends ProxmoxService
 
         /* 3. Delete the server */
         $this->serverRepository->delete();
+
+        // Wait for server to fully delete
+        $deletionStatus = false;
+
+        do {
+            try {
+                $this->serverRepository->getStatus(); // if it errors, this indicates the server doesn't exist
+            } catch (Exception $e) {
+                $deletionStatus = true;
+            }
+        } while (!$deletionStatus);
 
         /* 4. Return the server details */
         return $details;
