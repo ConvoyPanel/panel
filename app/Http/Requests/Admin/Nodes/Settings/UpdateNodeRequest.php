@@ -30,8 +30,8 @@ class UpdateNodeRequest extends FormRequest
             'name' => 'string|required',
             'cluster' => 'string|required',
             'hostname' => [new Hostname, 'required'],
-            'token_id' => 'string',
-            'secret' => 'string',
+            'token_id' => 'string|nullable',
+            'secret' => 'string|nullable',
             'port' => 'integer|required',
         ];
     }
