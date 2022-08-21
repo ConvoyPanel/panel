@@ -10,11 +10,13 @@ use App\Models\Server;
 use App\Models\Template;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
+use App\Transformers\Application\ServerTransformer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends Controller
 {
@@ -93,6 +95,12 @@ class ServerController extends Controller
 
     public function search(Request $request)
     {
-        return Server::search($request->search)->get()->load(['node:id,name']);
+        $servers = QueryBuilder::for(Server::query())
+            ->allowedFilters(['name', 'user_id', 'node_id', 'vmid', 'installing'])
+            ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
+            ->allowedIncludes(['node'])
+            ->paginate($request->query('per_page') ?? 50);
+
+        return fractal($servers, new ServerTransformer())->respond();
     }
 }

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin\Users;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Models\User;
+use App\Transformers\Application\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
 {
@@ -46,6 +48,11 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        return User::search($request->search)->get();
+        $users = QueryBuilder::for(User::query())
+            ->allowedFilters(['name', 'email', 'root_admin'])
+            ->allowedSorts(['id'])
+            ->paginate($request->query('per_page') ?? 50);
+
+        return fractal($users, new UserTransformer())->respond();
     }
 }

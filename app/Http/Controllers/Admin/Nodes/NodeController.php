@@ -6,8 +6,10 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Models\Node;
+use App\Transformers\Application\NodeTransformer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class NodeController extends ApplicationApiController
 {
@@ -37,7 +39,12 @@ class NodeController extends ApplicationApiController
 
     public function search(Request $request)
     {
-        return Node::search($request->search)->get();
+        $nodes = QueryBuilder::for(Node::query())
+            ->allowedFilters(['name', 'cluster', 'hostname', 'port'])
+            ->allowedSorts(['id'])
+            ->paginate($request->query('per_page') ?? 50);
+
+        return fractal($nodes, new NodeTransformer())->respond();
     }
 
     public function update(Node $node, UpdateNodeRequest $request)

@@ -25,7 +25,7 @@ class Node extends Model
 //    ];
 
     protected $hidden = [
-        'username', 'password',
+        'token_id', 'secret'
     ];
 
     public function servers()
