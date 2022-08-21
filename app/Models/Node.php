@@ -12,7 +12,7 @@ class Node extends Model
     use HasFactory, Searchable;
 
     protected $fillable = [
-        'name', 'hostname', 'token_id', 'secret', 'port'
+        'name', 'cluster', 'hostname', 'token_id', 'secret', 'port'
     ];
 
 //    public $validationRules = [
