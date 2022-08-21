@@ -11,7 +11,9 @@ export interface Server extends DefaultServer {
 export default (search: string) => {
   return axios.get<Server[]>(
     route('admin.servers.search', {
-      search,
+      params: {
+        'filter[*]': search,
+      },
     })
   )
 }

@@ -114,13 +114,15 @@ class InstallService extends ProxmoxService
         $this->serverRepository->create($template->server->vmid);
 
         // Wait until cloning is complete
-        $intermissionDetails = $this->detailService->getDetails();
+        $intermissionDetails = null;
 
-        if (Arr::get($intermissionDetails, 'locked')) {
-            do {
+        do {
+            try {
                 $intermissionDetails = $this->detailService->getDetails();
-            } while (Arr::get($intermissionDetails, 'locked'));
-        }
+            } catch (Exception $e) {
+                $intermissionDetails = null;
+            }
+        } while (empty($intermissionDetails) || Arr::get($intermissionDetails, 'locked'));
 
         $this->updateService->handle($details);
 

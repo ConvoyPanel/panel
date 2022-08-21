@@ -4,7 +4,9 @@ import axios from 'axios'
 export default (search: string) => {
   return axios.get<Node[]>(
     route('admin.nodes.search', {
-      search,
+      params: {
+        'filter[*]' : search,
+      }
     })
   )
 }

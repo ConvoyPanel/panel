@@ -21,7 +21,7 @@ class ProcessReinstallation implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 420;
+    public $timeout = 1000;
 
     /**
      * The number of times the job may be attempted.

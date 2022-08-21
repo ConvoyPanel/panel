@@ -4,7 +4,9 @@ import axios from 'axios'
 export default (search: string) => {
   return axios.get<User[]>(
     route('admin.users.search', {
-      search,
+      params: {
+        'filter[*]' : search,
+      }
     })
   )
 }
