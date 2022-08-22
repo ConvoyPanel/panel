@@ -15,3 +15,22 @@ export interface AuthInterface {
 export interface DefaultProps {
   auth: AuthInterface
 }
+
+export interface LinkInterface {
+  back?: string
+  next?: string
+}
+
+export interface PaginationInterface {
+  total: number
+  count: number
+  per_page: number
+  current_page: number
+  total_pages: number
+  links: LinkInterface
+}
+
+export interface PaginatedInterface<T> {
+  data: T
+  meta: PaginationInterface
+}

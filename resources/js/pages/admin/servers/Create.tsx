@@ -35,7 +35,7 @@ import getSearchNodes from '@/api/admin/nodes/searchNodes'
 import SelectItem from '@/components/SelectItem'
 import getSearchUsers from '@/api/admin/users/searchUsers'
 import { useQuery } from '@tanstack/react-query'
-import getTemplates from '@/api/server/settings/getTemplates'
+import getTemplates from '@/api/admin/nodes/templates/getTemplates'
 import getSearchAddresses from '@/api/admin/nodes/addresses/searchAddresses'
 
 interface Props extends DefaultProps {}
@@ -94,7 +94,7 @@ const Create = ({ auth }: Props) => {
 
   const searchNodes = useCallback(
     debounce(async (query: string) => {
-      const { data } = await getSearchNodes(query)
+      const { data: { data } } = await getSearchNodes(query)
       setNodes(
         data.map((node) => {
           return {
@@ -118,7 +118,7 @@ const Create = ({ auth }: Props) => {
 
   const searchUsers = useCallback(
     debounce(async (query: string) => {
-      const { data } = await getSearchUsers(query)
+      const { data: { data } } = await getSearchUsers(query)
       setUsers(
         data.map((user) => {
           return {
@@ -141,13 +141,13 @@ const Create = ({ auth }: Props) => {
 
   const searchIps = useCallback(
     debounce(async (query: string) => {
-      const { data: res } = await getSearchAddresses(
+      const { data: { data } } = await getSearchAddresses(
         query,
         dataRef.current.node_id as number,
         true
       )
       setIps(
-        res.map((ip) => {
+        data.map((ip) => {
           return {
             label: ip.address,
             value: ip.id.toString(),

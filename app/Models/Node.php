@@ -5,11 +5,10 @@ namespace App\Models;
 use App\Rules\Network\Hostname;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 
 class Node extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory;
 
     protected $fillable = [
         'name', 'cluster', 'hostname', 'token_id', 'secret', 'port'
@@ -36,12 +35,5 @@ class Node extends Model
     public function addresses()
     {
         return $this->hasMany(IPAddress::class);
-    }
-
-    public function toSearchableArray()
-    {
-        return [
-            'name' => $this->name
-        ];
     }
 }

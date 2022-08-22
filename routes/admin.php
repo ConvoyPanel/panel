@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Users\UserController;
 use App\Http\Controllers\Admin\Servers\Settings;
 use App\Http\Controllers\Admin\Users;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Templates\TemplateController;
 
 Route::get('/', [IndexController::class, 'index'])->name('admin.dashboard');
 
@@ -30,6 +31,11 @@ Route::prefix('/nodes')->group(function () {
     Route::prefix('/{node}')->group(function () {
         Route::get('/', [NodeController::class, 'show'])->name('admin.nodes.show');
         Route::delete('/', [NodeController::class, 'destroy']);
+
+        Route::prefix('/templates')->group(function () {
+            Route::get('/', [TemplateController::class, 'index'])->name('admin.nodes.show.templates');
+            Route::get('/{template}', [TemplateController::class, 'show'])->name('admin.nodes.show.templates.show');
+        });
 
         Route::prefix('/addresses')->group(function () {
             Route::get('/', [AddressController::class, 'index'])->name('admin.nodes.show.addresses');

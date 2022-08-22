@@ -80,9 +80,9 @@ class AddressController extends ApplicationApiController
 
         if ($request->show_available_ips)
         {
-            return $builder->where('server_id', null)->get();
+            $builder = $builder->where('server_id', null);
         }
 
-        return $builder->get();
+        return $builder->paginate($request->query('per_page') ?? 50);
     }
 }

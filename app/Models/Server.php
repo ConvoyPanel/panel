@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 
 class Server extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
@@ -36,12 +35,5 @@ class Server extends Model
     public function template()
     {
         return $this->hasOne(Template::class);
-    }
-
-    public function toSearchableArray()
-    {
-        return [
-            'name' => $this->name
-        ];
     }
 }

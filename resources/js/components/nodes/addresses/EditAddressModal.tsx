@@ -71,7 +71,7 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
 
   const searchServers = useCallback(
     debounce(async (query: string) => {
-      const { data } = await getSearchServers(query)
+      const { data: { data } } = await getSearchServers(query)
       setServers(
         data.map((server) => {
           return {

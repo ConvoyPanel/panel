@@ -52,7 +52,7 @@ const BasicSettings = () => {
 
   const searchNodes = useCallback(
     debounce(async (query: string) => {
-      const { data } = await getSearchNodes(query)
+      const { data: { data } } = await getSearchNodes(query)
       setNodes(
         data.map((node) => {
           return {
@@ -76,7 +76,7 @@ const BasicSettings = () => {
 
   const searchUsers = useCallback(
     debounce(async (query: string) => {
-      const { data } = await getSearchUsers(query)
+      const { data: { data } } = await getSearchUsers(query)
       setUsers(
         data.map((user) => {
           return {
