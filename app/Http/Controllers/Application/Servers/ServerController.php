@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Application\Servers;
 
 use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Application\Servers\StoreServerRequest;
 use App\Http\Requests\Application\Servers\UpdateServerRequest;
 use App\Http\Requests\Application\Servers\UpdateDetailsRequest;
@@ -11,14 +10,11 @@ use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
-use App\Services\Servers\ResourceService;
 use App\Services\Servers\ServerDetailService;
 use App\Services\Servers\ServerUpdateService;
 use App\Transformers\Application\ServerTransformer;
-use App\Transformers\Application\SpecificationTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Proxmox\Api\Nodes\Node\Network;
 use Spatie\QueryBuilder\QueryBuilder;
 use Exception;
 

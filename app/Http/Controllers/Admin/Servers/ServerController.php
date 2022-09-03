@@ -4,17 +4,13 @@ namespace App\Http\Controllers\Admin\Servers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
-use App\Jobs\Servers\ProcessInstallation;
-use App\Models\IPAddress;
 use App\Models\Server;
-use App\Models\Template;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
 use App\Transformers\Application\ServerTransformer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -29,6 +25,8 @@ class ServerController extends Controller
         return Inertia::render('admin/servers/Index', [
             'servers' => Server::with(['template', 'owner:id,name,email', 'node:id,name'])->get(),
         ]);
+
+
     }
 
     public function show(Server $server)
