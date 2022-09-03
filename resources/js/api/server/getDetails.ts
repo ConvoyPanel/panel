@@ -5,7 +5,6 @@ import axios from 'axios'
 export interface Disk {
   disk: string
   size: string
-  pending: boolean
 }
 
 export interface Details {
