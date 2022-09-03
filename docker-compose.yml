@@ -8,13 +8,17 @@ services:
       - 80:80
       - 443:443
   php:
-    build: ./dockerfiles/php
+    build:
+      context: ./dockerfiles/php
+      args:
+        - WITH_XDEBUG=$DEV_XDEBUG
     restart: unless-stopped
     volumes:
       # - ./dockerfiles/php-fpm/php.ini:/usr/local/etc/php/php.ini
        - .:/var/www/html/
     expose:
       - 9000
+    env_file: .env
   workspace:
     build: ./dockerfiles/workspace
     tty: true
