@@ -3,6 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Enums\Network\AddressType;
+use App\Models\Objects\Server\ServerDetailsObject;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
@@ -67,6 +68,8 @@ class ServerDetailService extends ProxmoxService
             'node_id' => $this->server->node->id,
         ];
 
-        return $details;
+        $data = ServerDetailsObject::from($details);
+
+        return $data;
     }
 }
