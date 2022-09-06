@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import Authenticated from '@/components/layouts/Authenticated'
 import { Head } from '@inertiajs/inertia-react'
-import { DefaultProps } from '@/api/types/default'
+import { DefaultProps, PaginatedInterface } from '@/api/types/default'
 import Main from '@/components/Main'
 import { Paper, Table } from '@mantine/core'
 import { Button } from '@mantine/core'
@@ -27,7 +27,7 @@ interface Server extends DefaultServer {
 }
 
 interface Props extends DefaultProps {
-  servers: Server[]
+  servers: PaginatedInterface<Server[]>
 }
 
 export default function Index({ auth, servers }: Props) {
@@ -59,7 +59,7 @@ export default function Index({ auth, servers }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {servers.map((server) => (
+                {servers.data.map((server) => (
                   <tr key={server.id}>
                     <td>{server.name}</td>
                     <td>{server.vmid}</td>
@@ -92,7 +92,7 @@ export default function Index({ auth, servers }: Props) {
             </Table>
           </div>
 
-          {servers.length === 0 && (
+          {servers.meta.total === 0 && (
             <EmptyState
               icon={ServerIcon}
               title='No Servers'

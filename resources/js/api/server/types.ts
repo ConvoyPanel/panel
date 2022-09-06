@@ -5,6 +5,7 @@ export interface Server {
     vmid: number
     name: string
     description?: string
+    installing: boolean
     updated_at: string
     created_at: string
 }

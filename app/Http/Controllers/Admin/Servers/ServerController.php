@@ -8,6 +8,7 @@ use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
+use App\Transformers\Admin\ServerTransformer as AdminServerTransformer;
 use App\Transformers\Application\ServerTransformer;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,13 +22,12 @@ class ServerController extends Controller
     {
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $servers = Server::with(['template', 'owner:id,name,email', 'node:id,name'])->paginate($request->query('per_page') ?? 50);
         return Inertia::render('admin/servers/Index', [
-            'servers' => Server::with(['template', 'owner:id,name,email', 'node:id,name'])->get(),
+            'servers' => fractal($servers, new AdminServerTransformer())->toArray(),
         ]);
-
-
     }
 
     public function show(Server $server)
