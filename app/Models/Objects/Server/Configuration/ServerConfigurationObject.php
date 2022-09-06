@@ -10,7 +10,8 @@ class ServerConfigurationObject extends Data
     public function __construct(
         public array|Optional $boot_order,
         public array|Optional $disks,
-        public bool $template,
-        public AddressConfigurationObject $addresses,
+        public bool|Optional $template,
+        public AddressConfigurationObject|Optional $addresses,
+        public bool|Optional $visible,
     ){}
 }

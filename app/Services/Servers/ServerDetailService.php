@@ -3,12 +3,14 @@
 namespace App\Services\Servers;
 
 use App\Enums\Network\AddressType;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Models\Objects\Server\ServerDetailsObject;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
 use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Support\Arr;
+use Spatie\LaravelData\Optional;
 use Webmozart\Assert\Assert;
 
 class ServerDetailService extends ProxmoxService
@@ -24,6 +26,10 @@ class ServerDetailService extends ProxmoxService
         $this->cloudinitService  = new CloudinitService;
     }
 
+    /**
+     * @return ServerDetailsObject
+     * @throws ProxmoxConnectionException
+     */
     public function getDetails()
     {
         Assert::isInstanceOf($this->server, Server::class);
@@ -68,8 +74,6 @@ class ServerDetailService extends ProxmoxService
             'node_id' => $this->server->node->id,
         ];
 
-        $data = ServerDetailsObject::from($details);
-
-        return $data;
+        return ServerDetailsObject::from($details);
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\Network\AddressType;
 use App\Exceptions\Service\Server\InvalidTemplateException;
 use App\Jobs\Servers\ProcessInstallation;
 use App\Models\IPAddress;
+use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\ProxmoxService;
@@ -27,7 +28,7 @@ class ServerCreationService extends ProxmoxService
         $this->networkService = new NetworkService;
     }
 
-    public function handle(array $deployment)
+    public function handle(ServerDeploymentObject $deployment)
     {
         Assert::inArray(Arr::get($deployment, 'type'), ['existing', 'new']);
 

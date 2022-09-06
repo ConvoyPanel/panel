@@ -6,6 +6,8 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Requests\Application\Servers\StoreServerRequest;
 use App\Http\Requests\Application\Servers\UpdateServerRequest;
 use App\Http\Requests\Application\Servers\UpdateDetailsRequest;
+use App\Models\Objects\Server\ServerDeploymentObject;
+use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
@@ -64,7 +66,7 @@ class ServerController extends ApplicationApiController
             ],
         ];
 
-        $server = $this->creationService->handle($deployment);
+        $server = $this->creationService->handle(ServerDeploymentObject::from($deployment));
 
         return fractal($server, new ServerTransformer())->respond();
     }
@@ -124,7 +126,7 @@ class ServerController extends ApplicationApiController
             ],
         ];
 
-        $this->updateService->setServer($server)->handle($deployment);
+        $this->updateService->setServer($server)->handle(ServerSpecificationsObject::from($deployment));
 
         return $this->detailService->setServer($server)->getDetails();
     }

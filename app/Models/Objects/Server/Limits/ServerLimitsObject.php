@@ -8,8 +8,8 @@ use Spatie\LaravelData\Optional;
 class ServerLimitsObject extends Data
 {
     public function __construct(
-        public int $cpu,
-        public int $memory,
+        public int|Optional $cpu,
+        public int|Optional $memory,
         public array|Optional $address_ids,
         public int|Optional $disk,
         public AddressLimitsObject|Optional $addresses,

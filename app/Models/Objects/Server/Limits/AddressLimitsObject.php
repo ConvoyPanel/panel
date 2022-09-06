@@ -9,8 +9,8 @@ use Spatie\LaravelData\Optional;
 class AddressLimitsObject extends Data
 {
     public function __construct(
-        public AddressObject|Optional $ipv4,
-        public AddressObject|Optional $ipv6,
+        public AddressObject|null $ipv4,
+        public AddressObject|null $ipv6,
     ) {
     }
 }

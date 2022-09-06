@@ -2,6 +2,8 @@
 
 namespace App\Services\Servers;
 
+use App\Models\Objects\Server\ServerDeploymentObject;
+use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
 use App\Models\Template;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
@@ -88,7 +90,7 @@ class InstallService extends ProxmoxService
         return $details;
     }
 
-    public function install(Template $template, array $details)
+    public function install(Template $template, ServerDeploymentObject $details)
     {
         /*
          * Procedure
@@ -122,9 +124,9 @@ class InstallService extends ProxmoxService
             } catch (Exception $e) {
                 $intermissionDetails = null;
             }
-        } while (empty($intermissionDetails) || Arr::get($intermissionDetails, 'locked'));
+        } while (empty($intermissionDetails) || $intermissionDetails->locked);
 
-        $this->updateService->handle($details);
+        $this->updateService->handle(ServerSpecificationsObject::from($details->toArray()));
 
         return $this->detailService->getDetails();
     }
@@ -135,7 +137,7 @@ class InstallService extends ProxmoxService
 
         $details = $this->delete();
 
-        return $this->install($template, $details);
+        return $this->install($template, ServerDeploymentObject::from($details->toArray()));
     }
 
     public function convertToBytes(string $from): ?int
