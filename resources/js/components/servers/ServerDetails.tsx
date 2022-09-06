@@ -8,7 +8,7 @@ import { formatBytes } from '@/api/server/getStatus'
 const ServerDetails = () => {
   const serverContext = useContext(ServerContext)
 
-  const { data, status } = useQuery(['details'], async () => {
+  const { data, status } = useQuery([`details-${serverContext!.server.id}`], async () => {
     const { data } = await getResources(serverContext!.server.id)
     return data
   })

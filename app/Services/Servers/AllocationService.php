@@ -43,7 +43,7 @@ class AllocationService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
 
         $disks = array_values(array_filter($this->repository->setServer($this->server)->getAllocations(), function ($disk) {
-            if (str_contains($disk['value'], 'media'))
+            if (str_contains(Arr::get($disk, 'value'), 'media'))
                 return false;
 
             return in_array($disk['key'], $this->repository->validDisks);
