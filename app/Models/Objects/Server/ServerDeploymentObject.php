@@ -10,12 +10,12 @@ use Spatie\LaravelData\Optional;
 class ServerDeploymentObject extends Data
 {
     public function __construct(
-        public string|Optional $type,
-        public int|Optional $user_id,
-        public int|Optional $node_id,
-        public int|Optional $template_id,
-        public string|Optional $name,
-        public int|Optional $vmid,
+        public string|null $type,
+        public int|null $user_id,
+        public int|null $node_id,
+        public int|null $template_id,
+        public string|null $name,
+        public int|null $vmid,
         public ServerLimitsObject $limits,
         public ServerConfigurationObject $configuration,
     ) {

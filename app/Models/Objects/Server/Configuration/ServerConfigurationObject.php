@@ -8,10 +8,10 @@ use Spatie\LaravelData\Optional;
 class ServerConfigurationObject extends Data
 {
     public function __construct(
-        public array|Optional $boot_order,
-        public array|Optional $disks,
-        public bool|Optional $template,
-        public AddressConfigurationObject|Optional $addresses,
-        public bool|Optional $visible,
+        public array|null $boot_order,
+        public array|null $disks,
+        public bool|null $template,
+        public AddressConfigurationObject|null $addresses,
+        public bool|null $visible,
     ){}
 }

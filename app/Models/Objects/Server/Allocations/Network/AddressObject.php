@@ -11,7 +11,7 @@ class AddressObject extends Data
         public string $address,
         public int $cidr,
         public string $gateway,
-        public string|Optional $mac_address,
+        public string|null $mac_address,
     ) {
     }
 }
