@@ -3,21 +3,13 @@
 namespace App\Http\Controllers\Client\Servers;
 
 use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Models\Server;
-use Illuminate\Http\Request;
-use App\Services\Servers\CloudinitService;
 use Inertia\Inertia;
 use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
 use App\Jobs\Servers\ProcessReinstallation;
-use App\Models\Node;
-use App\Models\Template;
 use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Services\Nodes\TemplateService;
-use App\Services\Servers\InstallService;
-use App\Services\Servers\VncService;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SettingsController extends ApplicationApiController
 {
