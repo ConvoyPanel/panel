@@ -31,7 +31,7 @@ export interface Details {
       ipv6?: Pick<Address, 'cidr' | 'gateway' | 'address'>
     }
   }
-  configuration: {
+  config: {
     boot_order: string[]
     disks: Disk[]
     template: boolean

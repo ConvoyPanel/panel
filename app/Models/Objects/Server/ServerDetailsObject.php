@@ -2,7 +2,7 @@
 
 namespace App\Models\Objects\Server;
 
-use App\Models\Objects\Server\Configuration\ServerConfigurationObject;
+use App\Models\Objects\Server\Configuration\ServerConfigObject;
 use App\Models\Objects\Server\Limits\ServerLimitsObject;
 use App\Models\Objects\Server\Usage\ServerUsageObject;
 use Spatie\LaravelData\Data;
@@ -17,7 +17,7 @@ class ServerDetailsObject extends Data
         public bool $locked,
         public ServerUsageObject $usage,
         public ServerLimitsObject $limits,
-        public ServerConfigurationObject $configuration,
+        public ServerConfigObject $config,
     ) {
     }
 }

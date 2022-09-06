@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Servers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
+use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\InstallService;
@@ -57,7 +58,7 @@ class ServerController extends Controller
                 'memory' => Arr::get($data, 'memory'),
                 'address_ids' => Arr::get($data, 'addresses')
             ],
-            'configuration' => [
+            'config' => [
                 'boot_order' => ['default'],
                 'disks' => [
                     [
@@ -70,7 +71,7 @@ class ServerController extends Controller
             ],
         ];
 
-        $server = $this->creationService->handle($deployment);
+        $server = $this->creationService->handle(ServerDeploymentObject::from($deployment));
 
         return redirect()->route('admin.servers.show', [$server->id]);
     }

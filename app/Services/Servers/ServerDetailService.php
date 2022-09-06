@@ -65,7 +65,7 @@ class ServerDetailService extends ProxmoxService
                     'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
                 ]
             ],
-            'configuration' => [
+            'config' => [
                 'boot_order' => $this->allocationService->getBootOrder(),
                 'disks' => $this->allocationService->getDisks(),
                 'template' => Arr::get($resources, 'template'),

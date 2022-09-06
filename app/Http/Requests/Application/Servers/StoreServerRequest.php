@@ -43,8 +43,8 @@ class StoreServerRequest extends FormRequest
 
         if ($this->request->get('type') === 'existing')
         {
-            $rules['configuration.template'] = 'sometimes|boolean';
-            $rules['configuration.visible'] = 'sometimes|boolean';
+            $rules['config.template'] = 'sometimes|boolean';
+            $rules['config.visible'] = 'sometimes|boolean';
             $rules['vmid'] = 'numeric|min:100|max:999999999|required';
         }
 

@@ -53,7 +53,7 @@ class ServerController extends ApplicationApiController
                 'memory' => Arr::get($data, 'limits.memory'),
                 'address_ids' => Arr::get($data, 'limits.address_ids')
             ],
-            'configuration' => [
+            'config' => [
                 'boot_order' => ['default'],
                 'disks' => [
                     [
@@ -61,8 +61,8 @@ class ServerController extends ApplicationApiController
                         'size' => Arr::get($data, 'limits.disk'),
                     ]
                 ],
-                'template' => Arr::get($data, 'configuration.template', false),
-                'visible' => Arr::get($data, 'configuration.visible', false),
+                'template' => Arr::get($data, 'config.template', false),
+                'visible' => Arr::get($data, 'config.visible', false),
             ],
         ];
 
@@ -115,8 +115,8 @@ class ServerController extends ApplicationApiController
                 'memory' => Arr::get($data, 'limits.memory'),
                 'address_ids' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', []))
             ],
-            'configuration' => [
-                'boot_order' => ['default'],
+            'config' => [
+                'boot_order' => Arr::get($data, 'limits.disk') ? ['default'] : [],
                 'disks' => [
                     [
                         'disk' => 'default',

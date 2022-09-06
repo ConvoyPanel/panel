@@ -40,10 +40,10 @@ class ServerCreationService extends ProxmoxService
                 'vmid' => Arr::get($deployment, 'vmid'),
             ]);
 
-            if (Arr::get($deployment, 'configuration.template')) {
+            if (Arr::get($deployment, 'config.template')) {
                 Template::create([
                     'server_id' => $server->id,
-                    'visible' => Arr::get($deployment, 'configuration.visible', false)
+                    'visible' => Arr::get($deployment, 'config.visible', false)
                 ]);
             }
 
@@ -74,7 +74,7 @@ class ServerCreationService extends ProxmoxService
             $transformedDeployment = $deployment;
             $transformedDeployment['limits']['addresses'] = $addresses;
 
-            ProcessInstallation::dispatch($server, $transformedDeployment);
+            ProcessInstallation::dispatch($server, ServerDeploymentObject::from($transformedDeployment));
 
             return $server;
         }

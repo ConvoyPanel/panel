@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Servers;
 
+use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Servers\CloudinitService;
@@ -39,7 +40,7 @@ class ProcessInstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Server $server, protected array $deployment)
+    public function __construct(protected Server $server, protected ServerDeploymentObject $deployment)
     {
         //
     }
