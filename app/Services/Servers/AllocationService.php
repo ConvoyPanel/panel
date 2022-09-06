@@ -86,10 +86,9 @@ class AllocationService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
 
         $payload = [];
-
-        if (Arr::exists($specs, 'cpu'))
+        if (!empty(Arr::get($specs, 'cpu')))
             $payload['cores'] = Arr::get($specs, 'cpu');
-        if (Arr::exists($specs, 'memory'))
+        if (!empty(Arr::get($specs, 'memory')))
             $payload['memory'] = floor(Arr::get($specs, 'memory') / 1048576);
 
         return $this->repository->setServer($this->server)->update($payload);

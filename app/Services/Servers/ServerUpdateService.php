@@ -42,10 +42,10 @@ class ServerUpdateService extends ProxmoxService
         $this->powerRepository->setServer($this->server);
 
         /* 2. Configure the specifications */
-        if ($deployment->limits->cpu || $deployment->limits->memory)
+        if ($deployment->limits?->cpu || $deployment->limits?->memory)
             $this->allocationService->updateSpecifications([
-                'cpu' => $deployment->limits->cpu,
-                'memory' => $deployment->limits->memory,
+                'cpu' => $deployment->limits?->cpu,
+                'memory' => $deployment->limits?->memory,
             ]);
 
         /* 3. Configure the IPs */
