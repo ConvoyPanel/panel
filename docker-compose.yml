@@ -14,7 +14,6 @@ services:
         - WITH_XDEBUG=$DEV_XDEBUG
     restart: unless-stopped
     volumes:
-      # - ./dockerfiles/php-fpm/php.ini:/usr/local/etc/php/php.ini
        - .:/var/www/html/
     expose:
       - 9000
@@ -29,7 +28,7 @@ services:
       - 5173:5173
     volumes:
       - .:/app/
-  redis: # consider mounting a volume for production because the saved data will be deleted when the container is deleted
+  redis:
     image: redis:7.0.4-alpine3.16
     restart: unless-stopped
     command: redis-server --save 20 1 --loglevel notice --requirepass ${REDIS_PASSWORD}
@@ -42,7 +41,22 @@ services:
     working_dir: /var/www/html/
     volumes:
       - .:/var/www/html/
-
+  soketi:
+    restart: unless-stopped
+    image: 'quay.io/soketi/soketi:1.4-16-alpine'
+    ports:
+      - '${SOKETI_PORT:-6001}:6001'
+      - '${SOKETI_METRICS_SERVER_PORT:-9601}:9601'
+    environment:
+      - DEBUG='${DEBUG:-1}'
+      - PUSHER_APP_ID='${PUSHER_APP_ID}'
+      - PUSHER_APP_KEY='${PUSHER_APP_KEY}'
+      - PUSHER_APP_SECRET='${PUSHER_APP_SECRET}'
+      - PUSHER_HOST='${PUSHER_HOST:-127.0.0.1}'
+      - PUSHER_PORT= '${PUSHER_PORT:-6001}'
+      - PUSHER_SCHEME='${PUSHER_SCHEME:-http}'
+      - METRICS_SERVER_PORT=${METRICS_SERVER_PORT-9601}
+      - DEFAULT_APP_ENABLE_CLIENT_MESSAGES=${DEFAULT_APP_ENABLE_CLIENT_MESSAGES-false}
   database:
     image: mysql:8.0.29
     restart: unless-stopped
