@@ -7,7 +7,7 @@ import { Head, useForm } from '@inertiajs/inertia-react'
 import { Button, Modal, Paper, Select, Table, TextInput } from '@mantine/core'
 import { PlayIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid'
 import { Backup } from '@/api/server/backups/types'
-import { DuplicateIcon } from '@heroicons/react/outline'
+import { ArchiveIcon, DuplicateIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
 import { formatBytes } from '@/api/server/getStatus'
@@ -229,7 +229,7 @@ const Index = ({ auth, server, backups }: Props) => {
 
             {backups.length === 0 && (
               <EmptyState
-                icon={DuplicateIcon}
+                icon={ArchiveIcon}
                 title='No Backups'
                 description='You have no backups yet.'
                 action='New Backup'

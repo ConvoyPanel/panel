@@ -16,7 +16,7 @@ import { useMemo, useState } from 'react'
 import RoundedButton from '@/components/RoundedButton'
 import { Inertia } from '@inertiajs/inertia'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
-import { ArchiveIcon } from '@heroicons/react/outline'
+import { ArchiveIcon, DuplicateIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
 
@@ -229,7 +229,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
 
             {snapshots.length <= 1 && (
               <EmptyState
-                icon={ArchiveIcon}
+                icon={DuplicateIcon}
                 title='No Snapshots'
                 description='Get started by creating a new snapshot.'
                 action='New Snapshot'
