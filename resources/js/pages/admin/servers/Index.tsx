@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Authenticated from '@/components/layouts/Authenticated'
 import { Head } from '@inertiajs/inertia-react'
 import { DefaultProps, PaginatedInterface } from '@/api/types/default'
 import Main from '@/components/Main'
-import { Paper, Table } from '@mantine/core'
+import { Pagination, Paper, Table } from '@mantine/core'
 import { Button } from '@mantine/core'
 import { Inertia } from '@inertiajs/inertia'
 import { Server as DefaultServer } from '@/api/server/types'
@@ -12,6 +12,7 @@ import EmptyState from '@/components/EmptyState'
 import { ServerIcon } from '@heroicons/react/outline'
 import { Template } from '@/api/admin/servers/templates/types'
 import { CheckIcon, EyeIcon } from '@heroicons/react/solid'
+import Paginator from '@/components/elements/pagination/Paginator'
 
 interface Server extends DefaultServer {
   template?: Template
@@ -30,7 +31,7 @@ interface Props extends DefaultProps {
   servers: PaginatedInterface<Server[]>
 }
 
-export default function Index({ auth, servers }: Props) {
+const Index = ({ auth, servers }: Props) => {
   return (
     <Authenticated auth={auth} header={<h1 className='h1'>Servers</h1>}>
       <Head title='Servers' />
@@ -92,7 +93,9 @@ export default function Index({ auth, servers }: Props) {
             </Table>
           </div>
 
-          {servers.meta.total === 0 && (
+          <Paginator pages={servers.meta.pagination.total_pages} route='admin.servers' />
+
+          {servers.meta.pagination.total === 0 && (
             <EmptyState
               icon={ServerIcon}
               title='No Servers'
@@ -106,3 +109,5 @@ export default function Index({ auth, servers }: Props) {
     </Authenticated>
   )
 }
+
+export default Index

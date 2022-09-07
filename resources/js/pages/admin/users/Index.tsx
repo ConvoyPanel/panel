@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import Authenticated from '@/components/layouts/Authenticated'
 import { Head } from '@inertiajs/inertia-react'
-import { DefaultProps } from '@/api/types/default'
+import { DefaultProps, PaginatedInterface } from '@/api/types/default'
 import Main from '@/components/Main'
 import { Button, Paper, Table } from '@mantine/core'
 import { Inertia } from '@inertiajs/inertia'
@@ -11,9 +11,10 @@ import { CheckIcon } from '@heroicons/react/solid'
 import EditButton from '@/components/elements/tables/EditButton'
 import { UserCircleIcon } from '@heroicons/react/outline'
 import NewUserModal from '@/components/users/NewUserModal'
+import Paginator from '@/components/elements/pagination/Paginator'
 
 interface Props extends DefaultProps {
-  users: User[]
+  users: PaginatedInterface<User[]>
 }
 
 export default function Index({ auth, users }: Props) {
@@ -46,7 +47,7 @@ export default function Index({ auth, users }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {users.data.map((user) => (
                   <tr key={user.id}>
                     <td>{user.name}</td>
                     <td>{user.email}</td>
@@ -70,7 +71,9 @@ export default function Index({ auth, users }: Props) {
             </Table>
           </div>
 
-          {users.length === 0 && (
+          <Paginator pages={users.meta.pagination.total_pages} route='admin.users' />
+
+          {users.meta.pagination.total === 0 && (
             <EmptyState
               icon={UserCircleIcon}
               title='No Users'

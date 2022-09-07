@@ -25,6 +25,7 @@ class ServerController extends Controller
     public function index(Request $request)
     {
         $servers = Server::with(['template', 'owner:id,name,email', 'node:id,name'])->paginate($request->query('per_page') ?? 50);
+
         return Inertia::render('admin/servers/Index', [
             'servers' => fractal($servers, new AdminServerTransformer())->toArray(),
         ]);

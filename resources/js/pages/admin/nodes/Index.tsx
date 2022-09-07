@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import Authenticated from '@/components/layouts/Authenticated'
 import { Head } from '@inertiajs/inertia-react'
-import { DefaultProps } from '@/api/types/default'
+import { DefaultProps, PaginatedInterface } from '@/api/types/default'
 import Main from '@/components/Main'
 import { Button, Paper, Table } from '@mantine/core'
 import { Node } from '@/api/admin/nodes/types'
@@ -11,9 +11,10 @@ import { Inertia } from '@inertiajs/inertia'
 import RoundedButton from '@/components/RoundedButton'
 import { PencilIcon } from '@heroicons/react/solid'
 import EditButton from '@/components/elements/tables/EditButton'
+import Paginator from '@/components/elements/pagination/Paginator'
 
 interface Props extends DefaultProps {
-  nodes: Node[]
+  nodes: PaginatedInterface<Node[]>
 }
 
 export default function Index({ auth, nodes }: Props) {
@@ -41,7 +42,7 @@ export default function Index({ auth, nodes }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {nodes.map((node) => (
+                {nodes.data.map((node) => (
                   <tr key={node.id}>
                     <td>{node.name}</td>
                     <td>{node.cluster}</td>
@@ -59,7 +60,9 @@ export default function Index({ auth, nodes }: Props) {
             </Table>
           </div>
 
-          {nodes.length === 0 && (
+          <Paginator pages={nodes.meta.pagination.total_pages} route='admin.nodes' />
+
+          {nodes.meta.pagination.total === 0 && (
             <EmptyState
               icon={ServerIcon}
               title='No Nodes'

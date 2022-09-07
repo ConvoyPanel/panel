@@ -6,6 +6,7 @@ use App\Http\Controllers\ApplicationApiController;
 use App\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Models\Node;
+use App\Transformers\Admin\NodeTransformer as AdminNodeTransformer;
 use App\Transformers\Application\NodeTransformer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,9 +14,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class NodeController extends ApplicationApiController
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('admin/nodes/Index', ['nodes' => Node::all()]);
+        return Inertia::render('admin/nodes/Index', ['nodes' => fractal(Node::paginate($request->query('per_page') ?? 50), new AdminNodeTransformer)]);
     }
 
     public function create()

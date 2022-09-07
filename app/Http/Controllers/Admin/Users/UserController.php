@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Users;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Models\User;
+use App\Transformers\Admin\UserTransformer as AdminUserTransformer;
 use App\Transformers\Application\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,10 +14,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         return Inertia::render('admin/users/Index', [
-            'users' => User::all()
+            'users' => fractal(User::paginate($request->query('per_page') ?? 50), new AdminUserTransformer())->toArray(),
         ]);
     }
 

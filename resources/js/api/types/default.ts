@@ -17,7 +17,7 @@ export interface DefaultProps {
 }
 
 export interface LinkInterface {
-  back?: string
+  previous?: string
   next?: string
 }
 
@@ -32,5 +32,7 @@ export interface PaginationInterface {
 
 export interface PaginatedInterface<T> {
   data: T
-  meta: PaginationInterface
+  meta: {
+    pagination: PaginationInterface
+  }
 }
