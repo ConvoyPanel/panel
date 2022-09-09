@@ -2,6 +2,7 @@
 
 namespace App\Services\Servers;
 
+use App\Facades\Activity;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
@@ -114,6 +115,7 @@ class InstallService extends ProxmoxService
 
         /* 1. Clone the template */
         $this->serverRepository->create($template->server->vmid);
+        Activity::event('server:install');
 
         // Wait until cloning is complete
         $intermissionDetails = null;

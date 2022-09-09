@@ -17,11 +17,13 @@ return new class extends Migration
             $table->id();
             $table->uuid('batch')->nullable();
             $table->string('event')->index();
+            $table->string('upid')->nullable();
+            $table->string('status')->default('ok');
             $table->string('ip');
             $table->text('description')->nullable();
             $table->nullableNumericMorphs('actor');
             $table->json('properties');
-            $table->timestamp('timestamp')->useCurrent()->onUpdate(null);
+            $table->timestamps();
         });
     }
 

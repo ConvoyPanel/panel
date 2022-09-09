@@ -12,6 +12,7 @@ use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\Servers\SettingsController;
 use App\Http\Controllers\Client\Servers\SnapshotController;
+use App\Http\Middleware\Activity\ServerSubject;
 use App\Http\Middleware\CheckServerInstalling;
 use App\Http\Middleware\CheckServerNotInstalling;
 
@@ -28,7 +29,14 @@ Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->n
 |
 */
 
-Route::group(['prefix' => '/servers/{server}', 'middleware' => [AuthenticateServerAccess::class, CheckServerInstalling::class]], function () {
+Route::group([
+    'prefix' => '/servers/{server}',
+    'middleware' => [
+        ServerSubject::class,
+        AuthenticateServerAccess::class,
+        CheckServerInstalling::class,
+    ]
+], function () {
     Route::get('/', [ServerController::class, 'show'])->name('servers.show');
     Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('servers.show.templates');
     Route::get('/installing', [ServerController::class, 'showIsInstallingPage'])->middleware(CheckServerNotInstalling::class)->withoutMiddleware(CheckServerInstalling::class)->name('servers.show.installing');

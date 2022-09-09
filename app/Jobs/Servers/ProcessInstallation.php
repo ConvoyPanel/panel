@@ -2,9 +2,11 @@
 
 namespace App\Jobs\Servers;
 
+use App\Facades\LogTarget;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
+use App\Services\Activity\ActivityLogBatchService;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\InstallService;
 use App\Services\Servers\NetworkService;
@@ -14,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Container\Container;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -35,6 +38,8 @@ class ProcessInstallation implements ShouldQueue
      */
     public $tries = 1;
 
+    protected ActivityLogBatchService $batch;
+
     /**
      * Create a new job instance.
      *
@@ -42,7 +47,12 @@ class ProcessInstallation implements ShouldQueue
      */
     public function __construct(protected Server $server, protected ServerDeploymentObject $deployment)
     {
-        //
+        Container::getInstance()->call([$this, 'loadDependencies']);
+    }
+
+    public function loadDependencies(ActivityLogBatchService $batch)
+    {
+        $this->batch = $batch;
     }
 
     /**
@@ -54,10 +64,14 @@ class ProcessInstallation implements ShouldQueue
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $this->server->update(['installing' => true]);
+        LogTarget::setSubject($this->server->id);
 
-        (new InstallService)->setServer($this->server)->install(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
+        $this->batch->transaction(function (string $uuid) {
+            $this->server->update(['installing' => true]);
 
-        $this->server->update(['installing' => false]);
+            (new InstallService)->setServer($this->server)->install(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
+
+            $this->server->update(['installing' => false]);
+        });
     }
 }
