@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Http\Middleware\Client\Server;
 
 use App\Models\Server;
 use Closure;

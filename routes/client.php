@@ -8,7 +8,7 @@ use App\Http\Controllers\Client\Servers\PowerController;
 use App\Http\Controllers\Client\Servers\SecurityController;
 use App\Http\Controllers\Client\Servers\ServerController;
 use App\Http\Controllers\Client\Servers\StatusController;
-use App\Http\Middleware\AuthenticateServerAccess;
+use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\Servers\SettingsController;
 use App\Http\Controllers\Client\Servers\SnapshotController;

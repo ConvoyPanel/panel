@@ -29,3 +29,11 @@ https://dev.to/jackmiras/xdebug-in-phpstorm-with-docker-2al8
 
 #### VSCode Guide (tested & working)
 https://dev.to/jackmiras/xdebug-in-vscode-with-docker-379l
+
+## Acknowledgements
+
+Convoy wouldn't have been possible without these organizations and people
+
+- Advin Servers - provided several development servers (at least $200 of hardware) to help me develop this SaaS
+- Kjartann#0149 (Discord) - donated over $200 to Convoy development and encouraged me to keep on working on this panel!
+- Pterodactyl Panel - provided the architecture and a lot of backend/boilerplate code for Convoy.
