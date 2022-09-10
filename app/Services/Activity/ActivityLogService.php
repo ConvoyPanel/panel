@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Container\Container;
 use App\Services\Activity\ActivityLogTargetableService;
+use Illuminate\Contracts\Auth\Factory;
 use Webmozart\Assert\Assert;
+use Illuminate\Database\ConnectionInterface;
 
 class ActivityLogService
 {
@@ -24,8 +25,12 @@ class ActivityLogService
 
     protected array $subjects = [];
 
-    public function __construct(protected ActivityLogBatchService $batch, protected ActivityLogTargetableService $targetable)
-    {
+    public function __construct(
+        protected Factory $manager,
+        protected ActivityLogBatchService $batch,
+        protected ActivityLogTargetableService $targetable,
+        protected ConnectionInterface $connection,
+    ) {
         $this->batch = $batch;
         $this->targetable = $targetable;
     }
