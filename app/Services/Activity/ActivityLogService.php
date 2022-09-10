@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Container\Container;
-use Pterodactyl\Services\Activity\ActivityLogTargetableService;
+use App\Services\Activity\ActivityLogTargetableService;
 use Webmozart\Assert\Assert;
 
 class ActivityLogService
@@ -24,16 +24,7 @@ class ActivityLogService
 
     protected array $subjects = [];
 
-    protected ActivityLogBatchService $batch;
-
-    protected ActivityLogTargetableService $targetable;
-
-    public function __construct()
-    {
-        Container::getInstance()->call([$this, 'loadDependencies']);
-    }
-
-    public function loadDependencies(ActivityLogBatchService $batch, ActivityLogTargetableService $targetable)
+    public function __construct(protected ActivityLogBatchService $batch, protected ActivityLogTargetableService $targetable)
     {
         $this->batch = $batch;
         $this->targetable = $targetable;
@@ -226,6 +217,11 @@ class ActivityLogService
         }
 
         return $this->activity;
+    }
+
+    public function test()
+    {
+        return $this->targetable->subject();
     }
 
     /**

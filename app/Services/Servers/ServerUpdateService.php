@@ -8,27 +8,18 @@ use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Services\ProxmoxService;
 use Illuminate\Support\Arr;
-use Spatie\LaravelData\Optional;
 use Webmozart\Assert\Assert;
 
 class ServerUpdateService extends ProxmoxService
 {
-    private AllocationService $allocationService;
-    private CloudinitService $cloudinitService;
-    private NetworkService $networkService;
-    private ServerDetailService $detailService;
-    private ProxmoxPowerRepository $powerRepository;
-    private ProxmoxAllocationRepository $allocationRepository;
-
-    public function __construct()
-    {
-        $this->allocationService = new AllocationService;
-        $this->cloudinitService = new CloudinitService;
-        $this->networkService = new NetworkService;
-        $this->detailService = new ServerDetailService;
-        $this->powerRepository = new ProxmoxPowerRepository;
-        $this->allocationRepository = new ProxmoxAllocationRepository;
-    }
+    public function __construct(
+        protected AllocationService $allocationService,
+        protected CloudinitService $cloudinitService,
+        protected NetworkService $networkService,
+        protected ServerDetailService $detailService,
+        protected ProxmoxPowerRepository $powerRepository,
+        protected ProxmoxAllocationRepository $allocationRepository,
+    ) {}
 
 
     public function handle(ServerSpecificationsObject $deployment)

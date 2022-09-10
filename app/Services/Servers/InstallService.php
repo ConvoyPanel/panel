@@ -7,10 +7,10 @@ use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
 use App\Models\Template;
-use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\ProxmoxService;
+use Illuminate\Container\Container;
 use Exception;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
@@ -21,26 +21,12 @@ use Webmozart\Assert\Assert;
  */
 class InstallService extends ProxmoxService
 {
-    private NetworkService $networkService;
-    private CloudinitService $cloudinitService;
-    private ServerDetailService $detailService;
-    private ProxmoxServerRepository $serverRepository;
-    private ProxmoxAllocationRepository $allocationRepository;
-    private AllocationService $allocationService;
-    private ProxmoxPowerRepository $powerRepository;
-    private ServerUpdateService $updateService;
-
-    public function __construct()
-    {
-        $this->networkService = new NetworkService;
-        $this->cloudinitService = new CloudinitService;
-        $this->detailService = new ServerDetailService;
-        $this->serverRepository = new ProxmoxServerRepository;
-        $this->allocationRepository = new ProxmoxAllocationRepository;
-        $this->allocationService = new AllocationService;
-        $this->powerRepository = new ProxmoxPowerRepository;
-        $this->updateService = new ServerUpdateService;
-    }
+    public function __construct(
+        protected ServerDetailService $detailService,
+        protected ProxmoxServerRepository $serverRepository,
+        protected ProxmoxPowerRepository $powerRepository,
+        protected ServerUpdateService $updateService
+    ) {}
 
     public function delete()
     {
@@ -56,7 +42,6 @@ class InstallService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
         $this->detailService->setServer($this->server);
         $this->serverRepository->setServer($this->server);
-        $this->powerRepository->setServer($this->server);
 
         /* 1. Get the server details */
         $details = $this->detailService->getDetails();
@@ -104,11 +89,7 @@ class InstallService extends ProxmoxService
          */
 
         Assert::isInstanceOf($this->server, Server::class);
-        $this->allocationRepository->setServer($this->server);
-        $this->allocationService->setServer($this->server);
         $this->detailService->setServer($this->server);
-        $this->cloudinitService->setServer($this->server);
-        $this->networkService->setServer($this->server);
         $this->powerRepository->setServer($this->server);
         $this->serverRepository->setServer($this->server);
         $this->updateService->setServer($this->server);

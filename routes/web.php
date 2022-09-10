@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Application;
+use App\Facades\Activity;
+use App\Facades\LogTarget;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------

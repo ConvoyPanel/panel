@@ -45,14 +45,14 @@ class ProcessReinstallation implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(InstallService $installer)
     {
         $server = Server::find($this->serverId);
         $template = Template::find($this->templateId);
 
         $server->update(['installing' => true]);
 
-        (new InstallService)->setServer($server)->reinstall($template);
+        $installer->setServer($server)->reinstall($template);
 
         $server->update(['installing' => false]);
     }
