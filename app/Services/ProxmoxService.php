@@ -22,7 +22,7 @@ abstract class ProxmoxService
      *
      * @return $this
      */
-    public function setServer(Server $server)
+    public function setServer(Server $server): self
     {
         $this->server = clone $server;
 
@@ -36,7 +36,7 @@ abstract class ProxmoxService
      *
      * @return $this
      */
-    public function setNode(Node $node)
+    public function setNode(Node $node): self
     {
         $this->node = $node;
 

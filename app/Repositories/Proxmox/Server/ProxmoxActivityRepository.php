@@ -28,10 +28,10 @@ class ProxmoxActivityRepository extends ProxmoxRepository
 
     public function getStatus(string $upid)
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        Assert::isInstanceOf($this->node, Node::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/status', $this->node->cluster, $upid));
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/status', $this->node->cluster, rawurlencode($upid)));
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }
@@ -41,10 +41,10 @@ class ProxmoxActivityRepository extends ProxmoxRepository
 
     public function getLog(string $upid, int $startAt = 0, int $limitLines = 100)
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        Assert::isInstanceOf($this->node, Node::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/log', $this->node->cluster, $upid), [
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/log', $this->node->cluster, rawurlencode($upid)), [
                 'query' => [
                      'start' => $startAt,
                     'limit' => $limitLines,
@@ -62,7 +62,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
 
         try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/tasks/%s', $this->node->cluster, $upid));
+            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/tasks/%s', $this->node->cluster, rawurlencode($upid)));
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }

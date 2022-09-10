@@ -7,6 +7,7 @@
 
 namespace App\Services\Activity;
 
+use App\Enums\Activity\Status;
 use App\Models\ActivityLog;
 use App\Models\ActivityLogSubject;
 use Illuminate\Support\Arr;
@@ -127,6 +128,14 @@ class ActivityLogService
         ]);
     }
 
+    public function runner(string $upid): self
+    {
+        $this->getActivity()->upid = $upid;
+        $this->activity->status = Status::RUNNING;
+
+        return $this;
+    }
+
     /**
      * Logs an activity log entry with the set values and then returns the
      * model instance to the caller. If there is an exception encountered while
@@ -203,6 +212,7 @@ class ActivityLogService
         }
 
         $this->activity = new ActivityLog([
+
             'ip' => Request::ip(),
             'batch_uuid' => $this->batch->uuid(),
             'properties' => Collection::make([]),

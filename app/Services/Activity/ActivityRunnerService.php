@@ -2,12 +2,71 @@
 
 namespace App\Services\Activity;
 
-class ActivityRunnerService
-{
+use App\Enums\Activity\Status;
+use App\Models\ActivityLog;
+use App\Models\Node;
+use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use App\Services\ProxmoxService;
+use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Webmozart\Assert\Assert;
 
-    public function refresh()
+class ActivityRunnerService extends ProxmoxService
+{
+    protected ActivityLog $activity;
+
+    public function __construct(protected ProxmoxActivityRepository $repository)
     {
 
+    }
+
+    public function setActivity(ActivityLog $activity): self
+    {
+        $this->activity = $activity;
+
+        return $this;
+    }
+
+    /*
+     * Automatic status updating
+     */
+
+    public function refresh(): ActivityLog
+    {
+        Assert::isInstanceOf($this->activity, ActivityLog::class);
+        Assert::isInstanceOf($this->node, Node::class);
+
+        if (is_null($this->activity->upid))
+        {
+            $this->error();
+
+            return;
+        }
+
+        try {
+            $status = $this->repository->setNode($this->node)->getStatus($this->activity->upid);
+        } catch (Exception $e) {
+            $this->error();
+
+            return;
+        }
+
+        if (Arr::get($status, 'status') === 'running')
+        {
+            $this->start();
+
+            return;
+        }
+
+        if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok')
+        {
+            $this->end();
+        } else {
+            $this->error();
+        }
+
+        return $this->activity;
     }
 
     /*
@@ -16,16 +75,26 @@ class ActivityRunnerService
 
     public function start()
     {
+        Assert::isInstanceOf($this->activity, ActivityLog::class);
 
+        $this->activity->status = Status::RUNNING;
+        $this->activity->save();
     }
 
     public function error()
     {
+        Assert::isInstanceOf($this->activity, ActivityLog::class);
 
+
+        $this->activity->status = Status::ERROR;
+        $this->activity->save();
     }
 
     public function end()
     {
+        Assert::isInstanceOf($this->activity, ActivityLog::class);
 
+        $this->activity->status = Status::OK;
+        $this->activity->save();
     }
 }
