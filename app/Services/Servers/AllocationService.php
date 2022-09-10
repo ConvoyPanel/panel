@@ -28,16 +28,6 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    /*
-    * @deprecated This function is redundant and is just a proxy to another function
-    */
-    public function resizeDisk(int $bytes, string $disk)
-    {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        return $this->repository->setServer($this->server)->resizeDisk($bytes, $disk);
-    }
-
     public function getDisks(): array
     {
         Assert::isInstanceOf($this->server, Server::class);

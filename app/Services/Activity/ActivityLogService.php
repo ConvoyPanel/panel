@@ -224,11 +224,6 @@ class ActivityLogService
         return $this->activity;
     }
 
-    public function test()
-    {
-        return $this->targetable->subject();
-    }
-
     /**
      * Saves the activity log instance and attaches all of the subject models.
      *

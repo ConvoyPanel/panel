@@ -42,13 +42,4 @@ abstract class ProxmoxService
 
         return $this;
     }
-
-    public function removeDataProperty(mixed $data, bool $returnNullIfEmpty = false)
-    {
-        if (gettype($data) === 'array') {
-            return  $data['data'] ?? $data;
-        } else {
-            return $returnNullIfEmpty ? null : [];
-        }
-    }
 }
