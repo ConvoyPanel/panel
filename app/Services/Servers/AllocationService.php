@@ -10,12 +10,8 @@ use Webmozart\Assert\Assert;
 
 class AllocationService extends ProxmoxService
 {
-    private ProxmoxAllocationRepository $repository;
-
-    public function __construct()
-    {
-        $this->repository = new ProxmoxAllocationRepository;
-    }
+    public function __construct(protected ProxmoxAllocationRepository $repository)
+    {}
 
     public function createDisk(int $bytes, string $disk, string $format = 'qcow2')
     {

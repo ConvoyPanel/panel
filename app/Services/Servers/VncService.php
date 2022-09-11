@@ -11,14 +11,8 @@ use Illuminate\Support\Arr;
 
 class VncService extends ProxmoxService
 {
-    private ProxmoxServerRepository $serverRepository;
-    private ProxmoxAccessRepository $accessRepository;
-
-    public function __construct()
-    {
-        $this->serverRepository = new ProxmoxServerRepository;
-        $this->accessRepository = new ProxmoxAccessRepository;
-    }
+    public function __construct(protected ProxmoxServerRepository $serverRepository, protected ProxmoxAccessRepository $accessRepository)
+    {}
 
     public function getTemporaryVncCredentials()
     {

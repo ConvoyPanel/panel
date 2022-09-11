@@ -2,8 +2,10 @@
 
 namespace App\Jobs\Servers;
 
+use App\Facades\LogTarget;
 use App\Models\Server;
 use App\Models\Template;
+use App\Services\Activity\ActivityLogBatchService;
 use App\Services\Servers\InstallService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -35,7 +37,7 @@ class ProcessReinstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId)
+    public function __construct(protected $serverId, protected $templateId, protected ?string $batchUuid)
     {
         //
     }
@@ -45,15 +47,19 @@ class ProcessReinstallation implements ShouldQueue
      *
      * @return void
      */
-    public function handle(InstallService $installer)
+    public function handle(ActivityLogBatchService $batch, InstallService $installer)
     {
         $server = Server::find($this->serverId);
         $template = Template::find($this->templateId);
 
-        $server->update(['installing' => true]);
+        LogTarget::setSubject($server);
 
-        $installer->setServer($server)->reinstall($template);
+        $batch->transaction(function () use ($installer, $server, $template) {
+            $server->update(['installing' => true]);
 
-        $server->update(['installing' => false]);
+            $installer->setServer($server)->reinstall($template);
+
+            $server->update(['installing' => false]);
+        }, $this->batchUuid);
     }
 }

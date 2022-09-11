@@ -18,17 +18,8 @@ use Webmozart\Assert\Assert;
  */
 class CloudinitService extends ProxmoxService
 {
-    /**
-     * @var ProxmoxCloudinitRepository
-     */
-    private ProxmoxCloudinitRepository $cloudinitRepository;
-
-    /**
-     *
-     */
-    public function __construct()
+    public function __construct(protected ProxmoxCloudinitRepository $repository)
     {
-        $this->cloudinitRepository = new ProxmoxCloudinitRepository();
     }
 
     /**
@@ -38,13 +29,13 @@ class CloudinitService extends ProxmoxService
      */
     public function changePassword(string $password, AuthenticationType $type)
     {
-        $this->cloudinitRepository->setServer($this->server);
+        $this->repository->setServer($this->server);
 
         if (AuthenticationType::KEY === $type)
         {
-            return $this->cloudinitRepository->update([$type->value => rawurlencode($password)]);
+            return $this->repository->update([$type->value => rawurlencode($password)]);
         } else {
-            return $this->cloudinitRepository->update([$type->value => $password]);
+            return $this->repository->update([$type->value => $password]);
         }
     }
 
@@ -61,7 +52,7 @@ class CloudinitService extends ProxmoxService
      */
     public function changeBIOS(BiosType $type)
     {
-        return $this->cloudinitRepository->setServer($this->server)->update(['bios' => $type->value]);
+        return $this->repository->setServer($this->server)->update(['bios' => $type->value]);
     }
 
     /**
@@ -71,7 +62,7 @@ class CloudinitService extends ProxmoxService
      */
     public function changeHostname(string $hostname)
     {
-        return $this->cloudinitRepository->setServer($this->server)->update(['searchdomain' => $hostname]);
+        return $this->repository->setServer($this->server)->update(['searchdomain' => $hostname]);
     }
 
     /**
@@ -81,12 +72,12 @@ class CloudinitService extends ProxmoxService
      */
     public function changeNameserver(string $nameserver)
     {
-        return $this->cloudinitRepository->setServer($this->server)->update(['nameserver' => $nameserver]);
+        return $this->repository->setServer($this->server)->update(['nameserver' => $nameserver]);
     }
 
     public function getIpConfig(): array
     {
-        $data = $this->cloudinitRepository->setServer($this->server)->getConfig();
+        $data = $this->repository->setServer($this->server)->getConfig();
 
         $config = [
             'ipv4' => null,
@@ -136,11 +127,11 @@ class CloudinitService extends ProxmoxService
      */
     public function updateIpConfig(string|array $config)
     {
-        $this->cloudinitRepository->setServer($this->server);
+        $this->repository->setServer($this->server);
 
         if (gettype($config) === 'string')
         {
-            return $this->cloudinitRepository->update([
+            return $this->repository->update([
                 'ipconfig0' => $config,
             ]);
         }
@@ -163,7 +154,7 @@ class CloudinitService extends ProxmoxService
                 $payload[] = 'gw6=' . $ipv6['gateway'];
             }
 
-            return $this->cloudinitRepository->update([
+            return $this->repository->update([
                 'ipconfig0' => Arr::join($payload, ','),
             ]);
         }

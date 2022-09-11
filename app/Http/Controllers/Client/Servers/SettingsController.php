@@ -9,11 +9,12 @@ use Inertia\Inertia;
 use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
 use App\Jobs\Servers\ProcessReinstallation;
 use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use App\Services\Activity\ActivityLogBatchService;
 use App\Services\Nodes\TemplateService;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository)
+    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository, private ActivityLogBatchService $batch)
     {
     }
 
@@ -39,9 +40,11 @@ class SettingsController extends ApplicationApiController
 
     public function reinstall(Server $server, ReinstallServerRequest $request)
     {
-        $server->update(['installing' => true]);
+        $this->batch->transaction(function (string $uuid) use ($server, $request) {
+            $server->update(['installing' => true]);
 
-        ProcessReinstallation::dispatch($server->id, $request->template_id);
+            ProcessReinstallation::dispatch($server->id, $request->template_id, $uuid);
+        });
 
         return redirect()->route('servers.show.installing', [$server->id]);
     }

@@ -40,7 +40,7 @@ class ProcessInstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Server $server, protected ServerDeploymentObject $deployment)
+    public function __construct(protected Server $server, protected ServerDeploymentObject $deployment, protected ?string $batchUuid)
     {
 
     }
@@ -54,7 +54,7 @@ class ProcessInstallation implements ShouldQueue
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        LogTarget::setSubject($this->server->id);
+        LogTarget::setSubject($this->server);
 
         $batch->transaction(function () use ($installer) {
             $this->server->update(['installing' => true]);
@@ -62,6 +62,6 @@ class ProcessInstallation implements ShouldQueue
             $installer->setServer($this->server)->install(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
 
             $this->server->update(['installing' => false]);
-        });
+        }, $this->batchUuid);
     }
 }

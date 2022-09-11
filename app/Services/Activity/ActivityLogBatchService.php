@@ -22,10 +22,10 @@ class ActivityLogBatchService
      * Starts a new batch transaction. If there is already a transaction present
      * this will be nested.
      */
-    public function start(): void
+    public function start(?string $uuid = null): void
     {
         if ($this->transaction === 0) {
-            $this->uuid = Uuid::uuid4()->toString();
+            $this->uuid = $uuid ?? Uuid::uuid4()->toString();
         }
 
         ++$this->transaction;
@@ -50,9 +50,9 @@ class ActivityLogBatchService
      *
      * @return mixed
      */
-    public function transaction(\Closure $callback)
+    public function transaction(\Closure $callback, ?string $uuid = null)
     {
-        $this->start();
+        $this->start($uuid);
         $result = $callback($this->uuid());
         $this->end();
 

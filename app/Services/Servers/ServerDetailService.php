@@ -8,22 +8,13 @@ use App\Models\Objects\Server\ServerDetailsObject;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
-use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Support\Arr;
-use Spatie\LaravelData\Optional;
 use Webmozart\Assert\Assert;
 
 class ServerDetailService extends ProxmoxService
 {
-    private ProxmoxAllocationRepository $repository;
-    private AllocationService $allocationService;
-    private CloudinitService $cloudinitService;
-
-    public function __construct()
+    public function __construct(protected ProxmoxAllocationRepository $repository, protected AllocationService $allocationService, protected CloudinitService $cloudinitService)
     {
-        $this->repository = new ProxmoxAllocationRepository;
-        $this->allocationService = new AllocationService;
-        $this->cloudinitService  = new CloudinitService;
     }
 
     /**
@@ -46,11 +37,11 @@ class ServerDetailService extends ProxmoxService
             'status' => Arr::get($resources, 'status'),
             'locked' => Arr::get($resources, 'lock', false),
             'usage' => [
-              'uptime' => Arr::get($resources, 'uptime'),
-              'network' => [
-                  'in' => Arr::get($resources, 'netin'),
-                  'out' => Arr::get($resources, 'netout'),
-              ],
+                'uptime' => Arr::get($resources, 'uptime'),
+                'network' => [
+                    'in' => Arr::get($resources, 'netin'),
+                    'out' => Arr::get($resources, 'netout'),
+                ],
                 'disk' => [
                     'write' => Arr::get($resources, 'diskwrite'),
                     'read' => Arr::get($resources, 'diskread'),
@@ -61,8 +52,8 @@ class ServerDetailService extends ProxmoxService
                 'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
                 'disk' => Arr::get($resources, 'maxdisk'),
                 'addresses' => [
-                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->first(['address' ,'cidr', 'gateway', 'mac_address'])?->toArray(),
-                    'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->first(['address' ,'cidr', 'gateway'])?->toArray(),
+                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->first(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
+                    'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->first(['address', 'cidr', 'gateway'])?->toArray(),
                 ]
             ],
             'config' => [

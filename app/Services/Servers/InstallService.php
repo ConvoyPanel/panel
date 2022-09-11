@@ -3,6 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Facades\Activity;
+use App\Facades\LogRunner;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
@@ -42,6 +43,7 @@ class InstallService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
         $this->detailService->setServer($this->server);
         $this->serverRepository->setServer($this->server);
+        $this->powerRepository->setServer($this->server);
 
         /* 1. Get the server details */
         $details = $this->detailService->getDetails();
@@ -59,7 +61,8 @@ class InstallService extends ProxmoxService
         }
 
         /* 3. Delete the server */
-        $this->serverRepository->delete();
+        $upid = $this->serverRepository->delete();
+        $activity = Activity::event('server:uninstall')->runner($upid)->log();
 
         // Wait for server to fully delete
         $deletionStatus = false;
@@ -71,6 +74,8 @@ class InstallService extends ProxmoxService
                 $deletionStatus = true;
             }
         } while (!$deletionStatus);
+
+        LogRunner::setActivity($activity)->end();
 
         /* 4. Return the server details */
         return $details;
@@ -95,8 +100,8 @@ class InstallService extends ProxmoxService
         $this->updateService->setServer($this->server);
 
         /* 1. Clone the template */
-        $this->serverRepository->create($template->server->vmid);
-        Activity::event('server:install');
+        $upid = $this->serverRepository->create($template->server->vmid);
+        $activity = Activity::event('server:install')->runner($upid)->log();
 
         // Wait until cloning is complete
         $intermissionDetails = null;
@@ -109,7 +114,11 @@ class InstallService extends ProxmoxService
             }
         } while (empty($intermissionDetails) || $intermissionDetails->locked);
 
+        LogRunner::setActivity($activity)->end();
+
+        $activity = Activity::event('server:details.update')->runner()->log();
         $this->updateService->handle(ServerSpecificationsObject::from($details->toArray()));
+        LogRunner::setActivity($activity)->end();
 
         return $this->detailService->getDetails();
     }

@@ -7,19 +7,14 @@ use App\Models\IPAddress;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Webmozart\Assert\Assert;
 
 class NetworkService extends ProxmoxService
 {
-    private ProxmoxAllocationRepository $allocationRepository;
 
-    public function __construct()
-    {
-        $this->allocationRepository = new ProxmoxAllocationRepository;
-    }
+    public function __construct(protected ProxmoxAllocationRepository $allocationRepository)
+    {}
 
     public function deleteIpset(string $name)
     {

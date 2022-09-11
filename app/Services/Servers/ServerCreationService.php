@@ -9,6 +9,7 @@ use App\Models\IPAddress;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
+use App\Services\Activity\ActivityLogBatchService;
 use App\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -21,11 +22,8 @@ use Webmozart\Assert\Assert;
  */
 class ServerCreationService extends ProxmoxService
 {
-    private NetworkService $networkService;
-
-    public function __construct()
+    public function __construct(protected NetworkService $networkService, protected ActivityLogBatchService $batch)
     {
-        $this->networkService = new NetworkService;
     }
 
     public function handle(ServerDeploymentObject $deployment)
@@ -74,7 +72,9 @@ class ServerCreationService extends ProxmoxService
             $transformedDeployment = $deployment;
             $transformedDeployment['limits']['addresses'] = $addresses;
 
-            ProcessInstallation::dispatch($server, ServerDeploymentObject::from($transformedDeployment));
+            $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
+                ProcessInstallation::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
+            });
 
             return $server;
         }

@@ -41,7 +41,7 @@ class ActivityRunnerService extends ProxmoxService
         {
             $this->error();
 
-            return;
+            return $this->activity;
         }
 
         try {
@@ -49,14 +49,14 @@ class ActivityRunnerService extends ProxmoxService
         } catch (Exception $e) {
             $this->error();
 
-            return;
+            return $this->activity;
         }
 
         if (Arr::get($status, 'status') === 'running')
         {
             $this->start();
 
-            return;
+            return $this->activity;
         }
 
         if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok')

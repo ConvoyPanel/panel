@@ -29,10 +29,8 @@ abstract class ProxmoxRepository
     /**
      * BaseWingsRepository constructor.
      */
-    //public function __construct(Application $application)
-    //{
-     //   $this->app = $application;
-    //}
+    public function __construct(protected Application $app)
+    {}
 
     /**
      * Set the server model this request is stemming from.
@@ -79,7 +77,7 @@ abstract class ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
 
         return new Client([
-            'verify' => false,
+            'verify' => $this->app->environment('production'),
             'base_uri' => "https://{$this->node->hostname}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),

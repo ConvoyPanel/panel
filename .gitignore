@@ -15,3 +15,4 @@ yarn-error.log
 /.vscode
 /supervisord.log
 /supervisord.pid
+_ide_*.php
