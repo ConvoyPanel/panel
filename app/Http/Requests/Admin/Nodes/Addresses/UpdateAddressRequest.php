@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Nodes\Addresses;
 
 use App\Enums\Network\AddressType;
+use App\Models\IPAddress;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -25,14 +26,6 @@ class UpdateAddressRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'server_id' => 'exists:servers,id|nullable',
-            'node_id' => 'required|exists:nodes,id',
-            'type' => [new Enum(AddressType::class), 'required'],
-            'address' => 'ip',
-            'cidr' => 'numeric|required',
-            'gateway' => 'ip',
-            'mac_address' => 'mac_address|nullable',
-        ];
+        return IPAddress::getRules();
     }
 }
