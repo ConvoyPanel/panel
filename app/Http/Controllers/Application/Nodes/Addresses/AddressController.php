@@ -40,36 +40,14 @@ class AddressController extends ApplicationApiController
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
-        if ($request->server_id)
-        {
-            $this->service->validateForDuplicates($request->server_id, $request->type, $address->id);
-        }
-
-        if (AddressType::from($request->type) === AddressType::IPV4)
-        {
-            $address->update($request->validated());
-        } else {
-            $address->update($request->safe()->except(['mac_address']));
-        }
+        $address->update($request->validated());
 
         return fractal($address, new AddressTransformer())->respond();
     }
 
     public function store(Node $node, StoreAddressRequest $request)
     {
-        if ($request->server_id)
-        {
-            $this->service->validateForDuplicates($request->server_id, $request->type);
-        }
-
-        $address = null;
-
-        if (AddressType::from($request->type) === AddressType::IPV4)
-        {
-            $address = IPAddress::create($request->validated());
-        } else {
-            $address = IPAddress::create($request->safe()->except(['mac_address']));
-        }
+        $address = IPAddress::create($request->validated());
 
 
         return fractal($address, new AddressTransformer())->respond();

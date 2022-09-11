@@ -27,15 +27,18 @@ export interface Details {
     memory: number,
     disk: number,
     addresses: {
-      ipv4?: Pick<Address, 'cidr' | 'gateway' | 'address'>
-      ipv6?: Pick<Address, 'cidr' | 'gateway' | 'address'>
+      ipv4: Pick<Address, 'cidr' | 'gateway' | 'address' | 'mac_address'>[]
+      ipv6: Pick<Address, 'cidr' | 'gateway' | 'address' | 'mac_address'>[]
     }
   }
   config: {
     boot_order: string[]
     disks: Disk[]
     template: boolean
-    addresses: Pick<Address, 'cidr' | 'gateway' | 'address'>
+    addresses: {
+      ipv4?: Pick<Address, 'cidr' | 'gateway' | 'address'>
+      ipv6?: Pick<Address, 'cidr' | 'gateway' | 'address'>
+    }
   }
 }
 

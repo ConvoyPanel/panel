@@ -71,7 +71,9 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
 
   const searchServers = useCallback(
     debounce(async (query: string) => {
-      const { data: { data } } = await getSearchServers(query)
+      const {
+        data: { data },
+      } = await getSearchServers(query)
       setServers(
         data.map((server) => {
           return {
@@ -150,15 +152,13 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
             error={errors.gateway}
             required
           />
-          {data.type === 'ipv4' && (
-            <TextInput
-              label='Mac Address'
-              name='mac_address'
-              value={data.mac_address}
-              onChange={onHandleChange}
-              error={errors.mac_address}
-            />
-          )}
+          <TextInput
+            label='Mac Address'
+            name='mac_address'
+            value={data.mac_address}
+            onChange={onHandleChange}
+            error={errors.mac_address}
+          />
         </div>
         <Button
           type='submit'

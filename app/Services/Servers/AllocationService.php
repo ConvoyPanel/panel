@@ -2,6 +2,7 @@
 
 namespace App\Services\Servers;
 
+use App\Models\Objects\Server\Allocations\Storage\DiskObject;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use App\Services\ProxmoxService;
@@ -24,7 +25,7 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    public function getDisks(): array
+    public function getDisks()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -35,9 +36,9 @@ class AllocationService extends ProxmoxService
             return in_array($disk['key'], $this->repository->validDisks);
         }));
 
-        return Arr::map($disks, function ($value) {
+        return DiskObject::collection(Arr::map($disks, function ($value) {
             return $this->formatDisk($value);
-        });
+        }));
     }
 
     public function getBootOrder(bool $filterNonLocalDisks = false): array

@@ -25,13 +25,12 @@ export interface FormData {
 }
 
 export interface Props {
-    node: Node,
-    open: boolean,
-    setOpen: (show: boolean) => void
-
+  node: Node
+  open: boolean
+  setOpen: (show: boolean) => void
 }
 
-const NewAddressModal = ({node, open, setOpen}: Props) => {
+const NewAddressModal = ({ node, open, setOpen }: Props) => {
   const { data, setData, post, processing, errors, reset } = useForm<FormData>({
     server_id: undefined,
     node_id: node.id,
@@ -64,7 +63,9 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
 
   const searchServers = useCallback(
     debounce(async (query: string) => {
-      const { data: { data } } = await getSearchServers(query)
+      const {
+        data: { data },
+      } = await getSearchServers(query)
       setServers(
         data.map((server) => {
           return {
@@ -144,15 +145,13 @@ const NewAddressModal = ({node, open, setOpen}: Props) => {
             error={errors.gateway}
             required
           />
-          {data.type === 'ipv4' && (
-            <TextInput
-              label='Mac Address'
-              name='mac_address'
-              value={data.mac_address}
-              onChange={onHandleChange}
-              error={errors.mac_address}
-            />
-          )}
+          <TextInput
+            label='Mac Address'
+            name='mac_address'
+            value={data.mac_address}
+            onChange={onHandleChange}
+            error={errors.mac_address}
+          />
         </div>
         <Button
           type='submit'

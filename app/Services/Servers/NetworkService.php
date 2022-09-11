@@ -56,50 +56,26 @@ class NetworkService extends ProxmoxService
         return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address}"]);
     }
 
-    public function validateForDuplicates(int $server_id, string $type, int|null $address_id = null)
-    {
-        $existingAddress = Server::find($server_id)->addresses()->where('type', AddressType::from($type)->value)->first();
-
-        if ($existingAddress !== null && $existingAddress->server_id === $server_id && $existingAddress->id !== $address_id)
-        {
-            throw ValidationException::withMessages([
-                'server_id' => "This server already has an {$type} address."
-            ]);
-        }
-    }
-
     /**
      * @param array<int, int> $addressIds
      */
     public function convertFromEloquent(array $addressIds): array
     {
         $addresses = [
-            'ipv4' => null,
-            'ipv6' => null,
+            'ipv4' => [],
+            'ipv6' => [],
         ];
 
             Arr::map($addressIds, function ($address_id) use (&$addresses) {
                 $address = IPAddress::find($address_id);
                 $type = AddressType::from($address->type)->value;
 
-                if (isset($addresses[$type]))
-                    throw ValidationException::withMessages([
-                        'addresses' => 'You cannot set multiple IPv4 or IPv6 addresses'
-                    ]);
-
-                if (isset($address->server_id))
-                    throw ValidationException::withMessages([
-                        'addresses' => 'This address is actively being used',
-                    ]);
-
-                $addresses[$type] = [
+                $addresses[$type][] = [
                     'address' => $address->address,
                     'cidr' => $address->cidr,
                     'gateway' => $address->gateway,
+                    'mac_address' => $address->mac_address
                 ];
-
-                if ($type === AddressType::IPV4->value)
-                    $addresses[$type]['mac_address'] = $address->mac_address;
             });
 
         return $addresses;

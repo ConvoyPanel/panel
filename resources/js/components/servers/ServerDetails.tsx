@@ -8,10 +8,13 @@ import { formatBytes } from '@/api/server/getStatus'
 const ServerDetails = () => {
   const serverContext = useContext(ServerContext)
 
-  const { data, status } = useQuery([`details-${serverContext!.server.id}`], async () => {
-    const { data } = await getResources(serverContext!.server.id)
-    return data
-  })
+  const { data, status } = useQuery(
+    [`details-${serverContext!.server.id}`],
+    async () => {
+      const { data } = await getResources(serverContext!.server.id)
+      return data
+    }
+  )
 
   const memory = formatBytes(data?.limits.memory || 0)
   const disk = formatBytes(data?.limits.disk || 0)
@@ -29,13 +32,13 @@ const ServerDetails = () => {
             <dl>
               <dt className='dt'>IP Address</dt>
               <dd className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 dd'>
-                {data.limits.addresses.ipv4 && (
-                  <Code>{data.limits.addresses.ipv4?.address}</Code>
-                )}
-                {data.limits.addresses.ipv6 && (
-                  <Code>{data.limits.addresses.ipv6?.address}</Code>
-                )}
-                {!data.limits.addresses.ipv6 && !data.limits.addresses.ipv4
+                {data.limits.addresses.ipv4.map((address) => (
+                  <Code>{address.address}</Code>
+                ))}
+                {data.limits.addresses.ipv6.map((address) => (
+                  <Code>{address.address}</Code>
+                ))}
+                {data.limits.addresses.ipv6.length === 0 && data.limits.addresses.ipv4.length === 0
                   ? 'Unavailable'
                   : ''}
               </dd>

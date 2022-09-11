@@ -34,34 +34,14 @@ class AddressController extends ApplicationApiController
 
     public function store(Node $node, StoreAddressRequest $request)
     {
-        if ($request->server_id)
-        {
-            $this->service->validateForDuplicates($request->server_id, $request->type);
-        }
-
-        if (AddressType::from($request->type) === AddressType::IPV4)
-        {
-            IPAddress::create($request->validated());
-        } else {
-            IPAddress::create($request->safe()->except(['mac_address']));
-        }
+        IPAddress::create($request->validated());
 
         return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }
 
     public function update(Node $node, IPAddress $address, UpdateAddressRequest $request)
     {
-        if ($request->server_id)
-        {
-            $this->service->validateForDuplicates($request->server_id, $request->type, $address->id);
-        }
-
-        if (AddressType::from($request->type) === AddressType::IPV4)
-        {
-            $address->update($request->validated());
-        } else {
-            $address->update($request->safe()->except(['mac_address']));
-        }
+        $address->update($request->validated());
 
         return redirect()->route('admin.nodes.show.addresses', [$node->id]);
     }

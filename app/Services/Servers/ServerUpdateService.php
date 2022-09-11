@@ -40,16 +40,22 @@ class ServerUpdateService extends ProxmoxService
             ]);
 
         /* 3. Configure the IPs */
-        if ($deployment->limits?->addresses?->ipv4 || $deployment->limits?->addresses?->ipv6)
+        if ($deployment->limits?->addresses?->ipv4->count() !== 0  || $deployment->limits?->addresses?->ipv6->count() !== 0)
         {
             $this->networkService->clearIpsets();
 
-            $this->cloudinitService->updateIpConfig($deployment->limits->addresses->toArray());
+            $this->cloudinitService->updateIpConfig([
+                'ipv4' => $deployment->limits->addresses->ipv4->first(),
+                'ipv6' => $deployment->limits->addresses->ipv6->first()
+            ]);
+
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
         }
 
-        if ($deployment->limits?->addresses?->ipv4?->mac_address) {
-            $this->networkService->updateMacAddress($deployment->limits->addresses->ipv4->mac_address);
+        if (isset($deployment->limits?->addresses?->ipv4?->first()->mac_address)) {
+            $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv4?->first()->mac_address);
+        } elseif (isset($deployment->limits?->addresses?->ipv6?->first()->mac_address)) {
+            $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv6?->first()->mac_address);
         }
 
         /* 4. Configure the disks */
