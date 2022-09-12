@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Events\Activity\ActivityLogged;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Event;
 
 class ActivityLog extends Model
 {
@@ -54,5 +56,18 @@ class ActivityLog extends Model
     public function scopeForActor(Builder $builder, Model $actor): Builder
     {
         return $builder->whereMorphedTo('actor', $actor);
+    }
+
+    /**
+     * Boots the model event listeners. This will trigger an activity log event every
+     * time a new model is inserted which can then be captured and worked with as needed.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function (self $model) {
+            Event::dispatch(new ActivityLogged($model));
+        });
     }
 }
