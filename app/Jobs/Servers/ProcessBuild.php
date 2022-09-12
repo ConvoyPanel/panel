@@ -7,7 +7,7 @@ use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Activity\ActivityLogBatchService;
-use App\Services\Servers\InstallService;
+use App\Services\Servers\BuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -50,16 +50,16 @@ class ProcessBuild implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ActivityLogBatchService $batch, InstallService $installer)
+    public function handle(ActivityLogBatchService $batch, BuildService $builder)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         LogTarget::setSubject($this->server);
 
-        $batch->transaction(function () use ($installer) {
+        $batch->transaction(function () use ($builder) {
             $this->server->update(['installing' => true]);
 
-            $installer->setServer($this->server)->build(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
+            $builder->setServer($this->server)->build(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
 
             $this->server->update(['installing' => false]);
         }, $this->batchUuid);

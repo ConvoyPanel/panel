@@ -8,7 +8,7 @@ use App\Facades\LogTarget;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Activity\ActivityLogBatchService;
-use App\Services\Servers\InstallService;
+use App\Services\Servers\BuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -49,18 +49,18 @@ class ProcessRebuild implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ActivityLogBatchService $batch, InstallService $installer)
+    public function handle(ActivityLogBatchService $batch, BuildService $builder)
     {
         $server = Server::find($this->serverId);
         $template = Template::find($this->templateId);
 
         LogTarget::setSubject($server);
 
-        $batch->transaction(function () use ($installer, $server, $template) {
+        $batch->transaction(function () use ($builder, $server, $template) {
             $server->update(['installing' => true]);
             $activity = Activity::event('server:rebuild')->runner()->log();
 
-            $installer->setServer($server)->rebuild($template);
+            $builder->setServer($server)->rebuild($template);
 
             $server->update(['installing' => false]);
             LogRunner::setActivity($activity)->end();

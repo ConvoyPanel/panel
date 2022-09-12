@@ -10,7 +10,7 @@ use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Objects\Server\ServerSpecificationsObject;
 use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
-use App\Services\Servers\InstallService;
+use App\Services\Servers\BuildService;
 use App\Services\Servers\NetworkService;
 use App\Services\Servers\ServerDetailService;
 use App\Services\Servers\ServerUpdateService;
@@ -22,7 +22,7 @@ use Exception;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerCreationService $creationService, private NetworkService $networkService, private ServerDetailService $detailService, private ServerUpdateService $updateService, private InstallService $installService)
+    public function __construct(private ServerCreationService $creationService, private NetworkService $networkService, private ServerDetailService $detailService, private ServerUpdateService $updateService, private BuildService $buildService)
     {
 
     }
@@ -81,7 +81,7 @@ class ServerController extends ApplicationApiController
         if (empty($request->no_purge))
         {
             try {
-                $this->installService->setServer($server)->delete();
+                $this->buildService->setServer($server)->delete();
             } catch (Exception $e) {
 
             }

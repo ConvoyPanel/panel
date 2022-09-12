@@ -19,7 +19,7 @@ use Webmozart\Assert\Assert;
  * Class SnapshotService
  * @package App\Services\Servers
  */
-class InstallService extends ProxmoxService
+class BuildService extends ProxmoxService
 {
     public function __construct(
         protected ServerDetailService $detailService,

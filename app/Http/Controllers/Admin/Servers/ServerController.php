@@ -7,7 +7,7 @@ use App\Http\Requests\Admin\Servers\StoreServerRequest;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
-use App\Services\Servers\InstallService;
+use App\Services\Servers\BuildService;
 use App\Transformers\Admin\ServerTransformer as AdminServerTransformer;
 use App\Transformers\Application\ServerTransformer;
 use Exception;
@@ -18,7 +18,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends Controller
 {
-    public function __construct(private InstallService $installService, private ServerCreationService $creationService)
+    public function __construct(private BuildService $buildService, private ServerCreationService $creationService)
     {
     }
 
@@ -82,7 +82,7 @@ class ServerController extends Controller
         if (empty($request->no_purge))
         {
             try {
-                $this->installService->setServer($server)->delete();
+                $this->buildService->setServer($server)->delete();
             } catch (Exception $e) {
 
             }
