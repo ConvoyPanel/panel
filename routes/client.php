@@ -125,7 +125,7 @@ Route::group([
         Route::put('/password', [CloudinitController::class, 'updatePassword'])->name('servers.show.settings.password');
         Route::put('/bios', [CloudinitController::class, 'updateBios'])->name('servers.show.settings.bios');
         Route::put('/network-config', [CloudinitController::class, 'updateNetworkConfig'])->name('servers.show.settings.network-config');
-        Route::post('/reinstall', [SettingsController::class, 'reinstall'])->name('servers.show.settings.reinstall');
+        Route::post('/rebuild', [SettingsController::class, 'rebuild'])->name('servers.show.settings.rebuild');
         Route::get('/cloudinit/dump', [CloudinitController::class, 'dumpConfig'])->name('servers.show.settings.cloudinit.config');
     });
 });

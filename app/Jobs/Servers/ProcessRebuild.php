@@ -2,8 +2,9 @@
 
 namespace App\Jobs\Servers;
 
+use Activity;
+use App\Facades\LogRunner;
 use App\Facades\LogTarget;
-use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Activity\ActivityLogBatchService;
@@ -14,10 +15,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
-class ProcessInstallation implements ShouldQueue
+class ProcessRebuild implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -40,9 +39,9 @@ class ProcessInstallation implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Server $server, protected ServerDeploymentObject $deployment, protected ?string $batchUuid)
+    public function __construct(protected $serverId, protected $templateId, protected ?string $batchUuid)
     {
-
+        //
     }
 
     /**
@@ -52,16 +51,19 @@ class ProcessInstallation implements ShouldQueue
      */
     public function handle(ActivityLogBatchService $batch, InstallService $installer)
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        $server = Server::find($this->serverId);
+        $template = Template::find($this->templateId);
 
-        LogTarget::setSubject($this->server);
+        LogTarget::setSubject($server);
 
-        $batch->transaction(function () use ($installer) {
-            $this->server->update(['installing' => true]);
+        $batch->transaction(function () use ($installer, $server, $template) {
+            $server->update(['installing' => true]);
+            $activity = Activity::event('server:rebuild')->runner()->log();
 
-            $installer->setServer($this->server)->install(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
+            $installer->setServer($server)->rebuild($template);
 
-            $this->server->update(['installing' => false]);
+            $server->update(['installing' => false]);
+            LogRunner::setActivity($activity)->end();
         }, $this->batchUuid);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Services\Servers;
 
 use App\Enums\Network\AddressType;
 use App\Exceptions\Service\Server\InvalidTemplateException;
-use App\Jobs\Servers\ProcessInstallation;
+use App\Jobs\Servers\ProcessBuild;
 use App\Models\IPAddress;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
@@ -73,7 +73,7 @@ class ServerCreationService extends ProxmoxService
             $transformedDeployment['limits']['addresses'] = $addresses;
 
             $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
-                ProcessInstallation::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
+                ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
             });
 
             return $server;

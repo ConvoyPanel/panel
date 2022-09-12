@@ -11,7 +11,6 @@ use App\Models\Template;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\ProxmoxService;
-use Illuminate\Container\Container;
 use Exception;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
@@ -81,7 +80,7 @@ class InstallService extends ProxmoxService
         return $details;
     }
 
-    public function install(Template $template, ServerDeploymentObject $details)
+    public function build(Template $template, ServerDeploymentObject $details)
     {
         /*
          * Procedure
@@ -123,13 +122,13 @@ class InstallService extends ProxmoxService
         return $this->detailService->getDetails();
     }
 
-    public function reinstall(Template $template)
+    public function rebuild(Template $template)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         $details = $this->delete();
 
-        return $this->install($template, ServerDeploymentObject::from($details->toArray()));
+        return $this->build($template, ServerDeploymentObject::from($details->toArray()));
     }
 
     public function convertToBytes(string $from): ?int

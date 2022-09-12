@@ -15,9 +15,8 @@ import {
   useState,
 } from 'react'
 import getTemplates from '@/api/server/settings/getTemplates'
-import reinstallServer from '@/api/server/settings/reinstallServer'
 
-const ReinstallSettings = () => {
+const RebuildSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
   const [showModal, setShowModal] = useState(false)
@@ -54,8 +53,8 @@ const ReinstallSettings = () => {
     setShowModal(true)
   }
 
-  const handleReinstall = async () => {
-    post(route('servers.show.settings.reinstall', settingsContext?.server.id))
+  const handleRebuild = async () => {
+    post(route('servers.show.settings.rebuild', settingsContext?.server.id))
   }
 
   return (
@@ -95,7 +94,7 @@ const ReinstallSettings = () => {
               className='mt-3'
               fullWidth
               disabled={!isConfirmed}
-              onClick={() => handleReinstall()}
+              onClick={() => handleRebuild()}
             >
               I understand the consequences.
             </Button>
@@ -119,4 +118,4 @@ const ReinstallSettings = () => {
   )
 }
 
-export default ReinstallSettings
+export default RebuildSettings
