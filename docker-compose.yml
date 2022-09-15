@@ -12,6 +12,7 @@ services:
       context: ./dockerfiles/php
       args:
         - WITH_XDEBUG=$DEV_XDEBUG
+        - APP_ENV=$APP_ENV
     restart: unless-stopped
     volumes:
        - .:/var/www/html/

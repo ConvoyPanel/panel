@@ -21,7 +21,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
         try {
             $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/status/current', $this->node->cluster, $this->server->vmid));
         } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException();
+            throw new ProxmoxConnectionException($e);
         }
 
         return $this->getData($response);
