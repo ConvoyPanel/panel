@@ -40,10 +40,10 @@ class SettingsController extends ApplicationApiController
 
     public function rebuild(Server $server, ReinstallServerRequest $request)
     {
-        $this->batch->transaction(function () use ($server, $request) {
+        $this->batch->transaction(function (string $uuid) use ($server, $request) {
             $server->update(['installing' => true]);
 
-            ProcessRebuild::dispatch($server->id, $request->template_id);
+            ProcessRebuild::dispatch($server->id, $request->template_id, $uuid);
         });
 
         return redirect()->route('servers.show.installing', [$server->id]);

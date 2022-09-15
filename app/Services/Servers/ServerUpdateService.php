@@ -45,8 +45,8 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->clearIpsets();
 
             $this->cloudinitService->updateIpConfig([
-                'ipv4' => $deployment->limits->addresses->ipv4->first(),
-                'ipv6' => $deployment->limits->addresses->ipv6->first()
+                'ipv4' => $deployment->limits->addresses->ipv4->first()?->toArray(),
+                'ipv6' => $deployment->limits->addresses->ipv6->first()?->toArray(),
             ]);
 
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));

@@ -39,7 +39,7 @@ class ProcessRebuild implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId, protected ?string $batchUuid)
+    public function __construct(protected $serverId, protected $templateId, protected string $batchUuid)
     {
         //
     }
