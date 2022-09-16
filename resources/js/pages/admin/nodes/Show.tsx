@@ -10,7 +10,8 @@ interface Props extends DefaultProps {
     node: Node
 }
 
-const VncCommands = `wget -qO- https://github.com/Performave/convoy-novnc/archive/refs/heads/main.zip | unzip`
+const VncCommands = `wget https://cdn.discordapp.com/attachments/746612878261616704/1020480277497262120/novnc.zip && unzip -d /main.zip`
+// Link for novnc.zip is temporary, please change it to cdn later
 
 const Show = ({ auth, node }: Props) => {
 
