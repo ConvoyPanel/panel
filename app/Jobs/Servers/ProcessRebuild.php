@@ -5,6 +5,7 @@ namespace App\Jobs\Servers;
 use Activity;
 use App\Facades\LogRunner;
 use App\Facades\LogTarget;
+use App\Models\ActivityLog;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Activity\ActivityLogBatchService;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
 
 class ProcessRebuild implements ShouldQueue
 {
@@ -33,6 +35,8 @@ class ProcessRebuild implements ShouldQueue
      * @var int
      */
     public $tries = 1;
+
+    protected ActivityLog $activity;
 
     /**
      * Create a new job instance.
@@ -58,12 +62,23 @@ class ProcessRebuild implements ShouldQueue
 
         $batch->transaction(function () use ($builder, $server, $template) {
             $server->update(['installing' => true]);
-            $activity = Activity::event('server:rebuild')->runner()->log();
+            $this->activity = Activity::event('server:rebuild')->runner()->log();
 
             $builder->setServer($server)->rebuild($template);
 
             $server->update(['installing' => false]);
-            LogRunner::setActivity($activity)->end();
+            LogRunner::setActivity($this->activity)->end();
         }, $this->batchUuid);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(Throwable $exception)
+    {
+        LogRunner::setActivity($this->activity)->error();
     }
 }

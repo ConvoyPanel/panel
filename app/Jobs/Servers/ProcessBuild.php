@@ -2,7 +2,10 @@
 
 namespace App\Jobs\Servers;
 
+use App\Facades\Activity;
+use App\Facades\LogRunner;
 use App\Facades\LogTarget;
+use App\Models\ActivityLog;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
@@ -15,6 +18,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 class ProcessBuild implements ShouldQueue
@@ -34,6 +38,8 @@ class ProcessBuild implements ShouldQueue
      * @var int
      */
     public $tries = 1;
+
+    protected ActivityLog $activity;
 
     /**
      * Create a new job instance.
@@ -58,10 +64,23 @@ class ProcessBuild implements ShouldQueue
 
         $batch->transaction(function () use ($builder) {
             $this->server->update(['installing' => true]);
+            $this->activity = Activity::event('server:build')->runner()->log();
 
-            $builder->setServer($this->server)->build(Template::find(Arr::get($this->deployment, 'template_id')), $this->deployment);
+            $builder->setServer($this->server)->build(Template::find($this->deployment->template_id), $this->deployment);
 
             $this->server->update(['installing' => false]);
+            LogRunner::setActivity($this->activity)->end();
         }, $this->batchUuid);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(Throwable $exception)
+    {
+        LogRunner::setActivity($this->activity)->error();
     }
 }

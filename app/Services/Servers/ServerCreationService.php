@@ -6,6 +6,7 @@ use App\Enums\Network\AddressType;
 use App\Exceptions\Service\Server\InvalidTemplateException;
 use App\Jobs\Servers\ProcessBuild;
 use App\Models\IPAddress;
+use App\Models\Objects\Server\Limits\AddressLimitsObject;
 use App\Models\Objects\Server\ServerDeploymentObject;
 use App\Models\Server;
 use App\Models\Template;
@@ -28,49 +29,49 @@ class ServerCreationService extends ProxmoxService
 
     public function handle(ServerDeploymentObject $deployment)
     {
-        Assert::inArray(Arr::get($deployment, 'type'), ['existing', 'new']);
+        Assert::inArray($deployment->type, ['existing', 'new']);
 
-        if (Arr::get($deployment, 'type') === 'existing') {
+        if ($deployment->type === 'existing') {
             $server = Server::create([
-                'name' => Arr::get($deployment, 'name'),
-                'user_id' => Arr::get($deployment, 'user_id'),
-                'node_id' => Arr::get($deployment, 'node_id'),
-                'vmid' => Arr::get($deployment, 'vmid'),
+                'name' => $deployment->name,
+                'user_id' => $deployment->user_id,
+                'node_id' => $deployment->node_id,
+                'vmid' => $deployment->vmid,
             ]);
 
-            if (Arr::get($deployment, 'config.template')) {
+            if ((bool) $deployment->config->template) {
                 Template::create([
                     'server_id' => $server->id,
-                    'visible' => Arr::get($deployment, 'config.visible', false)
+                    'visible' => (bool) $deployment->config->visible
                 ]);
             }
 
             return $server;
         }
 
-        if (Arr::get($deployment, 'type') === 'new') {
-            $template = Template::findOrFail(Arr::get($deployment, 'template_id'));
+        if ($deployment->type === 'new') {
+            $template = Template::findOrFail($deployment->template_id);
 
-            if ($template->server->node->id !== intval(Arr::get($deployment, 'node_id'))) {
+            if ($template->server->node->id !== intval($deployment->node_id)) {
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
 
-            $addresses = $this->networkService->convertFromEloquent(Arr::get($deployment, 'limits.address_ids', []));
+            $addresses = $this->networkService->convertFromEloquent($deployment->limits?->address_ids ?? []);
 
             $server = Server::create([
-                'name' => Arr::get($deployment, 'name'),
-                'user_id' => Arr::get($deployment, 'user_id'),
-                'node_id' => Arr::get($deployment, 'node_id'),
-                'vmid' => Arr::get($deployment, 'vmid') ?? random_int(100, 999999999),
+                'name' => $deployment->name,
+                'user_id' => $deployment->user_id,
+                'node_id' => $deployment->node_id,
+                'vmid' => $deployment->vmid ?? random_int(100, 999999999),
             ]);
 
-            if (Arr::get($deployment, 'limits.address_ids'))
-                Arr::map(Arr::get($deployment, 'limits.address_ids'), function ($address_id) use ($server) {
+            if ($deployment->limits?->address_ids)
+                Arr::map($deployment->limits->address_ids, function ($address_id) use ($server) {
                     IPAddress::find($address_id)->update(['server_id' => $server->id]);
                 });
 
             $transformedDeployment = $deployment;
-            $transformedDeployment['limits']['addresses'] = $addresses;
+            $transformedDeployment->limits->addresses = AddressLimitsObject::from($addresses);
 
             $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
                 ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
