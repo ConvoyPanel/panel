@@ -15,7 +15,7 @@ class ActivityController extends Controller
         $activity = QueryBuilder::for($server->activity())
             ->with('actor')
             ->allowedSorts(['created_at', 'updated_at'])
-            ->allowedFilter(['event', 'batch', 'status'])
+            ->allowedFilters(['event', 'batch', 'status'])
             ->paginate(min($request->query('per_page', 25), 100))
             ->appends($request->query());
 

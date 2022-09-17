@@ -11,7 +11,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ActivityLogged extends Activity implements ShouldBroadcast
+class ActivityUpdated extends Activity implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

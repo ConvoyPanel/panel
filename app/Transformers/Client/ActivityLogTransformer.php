@@ -6,11 +6,25 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use League\Fractal\TransformerAbstract;
+use Illuminate\Container\Container;
 
 class ActivityLogTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = ['actor'];
+
+    protected Request $request;
+
+    public function __construct()
+    {
+        Container::getInstance()->call([$this, 'loadDependencies']);
+    }
+
+    public function loadDependencies(Request $request)
+    {
+        $this->request = $request;
+    }
 
     public function transform(ActivityLog $model): array
     {

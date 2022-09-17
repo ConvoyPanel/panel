@@ -17,7 +17,7 @@ interface Props extends DefaultProps {
 }
 
 const Index = ({ auth, server }: Props) => {
-  const { data, status } = useQuery(['logs'], async () => {
+  const { data, status } = useQuery([`logs-${server.id}`], async () => {
     const { data } = await getLogs(server.id)
     return data
   })

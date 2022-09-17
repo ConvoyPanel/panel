@@ -40,14 +40,14 @@ Route::group([
 ], function () {
     Route::get('/', [ServerController::class, 'show'])->name('servers.show');
     Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('servers.show.templates');
-    Route::get('/installing', [ServerController::class, 'showIsInstallingPage'])->middleware(CheckServerNotInstalling::class)->withoutMiddleware(CheckServerInstalling::class)->name('servers.show.installing');
+    Route::get('/building', [ServerController::class, 'showBuilding'])->middleware(CheckServerNotInstalling::class)->withoutMiddleware(CheckServerInstalling::class)->name('servers.show.building');
 
     Route::get('/status', [StatusController::class, 'show'])->name('servers.show.status');
     Route::post('/status', [PowerController::class, 'sendCommand']);
 
     Route::get('/details', [ServerController::class, 'getDetails'])->name('servers.show.details');
 
-    Route::get('/activity', ActivityController::class)->name('servers.show.activity');
+    Route::get('/activity', ActivityController::class)->withoutMiddleware(CheckServerInstalling::class)->name('servers.show.activity');
 
     /*
     |--------------------------------------------------------------------------

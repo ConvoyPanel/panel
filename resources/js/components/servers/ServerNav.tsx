@@ -1,3 +1,4 @@
+import getActivity from '@/api/server/getActivity'
 import { Inertia } from '@inertiajs/inertia'
 import { Tabs } from '@mantine/core'
 import { useEffect, useState } from 'react'
@@ -28,6 +29,10 @@ const ServerNav = ({ id }: Props) => {
     window.Echo.private(`server.${id}`).listen('ActivityLogged', (e: any) => {
       console.log(e)
     })
+
+    return () => {
+      window.Echo.leave(`server.${id}`)
+    }
   }, [])
 
   return (

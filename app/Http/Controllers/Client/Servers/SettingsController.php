@@ -46,6 +46,6 @@ class SettingsController extends ApplicationApiController
             ProcessRebuild::dispatch($server->id, $request->template_id, $uuid);
         });
 
-        return redirect()->route('servers.show.installing', [$server->id]);
+        return redirect()->route('servers.show.building', [$server->id]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\Activity\ActivityLogged;
+use App\Events\Activity\ActivityUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -13,11 +14,12 @@ class ActivityLog extends Model
 {
     use HasFactory;
 
-    //public $timestamps = false;
-
     protected $guarded = [
         'id',
-        //'timestamp',
+    ];
+
+    protected $casts = [
+        'properties' => 'collection',
     ];
 
     protected $with = ['subjects'];
@@ -83,6 +85,10 @@ class ActivityLog extends Model
 
         static::created(function (self $model) {
             Event::dispatch(new ActivityLogged($model));
+        });
+
+        static::updated(function (self $model) {
+            Event::dispatch(new ActivityUpdated($model));
         });
     }
 }
