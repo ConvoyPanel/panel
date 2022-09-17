@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Events\Activity\ActivityLogged;
 use App\Events\Activity\ActivityUpdated;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Event;
+use LogicException;
 
 class ActivityLog extends Model
 {
@@ -73,6 +75,25 @@ class ActivityLog extends Model
     public function scopeForActor(Builder $builder, Model $actor): Builder
     {
         return $builder->whereMorphedTo('actor', $actor);
+    }
+
+    public function serverSubject()
+    {
+        return Server::find($this->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);
+    }
+
+    /**
+     * Returns models to be pruned.
+     *
+     * @see https://laravel.com/docs/9.x/eloquent#pruning-models
+     */
+    public function prunable()
+    {
+        if (is_null(config('activity.prune_days'))) {
+            throw new LogicException('Cannot prune activity logs: no "prune_days" configuration value is set.');
+        }
+
+        return static::where('created_at', '<=', Carbon::now()->subDays(config('activity.prune_days')));
     }
 
     /**

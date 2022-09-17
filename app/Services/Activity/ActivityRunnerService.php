@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Node;
 use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Services\ProxmoxService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -16,9 +17,18 @@ class ActivityRunnerService extends ProxmoxService
 {
     protected ActivityLog $activity;
 
+    protected Node $node;
+
     public function __construct(protected ProxmoxActivityRepository $repository)
     {
 
+    }
+
+    public function setNode(Node $node): self
+    {
+        $this->node = $node;
+
+        return $this;
     }
 
     public function setActivity(ActivityLog $activity): self
@@ -36,8 +46,18 @@ class ActivityRunnerService extends ProxmoxService
     {
         Assert::isInstanceOf($this->activity, ActivityLog::class);
         Assert::isInstanceOf($this->node, Node::class);
+        Assert::inArray($this->activity->event, array_keys(ActivityLog::$eventTypes));
 
-        if (is_null($this->activity->upid))
+        if ($this->activity->status === Status::OK || $this->activity->status === Status::ERROR)
+        {
+            // we don't want to change something that's already confirmed
+            return $this->activity;
+        }
+
+        // set runner to error if it went beyond timeout
+        $diff = Carbon::parse($this->activity->created_at)->diffInSeconds(Carbon::now());
+
+        if ($diff > ActivityLog::$eventTypes[$this->activity->event]['timeout'])
         {
             $this->error();
 

@@ -2,8 +2,11 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
+use App\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Database\Console\PruneCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,7 +18,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command(RefreshActivityRunnersCommand::class)->everyMinute()->withoutOverlapping();
+
+        if (config('activity.prune_days')) {
+            $schedule->command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
+        }
     }
 
     /**
