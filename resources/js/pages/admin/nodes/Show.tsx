@@ -12,7 +12,7 @@ interface Props extends DefaultProps {
 
 const VncCommands = `wget https://cdn.discordapp.com/attachments/746612878261616704/1020480277497262120/novnc.zip && unzip -d / main.zip`
 // Link for novnc.zip is temporary, please change it to cdn later
-
+const TemplateDownloader = `wget https://github.com/ConvoyPanel/downloader/releases/download/v0.3.0/downloader-v0.3.0-linux-amd64.tar.gz && tar -xf downloader-v0.3.0-linux-amd64.tar.gz && ./downloader`
 const Show = ({ auth, node }: Props) => {
 
   return (
@@ -43,8 +43,12 @@ const Show = ({ auth, node }: Props) => {
             <h3 className='h3'>Add Server Templates</h3>
 
             <p className='p-desc'>
-              Server templates are unavailable at the moment.
+              Template Downloader will help you to download most of Templates for your Proxmox node.{' '}
+            <span className='font-bold'>
+                Run this command on the node you're deploying on.
+            </span>
             </p>
+            <Code block>{TemplateDownloader}</Code>
           </Paper>
       </Main>
     </Authenticated>
