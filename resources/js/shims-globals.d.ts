@@ -1,4 +1,7 @@
 import { Config, Router } from 'ziggy-js'
+import axios from 'axios'
+import Pusher from 'pusher-js'
+import Echo from 'laravel-echo'
 
 declare global {
   function route(): {
@@ -10,4 +13,10 @@ declare global {
     absolute?: boolean,
     customZiggy?: Config
   ): string
+
+  interface Window {
+    axios: Axios
+    Pusher: typeof Pusher
+    Echo: Echo
+  }
 }

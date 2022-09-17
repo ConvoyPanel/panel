@@ -3,6 +3,9 @@
 namespace App\Events\Activity;
 
 use App\Models\ActivityLog;
+use App\Models\Server;
+use App\Models\User;
+use Exception;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -33,10 +36,10 @@ class ActivityLogged extends Activity implements ShouldBroadcast
     {
         if ($this->isServerEvent())
         {
-            return new PrivateChannel('server.'.$this->model->subjects()->firstWhere('subject_type', $this->model->getKeyType())?->id);
+            return new PrivateChannel('server.'.$this->model->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);
         } elseif ($this->isUserEvent())
         {
-            return new PrivateChannel('user.'.$this->model->subjects()->firstWhere('subject_type', $this->model->getKeyType())?->id);
+            return new PrivateChannel('user.'.$this->model->subjects()->firstWhere('subject_type', (new User)->getMorphClass())?->subject_id);
         }
     }
 }

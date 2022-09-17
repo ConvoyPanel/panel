@@ -24,6 +24,10 @@ const ServerNav = ({ id }: Props) => {
 
   useEffect(() => {
     setActive(routes.indexOf(route().current() as string))
+
+    window.Echo.private(`server.${id}`).listen('ActivityLogged', (e: any) => {
+      console.log(e)
+    })
   }, [])
 
   return (
