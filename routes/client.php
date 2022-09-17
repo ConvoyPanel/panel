@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Client\IndexController;
+use App\Http\Controllers\Client\Servers\ActivityController;
 use App\Http\Controllers\Client\Servers\BackupController;
 use App\Http\Controllers\Client\Servers\CloudinitController;
 use App\Http\Controllers\Client\Servers\LogsController;
@@ -45,6 +46,8 @@ Route::group([
     Route::post('/status', [PowerController::class, 'sendCommand']);
 
     Route::get('/details', [ServerController::class, 'getDetails'])->name('servers.show.details');
+
+    Route::get('/activity', ActivityController::class)->name('servers.show.activity');
 
     /*
     |--------------------------------------------------------------------------

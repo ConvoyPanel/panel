@@ -30,6 +30,21 @@ class ActivityLog extends Model
         'properties' => ['array'],
     ];
 
+    public static $eventTypes = [
+        'server:details.update' => [
+            'timeout' => 240 // seconds
+        ],
+        'server:install' => [
+            'timeout' => false, // determined by status of UPID
+        ],
+        'server:uninstall' => [
+            'timeout' => false,
+        ],
+        'server:rebuild' => [
+            'timeout' => 1000
+        ],
+    ];
+
     public function actor(): MorphTo
     {
         $morph = $this->morphTo();

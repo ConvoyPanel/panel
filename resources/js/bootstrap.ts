@@ -35,10 +35,8 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
     // @ts-ignore
     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],/*
-    authEndpoint: '/broadcasting/auth', */
+    enabledTransports: ['ws', 'wss'],
     authorizer: (channel: any, options: any) => {
-        console.log('Authorize request', { channel, options })
         return {
             authorize: (socketId: number, callback: Function) => {
                 axios.post('/broadcasting/auth', {
