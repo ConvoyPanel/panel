@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(RefreshActivityRunnersCommand::class)->everyMinute()->withoutOverlapping();
+        //$schedule->command(RefreshActivityRunnersCommand::class)->everyMinute()->withoutOverlapping();
 
         if (config('activity.prune_days')) {
             $schedule->command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();

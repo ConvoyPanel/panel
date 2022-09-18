@@ -1,5 +1,5 @@
 import { Inertia } from '@inertiajs/inertia'
-import { Tabs } from '@mantine/core'
+import { Tabs, TabsValue } from '@mantine/core'
 import { useEffect, useState } from 'react'
 
 interface Props {
@@ -13,26 +13,26 @@ const NodeNav = ({ id }: Props) => {
     'admin.nodes.show.settings',
   ]
 
-  const [active, setActive] = useState(routes.indexOf(route().current() as string))
-  const onChange = (active: number, tabKey: string) => {
-    setActive(routes.indexOf(tabKey))
-    Inertia.visit(route(tabKey, id))
+  const [active, setActive] = useState<string | null>(route().current() as string)
+  const onChange = (value: TabsValue) => {
+    setActive(value)
+    Inertia.visit(route(value!, id))
   }
 
   useEffect(() => {
-    setActive(routes.indexOf(route().current() as string))
+    setActive(route().current() as string)
   }, [])
 
   return (
     <div className='bg-gray-50 border-y border-gray-200'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <Tabs
-          active={active}
+          value={active}
           onTabChange={onChange}
           styles={{
-            tabsListWrapper: {
+            /* tabsListWrapper: {
               borderStyle: 'none !important',
-            },
+            }, */
             tabsList: {
               flexWrap: 'nowrap',
               overflowX: 'auto',
@@ -41,9 +41,9 @@ const NodeNav = ({ id }: Props) => {
             },
           }}
         >
-          <Tabs.Tab label='Overview' tabKey={routes[0]}></Tabs.Tab>
-          <Tabs.Tab label='Addresses' tabKey={routes[1]}></Tabs.Tab>
-          <Tabs.Tab label='Settings' tabKey={routes[2]}></Tabs.Tab>
+          <Tabs.Tab value={routes[0]}>Overview</Tabs.Tab>
+          <Tabs.Tab value={routes[1]}>Addresses</Tabs.Tab>
+          <Tabs.Tab value={routes[2]}>Settings</Tabs.Tab>
         </Tabs>
       </div>
     </div>

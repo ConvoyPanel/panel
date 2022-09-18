@@ -1,6 +1,6 @@
 import getActivity from '@/api/server/getActivity'
 import { Inertia } from '@inertiajs/inertia'
-import { Tabs } from '@mantine/core'
+import { Tabs, TabsValue } from '@mantine/core'
 import { useEffect, useState } from 'react'
 
 interface Props {
@@ -17,14 +17,16 @@ const ServerNav = ({ id }: Props) => {
     'servers.show.settings',
   ]
 
-  const [active, setActive] = useState(routes.indexOf(route().current() as string))
-  const onChange = (active: number, tabKey: string) => {
-    setActive(routes.indexOf(tabKey))
-    Inertia.visit(route(tabKey, id))
+  const [active, setActive] = useState<string | null>(
+    route().current() as string
+  )
+  const onChange = (value: TabsValue) => {
+    setActive(value)
+    Inertia.visit(route(value!, id))
   }
 
   useEffect(() => {
-    setActive(routes.indexOf(route().current() as string))
+    setActive(route().current() as string)
 
     window.Echo.private(`server.${id}`).listen('ActivityLogged', (e: any) => {
       console.log(e)
@@ -39,26 +41,28 @@ const ServerNav = ({ id }: Props) => {
     <div className='bg-gray-50 border-y border-gray-200'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <Tabs
-          active={active}
+          value={active}
           onTabChange={onChange}
           styles={{
-            tabsListWrapper: {
-              borderStyle: 'none !important',
-            },
-            tabsList: {
-              flexWrap: 'nowrap',
+            root: {
               overflowX: 'auto',
               '&::-webkit-scrollbar': { display: 'none' },
               scrollbarWidth: 'none',
             },
+            tabsList: {
+              flexWrap: 'nowrap',
+              borderBottom: '2px solid transparent',
+            },
           }}
         >
-          <Tabs.Tab label='Overview' tabKey={routes[0]}></Tabs.Tab>
-          <Tabs.Tab label='Snapshots' tabKey={routes[1]}></Tabs.Tab>
-          <Tabs.Tab label='Backups' tabKey={routes[2]}></Tabs.Tab>
-          <Tabs.Tab label='Logs' tabKey={routes[3]}></Tabs.Tab>
-          <Tabs.Tab label='Security' tabKey={routes[4]}></Tabs.Tab>
-          <Tabs.Tab label='Settings' tabKey={routes[5]}></Tabs.Tab>
+          <Tabs.List>
+            <Tabs.Tab value={routes[0]}>Overview</Tabs.Tab>
+            <Tabs.Tab value={routes[1]}>Snapshots</Tabs.Tab>
+            <Tabs.Tab value={routes[2]}>Backups</Tabs.Tab>
+            <Tabs.Tab value={routes[3]}>Logs</Tabs.Tab>
+            <Tabs.Tab value={routes[4]}>Security</Tabs.Tab>
+            <Tabs.Tab value={routes[5]}>Settings</Tabs.Tab>
+          </Tabs.List>
         </Tabs>
       </div>
     </div>

@@ -79,8 +79,8 @@ export default function Authenticated({
 
               <div className='hidden sm:flex sm:items-center sm:ml-6'>
                 <div className='ml-3 relative'>
-                  <Menu
-                    control={
+                  <Menu width={175}>
+                    <Menu.Target>
                       <div>
                         <span className='inline-flex rounded-md'>
                           <button
@@ -93,31 +93,34 @@ export default function Authenticated({
                           </button>
                         </span>
                       </div>
-                    }
-                  >
-                    {auth.user.root_admin && route().current('admin.*') ? (
-                      <Menu.Item
-                        onClick={() => Inertia.visit(route('dashboard'))}
-                      >
-                        Switch to Client
-                      </Menu.Item>
-                    ) : (
-                      ''
-                    )}
+                    </Menu.Target>
 
-                    {auth.user.root_admin && !route().current('admin.*') ? (
-                      <Menu.Item
-                        onClick={() => Inertia.visit(route('admin.dashboard'))}
-                      >
-                        Switch to Admin
+                    <Menu.Dropdown>
+                      {auth.user.root_admin && route().current('admin.*') ? (
+                        <Menu.Item
+                          onClick={() => Inertia.visit(route('dashboard'))}
+                        >
+                          Switch to Client
+                        </Menu.Item>
+                      ) : (
+                        ''
+                      )}
+                      {auth.user.root_admin && !route().current('admin.*') ? (
+                        <Menu.Item
+                          onClick={() =>
+                            Inertia.visit(route('admin.dashboard'))
+                          }
+                        >
+                          Switch to Admin
+                        </Menu.Item>
+                      ) : (
+                        ''
+                      )}{' '}
+                      <Menu.Divider />
+                      <Menu.Item onClick={logout} color='red'>
+                        Log Out
                       </Menu.Item>
-                    ) : (
-                      ''
-                    )}
-
-                    <Menu.Item onClick={logout} color='red'>
-                      Log Out
-                    </Menu.Item>
+                    </Menu.Dropdown>
                   </Menu>
                 </div>
               </div>

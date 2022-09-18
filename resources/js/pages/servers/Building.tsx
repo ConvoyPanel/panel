@@ -88,7 +88,10 @@ const Building = ({ auth, server }: Props) => {
             <>
               <Accordion iconPosition='left' className='mt-3'>
                 <Accordion.Item label='Format Server (5s)'>
-                  test
+                  <Accordion>
+                    Test
+                  </Accordion>
+                  <Accordion.Panel>panel-1</Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item label='Install Template (waiting)'>
                   test
