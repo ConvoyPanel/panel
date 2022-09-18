@@ -3,7 +3,7 @@ import { SettingsContext } from '@/pages/servers/settings/Index'
 import { formDataHandler } from '@/util/helpers'
 import { Inertia } from '@inertiajs/inertia'
 import { useForm } from '@inertiajs/inertia-react'
-import { Radio, RadioGroup } from '@mantine/core'
+import { Radio } from '@mantine/core'
 import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
 
 const BiosConfigSettings = () => {
@@ -32,7 +32,7 @@ const BiosConfigSettings = () => {
       title='BIOS Configuration'
       inputs={
         <>
-          <RadioGroup
+          <Radio.Group
             value={data.type}
             error={errors.type}
             //@ts-ignore
@@ -40,7 +40,7 @@ const BiosConfigSettings = () => {
           >
             <Radio label='SeaBIOS' value='seabios'/>
             <Radio label='OVMF' value='ovmf'/>
-          </RadioGroup>
+          </Radio.Group>
         </>
       }
       defaultAction

@@ -79,7 +79,7 @@ export default function Authenticated({
 
               <div className='hidden sm:flex sm:items-center sm:ml-6'>
                 <div className='ml-3 relative'>
-                  <Menu width={175}>
+                  <Menu width={175} shadow='lg'>
                     <Menu.Target>
                       <div>
                         <span className='inline-flex rounded-md'>

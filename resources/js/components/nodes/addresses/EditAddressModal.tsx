@@ -3,7 +3,6 @@ import {
   Button,
   Modal,
   Radio,
-  RadioGroup,
   Select,
   TextInput,
 } from '@mantine/core'
@@ -117,7 +116,7 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
             data={servers}
             error={errors.server_id}
           />
-          <RadioGroup
+          <Radio.Group
             label='IP Type'
             value={data.type}
             error={errors.type}
@@ -126,7 +125,7 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
           >
             <Radio label='IPv4' value='ipv4' />
             <Radio label='IPv6' value='ipv6' />
-          </RadioGroup>
+          </Radio.Group>
           <TextInput
             label='IP Address'
             name='address'

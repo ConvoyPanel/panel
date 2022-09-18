@@ -1,15 +1,9 @@
 import FormBlock from '@/components/FormBlock'
 import { SettingsContext } from '@/pages/servers/settings/Index'
-import { ServerContext } from '@/pages/servers/Show'
 import { formDataHandler } from '@/util/helpers'
-import { Inertia } from '@inertiajs/inertia'
 import { useForm } from '@inertiajs/inertia-react'
 import {
   Badge,
-  Button,
-  Paper,
-  Radio,
-  RadioGroup,
   SegmentedControl,
   Textarea,
   TextInput,
