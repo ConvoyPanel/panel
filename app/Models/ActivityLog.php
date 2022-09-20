@@ -77,6 +77,7 @@ class ActivityLog extends Model
         return $builder->whereMorphedTo('actor', $actor);
     }
 
+    // TODO: create eloquent repositories
     public function serverSubject()
     {
         return Server::find($this->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);

@@ -9,7 +9,6 @@ use App\Models\Server;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\BuildService;
 use App\Transformers\Admin\ServerTransformer as AdminServerTransformer;
-use App\Transformers\Application\ServerTransformer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -96,11 +95,12 @@ class ServerController extends Controller
     public function search(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
+            ->with(['node', 'owner', 'template'])
             ->allowedFilters(['name', 'user_id', 'node_id', 'vmid', 'installing'])
             ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
             ->allowedIncludes(['node'])
             ->paginate($request->query('per_page') ?? 50);
 
-        return fractal($servers, new ServerTransformer())->respond();
+        return fractal($servers, new AdminServerTransformer())->respond();
     }
 }

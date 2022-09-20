@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Enums\Activity\Status;
 use App\Http\Controllers\ApplicationApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Servers\UpdateBasicInfoRequest;
+use App\Models\ActivityLog;
 use App\Models\Server;
 use App\Services\Servers\ResourceService;
 use App\Services\Servers\ServerDetailService;
@@ -27,8 +29,13 @@ class ServerController extends ApplicationApiController
 
     public function showBuilding(Server $server)
     {
+        $deployment = ActivityLog::where(['event' => 'server:rebuild', 'status' => Status::RUNNING])
+            ->orWhere(['event' => 'server:build', 'status' => Status::RUNNING])->first();
+
         return Inertia::render('servers/Building', [
             'server' => $server->toArray(),
+            'batch' => $deployment->batch,
+            'batch_type' => $deployment->event,
         ]);
     }
 

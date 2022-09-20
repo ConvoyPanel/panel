@@ -26,6 +26,10 @@
   @apply font-bold text-sm;
 }
 
+.p-deemphasized {
+  @apply text-gray-500 text-sm;
+}
+
 .p-desc {
   @apply text-sm text-gray-600;
 }
