@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Models\Objects\Server\Allocations\Storage\DiskObject;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
-use App\Services\ProxmoxService;
+use Convoy\Models\Objects\Server\Allocations\Storage\DiskObject;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 

@@ -1,7 +1,7 @@
 <?php
 
-use App\Facades\Activity;
-use App\Facades\LogTarget;
+use Convoy\Facades\Activity;
+use Convoy\Facades\LogTarget;
 use Illuminate\Support\Facades\Route;
 
 /*

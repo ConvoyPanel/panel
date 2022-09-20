@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use App\Services\Servers\PowerService;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Convoy\Services\Servers\PowerService;
 
 class PowerController extends ApplicationApiController
 {

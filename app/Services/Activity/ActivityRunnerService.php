@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Activity;
+namespace Convoy\Services\Activity;
 
-use App\Enums\Activity\Status;
-use App\Models\ActivityLog;
-use App\Models\Node;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
-use App\Services\ProxmoxService;
+use Convoy\Enums\Activity\Status;
+use Convoy\Models\ActivityLog;
+use Convoy\Models\Node;
+use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use Convoy\Services\ProxmoxService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Arr;

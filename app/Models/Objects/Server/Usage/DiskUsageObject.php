@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Objects\Server\Usage;
+namespace Convoy\Models\Objects\Server\Usage;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;

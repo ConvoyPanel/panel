@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Events\Activity;
+namespace Convoy\Events\Activity;
 
-use App\Models\ActivityLog;
+use Convoy\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Application\Users;
+namespace Convoy\Http\Controllers\Application\Users;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Application\Users\StoreUserRequest;
-use App\Http\Requests\Application\Users\UpdateUserRequest;
-use App\Models\User;
-use App\Transformers\Application\UserTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Application\Users\StoreUserRequest;
+use Convoy\Http\Requests\Application\Users\UpdateUserRequest;
+use Convoy\Models\User;
+use Convoy\Transformers\Application\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;

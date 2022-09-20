@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Client;
+namespace Convoy\Http\Controllers\Client;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 

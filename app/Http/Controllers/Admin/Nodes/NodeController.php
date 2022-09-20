@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Nodes;
+namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
-use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
-use App\Models\Node;
-use App\Transformers\Admin\NodeTransformer as AdminNodeTransformer;
-use App\Transformers\Application\NodeTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
+use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
+use Convoy\Models\Node;
+use Convoy\Transformers\Admin\NodeTransformer as AdminNodeTransformer;
+use Convoy\Transformers\Application\NodeTransformer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\QueryBuilder\QueryBuilder;

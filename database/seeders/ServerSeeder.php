@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Server;
-use App\Models\User;
-use App\Models\Node;
+use Convoy\Models\Server;
+use Convoy\Models\User;
+use Convoy\Models\Node;
 
 class ServerSeeder extends Seeder
 {

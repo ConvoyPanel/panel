@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Nodes;
+namespace Convoy\Services\Nodes;
 
-use App\Models\Node;
-use App\Models\Template;
-use App\Services\ProxmoxService;
+use Convoy\Models\Node;
+use Convoy\Models\Template;
+use Convoy\Services\ProxmoxService;
 use Webmozart\Assert\Assert;
 
 class TemplateService extends ProxmoxService

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace Convoy\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use Convoy\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use App\Services\ProxmoxService;
-use App\Enums\Servers\Cloudinit\AuthenticationType;
-use App\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\ProxmoxService;
+use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
+use Convoy\Enums\Servers\Cloudinit\BiosType;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
- * @package App\Services\Servers
+ * @package Convoy\Services\Servers
  */
 class CloudinitService extends ProxmoxService
 {

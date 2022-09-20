@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Server;
-use App\Models\User;
-use App\Models\Node;
+use Convoy\Models\Server;
+use Convoy\Models\User;
+use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ServerFactory extends Factory

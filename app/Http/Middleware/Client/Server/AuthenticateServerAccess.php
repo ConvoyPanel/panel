@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Middleware\Client\Server;
+namespace Convoy\Http\Middleware\Client\Server;
 
-use App\Models\Server;
+use Convoy\Models\Server;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

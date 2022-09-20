@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Transformers\Application;
+namespace Convoy\Transformers\Application;
 
-use App\Models\Template;
+use Convoy\Models\Template;
 use Illuminate\Support\Arr;
 use League\Fractal\TransformerAbstract;
 
@@ -16,7 +16,7 @@ class TemplateTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-    
+
     /**
      * List of resources possible to include
      *
@@ -25,7 +25,7 @@ class TemplateTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-    
+
     /**
      * A Fractal transformer.
      *

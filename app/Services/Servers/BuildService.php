@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Facades\Activity;
-use App\Facades\LogRunner;
-use App\Models\Objects\Server\ServerDeploymentObject;
-use App\Models\Objects\Server\ServerSpecificationsObject;
-use App\Models\Server;
-use App\Models\Template;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use App\Services\ProxmoxService;
+use Convoy\Facades\Activity;
+use Convoy\Facades\LogRunner;
+use Convoy\Models\Objects\Server\ServerDeploymentObject;
+use Convoy\Models\Objects\Server\ServerSpecificationsObject;
+use Convoy\Models\Server;
+use Convoy\Models\Template;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Convoy\Services\ProxmoxService;
 use Exception;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
- * @package App\Services\Servers
+ * @package Convoy\Services\Servers
  */
 class BuildService extends ProxmoxService
 {

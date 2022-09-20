@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace Convoy\Services;
 
 use Proxmox\PVE;
-use App\Models\Node;
-use App\Models\Server;
+use Convoy\Models\Node;
+use Convoy\Models\Server;
 use Webmozart\Assert\Assert;
 
 /**

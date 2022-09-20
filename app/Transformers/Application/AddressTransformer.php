@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Transformers\Application;
+namespace Convoy\Transformers\Application;
 
-use App\Enums\Network\AddressType;
-use App\Models\IPAddress;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Models\IPAddress;
 use League\Fractal\TransformerAbstract;
 
 class AddressTransformer extends TransformerAbstract
@@ -16,7 +16,7 @@ class AddressTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-    
+
     /**
      * List of resources possible to include
      *
@@ -25,7 +25,7 @@ class AddressTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-    
+
     /**
      * A Fractal transformer.
      *

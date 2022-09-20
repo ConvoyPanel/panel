@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Objects\Server\Allocations\Network;
+namespace Convoy\Models\Objects\Server\Allocations\Network;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;

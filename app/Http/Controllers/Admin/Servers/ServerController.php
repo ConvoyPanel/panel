@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Servers;
+namespace Convoy\Http\Controllers\Admin\Servers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Servers\StoreServerRequest;
-use App\Models\Objects\Server\ServerDeploymentObject;
-use App\Models\Server;
-use App\Services\Servers\ServerCreationService;
-use App\Services\Servers\BuildService;
-use App\Transformers\Admin\ServerTransformer as AdminServerTransformer;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Models\Objects\Server\ServerDeploymentObject;
+use Convoy\Models\Server;
+use Convoy\Services\Servers\ServerCreationService;
+use Convoy\Services\Servers\BuildService;
+use Convoy\Transformers\Admin\ServerTransformer as AdminServerTransformer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;

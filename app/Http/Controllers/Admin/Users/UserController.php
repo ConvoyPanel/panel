@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Users;
+namespace Convoy\Http\Controllers\Admin\Users;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Users\StoreUserRequest;
-use App\Models\User;
-use App\Transformers\Admin\UserTransformer as AdminUserTransformer;
-use App\Transformers\Application\UserTransformer;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
+use Convoy\Models\User;
+use Convoy\Transformers\Admin\UserTransformer as AdminUserTransformer;
+use Convoy\Transformers\Application\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Providers\RouteServiceProvider;
+use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

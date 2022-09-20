@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Application\Nodes;
+namespace Convoy\Http\Controllers\Application\Nodes;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Models\Node;
-use App\Transformers\Application\NodeTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Node;
+use Convoy\Transformers\Application\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 

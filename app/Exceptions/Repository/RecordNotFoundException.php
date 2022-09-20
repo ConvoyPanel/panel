@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions\Repository;
+namespace Convoy\Exceptions\Repository;
 
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;

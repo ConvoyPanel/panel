@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Application\Nodes\Addresses;
+namespace Convoy\Http\Controllers\Application\Nodes\Addresses;
 
-use App\Enums\Network\AddressType;
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Application\Nodes\Addresses\StoreAddressRequest;
-use App\Http\Requests\Application\Nodes\Addresses\UpdateAddressRequest;
-use App\Models\IPAddress;
-use App\Models\Node;
-use App\Services\Servers\NetworkService;
-use App\Transformers\Application\AddressTransformer;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Application\Nodes\Addresses\StoreAddressRequest;
+use Convoy\Http\Requests\Application\Nodes\Addresses\UpdateAddressRequest;
+use Convoy\Models\IPAddress;
+use Convoy\Models\Node;
+use Convoy\Services\Servers\NetworkService;
+use Convoy\Transformers\Application\AddressTransformer;
 use Illuminate\Http\Request;
 use PharIo\Manifest\Application;
 use Spatie\QueryBuilder\QueryBuilder;

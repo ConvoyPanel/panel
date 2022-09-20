@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Enums\Activity\Status;
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Client\Servers\UpdateBasicInfoRequest;
-use App\Models\ActivityLog;
-use App\Models\Server;
-use App\Services\Servers\ResourceService;
-use App\Services\Servers\ServerDetailService;
+use Convoy\Enums\Activity\Status;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Client\Servers\UpdateBasicInfoRequest;
+use Convoy\Models\ActivityLog;
+use Convoy\Models\Server;
+use Convoy\Services\Servers\ResourceService;
+use Convoy\Services\Servers\ServerDetailService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

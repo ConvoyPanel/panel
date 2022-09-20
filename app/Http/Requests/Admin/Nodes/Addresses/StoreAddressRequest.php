@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Requests\Admin\Nodes\Addresses;
+namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
-use App\Enums\Network\AddressType;
-use App\Models\IPAddress;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Models\IPAddress;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Objects\Server;
+namespace Convoy\Models\Objects\Server;
 
-use App\Models\Objects\Server\Configuration\ServerConfigObject;
-use App\Models\Objects\Server\Limits\ServerLimitsObject;
-use App\Models\Objects\Server\Usage\ServerUsageObject;
+use Convoy\Models\Objects\Server\Configuration\ServerConfigObject;
+use Convoy\Models\Objects\Server\Limits\ServerLimitsObject;
+use Convoy\Models\Objects\Server\Usage\ServerUsageObject;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 

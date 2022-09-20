@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Repositories\Eloquent;
+namespace Convoy\Repositories\Eloquent;
 
 use Illuminate\Http\Request;
 use Webmozart\Assert\Assert;
 use Illuminate\Support\Collection;
-use App\Repositories\Repository;
+use Convoy\Repositories\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use App\Contracts\Repository\RepositoryInterface;
-use App\Exceptions\Model\DataValidationException;
-use App\Exceptions\Repository\RecordNotFoundException;
+use Convoy\Contracts\Repository\RepositoryInterface;
+use Convoy\Exceptions\Model\DataValidationException;
+use Convoy\Exceptions\Repository\RecordNotFoundException;
 
 abstract class EloquentRepository extends Repository implements RepositoryInterface
 {

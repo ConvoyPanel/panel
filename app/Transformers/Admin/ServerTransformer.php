@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Transformers\Admin;
+namespace Convoy\Transformers\Admin;
 
-use App\Models\Server;
+use Convoy\Models\Server;
 use League\Fractal\TransformerAbstract;
 
 class ServerTransformer extends TransformerAbstract

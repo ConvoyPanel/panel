@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers\Settings;
+namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use App\Rules\Network\Hostname;
+use Convoy\Rules\Network\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\Network\Domain;
+use Convoy\Rules\Network\Domain;
 
 class UpdateNetworkConfigRequest extends FormRequest
 {

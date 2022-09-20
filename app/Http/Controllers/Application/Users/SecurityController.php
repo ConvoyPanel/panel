@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Application\Users;
+namespace Convoy\Http\Controllers\Application\Users;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Models\SSOToken;
-use App\Models\User;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\SSOToken;
+use Convoy\Models\User;
 use Illuminate\Support\Str;
 
 class SecurityController extends ApplicationApiController

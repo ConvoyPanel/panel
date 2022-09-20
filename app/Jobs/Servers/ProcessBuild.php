@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Jobs\Servers;
+namespace Convoy\Jobs\Servers;
 
-use App\Facades\Activity;
-use App\Facades\LogRunner;
-use App\Facades\LogTarget;
-use App\Models\ActivityLog;
-use App\Models\Objects\Server\ServerDeploymentObject;
-use App\Models\Server;
-use App\Models\Template;
-use App\Services\Activity\ActivityLogBatchService;
-use App\Services\Servers\BuildService;
+use Convoy\Facades\Activity;
+use Convoy\Facades\LogRunner;
+use Convoy\Facades\LogTarget;
+use Convoy\Models\ActivityLog;
+use Convoy\Models\Objects\Server\ServerDeploymentObject;
+use Convoy\Models\Server;
+use Convoy\Models\Template;
+use Convoy\Services\Activity\ActivityLogBatchService;
+use Convoy\Services\Servers\BuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Providers;
+namespace Convoy\Providers;
 
-use App\Http\Middleware\AdminAuthenticate;
-use App\Http\Middleware\AuthorizeProprietaryToken;
-use App\Http\Middleware\ForceJsonResponse;
-use App\Models\Server;
+use Convoy\Http\Middleware\AdminAuthenticate;
+use Convoy\Http\Middleware\AuthorizeProprietaryToken;
+use Convoy\Http\Middleware\ForceJsonResponse;
+use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;

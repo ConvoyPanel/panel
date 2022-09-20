@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use App\Services\Servers\CloudinitService;
-use App\Services\Servers\VncService;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\VncService;
 use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 

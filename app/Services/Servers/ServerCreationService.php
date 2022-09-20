@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Enums\Network\AddressType;
-use App\Exceptions\Service\Server\InvalidTemplateException;
-use App\Jobs\Servers\ProcessBuild;
-use App\Models\IPAddress;
-use App\Models\Objects\Server\Limits\AddressLimitsObject;
-use App\Models\Objects\Server\ServerDeploymentObject;
-use App\Models\Server;
-use App\Models\Template;
-use App\Services\Activity\ActivityLogBatchService;
-use App\Services\ProxmoxService;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Exceptions\Service\Server\InvalidTemplateException;
+use Convoy\Jobs\Servers\ProcessBuild;
+use Convoy\Models\IPAddress;
+use Convoy\Models\Objects\Server\Limits\AddressLimitsObject;
+use Convoy\Models\Objects\Server\ServerDeploymentObject;
+use Convoy\Models\Server;
+use Convoy\Models\Template;
+use Convoy\Services\Activity\ActivityLogBatchService;
+use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Proxmox\Api\Nodes\Node\Network;
@@ -19,7 +19,7 @@ use Webmozart\Assert\Assert;
 
 /**
  * Class ServerCreationService
- * @package App\Services\Servers
+ * @package Convoy\Services\Servers
  */
 class ServerCreationService extends ProxmoxService
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Convoy\Http\Controllers;
 
 use Illuminate\Http\Response;
-use App\Http\Controllers\Controller;
+use Convoy\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ApplicationApiController extends Controller

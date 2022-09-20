@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Console;
+namespace Convoy\Console;
 
-use App\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
-use App\Models\ActivityLog;
+use Convoy\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
+use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Database\Console\PruneCommand;

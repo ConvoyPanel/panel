@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Servers\Settings;
+namespace Convoy\Http\Controllers\Admin\Servers\Settings;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Servers\Settings\UpdateBasicInfoRequest;
-use App\Models\Server;
-use App\Models\Template;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBasicInfoRequest;
+use Convoy\Models\Server;
+use Convoy\Models\Template;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

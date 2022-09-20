@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Objects\Server\Limits;
+namespace Convoy\Models\Objects\Server\Limits;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;

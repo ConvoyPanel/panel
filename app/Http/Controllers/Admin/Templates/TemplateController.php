@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Templates;
+namespace Convoy\Http\Controllers\Admin\Templates;
 
-use App\Http\Controllers\Controller;
-use App\Models\Node;
-use App\Models\Template;
-use App\Services\Nodes\TemplateService;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Node;
+use Convoy\Models\Template;
+use Convoy\Services\Nodes\TemplateService;
 use Illuminate\Http\Request;
 
 class TemplateController extends Controller

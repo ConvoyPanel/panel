@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Requests\Admin\Nodes;
+namespace Convoy\Http\Requests\Admin\Nodes;
 
-use App\Enums\Proxmox\AuthenticationType;
-use App\Rules\Network\Hostname;
+use Convoy\Enums\Proxmox\AuthenticationType;
+use Convoy\Rules\Network\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

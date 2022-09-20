@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Enums\Network\AddressType;
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use App\Models\Objects\Server\ServerDetailsObject;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
-use App\Services\ProxmoxService;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Objects\Server\ServerDetailsObject;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 

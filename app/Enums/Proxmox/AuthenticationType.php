@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Proxmox;
+namespace Convoy\Enums\Proxmox;
 
 enum AuthenticationType: string
 {

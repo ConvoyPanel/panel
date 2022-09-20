@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Activity;
+namespace Convoy\Services\Activity;
 
 use Illuminate\Database\Eloquent\Model;
 

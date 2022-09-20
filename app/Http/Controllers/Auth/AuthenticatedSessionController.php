@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace Convoy\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\AuthorizeTokenRequest;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Models\SSOToken;
-use App\Providers\RouteServiceProvider;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Auth\AuthorizeTokenRequest;
+use Convoy\Http\Requests\Auth\LoginRequest;
+use Convoy\Models\SSOToken;
+use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      *
-     * @param  \App\Http\Requests\Auth\LoginRequest  $request
+     * @param  \Convoy\Http\Requests\Auth\LoginRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(LoginRequest $request)

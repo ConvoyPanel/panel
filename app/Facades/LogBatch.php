@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Facades;
+namespace Convoy\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use App\Services\Activity\ActivityLogBatchService;
+use Convoy\Services\Activity\ActivityLogBatchService;
 
 class LogBatch extends Facade
 {

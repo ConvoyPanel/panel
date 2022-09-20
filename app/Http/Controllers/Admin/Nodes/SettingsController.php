@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Nodes;
+namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use App\Http\Controllers\Controller;
-use App\Models\Node;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Node;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

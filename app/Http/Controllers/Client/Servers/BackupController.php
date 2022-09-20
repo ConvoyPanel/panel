@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
-use App\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use App\Services\Servers\BackupService;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
+use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Convoy\Services\Servers\BackupService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

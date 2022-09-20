@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Exceptions\Model;
+namespace Convoy\Exceptions\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Validation\Validator;
-use App\Exceptions\ConvoyException;
+use Convoy\Exceptions\ConvoyException;
 use Illuminate\Contracts\Support\MessageProvider;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 

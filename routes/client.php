@@ -1,21 +1,21 @@
 <?php
 
-use App\Http\Controllers\Client\IndexController;
-use App\Http\Controllers\Client\Servers\ActivityController;
-use App\Http\Controllers\Client\Servers\BackupController;
-use App\Http\Controllers\Client\Servers\CloudinitController;
-use App\Http\Controllers\Client\Servers\LogsController;
-use App\Http\Controllers\Client\Servers\PowerController;
-use App\Http\Controllers\Client\Servers\SecurityController;
-use App\Http\Controllers\Client\Servers\ServerController;
-use App\Http\Controllers\Client\Servers\StatusController;
-use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
+use Convoy\Http\Controllers\Client\IndexController;
+use Convoy\Http\Controllers\Client\Servers\ActivityController;
+use Convoy\Http\Controllers\Client\Servers\BackupController;
+use Convoy\Http\Controllers\Client\Servers\CloudinitController;
+use Convoy\Http\Controllers\Client\Servers\LogsController;
+use Convoy\Http\Controllers\Client\Servers\PowerController;
+use Convoy\Http\Controllers\Client\Servers\SecurityController;
+use Convoy\Http\Controllers\Client\Servers\ServerController;
+use Convoy\Http\Controllers\Client\Servers\StatusController;
+use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Client\Servers\SettingsController;
-use App\Http\Controllers\Client\Servers\SnapshotController;
-use App\Http\Middleware\Activity\ServerSubject;
-use App\Http\Middleware\CheckServerInstalling;
-use App\Http\Middleware\CheckServerNotInstalling;
+use Convoy\Http\Controllers\Client\Servers\SettingsController;
+use Convoy\Http\Controllers\Client\Servers\SnapshotController;
+use Convoy\Http\Middleware\Activity\ServerSubject;
+use Convoy\Http\Middleware\CheckServerInstalling;
+use Convoy\Http\Middleware\CheckServerNotInstalling;
 
 Route::get('/', [IndexController::class, 'index'])->name('dashboard');
 

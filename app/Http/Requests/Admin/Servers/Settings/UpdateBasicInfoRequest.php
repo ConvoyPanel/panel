@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\Servers\Settings;
+namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Illuminate\Foundation\Http\FormRequest;
 

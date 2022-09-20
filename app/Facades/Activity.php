@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Facades;
+namespace Convoy\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use App\Services\Activity\ActivityLogService;
+use Convoy\Services\Activity\ActivityLogService;
 
 class Activity extends Facade
 {

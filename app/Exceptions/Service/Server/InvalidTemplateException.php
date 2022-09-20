@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Exceptions\Service\Server;
+namespace Convoy\Exceptions\Service\Server;
 
-use App\Exceptions\ConvoyException;
+use Convoy\Exceptions\ConvoyException;
 
 class InvalidTemplateException extends ConvoyException
 {

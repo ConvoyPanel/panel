@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers\Settings;
+namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Enums\Servers\Cloudinit\BiosType;
 
 class UpdateBiosTypeRequest extends FormRequest
 {

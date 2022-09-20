@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\Network;
+namespace Convoy\Rules\Network;
 
 use Illuminate\Contracts\Validation\Rule;
 

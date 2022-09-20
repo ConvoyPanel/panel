@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use App\Services\Servers\ResourceService;
-use App\Services\Servers\StatusService;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Convoy\Services\Servers\ResourceService;
+use Convoy\Services\Servers\StatusService;
 
 /**
  * Class ServerStatusController
- * @package App\Http\Controllers\Client\Servers
+ * @package Convoy\Http\Controllers\Client\Servers
  */
 class StatusController extends ApplicationApiController
 {

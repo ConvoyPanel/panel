@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions;
+namespace Convoy\Exceptions;
 
 use Exception;
 

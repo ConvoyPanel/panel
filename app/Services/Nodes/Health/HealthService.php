@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\Nodes\Health;
+namespace Convoy\Services\Nodes\Health;
 
-use App\Models\Node;
-use App\Services\Nodes\VersionService;
+use Convoy\Models\Node;
+use Convoy\Services\Nodes\VersionService;
 use Carbon\Carbon;
 use Exception;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace Convoy\Models;
 
-use App\Enums\Network\AddressType;
+use Convoy\Enums\Network\AddressType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Enum;

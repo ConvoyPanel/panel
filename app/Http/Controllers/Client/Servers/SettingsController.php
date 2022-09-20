@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use App\Models\Server;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
+use Convoy\Models\Server;
 use Inertia\Inertia;
-use App\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
-use App\Jobs\Servers\ProcessRebuild;
-use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use App\Services\Activity\ActivityLogBatchService;
-use App\Services\Nodes\TemplateService;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
+use Convoy\Jobs\Servers\ProcessRebuild;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\Activity\ActivityLogBatchService;
+use Convoy\Services\Nodes\TemplateService;
 
 class SettingsController extends ApplicationApiController
 {

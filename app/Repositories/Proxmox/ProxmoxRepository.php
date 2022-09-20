@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Repositories\Proxmox;
+namespace Convoy\Repositories\Proxmox;
 
 use GuzzleHttp\Client;
-use App\Models\Node;
+use Convoy\Models\Node;
 use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
-use App\Models\Server;
+use Convoy\Models\Server;
 use Illuminate\Contracts\Foundation\Application;
 
 abstract class ProxmoxRepository

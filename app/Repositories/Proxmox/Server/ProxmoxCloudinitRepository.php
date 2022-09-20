@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace Convoy\Repositories\Proxmox\Server;
 
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use App\Models\Server;
-use App\Repositories\Proxmox\ProxmoxRepository;
-use App\Transformers\Proxmox\CidrTransformer;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use Convoy\Transformers\Proxmox\CidrTransformer;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;

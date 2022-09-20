@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Middleware\Activity;
+namespace Convoy\Http\Middleware\Activity;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Server;
-use App\Facades\LogTarget;
+use Convoy\Models\Server;
+use Convoy\Facades\LogTarget;
 
 class ServerSubject
 {

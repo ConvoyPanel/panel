@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace Convoy\Models;
 
-use App\Events\Activity\ActivityLogged;
-use App\Events\Activity\ActivityUpdated;
+use Convoy\Events\Activity\ActivityLogged;
+use Convoy\Events\Activity\ActivityUpdated;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

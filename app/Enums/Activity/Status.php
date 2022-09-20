@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Activity;
+namespace Convoy\Enums\Activity;
 
 enum Status: string
 {

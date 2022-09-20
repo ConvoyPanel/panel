@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Repositories;
+namespace Convoy\Repositories;
 
 use Closure;
 use InvalidArgumentException;
 use Illuminate\Foundation\Application;
-use App\Contracts\Repository\RepositoryInterface;
+use Convoy\Contracts\Repository\RepositoryInterface;
 
 abstract class Repository implements RepositoryInterface
 {

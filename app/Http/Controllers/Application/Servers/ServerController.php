@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\Application\Servers;
+namespace Convoy\Http\Controllers\Application\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Requests\Application\Servers\StoreServerRequest;
-use App\Http\Requests\Application\Servers\UpdateServerRequest;
-use App\Http\Requests\Application\Servers\UpdateDetailsRequest;
-use App\Models\Objects\Server\ServerDeploymentObject;
-use App\Models\Objects\Server\ServerSpecificationsObject;
-use App\Models\Server;
-use App\Services\Servers\ServerCreationService;
-use App\Services\Servers\BuildService;
-use App\Services\Servers\NetworkService;
-use App\Services\Servers\ServerDetailService;
-use App\Services\Servers\ServerUpdateService;
-use App\Transformers\Application\ServerTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Application\Servers\StoreServerRequest;
+use Convoy\Http\Requests\Application\Servers\UpdateServerRequest;
+use Convoy\Http\Requests\Application\Servers\UpdateDetailsRequest;
+use Convoy\Models\Objects\Server\ServerDeploymentObject;
+use Convoy\Models\Objects\Server\ServerSpecificationsObject;
+use Convoy\Models\Server;
+use Convoy\Services\Servers\ServerCreationService;
+use Convoy\Services\Servers\BuildService;
+use Convoy\Services\Servers\NetworkService;
+use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Services\Servers\ServerUpdateService;
+use Convoy\Transformers\Application\ServerTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Spatie\QueryBuilder\QueryBuilder;

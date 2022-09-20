@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use App\Services\ProxmoxService;
+use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Convoy\Services\ProxmoxService;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;

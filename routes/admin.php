@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\Admin\IndexController;
-use App\Http\Controllers\Admin\Nodes\Addresses\AddressController;
-use App\Http\Controllers\Admin\Nodes\NodeController;
-use App\Http\Controllers\Admin\Nodes\SettingsController;
-use App\Http\Controllers\Admin\Servers\ServerController;
-use App\Http\Controllers\Admin\Users\UserController;
-use App\Http\Controllers\Admin\Servers\Settings;
-use App\Http\Controllers\Admin\Users;
+use Convoy\Http\Controllers\Admin\IndexController;
+use Convoy\Http\Controllers\Admin\Nodes\Addresses\AddressController;
+use Convoy\Http\Controllers\Admin\Nodes\NodeController;
+use Convoy\Http\Controllers\Admin\Nodes\SettingsController;
+use Convoy\Http\Controllers\Admin\Servers\ServerController;
+use Convoy\Http\Controllers\Admin\Users\UserController;
+use Convoy\Http\Controllers\Admin\Servers\Settings;
+use Convoy\Http\Controllers\Admin\Users;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\Templates\TemplateController;
+use Convoy\Http\Controllers\Admin\Templates\TemplateController;
 
 Route::get('/', [IndexController::class, 'index'])->name('admin.dashboard');
 

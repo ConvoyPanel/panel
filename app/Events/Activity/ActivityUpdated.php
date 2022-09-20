@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Events\Activity;
+namespace Convoy\Events\Activity;
 
-use App\Models\ActivityLog;
-use App\Models\Server;
-use App\Models\User;
-use App\Transformers\Client\ActivityLogTransformer;
+use Convoy\Models\ActivityLog;
+use Convoy\Models\Server;
+use Convoy\Models\User;
+use Convoy\Transformers\Client\ActivityLogTransformer;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Facades;
+namespace Convoy\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use App\Services\Activity\ActivityRunnerService;
+use Convoy\Services\Activity\ActivityRunnerService;
 
 class LogRunner extends Facade
 {

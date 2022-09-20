@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Node;
+use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class NodeFactory extends Factory

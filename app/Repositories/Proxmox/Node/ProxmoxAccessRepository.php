@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repositories\Proxmox\Node;
+namespace Convoy\Repositories\Proxmox\Node;
 
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use App\Models\Node;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Node;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;

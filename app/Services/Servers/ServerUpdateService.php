@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Servers;
+namespace Convoy\Services\Servers;
 
-use App\Models\Objects\Server\ServerSpecificationsObject;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use App\Services\ProxmoxService;
+use Convoy\Models\Objects\Server\ServerSpecificationsObject;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 

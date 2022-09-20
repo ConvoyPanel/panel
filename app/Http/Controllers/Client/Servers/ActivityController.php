@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Server;
-use App\Transformers\Client\ActivityLogTransformer;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Server;
+use Convoy\Transformers\Client\ActivityLogTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 

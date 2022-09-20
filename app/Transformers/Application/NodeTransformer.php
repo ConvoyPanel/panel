@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Transformers\Application;
+namespace Convoy\Transformers\Application;
 
-use App\Models\Node;
+use Convoy\Models\Node;
 use League\Fractal\TransformerAbstract;
 
 class NodeTransformer extends TransformerAbstract
@@ -15,7 +15,7 @@ class NodeTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-    
+
     /**
      * List of resources possible to include
      *
@@ -24,7 +24,7 @@ class NodeTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-    
+
     /**
      * A Fractal transformer.
      *

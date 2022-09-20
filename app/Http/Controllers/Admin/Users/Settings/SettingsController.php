@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Users\Settings;
+namespace Convoy\Http\Controllers\Admin\Users\Settings;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Users\Settings\UpdateUserRequest;
-use App\Models\User;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Admin\Users\Settings\UpdateUserRequest;
+use Convoy\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;

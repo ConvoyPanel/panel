@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers\Security;
+namespace Convoy\Http\Requests\Client\Servers\Security;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\Servers\Cloudinit\AuthenticationType;
+use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 
 class UpdatePasswordRequest extends FormRequest
 {

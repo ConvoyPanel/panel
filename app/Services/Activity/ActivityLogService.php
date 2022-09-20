@@ -5,17 +5,17 @@
  *
 */
 
-namespace App\Services\Activity;
+namespace Convoy\Services\Activity;
 
-use App\Enums\Activity\Status;
-use App\Models\ActivityLog;
-use App\Models\ActivityLogSubject;
+use Convoy\Enums\Activity\Status;
+use Convoy\Models\ActivityLog;
+use Convoy\Models\ActivityLogSubject;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\Activity\ActivityLogTargetableService;
+use Convoy\Services\Activity\ActivityLogTargetableService;
 use Illuminate\Contracts\Auth\Factory;
 use Webmozart\Assert\Assert;
 use Illuminate\Database\ConnectionInterface;

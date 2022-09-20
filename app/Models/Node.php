@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace Convoy\Models;
 
-use App\Rules\Network\Hostname;
+use Convoy\Rules\Network\Hostname;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

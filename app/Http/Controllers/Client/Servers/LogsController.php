@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Http\Controllers\Controller;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
-use App\Services\Servers\LogService;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use Convoy\Services\Servers\LogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

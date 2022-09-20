@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Transformers\Application;
+namespace Convoy\Transformers\Application;
 
 use League\Fractal\TransformerAbstract;
 use Illuminate\Support\Arr;
@@ -15,7 +15,7 @@ class SpecificationTransformer extends TransformerAbstract
     protected array $defaultIncludes = [
         //
     ];
-    
+
     /**
      * List of resources possible to include
      *
@@ -24,7 +24,7 @@ class SpecificationTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         //
     ];
-    
+
     /**
      * A Fractal transformer.
      *

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Client\Servers\Backups;
+namespace Convoy\Http\Requests\Client\Servers\Backups;
 
 use Illuminate\Foundation\Http\FormRequest;
 

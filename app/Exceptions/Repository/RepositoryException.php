@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Exceptions\Repository;
+namespace Convoy\Exceptions\Repository;
 
-use App\Exceptions\ConvoyException;
+use Convoy\Exceptions\ConvoyException;
 
 class RepositoryException extends ConvoyException
 {

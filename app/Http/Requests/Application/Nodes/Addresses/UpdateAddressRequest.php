@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests\Application\Nodes\Addresses;
+namespace Convoy\Http\Requests\Application\Nodes\Addresses;
 
-use App\Enums\Network\AddressType;
+use Convoy\Enums\Network\AddressType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Console\Commands\Maintenance;
+namespace Convoy\Console\Commands\Maintenance;
 
-use App\Facades\LogRunner;
-use App\Models\ActivityLog;
+use Convoy\Facades\LogRunner;
+use Convoy\Models\ActivityLog;
 use Illuminate\Console\Command;
 
 class RefreshActivityRunnersCommand extends Command

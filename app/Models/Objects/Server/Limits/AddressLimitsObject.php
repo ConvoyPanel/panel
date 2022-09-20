@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\Objects\Server\Limits;
+namespace Convoy\Models\Objects\Server\Limits;
 
-use App\Models\Objects\Server\Allocations\Network\AddressObject;
+use Convoy\Models\Objects\Server\Allocations\Network\AddressObject;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;

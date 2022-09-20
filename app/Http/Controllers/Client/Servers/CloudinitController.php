@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Client\Servers;
+namespace Convoy\Http\Controllers\Client\Servers;
 
-use App\Http\Controllers\ApplicationApiController;
-use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use App\Services\Servers\CloudinitService;
-use App\Http\Requests\Client\Servers\Security\UpdatePasswordRequest;
-use App\Http\Requests\Client\Servers\Settings\UpdateNetworkConfigRequest;
-use App\Enums\Servers\Cloudinit\AuthenticationType;
-use App\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
-use App\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\Servers\CloudinitService;
+use Convoy\Http\Requests\Client\Servers\Security\UpdatePasswordRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkConfigRequest;
+use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
+use Convoy\Enums\Servers\Cloudinit\BiosType;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Yaml\Yaml;
 use Exception;

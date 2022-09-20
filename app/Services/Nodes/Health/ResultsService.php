@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Nodes\Health;
+namespace Convoy\Services\Nodes\Health;
 
-use App\Models\Node;
+use Convoy\Models\Node;
 
 class ResultsService
 {

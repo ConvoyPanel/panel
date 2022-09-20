@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Transformers\Admin;
+namespace Convoy\Transformers\Admin;
 
-use App\Models\Node;
+use Convoy\Models\Node;
 use League\Fractal\TransformerAbstract;
 
 class NodeTransformer extends TransformerAbstract
