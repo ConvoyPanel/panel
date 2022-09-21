@@ -12,7 +12,6 @@ use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;
 use Convoy\Enums\Servers\Cloudinit\BiosType;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\Yaml\Yaml;
 use Exception;
 
 class CloudinitController extends ApplicationApiController

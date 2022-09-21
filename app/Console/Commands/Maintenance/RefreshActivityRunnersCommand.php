@@ -2,6 +2,7 @@
 
 namespace Convoy\Console\Commands\Maintenance;
 
+use Convoy\Contracts\Repository\ActivityRepositoryInterface;
 use Convoy\Facades\LogRunner;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Command;
@@ -21,13 +22,13 @@ class RefreshActivityRunnersCommand extends Command
     /**
      * Handle command execution.
      */
-    public function handle()
+    public function handle(ActivityRepositoryInterface $repository)
     {
         $runners = ActivityLog::where('status', 'running')->whereIn('event', array_keys(ActivityLog::$eventTypes))->get();
 
         foreach ($runners as $runner)
         {
-            LogRunner::setNode($runner->serverSubject()->node)->setActivity($runner)->refresh();
+            LogRunner::setNode($repository->getServer($runner)->node)->setActivity($runner)->refresh();
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace Convoy\Repositories;
 
 use Closure;
+use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Illuminate\Foundation\Application;
 use Convoy\Contracts\Repository\RepositoryInterface;
@@ -49,9 +50,9 @@ abstract class Repository implements RepositoryInterface
     /**
      * Return the model being used for this repository.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function getModel(): mixed
+    public function getModel(): Model
     {
         return $this->model;
     }

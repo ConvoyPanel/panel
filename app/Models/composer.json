@@ -1,0 +1,14 @@
+{
+  "name": "vendor_name/Models",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "root",
+      "email": "email@example.com"
+    }
+  ],
+  "require": {
+  }
+}

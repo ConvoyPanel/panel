@@ -1,12 +1,17 @@
 {
-  "name": "laravel/laravel",
+  "name": "convoypanel/panel",
   "type": "project",
-  "description": "The Laravel Framework.",
+  "description": "A beautifully designed KVM server management panel for Proxmox Virtual Environment.",
   "keywords": [
-    "framework",
-    "laravel"
+    "proxmox",
+    "kvm",
+    "virtualization",
+    "hosting",
+    "SaaS",
+    "server",
+    "panel"
   ],
-  "license": "MIT",
+  "license": "AGPL",
   "require": {
     "php": "^8.0.2",
     "guzzlehttp/guzzle": "7.4.5",
@@ -15,17 +20,14 @@
     "laravel/helpers": "^1.5",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
-    "performave/proxmox": "dev-master",
     "pusher/pusher-php-server": "^7.0",
     "spatie/laravel-data": "^2.0",
     "spatie/laravel-fractal": "^6.0",
     "spatie/laravel-query-builder": "^5.0",
-    "symfony/yaml": "^6.1",
     "tightenco/ziggy": "^1.0",
     "webmozart/assert": "^1.11"
   },
   "require-dev": {
-    "barryvdh/laravel-ide-helper": "^2.12",
     "fakerphp/faker": "^1.9.1",
     "laravel/breeze": "^1.10",
     "laravel/sail": "^1.0.1",

@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Eloquent;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Webmozart\Assert\Assert;
 use Illuminate\Support\Collection;
@@ -67,7 +68,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      *
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         return $this->model;
     }

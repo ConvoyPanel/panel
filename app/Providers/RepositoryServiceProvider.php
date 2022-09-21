@@ -2,6 +2,8 @@
 
 namespace Convoy\Providers;
 
+use Convoy\Contracts\Repository\ActivityRepositoryInterface;
+use Convoy\Repositories\Eloquent\ActivityRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -11,5 +13,6 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(ActivityRepositoryInterface::class, ActivityRepository::class);
     }
 }
