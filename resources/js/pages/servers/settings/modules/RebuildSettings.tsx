@@ -108,7 +108,7 @@ const RebuildSettings = () => {
         </>
       }
       actions={
-        <Button color='red' type='submit' className='ml-4' disabled={formData.template_id === undefined} loading={processing}>
+        <Button color='red' type='submit' className='ml-4' disabled={formData.template_id === ''} loading={processing}>
           Rebuild
         </Button>
       }
