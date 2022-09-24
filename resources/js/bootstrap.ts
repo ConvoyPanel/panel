@@ -25,6 +25,7 @@ window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
+    namespace: 'Convoy.Events',
     // @ts-ignore
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     // @ts-ignore

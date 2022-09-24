@@ -3,16 +3,19 @@ import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import { Head } from '@inertiajs/inertia-react'
-import { Accordion, Group, Loader, Paper } from '@mantine/core'
+import { Accordion, Code, Group, Loader, Paper } from '@mantine/core'
 import LoadingState from '@/components/LoadingState'
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Inertia } from '@inertiajs/inertia'
 import { XCircleIcon, XIcon } from '@heroicons/react/outline'
+import { Activity } from '@/api/server/getActivity'
+import { CheckCircleIcon } from '@heroicons/react/solid'
 
 interface Props extends DefaultProps {
   server: Server
   batch?: string
-  batch_type?: string
+  batch_type?: 'server:rebuild' | 'server:build'
+  events: Activity[]
 }
 
 interface AccordionProps {
@@ -21,7 +24,7 @@ interface AccordionProps {
   timeEnd?: Date
 }
 
-const AccordionLabel = ({name, timeStart, timeEnd}: AccordionProps) => {
+const AccordionLabel = ({ name, timeStart, timeEnd }: AccordionProps) => {
   const [timeElapsed, setTimeElapsed] = useState(0)
 
   const interval = useRef<number>()
@@ -30,51 +33,126 @@ const AccordionLabel = ({name, timeStart, timeEnd}: AccordionProps) => {
     if (timeStart && !timeEnd && !interval.current) {
       interval.current = window.setInterval(() => {
         // set time elapsed to number of seconds
-        setTimeElapsed(parseFloat(((Date.now() - timeStart.getTime()) / 1000).toFixed(1)))
+        setTimeElapsed(
+          parseFloat(((Date.now() - timeStart.getTime()) / 1000).toFixed(1))
+        )
       }, 100)
     }
 
-    if (timeEnd) {
+    if (timeStart && timeEnd) {
+      setTimeElapsed(
+        parseFloat(
+          ((timeEnd.getTime() - timeStart.getTime()) / 1000).toFixed(1)
+        )
+      )
       window.clearInterval(interval.current)
       interval.current = undefined
     }
-
   }, [timeStart, timeEnd])
 
   // add extra .0 to time elapsed if it is a whole number
-  const timeElapsedString = timeElapsed % 1 === 0 ? `${timeElapsed}.0` : timeElapsed
+  const timeElapsedString =
+    timeElapsed % 1 === 0 ? `${timeElapsed}.0` : timeElapsed
 
   return (
     <div className='flex justify-between items-center p-1'>
       <p>{name}</p>
       <div className='flex items-center space-x-2'>
-        <p className='p-deemphasized'>{timeElapsedString}s</p>
-        {(timeStart && !timeEnd) ?
-        <Loader size='xs' /> : ''}
+        {timeStart && <p className='p-deemphasized'>{timeElapsedString}s</p>}
+        {!timeStart && !timeEnd ? (
+          <svg
+            className='h-6 w-6 stroke-gray-500'
+            viewBox='0 0 100 100'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <circle cx='50' cy='50' r='37' strokeWidth='6' fill='none' />
+          </svg>
+        ) : (
+          ''
+        )}
+        {timeStart && !timeEnd ? <Loader size='sm' /> : ''}
+        {timeEnd && <CheckCircleIcon className='text-blue-500 w-6 h-6' />}
       </div>
     </div>
   )
 }
 
-const Building = ({ auth, server, batch, batch_type }: Props) => {
-  //const [deployment, setDeployment] =
+interface ActivityEvent {
+  data: Activity
+}
+
+interface Events {
+  [key: string]: {
+    data?: Activity
+    title: string
+    description: string
+  }
+}
+
+const Building = ({
+  auth,
+  server,
+  batch,
+  batch_type,
+  events: hydratedEvents,
+}: Props) => {
+  const [events, setEvents] = useState<Events>({
+    'server:uninstall': {
+      title: 'Uninstalling Server',
+      description: 'This server is currently being uninstalled.',
+    },
+    'server:install': {
+      title: 'Copying Context',
+      description: 'This server is currently being installed.',
+    },
+    'server:details.update': {
+      title: 'Updating Server Details',
+      description: 'This server is currently updating its details.',
+    },
+  })
+
+  const s = new Date()
+  s.setMinutes(s.getMinutes() + 5)
+
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       Inertia.reload()
     }, 5000)
 
-    window.Echo.private(`server.${server.id}`).listen(
-      'Activity\\ActivityLogged',
-      (e: any) => {
-        console.log(e)
-      }
-    )
+    window.Echo.private(`server.${server.id}`)
+      .listen('Activity\\ActivityLogged', (event: ActivityEvent) =>
+        updateActivity(event.data)
+      )
+      .listen('Activity\\ActivityUpdated', (event: ActivityEvent) =>
+        updateActivity(event.data)
+      )
+
+    if (batch && batch_type) {
+      hydratedEvents.forEach((event) => {
+        updateActivity(event)
+      })
+    }
 
     return () => {
       clearInterval(refreshInterval)
       window.Echo.leave(`server.${server.id}`)
     }
   }, [])
+
+  const updateActivity = (activity: Activity) => {
+    if (events[activity.event] === undefined || activity.batch !== batch) return
+
+    setEvents((events) => ({
+      ...events,
+      [activity.event]: {
+        ...events[activity.event],
+        data: activity,
+      },
+    }))
+
+    console.log(activity)
+  }
+
   return (
     <Authenticated
       auth={auth}
@@ -97,34 +175,47 @@ const Building = ({ auth, server, batch, batch_type }: Props) => {
             ''
           )}
           {batch_type && batch ? (
-            <div className='rounded-md overflow-hidden mt-3'>
-              <Accordion chevronPosition='left'>
-                <Accordion.Item value='formatting'>
-                  <Accordion.Control>
-                    <AccordionLabel name='Formatting Server' timeStart={new Date()} />
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    Convoy is clearing the server and formatting it for deployment.
-                  </Accordion.Panel>
-                </Accordion.Item>
-                <Accordion.Item value='copying'>
-                  <Accordion.Control disabled>
-                    <AccordionLabel name='Copying Context' />
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    Convoy is installing the specified template to your server. This may take a few minutes.
-                  </Accordion.Panel>
-                </Accordion.Item>
-                <Accordion.Item value='updating'>
-                  <Accordion.Control disabled>
-                    <AccordionLabel name='Updating Server Configuration'/>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    Convoy is updating your server configurations.
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </Accordion>
-            </div>
+            <>
+              <Code>{batch}</Code>
+              <div className='rounded-md overflow-hidden mt-3'>
+                <Accordion chevronPosition='left'>
+                  {Object.keys(events).map((event) => (
+                    <Fragment key={event}>
+                      {(event === 'server:rebuild' && event === batch_type) ||
+                      (event === 'server:build' && event === batch_type) ||
+                      (event !== 'server:build' &&
+                        event !== 'server:rebuild') ? (
+                        <Accordion.Item value={event}>
+                          <Accordion.Control
+                            disabled={events[event].data === undefined}
+                          >
+                            <AccordionLabel
+                              name={events[event].title}
+                              timeStart={
+                                events[event].data
+                                  ? new Date(events[event].data!.created_at)
+                                  : undefined
+                              }
+                              timeEnd={
+                                events[event]?.data?.status === 'ok' &&
+                                events[event]?.data?.updated_at
+                                  ? new Date(events[event].data!.updated_at)
+                                  : undefined
+                              }
+                            />
+                          </Accordion.Control>
+                          <Accordion.Panel>
+                            {events[event].description}
+                          </Accordion.Panel>
+                        </Accordion.Item>
+                      ) : (
+                        ''
+                      )}
+                    </Fragment>
+                  ))}
+                </Accordion>
+              </div>
+            </>
           ) : (
             ''
           )}

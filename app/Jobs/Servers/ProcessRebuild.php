@@ -43,7 +43,7 @@ class ProcessRebuild implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId, protected string $batchUuid)
+    public function __construct(protected $serverId, protected $templateId, protected string $batchUuid, protected ?int $initialLogId)
     {
         //
     }
@@ -62,7 +62,8 @@ class ProcessRebuild implements ShouldQueue
 
         $batch->transaction(function () use ($builder, $server, $template) {
             $server->update(['installing' => true]);
-            $this->activity = Activity::event('server:rebuild')->runner()->log();
+
+            $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
 
             $builder->setServer($server)->rebuild($template);
 

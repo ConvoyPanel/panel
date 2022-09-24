@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Activity;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use Convoy\Models\Server;
@@ -43,7 +44,9 @@ class SettingsController extends ApplicationApiController
         $this->batch->transaction(function (string $uuid) use ($server, $request) {
             $server->update(['installing' => true]);
 
-            ProcessRebuild::dispatch($server->id, $request->template_id, $uuid);
+            $activity = Activity::event('server:rebuild')->runner()->log();
+
+            ProcessRebuild::dispatch($server->id, $request->template_id, $uuid, $activity->id);
         });
 
         return redirect()->route('servers.show.building', [$server->id]);

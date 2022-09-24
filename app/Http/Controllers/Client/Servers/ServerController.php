@@ -10,6 +10,7 @@ use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ResourceService;
 use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Transformers\Client\ActivityLogTransformer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,13 +30,14 @@ class ServerController extends ApplicationApiController
 
     public function showBuilding(Server $server)
     {
-        $deployment = ActivityLog::where(['event' => 'server:rebuild', 'status' => Status::RUNNING])
-            ->orWhere(['event' => 'server:build', 'status' => Status::RUNNING])->first();
+        $deployment = $server->activity()->where([['event', '=', 'server:rebuild'], ['status', '=', Status::RUNNING->value]])
+            ->orWhere([['event', '=', 'server:build'], ['status', '=', Status::RUNNING->value]])->first();
 
         return Inertia::render('servers/Building', [
             'server' => $server->toArray(),
-            'batch' => $deployment->batch,
-            'batch_type' => $deployment->event,
+            'batch' => $deployment?->batch,
+            'batch_type' => (bool) $deployment?->batch ? $deployment->event : null,
+            'events' => ActivityLog::where('batch', '=', $deployment)->get(),
         ]);
     }
 
