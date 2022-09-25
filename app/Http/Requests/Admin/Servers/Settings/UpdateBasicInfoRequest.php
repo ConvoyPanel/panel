@@ -26,7 +26,7 @@ class UpdateBasicInfoRequest extends FormRequest
     {
         $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
 
-        // TODO: finish all the basic info
+        // TODO: finish all the basic infod
         return [
             'name' => $rules['name'],
             'node_id' => $rules['node_id'],
