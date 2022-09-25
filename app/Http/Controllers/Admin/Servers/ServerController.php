@@ -66,8 +66,8 @@ class ServerController extends Controller
                         'size' => Arr::get($data, 'disk'),
                     ]
                 ],
-                'template' => Arr::get($data, 'is_template', false),
-                'visible' => Arr::get($data, 'is_visible', false),
+                'template' => Arr::get($data, 'template', false),
+                'visible' => Arr::get($data, 'visible', false),
             ],
         ];
 

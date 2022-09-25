@@ -2,10 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes;
 
-use Convoy\Enums\Proxmox\AuthenticationType;
-use Convoy\Rules\Network\Hostname;
+use Convoy\Models\Node;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreNodeRequest extends FormRequest
 {
@@ -26,13 +24,6 @@ class StoreNodeRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => 'string|required',
-            'cluster' => 'string|required',
-            'hostname' => [new Hostname, 'required'],
-            'token_id' => 'string|required',
-            'secret' => 'string|required',
-            'port' => 'integer|required',
-        ];
+        return Node::getRules();
     }
 }

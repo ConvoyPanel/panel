@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
+use Convoy\Models\Server;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBasicInfoRequest extends FormRequest
@@ -23,13 +24,16 @@ class UpdateBasicInfoRequest extends FormRequest
      */
     public function rules()
     {
+        $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
+
+        // TODO: finish all the basic info
         return [
-            'name' => 'min:1|max:40',
-            'node_id' => 'exists:nodes,id|required',
-            'user_id' => 'exists:users,id|required',
-            'vmid' => 'numeric|required',
-            'is_template' => 'boolean|required',
-            'is_visible' => 'boolean|required_with:is_template'
+            'name' => $rules['name'],
+            'node_id' => $rules['node_id'],
+            'user_id' => $rules['user_id'],
+            'vmid' => $rules['vmid'],
+            'template' => $rules['template'],
+            'visible' => $rules['visible'],
         ];
     }
 }

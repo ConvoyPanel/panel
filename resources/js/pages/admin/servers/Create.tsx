@@ -47,8 +47,8 @@ interface FormData {
   user_id?: number
   vmid?: number
   template_id?: number
-  is_template: boolean
-  is_visible: boolean
+  template: boolean
+  visible: boolean
   addresses: string[]
   cpu: number
   memory: number
@@ -63,8 +63,8 @@ const Create = ({ auth }: Props) => {
     user_id: undefined,
     vmid: undefined,
     template_id: undefined,
-    is_template: false,
-    is_visible: false,
+    template: false,
+    visible: false,
     addresses: [],
     cpu: 1,
     memory: 1073741824,
@@ -331,16 +331,16 @@ const Create = ({ auth }: Props) => {
 
               {data.type === 'existing' && (
                 <Checkbox
-                  checked={data.is_template}
-                  onChange={(e) => setData('is_template', e.target.checked)}
+                  checked={data.template}
+                  onChange={(e) => setData('template', e.target.checked)}
                   label='Mark as template'
                 />
               )}
 
-              {data.type === 'existing' && data.is_template ? (
+              {data.type === 'existing' && data.template ? (
                 <Checkbox
-                  checked={data.is_visible}
-                  onChange={(e) => setData('is_visible', e.target.checked)}
+                  checked={data.visible}
+                  onChange={(e) => setData('visible', e.target.checked)}
                   label='Make template visible'
                 />
               ) : (

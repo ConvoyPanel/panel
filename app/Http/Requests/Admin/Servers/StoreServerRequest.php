@@ -2,23 +2,15 @@
 
 namespace Convoy\Http\Requests\Admin\Servers;
 
+use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Models\Server;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property mixed $type
  */
-class StoreServerRequest extends FormRequest
+class StoreServerRequest extends AdminFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,29 +18,14 @@ class StoreServerRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'type' => 'in:new,existing|required',
-            'name' => 'min:1|max:40',
-            'node_id' => 'exists:nodes,id|required',
-            'user_id' => 'exists:users,id|required',
-            'vmid' => 'numeric|required_if:type,existing',
-            'addresses' => 'array|max:2',
-            'addresses.*' => 'exists:ip_addresses,id'
-        ];
-
-        if ($this->request->get('type') === 'new')
-        {
-            $rules['template_id'] = 'exists:templates,id|required';
-            $rules['cpu'] = 'numeric|min:1|required';
-            $rules['memory'] = 'numeric|min:16777216|required';
-            $rules['disk'] = 'numeric|min:1|required';
-        }
-
-        if ($this->request->get('type') === 'existing')
-        {
-            $rules['is_template'] = 'boolean|required';
-            $rules['is_visible'] = 'boolean|required_with:is_template';
-        }
+        $rules = Server::getRules();
+        $rules['template_id'] = 'required_if:type,new|exists:templates,id';
+        $rules['vmid'] = $this->convertRule('required', $rules['vmid'], 'required_if:type,existing');
+        $rules['cpu'] = $this->convertRule('required', $rules['cpu'], 'required_if:type,new');
+        $rules['memory'] = $this->convertRule('required', $rules['memory'], 'required_if:type,new');
+        $rules['disk'] = $this->convertRule('required', $rules['disk'], 'required_if:type,new');
+        $rules['template'] = $this->convertRule('required', $rules['template'], 'required_if:type,existing');
+        $rules['visible'] = $this->convertRule('required', $rules['visible'], 'required_with:template');
 
         return $rules;
     }

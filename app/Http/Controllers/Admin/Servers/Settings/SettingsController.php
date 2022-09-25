@@ -20,18 +20,18 @@ class SettingsController extends Controller
 
     public function updateBasicInfo(Server $server, UpdateBasicInfoRequest $request)
     {
-        if ($request->is_template === true)
+        if ($request->template === true)
         {
             if (isset($server->template))
             {
-                $server->template->update(['visible' => $request->is_visible ? true : false]);
+                $server->template->update(['visible' => $request->visible ? true : false]);
             } else {
                 Template::create([
                     'server_id' => $server->id,
-                    'visible' => $request->is_visible ? true : false,
+                    'visible' => $request->visible ? true : false,
                 ]);
             }
-        } elseif ($request->is_template === false) { //strict type checking
+        } elseif ($request->template === false) { //strict type checking
             if (isset($server->template))
             {
                 $server->template->delete();

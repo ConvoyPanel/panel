@@ -22,15 +22,15 @@ class Server extends Model
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|exists:nodes,id',
         'user_id' => 'required|exists:users,id',
-        'vmid' => 'required_if:type,existing|numeric',
+        'vmid' => 'required|numeric|min:100|max:999999999',
         'status' => 'nullable|string|in:suspended,installing',
         'addresses' => 'sometimes|array',
         'addresses.*' => 'exists:ip_addresses,id',
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
-        'is_template' => 'required_if:type,existing|boolean',
-        'is_visible' => 'required_with:is_template|boolean',
+        'template' => 'required_if:type,existing|boolean',
+        'visible' => 'required_with:template|boolean',
     ];
 
     public function node()

@@ -26,8 +26,8 @@ const BasicSettings = () => {
     user_id: settingsContext?.server.user_id,
     node_id: settingsContext?.server.node_id,
     vmid: settingsContext?.server.vmid,
-    is_template: settingsContext?.server.template ? true : false,
-    is_visible: settingsContext?.server.template?.visible ? true : false,
+    template: settingsContext?.server.template ? true : false,
+    visible: settingsContext?.server.template?.visible ? true : false,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -144,15 +144,15 @@ const BasicSettings = () => {
           />
 
             <Checkbox
-              checked={data.is_template}
-              onChange={(e) => setData('is_template', e.target.checked)}
+              checked={data.template}
+              onChange={(e) => setData('template', e.target.checked)}
               label='Mark as template'
             />
 
-          {data.is_template ? (
+          {data.template ? (
             <Checkbox
-              checked={data.is_visible}
-              onChange={(e) => setData('is_visible', e.target.checked)}
+              checked={data.visible}
+              onChange={(e) => setData('visible', e.target.checked)}
               label='Make template visible'
             />
           ) : (
