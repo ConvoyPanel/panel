@@ -26,6 +26,6 @@ class UpdateAddressRequest extends FormRequest
      */
     public function rules()
     {
-        return IPAddress::getRules();
+        return IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class));
     }
 }
