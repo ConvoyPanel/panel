@@ -28,6 +28,7 @@
         "pusher-js": "^7.4.0",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
+        "rollup-plugin-visualizer": "^5.8.2",
         "styled-components": "^5.3.5",
         "tailwindcss": "^3.1.0",
         "twin.macro": "^3.0.0-rc.3",
