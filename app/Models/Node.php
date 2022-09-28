@@ -37,4 +37,9 @@ class Node extends Model
     {
         return $this->hasMany(IPAddress::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }

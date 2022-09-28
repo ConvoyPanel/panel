@@ -28,6 +28,8 @@ RUN if [ $WITH_XDEBUG = "true" ]; then \
             echo "xdebug.mode=develop,coverage,debug,profile" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
         fi;
 
+RUN echo 'pm.max_children = 100' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
 WORKDIR /var/www
 
 CMD ["php-fpm"]

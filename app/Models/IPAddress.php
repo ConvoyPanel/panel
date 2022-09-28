@@ -26,4 +26,9 @@ class IPAddress extends Model
     {
         return $this->belongsTo(Node::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }

@@ -39,7 +39,7 @@ abstract class Model extends IlluminateModel
     /**
      * @var array
      */
-    public static array $validationRules = [];
+    public static $validationRules = [];
 
     /**
      * Listen for the model saving event and fire off the validation

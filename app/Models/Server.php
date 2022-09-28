@@ -60,4 +60,9 @@ class Server extends Model
     {
         return $this->morphToMany(ActivityLog::class, 'subject', 'activity_log_subjects');
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }

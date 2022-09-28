@@ -6,12 +6,13 @@ import PowerActions from '@/components/servers/PowerActions'
 import ServerStatistics from '@/components/servers/ServerStatistics'
 import useServerState from '@/util/useServerState'
 import { Head } from '@inertiajs/inertia-react'
-import { createContext, useEffect } from 'react'
+import { createContext, useEffect, useRef } from 'react'
 import StatGraphs from '@/components/servers/StatGraphs'
 import ServerNav from '@/components/servers/ServerNav'
 import ServerUnavailableModal from '@/components/servers/ServerUnavailableModal'
 import ServerDetails from '@/components/servers/ServerDetails'
 import LoadingState from '@/components/LoadingState'
+import { useDocumentVisibility } from '@mantine/hooks';
 
 interface Props extends DefaultProps {
   server: Server
@@ -28,13 +29,25 @@ const Show = ({ auth, server }: Props) => {
     server.id
   )
 
-  useEffect(() => {
-    updateServerStatus()
+  const documentState = useDocumentVisibility();
+  const documentStateRef = useRef(documentState);
+  const keepUpdating = useRef(true)
 
-    const updateStateInterval = setInterval(updateServerStatus, 1000)
+  useEffect(() => {
+    documentStateRef.current = documentState;
+  }, [documentState]);
+
+  useEffect(() => {
+    const update = async () => {
+      if (!keepUpdating.current) return
+      await updateServerStatus()
+      setTimeout(update, documentStateRef.current === 'visible' ? 1000 : 5000)
+    }
+
+    update()
 
     return () => {
-      clearInterval(updateStateInterval)
+      keepUpdating.current = false
     }
   }, [])
 
