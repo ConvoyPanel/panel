@@ -29,7 +29,7 @@ class ServerDetailService extends ProxmoxService
         $this->allocationService->setServer($this->server);
         $this->cloudinitService->setServer($this->server);
 
-        $config = Arr::keyBy($this->repository->getAllocations(), 'key');
+        //$config = Arr::keyBy($this->repository->getAllocations(), 'key');
         $resources = $this->repository->getResources();
 
         $details = [
@@ -60,12 +60,12 @@ class ServerDetailService extends ProxmoxService
                 'boot_order' => $this->allocationService->getBootOrder(),
                 'disks' => $this->allocationService->getDisks(),
                 'template' => Arr::get($resources, 'template'),
-                'addresses' => $this->cloudinitService->getIpConfig(),
+                'addresses' => $this->cloudinitService->getIpConfig(),/*
                 'limits' => [
                     'cpu' => Arr::get($resources, 'maxcpu'),
                     'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
                     'disk' => Arr::get($resources, 'maxdisk'),
-                ]
+                ] */
             ],
             'node_id' => $this->server->node->id,
         ];

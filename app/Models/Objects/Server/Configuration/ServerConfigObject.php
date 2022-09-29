@@ -15,7 +15,6 @@ class ServerConfigObject extends Data
         public DataCollection|null $disks,
         public bool|null $template,
         public AddressConfigObject|null $addresses,
-        public ServerLimitsObject $limits,
         public bool|null $visible,
     ){}
 }
