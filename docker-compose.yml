@@ -1,12 +1,16 @@
 services:
-  nginx:
-    build: ./dockerfiles/nginx
+  caddy:
+    build: ./dockerfiles/caddy
     restart: unless-stopped
     volumes:
-      - .:/var/www/html/
+      - .:/var/www/
+      - ./dockerfiles/caddy/data/config:/config
+      - ./dockerfiles/caddy/data/data:/data
     ports:
       - 80:80
       - 443:443
+      - 6001:6001
+    env_file: .env
   php:
     build:
       context: ./dockerfiles/php
@@ -15,7 +19,7 @@ services:
         - APP_ENV=$APP_ENV
     restart: unless-stopped
     volumes:
-       - .:/var/www/html/
+       - .:/var/www/
     expose:
       - 9000
     env_file: .env
@@ -28,7 +32,7 @@ services:
       - 3000:3000
       - 5173:5173
     volumes:
-      - .:/app/
+      - .:/var/www/
   redis:
     image: redis:7.0.4-alpine3.16
     restart: unless-stopped
@@ -39,14 +43,14 @@ services:
     build: ./dockerfiles/php-worker
     tty: true
     restart: unless-stopped
-    working_dir: /var/www/html/
+    working_dir: /var/www/
     volumes:
-      - .:/var/www/html/
+      - .:/var/www/
   soketi:
     restart: unless-stopped
     image: 'quay.io/soketi/soketi:1.4-16-alpine'
-    ports:
-      - '${SOKETI_PORT:-6001}:6001'
+    expose:
+      - 6001
 # Do not expose the metrics API to the internet in a production environment
 #      - '${SOKETI_METRICS_SERVER_PORT:-9601}:9601'
     env_file: .env

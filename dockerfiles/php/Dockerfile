@@ -30,8 +30,6 @@ RUN if [ $WITH_XDEBUG = "true" ]; then \
 
 RUN echo 'pm.max_children = 100' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
-WORKDIR /var/www
-
 CMD ["php-fpm"]
 
 EXPOSE 9000

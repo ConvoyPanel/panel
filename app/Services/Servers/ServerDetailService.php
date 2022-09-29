@@ -60,12 +60,7 @@ class ServerDetailService extends ProxmoxService
                 'boot_order' => $this->allocationService->getBootOrder(),
                 'disks' => $this->allocationService->getDisks(),
                 'template' => Arr::get($resources, 'template'),
-                'addresses' => $this->cloudinitService->getIpConfig(),/*
-                'limits' => [
-                    'cpu' => Arr::get($resources, 'maxcpu'),
-                    'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
-                    'disk' => Arr::get($resources, 'maxdisk'),
-                ] */
+                'addresses' => $this->cloudinitService->getIpConfig(),
             ],
             'node_id' => $this->server->node->id,
         ];
