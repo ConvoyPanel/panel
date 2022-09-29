@@ -8,6 +8,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 use Convoy\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
@@ -75,7 +76,7 @@ class CloudinitService extends ProxmoxService
         return $this->repository->setServer($this->server)->update(['nameserver' => $nameserver]);
     }
 
-    public function getIpConfig(): array
+    public function getIpConfig(): AddressConfigObject
     {
         $data = $this->repository->setServer($this->server)->getConfig();
 
@@ -117,7 +118,7 @@ class CloudinitService extends ProxmoxService
             });
         }
 
-        return $config;
+        return AddressConfigObject::from($config);
     }
 
     /**

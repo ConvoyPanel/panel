@@ -19,6 +19,7 @@ class StoreServerRequest extends AdminFormRequest
     public function rules()
     {
         $rules = Server::getRules();
+        $rules['type'] = $this->convertRule('sometimes', $rules['type'], 'required');
         $rules['template_id'] = 'required_if:type,new|exists:templates,id';
         $rules['vmid'] = $this->convertRule('required', $rules['vmid'], 'required_if:type,existing');
         $rules['cpu'] = $this->convertRule('required', $rules['cpu'], 'required_if:type,new');

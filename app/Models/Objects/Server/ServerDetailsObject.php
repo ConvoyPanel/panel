@@ -6,7 +6,6 @@ use Convoy\Models\Objects\Server\Configuration\ServerConfigObject;
 use Convoy\Models\Objects\Server\Limits\ServerLimitsObject;
 use Convoy\Models\Objects\Server\Usage\ServerUsageObject;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
 
 class ServerDetailsObject extends Data
 {

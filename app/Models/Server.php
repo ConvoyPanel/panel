@@ -2,12 +2,18 @@
 
 namespace Convoy\Models;
 
+use Convoy\Casts\MegabytesAndBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Server extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'memory' => MegabytesAndBytes::class,
+        'disk' => MegabytesAndBytes::class,
+    ];
 
     protected $fillable = [
         'name',
@@ -18,12 +24,13 @@ class Server extends Model
     ];
 
     public static $validationRules = [
-        'type' => 'required|in:new,existing',
+        'type' => 'sometimes|in:new,existing',
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|exists:nodes,id',
         'user_id' => 'required|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'status' => 'nullable|string|in:suspended,installing',
+        'installing' => 'sometimes|boolean',
         'addresses' => 'sometimes|array',
         'addresses.*' => 'exists:ip_addresses,id',
         'cpu' => 'required|numeric|min:1',

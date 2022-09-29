@@ -48,9 +48,9 @@ class ServerDetailService extends ProxmoxService
                 ],
             ],
             'limits' => [
-                'cpu' => Arr::get($resources, 'maxcpu'),
-                'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
-                'disk' => Arr::get($resources, 'maxdisk'),
+                'cpu' => $this->server->cpu,
+                'memory' => $this->server->memory,
+                'disk' => $this->server->disk,
                 'addresses' => [
                     'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
                     'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
@@ -61,6 +61,11 @@ class ServerDetailService extends ProxmoxService
                 'disks' => $this->allocationService->getDisks(),
                 'template' => Arr::get($resources, 'template'),
                 'addresses' => $this->cloudinitService->getIpConfig(),
+                'limits' => [
+                    'cpu' => Arr::get($resources, 'maxcpu'),
+                    'memory' => Arr::get($config, 'memory.value', 0) * 1048576,
+                    'disk' => Arr::get($resources, 'maxdisk'),
+                ]
             ],
             'node_id' => $this->server->node->id,
         ];
