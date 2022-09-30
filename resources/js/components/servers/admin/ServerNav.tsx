@@ -1,7 +1,4 @@
 import SubNavigation from '@/components/elements/SubNavigation'
-import { Inertia } from '@inertiajs/inertia'
-import { Tabs } from '@mantine/core'
-import { useEffect, useState } from 'react'
 
 interface Props {
   id: number
