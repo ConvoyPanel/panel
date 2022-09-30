@@ -1,6 +1,9 @@
 services:
   caddy:
-    build: ./dockerfiles/caddy
+    build:
+      context: ./dockerfiles/caddy
+      args:
+        - APP_ENV=$APP_ENV
     restart: unless-stopped
     volumes:
       - .:/var/www/
@@ -26,11 +29,8 @@ services:
   workspace:
     build: ./dockerfiles/workspace
     tty: true
-    environment:
-      - LARAVEL_SAIL=true
     ports:
       - 3000:3000
-      - 5173:5173
     volumes:
       - .:/var/www/
   redis:
