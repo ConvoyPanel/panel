@@ -37,6 +37,9 @@ class ServerCreationService extends ProxmoxService
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
                 'vmid' => $deployment->vmid,
+                'cpu' => $deployment->limits->cpu,
+                'memory' => $deployment->limits->memory,
+                'disk' => $deployment->limits->memory
             ]);
 
             if ((bool) $deployment->config->template) {
@@ -63,6 +66,9 @@ class ServerCreationService extends ProxmoxService
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
                 'vmid' => $deployment->vmid ?? random_int(100, 999999999),
+                'cpu' => $deployment->limits->cpu,
+                'memory' => $deployment->limits->memory,
+                'disk' => $deployment->limits->memory
             ]);
 
             if ($deployment->limits?->address_ids)

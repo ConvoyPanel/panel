@@ -19,7 +19,8 @@ class ServerUpdateService extends ProxmoxService
         protected ServerDetailService $detailService,
         protected ProxmoxPowerRepository $powerRepository,
         protected ProxmoxAllocationRepository $allocationRepository,
-    ) {}
+    ) {
+    }
 
 
     public function handle(ServerSpecificationsObject $deployment)
@@ -40,13 +41,12 @@ class ServerUpdateService extends ProxmoxService
             ]);
 
         /* 3. Configure the IPs */
-        if ($deployment->limits?->addresses?->ipv4->count() !== 0  || $deployment->limits?->addresses?->ipv6->count() !== 0)
-        {
+        if ((int) $deployment->limits?->addresses?->ipv4->count() !== 0  || (int) $deployment->limits?->addresses?->ipv6->count() !== 0) {
             $this->networkService->clearIpsets();
 
             $this->cloudinitService->updateIpConfig([
-                'ipv4' => $deployment->limits->addresses->ipv4->first()?->toArray(),
-                'ipv6' => $deployment->limits->addresses->ipv6->first()?->toArray(),
+                'ipv4' => $deployment->limits->addresses?->ipv4->first()?->toArray() ?? [],
+                'ipv6' => $deployment->limits->addresses?->ipv6->first()?->toArray() ?? [],
             ]);
 
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
@@ -58,19 +58,20 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv6?->first()->mac_address);
         }
 
-        /* 4. Configure the disks */
-        $templateDetails = $this->detailService->getDetails();
+        if ($deployment->limits?->disk) {
+            /* 4. Configure the disks */
+            $templateDetails = $this->detailService->getDetails();
 
-        // Assume the first entry in the boot disks will be the one to resize. All other disks will be dynamically resized/recreated, but this behavior guarantees that a hosting provider can set the disk size no matter the disk type
-        $primaryDisk = collect($deployment->config?->disks)->where('disk', Arr::first($deployment->config?->boot_order))->first();
-        $templatePrimaryDisk = collect($templateDetails->config?->disks)->where('disk', Arr::first($templateDetails->config?->boot_order))->first();
+            // Assume the first entry in the boot disks will be the one to resize. All other disks will be dynamically resized/recreated, but this behavior guarantees that a hosting provider can set the disk size no matter the disk type
+            $templatePrimaryDisk = $templateDetails->config?->disks->where(key: 'disk', value: Arr::first($templateDetails->config?->boot_order))->first();
 
-        if ($primaryDisk !== null && $templatePrimaryDisk !== null) {
-            // If there's no primary disk, then we don't have to do any resizing. Easy!
-            $diff = $this->allocationService->convertToBytes($primaryDisk['size']) - $this->allocationService->convertToBytes($templatePrimaryDisk['size']);
+            if ($templatePrimaryDisk) {
+                // If there's no primary disk, then we don't have to do any resizing. Easy!
+                $diff = $deployment->limits->disk - $templatePrimaryDisk->size;
 
-            if ($diff > 0)
-                $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk['disk']);
+                if ($diff > 0)
+                    $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk->disk);
+            }
         }
 
         /* 5. Kill the server to guarantee configurations are active */

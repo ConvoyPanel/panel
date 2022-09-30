@@ -56,16 +56,10 @@ class ServerController extends Controller
             'limits' => [
                 'cpu' => Arr::get($data, 'cpu'),
                 'memory' => Arr::get($data, 'memory'),
-                'address_ids' => Arr::get($data, 'addresses')
+                'address_ids' => Arr::get($data, 'addresses'),
+                'disk' => Arr::get($data, 'disk')
             ],
             'config' => [
-                'boot_order' => ['default'],
-                'disks' => [
-                    [
-                        'disk' => 'default',
-                        'size' => Arr::get($data, 'disk'),
-                    ]
-                ],
                 'template' => Arr::get($data, 'template', false),
                 'visible' => Arr::get($data, 'visible', false),
             ],
