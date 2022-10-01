@@ -57,7 +57,10 @@ class ServerController extends Controller
                 'cpu' => Arr::get($data, 'cpu'),
                 'memory' => Arr::get($data, 'memory'),
                 'address_ids' => Arr::get($data, 'addresses'),
-                'disk' => Arr::get($data, 'disk')
+                'disk' => Arr::get($data, 'disk'),
+                'snapshot_limit' => Arr::get($data, 'snapshot_limit'),
+                'backup_limit' => Arr::get($data, 'backup_limit'),
+                'bandwidth_limit' => Arr::get($data, 'bandwidth_limit'),
             ],
             'config' => [
                 'template' => Arr::get($data, 'template', false),

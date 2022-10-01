@@ -6,6 +6,8 @@ export interface Node {
     port: number
     latency?: number
     last_pinged?: string
+    network: string
+    storage: string
     created_at: string
     updated_at?: string
 }

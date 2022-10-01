@@ -4,11 +4,9 @@ namespace Convoy\Services\Servers;
 
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\IPAddress;
-use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 
 class NetworkService extends ProxmoxService
 {
@@ -54,6 +52,11 @@ class NetworkService extends ProxmoxService
     public function updateMacAddress(string $address)
     {
         return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address}"]);
+    }
+
+    public function syncNetworkDeviceSettings()
+    {
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => "bridge={$this->node->network}"], put: true);
     }
 
     /**

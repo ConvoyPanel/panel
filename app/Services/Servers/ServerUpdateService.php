@@ -58,6 +58,9 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv6?->first()->mac_address);
         }
 
+        // TODO: sync network device bridge
+        //$this->networkService->syncNetworkDeviceSettings();
+
         if ($deployment->limits?->disk) {
             /* 4. Configure the disks */
             $templateDetails = $this->detailService->getDetails();

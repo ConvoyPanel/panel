@@ -32,6 +32,13 @@ class ServerDetailService extends ProxmoxService
         //$config = Arr::keyBy($this->repository->getAllocations(), 'key');
         $resources = $this->repository->getResources();
 
+        $addresses = [
+            'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
+            'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
+        ];
+
+        $mac_address = Arr::first($addresses['ipv4'], default: null)?->mac_address ?? Arr::first($addresses['ipv6'], default: null)?->mac_address;
+
         $details = [
             'vmid' => $this->server->vmid,
             'status' => Arr::get($resources, 'status'),
@@ -51,10 +58,11 @@ class ServerDetailService extends ProxmoxService
                 'cpu' => $this->server->cpu,
                 'memory' => $this->server->memory,
                 'disk' => $this->server->disk,
-                'addresses' => [
-                    'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
-                    'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
-                ]
+                'addresses' => $addresses,
+                'snapshot_limit' => $this->server->snapshot_limit,
+                'backup_limit' => $this->server->backup_limit,
+                'bandwidth_limit' => $this->server->bandwidth_limit,
+                'mac_address' => $mac_address,
             ],
             'config' => [
                 'boot_order' => $this->allocationService->getBootOrder(),

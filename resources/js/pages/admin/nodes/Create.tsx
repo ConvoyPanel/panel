@@ -1,27 +1,22 @@
 import { DefaultProps } from '@/api/types/default'
-import { Server } from '@/api/server/types'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import { Head, Link, useForm } from '@inertiajs/inertia-react'
-import { ArrowLeftIcon, ChevronLeftIcon, ExclamationCircleIcon } from '@heroicons/react/solid'
+import {
+  ArrowLeftIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/react/solid'
 import {
   Button,
-  Code,
   NumberInput,
-  Overlay,
   Paper,
   TextInput,
-  ActionIcon,
-  Tooltip,
   Alert,
 } from '@mantine/core'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
-import { CheckCircleIcon } from '@heroicons/react/outline'
-import { Inertia } from '@inertiajs/inertia'
 
-interface Props extends DefaultProps {
-}
+interface Props extends DefaultProps {}
 
 const Create = ({ auth }: Props) => {
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -31,6 +26,8 @@ const Create = ({ auth }: Props) => {
     token_id: '',
     secret: '',
     port: 8006,
+    network: '',
+    storage: '',
   })
 
   const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
@@ -42,7 +39,10 @@ const Create = ({ auth }: Props) => {
   }
 
   return (
-    <Authenticated auth={auth} header={<h1 className='h1'>Import Node from 'convoy/nodes'</h1>}>
+    <Authenticated
+      auth={auth}
+      header={<h1 className='h1'>Import Node from 'convoy/nodes'</h1>}
+    >
       <Head title={`Import Node`} />
 
       <Main>
@@ -59,8 +59,15 @@ const Create = ({ auth }: Props) => {
         <div className='flex flex-col !mt-9 space-y-3'>
           <Paper shadow='xs' className='p-card w-full relative overflow-hidden'>
             <h3 className='h3'>Configure Node</h3>
-            <Alert className='mt-3' icon={<ExclamationCircleIcon className='h-5 w-5' />} title='Warning' color='yellow' variant='filled'>
-              Disable 'privilege separation' when creating the API Token in Proxmox Virtual Environment
+            <Alert
+              className='mt-3'
+              icon={<ExclamationCircleIcon className='h-5 w-5' />}
+              title='Warning'
+              color='yellow'
+              variant='filled'
+            >
+              Disable 'privilege separation' when creating the API Token in
+              Proxmox Virtual Environment
             </Alert>
             <form className='mt-3 space-y-3' onSubmit={submit}>
               <TextInput
@@ -72,7 +79,7 @@ const Create = ({ auth }: Props) => {
                 error={errors.name}
                 required
               />
-              <div className='grid sm:grid-cols-7 sm:gap-3'>
+              <div className='grid sm:grid-cols-7 gap-3'>
                 <TextInput
                   label='Hostname'
                   name='hostname'
@@ -101,25 +108,49 @@ const Create = ({ auth }: Props) => {
                 error={errors.cluster}
                 required
               />
-              <TextInput
-                label='Token ID'
-                name='token_id'
-                value={data.token_id}
-                className='mt-1 block w-full'
-                onChange={onHandleChange}
-                error={errors.token_id}
-                required
-              />
-              <TextInput
-                label='Token Secret'
-                name='secret'
-                type='password'
-                value={data.secret}
-                className='mt-1 block w-full'
-                onChange={onHandleChange}
-                error={errors.secret}
-                required
-              />
+              <div className='grid sm:grid-cols-2 gap-3'>
+                <TextInput
+                  label='Token ID'
+                  name='token_id'
+                  value={data.token_id}
+                  className='mt-1 block w-full'
+                  onChange={onHandleChange}
+                  error={errors.token_id}
+                  required
+                />
+                <TextInput
+                  label='Token Secret'
+                  name='secret'
+                  type='password'
+                  value={data.secret}
+                  className='mt-1 block w-full'
+                  onChange={onHandleChange}
+                  error={errors.secret}
+                  required
+                />
+              </div>
+              <div className='grid sm:grid-cols-2 gap-3'>
+                <TextInput
+                  label='Network Interface'
+                  name='network'
+                  value={data.network}
+                  className='mt-1 block w-full'
+                  onChange={onHandleChange}
+                  error={errors.network}
+                  placeholder='vmbr1'
+                  required
+                />
+                <TextInput
+                  label='Volume Storage'
+                  name='storage'
+                  value={data.storage}
+                  className='mt-1 block w-full'
+                  onChange={onHandleChange}
+                  error={errors.storage}
+                  placeholder='local, local-lvm, etc'
+                  required
+                />
+              </div>
 
               <Button
                 className='!mt-9'

@@ -13,6 +13,7 @@ class Server extends Model
     protected $casts = [
         'memory' => MegabytesAndBytes::class,
         'disk' => MegabytesAndBytes::class,
+        'bandwidth_limit' => MegabytesAndBytes::class,
     ];
 
     protected $fillable = [
@@ -36,8 +37,12 @@ class Server extends Model
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
+        'snapshot_limit' => 'present|nullable|integer|min:0',
+        'backup_limit' => 'present|nullable|integer|min:0',
+        'bandwidth_limit' => 'present|nullable|integer|min:0',
         'template' => 'required_if:type,existing|boolean',
         'visible' => 'required_with:template|boolean',
+        'template_id' => 'required_if:type,new|exists:templates,id',
     ];
 
     public function node()

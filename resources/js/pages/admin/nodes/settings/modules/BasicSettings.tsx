@@ -1,8 +1,6 @@
 import FormBlock from '@/components/FormBlock'
 import { SettingsContext } from '@/pages/admin/nodes/settings/Index'
-import { ServerContext } from '@/pages/servers/Show'
 import { formDataHandler } from '@/util/helpers'
-import { Inertia } from '@inertiajs/inertia'
 import { useForm } from '@inertiajs/inertia-react'
 import { Button, NumberInput, Paper, TextInput } from '@mantine/core'
 import { ChangeEvent, FormEvent, useContext, useEffect } from 'react'
@@ -17,6 +15,8 @@ const BasicSettings = () => {
     token_id: '',
     secret: '',
     port: settingsContext?.node.port,
+    network: settingsContext?.node.network,
+    storage: settingsContext?.node.storage,
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -40,7 +40,7 @@ const BasicSettings = () => {
             required
           />
 
-          <div className='grid sm:grid-cols-3 sm:gap-3 space-y-3 sm:space-y-0'>
+          <div className='grid sm:grid-cols-3 gap-3'>
             <TextInput
               label='Hostname'
               name='hostname'
@@ -68,6 +68,30 @@ const BasicSettings = () => {
             error={errors.cluster}
             required
           />
+
+          <div className='grid sm:grid-cols-1 gap-3'>
+            <TextInput
+              label='Network Interface'
+              name='network'
+              value={data.network}
+              className='mt-1 block w-full'
+              onChange={onHandleChange}
+              error={errors.network}
+              placeholder='vmbr1'
+              required
+            />
+            <TextInput
+              label='Volume Storage'
+              name='storage'
+              value={data.storage}
+              className='mt-1 block w-full'
+              onChange={onHandleChange}
+              error={errors.storage}
+              placeholder='local, local-lvm, etc'
+              required
+            />
+          </div>
+
           <TextInput
             label='Token ID'
             name='token_id'

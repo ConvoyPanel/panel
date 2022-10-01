@@ -2,13 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Settings;
 
-use Convoy\Enums\Proxmox\AuthenticationType;
+use Convoy\Http\Requests\Admin\AdminFormRequest;
 use Convoy\Models\Node;
-use Convoy\Rules\Network\Hostname;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
-class UpdateNodeRequest extends FormRequest
+class UpdateNodeRequest extends AdminFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

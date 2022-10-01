@@ -41,7 +41,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function backup(string $mode, string $compressionType, string $storage = 'local')
+    public function backup(string $mode, string $compressionType)
     {
         Assert::isInstanceOf($this->server, Server::class);
         Assert::inArray($mode, $this->modes, 'Invalid mode');
@@ -51,7 +51,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/vzdump', $this->node->cluster),[
                 'json' => [
                     'vmid' => $this->server->vmid,
-                    'storage' => $storage,
+                    'storage' => $this->node->storage,
                     'mode' => $mode,
                     'remove' => 0,
                     'compress' => $compressionType,
@@ -83,12 +83,12 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function delete(string $archive, string $storage = 'local')
+    public function delete(string $archive)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/storage/%s/content/%s', $this->node->cluster, $storage, $archive));
+            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/storage/%s/content/%s', $this->node->cluster, $this->node->storage, $archive));
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }

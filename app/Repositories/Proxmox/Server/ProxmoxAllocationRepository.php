@@ -3,7 +3,6 @@
 namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use GuzzleHttp\Exception\GuzzleException;
@@ -39,14 +38,13 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function update(array $params = [])
+    public function update(array $params = [], bool $put = false)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/config', $this->node->cluster, $this->server->vmid),
-            [
-                'json' => $params
+            $response = $this->getHttpClient()->request($put ? 'put' : 'post', sprintf('/api2/json/nodes/%s/qemu/%s/config', $this->node->cluster, $this->server->vmid), [
+                'json' => $params,
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -63,13 +61,15 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
         $gigabytes = $bytes / 1073741824;
 
         try {
-            $response = $this->getHttpClient()->put(sprintf('/api2/json/nodes/%s/qemu/%s/resize', $this->node->cluster, $this->server->vmid),
+            $response = $this->getHttpClient()->put(
+                sprintf('/api2/json/nodes/%s/qemu/%s/resize', $this->node->cluster, $this->server->vmid),
                 [
                     'json' => [
                         'disk' => $disk,
                         'size' => "+{$gigabytes}G"
                     ]
-                ]);
+                ]
+            );
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }

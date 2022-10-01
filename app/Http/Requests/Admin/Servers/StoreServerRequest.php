@@ -20,13 +20,7 @@ class StoreServerRequest extends AdminFormRequest
     {
         $rules = Server::getRules();
         $rules['type'] = $this->convertRule('sometimes', $rules['type'], 'required');
-        $rules['template_id'] = 'required_if:type,new|exists:templates,id';
         $rules['vmid'] = $this->convertRule('required', $rules['vmid'], 'required_if:type,existing');
-        $rules['cpu'] = $this->convertRule('required', $rules['cpu'], 'required_if:type,new');
-        $rules['memory'] = $this->convertRule('required', $rules['memory'], 'required_if:type,new');
-        $rules['disk'] = $this->convertRule('required', $rules['disk'], 'required_if:type,new');
-        $rules['template'] = $this->convertRule('required', $rules['template'], 'required_if:type,existing');
-        $rules['visible'] = $this->convertRule('required', $rules['visible'], 'required_with:template');
 
         return $rules;
     }

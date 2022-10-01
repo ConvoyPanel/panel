@@ -4,6 +4,8 @@ namespace Convoy\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
+use Webmozart\Assert\Assert;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class AdminFormRequest extends FormRequest
 {
@@ -37,5 +39,31 @@ abstract class AdminFormRequest extends FormRequest
 
             return $entry;
         });
+    }
+
+
+
+    /**
+     * Returns the named route parameter and asserts that it is a real model that
+     * exists in the database.
+     *
+     * @template T of \Illuminate\Database\Eloquent\Model
+     *
+     * @param class-string<T> $expect
+     *
+     * @return T
+     * @noinspection PhpUndefinedClassInspection
+     * @noinspection PhpDocSignatureInspection
+     */
+    public function parameter(string $key, string $expect)
+    {
+        $value = $this->route()->parameter($key);
+
+        Assert::isInstanceOf($value, $expect);
+        Assert::isInstanceOf($value, Model::class);
+        Assert::true($value->exists);
+
+        /* @var T $value */
+        return $value;
     }
 }
