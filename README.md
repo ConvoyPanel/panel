@@ -30,6 +30,26 @@ https://dev.to/jackmiras/xdebug-in-phpstorm-with-docker-2al8
 #### VSCode Guide (tested & working)
 https://dev.to/jackmiras/xdebug-in-vscode-with-docker-379l
 
+
+VSCode PHP Debugger Configuration
+```
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for XDebug on Docker",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/var/www/": "${workspaceFolder}"
+      }
+    }
+  ]
+}
+
+```
+
 ## Acknowledgements
 
 Convoy wouldn't have been possible without these organizations and people

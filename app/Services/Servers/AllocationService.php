@@ -88,7 +88,7 @@ class AllocationService extends ProxmoxService
             'size' => 0,
         ];
 
-        preg_match("/,size=(\d+\w?),/s", Arr::get($rawDisk, 'value'), $matches);
+        preg_match("/size=(\d+\w?)/s", Arr::get($rawDisk, 'value'), $matches);
 
         $disk['size'] = $this->convertToBytes($matches[1]);
 
