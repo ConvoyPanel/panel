@@ -48,7 +48,6 @@ class ProcessBuild implements ShouldQueue
      */
     public function __construct(protected Server $server, protected ServerDeploymentObject $deployment, protected ?string $batchUuid)
     {
-
     }
 
     /**
@@ -62,25 +61,20 @@ class ProcessBuild implements ShouldQueue
 
         LogTarget::setSubject($this->server);
 
-        $batch->transaction(function () use ($builder) {
-            $this->server->update(['installing' => true]);
-            $this->activity = Activity::event('server:build')->runner()->log();
+        try {
+            $batch->transaction(function () use ($builder) {
+                $this->server->update(['installing' => true]);
+                $this->activity = Activity::event('server:build')->runner()->log();
 
-            $builder->setServer($this->server)->build(Template::find($this->deployment->template_id), $this->deployment);
+                $builder->setServer($this->server)->build(Template::find($this->deployment->template_id), $this->deployment);
 
-            $this->server->update(['installing' => false]);
-            LogRunner::setActivity($this->activity)->end();
-        }, $this->batchUuid);
-    }
+                $this->server->update(['installing' => false]);
+                LogRunner::setActivity($this->activity)->end();
+            }, $this->batchUuid);
+        } catch (Throwable $e) {
+            LogRunner::setActivity($this->activity)->error();
 
-    /**
-     * Handle a job failure.
-     *
-     * @param  \Throwable  $exception
-     * @return void
-     */
-    public function failed(Throwable $exception)
-    {
-        LogRunner::setActivity($this->activity)->error();
+            throw $e;
+        }
     }
 }

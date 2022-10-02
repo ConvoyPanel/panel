@@ -60,26 +60,21 @@ class ProcessRebuild implements ShouldQueue
 
         LogTarget::setSubject($server);
 
-        $batch->transaction(function () use ($builder, $server, $template) {
-            $server->update(['installing' => true]);
+        try {
+            $batch->transaction(function () use ($builder, $server, $template) {
+                $server->update(['installing' => true]);
 
-            $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
+                $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
 
-            $builder->setServer($server)->rebuild($template);
+                $builder->setServer($server)->rebuild($template);
 
-            $server->update(['installing' => false]);
-            LogRunner::setActivity($this->activity)->end();
-        }, $this->batchUuid);
-    }
+                $server->update(['installing' => false]);
+                LogRunner::setActivity($this->activity)->end();
+            }, $this->batchUuid);
+        } catch (Throwable $e) {
+            LogRunner::setActivity($this->activity)->error();
 
-    /**
-     * Handle a job failure.
-     *
-     * @param  \Throwable  $exception
-     * @return void
-     */
-    public function failed(Throwable $exception)
-    {
-        LogRunner::setActivity($this->activity)->error();
+            throw $e;
+        }
     }
 }
