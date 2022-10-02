@@ -7,13 +7,14 @@ use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\ServerDetailsObject;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
 class ServerDetailService extends ProxmoxService
 {
-    public function __construct(protected ProxmoxAllocationRepository $repository, protected AllocationService $allocationService, protected CloudinitService $cloudinitService)
+    public function __construct(protected ProxmoxAllocationRepository $repository, protected ProxmoxCloudinitRepository $cloudinitRepository, protected AllocationService $allocationService, protected CloudinitService $cloudinitService)
     {
     }
 
@@ -28,16 +29,22 @@ class ServerDetailService extends ProxmoxService
         $this->repository->setServer($this->server);
         $this->allocationService->setServer($this->server);
         $this->cloudinitService->setServer($this->server);
+        $this->cloudinitRepository->setServer($this->server);
 
         //$config = Arr::keyBy($this->repository->getAllocations(), 'key');
         $resources = $this->repository->getResources();
+        $config = $this->cloudinitRepository->getConfig();
 
         $addresses = [
             'ipv4' => $this->server->addresses()->where('type', AddressType::IPV4->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
             'ipv6' => $this->server->addresses()->where('type', AddressType::IPV6->value)->get(['address', 'cidr', 'gateway', 'mac_address'])?->toArray(),
         ];
 
-        $mac_address = Arr::first($addresses['ipv4'], default: null)?->mac_address ?? Arr::first($addresses['ipv6'], default: null)?->mac_address;
+        $mac_address = null;
+        if (preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($config, 'net0', ''), $matches))
+        {
+            $mac_address = $matches[0];
+        }
 
         $details = [
             'vmid' => $this->server->vmid,
@@ -62,9 +69,10 @@ class ServerDetailService extends ProxmoxService
                 'snapshot_limit' => $this->server->snapshot_limit,
                 'backup_limit' => $this->server->backup_limit,
                 'bandwidth_limit' => $this->server->bandwidth_limit,
-                'mac_address' => $mac_address,
+                'mac_address' => Arr::first($addresses['ipv4'], default: null)?->mac_address ?? Arr::first($addresses['ipv6'], default: null)?->mac_address,
             ],
             'config' => [
+                'mac_address' => $mac_address,
                 'boot_order' => $this->allocationService->getBootOrder(),
                 'disks' => $this->allocationService->getDisks(),
                 'template' => Arr::get($resources, 'template'),

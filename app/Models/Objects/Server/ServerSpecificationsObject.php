@@ -11,7 +11,7 @@ class ServerSpecificationsObject extends Data
 {
     public function __construct(
         public ServerLimitsObject $limits,
-        //public ServerConfigObject|null $config,
+        public ServerConfigObject|null $config,
     ) {
     }
 }

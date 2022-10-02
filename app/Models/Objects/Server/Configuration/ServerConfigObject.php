@@ -10,6 +10,7 @@ use Spatie\LaravelData\Attributes\DataCollectionOf;
 class ServerConfigObject extends Data
 {
     public function __construct(
+        public string|null $mac_address,
         public array|null $boot_order,
         #[DataCollectionOf(DiskObject::class)]
         public DataCollection|null $disks,

@@ -49,15 +49,15 @@ class NetworkService extends ProxmoxService
         }
     }
 
-    public function updateMacAddress(string $address)
+    public function syncSettings(string $address)
     {
-        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address}"]);
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address},bridge={$this->node->network}"]);
     }
 
-    public function syncNetworkDeviceSettings()
+    /* public function syncNetworkDeviceSettings()
     {
         return $this->allocationRepository->setServer($this->server)->update(['net0' => "bridge={$this->node->network}"], put: true);
-    }
+    } */
 
     /**
      * @param array<int, int> $addressIds

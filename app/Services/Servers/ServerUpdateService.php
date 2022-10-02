@@ -52,14 +52,10 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
         }
 
-        if (isset($deployment->limits?->addresses?->ipv4?->first()->mac_address)) {
-            $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv4?->first()->mac_address);
-        } elseif (isset($deployment->limits?->addresses?->ipv6?->first()->mac_address)) {
-            $this->networkService->updateMacAddress($deployment->limits?->addresses?->ipv6?->first()->mac_address);
-        }
+        $mac_address = $deployment->limits?->addresses?->ipv4?->first()?->mac_address ?? $deployment->limits?->addresses?->ipv6?->first()?->mac_address ?? $deployment->config->mac_address;
 
-        // TODO: sync network device bridge
-        //$this->networkService->syncNetworkDeviceSettings();
+        $this->networkService->syncSettings($mac_address);
+
 
         if ($deployment->limits?->disk) {
             /* 4. Configure the disks */
