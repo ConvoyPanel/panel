@@ -17,10 +17,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
     ];
 
     public $compressionTypes = [
-      'none',
-      'lzo',
-      'gzip',
-      'zstd',
+        'none',
+        'lzo',
+        'gzip',
+        'zstd',
     ];
 
     public function getBackups(string $storage = 'local')
@@ -28,7 +28,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $storage),[
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $storage), [
                 'query' => [
                     'content' => 'backup',
                     'vmid' => $this->server->vmid
@@ -48,7 +48,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::inArray($compressionType, $this->compressionTypes, 'Invalid compression type');
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/vzdump', $this->node->cluster),[
+            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/vzdump', $this->node->cluster), [
                 'json' => [
                     'vmid' => $this->server->vmid,
                     'storage' => $this->node->storage,
@@ -61,7 +61,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-    return $this->getData($response);
+        return $this->getData($response);
     }
 
     public function restore(string $archive)
@@ -69,7 +69,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu', $this->node->cluster),[
+            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu', $this->node->cluster), [
                 'json' => [
                     'vmid' => $this->server->vmid,
                     'force' => 1,
@@ -92,5 +92,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }
+
+        return $this->getData($response);
     }
 }

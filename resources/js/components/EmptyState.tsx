@@ -8,9 +8,10 @@ interface Props {
   description: string
   action: string
   onClick: () => void
+  disabled?: boolean
 }
 
-const EmptyState = ({icon: Icon, title, description, action, onClick}: Props) => {
+const EmptyState = ({icon: Icon, title, description, action, onClick, disabled}: Props) => {
   return <div className='flex flex-col justify-center items-center text-center h-[60vh]'>
     <Icon
       className='mx-auto h-12 w-12 text-gray-400'
@@ -21,7 +22,7 @@ const EmptyState = ({icon: Icon, title, description, action, onClick}: Props) =>
       { description }
     </p>
     <div className='mt-6'>
-      <Button onClick={onClick} type='button'>
+      <Button onClick={onClick} type='button' disabled={ disabled }>
         <PlusIcon className='-ml-1 mr-2 h-5 w-5' aria-hidden='true' />
         { action }
       </Button>

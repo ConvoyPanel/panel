@@ -2,8 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Enums\Network\AddressType;
-use Convoy\Exceptions\Service\Server\InvalidTemplateException;
+use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 use Convoy\Jobs\Servers\ProcessBuild;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Objects\Server\Limits\AddressLimitsObject;
@@ -13,8 +12,6 @@ use Convoy\Models\Template;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
-use Proxmox\Api\Nodes\Node\Network;
 use Webmozart\Assert\Assert;
 
 /**

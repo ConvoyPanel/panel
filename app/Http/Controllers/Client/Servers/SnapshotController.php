@@ -5,35 +5,38 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
-use Convoy\Services\Servers\CloudinitService;
-use Convoy\Services\Servers\SnapshotService;
 use Convoy\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
+use Convoy\Services\Servers\Snapshots\SnapshotCreationService;
+use Convoy\Services\Servers\Snapshots\SnapshotDeletionService;
 
 class SnapshotController extends ApplicationApiController
 {
-    public function __construct(private ProxmoxSnapshotRepository $repository)
+    public function __construct(protected ProxmoxSnapshotRepository $repository, protected SnapshotCreationService $creationService, protected SnapshotDeletionService $deletionService)
     {
     }
 
     public function index(Server $server)
     {
+        $snapshots = $this->repository->setServer($server)->getSnapshots();
+
         return inertia('servers/snapshots/Index', [
             'server' => $server,
-            'snapshots' => $this->repository->setServer($server)->getSnapshots(),
+            'snapshots' => $snapshots,
+            'can_create' => isset($server->snapshot_limit) ? count($snapshots) < $server->snapshot_limit : true,
         ]);
     }
 
 
     public function store(Server $server, SnapshotRequest $request)
     {
-        $this->repository->setServer($server)->create($request->name);
+        $this->creationService->setServer($server)->handle($request->name);
 
         return back();
     }
 
     public function destroy(Server $server, SnapshotRequest $request)
     {
-        $this->repository->setServer($server)->delete($request->name);
+        $this->deletionService->setServer($server)->handle($request->name);
 
         return back();
     }

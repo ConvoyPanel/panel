@@ -8,28 +8,33 @@ use Convoy\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Convoy\Services\Servers\Backups\BackupCreationService;
+use Convoy\Services\Servers\Backups\BackupDeletionService;
 use Convoy\Services\Servers\BackupService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(private ProxmoxBackupRepository $repository)
+    public function __construct(protected ProxmoxBackupRepository $repository, protected BackupCreationService $creationService, protected BackupDeletionService $deletionService)
     {
 
     }
 
     public function index(Server $server)
     {
+        $backups = $this->repository->setServer($server)->getBackups();
+
         return Inertia::render('servers/backups/Index', [
             'server' => $server,
-            'backups' => $this->repository->setServer($server)->getBackups(),
+            'backups' => $backups,
+            'can_create' => isset($server->backup_limit) ? count($backups) < $server->backup_limit : true,
         ]);
     }
 
     public function store(Server $server, StoreBackupRequest $request)
     {
-        $this->repository->setServer($server)->backup($request->mode, $request->compressionType);
+        $this->creationService->setServer($server)->handle($request->mode, $request->compressionType);
 
         return back();
     }
@@ -43,7 +48,7 @@ class BackupController extends ApplicationApiController
 
     public function destroy(Server $server, RollbackBackupRequest $request)
     {
-        $this->repository->setServer($server)->delete($request->archive);
+        $this->deletionService->setServer($server)->handle($request->archive);
 
         return back();
     }

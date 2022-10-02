@@ -4,17 +4,16 @@ import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
 import ServerNav from '@/components/servers/ServerNav'
 import { Head, useForm } from '@inertiajs/inertia-react'
-import { Button, Modal, Paper, Select, Table, TextInput } from '@mantine/core'
-import { PlayIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid'
+import { Button, Modal, Paper, Select, Table } from '@mantine/core'
+import { PlayIcon } from '@heroicons/react/solid'
 import { Backup } from '@/api/server/backups/types'
-import { ArchiveIcon, DuplicateIcon } from '@heroicons/react/outline'
+import { ArchiveIcon } from '@heroicons/react/outline'
 import EmptyState from '@/components/EmptyState'
 import dateTimeCalculator from '@/util/dateTimeCalculator'
 import { formatBytes } from '@/api/server/getStatus'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { formDataHandler } from '@/util/helpers'
 import RoundedButton from '@/components/RoundedButton'
-import { Inertia } from '@inertiajs/inertia'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface BackupRowProps {
@@ -27,7 +26,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   const [showRollbackModal, setShowRollbackModal] = useState(false)
   const { delete: deleteBackup, processing: processingDelete } = useForm({})
   const { post: rollbackBackup, processing: processingRollback } = useForm({
-    archive: backup.volid
+    archive: backup.volid,
   })
 
   const calculateTime = (time: number) => {
@@ -40,16 +39,21 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   const size = formatBytes(backup.size)
 
   const handleDelete = async () => {
-    deleteBackup(route('servers.show.backups', { archive: backup.volid, server: serverId }), {
-      onSuccess: () => setShowDeleteModal(false)
-    })
+    deleteBackup(
+      route('servers.show.backups', {
+        archive: backup.volid,
+        server: serverId,
+      }),
+      {
+        onSuccess: () => setShowDeleteModal(false),
+      }
+    )
   }
 
   const handleRollback = async () => {
     await rollbackBackup(route('servers.show.backups.rollback', serverId), {
-      onSuccess: () => setShowRollbackModal(false)
+      onSuccess: () => setShowRollbackModal(false),
     })
-
   }
 
   return (
@@ -119,9 +123,10 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
 interface Props extends DefaultProps {
   server: Server
   backups: Backup[]
+  can_create: boolean
 }
 
-const Index = ({ auth, server, backups }: Props) => {
+const Index = ({ auth, server, backups, can_create }: Props) => {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -203,7 +208,10 @@ const Index = ({ auth, server, backups }: Props) => {
           <h3 className='h3-deemphasized'>Backups</h3>
           <Paper shadow='xs' className='p-card w-full mt-3'>
             <div className='flex justify-end'>
-              <Button onClick={() => setShowCreateModal(true)}>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                disabled={!can_create}
+              >
                 New Backup
               </Button>
             </div>
@@ -234,6 +242,7 @@ const Index = ({ auth, server, backups }: Props) => {
                 description='You have no backups yet.'
                 action='New Backup'
                 onClick={() => setShowCreateModal(true)}
+                disabled={!can_create}
               />
             )}
           </Paper>

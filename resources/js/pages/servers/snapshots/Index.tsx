@@ -11,7 +11,7 @@ import {
   TrashIcon,
 } from '@heroicons/react/solid'
 import { Head, useForm } from '@inertiajs/inertia-react'
-import { Button, Modal, Paper, Table, TextInput } from '@mantine/core'
+import { Button, Modal, Paper, Table, TextInput, Tooltip } from '@mantine/core'
 import { useMemo, useState } from 'react'
 import RoundedButton from '@/components/RoundedButton'
 import { Inertia } from '@inertiajs/inertia'
@@ -33,15 +33,24 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
   const { post: rollbackSnapshot, processing: processingRollback } = useForm({})
 
   const handleDelete = async () => {
-    deleteSnapshot(route('servers.show.snapshots', { name: snapshot.name, server: server.id }), {
-      onSuccess: () => setShowDeleteModal(false)
-    })
+    deleteSnapshot(
+      route('servers.show.snapshots', {
+        name: snapshot.name,
+        server: server.id,
+      }),
+      {
+        onSuccess: () => setShowDeleteModal(false),
+      }
+    )
   }
 
   const handleRollback = async () => {
-    rollbackSnapshot(route('servers.show.snapshots.rollback', { server: server.id }), {
-      onSuccess: () => setShowRollbackModal(false)
-    })
+    rollbackSnapshot(
+      route('servers.show.snapshots.rollback', { server: server.id }),
+      {
+        onSuccess: () => setShowRollbackModal(false),
+      }
+    )
   }
 
   if (snapshot.snaptime === undefined && snapshot.running !== undefined) {
@@ -129,18 +138,19 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
 interface Props extends DefaultProps {
   server: Server
   snapshots: Snapshot[]
+  can_create: boolean
 }
 
-const Index = ({ auth, server, snapshots }: Props) => {
+const Index = ({ auth, server, snapshots, can_create }: Props) => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const { post, errors, processing, data, setData } = useForm({
     name: '',
   })
 
   const handleCreate = async () => {
-      await post(route('servers.show.snapshots', { server: server.id }), {
-        onSuccess: () => setShowCreateModal(false),
-      })
+    await post(route('servers.show.snapshots', { server: server.id }), {
+      onSuccess: () => setShowCreateModal(false),
+    })
   }
 
   const currentSnapshot = useMemo(() => {
@@ -179,7 +189,9 @@ const Index = ({ auth, server, snapshots }: Props) => {
               }}
               className='block w-full'
               autoFocus
-              onChange={(e) => setData('name', e.target.value.replace(/\s+/g, '-'))}
+              onChange={(e) =>
+                setData('name', e.target.value.replace(/\s+/g, '-'))
+              }
               error={errors.name}
               required
             />
@@ -198,7 +210,10 @@ const Index = ({ auth, server, snapshots }: Props) => {
           <h3 className='h3-deemphasized'>Snapshots</h3>
           <Paper shadow='xs' className='p-card w-full mt-3'>
             <div className='flex justify-end'>
-              <Button onClick={() => setShowCreateModal(true)}>
+              <Button
+                disabled={!can_create}
+                onClick={() => setShowCreateModal(true)}
+              >
                 New Snapshot
               </Button>
             </div>
@@ -234,6 +249,7 @@ const Index = ({ auth, server, snapshots }: Props) => {
                 description='Get started by creating a new snapshot.'
                 action='New Snapshot'
                 onClick={() => setShowCreateModal(true)}
+                disabled={!can_create}
               />
             )}
           </Paper>

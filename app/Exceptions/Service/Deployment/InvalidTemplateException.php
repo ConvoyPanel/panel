@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Server;
+namespace Convoy\Exceptions\Service\Deployment;
 
 use Convoy\Exceptions\ConvoyException;
 

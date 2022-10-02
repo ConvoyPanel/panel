@@ -31,7 +31,6 @@ class ServerDetailService extends ProxmoxService
         $this->cloudinitService->setServer($this->server);
         $this->cloudinitRepository->setServer($this->server);
 
-        //$config = Arr::keyBy($this->repository->getAllocations(), 'key');
         $resources = $this->repository->getResources();
         $config = $this->cloudinitRepository->getConfig();
 
