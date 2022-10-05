@@ -3,15 +3,6 @@
 use Illuminate\Support\Facades\Facade;
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Application Version
-    |--------------------------------------------------------------------------
-    | This value is set when creating a Convoy release. You should not
-    | change this value if you are not maintaining your own internal versions.
-    */
-
-    'version' => 'canary',
 
     /*
     |--------------------------------------------------------------------------
