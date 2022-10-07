@@ -15,6 +15,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
@@ -49,14 +50,24 @@ class ProcessRebuild implements ShouldQueue
     }
 
     /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware()
+    {
+        return [new WithoutOverlapping($this->serverId)];
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
      */
     public function handle(ActivityLogBatchService $batch, BuildService $builder)
     {
-        $server = Server::find($this->serverId);
-        $template = Template::find($this->templateId);
+        $server = Server::findOrFail($this->serverId);
+        $template = Template::findOrFail($this->templateId);
 
         LogTarget::setSubject($server);
 

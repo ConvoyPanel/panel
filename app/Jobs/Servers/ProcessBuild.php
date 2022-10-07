@@ -12,12 +12,11 @@ use Convoy\Models\Template;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\Servers\BuildService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Throwable;
 use Webmozart\Assert\Assert;
 
@@ -51,6 +50,16 @@ class ProcessBuild implements ShouldQueue
     }
 
     /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware()
+    {
+        return [new WithoutOverlapping($this->server->id)];
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
@@ -66,7 +75,7 @@ class ProcessBuild implements ShouldQueue
                 $this->server->update(['installing' => true]);
                 $this->activity = Activity::event('server:build')->runner()->log();
 
-                $builder->setServer($this->server)->build(Template::find($this->deployment->template_id), $this->deployment);
+                $builder->setServer($this->server)->build(Template::findOrFail($this->deployment->template_id), $this->deployment);
 
                 $this->server->update(['installing' => false]);
                 LogRunner::setActivity($this->activity)->end();
