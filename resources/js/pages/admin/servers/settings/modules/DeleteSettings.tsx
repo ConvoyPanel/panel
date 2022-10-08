@@ -19,7 +19,7 @@ const DeleteSettings = () => {
   }
 
   const handleDelete = () => {
-    deleteServer(route('admin.servers.show', settingsContext?.server.id))
+    deleteServer(route('admin.servers.show', settingsContext?.server.uuidShort))
   }
 
   return (

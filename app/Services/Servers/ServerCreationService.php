@@ -9,8 +9,10 @@ use Convoy\Models\Objects\Server\Limits\AddressLimitsObject;
 use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
+use Convoy\Repositories\Eloquent\ServerRepository;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\ProxmoxService;
+use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -20,7 +22,7 @@ use Webmozart\Assert\Assert;
  */
 class ServerCreationService extends ProxmoxService
 {
-    public function __construct(protected NetworkService $networkService, protected ActivityLogBatchService $batch)
+    public function __construct(protected NetworkService $networkService, protected ServerRepository $repository, protected ActivityLogBatchService $batch)
     {
     }
 
@@ -28,8 +30,12 @@ class ServerCreationService extends ProxmoxService
     {
         Assert::inArray($deployment->type, ['existing', 'new']);
 
+        $uuid = $this->generateUniqueUuidCombo();
+
         if ($deployment->type === 'existing') {
             $server = Server::create([
+                'uuid' => $uuid,
+                'uuidShort' => substr($uuid, 0, 8),
                 'name' => $deployment->name,
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
@@ -62,6 +68,8 @@ class ServerCreationService extends ProxmoxService
             $addresses = $this->networkService->convertFromEloquent($deployment->limits?->address_ids ?? []);
 
             $server = Server::create([
+                'uuid' => $uuid,
+                'uuidShort' => substr($uuid, 0, 8),
                 'name' => $deployment->name,
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
@@ -88,5 +96,21 @@ class ServerCreationService extends ProxmoxService
 
             return $server;
         }
+    }
+
+
+
+    /**
+     * Create a unique UUID and UUID-Short combo for a server.
+     */
+    private function generateUniqueUuidCombo(): string
+    {
+        $uuid = Str::uuid()->toString();
+
+        if (!$this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
+            return $this->generateUniqueUuidCombo();
+        }
+
+        return $uuid;
     }
 }

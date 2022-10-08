@@ -26,7 +26,7 @@ export const ServerContext = createContext<ServerContextInterface | null>(null)
 
 const Show = ({ auth, server }: Props) => {
   const { serverState, updateServerStatus, isErroring } = useServerState(
-    server.id
+    server.uuidShort
   )
 
   const documentState = useDocumentVisibility();
@@ -55,7 +55,7 @@ const Show = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.id} />}
+      secondaryHeader={<ServerNav id={server.uuidShort} />}
     >
       <Head title={`${server.name} - Overview`} />
 

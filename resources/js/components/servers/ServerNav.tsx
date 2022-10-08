@@ -1,11 +1,8 @@
-import getActivity from '@/api/server/getActivity'
 import SubNavigation from '@/components/elements/SubNavigation'
-import { Inertia } from '@inertiajs/inertia'
-import { Tabs, TabsValue } from '@mantine/core'
 import { useEffect, useState } from 'react'
 
 interface Props {
-  id: number
+  id: string
 }
 
 const ServerNav = ({ id }: Props) => {

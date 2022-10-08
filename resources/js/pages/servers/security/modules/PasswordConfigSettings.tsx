@@ -22,7 +22,7 @@ const PasswordConfigSettings = () => {
   })
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
-    post(route('servers.show.settings.password', settingsContext?.server.id))
+    post(route('servers.show.settings.password', settingsContext?.server.uuidShort))
   }
 
   useEffect(() => {

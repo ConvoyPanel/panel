@@ -24,7 +24,7 @@ const NetworkConfigSettings = () => {
     put(
       route(
         'servers.show.settings.network-config',
-        settingsContext?.server.id
+        settingsContext?.server.uuidShort
       )
     )
   }

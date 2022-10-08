@@ -77,7 +77,7 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
         data.map((server) => {
           return {
             label: server.name,
-            value: server.id.toString(),
+            value: server.uuidShort.toString(),
             description: `Node: ${
               server.node.name
             }, VMID: ${server.vmid.toString()}`,

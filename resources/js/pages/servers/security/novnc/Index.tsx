@@ -24,7 +24,7 @@ const Index = ({ auth, server }: Props) => {
 
   useEffect(() => {
     const main = async () => {
-      const { data } = await getCredentials(server.id)
+      const { data } = await getCredentials(server.uuidShort)
 
       setCredentials(data)
 
@@ -49,7 +49,7 @@ const Index = ({ auth, server }: Props) => {
     setUsed(true)
 
     setTimeout(() => {
-      Inertia.visit(route('servers.show.security', server.id))
+      Inertia.visit(route('servers.show.security', server.uuidShort))
     }, 3000)
   }
 
@@ -57,7 +57,7 @@ const Index = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.id} />}
+      secondaryHeader={<ServerNav id={server.uuidShort} />}
     >
       <Head title={`${server.name} - NoVNC`} />
 

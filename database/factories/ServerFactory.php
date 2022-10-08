@@ -27,7 +27,7 @@ class ServerFactory extends Factory
             'name' => $this->faker->firstName(),
             'user_id' => User::factory(),
             'node_id' => Node::factory(),
-            'vmid' => rand(1,5000)
+            'vmid' => rand(100,5000)
         ];
     }
 }

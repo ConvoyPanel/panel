@@ -6,7 +6,7 @@ import { useContext, useMemo } from 'react'
 
 const ServerStatistics = () => {
   const serverContext = useContext(ServerContext)
-  const { serverState } = useServerState(serverContext?.server.id as number)
+  const { serverState } = useServerState(serverContext!.server.uuidShort)
 
   interface Statistic {
     name: string

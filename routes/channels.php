@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('server.{id}', function ($user, $id) {
-    return (int) $user->id === (int) Server::findOrFail($id)->user_id || (bool) $user->root_admin;
+Broadcast::channel('server.{id}', function ($user, $uuid) {
+    return (int) $user->id === (int) App::make('Convoy\Repositories\Eloquent\ServerRepository')->getByUuid($uuid)->user_id || (bool) $user->root_admin;
 });
 
 Broadcast::channel('user.{id}', function ($user, $id) {

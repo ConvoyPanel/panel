@@ -80,7 +80,7 @@ class ProcessBuild implements ShouldQueue
                 $this->server->update(['installing' => false]);
                 LogRunner::setActivity($this->activity)->end();
             }, $this->batchUuid);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             LogRunner::setActivity($this->activity)->error();
 
             throw $e;

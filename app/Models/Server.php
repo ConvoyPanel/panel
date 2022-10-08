@@ -75,6 +75,6 @@ class Server extends Model
 
     public function getRouteKeyName(): string
     {
-        return 'id';
+        return 'uuidShort';
     }
 }

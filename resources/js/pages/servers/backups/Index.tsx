@@ -138,7 +138,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
     formDataHandler(event, setData)
 
   const handleCreate = () => {
-    post(route('servers.show.backups', server.id))
+    post(route('servers.show.backups', server.uuidShort))
 
     setShowCreateModal(false)
   }
@@ -160,7 +160,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.id} />}
+      secondaryHeader={<ServerNav id={server.uuidShort} />}
     >
       <Head title={`${server.name} - Backups`} />
 
@@ -229,7 +229,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
                 </thead>
                 <tbody>
                   {backups.map((backup) => (
-                    <BackupRow serverId={server.id} backup={backup} />
+                    <BackupRow serverId={server.uuidShort} backup={backup} />
                   ))}
                 </tbody>
               </Table>

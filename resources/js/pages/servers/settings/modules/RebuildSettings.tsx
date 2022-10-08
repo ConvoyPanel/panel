@@ -29,7 +29,7 @@ const RebuildSettings = () => {
   }, [confirmOne, confirmText])
 
   const { data, status } = useQuery(['templates'], async () => {
-    const { data } = await getTemplates(settingsContext!.server.id)
+    const { data } = await getTemplates(settingsContext!.server.uuidShort)
     return data
   })
 
@@ -54,7 +54,7 @@ const RebuildSettings = () => {
   }
 
   const handleRebuild = async () => {
-    post(route('servers.show.settings.rebuild', settingsContext?.server.id))
+    post(route('servers.show.settings.rebuild', settingsContext?.server.uuidShort))
   }
 
   return (
