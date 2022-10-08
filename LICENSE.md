@@ -7,8 +7,8 @@ The licensee may use this code in production if they have an active subscription
 
 Change License
 
-GNU AFFERO GENERAL PUBLIC LICENSE
-Version 3, 19 November 2007
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
 
 Terms
 
