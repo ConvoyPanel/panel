@@ -8,7 +8,7 @@ export interface Route {
 }
 
 export interface Props {
-  id: number
+  id: string | number
   routes: Route[]
 }
 

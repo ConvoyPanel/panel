@@ -13,6 +13,6 @@ export interface Log {
   endtime: number
 }
 
-export default (serverId: number) => {
-  return axios.get<Log[]>(route('servers.show.logs.json', serverId))
+export default (serverUuid: string) => {
+  return axios.get<Log[]>(route('servers.show.logs.json', serverUuid))
 }

@@ -1,7 +1,7 @@
 import SubNavigation from '@/components/elements/SubNavigation'
 
 interface Props {
-  id: number
+  id: string
 }
 
 const ServerNav = ({ id }: Props) => {

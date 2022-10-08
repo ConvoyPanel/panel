@@ -17,11 +17,11 @@ import RoundedButton from '@/components/RoundedButton'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface BackupRowProps {
-  serverId: number
+  serverUuid: string
   backup: Backup
 }
 
-const BackupRow = ({ serverId, backup }: BackupRowProps) => {
+const BackupRow = ({ serverUuid, backup }: BackupRowProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRollbackModal, setShowRollbackModal] = useState(false)
   const { delete: deleteBackup, processing: processingDelete } = useForm({})
@@ -42,7 +42,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
     deleteBackup(
       route('servers.show.backups', {
         archive: backup.volid,
-        server: serverId,
+        server: serverUuid,
       }),
       {
         onSuccess: () => setShowDeleteModal(false),
@@ -51,7 +51,7 @@ const BackupRow = ({ serverId, backup }: BackupRowProps) => {
   }
 
   const handleRollback = async () => {
-    await rollbackBackup(route('servers.show.backups.rollback', serverId), {
+    await rollbackBackup(route('servers.show.backups.rollback', serverUuid), {
       onSuccess: () => setShowRollbackModal(false),
     })
   }
@@ -229,7 +229,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
                 </thead>
                 <tbody>
                   {backups.map((backup) => (
-                    <BackupRow serverId={server.uuidShort} backup={backup} />
+                    <BackupRow serverUuid={server.uuidShort} backup={backup} />
                   ))}
                 </tbody>
               </Table>
