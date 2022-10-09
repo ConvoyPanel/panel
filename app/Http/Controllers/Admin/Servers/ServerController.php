@@ -79,7 +79,7 @@ class ServerController extends Controller
         {
             try {
                 $this->buildService->setServer($server)->delete();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
 
             }
         }
@@ -93,9 +93,7 @@ class ServerController extends Controller
     {
         $servers = QueryBuilder::for(Server::query())
             ->with(['node', 'owner', 'template'])
-            ->allowedFilters(['name', 'user_id', 'node_id', 'vmid', 'installing'])
-            ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
-            ->allowedIncludes(['node'])
+            ->allowedFilters(['node.id', 'status', 'uuid', 'uuidShort', 'name', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
         return fractal($servers, new AdminServerTransformer())->respond();

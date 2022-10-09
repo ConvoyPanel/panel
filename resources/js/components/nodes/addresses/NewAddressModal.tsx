@@ -69,7 +69,7 @@ const NewAddressModal = ({ node, open, setOpen }: Props) => {
         data.map((server) => {
           return {
             label: server.name,
-            value: server.uuidShort.toString(),
+            value: server.id.toString(),
             description: `Node: ${
               server.node.name
             }, VMID: ${server.vmid.toString()}`,

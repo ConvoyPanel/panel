@@ -61,7 +61,7 @@ const Index = ({ auth, servers }: Props) => {
               </thead>
               <tbody>
                 {servers.data.map((server) => (
-                  <tr key={server.uuidShort}>
+                  <tr key={server.id}>
                     <td>{server.name}</td>
                     <td>{server.vmid}</td>
                     <td>{server.node.name}</td>
@@ -83,7 +83,7 @@ const Index = ({ auth, servers }: Props) => {
                     <td>
                       <EditButton
                         onClick={() =>
-                          Inertia.visit(route('admin.servers.show', server.uuidShort))
+                          Inertia.visit(route('admin.servers.show', server.id))
                         }
                       />
                     </td>

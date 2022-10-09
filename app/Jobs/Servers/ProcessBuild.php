@@ -75,7 +75,7 @@ class ProcessBuild implements ShouldQueue
                 $this->server->update(['installing' => true]);
                 $this->activity = Activity::event('server:build')->runner()->log();
 
-                $builder->setServer($this->server)->build(Template::findOrFail($this->deployment->template_id), $this->deployment);
+                $builder->setServer($this->server)->build(Template::findOrFail($this->deployment->template_id));
 
                 $this->server->update(['installing' => false]);
                 LogRunner::setActivity($this->activity)->end();

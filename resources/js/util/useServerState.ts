@@ -5,7 +5,7 @@ import getStatus, { formatBytes } from '@/api/server/getStatus'
 
 const { useStoreActions, useStoreState } = createTypedHooks<ApplicationStore>()
 
-const useServerState = (id: string) => {
+const useServerState = (id: number) => {
   const server = useStoreState((state) => state.server.data)
   const setServer = useStoreActions((actions) => actions.server.setServer)
   const [isErroring, setIsErroring] = useState(false)
@@ -38,7 +38,7 @@ const useServerState = (id: string) => {
 
   // preflight check to make sure we have the right server
   useEffect(() => {
-    if (server && server.uuidShort !== id) {
+    if (server && server.id !== id) {
       setServer(undefined)
     }
   }, [])
@@ -50,7 +50,7 @@ const useServerState = (id: string) => {
       const { time, unit } = convertTimeToSmallest(uptime)
 
       setServer({
-        uuidShort: id,
+        id,
         state: status,
         uptime: {
           time,

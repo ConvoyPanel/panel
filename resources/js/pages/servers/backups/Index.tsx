@@ -17,11 +17,11 @@ import RoundedButton from '@/components/RoundedButton'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
 
 interface BackupRowProps {
-  serverUuid: string
+  id: number
   backup: Backup
 }
 
-const BackupRow = ({ serverUuid, backup }: BackupRowProps) => {
+const BackupRow = ({ id, backup }: BackupRowProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showRollbackModal, setShowRollbackModal] = useState(false)
   const { delete: deleteBackup, processing: processingDelete } = useForm({})
@@ -42,7 +42,7 @@ const BackupRow = ({ serverUuid, backup }: BackupRowProps) => {
     deleteBackup(
       route('servers.show.backups', {
         archive: backup.volid,
-        server: serverUuid,
+        server: id,
       }),
       {
         onSuccess: () => setShowDeleteModal(false),
@@ -51,7 +51,7 @@ const BackupRow = ({ serverUuid, backup }: BackupRowProps) => {
   }
 
   const handleRollback = async () => {
-    await rollbackBackup(route('servers.show.backups.rollback', serverUuid), {
+    await rollbackBackup(route('servers.show.backups.rollback', id), {
       onSuccess: () => setShowRollbackModal(false),
     })
   }
@@ -134,11 +134,8 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
     compressionType: 'zstd',
   })
 
-  const onHandleChange = (event: ChangeEvent<HTMLInputElement>) =>
-    formDataHandler(event, setData)
-
   const handleCreate = () => {
-    post(route('servers.show.backups', server.uuidShort))
+    post(route('servers.show.backups', server.id))
 
     setShowCreateModal(false)
   }
@@ -160,7 +157,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.uuidShort} />}
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Backups`} />
 
@@ -229,7 +226,7 @@ const Index = ({ auth, server, backups, can_create }: Props) => {
                 </thead>
                 <tbody>
                   {backups.map((backup) => (
-                    <BackupRow serverUuid={server.uuidShort} backup={backup} />
+                    <BackupRow id={server.id} backup={backup} />
                   ))}
                 </tbody>
               </Table>

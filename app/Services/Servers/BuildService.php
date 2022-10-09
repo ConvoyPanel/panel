@@ -80,7 +80,7 @@ class BuildService extends ProxmoxService
         return $details;
     }
 
-    public function build(Template $template, ServerDeploymentObject $details)
+    public function build(Template $template)
     {
         /*
          * Procedure
@@ -108,7 +108,7 @@ class BuildService extends ProxmoxService
         do {
             try {
                 $intermissionDetails = $this->detailService->getDetails();
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $intermissionDetails = null;
             }
         } while (empty($intermissionDetails) || $intermissionDetails->locked);
@@ -116,7 +116,8 @@ class BuildService extends ProxmoxService
         LogRunner::setActivity($activity)->end();
 
         $activity = Activity::event('server:details.update')->runner()->log();
-        $this->updateService->handle(ServerSpecificationsObject::from($details->toArray()));
+
+        $this->updateService->handle(ServerSpecificationsObject::from($intermissionDetails->toArray()));
         LogRunner::setActivity($activity)->end();
 
         return $this->detailService->getDetails();
@@ -126,9 +127,9 @@ class BuildService extends ProxmoxService
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $details = $this->delete();
+        $this->delete();
 
-        return $this->build($template, ServerDeploymentObject::from($details->toArray()));
+        return $this->build($template);
     }
 
     public function convertToBytes(string $from): ?int

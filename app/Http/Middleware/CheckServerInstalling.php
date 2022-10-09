@@ -32,7 +32,7 @@ class CheckServerInstalling
             {
                 throw new AccessDeniedHttpException('Server is installing');
             } else {
-                return redirect()->route('servers.show.building', $server->id);
+                return redirect()->route('servers.show.building', $server->uuidShort);
             }
         }
 

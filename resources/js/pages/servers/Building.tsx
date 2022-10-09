@@ -119,7 +119,7 @@ const Building = ({
       Inertia.reload()
     }, 5000)
 
-    window.Echo.private(`server.${server.uuidShort}`)
+    window.Echo.private(`server.${server.id}`)
       .listen('Activity\\ActivityLogged', (event: ActivityEvent) =>
         updateActivity(event.data)
       )
@@ -135,7 +135,7 @@ const Building = ({
 
     return () => {
       clearInterval(refreshInterval)
-      window.Echo.leave(`server.${server.uuidShort}`)
+      window.Echo.leave(`server.${server.id}`)
     }
   }, [])
 

@@ -36,7 +36,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
     deleteSnapshot(
       route('servers.show.snapshots', {
         name: snapshot.name,
-        server: server.uuidShort,
+        server: server.id,
       }),
       {
         onSuccess: () => setShowDeleteModal(false),
@@ -46,7 +46,7 @@ const SnapshotRow = ({ server, snapshot, currentSnapshot }: SnapshotProps) => {
 
   const handleRollback = async () => {
     rollbackSnapshot(
-      route('servers.show.snapshots.rollback', { server: server.uuidShort }),
+      route('servers.show.snapshots.rollback', { server: server.id }),
       {
         onSuccess: () => setShowRollbackModal(false),
       }
@@ -148,7 +148,7 @@ const Index = ({ auth, server, snapshots, can_create }: Props) => {
   })
 
   const handleCreate = async () => {
-    await post(route('servers.show.snapshots', { server: server.uuidShort }), {
+    await post(route('servers.show.snapshots', { server: server.id }), {
       onSuccess: () => setShowCreateModal(false),
     })
   }
@@ -163,7 +163,7 @@ const Index = ({ auth, server, snapshots, can_create }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.uuidShort} />}
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Snapshots`} />
 

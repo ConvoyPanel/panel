@@ -11,7 +11,7 @@ const VncRedirectSettings = () => {
 
   const redirect = () => {
     Inertia.visit(
-      route('servers.show.security.vnc', settingsContext?.server.uuidShort)
+      route('servers.show.security.vnc', settingsContext?.server.id)
     )
   }
 

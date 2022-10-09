@@ -9,7 +9,7 @@ import { formatBytes, Sizes } from '@/api/server/getStatus'
 
 const StatGraphs = () => {
   const serverContext = useContext(ServerContext)
-  const { serverState } = useServerState(serverContext!.server.uuidShort)
+  const { serverState } = useServerState(serverContext!.server.id)
 
   const cpu = useChartTickLabel('CPU', 100, '%', 2)
   const memory = useChartTickLabel('Memory', serverState?.maxmem.size || 1, serverState?.maxmem.unit || 'GB', 2)

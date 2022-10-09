@@ -30,7 +30,7 @@ class ServerController extends ApplicationApiController
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
-            ->allowedFilters(['user_id', 'node_id', 'vmid', 'name', 'description', 'installing'])
+            ->allowedFilters(['status', 'uuid', 'uuidShort', 'name', 'user_id', 'node_id', 'vmid'])
             ->allowedSorts(['id', 'user_id', 'node_id', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
@@ -113,16 +113,8 @@ class ServerController extends ApplicationApiController
             'limits' => [
                 'cpu' => Arr::get($data, 'limits.cpu'),
                 'memory' => Arr::get($data, 'limits.memory'),
-                'address_ids' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', []))
-            ],
-            'config' => [
-                'boot_order' => Arr::get($data, 'limits.disk') ? ['default'] : [],
-                'disks' => [
-                    [
-                        'disk' => 'default',
-                        'size' => Arr::get($data, 'limits.disk'),
-                    ]
-                ],
+                'disk' => Arr::get($data, 'limits.disk'),
+                'addresses' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', []))
             ],
         ];
 

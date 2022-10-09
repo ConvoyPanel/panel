@@ -6,9 +6,9 @@ import { useContext } from 'react'
 
 const PowerActions = () => {
   const serverContext = useContext(ServerContext)
-  const { serverState } = useServerState(serverContext!.server.uuidShort)
+  const { serverState } = useServerState(serverContext!.server.id)
 
-  const postState = (state: PowerAction) => updateState(state, serverContext!.server.uuidShort)
+  const postState = (state: PowerAction) => updateState(state, serverContext!.server.id)
 
   return (
     <div>

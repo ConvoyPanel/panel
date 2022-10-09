@@ -9,9 +9,9 @@ const ServerDetails = () => {
   const serverContext = useContext(ServerContext)
 
   const { data, status } = useQuery(
-    [`details-${serverContext!.server.uuidShort}`],
+    [`details-${serverContext!.server.id}`],
     async () => {
-      const { data } = await getResources(serverContext!.server.uuidShort)
+      const { data } = await getResources(serverContext!.server.id)
       return data
     }
   )

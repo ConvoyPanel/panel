@@ -17,7 +17,7 @@ const BasicSettings = () => {
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     post(
-      route('servers.show.settings.basic-info', settingsContext?.server.uuidShort)
+      route('servers.show.settings.basic-info', settingsContext?.server.id)
     )
   }
 

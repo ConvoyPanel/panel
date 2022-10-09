@@ -2,7 +2,7 @@ import SubNavigation from '@/components/elements/SubNavigation'
 import { useEffect, useState } from 'react'
 
 interface Props {
-  id: string
+  id: number
 }
 
 const ServerNav = ({ id }: Props) => {

@@ -33,7 +33,7 @@ const Index = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.uuidShort} />}
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Settings`} />
 

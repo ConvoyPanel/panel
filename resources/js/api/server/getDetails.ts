@@ -42,6 +42,6 @@ export interface Details {
   }
 }
 
-export default (id: string) => {
+export default (id: number) => {
   return axios.get<Details>(route('servers.show.details', id))
 }

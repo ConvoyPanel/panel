@@ -34,7 +34,7 @@ const BasicSettings = () => {
     put(
       route(
         'admin.servers.show.settings.basic-info',
-        settingsContext?.server.uuidShort
+        settingsContext?.server.id
       )
     )
   }

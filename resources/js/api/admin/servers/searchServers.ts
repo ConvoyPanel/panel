@@ -9,12 +9,13 @@ export interface Server extends DefaultServer {
   }
 }
 
-export default (search: string) => {
+export default (search: string, nodeId?: number) => {
   return axios.get<PaginatedInterface<Server[]>>(
     route('admin.servers.search', {
-      params: {
-        'filter[*]': search,
-      },
+      'filter[uuidShort]': search,
+      'filter[name]': search,
+      'filter[vmid]': search,
+      ...(nodeId && { 'filter[node.id]': nodeId }),
     })
   )
 }

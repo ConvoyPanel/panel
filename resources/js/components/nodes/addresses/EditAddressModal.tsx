@@ -72,12 +72,12 @@ const EditAddressModal = ({ node, address, open, setOpen }: Props) => {
     debounce(async (query: string) => {
       const {
         data: { data },
-      } = await getSearchServers(query)
+      } = await getSearchServers(query, node.id)
       setServers(
         data.map((server) => {
           return {
             label: server.name,
-            value: server.uuidShort.toString(),
+            value: server.id.toString(),
             description: `Node: ${
               server.node.name
             }, VMID: ${server.vmid.toString()}`,

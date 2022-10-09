@@ -10,7 +10,6 @@ import { LinkIcon } from '@heroicons/react/outline'
 import { Head, useForm } from '@inertiajs/inertia-react'
 import { Button, Modal, Paper, Table } from '@mantine/core'
 import { useState } from 'react'
-import getSearchNodes from '@/api/admin/nodes/searchNodes'
 import NewAddressModal from '@/components/nodes/addresses/NewAddressModal'
 import EditButton from '@/components/elements/tables/EditButton'
 import DeleteButton from '@/components/elements/tables/DeleteButton'
@@ -95,15 +94,6 @@ const AddressRow = ({ address, node }: AddressRowProps) => {
 
 const Index = ({ auth, node, addresses }: Props) => {
   const [showCreateModal, setShowCreateModal] = useState(false)
-
-  /* const [nodes, setNodes] = useState<Node[]>([])
-  const searchNodes = useCallback(
-    debounce(async (query: string) => {
-      const { data } = await getSearchNodes(query)
-      setNodes(data)
-    }, 500),
-    []
-  ) */
 
   return (
     <Authenticated

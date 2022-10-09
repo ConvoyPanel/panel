@@ -16,12 +16,10 @@ class Server extends Model
         'bandwidth_limit' => MegabytesAndBytes::class,
     ];
 
-    protected $fillable = [
-        'name',
-        'user_id',
-        'node_id',
-        'vmid',
-        'installing'
+    protected $guarded = [
+        'id',
+        'updated_at',
+        'created_at'
     ];
 
     public static $validationRules = [
@@ -75,6 +73,6 @@ class Server extends Model
 
     public function getRouteKeyName(): string
     {
-        return 'uuidShort';
+        return 'id';
     }
 }

@@ -17,14 +17,14 @@ const Show = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{ server.name }</h1>}
-      secondaryHeader={<ServerNav id={server.uuidShort} />}
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Overview`} />
 
       <Main>
         <h3 className='h3-deemphasized'>Overview</h3>
         <Paper shadow='xs' className='p-card'>
-          <Button href={route('servers.show', server.uuidShort)} target='_blank' component='a'>Enter server management</Button>
+          <Button href={route('servers.show', server.id)} target='_blank' component='a'>Enter server management</Button>
         </Paper>
       </Main>
     </Authenticated>

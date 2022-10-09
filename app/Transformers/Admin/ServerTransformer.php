@@ -34,6 +34,7 @@ class ServerTransformer extends TransformerAbstract
     {
         return [
             'id' => $server->id,
+            'uuidShort' => $server->uuidShort,
             'user_id' => $server->user_id,
             'node_id' => $server->node_id,
             'vmid' => $server->vmid,

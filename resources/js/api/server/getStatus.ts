@@ -80,6 +80,6 @@ export interface ServerStateInterface {
   maxmem: number
 }
 
-export default (id: string) => {
+export default (id: number) => {
   return axios.get<ServerStateInterface>(route('servers.show.status', id))
 }

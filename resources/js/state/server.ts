@@ -7,7 +7,7 @@ export interface MemUnparsed {
 }
 
 export interface ServerData {
-  uuidShort: string
+  id: number
   uptime: {
     time: number
     unit: string

@@ -17,6 +17,7 @@ import {
   Select,
   Checkbox,
   MultiSelect,
+  CloseButton,
 } from '@mantine/core'
 import {
   ChangeEvent,
@@ -53,6 +54,9 @@ interface FormData {
   cpu: number
   memory: number
   disk: number
+  snapshot_limit?: number
+  backup_limit?: number
+  bandwidth_limit?: number
 }
 
 const Create = ({ auth }: Props) => {
@@ -69,6 +73,9 @@ const Create = ({ auth }: Props) => {
     cpu: 1,
     memory: 1073741824,
     disk: 1073741824,
+    snapshot_limit: undefined,
+    backup_limit: undefined,
+    bandwidth_limit: undefined,
   })
 
   const dataRef = useRef(data)
@@ -94,7 +101,9 @@ const Create = ({ auth }: Props) => {
 
   const searchNodes = useCallback(
     debounce(async (query: string) => {
-      const { data: { data } } = await getSearchNodes(query)
+      const {
+        data: { data },
+      } = await getSearchNodes(query)
       setNodes(
         data.map((node) => {
           return {
@@ -118,7 +127,9 @@ const Create = ({ auth }: Props) => {
 
   const searchUsers = useCallback(
     debounce(async (query: string) => {
-      const { data: { data } } = await getSearchUsers(query)
+      const {
+        data: { data },
+      } = await getSearchUsers(query)
       setUsers(
         data.map((user) => {
           return {
@@ -141,7 +152,9 @@ const Create = ({ auth }: Props) => {
 
   const searchIps = useCallback(
     debounce(async (query: string) => {
-      const { data: { data } } = await getSearchAddresses(
+      const {
+        data: { data },
+      } = await getSearchAddresses(
         query,
         dataRef.current.node_id as number,
         true
@@ -300,34 +313,87 @@ const Create = ({ auth }: Props) => {
                 ''
               )}
 
-              {data.type === 'new' && (
-                <div className='grid sm:grid-cols-3 sm:gap-3 space-y-3 sm:space-y-0'>
-                  <NumberInput
-                    label='CPU'
-                    name='cpu'
-                    value={data.cpu}
-                    className='block w-full'
-                    onChange={(e) => setData('cpu', e as number)}
-                    error={errors.cpu}
-                  />
-                  <NumberInput
-                    label='Memory (GB)'
-                    name='memory'
-                    value={data.memory / 1073741824}
-                    className='block w-full'
-                    onChange={(e) => setData('memory', e as number * 1073741824)}
-                    error={errors.memory}
-                  />
-                  <NumberInput
-                    label='Disk (GB)'
-                    name='disk'
-                    value={data.disk / 1073741824}
-                    className='block w-full'
-                    onChange={(e) => setData('disk', e as number * 1073741824)}
-                    error={errors.disk}
-                  />
-                </div>
-              )}
+              <div className='grid sm:grid-cols-3 sm:gap-3 space-y-3 sm:space-y-0'>
+                <NumberInput
+                  label='CPU'
+                  name='cpu'
+                  value={data.cpu}
+                  className='block w-full'
+                  onChange={(e) => setData('cpu', e as number)}
+                  error={errors.cpu}
+                />
+                <NumberInput
+                  label='Memory (GB)'
+                  name='memory'
+                  value={data.memory / 1073741824}
+                  className='block w-full'
+                  onChange={(e) =>
+                    setData('memory', (e as number) * 1073741824)
+                  }
+                  error={errors.memory}
+                />
+                <NumberInput
+                  label='Disk (GB)'
+                  name='disk'
+                  value={data.disk / 1073741824}
+                  className='block w-full'
+                  onChange={(e) => setData('disk', (e as number) * 1073741824)}
+                  error={errors.disk}
+                />
+              </div>
+
+              <div className='grid sm:grid-cols-3 sm:gap-3 space-y-3 sm:space-y-0'>
+                <NumberInput
+                  label='Snapshot Limit'
+                  name='snapshot_limit'
+                  value={data.snapshot_limit}
+                  className='block w-full'
+                  onChange={(e) =>
+                    setData('snapshot_limit', e ? Math.abs(e) : e)
+                  }
+                  rightSection={
+                    <CloseButton
+                      onClick={() => setData('snapshot_limit', undefined)}
+                    />
+                  }
+                  rightSectionWidth={40}
+                  error={errors.snapshot_limit}
+                />
+
+                <NumberInput
+                  label='Backup Limit'
+                  name='backup_limit'
+                  value={data.backup_limit}
+                  className='block w-full'
+                  onChange={(e) =>
+                    setData('backup_limit', e ? Math.abs(e) : e)
+                  }
+                  rightSection={
+                    <CloseButton
+                      onClick={() => setData('backup_limit', undefined)}
+                    />
+                  }
+                  rightSectionWidth={40}
+                  error={errors.backup_limit}
+                />
+
+                <NumberInput
+                  label='Bandwidth Limit (GB)'
+                  name='bandwidth_limit'
+                  value={data.bandwidth_limit ? data.bandwidth_limit / 1073741824 : undefined}
+                  className='block w-full'
+                  onChange={(e) =>
+                    setData('bandwidth_limit', e ? Math.abs(e) * 1073741824 : e)
+                  }
+                  rightSection={
+                    <CloseButton
+                      onClick={() => setData('bandwidth_limit', undefined)}
+                    />
+                  }
+                  rightSectionWidth={40}
+                  error={errors.bandwidth_limit}
+                />
+              </div>
 
               {data.type === 'existing' && (
                 <Checkbox

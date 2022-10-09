@@ -17,8 +17,8 @@ interface Props extends DefaultProps {
 }
 
 const Index = ({ auth, server }: Props) => {
-  const { data, status } = useQuery([`logs-${server.uuidShort}`], async () => {
-    const { data } = await getLogs(server.uuidShort)
+  const { data, status } = useQuery([`logs-${server.id}`], async () => {
+    const { data } = await getLogs(server.id)
     return data
   })
 
@@ -33,7 +33,7 @@ const Index = ({ auth, server }: Props) => {
     <Authenticated
       auth={auth}
       header={<h1 className='server-title'>{server.name}</h1>}
-      secondaryHeader={<ServerNav id={server.uuidShort} />}
+      secondaryHeader={<ServerNav id={server.id} />}
     >
       <Head title={`${server.name} - Logs`} />
 
