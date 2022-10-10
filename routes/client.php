@@ -8,14 +8,14 @@ use Convoy\Http\Controllers\Client\Servers\LogsController;
 use Convoy\Http\Controllers\Client\Servers\PowerController;
 use Convoy\Http\Controllers\Client\Servers\SecurityController;
 use Convoy\Http\Controllers\Client\Servers\ServerController;
-use Convoy\Http\Controllers\Client\Servers\StatusController;
-use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
-use Illuminate\Support\Facades\Route;
 use Convoy\Http\Controllers\Client\Servers\SettingsController;
 use Convoy\Http\Controllers\Client\Servers\SnapshotController;
+use Convoy\Http\Controllers\Client\Servers\StatusController;
 use Convoy\Http\Middleware\Activity\ServerSubject;
 use Convoy\Http\Middleware\CheckServerInstalling;
 use Convoy\Http\Middleware\CheckServerNotInstalling;
+use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [IndexController::class, 'index'])->name('dashboard');
 
@@ -36,7 +36,7 @@ Route::group([
         ServerSubject::class,
         AuthenticateServerAccess::class,
         CheckServerInstalling::class,
-    ]
+    ],
 ], function () {
     Route::get('/', [ServerController::class, 'show'])->name('servers.show');
     Route::get('/templates', [SettingsController::class, 'getTemplates'])->name('servers.show.templates');

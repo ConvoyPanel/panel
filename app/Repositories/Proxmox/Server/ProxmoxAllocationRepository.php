@@ -66,8 +66,8 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
                 [
                     'json' => [
                         'disk' => $disk,
-                        'size' => "+{$gigabytes}G"
-                    ]
+                        'size' => "+{$gigabytes}G",
+                    ],
                 ]
             );
         } catch (GuzzleException $e) {
@@ -114,7 +114,7 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
                 'json' => [
                     'name' => $name,
                     'comment' => $comments,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -159,7 +159,7 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
                     'cidr' => $address,
                     'nomatch' => $noMatch,
                     'comment' => $comments,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

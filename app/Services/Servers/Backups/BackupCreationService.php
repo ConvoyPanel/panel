@@ -16,8 +16,7 @@ class BackupCreationService extends ProxmoxService
     {
         $backups = $this->repository->setServer($this->server)->getBackups();
 
-        if (!$this->server->backup_limit || count($backups) >= $this->server->backup_limit)
-        {
+        if (! $this->server->backup_limit || count($backups) >= $this->server->backup_limit) {
             if ((int) $this->server->backup_limit <= 0 && isset($this->server->backup_limit)) {
                 throw new TooManyBackupsException((int) $this->server->backup_limit);
             }

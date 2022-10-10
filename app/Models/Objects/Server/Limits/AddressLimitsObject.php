@@ -3,9 +3,9 @@
 namespace Convoy\Models\Objects\Server\Limits;
 
 use Convoy\Models\Objects\Server\Allocations\Network\AddressObject;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
 
 class AddressLimitsObject extends Data
 {

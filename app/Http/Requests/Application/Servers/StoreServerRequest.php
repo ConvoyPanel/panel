@@ -30,8 +30,7 @@ class StoreServerRequest extends FormRequest
             'user_id' => 'exists:users,id|required',
         ];
 
-        if ($this->request->get('type') === 'new')
-        {
+        if ($this->request->get('type') === 'new') {
             $rules['template_id'] = 'exists:templates,id|required';
             $rules['vmid'] = 'sometimes|numeric|min:100|max:999999999|required';
             $rules['limits'] = 'array|required';
@@ -41,8 +40,7 @@ class StoreServerRequest extends FormRequest
             $rules['limits.address_ids'] = 'numeric|exists:ip_addresses,id|required';
         }
 
-        if ($this->request->get('type') === 'existing')
-        {
+        if ($this->request->get('type') === 'existing') {
             $rules['config.template'] = 'sometimes|boolean';
             $rules['config.visible'] = 'sometimes|boolean';
             $rules['vmid'] = 'numeric|min:100|max:999999999|required';

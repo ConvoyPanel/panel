@@ -2,16 +2,15 @@
 
 namespace Convoy\Services\Nodes\Health;
 
+use Carbon\Carbon;
 use Convoy\Models\Node;
 use Convoy\Services\Nodes\VersionService;
-use Carbon\Carbon;
 use Exception;
 
 class HealthService
 {
     public function __construct(private VersionService $versionService)
     {
-
     }
 
     public function handle()

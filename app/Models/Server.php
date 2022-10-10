@@ -19,7 +19,7 @@ class Server extends Model
     protected $guarded = [
         'id',
         'updated_at',
-        'created_at'
+        'created_at',
     ];
 
     public static $validationRules = [

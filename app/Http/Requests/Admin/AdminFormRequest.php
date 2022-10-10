@@ -2,10 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
-use Illuminate\Database\Eloquent\Model;
 
 abstract class AdminFormRequest extends FormRequest
 {
@@ -34,14 +34,13 @@ abstract class AdminFormRequest extends FormRequest
     public function convertRule(string $rule, array $rules, string $replaceWith)
     {
         return Arr::map($rules, function ($entry) use ($rule, $replaceWith) {
-            if ($entry === $rule)
+            if ($entry === $rule) {
                 return $replaceWith;
+            }
 
             return $entry;
         });
     }
-
-
 
     /**
      * Returns the named route parameter and asserts that it is a real model that
@@ -49,8 +48,7 @@ abstract class AdminFormRequest extends FormRequest
      *
      * @template T of \Illuminate\Database\Eloquent\Model
      *
-     * @param class-string<T> $expect
-     *
+     * @param  class-string<T>  $expect
      * @return T
      * @noinspection PhpUndefinedClassInspection
      * @noinspection PhpDocSignatureInspection

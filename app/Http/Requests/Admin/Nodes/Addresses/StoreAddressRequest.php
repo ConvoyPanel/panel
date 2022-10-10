@@ -2,10 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
-use Convoy\Enums\Network\AddressType;
 use Convoy\Models\IPAddress;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreAddressRequest extends FormRequest
 {

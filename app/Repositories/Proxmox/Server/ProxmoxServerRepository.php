@@ -3,7 +3,6 @@
 namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use GuzzleHttp\Exception\GuzzleException;
@@ -37,7 +36,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
                     'target' => $this->node->cluster,
                     'newid' => $this->server->vmid,
                     'full' => true,
-                ], $params)
+                ], $params),
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -52,7 +51,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         try {
             $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/qemu/%s', $this->node->cluster, $this->server->vmid), [
-                'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock
+                'destroy-unreferenced-disks' => $destroyUnreferencedDisks, 'purge' => $purgeJobConfigurations, 'skiplock' => $skipLock,
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -68,10 +67,10 @@ class ProxmoxServerRepository extends ProxmoxRepository
         try {
             $response = $this->getHttpClient()->put('/api2/json/access/acl', [
                 'json' => [
-                    'path' => '/vms/' . $this->server->vmid,
+                    'path' => '/vms/'.$this->server->vmid,
                     'users' => $userid,
                     'roles' => $roleid,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

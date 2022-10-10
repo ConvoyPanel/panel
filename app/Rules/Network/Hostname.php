@@ -25,8 +25,7 @@ class Hostname implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (strlen($value) === 0)
-        {
+        if (strlen($value) === 0) {
             return true;
         }
 

@@ -5,7 +5,6 @@ namespace Convoy\Http\Controllers\Admin\Users\Settings;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Users\Settings\UpdateUserRequest;
 use Convoy\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -20,13 +19,12 @@ class SettingsController extends Controller
 
     public function update(User $user, UpdateUserRequest $request)
     {
-        if (isset($request->password))
-        {
+        if (isset($request->password)) {
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'root_admin' => $request->root_admin
+                'root_admin' => $request->root_admin,
             ]);
         } else {
             $user->update($request->safe()->except(['password']));

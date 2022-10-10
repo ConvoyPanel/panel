@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Security;
 
+use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 
 class UpdatePasswordRequest extends FormRequest
 {
@@ -29,10 +29,12 @@ class UpdatePasswordRequest extends FormRequest
             'type' => [new Enum(AuthenticationType::class), 'required'],
         ];
 
-        if ($this->request->get('type') === 'sshkeys')
+        if ($this->request->get('type') === 'sshkeys') {
             $rules['contents'] = ['required_if:type,sshkeys'];
-        if ($this->request->get('type') === 'cipassword')
+        }
+        if ($this->request->get('type') === 'cipassword') {
             $rules['password'] = ['confirmed', 'min:10', 'required_if:type,cipassword'];
+        }
 
         return $rules;
     }

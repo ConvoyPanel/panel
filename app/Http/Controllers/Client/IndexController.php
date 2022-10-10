@@ -3,9 +3,8 @@
 namespace Convoy\Http\Controllers\Client;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class IndexController extends ApplicationApiController
 {

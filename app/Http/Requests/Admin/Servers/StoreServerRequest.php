@@ -4,7 +4,6 @@ namespace Convoy\Http\Requests\Admin\Servers;
 
 use Convoy\Http\Requests\Admin\AdminFormRequest;
 use Convoy\Models\Server;
-use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property mixed $type

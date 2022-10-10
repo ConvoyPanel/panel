@@ -15,7 +15,7 @@ class IPAddress extends Model
     public static $validationRules = [
         'server_id' => ['exists:servers,id', 'nullable'],
         'node_id' => ['exists:nodes,id', 'required'],
-        'type' => ['in:ipv4,ipv6','required'],
+        'type' => ['in:ipv4,ipv6', 'required'],
         'address' => ['ip'],
         'cidr' => ['numeric', 'required'],
         'gateway' => ['ip'],

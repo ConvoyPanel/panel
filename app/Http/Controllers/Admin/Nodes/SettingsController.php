@@ -4,7 +4,6 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\Controller;
 use Convoy\Models\Node;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SettingsController extends Controller

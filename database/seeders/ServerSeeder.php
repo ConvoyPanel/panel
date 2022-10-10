@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
-use Convoy\Models\Node;
+use Illuminate\Database\Seeder;
 
 class ServerSeeder extends Seeder
 {

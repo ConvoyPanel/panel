@@ -6,9 +6,6 @@ use Convoy\Contracts\Repository\ActivityRepositoryInterface;
 use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
 
-/**
- *
- */
 class ActivityRepository extends EloquentRepository implements ActivityRepositoryInterface
 {
     /**
@@ -20,12 +17,11 @@ class ActivityRepository extends EloquentRepository implements ActivityRepositor
     }
 
     /**
-     * @param ActivityLog $activity
+     * @param  ActivityLog  $activity
      * @return Server|null
      */
     public function getServer(ActivityLog $activity): ?Server
     {
         return $activity->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject()->first();
     }
-
 }

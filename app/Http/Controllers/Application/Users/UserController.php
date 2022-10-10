@@ -3,7 +3,6 @@
 namespace Convoy\Http\Controllers\Application\Users;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Application\Users\StoreUserRequest;
 use Convoy\Http\Requests\Application\Users\UpdateUserRequest;
 use Convoy\Models\User;
@@ -13,13 +12,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\QueryBuilder;
 
-/**
- *
- */
 class UserController extends ApplicationApiController
 {
     /**
-     * @param Request $request
+     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): \Illuminate\Http\JsonResponse
@@ -33,7 +29,7 @@ class UserController extends ApplicationApiController
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(User $user)
@@ -41,9 +37,8 @@ class UserController extends ApplicationApiController
         return fractal($user, new UserTransformer())->respond();
     }
 
-
     /**
-     * @param StoreUserRequest $request
+     * @param  StoreUserRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreUserRequest $request)
@@ -52,14 +47,14 @@ class UserController extends ApplicationApiController
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'root_admin' => $request->root_admin
+            'root_admin' => $request->root_admin,
         ]);
 
         return fractal($user, new UserTransformer())->respond();
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @return Response
      */
     public function destroy(User $user)
@@ -70,8 +65,8 @@ class UserController extends ApplicationApiController
     }
 
     /**
-     * @param User $user
-     * @param UpdateUserRequest $request
+     * @param  User  $user
+     * @param  UpdateUserRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(User $user, UpdateUserRequest $request)
@@ -81,7 +76,7 @@ class UserController extends ApplicationApiController
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'root_admin' => $request->root_admin
+                'root_admin' => $request->root_admin,
             ]);
         } else {
             $user->update($request->safe()->except(['password']));

@@ -9,7 +9,8 @@ use Illuminate\Support\Str;
 abstract class Activity
 {
     public function __construct(public ActivityLog $model)
-    {}
+    {
+    }
 
     public function is(string $event): bool
     {

@@ -12,7 +12,8 @@ use Webmozart\Assert\Assert;
 class AllocationService extends ProxmoxService
 {
     public function __construct(protected ProxmoxAllocationRepository $repository)
-    {}
+    {
+    }
 
     public function createDisk(int $bytes, string $disk, string $format = 'qcow2')
     {
@@ -21,7 +22,7 @@ class AllocationService extends ProxmoxService
         Assert::inArray($disk, $this->repository->validDisks, 'Invalid disk type');
 
         return $this->repository->setServer($this->server)->update([
-            $disk => 'local:' . ($bytes / 11073741824) . ',format=' . $format
+            $disk => 'local:'.($bytes / 11073741824).',format='.$format,
         ]);
     }
 
@@ -30,8 +31,9 @@ class AllocationService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
 
         $disks = array_values(array_filter($this->repository->setServer($this->server)->getAllocations(), function ($disk) {
-            if (str_contains(Arr::get($disk, 'value'), 'media'))
+            if (str_contains(Arr::get($disk, 'value'), 'media')) {
                 return false;
+            }
 
             return in_array($disk['key'], $this->repository->validDisks);
         }));
@@ -48,13 +50,14 @@ class AllocationService extends ProxmoxService
         $raw = collect($this->repository->setServer($this->server)->getAllocations())->where('key', 'boot')->firstOrFail();
 
         $disks = array_values(array_filter(explode(';', Arr::last(explode('=', Arr::get($raw, 'value')))), function ($disk) {
-            return !ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+            return ! ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
-        if ($filterNonLocalDisks)
+        if ($filterNonLocalDisks) {
             return array_values(array_filter($disks, function ($disk) {
                 return in_array($disk, $this->repository->validDisks);
             }));
+        }
 
         return $disks;
     }
@@ -64,7 +67,7 @@ class AllocationService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
 
         return $this->repository->setServer($this->server)->update([
-            'boot' => count($disks) > 0 ? 'order=' . Arr::join($disks, ';') : ''
+            'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }
 
@@ -73,10 +76,12 @@ class AllocationService extends ProxmoxService
         Assert::isInstanceOf($this->server, Server::class);
 
         $payload = [];
-        if (!empty(Arr::get($specs, 'cpu')))
+        if (! empty(Arr::get($specs, 'cpu'))) {
             $payload['cores'] = Arr::get($specs, 'cpu');
-        if (!empty(Arr::get($specs, 'memory')))
+        }
+        if (! empty(Arr::get($specs, 'memory'))) {
             $payload['memory'] = floor(Arr::get($specs, 'memory') / 1048576);
+        }
 
         return $this->repository->setServer($this->server)->update($payload);
     }

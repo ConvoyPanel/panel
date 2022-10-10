@@ -20,6 +20,7 @@ class ServerDetailService extends ProxmoxService
 
     /**
      * @return ServerDetailsObject
+     *
      * @throws ProxmoxConnectionException
      */
     public function getDetails()
@@ -40,8 +41,7 @@ class ServerDetailService extends ProxmoxService
         ];
 
         $mac_address = null;
-        if (preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($config, 'net0', ''), $matches))
-        {
+        if (preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($config, 'net0', ''), $matches)) {
             $mac_address = $matches[0];
         }
 

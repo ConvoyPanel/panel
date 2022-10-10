@@ -5,7 +5,6 @@ namespace Convoy\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Config;
 
 class AuthorizeProprietaryToken
 {
@@ -20,11 +19,9 @@ class AuthorizeProprietaryToken
     {
         $secret = $request->header('Authorization');
 
-
-        if ($secret !== config('external.secret') || strlen(config('external.secret')) === 0 || empty(config('external.secret')))
-        {
+        if ($secret !== config('external.secret') || strlen(config('external.secret')) === 0 || empty(config('external.secret'))) {
             return new Response([
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], Response::HTTP_UNAUTHORIZED);
         }
 

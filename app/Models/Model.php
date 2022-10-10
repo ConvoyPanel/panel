@@ -2,15 +2,15 @@
 
 namespace Convoy\Models;
 
+use Convoy\Exceptions\Model\DataValidationException;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Convoy\Exceptions\Model\DataValidationException;
-use Illuminate\Database\Eloquent\Model as IlluminateModel;
 
 abstract class Model extends IlluminateModel
 {
@@ -130,8 +130,7 @@ abstract class Model extends IlluminateModel
      * Returns the rules associated with the model, specifically for updating the given model
      * rather than just creating it.
      *
-     * @param \Illuminate\Database\Eloquent\Model|int|string $model
-     *
+     * @param  \Illuminate\Database\Eloquent\Model|int|string  $model
      * @return array
      */
     public static function getRulesForUpdate($model, string $column = 'id')
@@ -147,7 +146,7 @@ abstract class Model extends IlluminateModel
             // working model so we don't run into errors due to the way that field validation
             // works.
             foreach ($data as &$datum) {
-                if (!is_string($datum) || !Str::startsWith($datum, 'unique')) {
+                if (! is_string($datum) || ! Str::startsWith($datum, 'unique')) {
                     continue;
                 }
 
@@ -172,16 +171,16 @@ abstract class Model extends IlluminateModel
 
         $validator = $this->getValidator();
         $validator->setData(
-        // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
-        // for that model. Doing this will return all of the attributes in a format that can
-        // properly be validated.
+            // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
+            // for that model. Doing this will return all of the attributes in a format that can
+            // properly be validated.
             $this->addCastAttributesToArray(
                 $this->getAttributes(),
                 $this->getMutatedAttributes()
             )
         );
 
-        if (!$validator->passes()) {
+        if (! $validator->passes()) {
             throw new ValidationException($validator);
         }
     }
@@ -189,13 +188,12 @@ abstract class Model extends IlluminateModel
     /**
      * Return a timestamp as DateTime object.
      *
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return \Illuminate\Support\Carbon|\Carbon\CarbonImmutable
      */
     protected function asDateTime($value)
     {
-        if (!$this->immutableDates) {
+        if (! $this->immutableDates) {
             return parent::asDateTime($value);
         }
 

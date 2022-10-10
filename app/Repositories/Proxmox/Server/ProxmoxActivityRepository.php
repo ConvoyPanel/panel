@@ -17,7 +17,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
 
         try {
             $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks', $this->node->cluster), [
-                'query' => ['vmid' => $this->server->vmid, 'start' => $startAt, 'limit' => $limitRows]
+                'query' => ['vmid' => $this->server->vmid, 'start' => $startAt, 'limit' => $limitRows],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -46,9 +46,9 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         try {
             $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/log', $this->node->cluster, rawurlencode($upid)), [
                 'query' => [
-                     'start' => $startAt,
+                    'start' => $startAt,
                     'limit' => $limitLines,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

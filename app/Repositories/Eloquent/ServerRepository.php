@@ -23,10 +23,10 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
      */
     public function isUniqueUuidCombo(string $uuid, string $short): bool
     {
-        return !$this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuidShort', '=', $short)->exists();
+        return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuidShort', '=', $short)->exists();
     }
 
-     /**
+    /**
      * Return a server by UUID.
      *
      * @throws \Convoy\Exceptions\Repository\RecordNotFoundException

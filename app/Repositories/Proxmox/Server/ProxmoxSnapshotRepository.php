@@ -31,7 +31,7 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
             $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/snapshot', $this->node->cluster, $this->server->vmid), [
                 'json' => [
                     'snapname' => $name,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

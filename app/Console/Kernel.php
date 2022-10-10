@@ -5,8 +5,8 @@ namespace Convoy\Console;
 use Convoy\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Database\Console\PruneCommand;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {

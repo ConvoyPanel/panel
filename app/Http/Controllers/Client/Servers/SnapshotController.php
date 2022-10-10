@@ -3,9 +3,9 @@
 namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
-use Convoy\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 use Convoy\Services\Servers\Snapshots\SnapshotCreationService;
 use Convoy\Services\Servers\Snapshots\SnapshotDeletionService;
 
@@ -25,7 +25,6 @@ class SnapshotController extends ApplicationApiController
             'can_create' => isset($server->snapshot_limit) ? count($snapshots) < $server->snapshot_limit : true,
         ]);
     }
-
 
     public function store(Server $server, SnapshotRequest $request)
     {

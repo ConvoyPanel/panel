@@ -3,10 +3,10 @@
 namespace Convoy\Repositories;
 
 use Closure;
-use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
-use Illuminate\Foundation\Application;
 use Convoy\Contracts\Repository\RepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
+use InvalidArgumentException;
 
 abstract class Repository implements RepositoryInterface
 {
@@ -60,8 +60,7 @@ abstract class Repository implements RepositoryInterface
     /**
      * Setup column selection functionality.
      *
-     * @param array|string $columns
-     *
+     * @param  array|string  $columns
      * @return $this
      */
     public function setColumns($columns = ['*']): Repository|static
@@ -120,8 +119,7 @@ abstract class Repository implements RepositoryInterface
     /**
      * Take the provided model and make it accessible to the rest of the repository.
      *
-     * @param array $model
-     *
+     * @param  array  $model
      * @return mixed
      */
     protected function initializeModel(...$model): mixed

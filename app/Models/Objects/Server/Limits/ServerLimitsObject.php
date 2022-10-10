@@ -3,7 +3,6 @@
 namespace Convoy\Models\Objects\Server\Limits;
 
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
 
 class ServerLimitsObject extends Data
 {

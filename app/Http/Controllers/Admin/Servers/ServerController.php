@@ -6,10 +6,9 @@ use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
 use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\BuildService;
+use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Transformers\Admin\ServerTransformer as AdminServerTransformer;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Inertia\Inertia;
@@ -75,12 +74,10 @@ class ServerController extends Controller
 
     public function destroy(Server $server, Request $request)
     {
-        if (empty($request->no_purge))
-        {
+        if (empty($request->no_purge)) {
             try {
                 $this->buildService->setServer($server)->delete();
             } catch (\Exception $e) {
-
             }
         }
 

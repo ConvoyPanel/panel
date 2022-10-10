@@ -9,22 +9,22 @@ class Node extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'cluster', 'hostname', 'token_id', 'secret', 'port', 'network', 'storage'
+        'name', 'cluster', 'hostname', 'token_id', 'secret', 'port', 'network', 'storage',
     ];
 
-   public static $validationRules = [
-       'name' => 'required|string|max:191',
-       'cluster' => 'required|string|max:191',
-       'hostname' => ['required', 'regex:/^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/'],
-       'token_id' => 'required|string',
-       'secret' => 'required|string',
-       'port' => 'required|integer',
-       'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-       'storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-   ];
+    public static $validationRules = [
+        'name' => 'required|string|max:191',
+        'cluster' => 'required|string|max:191',
+        'hostname' => ['required', 'regex:/^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/'],
+        'token_id' => 'required|string',
+        'secret' => 'required|string',
+        'port' => 'required|integer',
+        'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        'storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+    ];
 
     protected $hidden = [
-        'token_id', 'secret'
+        'token_id', 'secret',
     ];
 
     public function servers()

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
-use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ServerFactory extends Factory
@@ -27,7 +27,7 @@ class ServerFactory extends Factory
             'name' => $this->faker->firstName(),
             'user_id' => User::factory(),
             'node_id' => Node::factory(),
-            'vmid' => rand(100,5000)
+            'vmid' => rand(100, 5000),
         ];
     }
 }

@@ -4,7 +4,6 @@ namespace Convoy\Services\Servers;
 
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogRunner;
-use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Objects\Server\ServerSpecificationsObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
@@ -17,7 +16,6 @@ use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
- * @package Convoy\Services\Servers
  */
 class BuildService extends ProxmoxService
 {
@@ -26,7 +24,8 @@ class BuildService extends ProxmoxService
         protected ProxmoxServerRepository $serverRepository,
         protected ProxmoxPowerRepository $powerRepository,
         protected ServerUpdateService $updateService
-    ) {}
+    ) {
+    }
 
     public function delete()
     {
@@ -72,7 +71,7 @@ class BuildService extends ProxmoxService
             } catch (Exception $e) {
                 $deletionStatus = true;
             }
-        } while (!$deletionStatus);
+        } while (! $deletionStatus);
 
         LogRunner::setActivity($activity)->end();
 

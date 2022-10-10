@@ -5,13 +5,13 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Activity;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use Convoy\Models\Server;
-use Inertia\Inertia;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
 use Convoy\Jobs\Servers\ProcessRebuild;
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\Nodes\TemplateService;
+use Inertia\Inertia;
 
 class SettingsController extends ApplicationApiController
 {

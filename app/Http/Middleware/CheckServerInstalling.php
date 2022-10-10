@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Middleware;
 
-use Convoy\Models\Server;
 use Closure;
+use Convoy\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,18 +21,15 @@ class CheckServerInstalling
     {
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server)
-        {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($server->installing)
-        {
-            if ($request->wantsJson())
-            {
+        if ($server->installing) {
+            if ($request->wantsJson()) {
                 throw new AccessDeniedHttpException('Server is installing');
             } else {
-                return redirect()->route('servers.show.building', $server->uuidShort);
+                return redirect()->route('servers.show.building', $server->id);
             }
         }
 

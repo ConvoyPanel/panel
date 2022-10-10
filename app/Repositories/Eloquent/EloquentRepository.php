@@ -2,18 +2,18 @@
 
 namespace Convoy\Repositories\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
-use Webmozart\Assert\Assert;
-use Illuminate\Support\Collection;
-use Convoy\Repositories\Repository;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Convoy\Contracts\Repository\RepositoryInterface;
 use Convoy\Exceptions\Model\DataValidationException;
 use Convoy\Exceptions\Repository\RecordNotFoundException;
+use Convoy\Repositories\Repository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Webmozart\Assert\Assert;
 
 abstract class EloquentRepository extends Repository implements RepositoryInterface
 {
@@ -27,8 +27,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      * present when returning results. This allows repository methods to be called in API
      * context's such that we can pass through ?filter[name]=Dane&sort=desc for example.
      *
-     * @param bool $usingFilters
-     *
+     * @param  bool  $usingFilters
      * @return $this
      */
     public function usingRequestFilters($usingFilters = true)
@@ -55,7 +54,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      */
     protected function paginate(Builder $instance, int $default = 50)
     {
-        if (!$this->useRequestFilters) {
+        if (! $this->useRequestFilters) {
             return $instance->paginate($default);
         }
 
@@ -95,10 +94,10 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
         $instance = $this->getBuilder()->newModelInstance();
         ($force) ? $instance->forceFill($fields) : $instance->fill($fields);
 
-        if (!$validate) {
+        if (! $validate) {
             $saved = $instance->skipValidation()->save();
         } else {
-            if (!$saved = $instance->save()) {
+            if (! $saved = $instance->save()) {
                 throw new DataValidationException($instance->getValidator(), $instance);
             }
         }
@@ -175,8 +174,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Update a given ID with the passed array of fields.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return \Illuminate\Database\Eloquent\Model|bool
      *
      * @throws \Pterodactyl\Exceptions\Model\DataValidationException
@@ -192,10 +190,10 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
 
         ($force) ? $instance->forceFill($fields) : $instance->fill($fields);
 
-        if (!$validate) {
+        if (! $validate) {
             $saved = $instance->skipValidation()->save();
         } else {
-            if (!$saved = $instance->save()) {
+            if (! $saved = $instance->save()) {
                 throw new DataValidationException($instance->getValidator(), $instance);
             }
         }
@@ -206,8 +204,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Update a model using the attributes passed.
      *
-     * @param array|\Closure $attributes
-     *
+     * @param  array|\Closure  $attributes
      * @return int
      */
     public function updateWhere($attributes, array $values)
@@ -291,7 +288,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
         }
 
         $bindings = array_values(array_filter(array_flatten($values, 1), function ($binding) {
-            return !$binding instanceof Expression;
+            return ! $binding instanceof Expression;
         }));
 
         $grammar = $this->getBuilder()->toBase()->getGrammar();

@@ -24,7 +24,7 @@ class UpdateBasicInfoRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'min:1|max:40'
+            'name' => 'min:1|max:40',
         ];
     }
 }

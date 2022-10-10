@@ -2,10 +2,10 @@
 
 use Convoy\Http\Controllers\Application\Nodes\Addresses\AddressController;
 use Convoy\Http\Controllers\Application\Nodes\NodeController;
+use Convoy\Http\Controllers\Application\Nodes\Templates\TemplateController;
 use Convoy\Http\Controllers\Application\Servers\ServerController;
 use Convoy\Http\Controllers\Application\Users\SecurityController;
 use Convoy\Http\Controllers\Application\Users\UserController;
-use Convoy\Http\Controllers\Application\Nodes\Templates\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 /*

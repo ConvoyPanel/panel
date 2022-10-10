@@ -2,7 +2,6 @@
 
 namespace Convoy\Transformers\Application;
 
-use Convoy\Models\Template;
 use Illuminate\Support\Arr;
 use League\Fractal\TransformerAbstract;
 

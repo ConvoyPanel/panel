@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Middleware;
 
-use Convoy\Providers\RouteServiceProvider;
 use Closure;
+use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

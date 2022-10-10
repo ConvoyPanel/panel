@@ -6,7 +6,6 @@ use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBasicInfoRequest;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SettingsController extends Controller
@@ -20,10 +19,8 @@ class SettingsController extends Controller
 
     public function updateBasicInfo(Server $server, UpdateBasicInfoRequest $request)
     {
-        if ($request->template === true)
-        {
-            if (isset($server->template))
-            {
+        if ($request->template === true) {
+            if (isset($server->template)) {
                 $server->template->update(['visible' => $request->visible ? true : false]);
             } else {
                 Template::create([
@@ -32,8 +29,7 @@ class SettingsController extends Controller
                 ]);
             }
         } elseif ($request->template === false) { //strict type checking
-            if (isset($server->template))
-            {
+            if (isset($server->template)) {
                 $server->template->delete();
             }
         }

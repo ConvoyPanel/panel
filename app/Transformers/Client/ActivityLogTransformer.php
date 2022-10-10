@@ -2,13 +2,13 @@
 
 namespace Convoy\Transformers\Client;
 
-use Illuminate\Support\Str;
-use Convoy\Models\User;
 use Convoy\Models\ActivityLog;
+use Convoy\Models\User;
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
-use Illuminate\Container\Container;
 
 class ActivityLogTransformer extends TransformerAbstract
 {
@@ -46,7 +46,7 @@ class ActivityLogTransformer extends TransformerAbstract
 
     public function includeActor(ActivityLog $model)
     {
-        if (!$model->actor instanceof User) {
+        if (! $model->actor instanceof User) {
             return $this->null();
         }
 
@@ -59,20 +59,20 @@ class ActivityLogTransformer extends TransformerAbstract
      */
     protected function properties(ActivityLog $model): array
     {
-        if (!$model->properties || $model->properties->isEmpty()) {
+        if (! $model->properties || $model->properties->isEmpty()) {
             return [];
         }
 
         $properties = $model->properties
             ->mapWithKeys(function ($value, $key) use ($model) {
-                if ($key === 'ip' && !optional($model->actor)->is($this->request->user())) {
+                if ($key === 'ip' && ! optional($model->actor)->is($this->request->user())) {
                     return [$key => '[hidden]'];
                 }
 
-                if (!is_array($value)) {
+                if (! is_array($value)) {
                     // Perform some directory normalization at this point.
                     if ($key === 'directory') {
-                        $value = str_replace('//', '/', '/' . trim($value, '/') . '/');
+                        $value = str_replace('//', '/', '/'.trim($value, '/').'/');
                     }
 
                     return [$key => $value];
@@ -104,12 +104,12 @@ class ActivityLogTransformer extends TransformerAbstract
             return false;
         }
 
-        $str = trans('activity.' . str_replace(':', '.', $model->event));
+        $str = trans('activity.'.str_replace(':', '.', $model->event));
         preg_match_all('/:(?<key>[\w.-]+\w)(?:[^\w:]?|$)/', $str, $matches);
 
         $exclude = array_merge($matches['key'], ['ip', 'useragent', 'using_sftp']);
         foreach ($model->properties->keys() as $key) {
-            if (!in_array($key, $exclude, true)) {
+            if (! in_array($key, $exclude, true)) {
                 return true;
             }
         }

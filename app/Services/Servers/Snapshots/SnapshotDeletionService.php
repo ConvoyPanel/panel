@@ -10,6 +10,7 @@ class SnapshotDeletionService extends ProxmoxService
     public function __construct(protected ProxmoxSnapshotRepository $repository)
     {
     }
+
     public function handle(string $name): ?string
     {
         return $this->repository->setServer($this->server)->delete($name);

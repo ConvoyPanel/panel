@@ -24,7 +24,7 @@ class SnapshotRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|alpha_dash|max:50'
+            'name' => 'required|alpha_dash|max:50',
         ];
     }
 }

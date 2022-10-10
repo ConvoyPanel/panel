@@ -3,7 +3,6 @@
 namespace Convoy\Http\Controllers\Application\Users;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Models\SSOToken;
 use Convoy\Models\User;
 use Illuminate\Support\Str;
@@ -14,7 +13,7 @@ class SecurityController extends ApplicationApiController
     {
         $SSOToken = SSOToken::create([
             'user_id' => $user->id,
-            'token' => hash('sha256', Str::random(50))
+            'token' => hash('sha256', Str::random(50)),
         ]);
 
         return $SSOToken->toArray();

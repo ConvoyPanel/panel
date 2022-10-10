@@ -4,27 +4,26 @@ namespace Convoy\Http\Controllers\Application\Servers;
 
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Application\Servers\StoreServerRequest;
-use Convoy\Http\Requests\Application\Servers\UpdateServerRequest;
 use Convoy\Http\Requests\Application\Servers\UpdateDetailsRequest;
+use Convoy\Http\Requests\Application\Servers\UpdateServerRequest;
 use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Objects\Server\ServerSpecificationsObject;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\BuildService;
 use Convoy\Services\Servers\NetworkService;
+use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\ServerUpdateService;
 use Convoy\Transformers\Application\ServerTransformer;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Spatie\QueryBuilder\QueryBuilder;
-use Exception;
 
 class ServerController extends ApplicationApiController
 {
     public function __construct(private ServerCreationService $creationService, private NetworkService $networkService, private ServerDetailService $detailService, private ServerUpdateService $updateService, private BuildService $buildService)
     {
-
     }
 
     public function index(Request $request)
@@ -51,7 +50,7 @@ class ServerController extends ApplicationApiController
             'limits' => [
                 'cpu' => Arr::get($data, 'limits.cpu'),
                 'memory' => Arr::get($data, 'limits.memory'),
-                'address_ids' => Arr::get($data, 'limits.address_ids')
+                'address_ids' => Arr::get($data, 'limits.address_ids'),
             ],
             'config' => [
                 'boot_order' => ['default'],
@@ -59,7 +58,7 @@ class ServerController extends ApplicationApiController
                     [
                         'disk' => 'default',
                         'size' => Arr::get($data, 'limits.disk'),
-                    ]
+                    ],
                 ],
                 'template' => Arr::get($data, 'config.template', false),
                 'visible' => Arr::get($data, 'config.visible', false),
@@ -78,17 +77,14 @@ class ServerController extends ApplicationApiController
 
     public function destroy(Server $server, Request $request)
     {
-        if (empty($request->no_purge))
-        {
+        if (empty($request->no_purge)) {
             try {
                 $this->buildService->setServer($server)->delete();
             } catch (Exception $e) {
-
             }
         }
 
         $server->delete();
-
 
         return $this->returnNoContent();
     }
@@ -114,7 +110,7 @@ class ServerController extends ApplicationApiController
                 'cpu' => Arr::get($data, 'limits.cpu'),
                 'memory' => Arr::get($data, 'limits.memory'),
                 'disk' => Arr::get($data, 'limits.disk'),
-                'addresses' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', []))
+                'addresses' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', [])),
             ],
         ];
 

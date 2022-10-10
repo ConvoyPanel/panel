@@ -2,9 +2,9 @@
 
 namespace Convoy\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\Activity\ActivityLogTargetableService;
+use Illuminate\Support\ServiceProvider;
 
 class ActivityLogServiceProvider extends ServiceProvider
 {

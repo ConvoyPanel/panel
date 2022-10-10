@@ -2,8 +2,8 @@
 
 namespace Convoy\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Convoy\Services\Activity\ActivityLogTargetableService;
+use Illuminate\Support\Facades\Facade;
 
 class LogTarget extends Facade
 {

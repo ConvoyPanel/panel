@@ -44,11 +44,9 @@ class ActivityUpdated extends Activity implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        if ($this->isServerEvent())
-        {
+        if ($this->isServerEvent()) {
             return new PrivateChannel('server.'.$this->model->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);
-        } elseif ($this->isUserEvent())
-        {
+        } elseif ($this->isUserEvent()) {
             return new PrivateChannel('user.'.$this->model->subjects()->firstWhere('subject_type', (new User)->getMorphClass())?->subject_id);
         }
 

@@ -10,15 +10,14 @@ namespace Convoy\Services\Activity;
 use Convoy\Enums\Activity\Status;
 use Convoy\Models\ActivityLog;
 use Convoy\Models\ActivityLogSubject;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Database\Eloquent\Model;
-use Convoy\Services\Activity\ActivityLogTargetableService;
 use Illuminate\Contracts\Auth\Factory;
-use Webmozart\Assert\Assert;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
+use Webmozart\Assert\Assert;
 
 class ActivityLogService
 {
@@ -72,7 +71,7 @@ class ActivityLogService
     /**
      * Sets the subject model instance.
      *
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Model[] $subjects
+     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Model[]  $subjects
      */
     public function subject(...$subjects): self
     {
@@ -104,8 +103,8 @@ class ActivityLogService
     /**
      * Sets a custom property on the activty log instance.
      *
-     * @param string|array $key
-     * @param mixed $value
+     * @param  string|array  $key
+     * @param  mixed  $value
      */
     public function property($key, $value = null): self
     {
@@ -146,7 +145,7 @@ class ActivityLogService
     {
         $activity = $this->getActivity();
 
-        if (!is_null($description)) {
+        if (! is_null($description)) {
             $activity->description = $description;
         }
 

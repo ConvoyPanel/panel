@@ -3,9 +3,9 @@
 namespace Convoy\Http\Middleware\Activity;
 
 use Closure;
-use Illuminate\Http\Request;
-use Convoy\Models\Server;
 use Convoy\Facades\LogTarget;
+use Convoy\Models\Server;
+use Illuminate\Http\Request;
 
 class ServerSubject
 {

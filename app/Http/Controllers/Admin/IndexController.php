@@ -3,7 +3,6 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class IndexController extends Controller

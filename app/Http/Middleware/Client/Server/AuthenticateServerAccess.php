@@ -2,10 +2,9 @@
 
 namespace Convoy\Http\Middleware\Client\Server;
 
-use Convoy\Models\Server;
 use Closure;
+use Convoy\Models\Server;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthenticateServerAccess
@@ -22,13 +21,11 @@ class AuthenticateServerAccess
         $user = $request->user();
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server)
-        {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($user->id !== $server->user_id && !$user->root_admin)
-        {
+        if ($user->id !== $server->user_id && ! $user->root_admin) {
             throw new NotFoundHttpException('Server not found'); // user shouldn't know that it exists
         }
 

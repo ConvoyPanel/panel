@@ -4,7 +4,6 @@ namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Http\Requests\Admin\AdminFormRequest;
 use Convoy\Models\Server;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBasicInfoRequest extends AdminFormRequest
 {

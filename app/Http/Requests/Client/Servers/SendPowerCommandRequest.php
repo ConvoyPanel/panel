@@ -24,7 +24,7 @@ class SendPowerCommandRequest extends FormRequest
     public function rules()
     {
         return [
-            'action' => 'required|in:start,shutdown,kill,reboot'
+            'action' => 'required|in:start,shutdown,kill,reboot',
         ];
     }
 }

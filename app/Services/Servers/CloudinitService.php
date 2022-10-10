@@ -2,20 +2,16 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\ProxmoxService;
 use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
 use Convoy\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
-use GuzzleHttp\Exception\GuzzleException;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService
- * @package Convoy\Services\Servers
  */
 class CloudinitService extends ProxmoxService
 {
@@ -24,16 +20,15 @@ class CloudinitService extends ProxmoxService
     }
 
     /**
-     * @param string $password
-     * @param array $params
+     * @param  string  $password
+     * @param  array  $params
      * @return mixed
      */
     public function changePassword(string $password, AuthenticationType $type)
     {
         $this->repository->setServer($this->server);
 
-        if (AuthenticationType::KEY === $type)
-        {
+        if (AuthenticationType::KEY === $type) {
             return $this->repository->update([$type->value => rawurlencode($password)]);
         } else {
             return $this->repository->update([$type->value => $password]);
@@ -41,14 +36,15 @@ class CloudinitService extends ProxmoxService
     }
 
     /**
-     * @param BiosType $type
-     * @param array $params
+     * @param  BiosType  $type
+     * @param  array  $params
      * @return mixed
      */
     // Generally needed for Windows VM's with over 2TB disk, still WIP since I still need to add EFI disk
     /**
-     * @param BiosType $type
+     * @param  BiosType  $type
      * @return mixed
+     *
      * @throws ProxmoxConnectionException
      */
     public function changeBIOS(BiosType $type)
@@ -57,8 +53,8 @@ class CloudinitService extends ProxmoxService
     }
 
     /**
-     * @param string $hostname
-     * @param array $params
+     * @param  string  $hostname
+     * @param  array  $params
      * @return mixed
      */
     public function changeHostname(string $hostname)
@@ -67,8 +63,8 @@ class CloudinitService extends ProxmoxService
     }
 
     /**
-     * @param string $dns
-     * @param array $params
+     * @param  string  $dns
+     * @param  array  $params
      * @return mixed
      */
     public function changeNameserver(string $nameserver)
@@ -87,15 +83,13 @@ class CloudinitService extends ProxmoxService
 
         $rawConfig = Arr::get($data, 'ipconfig0');
 
-        if ($rawConfig)
-        {
+        if ($rawConfig) {
             $configs = explode(',', $rawConfig);
 
             Arr::map($configs, function ($value) use (&$config, $data) {
                 $property = explode('=', $value);
 
-                if ($property[0] === 'ip')
-                {
+                if ($property[0] === 'ip') {
                     $cidr = explode('/', $property[1]);
                     $config['ipv4']['address'] = $cidr[0];
                     $config['ipv4']['cidr'] = $cidr[1];
@@ -105,16 +99,17 @@ class CloudinitService extends ProxmoxService
 
                     $config['ipv4']['mac_address'] = $matches[0] ?? null;
                 }
-                if ($property[0] === 'ip6')
-                {
+                if ($property[0] === 'ip6') {
                     $cidr = explode('/', $property[1]);
                     $config['ipv6']['address'] = $cidr[0];
                     $config['ipv6']['cidr'] = $cidr[1];
                 }
-                if ($property[0] === 'gw')
+                if ($property[0] === 'gw') {
                     $config['ipv4']['gateway'] = $property[1];
-                if ($property[0] === 'gw6')
+                }
+                if ($property[0] === 'gw6') {
                     $config['ipv6']['gateway'] = $property[1];
+                }
             });
         }
 
@@ -122,37 +117,34 @@ class CloudinitService extends ProxmoxService
     }
 
     /**
-     * @param string|array $config
+     * @param  string|array  $config
      * @return mixed|void
+     *
      * @throws ProxmoxConnectionException
      */
     public function updateIpConfig(string|array $config)
     {
         $this->repository->setServer($this->server);
 
-        if (gettype($config) === 'string')
-        {
+        if (gettype($config) === 'string') {
             return $this->repository->update([
                 'ipconfig0' => $config,
             ]);
         }
 
-        if (gettype($config) === 'array')
-        {
+        if (gettype($config) === 'array') {
             $payload = [];
 
-            if (isset($config['ipv4']))
-            {
+            if (isset($config['ipv4'])) {
                 $ipv4 = $config['ipv4'];
                 $payload[] = "ip={$ipv4['address']}/{$ipv4['cidr']}";
-                $payload[] = 'gw=' . $ipv4['gateway'];
+                $payload[] = 'gw='.$ipv4['gateway'];
             }
 
-            if (isset($config['ipv6']))
-            {
+            if (isset($config['ipv6'])) {
                 $ipv6 = $config['ipv6'];
                 $payload[] = "ip6={$ipv6['address']}/{$ipv6['cidr']}";
-                $payload[] = 'gw6=' . $ipv6['gateway'];
+                $payload[] = 'gw6='.$ipv6['gateway'];
             }
 
             return $this->repository->update([

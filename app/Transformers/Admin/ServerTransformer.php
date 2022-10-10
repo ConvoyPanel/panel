@@ -52,7 +52,7 @@ class ServerTransformer extends TransformerAbstract
             'node' => [
                 'id' => $server->node->id,
                 'name' => $server->node->name,
-            ]
+            ],
         ];
     }
 }

@@ -2,9 +2,7 @@
 
 namespace Convoy\Http\Controllers\Application\Nodes\Addresses;
 
-use Convoy\Enums\Network\AddressType;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Application\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Application\Nodes\Addresses\UpdateAddressRequest;
 use Convoy\Models\IPAddress;
@@ -12,14 +10,12 @@ use Convoy\Models\Node;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Application\AddressTransformer;
 use Illuminate\Http\Request;
-use PharIo\Manifest\Application;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends ApplicationApiController
 {
     public function __construct(private NetworkService $service)
     {
-
     }
 
     public function index(Node $node, Request $request)
@@ -48,7 +44,6 @@ class AddressController extends ApplicationApiController
     public function store(Node $node, StoreAddressRequest $request)
     {
         $address = IPAddress::create($request->validated());
-
 
         return fractal($address, new AddressTransformer())->respond();
     }

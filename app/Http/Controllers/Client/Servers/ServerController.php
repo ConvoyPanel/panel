@@ -4,21 +4,15 @@ namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Enums\Activity\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
-use Convoy\Http\Requests\Client\Servers\UpdateBasicInfoRequest;
 use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ResourceService;
 use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Transformers\Client\ActivityLogTransformer;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ServerController extends ApplicationApiController
 {
     public function __construct(private ServerDetailService $detailService)
     {
-
     }
 
     public function show(Server $server)

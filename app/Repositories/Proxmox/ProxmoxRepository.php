@@ -2,12 +2,12 @@
 
 namespace Convoy\Repositories\Proxmox;
 
-use GuzzleHttp\Client;
 use Convoy\Models\Node;
+use Convoy\Models\Server;
+use GuzzleHttp\Client;
+use Illuminate\Contracts\Foundation\Application;
 use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
-use Convoy\Models\Server;
-use Illuminate\Contracts\Foundation\Application;
 
 abstract class ProxmoxRepository
 {
@@ -30,7 +30,8 @@ abstract class ProxmoxRepository
      * BaseWingsRepository constructor.
      */
     public function __construct(protected Application $app)
-    {}
+    {
+    }
 
     /**
      * Set the server model this request is stemming from.
@@ -66,6 +67,7 @@ abstract class ProxmoxRepository
     public function getData(ResponseInterface $response)
     {
         $json = json_decode($response->getBody(), true);
+
         return $json['data'] ?? $json;
     }
 

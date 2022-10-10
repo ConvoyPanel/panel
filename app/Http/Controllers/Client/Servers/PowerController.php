@@ -6,13 +6,11 @@ use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use Convoy\Services\Servers\PowerService;
 
 class PowerController extends ApplicationApiController
 {
     public function __construct(private ProxmoxPowerRepository $repository)
     {
-
     }
 
     public function sendCommand(SendPowerCommandRequest $request, Server $server)

@@ -7,6 +7,7 @@ use Ramsey\Uuid\Uuid;
 class ActivityLogBatchService
 {
     protected int $transaction = 0;
+
     protected ?string $uuid = null;
 
     /**
@@ -28,7 +29,7 @@ class ActivityLogBatchService
             $this->uuid = $uuid ?? Uuid::uuid4()->toString();
         }
 
-        ++$this->transaction;
+        $this->transaction++;
     }
 
     /**

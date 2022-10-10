@@ -5,11 +5,11 @@ use Convoy\Http\Controllers\Admin\Nodes\Addresses\AddressController;
 use Convoy\Http\Controllers\Admin\Nodes\NodeController;
 use Convoy\Http\Controllers\Admin\Nodes\SettingsController;
 use Convoy\Http\Controllers\Admin\Servers\ServerController;
-use Convoy\Http\Controllers\Admin\Users\UserController;
 use Convoy\Http\Controllers\Admin\Servers\Settings;
-use Convoy\Http\Controllers\Admin\Users;
-use Illuminate\Support\Facades\Route;
 use Convoy\Http\Controllers\Admin\Templates\TemplateController;
+use Convoy\Http\Controllers\Admin\Users;
+use Convoy\Http\Controllers\Admin\Users\UserController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [IndexController::class, 'index'])->name('admin.dashboard');
 

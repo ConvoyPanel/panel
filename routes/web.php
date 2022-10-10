@@ -1,9 +1,5 @@
 <?php
 
-use Convoy\Facades\Activity;
-use Convoy\Facades\LogTarget;
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes

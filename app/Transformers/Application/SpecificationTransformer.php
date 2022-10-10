@@ -2,8 +2,8 @@
 
 namespace Convoy\Transformers\Application;
 
-use League\Fractal\TransformerAbstract;
 use Illuminate\Support\Arr;
+use League\Fractal\TransformerAbstract;
 
 class SpecificationTransformer extends TransformerAbstract
 {

@@ -2,8 +2,8 @@
 
 namespace Convoy\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Convoy\Services\Activity\ActivityRunnerService;
+use Illuminate\Support\Facades\Facade;
 
 class LogRunner extends Facade
 {

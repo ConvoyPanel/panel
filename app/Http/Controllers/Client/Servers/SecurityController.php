@@ -3,10 +3,8 @@
 namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\VncService;
 use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -36,7 +34,7 @@ class SecurityController extends ApplicationApiController
     {
         $data = $this->vncService->setServer($server)->getTemporaryVncCredentials();
 
-        if (!$data) {
+        if (! $data) {
             throw new ServiceUnavailableHttpException();
         }
 
@@ -44,7 +42,7 @@ class SecurityController extends ApplicationApiController
             'node_id' => $server->node->cluster,
             'vmid' => $server->vmid,
             'token' => $data,
-            'endpoint' => 'https://' . $server->node->hostname . ':' . $server->node->port . '/novnc/novnc.html',
+            'endpoint' => 'https://'.$server->node->hostname.':'.$server->node->port.'/novnc/novnc.html',
         ]);
     }
 }

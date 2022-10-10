@@ -22,7 +22,6 @@ class ServerUpdateService extends ProxmoxService
     ) {
     }
 
-
     public function handle(ServerSpecificationsObject $deployment)
     {
         Assert::isInstanceOf($this->server, Server::class);
@@ -34,14 +33,15 @@ class ServerUpdateService extends ProxmoxService
         $this->powerRepository->setServer($this->server);
 
         /* 2. Configure the specifications */
-        if ($deployment->limits?->cpu || $deployment->limits?->memory)
+        if ($deployment->limits?->cpu || $deployment->limits?->memory) {
             $this->allocationService->updateSpecifications([
                 'cpu' => $deployment->limits?->cpu,
                 'memory' => $deployment->limits?->memory,
             ]);
+        }
 
         /* 3. Configure the IPs */
-        if ((int) $deployment->limits?->addresses?->ipv4->count() !== 0  || (int) $deployment->limits?->addresses?->ipv6->count() !== 0) {
+        if ((int) $deployment->limits?->addresses?->ipv4->count() !== 0 || (int) $deployment->limits?->addresses?->ipv6->count() !== 0) {
             $this->networkService->clearIpsets();
 
             $this->cloudinitService->updateIpConfig([
@@ -56,7 +56,6 @@ class ServerUpdateService extends ProxmoxService
 
         $this->networkService->syncSettings($mac_address);
 
-
         if ($deployment->limits?->disk) {
             /* 4. Configure the disks */
             $templateDetails = $this->detailService->getDetails();
@@ -68,8 +67,9 @@ class ServerUpdateService extends ProxmoxService
                 // If there's no primary disk, then we don't have to do any resizing. Easy!
                 $diff = $deployment->limits->disk - $templatePrimaryDisk->size;
 
-                if ($diff > 0)
+                if ($diff > 0) {
                     $this->allocationRepository->resizeDisk($diff, $templatePrimaryDisk->disk);
+                }
             }
         }
 

@@ -6,7 +6,6 @@ use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
 use Convoy\Models\User;
 use Convoy\Transformers\Client\ActivityLogTransformer;
-use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -46,9 +45,9 @@ class ActivityLogged extends Activity implements ShouldBroadcast
     public function broadcastOn()
     {
         if ($this->isServerEvent()) {
-            return new PrivateChannel('server.' . $this->model->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);
+            return new PrivateChannel('server.'.$this->model->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject_id);
         } elseif ($this->isUserEvent()) {
-            return new PrivateChannel('user.' . $this->model->subjects()->firstWhere('subject_type', (new User)->getMorphClass())?->subject_id);
+            return new PrivateChannel('user.'.$this->model->subjects()->firstWhere('subject_type', (new User)->getMorphClass())?->subject_id);
         }
 
         throw new LogicException('Event subject is invalid');

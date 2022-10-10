@@ -28,7 +28,7 @@ class UpdateDetailsRequest extends FormRequest
             'limits.cpu' => 'sometimes|numeric|min:1|required',
             'limits.memory' => 'sometimes|numeric|min:16777216|required',
             'limits.disk' => 'sometimes|numeric|min:1|required',
-            'limits.address_ids' => 'sometimes|numeric|exists:ip_addresses,id|required'
+            'limits.address_ids' => 'sometimes|numeric|exists:ip_addresses,id|required',
         ];
     }
 }

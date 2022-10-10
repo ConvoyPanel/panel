@@ -2,26 +2,20 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes\Addresses;
 
-use Convoy\Enums\Network\AddressType;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Node;
-use Convoy\Models\Server;
 use Convoy\Services\Servers\NetworkService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends ApplicationApiController
 {
     public function __construct(private NetworkService $service)
     {
-
     }
 
     public function index(Node $node)
@@ -58,8 +52,7 @@ class AddressController extends ApplicationApiController
         $builder = QueryBuilder::for(IPAddress::class)
             ->allowedFilters(['server_id', 'address', 'cidr', 'gateway', 'type'])->where('node_id', $node->id);
 
-        if ($request->show_available_ips)
-        {
+        if ($request->show_available_ips) {
             $builder = $builder->where('server_id', null);
         }
 

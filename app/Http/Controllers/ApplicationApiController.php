@@ -2,32 +2,29 @@
 
 namespace Convoy\Http\Controllers;
 
-use Illuminate\Http\Response;
-use Convoy\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ApplicationApiController extends Controller
 {
     protected function returnNoContent(): Response
     {
-        return (new Response('', Response::HTTP_NO_CONTENT));
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     protected function returnContent($payload, $code = Response::HTTP_OK): Response
     {
-        return (new Response($payload, $code));
+        return new Response($payload, $code);
     }
 
     // This can only be used if you are returning a success message after completing an action
-    protected function returnInertiaResponse(Request $request, String $message, array $content = [])
+    protected function returnInertiaResponse(Request $request, string $message, array $content = [])
     {
         if (count($content) > 0) {
-
             return $request->wantsJson()
                 ? $this->returnContent($content)
                 : back()->with('status', $message);
         } else {
-
             return $request->wantsJson()
                 ? $this->returnNoContent()
                 : back()->with('status', $message);

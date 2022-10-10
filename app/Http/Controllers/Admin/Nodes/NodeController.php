@@ -27,7 +27,7 @@ class NodeController extends ApplicationApiController
     public function show(Node $node)
     {
         return Inertia::render('admin/nodes/Show', [
-            'node' => $node
+            'node' => $node,
         ]);
     }
 
@@ -52,11 +52,13 @@ class NodeController extends ApplicationApiController
     {
         $payload = $request->safe()->except(['token_id', 'secret']);
 
-        if (isset($request->token_id))
+        if (isset($request->token_id)) {
             $payload['token_id'] = $request->safe()->only(['token_id']);
+        }
 
-        if (isset($request->secret))
+        if (isset($request->secret)) {
             $payload['secret'] = $request->safe()->only(['secret']);
+        }
 
         $node->update($payload);
 

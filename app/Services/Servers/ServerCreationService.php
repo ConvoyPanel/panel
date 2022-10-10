@@ -12,13 +12,12 @@ use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\ProxmoxService;
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
 
 /**
  * Class ServerCreationService
- * @package Convoy\Services\Servers
  */
 class ServerCreationService extends ProxmoxService
 {
@@ -51,7 +50,7 @@ class ServerCreationService extends ProxmoxService
             if ((bool) $deployment->config->template) {
                 Template::create([
                     'server_id' => $server->id,
-                    'visible' => (bool) $deployment->config->visible
+                    'visible' => (bool) $deployment->config->visible,
                 ]);
             }
 
@@ -82,13 +81,16 @@ class ServerCreationService extends ProxmoxService
                 'bandwidth_limit' => $deployment->limits->bandwidth_limit,
             ]);
 
-            if ($deployment->limits?->address_ids)
+            if ($deployment->limits?->address_ids) {
                 Arr::map($deployment->limits->address_ids, function ($address_id) use ($server) {
                     IPAddress::find($address_id)->update(['server_id' => $server->id]);
                 });
+            }
 
             $transformedDeployment = $deployment;
             $transformedDeployment->limits->addresses = AddressLimitsObject::from($addresses);
+
+            $server->update(['installing' => true]);
 
             $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
                 ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
@@ -98,8 +100,6 @@ class ServerCreationService extends ProxmoxService
         }
     }
 
-
-
     /**
      * Create a unique UUID and UUID-Short combo for a server.
      */
@@ -107,7 +107,7 @@ class ServerCreationService extends ProxmoxService
     {
         $uuid = Str::uuid()->toString();
 
-        if (!$this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
+        if (! $this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
             return $this->generateUniqueUuidCombo();
         }
 

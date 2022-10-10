@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Enums\Servers\Cloudinit\BiosType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use Convoy\Enums\Servers\Cloudinit\BiosType;
 
 class UpdateBiosTypeRequest extends FormRequest
 {
@@ -26,7 +26,7 @@ class UpdateBiosTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'type' => [new Enum(BiosType::class), 'alpha_dash', 'required']
+            'type' => [new Enum(BiosType::class), 'alpha_dash', 'required'],
         ];
     }
 }

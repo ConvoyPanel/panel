@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Controllers\Auth;
 
+use Carbon\Carbon;
 use Convoy\Http\Controllers\Controller;
-use Convoy\Http\Requests\Auth\AuthorizeTokenRequest;
 use Convoy\Http\Requests\Auth\LoginRequest;
 use Convoy\Models\SSOToken;
 use Convoy\Providers\RouteServiceProvider;
@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Carbon\Carbon;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
@@ -49,16 +48,14 @@ class AuthenticatedSessionController extends Controller
     {
         $SSOToken = SSOToken::where('token', $request->token)->first();
 
-        if (!isset($SSOToken))
-        {
+        if (! isset($SSOToken)) {
             return throw new NotFoundHttpException('Token doesn\'t exist');
         }
 
         // expire tokens if they're past a specific time
         $diff = Carbon::parse($SSOToken->created_at)->diffInMinutes(Carbon::now());
 
-        if ($diff > 2 || $SSOToken->used)
-        {
+        if ($diff > 2 || $SSOToken->used) {
             return throw new UnauthorizedHttpException('', 'Token expired');
         }
 

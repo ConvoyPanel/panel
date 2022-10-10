@@ -149,8 +149,6 @@ const Building = ({
         data: activity,
       },
     }))
-
-    console.log(activity)
   }
 
   return (

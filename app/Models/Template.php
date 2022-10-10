@@ -11,7 +11,7 @@ class Template extends Model
 
     protected $fillable = [
         'server_id',
-        'visible'
+        'visible',
     ];
 
     public function server()

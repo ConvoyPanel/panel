@@ -2,8 +2,8 @@
 
 namespace Convoy\Contracts\Repository;
 
-use Illuminate\Support\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface RepositoryInterface
 {
@@ -38,8 +38,7 @@ interface RepositoryInterface
     /**
      * An array of columns to filter the response by.
      *
-     * @param array|string $columns
-     *
+     * @param  array|string  $columns
      * @return $this
      */
     public function setColumns($columns = ['*']);
@@ -117,8 +116,7 @@ interface RepositoryInterface
     /**
      * Update a given ID with the passed array of fields.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return mixed
      *
      * @throws \Convoy\Exceptions\Model\DataValidationException

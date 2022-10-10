@@ -31,8 +31,8 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $storage), [
                 'query' => [
                     'content' => 'backup',
-                    'vmid' => $this->server->vmid
-                ]
+                    'vmid' => $this->server->vmid,
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -55,7 +55,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
                     'mode' => $mode,
                     'remove' => 0,
                     'compress' => $compressionType,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
@@ -74,7 +74,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
                     'vmid' => $this->server->vmid,
                     'force' => 1,
                     'archive' => $archive,
-                ]
+                ],
             ]);
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);

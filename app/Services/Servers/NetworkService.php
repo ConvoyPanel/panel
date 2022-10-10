@@ -10,9 +10,9 @@ use Illuminate\Support\Arr;
 
 class NetworkService extends ProxmoxService
 {
-
     public function __construct(protected ProxmoxAllocationRepository $allocationRepository)
-    {}
+    {
+    }
 
     public function deleteIpset(string $name)
     {
@@ -60,7 +60,7 @@ class NetworkService extends ProxmoxService
     } */
 
     /**
-     * @param array<int, int> $addressIds
+     * @param  array<int, int>  $addressIds
      */
     public function convertFromEloquent(array $addressIds): array
     {
@@ -69,17 +69,17 @@ class NetworkService extends ProxmoxService
             'ipv6' => [],
         ];
 
-            Arr::map($addressIds, function ($address_id) use (&$addresses) {
-                $address = IPAddress::find($address_id);
-                $type = AddressType::from($address->type)->value;
+        Arr::map($addressIds, function ($address_id) use (&$addresses) {
+            $address = IPAddress::find($address_id);
+            $type = AddressType::from($address->type)->value;
 
-                $addresses[$type][] = [
-                    'address' => $address->address,
-                    'cidr' => $address->cidr,
-                    'gateway' => $address->gateway,
-                    'mac_address' => $address->mac_address
-                ];
-            });
+            $addresses[$type][] = [
+                'address' => $address->address,
+                'cidr' => $address->cidr,
+                'gateway' => $address->gateway,
+                'mac_address' => $address->mac_address,
+            ];
+        });
 
         return $addresses;
     }

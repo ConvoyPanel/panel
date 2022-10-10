@@ -26,8 +26,7 @@ class RefreshActivityRunnersCommand extends Command
     {
         $runners = ActivityLog::where('status', 'running')->whereIn('event', array_keys(ActivityLog::$eventTypes))->get();
 
-        foreach ($runners as $runner)
-        {
+        foreach ($runners as $runner) {
             LogRunner::setNode($repository->getServer($runner)->node)->setActivity($runner)->refresh();
         }
     }

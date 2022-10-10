@@ -34,7 +34,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'root_admin' => $request->root_admin
+            'root_admin' => $request->root_admin,
         ]);
 
         return redirect()->route('admin.users.show', [$user->id]);

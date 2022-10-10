@@ -2,10 +2,10 @@
 
 namespace Convoy\Repositories\Proxmox\Node;
 
+use Carbon\Carbon;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use Carbon\Carbon;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -19,7 +19,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         $payload = [
             'enable' => Arr::get($data, 'enable', true),
-            'userid' => Arr::get($data, 'userid', 'convoy-' . Str::random(50)) . '@' . Arr::get($data, 'authType', 'pve'),
+            'userid' => Arr::get($data, 'userid', 'convoy-'.Str::random(50)).'@'.Arr::get($data, 'authType', 'pve'),
             'password' => Arr::get($data, 'password', Str::random(60)),
             'expire' => Arr::get($data, 'expire', Carbon::now()->addDay()->timestamp),
         ];

@@ -2,13 +2,13 @@
 
 namespace Convoy\Models;
 
+use Carbon\Carbon;
 use Convoy\Events\Activity\ActivityLogged;
 use Convoy\Events\Activity\ActivityUpdated;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Event;
 use LogicException;
 
@@ -36,7 +36,7 @@ class ActivityLog extends Model
 
     public static $eventTypes = [
         'server:details.update' => [
-            'timeout' => 240 // seconds
+            'timeout' => 240, // seconds
         ],
         'server:install' => [
             'timeout' => false, // determined by status of UPID
@@ -45,7 +45,7 @@ class ActivityLog extends Model
             'timeout' => false,
         ],
         'server:rebuild' => [
-            'timeout' => 1000
+            'timeout' => 1000,
         ],
     ];
 

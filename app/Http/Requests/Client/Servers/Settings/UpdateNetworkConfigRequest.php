@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Rules\Network\Domain;
 use Convoy\Rules\Network\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
-use Convoy\Rules\Network\Domain;
 
 class UpdateNetworkConfigRequest extends FormRequest
 {

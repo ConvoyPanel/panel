@@ -3,7 +3,6 @@
 namespace Convoy\Http\Controllers\Application\Nodes;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Models\Node;
 use Convoy\Transformers\Application\NodeTransformer;
 use Illuminate\Http\Request;

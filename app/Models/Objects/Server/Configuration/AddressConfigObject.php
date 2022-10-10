@@ -4,7 +4,6 @@ namespace Convoy\Models\Objects\Server\Configuration;
 
 use Convoy\Models\Objects\Server\Allocations\Network\AddressObject;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
 
 class AddressConfigObject extends Data
 {
