@@ -1,17 +1,18 @@
-import { Node } from '@/api/admin/nodes/types'
 import { Template } from '@/api/admin/servers/templates/types'
+import { Details } from '@/api/server/getDetails'
 import { Server as DefaultServer } from '@/api/server/types'
 import { AuthInterface, DefaultProps } from '@/api/types/default'
 import Authenticated from '@/components/layouts/Authenticated'
 import Main from '@/components/Main'
-import NodeNav from '@/components/nodes/NodeNav'
 import ServerNav from '@/components/servers/admin/ServerNav'
 import BasicSettings from '@/pages/admin/servers/settings/modules/BasicSettings'
 import DeleteSettings from '@/pages/admin/servers/settings/modules/DeleteSettings'
+import DetailSettings from '@/pages/admin/servers/settings/modules/DetailSettings'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext } from 'react'
 
 interface Props extends DefaultProps {
+  details: Details
   server: Server
 }
 
@@ -21,6 +22,7 @@ interface Server extends DefaultServer {
 
 export interface SettingsContextInterface {
   server: Server
+  details: Details
   auth: AuthInterface
 }
 
@@ -28,7 +30,7 @@ export const SettingsContext = createContext<SettingsContextInterface | null>(
   null
 )
 
-const Index = ({ auth, server }: Props) => {
+const Index = ({ auth, server, details }: Props) => {
   return (
     <Authenticated
       auth={auth}
@@ -39,10 +41,13 @@ const Index = ({ auth, server }: Props) => {
 
       <Main>
         <h3 className='h3-deemphasized'>Settings</h3>
-        <SettingsContext.Provider value={{ server, auth }}>
+        <SettingsContext.Provider value={{ server, auth, details }}>
           <div className='settings-grid'>
             <div className='settings-column'>
               <BasicSettings />
+            </div>
+            <div className='settings-column'>
+              <DetailSettings />
             </div>
             <div className='settings-column'>
               <DeleteSettings />

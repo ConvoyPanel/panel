@@ -103,7 +103,7 @@ class AllocationService extends ProxmoxService
     public function convertToBytes(string $from): ?int
     {
         $units = ['B', 'K', 'M', 'G', 'T', 'P'];
-        $number = substr($from, 0, -1);
+        $number = (int) substr($from, 0, -1);
         $suffix = strtoupper(substr($from, -1));
 
         //B or no suffix

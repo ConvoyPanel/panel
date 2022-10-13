@@ -35,11 +35,6 @@ class CloudinitService extends ProxmoxService
         }
     }
 
-    /**
-     * @param  BiosType  $type
-     * @param  array  $params
-     * @return mixed
-     */
     // Generally needed for Windows VM's with over 2TB disk, still WIP since I still need to add EFI disk
     /**
      * @param  BiosType  $type

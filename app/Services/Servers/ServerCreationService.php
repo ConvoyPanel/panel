@@ -12,6 +12,7 @@ use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
 use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\ProxmoxService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
@@ -112,5 +113,30 @@ class ServerCreationService extends ProxmoxService
         }
 
         return $uuid;
+    }
+
+    public function createDeployment(Request $request): array
+    {
+        return [
+            'type' => $request->input('type'),
+            'user_id' => $request->input('user_id'),
+            'node_id' => $request->input('node_id'),
+            'template_id' => $request->input('template_id'),
+            'name' => $request->input('name'),
+            'vmid' => $request->input('vmid'),
+            'limits' => [
+                'cpu' => $request->input('limits.cpu'),
+                'memory' => $request->input('limits.memory'),
+                'address_ids' => $request->input('limits.addresses'),
+                'disk' => $request->input('limits.disk'),
+                'snapshot_limit' => $request->input('limits.snapshot_limit'),
+                'backup_limit' => $request->input('limits.backup_limit'),
+                'bandwidth_limit' => $request->input('limits.bandwidth_limit'),
+            ],
+            'config' => [
+                'template' => $request->input('config.template'),
+                'visible' => $request->input('config.visible'),
+            ],
+        ];
     }
 }

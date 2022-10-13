@@ -77,6 +77,7 @@ Route::prefix('/servers')->group(function () {
         Route::prefix('/settings')->group(function () {
             Route::get('/', [Settings\SettingsController::class, 'index'])->name('admin.servers.show.settings');
             Route::put('/basic-info', [Settings\SettingsController::class, 'updateBasicInfo'])->name('admin.servers.show.settings.basic-info');
+            Route::put('/details', [Settings\SettingsController::class, 'updateDetails'])->name('admin.servers.show.settings.details');
         });
     });
 });

@@ -13,11 +13,11 @@ class MegabytesAndBytes implements CastsAttributes
      * @param  string  $key
      * @param  int  $value
      * @param  array  $attributes
-     * @return int
+     * @return ?int
      */
     public function get($model, $key, $value, $attributes)
     {
-        return $value * 1048576; // Convert from megabytes to bytes
+        return isset($value) ? $value * 1048576 : $value; // Convert from megabytes to bytes
     }
 
     /**
@@ -27,10 +27,10 @@ class MegabytesAndBytes implements CastsAttributes
      * @param  string  $key
      * @param  int  $value
      * @param  array  $attributes
-     * @return int
+     * @return ?int
      */
     public function set($model, $key, $value, $attributes)
     {
-        return floor($value / 1048576); // Convert from bytes to megabytes to prevent overflow
+        return isset($value) ? intval(floor($value / 1048576)) : $value; // Convert from bytes to megabytes to prevent overflow
     }
 }

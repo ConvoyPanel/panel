@@ -30,8 +30,13 @@ export interface Details {
       ipv4: Pick<Address, 'cidr' | 'gateway' | 'address' | 'mac_address'>[]
       ipv6: Pick<Address, 'cidr' | 'gateway' | 'address' | 'mac_address'>[]
     }
+    snapshot_limit?: number
+    backup_limit?: number
+    bandwidth_limit?: number
+    mac_address?: string
   }
   config: {
+    mac_address?: string
     boot_order: string[]
     disks: Disk[]
     template: boolean

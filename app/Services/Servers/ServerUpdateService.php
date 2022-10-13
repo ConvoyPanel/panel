@@ -22,7 +22,7 @@ class ServerUpdateService extends ProxmoxService
     ) {
     }
 
-    public function handle(ServerSpecificationsObject $deployment)
+    public function handle(ServerSpecificationsObject $deployment, ?bool $disableAutofill = false)
     {
         Assert::isInstanceOf($this->server, Server::class);
         $this->allocationService->setServer($this->server);
@@ -31,6 +31,11 @@ class ServerUpdateService extends ProxmoxService
         $this->detailService->setServer($this->server);
         $this->allocationRepository->setServer($this->server);
         $this->powerRepository->setServer($this->server);
+
+        /* 1. Autofill */
+        if (!$disableAutofill) {
+            $deployment = ServerSpecificationsObject::from(array_merge($deployment->toArray(), $this->detailService->getDetails()->toArray()));
+        }
 
         /* 2. Configure the specifications */
         if ($deployment->limits?->cpu || $deployment->limits?->memory) {

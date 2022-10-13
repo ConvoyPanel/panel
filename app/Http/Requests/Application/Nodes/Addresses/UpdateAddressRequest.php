@@ -20,14 +20,6 @@ class UpdateAddressRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array{
-     *     server_id: int | null,
-     *     node_id: int,
-     *     address: string,
-     *     cidr: int,
-     *     gateway: string,
-     *     type: string
      */
     public function rules()
     {

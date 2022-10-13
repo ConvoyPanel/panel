@@ -21,7 +21,7 @@ import getSearchUsers from '@/api/admin/users/searchUsers'
 const BasicSettings = () => {
   const settingsContext = useContext(SettingsContext)
 
-  const { data, setData, put, processing, errors, reset } = useForm({
+  const { data, setData, put, processing, errors } = useForm({
     name: settingsContext?.server.name,
     user_id: settingsContext?.server.user_id,
     node_id: settingsContext?.server.node_id,
