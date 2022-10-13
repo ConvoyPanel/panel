@@ -31,7 +31,7 @@ class ServerController extends ApplicationApiController
             'server' => $server->toArray(),
             'batch' => $deployment?->batch,
             'batch_type' => (bool) $deployment?->batch ? $deployment->event : null,
-            'events' => ActivityLog::where('batch', '=', $deployment)->get(),
+            'events' => (bool) $deployment?->batch ? ActivityLog::where('batch', '=', $deployment->batch)->get() : [],
         ]);
     }
 

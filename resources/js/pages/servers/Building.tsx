@@ -126,7 +126,6 @@ const Building = ({
       .listen('Activity\\ActivityUpdated', (event: ActivityEvent) =>
         updateActivity(event.data)
       )
-
     if (batch && batch_type) {
       hydratedEvents.forEach((event) => {
         updateActivity(event)

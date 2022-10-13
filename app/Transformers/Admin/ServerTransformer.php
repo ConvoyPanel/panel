@@ -40,7 +40,7 @@ class ServerTransformer extends TransformerAbstract
             'vmid' => $server->vmid,
             'name' => $server->name,
             'description' => $server->description,
-            'installing' => $server->installing,
+            'status' => $server->status,
             'updated_at' => $server->updated_at,
             'created_at' => $server->created_at,
             'template' => $server->template,

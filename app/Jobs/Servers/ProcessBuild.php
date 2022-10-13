@@ -2,6 +2,7 @@
 
 namespace Convoy\Jobs\Servers;
 
+use Convoy\Enums\Servers\Status;
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogRunner;
 use Convoy\Facades\LogTarget;
@@ -69,14 +70,15 @@ class ProcessBuild implements ShouldQueue
 
         LogTarget::setSubject($this->server);
 
+        $this->activity = Activity::event('server:build')->runner()->log();
+
         try {
             $batch->transaction(function () use ($builder) {
-                $this->server->update(['installing' => true]);
-                $this->activity = Activity::event('server:build')->runner()->log();
+                $this->server->update(['status' => Status::INSTALLING->value]);
 
                 $builder->setServer($this->server)->build(Template::findOrFail($this->deployment->template_id));
 
-                $this->server->update(['installing' => false]);
+                $this->server->update(['status' => null]);
                 LogRunner::setActivity($this->activity)->end();
             }, $this->batchUuid);
         } catch (\Exception $e) {

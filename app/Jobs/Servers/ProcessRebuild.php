@@ -3,6 +3,7 @@
 namespace Convoy\Jobs\Servers;
 
 use Activity;
+use Convoy\Enums\Servers\Status;
 use Convoy\Facades\LogRunner;
 use Convoy\Facades\LogTarget;
 use Convoy\Models\ActivityLog;
@@ -69,15 +70,15 @@ class ProcessRebuild implements ShouldQueue
 
         LogTarget::setSubject($server);
 
+        $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
+
         try {
             $batch->transaction(function () use ($builder, $server, $template) {
-                $server->update(['installing' => true]);
-
-                $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
+                $server->update(['status' => Status::INSTALLING->value]);
 
                 $builder->setServer($server)->rebuild($template);
 
-                $server->update(['installing' => false]);
+                $server->update(['status' => null]);
                 LogRunner::setActivity($this->activity)->end();
             }, $this->batchUuid);
         } catch (\Exception $e) {

@@ -3,6 +3,7 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MegabytesAndBytes;
+use Convoy\Enums\Servers\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
@@ -28,7 +29,7 @@ class Server extends Model
         'node_id' => 'required|exists:nodes,id',
         'user_id' => 'required|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
-        'status' => 'nullable|string|in:suspended,installing',
+        'status' => 'nullable|string',
         'installing' => 'sometimes|boolean',
         'addresses' => 'sometimes|array',
         'addresses.*' => 'exists:ip_addresses,id',
@@ -69,6 +70,16 @@ class Server extends Model
     public function activity(): MorphToMany
     {
         return $this->morphToMany(ActivityLog::class, 'subject', 'activity_log_subjects');
+    }
+
+    public function isInstalled(): bool
+    {
+        return $this->status !== Status::INSTALLING->value;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === Status::SUSPENDED->value;
     }
 
     public function getRouteKeyName(): string

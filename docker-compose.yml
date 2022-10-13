@@ -39,8 +39,8 @@ services:
     command: redis-server --save 20 1 --loglevel notice --requirepass ${REDIS_PASSWORD}
     ports:
       - 6379:6379
-  php-worker:
-    build: ./dockerfiles/php-worker
+  workers:
+    build: ./dockerfiles/workers
     tty: true
     restart: unless-stopped
     working_dir: /var/www/

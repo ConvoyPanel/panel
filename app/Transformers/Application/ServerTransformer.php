@@ -35,7 +35,7 @@ class ServerTransformer extends TransformerAbstract
         return [
             'id' => $server->id,
             'vmid' => $server->vmid,
-            'installing' => $server->installing,
+            'status' => $server->status,
             'name' => $server->name,
             'user_id' => $server->user_id,
             'node_id' => $server->node_id,
