@@ -110,11 +110,13 @@ class ServerController extends ApplicationApiController
                 'cpu' => Arr::get($data, 'limits.cpu'),
                 'memory' => Arr::get($data, 'limits.memory'),
                 'disk' => Arr::get($data, 'limits.disk'),
+                // TODO: make eloquent mark these as used
                 'addresses' => $this->networkService->convertFromEloquent(Arr::get($data, 'limits.addresses_ids', [])),
             ],
         ];
+        $server->update($request->safe()->only(['cpu', 'memory', 'disk']));
 
-        $this->updateService->setServer($server)->handle(ServerSpecificationsObject::from($deployment));
+        $this->updateService->setServer($server)->handle();
 
         return $this->detailService->setServer($server)->getDetails();
     }

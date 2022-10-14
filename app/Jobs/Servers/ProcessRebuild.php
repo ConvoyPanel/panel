@@ -27,7 +27,7 @@ class ProcessRebuild implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 1000;
+    public $timeout = 3000;
 
     /**
      * The number of times the job may be attempted.

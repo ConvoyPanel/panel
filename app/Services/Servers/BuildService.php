@@ -116,7 +116,7 @@ class BuildService extends ProxmoxService
 
         $activity = Activity::event('server:details.update')->runner()->log();
 
-        $this->updateService->handle(ServerSpecificationsObject::from($intermissionDetails->toArray()));
+        $this->updateService->handle();
         LogRunner::setActivity($activity)->end();
 
         return $this->detailService->getDetails();

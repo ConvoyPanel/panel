@@ -15,7 +15,7 @@ use Inertia\Inertia;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private ServerUpdateService $updateService, private ServerDetailService $detailService)
+    public function __construct(private ServerDetailService $detailService)
     {}
 
     public function index(Server $server)

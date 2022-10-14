@@ -2,7 +2,6 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Objects\Server\ServerSpecificationsObject;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
@@ -22,7 +21,7 @@ class ServerUpdateService extends ProxmoxService
     ) {
     }
 
-    public function handle(ServerSpecificationsObject $deployment, ?bool $disableAutofill = false)
+    public function handle()
     {
         Assert::isInstanceOf($this->server, Server::class);
         $this->allocationService->setServer($this->server);
@@ -32,10 +31,8 @@ class ServerUpdateService extends ProxmoxService
         $this->allocationRepository->setServer($this->server);
         $this->powerRepository->setServer($this->server);
 
-        /* 1. Autofill */
-        if (!$disableAutofill) {
-            $deployment = ServerSpecificationsObject::from(array_merge($deployment->toArray(), $this->detailService->getDetails()->toArray()));
-        }
+        /* 1. Fetch deployment */
+        $deployment = $this->detailService->getDetails();
 
         /* 2. Configure the specifications */
         if ($deployment->limits?->cpu || $deployment->limits?->memory) {
@@ -50,8 +47,8 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->clearIpsets();
 
             $this->cloudinitService->updateIpConfig([
-                'ipv4' => $deployment->limits->addresses?->ipv4->first()?->toArray() ?? [],
-                'ipv6' => $deployment->limits->addresses?->ipv6->first()?->toArray() ?? [],
+                'ipv4' => $deployment->limits->addresses?->ipv4->first()?->toArray(),
+                'ipv6' => $deployment->limits->addresses?->ipv6->first()?->toArray(),
             ]);
 
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));

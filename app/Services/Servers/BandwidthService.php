@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Carbon\Carbon;
 use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
 use Convoy\Services\ProxmoxService;
 
@@ -11,16 +12,18 @@ class BandwidthService extends ProxmoxService
     {
     }
 
-    public function getUsage(string $timeframe = 'month')
+    public function getMonthlyUsage()
     {
-        $history = $this->repository->setServer($this->server)->getMetrics($timeframe);
+        $history = $this->repository->setServer($this->server)->getMetrics('month');
 
         $in = 0;
         $out = 0;
 
         foreach ($history as $metric) {
-            $in += $metric['netin'] ?? 0;
-            $out += $metric['netout'] ?? 0;
+            if (Carbon::createFromTimestamp($metric['time'])->isCurrentMonth()) {
+                $in += $metric['netin'] ?? 0;
+                $out += $metric['netout'] ?? 0;
+            }
         }
 
         return [

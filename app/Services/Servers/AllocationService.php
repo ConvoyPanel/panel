@@ -35,7 +35,7 @@ class AllocationService extends ProxmoxService
                 return false;
             }
 
-            return in_array($disk['key'], $this->repository->validDisks);
+            return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
         }));
 
         return DiskObject::collection(Arr::map($disks, function ($value) {

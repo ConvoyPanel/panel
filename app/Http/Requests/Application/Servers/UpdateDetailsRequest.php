@@ -31,4 +31,25 @@ class UpdateDetailsRequest extends FormRequest
             'limits.address_ids' => 'sometimes|numeric|exists:ip_addresses,id|required',
         ];
     }
+
+    /**
+     * Convert the allocation field into the expected format for the service handler.
+     *
+     * @return array
+     */
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated();
+
+        // Adjust the limits field to match what is expected by the model.
+        if (!empty($data['limits'])) {
+            foreach ($data['limits'] as $key => $value) {
+                $data[$key] = $value;
+            }
+
+            unset($data['limits']);
+        }
+
+        return $data;
+    }
 }
