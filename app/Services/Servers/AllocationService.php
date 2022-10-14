@@ -18,8 +18,8 @@ class AllocationService extends ProxmoxService
     public function createDisk(int $bytes, string $disk, string $format = 'qcow2')
     {
         Assert::isInstanceOf($this->server, Server::class);
-        Assert::inArray($format, $this->repository->diskFormats, 'Invalid disk format');
-        Assert::inArray($disk, $this->repository->validDisks, 'Invalid disk type');
+        Assert::inArray($format, ProxmoxAllocationRepository::$diskFormats, 'Invalid disk format');
+        Assert::inArray($disk, ProxmoxAllocationRepository::$validDisks, 'Invalid disk type');
 
         return $this->repository->setServer($this->server)->update([
             $disk => 'local:'.($bytes / 11073741824).',format='.$format,
