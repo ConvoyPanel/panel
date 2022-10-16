@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class NetworkService extends ProxmoxService
 {
-    public function __construct(protected ProxmoxAllocationRepository $allocationRepository)
+    public function __construct(private ProxmoxAllocationRepository $allocationRepository, private ServerDetailService $detailService)
     {
     }
 
@@ -49,15 +49,31 @@ class NetworkService extends ProxmoxService
         }
     }
 
-    public function syncSettings(string $address)
+    public function getPrimaryMacAddress()
     {
-        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$address},bridge={$this->node->network}"]);
+        $details = $this->detailService->setServer($this->server)->getDetails();
+
+        return $details->config->mac_address;
     }
 
-    /* public function syncNetworkDeviceSettings()
+    public function syncSettings()
     {
-        return $this->allocationRepository->setServer($this->server)->update(['net0' => "bridge={$this->node->network}"], put: true);
-    } */
+        $macAddress = $this->getPrimaryMacAddress();
+
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$macAddress},bridge={$this->node->network}"]);
+    }
+
+    public function updateRateLimit(?int $mebibytes = null)
+    {
+        $macAddress = $this->getPrimaryMacAddress();
+
+        $payload = "virtio={$macAddress},bridge={$this->node->network}";
+
+        if (!is_null($mebibytes))
+            $payload .= ',rate=' . $mebibytes;
+
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => $payload]);
+    }
 
     /**
      * @param  array<int, int>  $addressIds

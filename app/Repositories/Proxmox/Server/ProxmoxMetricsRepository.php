@@ -6,6 +6,7 @@ use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
 class ProxmoxMetricsRepository extends ProxmoxRepository
@@ -41,6 +42,11 @@ class ProxmoxMetricsRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        return $this->getData($response);
+        return Arr::map($this->getData($response), function (array $metric) {
+            $metric['netin'] = array_key_exists('netin', $metric) ? intval(floor($metric['netin'])) : 0;
+            $metric['netout'] = array_key_exists('netout', $metric) ? intval(floor($metric['netout'])) : 0;
+
+            return $metric;
+        });
     }
 }

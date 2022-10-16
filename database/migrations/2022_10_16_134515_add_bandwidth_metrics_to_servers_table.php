@@ -14,10 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('servers', function (Blueprint $table) {
-            $table->after('id', function ($table) {
-                $table->char('uuid', 36)->unique();
-                $table->char('uuidShort', 8)->unique();
-            });
+            $table->dropColumn('installing');
+            $table->integer('bandwidth_usage')->after('disk')->unsigned();
+            $table->timestamp('hydrated_at')->after('bandwidth_limit')->nullable();
         });
     }
 
@@ -29,7 +28,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('servers', function (Blueprint $table) {
-            $table->dropColumn(['uuid', 'uuidShort']);
+            $table->boolean('installing')->after('status')->default(false);
+            $table->dropColumn(['hydrated_at', 'bandwidth_usage']);
         });
     }
 };
