@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
 use Illuminate\Console\Command;
+use Illuminate\Console\View\Components\Task;
 
 class UpdateUsagesCommand extends Command
 {
@@ -27,34 +28,32 @@ class UpdateUsagesCommand extends Command
         $servers = Server::all();
 
         foreach ($servers as $server) {
-            echo "Updating id {$server->id}...    ";
+            with(new Task($this->output))->render("Server #{$server->id}", function () use ($repository, $server) {
+                try {
 
-            try {
-                $metrics = $repository->setServer($server)->getMetrics('hour');
+                    $metrics = $repository->setServer($server)->getMetrics('hour');
 
-                $bandwidth = $server->bandwidth_usage;
+                    $bandwidth = $server->bandwidth_usage;
 
-                foreach ($metrics as $metric) {
-                    if (Carbon::createFromTimestamp($metric['time'])->gt(Carbon::parse($server->hydrated_at))) {
-                        // we multiply it by 60 seconds because each metric is
-                        // recorded every 1 minute but the values like netin and
-                        // netout are in bytes/sec
-                        $bandwidth += (int) $metric['netin'] * 60 + (int) $metric['netout'] * 60;
+                    foreach ($metrics as $metric) {
+                        if (Carbon::createFromTimestamp($metric['time'])->gt(Carbon::parse($server->hydrated_at))) {
+                            // we multiply it by 60 seconds because each metric is
+                            // recorded every 1 minute but the values like netin and
+                            // netout are in bytes/sec
+                            $bandwidth += (int) $metric['netin'] * 60 + (int) $metric['netout'] * 60;
+                        }
                     }
-                }
 
-                if ($bandwidth > 0) {
-                    $server->update([
-                        'bandwidth_usage' => $bandwidth,
-                        'hydrated_at' => Carbon::now(),
-                    ]);
+                    if ($bandwidth > 0) {
+                        $server->update([
+                            'bandwidth_usage' => $bandwidth,
+                            'hydrated_at' => Carbon::now(),
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    // do nothing
                 }
-
-                echo 'OK' . PHP_EOL;
-            } catch (\Exception $e) {
-                // Do nothing.
-                echo 'FAILED' . PHP_EOL;
-            }
+            });
         }
     }
 }
