@@ -31,11 +31,12 @@
         "rollup-plugin-visualizer": "^5.8.2",
         "styled-components": "^5.3.5",
         "tailwindcss": "^3.1.0",
-        "twin.macro": "^3.0.0-rc.3",
+        "twin.macro": "^3.0.0-rc.5",
         "vite": "^2.9.11",
         "vite-plugin-babel-macros": "^1.0.6"
     },
     "dependencies": {
+        "@emotion/styled": "^11.10.4",
         "@heroicons/react": "^1.0.6",
         "@tanstack/react-query": "^4.0.5",
         "chart.js": "^3.8.0",

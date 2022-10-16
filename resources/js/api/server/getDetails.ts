@@ -16,6 +16,7 @@ export interface Details {
     network: {
       in: number,
       out: number,
+      monthly_total: number,
     }
     disk: {
       read: number,

@@ -9,6 +9,7 @@ class NetworkUsageObject extends Data
     public function __construct(
         public int $in,
         public int $out,
+        public int $monthly_total,
     ) {
     }
 }

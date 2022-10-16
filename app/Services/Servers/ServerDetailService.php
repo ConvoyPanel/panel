@@ -54,6 +54,7 @@ class ServerDetailService extends ProxmoxService
                 'network' => [
                     'in' => Arr::get($resources, 'netin'),
                     'out' => Arr::get($resources, 'netout'),
+                    'monthly_total' => $this->server->bandwidth_usage,
                 ],
                 'disk' => [
                     'write' => Arr::get($resources, 'diskwrite'),

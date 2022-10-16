@@ -4,6 +4,7 @@ namespace Convoy\Models;
 
 use Convoy\Casts\MegabytesAndBytes;
 use Convoy\Enums\Servers\Status;
+use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
@@ -88,5 +89,23 @@ class Server extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+
+    /**
+     * Checks if the server is currently in a user-accessible state. If not, an
+     * exception is raised. This should be called whenever something needs to make
+     * sure the server is not in a weird state that should block user access.
+     *
+     * @throws \Convoy\Exceptions\Http\Server\ServerStateConflictException
+     */
+    public function validateCurrentState()
+    {
+        if (
+            $this->isSuspended() ||
+            !$this->isInstalled()
+        ) {
+            throw new ServerStateConflictException($this);
+        }
     }
 }

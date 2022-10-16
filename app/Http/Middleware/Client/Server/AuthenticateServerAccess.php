@@ -3,12 +3,19 @@
 namespace Convoy\Http\Middleware\Client\Server;
 
 use Closure;
+use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthenticateServerAccess
 {
+
+    /**
+     * Routes that this middleware should not apply to if the user is an admin.
+     */
+    protected array $except = [];
+
     /**
      * Handle an incoming request.
      *
@@ -26,7 +33,21 @@ class AuthenticateServerAccess
         }
 
         if ($user->id !== $server->user_id && ! $user->root_admin) {
-            throw new NotFoundHttpException('Server not found'); // user shouldn't know that it exists
+            throw new NotFoundHttpException('Server not found');
+        }
+
+        try {
+            $server->validateCurrentState();
+        } catch (ServerStateConflictException $exception) {
+            if (!$request->routeIs('servers.show.building')) {
+                if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
+                    throw $exception;
+                }
+
+                if (!$user->root_admin || !$request->routeIs($this->except)) {
+                    throw $exception;
+                }
+            }
         }
 
         return $next($request);
