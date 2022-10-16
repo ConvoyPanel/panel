@@ -32,12 +32,14 @@ class UpdateUsagesCommand extends Command
             try {
                 $metrics = $repository->setServer($server)->getMetrics('hour');
 
-                $bandwidth = 0;
+                $bandwidth = $server->bandwidth_usage;
 
                 foreach ($metrics as $metric) {
                     if (Carbon::createFromTimestamp($metric['time'])->gt(Carbon::parse($server->hydrated_at))) {
-                        // we multiply it by 60 because each metric is for 1 minute but the values like netin and netout are in bytes/sec
-                        $bandwidth += $server->bandwidth_usage + (int) $metric['netin'] * 60 + (int) $metric['netout'] * 60;
+                        // we multiply it by 60 seconds because each metric is
+                        // recorded every 1 minute but the values like netin and
+                        // netout are in bytes/sec
+                        $bandwidth += (int) $metric['netin'] * 60 + (int) $metric['netout'] * 60;
                     }
                 }
 
