@@ -16,3 +16,4 @@ yarn-error.log
 /supervisord.log
 /supervisord.pid
 _ide_*.php
+stats.html
