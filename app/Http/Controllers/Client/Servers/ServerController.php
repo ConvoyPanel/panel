@@ -35,6 +35,13 @@ class ServerController extends ApplicationApiController
         ]);
     }
 
+    public function showSuspended(Server $server)
+    {
+        return Inertia::render('servers/Suspended', [
+            'server' => $server->toArray(),
+        ]);
+    }
+
     public function getDetails(Server $server)
     {
         return $this->detailService->setServer($server)->getDetails();

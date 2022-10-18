@@ -28,23 +28,30 @@ class AuthenticateServerAccess
         $user = $request->user();
         $server = $request->route()->parameter('server');
 
-        if (! $server instanceof Server) {
+        if (!$server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($user->id !== $server->user_id && ! $user->root_admin) {
+        if ($user->id !== $server->user_id && !$user->root_admin) {
             throw new NotFoundHttpException('Server not found');
         }
 
         try {
             $server->validateCurrentState();
         } catch (ServerStateConflictException $exception) {
-            if (!$request->routeIs('servers.show.building')) {
+            if (!$request->routeIs(['servers.show.building'])) {
                 if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
-                    throw $exception;
+                    //throw $exception; // for v3
+                    return redirect()->route('servers.show.suspended', $server->id);
                 }
 
-                if (!$user->root_admin || !$request->routeIs($this->except)) {
+                if ($server->isInstalling()) {
+                    //throw $exception; // for v3
+                    return redirect()->route('servers.show.building', $server->id);
+                }
+
+                // TODO: users can still view building screen on accident if the server is suspended and vice versa
+                if (!$user->root_admin || !$request->routeIs($this->except) && !$request->routeIs(['servers.show.suspended', 'servers.show.building'])) {
                     throw $exception;
                 }
             }

@@ -47,7 +47,7 @@ class ServerDetailService extends ProxmoxService
 
         $details = [
             'vmid' => $this->server->vmid,
-            'status' => Arr::get($resources, 'status'),
+            'status' => $this->server->status ?? Arr::get($resources, 'status'),
             'locked' => Arr::get($resources, 'lock', false),
             'usage' => [
                 'uptime' => Arr::get($resources, 'uptime'),

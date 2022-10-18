@@ -81,6 +81,11 @@ class Server extends Model
         return $this->status !== Status::INSTALLING->value;
     }
 
+    public function isInstalling(): bool
+    {
+        return $this->status === Status::INSTALLING->value;
+    }
+
     public function isSuspended(): bool
     {
         return $this->status === Status::SUSPENDED->value;
