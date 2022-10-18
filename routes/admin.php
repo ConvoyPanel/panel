@@ -78,6 +78,7 @@ Route::prefix('/servers')->group(function () {
             Route::get('/', [Settings\SettingsController::class, 'index'])->name('admin.servers.show.settings');
             Route::put('/basic-info', [Settings\SettingsController::class, 'updateBasicInfo'])->name('admin.servers.show.settings.basic-info');
             Route::put('/details', [Settings\SettingsController::class, 'updateDetails'])->name('admin.servers.show.settings.details');
+            Route::post('/suspension', [Settings\SettingsController::class, 'toggleSuspension'])->name('admin.servers.show.settings.suspension');
         });
     });
 });

@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Enums\Server\Cloudinit\BiosType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

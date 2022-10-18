@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Security;
 
-use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

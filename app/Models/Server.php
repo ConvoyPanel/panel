@@ -3,7 +3,7 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MegabytesAndBytes;
-use Convoy\Enums\Servers\Status;
+use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

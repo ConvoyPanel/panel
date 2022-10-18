@@ -2,8 +2,8 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
-use Convoy\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\Cloudinit\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;

@@ -3,7 +3,7 @@
 namespace Convoy\Http\Controllers\Client\Servers;
 
 use Activity;
-use Convoy\Enums\Servers\Status;
+use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;

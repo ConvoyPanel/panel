@@ -2,7 +2,7 @@
 
 namespace Convoy\Jobs\Servers;
 
-use Convoy\Enums\Servers\Status;
+use Convoy\Enums\Server\Status;
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogRunner;
 use Convoy\Facades\LogTarget;

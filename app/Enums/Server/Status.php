@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Servers;
+namespace Convoy\Enums\Server;
 
 enum Status: string
 {

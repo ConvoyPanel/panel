@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Convoy\Enums\Servers\Cloudinit\AuthenticationType;
-use Convoy\Enums\Servers\Cloudinit\BiosType;
+use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\Cloudinit\BiosType;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Security\UpdatePasswordRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBiosTypeRequest;

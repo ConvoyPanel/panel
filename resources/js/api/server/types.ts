@@ -7,7 +7,7 @@ export interface Server {
     vmid: number
     name: string
     description?: string
-    installing: boolean
+    status?: 'suspended' | 'installing'
     updated_at: string
     created_at: string
 }

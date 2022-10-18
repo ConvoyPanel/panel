@@ -8,6 +8,7 @@ import ServerNav from '@/components/servers/admin/ServerNav'
 import BasicSettings from '@/pages/admin/servers/settings/modules/BasicSettings'
 import DeleteSettings from '@/pages/admin/servers/settings/modules/DeleteSettings'
 import DetailSettings from '@/pages/admin/servers/settings/modules/DetailSettings'
+import SuspensionSettings from '@/pages/admin/servers/settings/modules/SuspensionSettings'
 import { Head } from '@inertiajs/inertia-react'
 import { createContext } from 'react'
 
@@ -45,6 +46,7 @@ const Index = ({ auth, server, details }: Props) => {
           <div className='settings-grid'>
             <div className='settings-column'>
               <BasicSettings />
+              <SuspensionSettings />
             </div>
             <div className='settings-column'>
               <DetailSettings />

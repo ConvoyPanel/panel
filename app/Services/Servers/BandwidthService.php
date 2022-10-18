@@ -3,7 +3,7 @@
 namespace Convoy\Services\Servers;
 
 use Carbon\Carbon;
-use Convoy\Enums\Servers\ThrottleAction;
+use Convoy\Enums\Server\ThrottleAction;
 use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
