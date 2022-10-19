@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 class ProxmoxAgentRepository extends ProxmoxRepository
 {
 
-    public $get_Info_Agent = [
+    public $infoActions = [
         'get-fsinfo',
         'get-host-name',
         'get-memory-block-info',
@@ -31,7 +31,7 @@ class ProxmoxAgentRepository extends ProxmoxRepository
         'suspend-ram',
     ];
 
-    public function exec(array $params = [])
+    public function execAgent(array $params = [])
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -46,7 +46,7 @@ class ProxmoxAgentRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function shutdown()
+    public function shutdownAgent()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -59,7 +59,7 @@ class ProxmoxAgentRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function ping()
+    public function pingAgent()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -72,13 +72,13 @@ class ProxmoxAgentRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function getAgentInfo(string $get_Info_Agent)
+    public function getAgentInfo(string $infoActions)
     {
         Assert::isInstanceOf($this->server, Server::class);
-        Assert::inArray($get_Info_Agent, $this->actions, 'Invalid action');
+        Assert::inArray($infoActions, $this->actions, 'Invalid action');
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/agent/%s', $this->node->cluster, $this->server->vmid, $get_Info_Agent), [
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/agent/%s', $this->node->cluster, $this->server->vmid, $infoActions), [
                 'json' => [
                     'timeout' => 30,
                 ],
@@ -90,7 +90,7 @@ class ProxmoxAgentRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function getAgentActions(string $suspendActions)
+    public function suspendAgent(string $suspendActions)
     {
         Assert::isInstanceOf($this->server, Server::class);
         Assert::inArray($suspendActions, $this->actions, 'Invalid action');
