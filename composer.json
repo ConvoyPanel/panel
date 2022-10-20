@@ -14,6 +14,7 @@
   "license": "BSL",
   "require": {
     "php": "^8.1",
+    "doctrine/dbal": "^3.4",
     "guzzlehttp/guzzle": "7.4.5",
     "inertiajs/inertia-laravel": "^0.5.4",
     "laravel/framework": "9.21",
