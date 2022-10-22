@@ -2,9 +2,10 @@
 
 namespace Convoy\Http\Requests\Application\Servers;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Http\Requests\Application\ApplicationFormRequest;
+use Convoy\Models\Server;
 
-class StoreServerRequest extends FormRequest
+class StoreServerRequest extends ApplicationFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,31 +22,54 @@ class StoreServerRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
-        $rules = [
-            'type' => 'in:new,existing|required',
-            'name' => 'min:1|max:40',
-            'node_id' => 'exists:nodes,id|required',
-            'user_id' => 'exists:users,id|required',
+        $rules = Server::getRules();
+
+        return [
+            'type' => $this->convertRule('sometimes', $rules['type'], 'required'),
+            'user_id' => $rules['user_id'],
+            'node_id' => $rules['node_id'],
+            'template_id' => $rules['template_id'],
+            'name' => $rules['name'],
+            'vmid' => $this->convertRule('required', $rules['vmid'], 'required_if:type,existing'),
+            'limits.cpu' => $rules['cpu'],
+            'limits.memory' => $rules['memory'],
+            'limits.disk' => $rules['disk'],
+            'limits.addresses' => $rules['addresses'],
+            'limits.addresses.*' => $rules['addresses.*'],
+            'limits.snapshot_limit' => $rules['snapshot_limit'],
+            'limits.backup_limit' => $rules['backup_limit'],
+            'limits.bandwidth_limit' => $rules['bandwidth_limit'],
+            'config.template' => $rules['template'],
+            'config.visible' => $rules['visible'],
         ];
+    }
 
-        if ($this->request->get('type') === 'new') {
-            $rules['template_id'] = 'exists:templates,id|required';
-            $rules['vmid'] = 'sometimes|numeric|min:100|max:999999999|required';
-            $rules['limits'] = 'array|required';
-            $rules['limits.cpu'] = 'numeric|min:1|required';
-            $rules['limits.memory'] = 'numeric|min:16777216|required';
-            $rules['limits.disk'] = 'numeric|min:1|required';
-            $rules['limits.address_ids'] = 'numeric|exists:ip_addresses,id|required';
-        }
+    public function validated($key = null, $default = null): array
+    {
+        $data = parent::validated();
 
-        if ($this->request->get('type') === 'existing') {
-            $rules['config.template'] = 'sometimes|boolean';
-            $rules['config.visible'] = 'sometimes|boolean';
-            $rules['vmid'] = 'numeric|min:100|max:999999999|required';
-        }
-
-        return $rules;
+        return [
+            'type' => array_get($data, 'type'),
+            'user_id' => array_get($data, 'user_id'),
+            'node_id' => array_get($data, 'node_id'),
+            'template_id' => array_get($data, 'template_id'),
+            'name' => array_get($data, 'name'),
+            'vmid' => array_get($data, 'vmid'),
+            'limits' => [
+                'cpu' => array_get($data, 'limits.cpu'),
+                'memory' => array_get($data, 'limits.memory'),
+                'disk' => array_get($data, 'limits.disk'),
+                'address_ids' => array_get($data, 'limits.addresses'),
+                'snapshot_limit' => array_get($data, 'limits.snapshot_limit'),
+                'backup_limit' => array_get($data, 'limits.backup_limit'),
+                'bandwidth_limit' => array_get($data, 'limits.bandwidth_limit'),
+            ],
+            'config' => [
+                'template' => array_get($data, 'config.template'),
+                'visible' => array_get($data, 'config.visible'),
+            ],
+        ];
     }
 }

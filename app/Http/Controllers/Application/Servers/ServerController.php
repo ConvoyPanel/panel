@@ -38,34 +38,8 @@ class ServerController extends ApplicationApiController
 
     public function store(StoreServerRequest $request)
     {
-        $data = $request->validated();
 
-        $deployment = [
-            'type' => Arr::get($data, 'type'),
-            'user_id' => Arr::get($data, 'user_id'),
-            'node_id' => Arr::get($data, 'node_id'),
-            'template_id' => Arr::get($data, 'template_id'),
-            'name' => Arr::get($data, 'name'),
-            'vmid' => Arr::get($data, 'vmid'),
-            'limits' => [
-                'cpu' => Arr::get($data, 'limits.cpu'),
-                'memory' => Arr::get($data, 'limits.memory'),
-                'address_ids' => Arr::get($data, 'limits.address_ids'),
-            ],
-            'config' => [
-                'boot_order' => ['default'],
-                'disks' => [
-                    [
-                        'disk' => 'default',
-                        'size' => Arr::get($data, 'limits.disk'),
-                    ],
-                ],
-                'template' => Arr::get($data, 'config.template', false),
-                'visible' => Arr::get($data, 'config.visible', false),
-            ],
-        ];
-
-        $server = $this->creationService->handle(ServerDeploymentObject::from($deployment));
+        $server = $this->creationService->handle(ServerDeploymentObject::from($request->validated()));
 
         return fractal($server, new ServerTransformer())->respond();
     }

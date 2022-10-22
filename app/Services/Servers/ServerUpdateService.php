@@ -54,7 +54,11 @@ class ServerUpdateService extends ProxmoxService
             $this->networkService->lockIps(Arr::flatten($this->server->addresses()->get(['address'])->toArray()));
         }
 
-        $this->networkService->syncSettings();
+        try {
+            $this->networkService->syncSettings();
+        } catch (\Exception $e) {
+            // do nothing.
+        }
 
         if ($deployment->limits?->disk) {
             /* 4. Configure the disks */

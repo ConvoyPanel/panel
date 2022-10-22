@@ -16,7 +16,7 @@ class SnapshotCreationService extends ProxmoxService
     {
         $snapshots = $this->repository->setServer($this->server)->getSnapshots();
 
-        if (! $this->server->snapshot_limit || count($snapshots) >= $this->server->snapshot_limit) {
+        if (! $this->server->snapshot_limit || (count($snapshots) - 1) >= $this->server->snapshot_limit) {
             if ((int) $this->server->snapshot_limit <= 0 && isset($this->server->snapshot_limit)) {
                 throw new TooManySnapshotsException((int) $this->server->snapshot_limit);
             }

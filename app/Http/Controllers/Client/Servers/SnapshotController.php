@@ -22,7 +22,7 @@ class SnapshotController extends ApplicationApiController
         return inertia('servers/snapshots/Index', [
             'server' => $server,
             'snapshots' => $snapshots,
-            'can_create' => isset($server->snapshot_limit) ? count($snapshots) < $server->snapshot_limit : true,
+            'can_create' => isset($server->snapshot_limit) ? (count($snapshots) - 1) < $server->snapshot_limit : true,
         ]);
     }
 

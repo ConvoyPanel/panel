@@ -50,7 +50,7 @@ class ServerDetailService extends ProxmoxService
             'status' => $this->server->status ?? Arr::get($resources, 'status'),
             'locked' => Arr::get($resources, 'lock', false),
             'usage' => [
-                'uptime' => Arr::get($resources, 'uptime'),
+                'uptime' => Arr::get($resources, 'uptime', 0),
                 'network' => [
                     'in' => Arr::get($resources, 'netin', 0),
                     'out' => Arr::get($resources, 'netout', 0),
