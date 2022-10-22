@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogRunner;
 use Convoy\Models\Objects\Server\ServerSpecificationsObject;
@@ -20,10 +21,10 @@ use Webmozart\Assert\Assert;
 class BuildService extends ProxmoxService
 {
     public function __construct(
-        protected ServerDetailService $detailService,
-        protected ProxmoxServerRepository $serverRepository,
-        protected ProxmoxPowerRepository $powerRepository,
-        protected ServerUpdateService $updateService
+        private ServerDetailService $detailService,
+        private ProxmoxServerRepository $serverRepository,
+        private ProxmoxPowerRepository $powerRepository,
+        private ServerUpdateService $updateService
     ) {
     }
 
@@ -120,7 +121,25 @@ class BuildService extends ProxmoxService
 
         $activity = Activity::event('server:details.update')->runner()->log();
 
-        $this->updateService->handle();
+        function runUpdate(ServerUpdateService $service) {
+            try {
+                $service->handle();
+            } catch (ProxmoxConnectionException $e) {
+                // for some fucking reason, Proxmox once in a while throws this stupid error. Proxmox can eat it while I retry the whole thing again
+                $fail = (bool) preg_match("/atomic file '\/var\/log\/pve\/tasks\/active' failed: No such file or directory/", $e->getMessage());
+
+                if ($fail) {
+                    sleep(1);
+
+                    runUpdate($service);
+                } else {
+                    throw $e;
+                }
+            }
+        };
+
+        runUpdate($this->updateService);
+
         LogRunner::setActivity($activity)->end();
 
         return $this->detailService->getDetails();
