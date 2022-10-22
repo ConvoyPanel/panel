@@ -52,13 +52,13 @@ class ServerDetailService extends ProxmoxService
             'usage' => [
                 'uptime' => Arr::get($resources, 'uptime'),
                 'network' => [
-                    'in' => Arr::get($resources, 'netin'),
-                    'out' => Arr::get($resources, 'netout'),
+                    'in' => Arr::get($resources, 'netin', 0),
+                    'out' => Arr::get($resources, 'netout', 0),
                     'monthly_total' => $this->server->bandwidth_usage,
                 ],
                 'disk' => [
-                    'write' => Arr::get($resources, 'diskwrite'),
-                    'read' => Arr::get($resources, 'diskread'),
+                    'write' => Arr::get($resources, 'diskwrite', 0),
+                    'read' => Arr::get($resources, 'diskread', 0),
                 ],
             ],
             'limits' => [

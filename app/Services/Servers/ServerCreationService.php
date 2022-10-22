@@ -2,7 +2,10 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
+use Convoy\Facades\Activity;
+use Convoy\Facades\LogTarget;
 use Convoy\Jobs\Servers\ProcessBuild;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Objects\Server\Limits\AddressLimitsObject;
@@ -82,6 +85,8 @@ class ServerCreationService extends ProxmoxService
                 'bandwidth_limit' => $deployment->limits->bandwidth_limit,
             ]);
 
+            LogTarget::setSubject($server);
+
             if ($deployment->limits?->address_ids) {
                 Arr::map($deployment->limits->address_ids, function ($address_id) use ($server) {
                     IPAddress::find($address_id)->update(['server_id' => $server->id]);
@@ -91,10 +96,12 @@ class ServerCreationService extends ProxmoxService
             $transformedDeployment = $deployment;
             $transformedDeployment->limits->addresses = AddressLimitsObject::from($addresses);
 
-            $server->update(['installing' => true]);
+            $server->update(['status' => Status::INSTALLING->value]);
 
             $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
-                ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid);
+                $activity = Activity::event('server:build')->runner()->log();
+
+                ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid, $activity->id);
             });
 
             return $server;
@@ -108,7 +115,7 @@ class ServerCreationService extends ProxmoxService
     {
         $uuid = Str::uuid()->toString();
 
-        if (! $this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
+        if (!$this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
             return $this->generateUniqueUuidCombo();
         }
 

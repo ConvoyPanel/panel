@@ -157,7 +157,6 @@ const NewAddressModal = ({ node, open, setOpen }: Props) => {
           loading={processing}
           className='mt-3'
           fullWidth
-          onClick={() => handleCreate()}
         >
           Create
         </Button>

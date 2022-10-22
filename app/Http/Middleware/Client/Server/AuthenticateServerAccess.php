@@ -38,8 +38,28 @@ class AuthenticateServerAccess
 
         try {
             $server->validateCurrentState();
+
+            if ($request->routeIs(['servers.show.building', 'servers.show.suspended'])) {
+                return redirect()->route('servers.show', $server);
+            }
         } catch (ServerStateConflictException $exception) {
-            if (!$request->routeIs(['servers.show.building'])) {
+            if ($server->isInstalling() && !$request->routeIs('servers.show.building')) {
+                //throw $exception; // for v3
+                return redirect()->route('servers.show.building', $server->id);
+            }
+
+            if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
+                //throw $exception; // for v3
+                return redirect()->route('servers.show.suspended', $server->id);
+            }
+
+            if ($request->routeIs(['servers.show.building', 'servers.show.suspended'])) {
+                return $next($request);
+            }
+
+            throw $exception;
+
+            /* if (!$request->routeIs(['servers.show.building'])) {
                 if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
                     //throw $exception; // for v3
                     return redirect()->route('servers.show.suspended', $server->id);
@@ -54,7 +74,7 @@ class AuthenticateServerAccess
                 if (!$user->root_admin || !$request->routeIs($this->except) && !$request->routeIs(['servers.show.suspended', 'servers.show.building'])) {
                     throw $exception;
                 }
-            }
+            } */
         }
 
         return $next($request);

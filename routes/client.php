@@ -35,7 +35,6 @@ Route::group([
     'middleware' => [
         ServerSubject::class,
         AuthenticateServerAccess::class,
-        CheckServerInstalling::class,
     ],
 ], function () {
     Route::get('/', [ServerController::class, 'show'])->name('servers.show');

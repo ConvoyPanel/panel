@@ -47,7 +47,11 @@ class BuildService extends ProxmoxService
         $details = $this->detailService->getDetails();
 
         /* 2. Power off the server */
-        $this->powerRepository->send('stop');
+        try {
+            $this->powerRepository->send('stop');
+        } catch (\Exception $e) {
+            // do nothing.
+        }
 
         // Wait for server to turn off
         $intermissionStatus = $this->serverRepository->getStatus();
