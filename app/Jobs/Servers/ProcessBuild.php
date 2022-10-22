@@ -45,7 +45,7 @@ class ProcessBuild implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Server $server, protected ServerDeploymentObject $deployment, protected ?string $batchUuid, protected ?int $initialLogId)
+    public function __construct(protected Server $server, protected int $templateId, protected ?string $batchUuid, protected ?int $initialLogId)
     {
     }
 
@@ -74,10 +74,9 @@ class ProcessBuild implements ShouldQueue
             $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:build')->runner()->log();
 
             try {
-
                 $this->server->update(['status' => Status::INSTALLING->value]);
 
-                $builder->setServer($this->server)->build(Template::findOrFail($this->deployment->template_id));
+                $builder->setServer($this->server)->build(Template::findOrFail($this->templateId));
 
                 $this->server->update(['status' => null]);
                 LogRunner::setActivity($this->activity)->end();

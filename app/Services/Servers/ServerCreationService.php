@@ -68,8 +68,6 @@ class ServerCreationService extends ProxmoxService
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
 
-            $addresses = $this->networkService->convertFromEloquent($deployment->limits?->address_ids ?? []);
-
             $server = Server::create([
                 'uuid' => $uuid,
                 'uuidShort' => substr($uuid, 0, 8),
@@ -93,15 +91,12 @@ class ServerCreationService extends ProxmoxService
                 });
             }
 
-            $transformedDeployment = $deployment;
-            $transformedDeployment->limits->addresses = AddressLimitsObject::from($addresses);
-
             $server->update(['status' => Status::INSTALLING->value]);
 
-            $this->batch->transaction(function (string $uuid) use ($server, $transformedDeployment) {
+            $this->batch->transaction(function (string $uuid) use ($server, $deployment) {
                 $activity = Activity::event('server:build')->runner()->log();
 
-                ProcessBuild::dispatch($server, ServerDeploymentObject::from($transformedDeployment), $uuid, $activity->id);
+                ProcessBuild::dispatch($server, $deployment->template_id, $uuid, $activity->id);
             });
 
             return $server;
