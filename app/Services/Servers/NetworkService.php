@@ -79,38 +79,29 @@ class NetworkService extends ProxmoxService
         return $this->allocationRepository->setServer($this->server)->update(['net0' => $payload]);
     }
 
-    public function updateAddresses(array $addressIds, bool $force = false)
+    public function updateAddresses(array $addressIds)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $this->connection->transaction(function () use ($addressIds, $force) {
-            $existingAddresses = $this->server->addresses;
+        $currentAddresses = $this->server->addresses()->get()->pluck('id')->toArray();
 
-            // make diff of addresses to remove
-            foreach ($existingAddresses as $address) {
-                if (!in_array($address->id, $addressIds)) {
-                    $address->update(['server_id' => null]);
-                }
-            }
+        $addressesToAdd = array_diff($addressIds, $currentAddresses);
+        $addressesToRemove = array_filter($currentAddresses, fn ($id) => !in_array($id, $addressIds));
 
-            // add the new addresses from the $addressIds
-            $addressesToAdd = IPAddress::whereIn('id', array_diff($addressIds, $existingAddresses->pluck('id')->toArray()))->get();
+        if (!empty($addressesToAdd)) {
+            IPAddress::query()
+                ->where('node_id', $this->server->node_id)
+                ->whereIn('id', $addressesToAdd)
+                ->whereNull('server_id')
+                ->update(['server_id' => $this->server->id]);
+        }
 
-            $addressesToAdd->each(function (IPAddress $address) use ($force) {
-                // This checks if an address is already binded to another server. We don't want to update another server on accident.
-                if ($address->server_id !== null && $address->server_id !== $this->server->id) {
-
-                    // if the developer specified to use force, welp we're going to update the unsuspecting server.
-                    if ($force) {
-                        $address->update(['server_id' => $this->server->id]);
-                    } else {
-                        throw new AddressInUseException($address->id);
-                    }
-                } else {
-                    $address->update(['server_id' => $this->server->id]);
-                }
-            });
-        });
+        if (!empty($addressesToRemove)) {
+            IPAddress::query()
+                ->where('server_id', $this->server->id)
+                ->whereIn('id', $addressesToRemove)
+                ->update(['server_id' => null]);
+        }
     }
 
     /**
