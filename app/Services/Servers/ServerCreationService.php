@@ -7,8 +7,6 @@ use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogTarget;
 use Convoy\Jobs\Servers\ProcessBuild;
-use Convoy\Models\IPAddress;
-use Convoy\Models\Objects\Server\Limits\AddressLimitsObject;
 use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
@@ -85,11 +83,7 @@ class ServerCreationService extends ProxmoxService
 
             LogTarget::setSubject($server);
 
-            if ($deployment->limits?->address_ids) {
-                Arr::map($deployment->limits->address_ids, function ($address_id) use ($server) {
-                    IPAddress::find($address_id)->update(['server_id' => $server->id]);
-                });
-            }
+            $this->networkService->setServer($server)->updateAddresses($deployment->limits->address_ids ?? []);
 
             $server->update(['status' => Status::INSTALLING->value]);
 

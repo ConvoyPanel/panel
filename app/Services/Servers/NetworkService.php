@@ -3,7 +3,6 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Enums\Network\AddressType;
-use Convoy\Exceptions\Service\Network\AddressInUseException;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
