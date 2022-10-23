@@ -48,6 +48,9 @@ Route::group(['prefix' => '/servers'], function () {
         Route::delete('/', [ServerController::class, 'destroy']);
         Route::get('/details', [ServerController::class, 'getDetails']);
         Route::patch('/details', [ServerController::class, 'updateDetails']);
+
+        Route::post('/suspend', [ServerController::class, 'suspend']);
+        Route::post('/unsuspend', [ServerController::class, 'unsuspend']);
     });
 });
 

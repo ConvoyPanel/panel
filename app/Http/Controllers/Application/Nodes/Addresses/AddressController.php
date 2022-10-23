@@ -43,7 +43,7 @@ class AddressController extends ApplicationApiController
 
     public function store(Node $node, StoreAddressRequest $request)
     {
-        $address = IPAddress::create($request->validated());
+        $address = IPAddress::create(array_merge($request->validated(), ['node_id' => $node->id]));
 
         return fractal($address, new AddressTransformer())->respond();
     }

@@ -2,9 +2,10 @@
 
 namespace Convoy\Http\Requests\Application\Servers;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Http\Requests\Application\ApplicationFormRequest;
+use Convoy\Models\Server;
 
-class UpdateServerRequest extends FormRequest
+class UpdateServerRequest extends ApplicationFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,11 +24,13 @@ class UpdateServerRequest extends FormRequest
      */
     public function rules()
     {
+        $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
+
         return [
-            'name' => 'min:1|max:40',
-            'node_id' => 'exists:nodes,id|required',
-            'user_id' => 'exists:users,id|required',
-            'vmid' => 'numeric|required',
+            'name' => $rules['name'],
+            'node_id' => $rules['node_id'],
+            'user_id' => $rules['user_id'],
+            'vmid' => $rules['vmid'],
         ];
     }
 }

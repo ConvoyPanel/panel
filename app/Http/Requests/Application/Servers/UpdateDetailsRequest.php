@@ -2,9 +2,10 @@
 
 namespace Convoy\Http\Requests\Application\Servers;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Http\Requests\Application\ApplicationFormRequest;
+use Convoy\Models\Server;
 
-class UpdateDetailsRequest extends FormRequest
+class UpdateDetailsRequest extends ApplicationFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,12 +24,17 @@ class UpdateDetailsRequest extends FormRequest
      */
     public function rules()
     {
+        $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
+
         return [
-            'limits' => 'sometimes|array|required',
-            'limits.cpu' => 'sometimes|numeric|min:1|required',
-            'limits.memory' => 'sometimes|numeric|min:16777216|required',
-            'limits.disk' => 'sometimes|numeric|min:1|required',
-            'limits.address_ids' => 'sometimes|numeric|exists:ip_addresses,id|required',
+            'limits.cpu' => $rules['cpu'],
+            'limits.memory' => $rules['memory'],
+            'limits.disk' => $rules['disk'],
+            'limits.snapshot_limit' => $rules['snapshot_limit'],
+            'limits.backup_limit' => $rules['backup_limit'],
+            'limits.bandwidth_limit' => $rules['bandwidth_limit'],
+            'limits.addresses' => $rules['addresses'],
+            'limits.addresses.*' => $rules['addresses.*'],
         ];
     }
 

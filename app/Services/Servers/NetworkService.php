@@ -102,30 +102,4 @@ class NetworkService extends ProxmoxService
                 ->update(['server_id' => null]);
         }
     }
-
-    /**
-     * @deprecated This is being deprecated in favor of the new updateAddresses method.
-     * @param  array<int, int>  $addressIds
-     */
-    public function convertFromEloquent(array $addressIds): array
-    {
-        $addresses = [
-            'ipv4' => [],
-            'ipv6' => [],
-        ];
-
-        Arr::map($addressIds, function ($address_id) use (&$addresses) {
-            $address = IPAddress::find($address_id);
-            $type = AddressType::from($address->type)->value;
-
-            $addresses[$type][] = [
-                'address' => $address->address,
-                'cidr' => $address->cidr,
-                'gateway' => $address->gateway,
-                'mac_address' => $address->mac_address,
-            ];
-        });
-
-        return $addresses;
-    }
 }

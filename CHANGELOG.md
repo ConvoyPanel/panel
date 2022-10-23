@@ -3,6 +3,18 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## v2.0.0
+## v2.0.0 (Bombay)
 ### Added
-* Something
+* Storing of CPU, memory, disk, snapshots, backups, and bandwidth limits
+* Added server suspensions
+* Added real-time status updates of server installs (though it will be deprecated in v3.x.x)
+* Automatic bandwidth throttler when a user exceeds the bandwidth limit
+
+### Changed
+* Internally, server details are now passed around the application using Laravel Data by Spatie. Though in v3.x.x, we are planning on switching to Data Transfer Objects by Spatie. We pulled the wrong package and didn't realize until one month in using the package LOL.
+* Virtual machines are now limited to one disk. Multiple disks may be supported when a daemon is available in the future.
+
+### Fixed
+* The commands in the node viewing page for installing the VNC Broker and templates.
+
+![The Bombay cat breed is the mascot for v2](https://imgur.com/fP6oxn9.png)
