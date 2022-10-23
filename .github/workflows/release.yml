@@ -20,7 +20,6 @@ jobs:
           git config --local user.email "ci@convoypanel.com"
           git config --local user.name "Convoy CI"
           git checkout -b $BRANCH
-          git pull
           git push -u origin $BRANCH
           sed -i "s/    'version' => 'canary',/    'version' => '${REF:11}',/" config/app.php
           git add config/app.php
