@@ -3,7 +3,7 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## v2.0.0 (Bombay)
+## v2.0.0-beta (Bombay)
 ### Added
 * Storing of CPU, memory, disk, snapshots, backups, and bandwidth limits
 * Added server suspensions
