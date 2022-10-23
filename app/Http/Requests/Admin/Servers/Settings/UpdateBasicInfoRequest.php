@@ -26,7 +26,6 @@ class UpdateBasicInfoRequest extends AdminFormRequest
     {
         $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
 
-        // TODO: finish all the basic infod
         return [
             'name' => $rules['name'],
             'node_id' => $rules['node_id'],
@@ -34,12 +33,6 @@ class UpdateBasicInfoRequest extends AdminFormRequest
             'vmid' => $rules['vmid'],
             'template' => $rules['template'],
             'visible' => $rules['visible'],
-            'cpu' => $rules['cpu'],
-            'memory' => $rules['memory'],
-            'disk' => $rules['disk'],
-            'snapshot_limit' => $rules['snapshot_limit'],
-            'backup_limit' => $rules['backup_limit'],
-            'bandwidth_limit' => $rules['bandwidth_limit'],
         ];
     }
 }

@@ -17,4 +17,8 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 ### Fixed
 * The commands in the node viewing page for installing the VNC Broker and templates.
 
+### Known Bugs
+* The real-time server installation communication is known to be buggy and will be resolved in v3.x.x
+* Editing the server field for IP Addresses will sometime result in the first server of the node to be used. This will be resolved in v3.x.x
+
 ![The Bombay cat breed is the mascot for v2](https://imgur.com/fP6oxn9.png)
