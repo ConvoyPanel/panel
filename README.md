@@ -6,7 +6,7 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel?ref=badge_shield)
 
 # Convoy
-Convoy is a modern and performant KVM server management panel for hosting businesses. It's built with PHP and React and proven technology like Proxmox, making it easier to drop in Convoy.
+Convoy is a modern and performant KVM server management panel for hosting businesses. It's built with PHP and React and proven technology like Proxmox, making it easier to drop Convoy in an existing system.
 
 Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a license to use Convoy today for $6/node/mo
 

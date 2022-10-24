@@ -13,6 +13,7 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 ### Changed
 * Internally, server details are now passed around the application using Laravel Data by Spatie. Though in v3.x.x, we are planning on switching to Data Transfer Objects by Spatie. We pulled the wrong package and didn't realize until one month in using the package LOL.
 * Virtual machines are now limited to one disk. Multiple disks may be supported when a daemon is available in the future.
+* The built-in web server is now Caddy instead of Nginx. This provides auto SSL out of the box.
 
 ### Fixed
 * The commands in the node viewing page for installing the VNC Broker and templates.
