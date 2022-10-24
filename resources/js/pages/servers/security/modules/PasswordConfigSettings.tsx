@@ -64,6 +64,7 @@ const PasswordConfigSettings = () => {
               placeholder='ssh-rsa ...'
               value={data.contents}
               onChange={(e) => setData('contents', e.target.value)}
+              error={errors.contents}
               autosize
               maxRows={4}
               required
