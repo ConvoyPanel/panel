@@ -67,7 +67,6 @@ const PasswordConfigSettings = () => {
               error={errors.contents}
               autosize
               maxRows={4}
-              required
             />
           )}
 

@@ -24,12 +24,16 @@ class CloudinitService extends ProxmoxService
      * @param  array  $params
      * @return mixed
      */
-    public function changePassword(string $password, AuthenticationType $type)
+    public function changePassword(?string $password, AuthenticationType $type)
     {
         $this->repository->setServer($this->server);
 
         if (AuthenticationType::KEY === $type) {
-            return $this->repository->update([$type->value => rawurlencode($password)]);
+            if (!empty($password)) {
+                return $this->repository->update([$type->value => rawurlencode($password)]);
+            } else {
+                $this->repository->update(['delete' => $type->value]);
+            }
         } else {
             return $this->repository->update([$type->value => $password]);
         }

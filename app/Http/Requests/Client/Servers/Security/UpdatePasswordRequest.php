@@ -30,10 +30,10 @@ class UpdatePasswordRequest extends FormRequest
         ];
 
         if ($this->request->get('type') === 'sshkeys') {
-            $rules['contents'] = ['required_if:type,sshkeys'];
+            $rules['contents'] = ['present', 'nullable', 'string', 'max:800'];
         }
         if ($this->request->get('type') === 'cipassword') {
-            $rules['password'] = ['confirmed', 'min:10', 'required_if:type,cipassword'];
+            $rules['password'] = ['confirmed', 'min:10', 'max:191', 'required'];
         }
 
         return $rules;
