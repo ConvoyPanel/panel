@@ -15,7 +15,7 @@ class Node extends Model
     public static $validationRules = [
         'name' => 'required|string|max:191',
         'cluster' => 'required|string|max:191',
-        'hostname' => ['required', 'regex:/^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/'],
+        'hostname' => 'required|string',
         'token_id' => 'required|string',
         'secret' => 'required|string',
         'port' => 'required|integer',

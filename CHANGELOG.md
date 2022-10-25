@@ -3,6 +3,10 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v2.0.2-beta
+### Fixed
+* FQDN validator for the hostname field when adding a new node
+
 ## v2.0.1-beta
 ### Fixed
 * Problem where validation errors for the SSH key wouldn't show up

@@ -3,6 +3,7 @@
 namespace Convoy\Http\Requests\Admin\Nodes;
 
 use Convoy\Models\Node;
+use Convoy\Rules\Network\Fqdn;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreNodeRequest extends FormRequest
@@ -24,6 +25,10 @@ class StoreNodeRequest extends FormRequest
      */
     public function rules()
     {
-        return Node::getRules();
+        $rules = Node::getRules();
+
+        $rules['hostname'][] = Fqdn::make();
+
+        return $rules;
     }
 }
