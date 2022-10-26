@@ -5,7 +5,7 @@ import macrosPlugin from 'vite-plugin-babel-macros'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
-  plugins: [react(), laravel(['resources/js/app.tsx']), macrosPlugin(), /* visualizer() */],
+  plugins: [react(), laravel(['resources/scripts/index.tsx']), macrosPlugin(), /* visualizer() */],
   build: {
     target: ['es2020'],
   },
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/resources/js',
+      '@': '/resources/scripts',
     },
   },
 })

@@ -51,18 +51,12 @@ services:
     image: 'quay.io/soketi/soketi:1.4-16-alpine'
     expose:
       - 6001
-# Do not expose the metrics API to the internet in a production environment
-#      - '${SOKETI_METRICS_SERVER_PORT:-9601}:9601'
     env_file: .env
     environment:
       - SOKETI_DEBUG=${DEBUG}
       - SOKETI_DEFAULT_APP_ID=${PUSHER_APP_ID}
       - SOKETI_DEFAULT_APP_KEY=${PUSHER_APP_KEY}
       - SOKETI_DEFAULT_APP_SECRET=${PUSHER_APP_SECRET}
- #     - SOKETI_HOST='0.0.0.0'
- #     - SOKETI_PORT=${PUSHER_PORT}
-#      - METRICS_SERVER_PORT=${METRICS_SERVER_PORT-9601}
-#      - SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES=false
   database:
     image: mysql:8.0.29
     restart: unless-stopped

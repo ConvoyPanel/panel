@@ -10,12 +10,9 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
 
         <!-- Scripts -->
-        @routes
         @viteReactRefresh
-        @vite('resources/js/app.tsx')
-        @inertiaHead
+        @vite('resources/scripts/index.tsx')
     </head>
     <body class="font-sans antialiased">
-        @inertia
     </body>
 </html>
