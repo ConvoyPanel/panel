@@ -21,7 +21,7 @@
         "autoprefixer": "^10.4.2",
         "axios": "^0.25",
         "laravel-echo": "^1.14.0",
-        "laravel-vite-plugin": "^0.3.0",
+        "laravel-vite-plugin": "^0.7.0",
         "lodash": "^4.17.19",
         "postcss": "^8.4.6",
         "pusher-js": "^7.4.0",
@@ -37,11 +37,13 @@
     "dependencies": {
         "@emotion/styled": "^11.10.4",
         "@heroicons/react": "^1.0.6",
+        "@mantine/nprogress": "^5.3.3",
         "@tanstack/react-query": "^4.0.5",
         "chart.js": "^3.8.0",
         "deepmerge-ts": "^4.2.1",
         "easy-peasy": "^5.0.4",
         "react-chartjs-2": "^4.2.0",
+        "swr": "^1.3.0",
         "ts-essentials": "^9.1.2"
     }
 }

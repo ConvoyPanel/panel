@@ -38,7 +38,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('/api/application')
                 ->group(base_path('routes/api-application.php'));
 
-            Route::middleware('web')
+            Route::middleware(['auth.session'])
+                ->group(base_path('routes/base.php'));
+
+            /* Route::middleware('web')
                 ->group(base_path('routes/auth.php'));
 
             Route::middleware(['web', 'auth'])
@@ -46,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware(['web', 'auth', AdminAuthenticate::class])
                 ->prefix('/admin')
-                ->group(base_path('routes/admin.php'));
+                ->group(base_path('routes/admin.php')); */
         });
     }
 

@@ -11,8 +11,9 @@
 
         <!-- Scripts -->
         @viteReactRefresh
-        @vite('resources/scripts/index.tsx')
+        @vite('resources/scripts/main.tsx')
     </head>
     <body class="font-sans antialiased">
+        <div id="root"></div>
     </body>
 </html>

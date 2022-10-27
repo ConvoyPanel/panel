@@ -30,7 +30,7 @@ services:
     build: ./dockerfiles/workspace
     tty: true
     ports:
-      - 3000:3000
+      - 1234:1234
     volumes:
       - .:/var/www/
   redis:

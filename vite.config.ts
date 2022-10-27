@@ -5,11 +5,12 @@ import macrosPlugin from 'vite-plugin-babel-macros'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
-  plugins: [react(), laravel(['resources/scripts/index.tsx']), macrosPlugin(), /* visualizer() */],
+  plugins: [react(), laravel(['resources/scripts/main.tsx']), macrosPlugin(), /* visualizer() */],
   build: {
     target: ['es2020'],
   },
   server: {
+    port: 1234,
     hmr: {
       host: 'localhost',
     },
