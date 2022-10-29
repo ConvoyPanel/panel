@@ -5,6 +5,7 @@ import {
   useMantineColorScheme,
 } from '@mantine/core'
 import { ReactNode, useEffect } from 'react'
+import colors from 'tailwindcss/colors'
 
 const emotionCache = createEmotionCache({
   key: 'mantine',
@@ -31,6 +32,10 @@ const ThemeProvider = ({ children }: Props) => {
       emotionCache={emotionCache}
       theme={{
         colorScheme: theme === 'dark' ? 'dark' : 'light',
+        colors: {
+          // @ts-ignore there will only be 10 colors in the palette.
+          //dark: Object.values(colors.stone)
+        }
       }}
     >
       {children}
