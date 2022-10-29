@@ -26,7 +26,8 @@ const LoginContainer = () => {
       clearFlashes()
 
       login(values).then(response => {
-        alert('cool')
+        window.location.replace('/')
+
       }).catch(error => {
         console.log(error)
 

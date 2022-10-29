@@ -1,15 +1,11 @@
-import { store, useStoreState } from '@/state'
+import { store } from '@/state'
 import { StoreProvider } from 'easy-peasy'
-import {
-  createEmotionCache,
-  MantineProvider,
-  useMantineColorScheme,
-} from '@mantine/core'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import ProgressBar from '@/components/elements/navigation/ProgressBar'
 import ThemeProvider from '@/components/ThemeProvider'
 import { lazy } from 'react'
 import Spinner from '@/components/elements/Spinner'
+import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -21,9 +17,15 @@ interface ExtendedWindow extends Window {
   }
 }
 
-const AuthenticationRouter = lazy(() =>
-  // @ts-expect-error: import.meta.glob is not typed by default
-  import('@/routers/AuthenticationRouter.tsx')
+const AuthenticationRouter = lazy(
+  () =>
+    // @ts-expect-error: import.meta.glob is not typed by default
+    import('@/routers/AuthenticationRouter.tsx')
+)
+const DashboardRouter = lazy(
+  () =>
+    // @ts-expect-error: import.meta.glob is not typed by default
+    import('@/routers/DashboardRouter.tsx')
 )
 
 const App = () => {
@@ -62,6 +64,16 @@ const App = () => {
                 <Spinner.Suspense>
                   <AuthenticationRouter />
                 </Spinner.Suspense>
+              }
+            />
+            <Route
+              path={'/*'}
+              element={
+                <AuthenticatedRoutes>
+                  <Spinner.Suspense>
+                    <DashboardRouter />
+                  </Spinner.Suspense>
+                </AuthenticatedRoutes>
               }
             />
           </Routes>

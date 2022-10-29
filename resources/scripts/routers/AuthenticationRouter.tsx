@@ -5,7 +5,6 @@ const AuthenticationRouter = () => {
   return (
     <Routes>
       <Route path={'/login'} element={<LoginContainer />} />
-
     </Routes>
   )
 }
