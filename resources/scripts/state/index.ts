@@ -1,12 +1,18 @@
 import progress, { ProgressStore } from '@/state/progress'
+import settings, { SettingsStore } from '@/state/settings'
+import user, { UserStore } from '@/state/user'
 import { createStore, createTypedHooks } from 'easy-peasy'
 
 export interface ApplicationStore {
   progress: ProgressStore
+  user: UserStore
+  settings: SettingsStore
 }
 
 const state: ApplicationStore = {
   progress,
+  user,
+  settings,
 }
 
 const typedHooks = createTypedHooks<ApplicationStore>()

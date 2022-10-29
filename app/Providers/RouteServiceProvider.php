@@ -34,12 +34,14 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware([ForceJsonResponse::class, AuthorizeProprietaryToken::class, 'api'])
-                ->prefix('/api/application')
-                ->group(base_path('routes/api-application.php'));
-
-            Route::middleware(['auth.session'])
-                ->group(base_path('routes/base.php'));
+            Route::middleware('web')->group(function () {
+                /* Route::middleware([ForceJsonResponse::class, AuthorizeProprietaryToken::class, 'api'])
+                    ->prefix('/api/application')
+                    ->group(base_path('routes/api-application.php'));
+ */
+                Route::middleware(['auth.session'])
+                    ->group(base_path('routes/base.php'));
+            });
 
             /* Route::middleware('web')
                 ->group(base_path('routes/auth.php'));

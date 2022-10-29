@@ -9,6 +9,13 @@
         <!-- Fonts -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
 
+        <!-- Inject Data -->
+        @if(!is_null(Auth::user()))
+                <script>
+                    window.ConvoyUser = {!! json_encode(Auth::user()->toReactObject()) !!};
+                </script>
+            @endif
+
         <!-- Scripts -->
         @viteReactRefresh
         @vite('resources/scripts/main.tsx')

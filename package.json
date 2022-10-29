@@ -37,16 +37,19 @@
     },
     "dependencies": {
         "@emotion/styled": "^11.10.5",
-        "@heroicons/react": "^1.0.6",
+        "@heroicons/react": "^2.0.0",
         "@mantine/nprogress": "^5.3.3",
         "@tanstack/react-query": "^4.0.5",
         "chart.js": "^3.8.0",
         "deepmerge-ts": "^4.2.1",
         "easy-peasy": "^5.1.0",
+        "formik": "^2.2.9",
         "react-chartjs-2": "^4.2.0",
+        "react-router": "^6.4.2",
         "react-router-dom": "^6.4.2",
         "react-transition-group": "^4.4.5",
         "swr": "^1.3.0",
-        "ts-essentials": "^9.1.2"
+        "ts-essentials": "^9.1.2",
+        "yup": "^0.32.11"
     }
 }
