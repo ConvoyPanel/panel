@@ -32,10 +32,6 @@ const ThemeProvider = ({ children }: Props) => {
       emotionCache={emotionCache}
       theme={{
         colorScheme: theme === 'dark' ? 'dark' : 'light',
-        colors: {
-          // @ts-ignore there will only be 10 colors in the palette.
-          //dark: Object.values(colors.stone)
-        }
       }}
     >
       {children}
