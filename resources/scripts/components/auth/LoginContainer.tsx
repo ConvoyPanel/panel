@@ -28,7 +28,7 @@ const LoginContainer = () => {
       login(values).then(response => {
         window.location.replace('/')
 
-      }).catch(error => {
+      }).catch((error) => {
         console.log(error)
 
         form.setSubmitting(false)

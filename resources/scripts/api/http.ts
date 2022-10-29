@@ -79,8 +79,8 @@ export function httpErrorToHuman(error: any): string {
             }
         }
 
-        if (data.errors && data.errors[0] && data.errors[0].detail) {
-            return data.errors[0].detail;
+        if (data.message) {
+            return data.message;
         }
 
         // Errors from wings directory, mostly just for file uploads.

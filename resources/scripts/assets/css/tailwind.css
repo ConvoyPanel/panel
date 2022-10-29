@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-    @apply dark:bg-black
+    @apply bg-stone-100 dark:bg-black
 }
