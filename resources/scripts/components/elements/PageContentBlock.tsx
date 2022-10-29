@@ -42,7 +42,7 @@ const PageContentBlock = ({
           <div className='flex justify-between'>
             <p className='text-xs text-stone-500'>
               &copy; 2020 - {new Date().getFullYear()}{' '}
-              <a href='https://performave.com' target='_blank'>
+              <a className='dark:hover:text-stone-400 hover:text-black' href='https://performave.com' target='_blank'>
                 Performave
               </a>
             </p>
