@@ -2,10 +2,8 @@ import { useStoreState } from '@/state'
 import {
   createEmotionCache,
   MantineProvider,
-  useMantineColorScheme,
 } from '@mantine/core'
 import { ReactNode, useEffect } from 'react'
-import colors from 'tailwindcss/colors'
 
 const emotionCache = createEmotionCache({
   key: 'mantine',
