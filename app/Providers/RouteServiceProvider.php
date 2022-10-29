@@ -41,17 +41,16 @@ class RouteServiceProvider extends ServiceProvider
  */
                 Route::middleware(['auth.session'])
                     ->group(base_path('routes/base.php'));
+
+                Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
             });
 
-            /* Route::middleware('web')
-                ->group(base_path('routes/auth.php'));
+            // Route::middleware(['web', 'auth'])
+            //     ->group(base_path('routes/client.php'));
 
-            Route::middleware(['web', 'auth'])
-                ->group(base_path('routes/client.php'));
-
-            Route::middleware(['web', 'auth', AdminAuthenticate::class])
-                ->prefix('/admin')
-                ->group(base_path('routes/admin.php')); */
+            // Route::middleware(['web', 'auth', AdminAuthenticate::class])
+            //     ->prefix('/admin')
+            //     ->group(base_path('routes/admin.php'));
         });
     }
 

@@ -7,8 +7,9 @@ import {
 } from '@mantine/core'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import ProgressBar from '@/components/elements/navigation/ProgressBar'
-import AuthenticationRouter from '@/routers/AuthenticationRouter'
 import ThemeProvider from '@/components/ThemeProvider'
+import { lazy } from 'react'
+import Spinner from '@/components/elements/Spinner'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -19,6 +20,11 @@ interface ExtendedWindow extends Window {
     updated_at: string
   }
 }
+
+const AuthenticationRouter = lazy(() =>
+  // @ts-expect-error: import.meta.glob is not typed by default
+  import('@/routers/AuthenticationRouter.tsx')
+)
 
 const App = () => {
   const { ConvoyUser } = window as ExtendedWindow
@@ -50,7 +56,14 @@ const App = () => {
         <ProgressBar />
         <BrowserRouter>
           <Routes>
-            <Route path={'/auth/*'} element={<AuthenticationRouter />} />
+            <Route
+              path={'/auth/*'}
+              element={
+                <Spinner.Suspense>
+                  <AuthenticationRouter />
+                </Spinner.Suspense>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
