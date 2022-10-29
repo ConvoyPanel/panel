@@ -1,6 +1,5 @@
-import { Navigate, Route, RouteProps, useLocation } from 'react-router'
+import { Navigate, useLocation } from 'react-router'
 import { useStoreState } from '@/state'
-import { ReactNode } from 'react'
 
 interface Props {
   children: JSX.Element
