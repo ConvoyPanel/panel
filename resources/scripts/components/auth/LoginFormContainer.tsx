@@ -17,7 +17,7 @@ const LoginFormContainer = ({ title, description, children }: Props) => {
   return (
     <div className='min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-black'>
       <div className='w-full sm:max-w-md'>
-        <FlashMessageRender className='mb-3' />
+        <FlashMessageRender className='px-6 sm:px-0 mb-3' />
         <div className='px-6 py-4 sm:bg-white dark:sm:bg-[#111111] sm:shadow-md overflow-hidden sm:rounded-md'>
           <h1 className='text-3xl font-bold dark:text-white'>{title}</h1>
           <p className='dark:text-stone-400 text-stone-500'>{description}</p>
