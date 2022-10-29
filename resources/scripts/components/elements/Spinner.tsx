@@ -9,7 +9,7 @@ interface Spinner extends React.FC {
 
 const Spinner: Spinner = () => {
   return (
-    <div className='grid place-items-center w-full h-screen'>
+    <div className='grid place-items-center w-full h-screen dark:bg-black'>
       <Loader size='lg' />
     </div>
   )

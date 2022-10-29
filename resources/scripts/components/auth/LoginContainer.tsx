@@ -38,7 +38,7 @@ const LoginContainer = () => {
   })
   return (
     <form onSubmit={form.handleSubmit}>
-      <LoginFormContainer title='Convoy' description='Sign in to your account'>
+      <LoginFormContainer title='Convoy' description='Sign in to your account' submitting={form.isSubmitting}>
         <TextInput
           label='Email'
           name='email'
