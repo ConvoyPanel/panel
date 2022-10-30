@@ -23,7 +23,7 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
      */
     public function isUniqueUuidCombo(string $uuid, string $short): bool
     {
-        return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuidShort', '=', $short)->exists();
+        return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)->exists();
     }
 
     /**
@@ -37,7 +37,7 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
             /** @var \Convoy\Models\Server $model */
             $model = $this->getBuilder()
                 ->where(function (Builder $query) use ($uuid) {
-                    $query->where('uuidShort', $uuid)->orWhere('uuid', $uuid);
+                    $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);
                 })
                 ->firstOrFail($this->getColumns());
 

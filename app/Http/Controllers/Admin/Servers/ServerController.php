@@ -90,7 +90,7 @@ class ServerController extends Controller
     {
         $servers = QueryBuilder::for(Server::query())
             ->with(['node', 'owner', 'template'])
-            ->allowedFilters(['node.id', 'status', 'uuid', 'uuidShort', 'name', 'vmid'])
+            ->allowedFilters(['node.id', 'status', 'uuid', 'uuid_short', 'name', 'vmid'])
             ->paginate($request->query('per_page') ?? 50);
 
         return fractal($servers, new AdminServerTransformer())->respond();

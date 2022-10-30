@@ -35,7 +35,7 @@ class ServerCreationService extends ProxmoxService
         if ($deployment->type === 'existing') {
             $server = Server::create([
                 'uuid' => $uuid,
-                'uuidShort' => substr($uuid, 0, 8),
+                'uuid_short' => substr($uuid, 0, 8),
                 'name' => $deployment->name,
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
@@ -67,7 +67,7 @@ class ServerCreationService extends ProxmoxService
 
             $server = Server::create([
                 'uuid' => $uuid,
-                'uuidShort' => substr($uuid, 0, 8),
+                'uuid_short' => substr($uuid, 0, 8),
                 'name' => $deployment->name,
                 'user_id' => $deployment->user_id,
                 'node_id' => $deployment->node_id,
@@ -99,7 +99,7 @@ class ServerCreationService extends ProxmoxService
     /**
      * Create a unique UUID and UUID-Short combo for a server.
      */
-    private function generateUniqueUuidCombo(): string
+    public function generateUniqueUuidCombo(): string
     {
         $uuid = Str::uuid()->toString();
 

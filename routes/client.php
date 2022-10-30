@@ -15,7 +15,7 @@ use Convoy\Http\Middleware\Activity\ServerSubject;
 use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [IndexController::class, 'index'])->name('dashboard');
+Route::get('/servers', [IndexController::class, 'index']);
 
 Route::get('/verify-auth-state', [IndexController::class, 'verifyAuthState'])->name('auth-state');
 

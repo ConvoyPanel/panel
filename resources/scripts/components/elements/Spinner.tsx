@@ -1,22 +1,26 @@
 import { Loader } from '@mantine/core'
 import { ReactNode, Suspense } from 'react'
 
-interface Spinner extends React.FC {
+interface Props {
+  screen?: boolean
+}
+
+interface Spinner extends React.FC<Props> {
   Suspense: React.FC<{
     children: ReactNode
   }>
 }
 
-const Spinner: Spinner = () => {
+const Spinner: Spinner = ({ screen }: Props) => {
   return (
-    <div className='grid place-items-center w-full h-screen dark:bg-black'>
+    <div className={`grid place-items-center w-full ${screen ? 'h-screen' : 'h-40'} dark:bg-black`}>
       <Loader size='lg' />
     </div>
   )
 }
 
 Spinner.Suspense = ({ children }) => {
-  return <Suspense fallback={<Spinner />}>{children}</Suspense>
+  return <Suspense fallback={<Spinner screen />}>{children}</Suspense>
 }
 
 export default Spinner

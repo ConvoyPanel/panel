@@ -3,21 +3,29 @@
 @tailwind utilities;
 
 body {
-    @apply bg-stone-100 dark:bg-primary dark:text-stone-400
+  @apply bg-stone-100 dark:bg-primary dark:text-stone-400;
 }
 
 .description {
-    @apply dark:text-stone-400 text-stone-500
+  @apply dark:text-stone-400 text-stone-500;
 }
 
 .description-small {
-    @apply dark:text-stone-400 text-stone-500 text-sm
+  @apply dark:text-stone-400 text-stone-500 text-sm;
 }
 
 .text-auto {
-    @apply text-black dark:text-white
+  @apply text-black dark:text-white;
 }
 
 .bg-auto {
-    @apply bg-white dark:bg-black
+  @apply bg-white dark:bg-black;
+}
+
+.dt {
+  @apply text-gray-500 text-xs font-medium uppercase tracking-wide;
+}
+
+.dd {
+  @apply text-black mt-1 font-medium;
 }

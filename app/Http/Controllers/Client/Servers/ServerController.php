@@ -8,6 +8,7 @@ use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerDetailService;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {

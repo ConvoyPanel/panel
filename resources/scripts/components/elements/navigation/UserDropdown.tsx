@@ -23,7 +23,7 @@ const UserDropdown = () => {
           <button className='flex items-center space-x-3 bg-transparent ring-transparent rounded-sm ring-4 hover:ring-stone-100 dark:hover:ring-stone-900 hover:bg-stone-100 dark:hover:bg-stone-900 transition'>
             <p className='text-auto font-medium text-sm'>{user.name}</p>
             <Avatar color='blue' size='md' radius='xl'>
-              {getInitials(user.name)}
+              {getInitials(user.name, ' ', 2)}
             </Avatar>
           </button>
         </Menu.Target>

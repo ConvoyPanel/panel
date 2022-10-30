@@ -17,6 +17,7 @@ const NavigationBar = () => {
           <UserDropdown />
         </div>
         <Tabs
+          value='gaming'
           styles={{
             root: {
               overflowX: 'auto',

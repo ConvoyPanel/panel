@@ -1,10 +1,12 @@
+import ServerContainer from '@/components/dashboard/ServerContainer'
 import PageContentBlock from '@/components/elements/PageContentBlock'
-import ScreenBlock from '@/components/elements/ScreenBlock'
 
 const DashboardContainer = () => {
-    return <PageContentBlock title='Dashboard' showFlashKey='dashboard'>
-            <h1>hola amigos</h1>
+  return (
+    <PageContentBlock title='Dashboard' showFlashKey='dashboard'>
+      <ServerContainer />
     </PageContentBlock>
+  )
 }
 
 export default DashboardContainer
