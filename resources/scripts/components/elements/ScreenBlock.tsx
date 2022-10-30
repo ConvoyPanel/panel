@@ -1,9 +1,14 @@
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import { Button } from '@mantine/core'
+import { ComponentType } from 'react'
+
+export interface IconProps {
+  className?: string
+}
 
 interface BaseProps {
   title: string
-  icon?: JSX.Element
+  icon?: ComponentType<IconProps>
   message: string
   full?: boolean
   onRetry?: () => void
@@ -24,7 +29,7 @@ export type ScreenBlockProps = PropsWithBack | PropsWithRetry
 
 const ScreenBlock = ({
   title,
-  icon,
+  icon: Icon,
   message,
   onBack,
   onRetry,
@@ -36,6 +41,8 @@ const ScreenBlock = ({
       title={title}
     >
       <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-primary rounded-md shadow-md text-center'>
+        {Icon && <Icon className='' />}
+
         <h2 className='text-stone-900 dark:text-white font-bold text-4xl'>{title}</h2>
         <p className='description-small mt-3'>{message}</p>
         {(onBack || onRetry) && (

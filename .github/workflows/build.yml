@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'develop'
+      - '3.0-develop'
   pull_request:
 jobs:
   build:
