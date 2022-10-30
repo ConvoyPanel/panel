@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    @apply bg-stone-100 dark:bg-black
+    @apply bg-stone-100 dark:bg-primary dark:text-stone-400
 }
 
 .description {
@@ -12,4 +12,12 @@ body {
 
 .description-small {
     @apply dark:text-stone-400 text-stone-500 text-sm
+}
+
+.text-auto {
+    @apply text-black dark:text-white
+}
+
+.bg-auto {
+    @apply bg-white dark:bg-black
 }

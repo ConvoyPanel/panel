@@ -1,6 +1,7 @@
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import { Button } from '@mantine/core'
 import { ComponentType } from 'react'
+import { LinkIcon } from '@heroicons/react/24/outline'
 
 export interface IconProps {
   className?: string
@@ -41,9 +42,9 @@ const ScreenBlock = ({
       title={title}
     >
       <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-primary rounded-md shadow-md text-center'>
-        {Icon && <Icon className='' />}
+        {Icon && <Icon className='w-16 h-16 border dark:border-stone-600 rounded-md p-3 text-black dark:text-stone-400 mx-auto' />}
 
-        <h2 className='text-stone-900 dark:text-white font-bold text-4xl'>{title}</h2>
+        <h2 className='text-stone-900 dark:text-white font-bold text-4xl mt-6'>{title}</h2>
         <p className='description-small mt-3'>{message}</p>
         {(onBack || onRetry) && (
           <div className='flex justify-center mt-3'>
@@ -70,6 +71,7 @@ export const NotFound = ({
     message={
       message || "The link is either broken or doesn't exist on the server."
     }
+    icon={LinkIcon}
     full={full}
     onBack={onBack}
   />

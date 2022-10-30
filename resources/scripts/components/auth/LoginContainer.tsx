@@ -4,9 +4,15 @@ import { Button, TextInput } from '@mantine/core'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import useFlash from '@/util/useFlash'
+import { useEffect } from 'react'
 
 const LoginContainer = () => {
   const { clearFlashes, clearAndAddHttpError } = useFlash();
+
+  useEffect(() => {
+    document.title = 'Login | Convoy'
+  }, [])
+
 
   const rules = yup.object({
     email: yup

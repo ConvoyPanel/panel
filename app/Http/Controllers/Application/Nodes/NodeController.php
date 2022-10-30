@@ -13,7 +13,7 @@ class NodeController extends ApplicationApiController
     public function index(Request $request)
     {
         $nodes = QueryBuilder::for(Node::query())
-            ->allowedFilters(['main', 'cluster', 'hostname', 'port', 'auth_type'])
+            ->allowedFilters(['name', 'cluster', 'hostname'])
             ->allowedSorts(['id', 'port'])
             ->paginate($request->query('per_page') ?? 50);
 

@@ -27,6 +27,7 @@ class UpdateDetailsRequest extends ApplicationFormRequest
         $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
 
         return [
+            'limits' => 'array|required',
             'limits.cpu' => $rules['cpu'],
             'limits.memory' => $rules['memory'],
             'limits.disk' => $rules['disk'],

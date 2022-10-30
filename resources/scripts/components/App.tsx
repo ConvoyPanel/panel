@@ -6,6 +6,7 @@ import ThemeProvider from '@/components/ThemeProvider'
 import { lazy } from 'react'
 import Spinner from '@/components/elements/Spinner'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
+import GuestRoutes from '@/routers/middleware/GuestRoutes'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -61,9 +62,11 @@ const App = () => {
             <Route
               path={'/auth/*'}
               element={
-                <Spinner.Suspense>
-                  <AuthenticationRouter />
-                </Spinner.Suspense>
+                <GuestRoutes>
+                  <Spinner.Suspense>
+                    <AuthenticationRouter />
+                  </Spinner.Suspense>
+                </GuestRoutes>
               }
             />
             <Route
