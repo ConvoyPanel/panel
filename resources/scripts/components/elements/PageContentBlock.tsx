@@ -32,7 +32,7 @@ const PageContentBlock = ({
   return (
     <CSSTransition nodeRef={nodeRef} timeout={150} classNames='fade' appear in>
       <>
-        <ContentContainer className={className}>
+        <ContentContainer className={`py-12 ${className}`}>
           {showFlashKey && (
             <FlashMessageRender byKey={showFlashKey} className='mb-4' />
           )}

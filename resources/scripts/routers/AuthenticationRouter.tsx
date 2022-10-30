@@ -7,7 +7,7 @@ const AuthenticationRouter = () => {
   return (
     <Routes>
       <Route path={'/login'} element={<LoginContainer />} />
-      <Route path={'/*'} element={<NotFound onBack={() => navigate('/auth/login')} />} />
+      <Route path={'/*'} element={<NotFound full onBack={() => navigate('/auth/login')} />} />
     </Routes>
   )
 }

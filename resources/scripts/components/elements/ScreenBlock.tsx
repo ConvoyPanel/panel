@@ -1,20 +1,52 @@
 import PageContentBlock from '@/components/elements/PageContentBlock'
+import { Button } from '@mantine/core'
 
 interface BaseProps {
   title: string
-  image?: string
+  icon?: JSX.Element
   message: string
+  full?: boolean
   onRetry?: () => void
   onBack?: () => void
 }
 
-const ScreenBlock = ({ title, image, message, onBack, onRetry }: BaseProps) => {
-  return (
-    <PageContentBlock title={title}>
-      <div className='flex justify-center'>
-        <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-primary'>
+interface PropsWithRetry extends BaseProps {
+  onRetry?: () => void
+  onBack?: never
+}
 
-        </div>
+interface PropsWithBack extends BaseProps {
+  onBack?: () => void
+  onRetry?: never
+}
+
+export type ScreenBlockProps = PropsWithBack | PropsWithRetry
+
+const ScreenBlock = ({
+  title,
+  icon,
+  message,
+  onBack,
+  onRetry,
+  full,
+}: ScreenBlockProps) => {
+  return (
+    <PageContentBlock
+      className={`${full && 'grid place-items-center min-h-screen -mt-10'}`}
+      title={title}
+    >
+      <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-primary rounded-md shadow-md text-center'>
+        <h2 className='text-stone-900 dark:text-white font-bold text-4xl'>{title}</h2>
+        <p className='description-small mt-3'>{message}</p>
+        {(onBack || onRetry) && (
+          <div className='flex justify-center mt-3'>
+            <Button
+              onClick={() => (onRetry ? onRetry() : onBack ? onBack() : null)}
+            >
+              {onBack ? 'Go Back' : 'Retry'}
+            </Button>
+          </div>
+        )}
       </div>
     </PageContentBlock>
   )
@@ -24,12 +56,14 @@ export const NotFound = ({
   title,
   message,
   onBack,
-}: Partial<Pick<BaseProps, 'title' | 'message' | 'onBack'>>) => (
+  full,
+}: Partial<Pick<BaseProps, 'title' | 'message' | 'onBack' | 'full'>>) => (
   <ScreenBlock
     title={title || '404'}
     message={
       message || "The link is either broken or doesn't exist on the server."
     }
+    full={full}
     onBack={onBack}
   />
 )

@@ -5,3 +5,11 @@
 body {
     @apply bg-stone-100 dark:bg-black
 }
+
+.description {
+    @apply dark:text-stone-400 text-stone-500
+}
+
+.description-small {
+    @apply dark:text-stone-400 text-stone-500 text-sm
+}

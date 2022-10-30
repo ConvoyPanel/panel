@@ -22,7 +22,7 @@ const LoginFormContainer = ({ title, description, children, submitting }: Props)
         <div className='px-6 py-4 sm:bg-white dark:sm:bg-primary sm:shadow-md overflow-hidden sm:rounded-md relative'>
           <LoadingOverlay visible={submitting || false} />
           <h1 className='text-3xl font-bold dark:text-white'>{title}</h1>
-          <p className='dark:text-stone-400 text-stone-500'>{description}</p>
+          <p className='description'>{description}</p>
           <div className='mt-3'>
             { children }
           </div>
