@@ -29,3 +29,11 @@ body {
 .dd {
   @apply text-black mt-1 font-medium;
 }
+
+.border-colors {
+  @apply border-[#eaeaea] dark:border-[#333333]
+}
+
+.border-colors-hover {
+  @apply border-[#eaeaea] dark:border-[#333333] hover:dark:border-white
+}
