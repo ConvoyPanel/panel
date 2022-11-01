@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     laravel(['resources/scripts/main.tsx']),
-    macrosPlugin() /* visualizer() */,
+    macrosPlugin()/* , visualizer(), */
   ],
   build: {
     target: ['es2020'],
