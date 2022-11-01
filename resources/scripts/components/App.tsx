@@ -7,6 +7,7 @@ import { lazy } from 'react'
 import Spinner from '@/components/elements/Spinner'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
+import { NotFound } from '@/components/elements/ScreenBlock'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -27,6 +28,11 @@ const DashboardRouter = lazy(
   () =>
     // @ts-expect-error: import.meta.glob is not typed by default
     import('@/routers/DashboardRouter.tsx')
+)
+const ServerRouter = lazy(
+  () =>
+    // @ts-expect-error: import.meta.glob is not typed by default
+    import('@/routers/ServerRouter.tsx')
 )
 
 const App = () => {
@@ -70,7 +76,7 @@ const App = () => {
               }
             />
             <Route
-              path={'/*'}
+              path={'/'}
               element={
                 <AuthenticatedRoutes>
                   <Spinner.Suspense>
@@ -79,6 +85,20 @@ const App = () => {
                 </AuthenticatedRoutes>
               }
             />
+
+            <Route
+              path={'/servers/:server'}
+              element={
+                <AuthenticatedRoutes>
+                  <Spinner.Suspense>
+                    <ServerRouter />
+                  </Spinner.Suspense>
+                </AuthenticatedRoutes>
+              }
+            />
+
+
+            <Route path={'*'} element={<NotFound full />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

@@ -41,7 +41,7 @@ const ScreenBlock = ({
       className={`${full && 'grid place-items-center min-h-screen -mt-10'}`}
       title={title}
     >
-      <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-primary rounded-md shadow-md text-center'>
+      <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-black rounded-md shadow-md text-center'>
         {Icon && <Icon className='w-16 h-16 border dark:border-stone-600 rounded-md p-3 text-black dark:text-stone-400 mx-auto' />}
 
         <h2 className='text-stone-900 dark:text-white font-bold text-4xl mt-6'>{title}</h2>

@@ -31,9 +31,35 @@ body {
 }
 
 .border-colors {
-  @apply border-[#eaeaea] dark:border-[#333333]
+  @apply border-[#eaeaea] dark:border-[#333333];
 }
 
 .border-colors-hover {
-  @apply border-[#eaeaea] dark:border-[#333333] hover:dark:border-white
+  @apply border-[#eaeaea] dark:border-[#333333] hover:dark:border-white;
+}
+
+.fade-enter,
+.fade-exit,
+.fade-appear {
+  will-change: opacity;
+}
+
+.fade-enter,
+.fade-appear {
+  @apply opacity-0;
+}
+
+.fade-enter-active,
+.fade-appear-active {
+  @apply opacity-100 transition-opacity ease-in;
+  transition-duration: 150ms;
+}
+
+.fade-exit {
+  @apply opacity-100;
+}
+
+.fade-exit-active {
+  @apply opacity-0 transition-opacity ease-in;
+  transition-duration: 150ms;
 }
