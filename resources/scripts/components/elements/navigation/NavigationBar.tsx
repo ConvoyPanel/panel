@@ -41,7 +41,7 @@ const NavigationBar = () => {
   }, [isVisible])
 
   return (
-    <div className='bg-white w-full relative dark:bg-black'>
+    <div className='bg-white w-full dark:bg-black'>
       <ContentContainer ref={topBar} className='pt-3'>
         <div className='flex justify-between'>
           <div className='flex items-center space-x-3'>
