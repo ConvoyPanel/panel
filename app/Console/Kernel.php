@@ -2,7 +2,6 @@
 
 namespace Convoy\Console;
 
-use Convoy\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
 use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
 use Convoy\Console\Commands\Server\UpdateUsagesCommand;
@@ -21,7 +20,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(RefreshActivityRunnersCommand::class)->everyMinute()->withoutOverlapping();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
         $schedule->command(ResetUsagesCommand::class)->daily();

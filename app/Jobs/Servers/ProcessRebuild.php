@@ -2,14 +2,9 @@
 
 namespace Convoy\Jobs\Servers;
 
-use Activity;
 use Convoy\Enums\Server\Status;
-use Convoy\Facades\LogRunner;
-use Convoy\Facades\LogTarget;
-use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\Servers\BuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,14 +31,12 @@ class ProcessRebuild implements ShouldQueue
      */
     public $tries = 1;
 
-    protected ActivityLog $activity;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId, protected string $batchUuid, protected ?int $initialLogId)
+    public function __construct(protected $serverId, protected $templateId)
     {
         //
     }
@@ -63,30 +56,20 @@ class ProcessRebuild implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ActivityLogBatchService $batch, BuildService $builder)
+    public function handle(BuildService $builder)
     {
         $server = Server::findOrFail($this->serverId);
         $template = Template::findOrFail($this->templateId);
 
-        LogTarget::setSubject($server);
+        try {
 
+            $server->update(['status' => Status::INSTALLING->value]);
 
-        $batch->transaction(function () use ($builder, $server, $template) {
-            $this->activity = $this->initialLogId ? ActivityLog::find($this->initialLogId) : Activity::event('server:rebuild')->runner()->log();
+            $builder->setServer($server)->rebuild($template);
 
-            try {
-
-                $server->update(['status' => Status::INSTALLING->value]);
-
-                $builder->setServer($server)->rebuild($template);
-
-                $server->update(['status' => null]);
-                LogRunner::setActivity($this->activity)->end();
-            } catch (\Exception $e) {
-                LogRunner::setActivity($this->activity)->error();
-
-                throw $e;
-            }
-        }, $this->batchUuid);
+            $server->update(['status' => null]);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

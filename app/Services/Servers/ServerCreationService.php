@@ -11,7 +11,6 @@ use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
-use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,7 +21,7 @@ use Webmozart\Assert\Assert;
  */
 class ServerCreationService extends ProxmoxService
 {
-    public function __construct(protected NetworkService $networkService, protected ServerRepository $repository, protected ActivityLogBatchService $batch)
+    public function __construct(protected NetworkService $networkService, protected ServerRepository $repository)
     {
     }
 
@@ -86,11 +85,7 @@ class ServerCreationService extends ProxmoxService
 
             $server->update(['status' => Status::INSTALLING->value]);
 
-            $this->batch->transaction(function (string $uuid) use ($server, $deployment) {
-                $activity = Activity::event('server:build')->runner()->log();
-
-                ProcessBuild::dispatch($server, $deployment->template_id, $uuid, $activity->id);
-            });
+            ProcessBuild::dispatch($server, $deployment->template_id);
 
             return $server;
         }

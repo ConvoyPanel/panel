@@ -46,17 +46,6 @@ services:
     working_dir: /var/www/
     volumes:
       - .:/var/www/
-  soketi:
-    restart: unless-stopped
-    image: 'quay.io/soketi/soketi:1.4-16-alpine'
-    expose:
-      - 6001
-    env_file: .env
-    environment:
-      - SOKETI_DEBUG=${DEBUG}
-      - SOKETI_DEFAULT_APP_ID=${PUSHER_APP_ID}
-      - SOKETI_DEFAULT_APP_KEY=${PUSHER_APP_KEY}
-      - SOKETI_DEFAULT_APP_SECRET=${PUSHER_APP_SECRET}
   database:
     image: mysql:8.0.29
     restart: unless-stopped

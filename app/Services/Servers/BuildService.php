@@ -3,9 +3,6 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Facades\Activity;
-use Convoy\Facades\LogRunner;
-use Convoy\Models\Objects\Server\ServerSpecificationsObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
@@ -65,7 +62,6 @@ class BuildService extends ProxmoxService
 
         /* 3. Delete the server */
         $upid = $this->serverRepository->delete();
-        $activity = Activity::event('server:uninstall')->runner($upid)->log();
 
         // Wait for server to fully delete
         $deletionStatus = false;
@@ -77,8 +73,6 @@ class BuildService extends ProxmoxService
                 $deletionStatus = true;
             }
         } while (! $deletionStatus);
-
-        LogRunner::setActivity($activity)->end();
 
         /* 4. Return the server details */
         return $details;
@@ -104,7 +98,6 @@ class BuildService extends ProxmoxService
 
         /* 1. Clone the template */
         $upid = $this->serverRepository->create($template->server->vmid);
-        $activity = Activity::event('server:install')->runner($upid)->log();
 
         // Wait until cloning is complete
         $intermissionDetails = null;
@@ -116,10 +109,6 @@ class BuildService extends ProxmoxService
                 $intermissionDetails = null;
             }
         } while (empty($intermissionDetails) || $intermissionDetails->locked);
-
-        LogRunner::setActivity($activity)->end();
-
-        $activity = Activity::event('server:details.update')->runner()->log();
 
         function runUpdate(ServerUpdateService $service) {
             try {
@@ -139,8 +128,6 @@ class BuildService extends ProxmoxService
         };
 
         runUpdate($this->updateService);
-
-        LogRunner::setActivity($activity)->end();
 
         return $this->detailService->getDetails();
     }

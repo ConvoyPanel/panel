@@ -2,7 +2,6 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Activity;
 use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
@@ -10,13 +9,12 @@ use Convoy\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
 use Convoy\Jobs\Servers\ProcessRebuild;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\Activity\ActivityLogBatchService;
 use Convoy\Services\Nodes\TemplateService;
 use Inertia\Inertia;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository, private ActivityLogBatchService $batch)
+    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository)
     {
     }
 
@@ -42,13 +40,9 @@ class SettingsController extends ApplicationApiController
 
     public function rebuild(Server $server, ReinstallServerRequest $request)
     {
-        $this->batch->transaction(function (string $uuid) use ($server, $request) {
-            $server->update(['status' => Status::INSTALLING->value]);
+        $server->update(['status' => Status::INSTALLING->value]);
 
-            $activity = Activity::event('server:rebuild')->runner()->log();
-
-            ProcessRebuild::dispatch($server->id, $request->template_id, $uuid, $activity->id);
-        });
+        ProcessRebuild::dispatch($server->id, $request->template_id);
 
         return redirect()->route('servers.show.building', [$server->id]);
     }

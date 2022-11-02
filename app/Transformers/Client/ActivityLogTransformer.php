@@ -34,7 +34,6 @@ class ActivityLogTransformer extends TransformerAbstract
             // is nothing else sufficiently unique to key off at this point.
             'id' => $model->id,
             'batch' => $model->batch,
-            'status' => $model->status,
             'event' => $model->event,
             'ip' => $this->canViewIP($model->actor) ? $model->ip : null,
             'description' => $model->description,
