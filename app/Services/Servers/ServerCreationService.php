@@ -85,7 +85,7 @@ class ServerCreationService extends ProxmoxService
 
             $server->update(['status' => Status::INSTALLING->value]);
 
-            ProcessBuild::dispatch($server, $deployment->template_id);
+            ProcessBuild::dispatch($server->id, $deployment->template_id);
 
             return $server;
         }

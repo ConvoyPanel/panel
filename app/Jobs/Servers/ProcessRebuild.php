@@ -69,6 +69,8 @@ class ProcessRebuild implements ShouldQueue
 
             $server->update(['status' => null]);
         } catch (\Exception $e) {
+            $server->update(['status' => Status::INSTALL_FAILED->value]);
+
             throw $e;
         }
     }

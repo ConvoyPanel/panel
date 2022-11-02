@@ -61,7 +61,7 @@ class BuildService extends ProxmoxService
         }
 
         /* 3. Delete the server */
-        $upid = $this->serverRepository->delete();
+        $this->serverRepository->delete();
 
         // Wait for server to fully delete
         $deletionStatus = false;
@@ -97,7 +97,7 @@ class BuildService extends ProxmoxService
         $this->updateService->setServer($this->server);
 
         /* 1. Clone the template */
-        $upid = $this->serverRepository->create($template->server->vmid);
+        $this->serverRepository->create($template->server->vmid);
 
         // Wait until cloning is complete
         $intermissionDetails = null;

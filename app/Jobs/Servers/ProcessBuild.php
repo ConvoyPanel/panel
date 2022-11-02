@@ -37,7 +37,7 @@ class ProcessBuild implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Server $server, protected int $templateId)
+    public function __construct(protected int $serverId, protected int $templateId)
     {
     }
 
@@ -48,7 +48,7 @@ class ProcessBuild implements ShouldQueue
      */
     public function middleware()
     {
-        return [new WithoutOverlapping($this->server->id)];
+        return [new WithoutOverlapping($this->serverId)];
     }
 
     /**
@@ -60,13 +60,17 @@ class ProcessBuild implements ShouldQueue
     {
         Assert::isInstanceOf($this->server, Server::class);
 
+        $server = Server::findOrFail($this->serverId);
+
         try {
-            $this->server->update(['status' => Status::INSTALLING->value]);
+            $server->update(['status' => Status::INSTALLING->value]);
 
-            $builder->setServer($this->server)->build(Template::findOrFail($this->templateId));
+            $builder->setServer($server)->build(Template::findOrFail($this->templateId));
 
-            $this->server->update(['status' => null]);
+            $server->update(['status' => null]);
         } catch (\Exception $e) {
+            $server->update(['status' => Status::INSTALL_FAILED->value]);
+
             throw $e;
         }
     }
