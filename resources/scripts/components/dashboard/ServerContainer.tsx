@@ -1,16 +1,14 @@
 import getServers from '@/api/getServers'
 import ServerCard from '@/components/dashboard/ServerCard'
 import Pagination from '@/components/elements/Pagination'
-import Spinner from '@/components/elements/Spinner'
 import { useStoreState } from '@/state'
 import { usePersistedState } from '@/util/usePersistedState'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Skeleton, Switch, TextInput } from '@mantine/core'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import debounce from 'debounce'
-import { array } from 'yup'
 
 const ServerContainer = () => {
   const { search: location } = useLocation()
@@ -33,6 +31,7 @@ const ServerContainer = () => {
         query: query.length > 0 ? query : undefined,
         page,
         type: showOnlyAdmin && rootAdmin ? 'all' : undefined,
+        perPage: 51
       })
   )
 

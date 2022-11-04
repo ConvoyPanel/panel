@@ -31,11 +31,17 @@ const Pagination = <T,>({ data: { items, pagination }, onPageSelect, children }:
         pages.push(i);
     }
 
+    useEffect(() => {
+        if (pagination.currentPage > pagination.totalPages) {
+            onPageSelect(pagination.totalPages);
+        }
+    }, [])
+
     return (
         <>
             {children({ items, isFirstPage, isLastPage })}
             {pages.length > 1 && (
-                <div className='flex justify-end'>
+                <div className='flex justify-end mt-6'>
                     <MantinePagination onChange={onPageSelect} page={pagination.currentPage} total={pagination.totalPages}/>
                 </div>
             )}
