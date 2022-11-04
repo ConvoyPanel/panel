@@ -3,6 +3,7 @@ import { ReactNode, Suspense } from 'react'
 
 interface Props {
   screen?: boolean
+  flat?: boolean
 }
 
 interface Spinner extends React.FC<Props> {
@@ -11,9 +12,9 @@ interface Spinner extends React.FC<Props> {
   }>
 }
 
-const Spinner: Spinner = ({ screen }: Props) => {
+const Spinner: Spinner = ({ screen, flat }: Props) => {
   return (
-    <div className={`grid place-items-center w-full ${screen ? 'h-screen' : 'h-40'} dark:bg-black`}>
+    <div className={`grid place-items-center w-full ${screen ? 'h-screen' : 'h-40'} ${flat && 'dark:bg-black'}`}>
       <Loader size='lg' />
     </div>
   )

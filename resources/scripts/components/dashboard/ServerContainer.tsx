@@ -5,11 +5,12 @@ import Spinner from '@/components/elements/Spinner'
 import { useStoreState } from '@/state'
 import { usePersistedState } from '@/util/usePersistedState'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Switch, TextInput } from '@mantine/core'
+import { Skeleton, Switch, TextInput } from '@mantine/core'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import useSWR, { mutate } from 'swr'
 import debounce from 'debounce'
+import { array } from 'yup'
 
 const ServerContainer = () => {
   const { search: location } = useLocation()
@@ -27,46 +28,72 @@ const ServerContainer = () => {
   )
   const { data, mutate } = useSWR(
     ['/api/client/servers', showOnlyAdmin && rootAdmin, page],
-    () => getServers({ query: query.length > 0 ? query : undefined ,page, type: showOnlyAdmin && rootAdmin ? 'all' : undefined })
+    () =>
+      getServers({
+        query: query.length > 0 ? query : undefined,
+        page,
+        type: showOnlyAdmin && rootAdmin ? 'all' : undefined,
+      })
   )
 
   useEffect(() => {
-      // Don't use react-router to handle changing this part of the URL, otherwise it
-      // triggers a needless re-render. We just want to track this in the URL incase the
-      // user refreshes the page.
-      window.history.replaceState(null, document.title, `/${page <= 1 ? '' : `?page=${page}`}`);
-  }, [page]);
+    // Don't use react-router to handle changing this part of the URL, otherwise it
+    // triggers a needless re-render. We just want to track this in the URL incase the
+    // user refreshes the page.
+    window.history.replaceState(
+      null,
+      document.title,
+      `/${page <= 1 ? '' : `?page=${page}`}`
+    )
+  }, [page])
 
-  const search = useCallback(debounce(() => {
-    setPage(1)
-    mutate()
-  }, 500), [])
+  const search = useCallback(
+    debounce(() => {
+      setPage(1)
+      mutate()
+    }, 500),
+    []
+  )
 
   return (
     <>
       <div className='flex space-x-3 items-center justify-end'>
         <p className='description-small'>Show all servers</p>
-        <Switch checked={showOnlyAdmin} onChange={() => setShowOnlyAdmin(!showOnlyAdmin)} />
+        <Switch
+          checked={showOnlyAdmin}
+          onChange={() => setShowOnlyAdmin(!showOnlyAdmin)}
+        />
       </div>
       <TextInput
         icon={<MagnifyingGlassIcon className='w-4 h-4' />}
         value={query}
-        onChange={(e) => { setQuery(e.currentTarget.value); search()}}
+        onChange={(e) => {
+          setQuery(e.currentTarget.value)
+          search()
+        }}
         placeholder='Search...'
       />
-      {!data ? (
-        <Spinner />
-      ) : (
-        <Pagination data={data} onPageSelect={setPage}>
-          {({ items }) => (
-            <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {items.map((server) => (
-                <ServerCard key={server.uuid} server={server} />
+      <div className='pt-6'>
+        {!data ? (
+          <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {Array(6)
+              .fill(0)
+              .map((val) => (
+                <Skeleton height='136px' />
               ))}
-            </div>
-          )}
-        </Pagination>
-      )}
+          </div>
+        ) : (
+          <Pagination data={data} onPageSelect={setPage}>
+            {({ items }) => (
+              <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {items.map((server) => (
+                  <ServerCard key={server.uuid} server={server} />
+                ))}
+              </div>
+            )}
+          </Pagination>
+        )}
+      </div>
     </>
   )
 }

@@ -1,5 +1,5 @@
 import ContentContainer from '@/components/elements/ContentContainer'
-import { Button } from '@mantine/core'
+import { Button, Divider } from '@mantine/core'
 import { useEffect } from 'react'
 
 interface Props {
@@ -19,12 +19,13 @@ const NavigationDropdown = ({ logout, visible }: Props) => {
   return (
     <>
       {visible && (
-        <div className='inset-x-0 top-[56px] pt-1.5 bottom-0 block fixed bg-white z-[2000] overflow-y-scroll'>
+        <div className='inset-x-0 top-[56px] pt-1.5 bottom-0 block fixed bg-auto z-[2000] overflow-y-scroll'>
           <ContentContainer>
             <div className='flex flex-col w-full'>
               <Button variant='subtle' color='red' onClick={logout}>
                 Logout
               </Button>
+              <Divider />
             </div>
           </ContentContainer>
         </div>

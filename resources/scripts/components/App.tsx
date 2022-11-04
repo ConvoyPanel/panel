@@ -3,7 +3,7 @@ import { StoreProvider } from 'easy-peasy'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import ProgressBar from '@/components/elements/navigation/ProgressBar'
 import ThemeProvider from '@/components/ThemeProvider'
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import Spinner from '@/components/elements/Spinner'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
@@ -79,9 +79,9 @@ const App = () => {
               path={'/'}
               element={
                 <AuthenticatedRoutes>
-                  <Spinner.Suspense>
+                  <Suspense>
                     <DashboardRouter />
-                  </Spinner.Suspense>
+                  </Suspense>
                 </AuthenticatedRoutes>
               }
             />

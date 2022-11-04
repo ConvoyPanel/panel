@@ -8,7 +8,7 @@ interface Props {
 const ContentContainer = styled.div<Props>`
   ${tw`max-w-7xl space-y-3 mx-auto px-4 sm:px-6 lg:px-8`}
 
-  ${({ padding }) => (padding ? tw`py-12` : '')}
+  ${({ padding }) => (padding ? tw`py-6` : '')}
 `
 
 export default ContentContainer
