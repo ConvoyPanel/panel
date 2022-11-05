@@ -2,9 +2,7 @@
 
 namespace Convoy\Providers;
 
-use Convoy\Http\Middleware\AdminAuthenticate;
-use Convoy\Http\Middleware\AuthorizeProprietaryToken;
-use Convoy\Http\Middleware\ForceJsonResponse;
+use Convoy\Http\Middleware\Client\Server\SubstituteBindings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -42,7 +40,7 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['auth.session'])
                     ->group(base_path('routes/base.php'));
 
-                Route::middleware(['auth'])->prefix('/api/client')
+                Route::middleware(['auth', SubstituteBindings::class])->prefix('/api/client')
                     ->group(base_path('routes/client.php'));
 
                 Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));

@@ -87,7 +87,7 @@ const App = () => {
             />
 
             <Route
-              path={'/servers/:server'}
+              path={'/servers/:id'}
               element={
                 <AuthenticatedRoutes>
                   <Spinner.Suspense>

@@ -31,7 +31,7 @@ const ServerContainer = () => {
         query: query.length > 0 ? query : undefined,
         page,
         type: showOnlyAdmin && rootAdmin ? 'all' : undefined,
-        perPage: 51
+        perPage: 51,
       })
   )
 
@@ -75,11 +75,9 @@ const ServerContainer = () => {
       <div className='pt-6'>
         {!data ? (
           <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {Array(6)
-              .fill(0)
-              .map((val) => (
-                <Skeleton height='136px' />
-              ))}
+            {[1, 2, 3, 4, 5, 6].map((val) => (
+              <Skeleton key={val} height='136px' />
+            ))}
           </div>
         ) : (
           <Pagination data={data} onPageSelect={setPage}>

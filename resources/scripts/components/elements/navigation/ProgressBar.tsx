@@ -13,7 +13,6 @@ const BarFill = styled.div`
 type Timer = ReturnType<typeof setTimeout>
 
 const ProgressBar = () => {
-  const nodeRef = useRef(null)
   const interval = useRef<Timer>(null) as React.MutableRefObject<Timer>
   const timeout = useRef<Timer>(null) as React.MutableRefObject<Timer>
   const [visible, setVisible] = useState(false)
@@ -64,7 +63,6 @@ const ProgressBar = () => {
   return (
     <div className='w-full fixed h-[3px]'>
       <CSSTransition
-        nodeRef={nodeRef}
         timeout={150}
         appear
         in={visible}

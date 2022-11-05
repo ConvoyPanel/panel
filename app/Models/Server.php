@@ -91,12 +91,6 @@ class Server extends Model
         return $this->status === Status::SUSPENDED->value;
     }
 
-    public function getRouteKeyName(): string
-    {
-        return 'id';
-    }
-
-
     /**
      * Checks if the server is currently in a user-accessible state. If not, an
      * exception is raised. This should be called whenever something needs to make

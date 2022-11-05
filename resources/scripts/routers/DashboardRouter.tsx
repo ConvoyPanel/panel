@@ -5,12 +5,20 @@ import TransitionRouter from '@/routers/TransitionRouter'
 import { Suspense } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
+
+const routes = [
+  {
+    name: 'Overview',
+    path: '/',
+  },
+]
+
 const DashboardRouter = () => {
   const location = useLocation();
 
   return (
     <>
-      <NavigationBar />
+      <NavigationBar routes={routes} />
 
       <TransitionRouter>
         <Suspense fallback={<Spinner />}>

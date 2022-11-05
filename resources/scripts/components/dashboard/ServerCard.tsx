@@ -3,6 +3,7 @@ import { formatBytes, getInitials } from '@/util/helpers'
 import styled from '@emotion/styled'
 import { Avatar, Badge } from '@mantine/core'
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import tw from 'twin.macro'
 
 interface Props {
@@ -23,7 +24,7 @@ const ServerCard = ({ server }: Props) => {
   const disk = useMemo(() => formatBytes(server.limits.disk, 0), [server])
 
   return (
-    <div className='bg-auto p-6 shadow hover:shadow-lg border border-colors border-colors-hover dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
+    <Link to={`/servers/${server.identifier}`} className='bg-auto p-6 shadow hover:shadow-lg border border-colors border-colors-hover dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
       <div className='flex items-center space-x-3'>
         <Avatar color='blue' size='md' radius='xl'>
           {getInitials(server.name, ' ', 2)}
@@ -55,7 +56,7 @@ const ServerCard = ({ server }: Props) => {
           <Dd className='dd-small'>{disk.size} {disk.unit}</Dd>
         </dl>
       </div>
-    </div>
+    </Link>
   )
 }
 
