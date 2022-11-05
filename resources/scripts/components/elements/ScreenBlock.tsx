@@ -1,7 +1,7 @@
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import { Button } from '@mantine/core'
 import { ComponentType } from 'react'
-import { LinkIcon } from '@heroicons/react/24/outline'
+import { ExclaimationCircleIcon, LinkIcon } from '@heroicons/react/24/outline'
 
 export interface IconProps {
   className?: string
@@ -12,6 +12,7 @@ interface BaseProps {
   icon?: ComponentType<IconProps>
   message: string
   full?: boolean
+  center?: boolean
   onRetry?: () => void
   onBack?: () => void
 }
@@ -32,6 +33,7 @@ const ScreenBlock = ({
   title,
   icon: Icon,
   message,
+  center,
   onBack,
   onRetry,
   full,
@@ -41,7 +43,7 @@ const ScreenBlock = ({
       className={`${full && 'grid place-items-center min-h-screen -mt-10'}`}
       title={title}
     >
-      <div className='w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-black rounded-md shadow-md text-center'>
+      <div className={`w-full sm:max-w-md p-12 md:p-20 bg-white dark:bg-black rounded-md shadow-md text-center ${center && 'mx-auto'}`}>
         {Icon && <Icon className='w-16 h-16 border dark:border-stone-600 rounded-md p-3 text-black dark:text-stone-400 mx-auto' />}
 
         <h2 className='text-stone-900 dark:text-white font-bold text-4xl mt-6'>{title}</h2>
@@ -59,6 +61,14 @@ const ScreenBlock = ({
     </PageContentBlock>
   )
 }
+
+type ServerErrorProps = (Omit<PropsWithBack, 'icon' | 'title'> | Omit<PropsWithRetry, 'icon' | 'title'>) & {
+  title?: string;
+};
+
+export const ServerError = ({ title, ...props }: ServerErrorProps) => (
+  <ScreenBlock title={title || 'Something went wrong'} center icon={ExclaimationCircleIcon} {...props} />
+);
 
 export const NotFound = ({
   title,

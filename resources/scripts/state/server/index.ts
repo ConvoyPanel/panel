@@ -1,18 +1,32 @@
-import { Server } from '@/api/server/getServer'
-import { action, Action, thunk, Thunk } from 'easy-peasy'
+import getServer, { Server } from '@/api/server/getServer'
+import { action, Action, createContextStore, thunk, Thunk } from 'easy-peasy'
 
-export interface ServerStore {
-    data?: Server
-    setServer: Action<ServerStore, Server>
-    getServer: Thunk<ServerStore, string>
+export interface ServerDataStore {
+  data?: Server
+  setServer: Action<ServerDataStore, Server>
+  getServer: Thunk<ServerDataStore, string>
 }
 
-const Server: ServerStore = {
-    data: undefined,
-    setServer: action((state, payload) => {
-        state.data = payload
-    }),
-    getServer: thunk(async (state, payload) => {
-        //const server = await getServers
-    })
+const server: ServerDataStore = {
+  data: undefined,
+  setServer: action((state, payload) => {
+    state.data = payload
+  }),
+  getServer: thunk(async (actions, uuid) => {
+    const server = await getServer(uuid)
+
+    actions.setServer(server)
+  }),
 }
+
+interface ServerStore {
+  server: ServerDataStore
+  clearServerState: Action<ServerStore>
+}
+
+export const ServerContext = createContextStore<ServerStore>({
+  server: server,
+  clearServerState: action((state) => {
+    state.server.data = undefined
+  }),
+})

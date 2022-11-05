@@ -7,21 +7,16 @@ use Convoy\Enums\Network\AddressType;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\ProxmoxService;
-use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
-class ServerDetailService extends ProxmoxService
+class ServerDetailService
 {
     public function __construct(protected ProxmoxAllocationRepository $repository, protected ProxmoxCloudinitRepository $cloudinitRepository, protected AllocationService $allocationService, protected CloudinitService $cloudinitService)
     {
     }
 
-    public function getByEloquent()
+    public function getByEloquent(Server $server)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $server = $this->server->loadMissing('addresses');
+        $server = $server->loadMissing('addresses');
 
         return ServerEloquentData::from([
             'id' => $server->id,

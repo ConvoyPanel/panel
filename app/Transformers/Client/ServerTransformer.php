@@ -2,6 +2,7 @@
 
 namespace Convoy\Transformers\Client;
 
+use Convoy\Data\Server\Eloquent\ServerEloquentData;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\Server;
 use League\Fractal\TransformerAbstract;
@@ -13,29 +14,8 @@ class ServerTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(Server $server)
+    public function transform(ServerEloquentData $server)
     {
-        $ipv4 = [];
-        $ipv6 = [];
-
-        foreach ($server->addresses as $address) {
-            if ($address->type === AddressType::IPV4->value) {
-                $ipv4[] = [
-                    'address' => $address->address,
-                    'cidr' => $address->cidr,
-                    'gateway' => $address->gateway,
-                    'mac_address' => $address->mac_address,
-                ];
-            } elseif ($address->type === AddressType::IPV6->value) {
-                $ipv6[] = [
-                    'address' => $address->address,
-                    'cidr' => $address->cidr,
-                    'gateway' => $address->gateway,
-                    'mac_address' => $address->mac_address,
-                ];
-            }
-        }
-
         return [
             'id' => $server->uuid_short,
             'internal_id' => $server->id,
@@ -45,18 +25,18 @@ class ServerTransformer extends TransformerAbstract
             'status' => $server->status,
             'node_id' => $server->node_id,
             'usages' => [
-                'bandwidth_usage' => $server->bandwidth_usage,
+                'bandwidth_usage' => $server->usages->bandwidth_usage,
             ],
             'limits' => [
-                'cpu' => $server->cpu,
-                'memory' => $server->memory,
-                'disk' => $server->disk,
-                'snapshots' => $server->snapshot_limit,
-                'backups' => $server->backup_limit,
-                'bandwidth' => $server->bandwidth_limit,
+                'cpu' => $server->limits->cpu,
+                'memory' => $server->limits->memory,
+                'disk' => $server->limits->disk,
+                'snapshots' => $server->limits->snapshots,
+                'backups' => $server->limits->backups,
+                'bandwidth' => $server->limits->bandwidth,
                 'addresses' => [
-                    'ipv4' => $ipv4,
-                    'ipv6' => $ipv6
+                    'ipv4' => $server->limits->addresses->ipv4,
+                    'ipv6' => $server->limits->addresses->ipv6
                 ]
             ]
         ];

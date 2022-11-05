@@ -8,6 +8,7 @@ import Spinner from '@/components/elements/Spinner'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
+import { ServerContext } from '@/state/server'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -91,12 +92,13 @@ const App = () => {
               element={
                 <AuthenticatedRoutes>
                   <Spinner.Suspense>
-                    <ServerRouter />
+                    <ServerContext.Provider>
+                      <ServerRouter />
+                    </ServerContext.Provider>
                   </Spinner.Suspense>
                 </AuthenticatedRoutes>
               }
             />
-
 
             <Route path={'*'} element={<NotFound full />} />
           </Routes>

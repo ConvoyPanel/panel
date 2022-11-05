@@ -18,7 +18,7 @@ export default ({
       .get('/api/client/servers', {
         params: {
           'filter[name]': query,
-          'per_page': perPage,
+          per_page: perPage,
           ...params,
         },
       })

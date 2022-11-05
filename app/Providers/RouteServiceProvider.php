@@ -2,7 +2,7 @@
 
 namespace Convoy\Providers;
 
-use Convoy\Http\Middleware\Client\Server\SubstituteBindings;
+use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -27,7 +27,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //Route::model('server', Server::class);
+        Route::bind('server', function ($value) {
+            return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
+        });
 
         $this->configureRateLimiting();
 
@@ -40,8 +42,8 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['auth.session'])
                     ->group(base_path('routes/base.php'));
 
-                Route::middleware(['auth', SubstituteBindings::class])->prefix('/api/client')
-                    ->group(base_path('routes/client.php'));
+                Route::middleware(['auth'])->prefix('/api/client')
+                    ->group(base_path('routes/api-client.php'));
 
                 Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
             });
