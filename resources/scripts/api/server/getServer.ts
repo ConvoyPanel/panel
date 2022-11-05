@@ -15,7 +15,8 @@ export interface Server {
     name: string
     description?: string
     status: EloquentStatus
-    usage: {
+    node_id: number
+    usages: {
         bandwidthUsage: number // bytes
     }
     limits: {
@@ -30,9 +31,6 @@ export interface Server {
             ipv6: Address[]
         }
     }
-    config: {
-        template: boolean
-    }
 }
 
 export const rawDataToServerObject = (data: FractalResponseData): Server => ({
@@ -43,10 +41,10 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
     uuid: data.uuid,
     name: data.name,
     status: data.status,
+    node_id: data.node_id,
     description: data.description ? (data.description.length > 0 ? data.description : null) : null,
-    usage: {
-        bandwidthUsage: data.usage.bandwidth_usage,
+    usages: {
+        bandwidthUsage: data.usages.bandwidth_usage,
     },
     limits: { ...data.limits },
-    config: { ...data.config },
 });

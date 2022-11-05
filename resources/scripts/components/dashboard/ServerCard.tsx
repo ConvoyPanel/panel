@@ -32,9 +32,9 @@ const ServerCard = ({ server }: Props) => {
         <div>
           <div className='flex items-center space-x-3'>
             <p className='font-medium text-auto'>{server.name}</p>{' '}
-            {server.config.template && (
+            {server.status === 'suspended' && (
               <Badge color='orange' radius='sm'>
-                Template
+                Suspended
               </Badge>
             )}
           </div>

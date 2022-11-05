@@ -2,7 +2,7 @@ import DashboardContainer from '@/components/dashboard/DashboardContainer'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import Spinner from '@/components/elements/Spinner'
 import TransitionRouter from '@/routers/TransitionRouter'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
 
@@ -14,7 +14,7 @@ const routes = [
 ]
 
 const DashboardRouter = () => {
-  const location = useLocation();
+  const location = useLocation()
 
   return (
     <>

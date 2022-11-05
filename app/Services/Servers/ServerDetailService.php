@@ -2,9 +2,8 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Eloquent\ServerEloquentData;
 use Convoy\Enums\Network\AddressType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Objects\Server\ServerDetailsObject;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
@@ -18,12 +17,39 @@ class ServerDetailService extends ProxmoxService
     {
     }
 
-    /**
-     * @return ServerDetailsObject
-     *
-     * @throws ProxmoxConnectionException
-     */
-    public function getDetails()
+    public function getByEloquent()
+    {
+        Assert::isInstanceOf($this->server, Server::class);
+
+        $server = $this->server->loadMissing('addresses');
+
+        return ServerEloquentData::from([
+            'id' => $server->id,
+            'uuid_short' => $server->uuid_short,
+            'uuid' => $server->uuid,
+            'node_id' => $server->node_id,
+            'name' => $server->name,
+            'description' => $server->description,
+            'status' => $server->status,
+            'usages' => [
+                'bandwidth_usage' => $server->bandwidth_usage,
+            ],
+            'limits' => [
+                'cpu' => $server->cpu,
+                'memory' => $server->memory,
+                'disk' => $server->disk,
+                'snapshots' => $server->snapshot_limit,
+                'backups' => $server->backup_limit,
+                'bandwidth' => $server->bandwidth_limit,
+                'addresses' => [
+                    'ipv4' => $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
+                    'ipv6' => $server->addresses->where('type', AddressType::IPV6->value)->toArray()
+                ],
+            ]
+        ]);
+    }
+
+    /* public function getDetails()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -82,5 +108,5 @@ class ServerDetailService extends ProxmoxService
         ];
 
         return ServerDetailsObject::from($details);
-    }
+    } */
 }

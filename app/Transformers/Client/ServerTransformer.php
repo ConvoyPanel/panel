@@ -43,7 +43,8 @@ class ServerTransformer extends TransformerAbstract
             'name' => $server->name,
             'description' => $server->description,
             'status' => $server->status,
-            'usage' => [
+            'node_id' => $server->node_id,
+            'usages' => [
                 'bandwidth_usage' => $server->bandwidth_usage,
             ],
             'limits' => [
@@ -57,9 +58,6 @@ class ServerTransformer extends TransformerAbstract
                     'ipv4' => $ipv4,
                     'ipv6' => $ipv6
                 ]
-            ],
-            'config' => [
-                'template' => isset($server->template)
             ]
         ];
     }
