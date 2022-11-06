@@ -1,22 +1,25 @@
 <?php
 
-namespace Convoy\Models\Objects\Server;
+namespace Convoy\Data\Server\Proxmox;
 
-use Convoy\Models\Objects\Server\Configuration\ServerConfigObject;
-use Convoy\Models\Objects\Server\Limits\ServerLimitsObject;
-use Convoy\Models\Objects\Server\Usage\ServerUsageObject;
+use Convoy\Data\Server\Eloquent\ServerLimitsData;
+use Convoy\Data\Server\Proxmox\Config\ServerConfigData;
 use Spatie\LaravelData\Data;
 
-class ServerDetailsObject extends Data
+class ServerProxmoxData extends Data
 {
     public function __construct(
+        public int $id,
+        public string $uuid_short,
+        public string $uuid,
         public int $node_id,
-        public int $vmid,
-        public string $status,
+        public string $name,
+        public ?string $description,
+        public ?string $status,
+        public string $state,
         public bool $locked,
-        public ServerUsageObject $usage,
-        public ServerLimitsObject $limits,
-        public ServerConfigObject $config,
+        public ServerLimitsData $limits,
+        public ServerConfigData $config,
     ) {
     }
 }

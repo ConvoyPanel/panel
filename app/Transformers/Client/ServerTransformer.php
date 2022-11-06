@@ -37,7 +37,8 @@ class ServerTransformer extends TransformerAbstract
                 'addresses' => [
                     'ipv4' => $server->limits->addresses->ipv4,
                     'ipv6' => $server->limits->addresses->ipv6
-                ]
+                ],
+                'mac_address' => $server->limits->mac_address
             ]
         ];
     }

@@ -31,11 +31,11 @@ class UpdateRateLimitsCommand extends Command
 
             try {
                 if ($server->bandwidth_usage >= $server->bandwidth_limit && isset($server->bandwidth_limit)) {
-                    $service->setServer($server)->updateRateLimit(1);
+                    $service->updateRateLimit($server, 1);
 
                     echo 'LIMITED' . PHP_EOL;
                 } else {
-                    $service->setServer($server)->updateRateLimit();
+                    $service->setServer($server)->updateRateLimit($server);
 
                     echo 'UNLIMITED' . PHP_EOL;
                 }

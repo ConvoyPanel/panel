@@ -3,6 +3,7 @@ import { EloquentStatus } from '@/api/server/types'
 
 export interface Address {
   id: number
+  type: 'ipv4' | 'ipv6'
   address: string
   cidr: number
   gateway: string
@@ -31,11 +32,13 @@ export interface Server {
       ipv4: Address[]
       ipv6: Address[]
     }
+    macAddress?: string
   }
 }
 
 export const rawDataToAddressObject = (data: any): Address => ({
   id: data.id,
+  type: data.type,
   address: data.address,
   cidr: data.cidr,
   gateway: data.gateway,
@@ -73,6 +76,7 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
         rawDataToAddressObject(address)
       ),
     },
+    macAddress: data.limits.mac_address,
   },
 })
 

@@ -52,30 +52,30 @@ class NetworkService extends ProxmoxService
         }
     }
 
-    public function getPrimaryMacAddress()
+    public function getPrimaryMacAddress(Server $server)
     {
-        $details = $this->detailService->setServer($this->server)->getDetails();
+        $details = $this->detailService->getByProxmox($server);
 
         return $details->config->mac_address;
     }
 
-    public function syncSettings()
+    public function syncSettings(Server $server)
     {
-        $macAddress = $this->getPrimaryMacAddress();
+        $macAddress = $this->getPrimaryMacAddress($server);
 
         return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$macAddress},bridge={$this->node->network}"]);
     }
 
-    public function updateRateLimit(?int $mebibytes = null)
+    public function updateRateLimit(Server $server, ?int $mebibytes = null)
     {
-        $macAddress = $this->getPrimaryMacAddress();
+        $macAddress = $this->getPrimaryMacAddress($server);
 
         $payload = "virtio={$macAddress},bridge={$this->node->network}";
 
         if (!is_null($mebibytes))
             $payload .= ',rate=' . $mebibytes;
 
-        return $this->allocationRepository->setServer($this->server)->update(['net0' => $payload]);
+        return $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
     }
 
     public function updateAddresses(array $addressIds)

@@ -2,7 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Objects\Server\Allocations\Storage\DiskObject;
+use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Services\ProxmoxService;
@@ -26,11 +26,9 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    public function getDisks()
+    public function getDisks(Server $server)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $disks = array_values(array_filter($this->repository->setServer($this->server)->getAllocations(), function ($disk) {
+        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) {
             if (str_contains(Arr::get($disk, 'value'), 'media')) {
                 return false;
             }
@@ -38,16 +36,14 @@ class AllocationService extends ProxmoxService
             return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
         }));
 
-        return DiskObject::collection(Arr::map($disks, function ($value) {
+        return DiskData::collection(Arr::map($disks, function ($value) {
             return $this->formatDisk($value);
         }));
     }
 
-    public function getBootOrder(bool $filterNonLocalDisks = false): array
+    public function getBootOrder(Server $server, bool $filterNonLocalDisks = false): array
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $raw = collect($this->repository->setServer($this->server)->getAllocations())->where('key', 'boot')->firstOrFail();
+        $raw = collect($this->repository->setServer($server)->getAllocations())->where('key', 'boot')->firstOrFail();
 
         $disks = array_values(array_filter(explode(';', Arr::last(explode('=', Arr::get($raw, 'value')))), function ($disk) {
             return ! ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
@@ -89,7 +85,7 @@ class AllocationService extends ProxmoxService
     public function formatDisk(array $rawDisk): array
     {
         $disk = [
-            'disk' => Arr::get($rawDisk, 'key'),
+            'name' => Arr::get($rawDisk, 'key'),
             'size' => 0,
         ];
 

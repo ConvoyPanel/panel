@@ -2,10 +2,12 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Enums\Server\Cloudinit\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
@@ -71,9 +73,9 @@ class CloudinitService extends ProxmoxService
         return $this->repository->setServer($this->server)->update(['nameserver' => $nameserver]);
     }
 
-    public function getIpConfig(): AddressConfigObject
+    public function getIpConfig(Server $server): AddressConfigData
     {
-        $data = $this->repository->setServer($this->server)->getConfig();
+        $data = $this->repository->setServer($server)->getConfig();
 
         $config = [
             'ipv4' => null,
@@ -85,18 +87,13 @@ class CloudinitService extends ProxmoxService
         if ($rawConfig) {
             $configs = explode(',', $rawConfig);
 
-            Arr::map($configs, function ($value) use (&$config, $data) {
+            Arr::map($configs, function ($value) use (&$config) {
                 $property = explode('=', $value);
 
                 if ($property[0] === 'ip') {
                     $cidr = explode('/', $property[1]);
                     $config['ipv4']['address'] = $cidr[0];
                     $config['ipv4']['cidr'] = $cidr[1];
-
-                    $matches = [];
-                    preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($data, 'net0', ''), $matches);
-
-                    $config['ipv4']['mac_address'] = $matches[0] ?? null;
                 }
                 if ($property[0] === 'ip6') {
                     $cidr = explode('/', $property[1]);
@@ -112,7 +109,7 @@ class CloudinitService extends ProxmoxService
             });
         }
 
-        return AddressConfigObject::from($config);
+        return AddressConfigData::from($config);
     }
 
     /**

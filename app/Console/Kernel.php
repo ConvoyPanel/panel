@@ -20,13 +20,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
-        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
-        $schedule->command(ResetUsagesCommand::class)->daily();
-
         if (config('activity.prune_days')) {
             $schedule->command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
         }
+
+        $schedule->command(ResetUsagesCommand::class)->daily();
+        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
     }
 
     /**
