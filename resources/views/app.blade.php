@@ -9,7 +9,7 @@
         <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
         <!-- Inject Data -->
         @if(!is_null(Auth::user()))

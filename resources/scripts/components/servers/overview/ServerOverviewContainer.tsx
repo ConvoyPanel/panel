@@ -1,9 +1,12 @@
-import PageContentBlock from '@/components/elements/PageContentBlock'
+import ServerDetailsBlock from '@/components/servers/overview/ServerDetailsBlock'
+import ServerContentBlock from '@/components/servers/ServerContentBlock'
 
 const ServerOverviewContainer = () => {
-    return <PageContentBlock title='Overview'>
-        <div>Overview</div>
-    </PageContentBlock>
+  return (
+    <ServerContentBlock title='Overview'>
+      <ServerDetailsBlock />
+    </ServerContentBlock>
+  )
 }
 
 export default ServerOverviewContainer

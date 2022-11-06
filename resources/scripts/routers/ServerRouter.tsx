@@ -1,17 +1,20 @@
 import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
-import { NotFound, ServerError } from '@/components/elements/ScreenBlock'
+import ScreenBlock, {
+  NotFound,
+  ServerError,
+} from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/routes'
 import { ServerContext } from '@/state/server'
 import { useEffect, useState } from 'react'
 import {
-  matchPath,
   Route,
   Routes,
   useLocation,
   useMatch,
 } from 'react-router-dom'
+import { ArrowPathIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
 
 const navRoutes = [
   {
@@ -21,7 +24,6 @@ const navRoutes = [
 ]
 
 const ServerRouter = () => {
-  const location = useLocation()
   const match = useMatch('/servers/:id')
   const [error, setError] = useState<string>()
   const server = ServerContext.useStoreState((state) => state.server.data)
@@ -55,17 +57,27 @@ const ServerRouter = () => {
           <Spinner />
         )
       ) : (
-        <Routes>
-          {routes.server.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={<route.component />}
-            />
-          ))}
+        <>
+          {server.status === 'suspended' && (
+            <ScreenBlock center icon={NoSymbolIcon} message='This server is suspended. Contact your provider or system administrator for help.' title='Suspended' />
+          )}
+          {server.status === 'installing' && (
+            <ScreenBlock center icon={ArrowPathIcon} message='Your server is being reinstalled. This can take from 1-15 minutes.' title='Installing' />
+          )}
+          {server.status === null || server.status === undefined ? (
+            <Routes>
+              {routes.server.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<route.component />}
+                />
+              ))}
 
-          <Route path={'*'} element={<NotFound full />} />
-        </Routes>
+              <Route path={'*'} element={<NotFound full />} />
+            </Routes>
+          ) : ''}
+        </>
       )}
     </>
   )

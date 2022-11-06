@@ -38,43 +38,12 @@ class AuthenticateServerAccess
 
         try {
             $server->validateCurrentState();
-
-            if ($request->routeIs(['servers.show.building', 'servers.show.suspended'])) {
-                return redirect()->route('servers.show', $server);
-            }
         } catch (ServerStateConflictException $exception) {
-            if ($server->isInstalling() && !$request->routeIs('servers.show.building')) {
-                //throw $exception; // for v3
-                return redirect()->route('servers.show.building', $server->id);
-            }
-
-            if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
-                //throw $exception; // for v3
-                return redirect()->route('servers.show.suspended', $server->id);
-            }
-
-            if ($request->routeIs(['servers.show.building', 'servers.show.suspended'])) {
+            if ($request->routeIs('api:client:servers.show')) {
                 return $next($request);
             }
 
             throw $exception;
-
-            /* if (!$request->routeIs(['servers.show.building'])) {
-                if ($server->isSuspended() && !$request->routeIs('servers.show.suspended')) {
-                    //throw $exception; // for v3
-                    return redirect()->route('servers.show.suspended', $server->id);
-                }
-
-                if ($server->isInstalling()) {
-                    //throw $exception; // for v3
-                    return redirect()->route('servers.show.building', $server->id);
-                }
-
-                // TODO: users can still view building screen on accident if the server is suspended and vice versa
-                if (!$user->root_admin || !$request->routeIs($this->except) && !$request->routeIs(['servers.show.suspended', 'servers.show.building'])) {
-                    throw $exception;
-                }
-            } */
         }
 
         return $next($request);

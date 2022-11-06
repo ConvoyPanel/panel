@@ -37,7 +37,7 @@ const http: AxiosInstance = axios.create({
 })
 
 http.interceptors.request.use((req) => {
-  if (!req.url?.endsWith('/resources')) {
+  if (!req.url?.endsWith('/status')) {
     store.getActions().progress.startContinuous()
   }
 
@@ -46,7 +46,7 @@ http.interceptors.request.use((req) => {
 
 http.interceptors.response.use(
   (resp) => {
-    if (!resp.request?.url?.endsWith('/resources')) {
+    if (!resp.request?.url?.endsWith('/status')) {
       store.getActions().progress.setComplete()
     }
 

@@ -1,5 +1,7 @@
 import getServer, { Server } from '@/api/server/getServer'
+import getStatus, { ServerStatus } from '@/api/server/getStatus'
 import { action, Action, createContextStore, thunk, Thunk } from 'easy-peasy'
+import isEqual from 'react-fast-compare'
 
 export interface ServerDataStore {
   data?: Server
@@ -10,7 +12,9 @@ export interface ServerDataStore {
 const server: ServerDataStore = {
   data: undefined,
   setServer: action((state, payload) => {
-    state.data = payload
+    if (!isEqual(payload, state.data)) {
+      state.data = payload
+    }
   }),
   getServer: thunk(async (actions, uuid) => {
     const server = await getServer(uuid)
@@ -19,14 +23,38 @@ const server: ServerDataStore = {
   }),
 }
 
+export interface ServerStatusStore {
+  data?: ServerStatus
+  getStatus: Thunk<ServerStatusStore, string>
+  setStatus: Action<ServerStatusStore, ServerStatus>
+}
+
+const status: ServerStatusStore = {
+  data: undefined,
+  getStatus: thunk(async (actions, uuid) => {
+    const status = await getStatus(uuid)
+
+    actions.setStatus(status)
+  }),
+
+  setStatus: action((state, payload) => {
+    if (!isEqual(payload, state.data)) {
+      state.data = payload
+    }
+  })
+}
+
 interface ServerStore {
   server: ServerDataStore
+  status: ServerStatusStore
   clearServerState: Action<ServerStore>
 }
 
 export const ServerContext = createContextStore<ServerStore>({
-  server: server,
+  server,
+  status,
   clearServerState: action((state) => {
     state.server.data = undefined
+    state.status.data = undefined
   }),
 })

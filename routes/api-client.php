@@ -14,5 +14,7 @@ Route::group([
         AuthenticateServerAccess::class,
     ],
 ], function () {
-    Route::get('/', [Client\Servers\ServerController::class, 'index']);
+    Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('api:client:servers.show');
+
+    Route::get('/status', [Client\Servers\ServerController::class, 'status']);
 });

@@ -15,7 +15,7 @@ ${tw`dark:text-stone-400 text-stone-500 text-xs`}
 `
 
 const Dd = styled.dt`
-${tw`text-sm font-semibold`}
+${tw`text-sm font-medium`}
 `
 
 const ServerCard = ({ server }: Props) => {

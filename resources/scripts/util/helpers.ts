@@ -50,3 +50,27 @@ export function formatBytes(
     unit: sizes[i],
   }
 }
+
+export const capitalize = (word: string) => {
+  return word.charAt(0).toUpperCase() + word.slice(1)
+}
+
+export const convertTimeToSmallest = (seconds: number) => {
+  const units = [
+    [1, 'seconds'],
+    [60, 'minutes'],
+    [60 * 60, 'hours'],
+    [60 * 60 * 24, 'days'],
+  ]
+  let bestUnit = units[0]
+  for (const unit of units) {
+    if (seconds >= unit[0]) {
+      bestUnit = unit
+    }
+  }
+
+  return {
+    time: seconds / (bestUnit[0] as number),
+    unit: bestUnit[1] as string,
+  }
+}

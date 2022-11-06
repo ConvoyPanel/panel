@@ -18,7 +18,7 @@ module.exports = {
                 primary: '#111111'
             },
             fontFamily: {
-                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
         },
     },
