@@ -191,7 +191,7 @@ const ServerDetailsBlock = () => {
                 size={128}
                 thickness={12}
                 roundCaps
-                sections={[{ value: bandwidth.percentage, color: 'green' }]}
+                sections={[{ value: bandwidth.percentage, color: bandwidth.percentage < 100 ? 'green' : 'yellow' }]}
               />
             </div>
             <Badge
