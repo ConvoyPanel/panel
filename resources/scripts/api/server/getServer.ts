@@ -18,7 +18,7 @@ export interface Server {
   status: EloquentStatus
   node_id: number
   usages: {
-    bandwidthUsage: number // bytes
+    bandwidth: number // bytes
   }
   limits: {
     cpu: number
@@ -56,7 +56,7 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
       : null
     : null,
   usages: {
-    bandwidthUsage: data.usages.bandwidth_usage,
+    bandwidth: data.usages.bandwidth,
   },
   limits: {
     cpu: data.limits.cpu,

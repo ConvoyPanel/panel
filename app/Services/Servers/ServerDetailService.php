@@ -27,7 +27,7 @@ class ServerDetailService
             'description' => $server->description,
             'status' => $server->status,
             'usages' => [
-                'bandwidth_usage' => $server->bandwidth_usage,
+                'bandwidth' => $server->bandwidth_usage,
             ],
             'limits' => [
                 'cpu' => $server->cpu,

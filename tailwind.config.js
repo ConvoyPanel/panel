@@ -15,11 +15,14 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                primary: '#111111'
+                primary: '#111111',
             },
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
+            boxShadow: {
+                'light': '0 4px 4px 0 rgba(0,0,0,.02)'
+            }
         },
     },
 

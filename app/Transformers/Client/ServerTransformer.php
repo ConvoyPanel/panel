@@ -25,7 +25,7 @@ class ServerTransformer extends TransformerAbstract
             'status' => $server->status,
             'node_id' => $server->node_id,
             'usages' => [
-                'bandwidth_usage' => $server->usages->bandwidth_usage,
+                'bandwidth' => $server->usages->bandwidth,
             ],
             'limits' => [
                 'cpu' => $server->limits->cpu,

@@ -1,9 +1,7 @@
 import { useStoreState } from '@/state'
-import {
-  createEmotionCache,
-  MantineProvider,
-} from '@mantine/core'
+import { createEmotionCache, MantineProvider } from '@mantine/core'
 import { ReactNode, useEffect } from 'react'
+import { NotificationsProvider } from '@mantine/notifications'
 
 const emotionCache = createEmotionCache({
   key: 'mantine',
@@ -32,7 +30,7 @@ const ThemeProvider = ({ children }: Props) => {
         colorScheme: theme === 'dark' ? 'dark' : 'light',
       }}
     >
-      {children}
+      <NotificationsProvider>{children}</NotificationsProvider>
     </MantineProvider>
   )
 }

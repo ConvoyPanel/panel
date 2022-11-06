@@ -29,7 +29,7 @@ export interface FormattedBytes {
   unit: string
 }
 
-export type Sizes = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB' | 'EB' | 'ZB' | 'YB'
+export type Sizes = 'B' | 'KiB' | 'MiB' | 'GiB' | 'TiB' | 'PiB' | 'EiB' | 'ZiB' | 'YiB'
 
 export function formatBytes(
   bytes: number,
@@ -47,7 +47,7 @@ export function formatBytes(
 
   return {
     size,
-    unit: sizes[i],
+    unit: sizes[i] as Sizes,
   }
 }
 
@@ -73,4 +73,16 @@ export const convertTimeToSmallest = (seconds: number) => {
     time: seconds / (bestUnit[0] as number),
     unit: bestUnit[1] as string,
   }
+}
+
+export const hexToRgba = (hex: string, alpha = 1): string => {
+  // noinspection RegExpSimplifiable
+  if (!/#?([a-fA-F0-9]{2}){3}/.test(hex)) {
+      return hex;
+  }
+
+  // noinspection RegExpSimplifiable
+  const [r, g, b] = hex.match(/[a-fA-F0-9]{2}/g)!.map((v) => parseInt(v, 16));
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

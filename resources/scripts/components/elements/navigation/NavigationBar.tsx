@@ -126,7 +126,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
       <NavigationDropdown logout={logout} visible={menuVisible} />
       <div
         ref={bottomBar}
-        className='bg-white pt-1.5 shadow-none transition-shadow dark:bg-black flex w-full dark:border-b border-colors z-[2000]'
+        className='bg-white pt-1.5 shadow-none transition-shadow dark:bg-black flex w-full border-b border-colors z-[2000]'
       >
         <ContentContainer className='flex w-full'>
           <div
