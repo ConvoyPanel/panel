@@ -136,87 +136,90 @@ const ServerDetailsBlock = () => {
       {!status ? (
         <Skeleton className='w-full col-span-10 !h-[421px] md:!h-[211px] lg:!h-[106px]' />
       ) : (
-        <>
-          <StatRow className='col-span-10'>
-            <div>
-              <p>Server State</p>
-              <div className='flex space-x-2 items-center mt-1'>
-                <div className='grid place-items-center h-full'>
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      status.state === 'running' ? 'bg-green-500' : 'bg-red-500'
-                    }`}
-                  ></div>
-                </div>
-                <p className='text-2xl font-semibold dark:text-white'>
-                  {capitalize(status.state)}
-                </p>
+        <StatRow className='col-span-10'>
+          <div>
+            <p>Server State</p>
+            <div className='flex space-x-2 items-center mt-1'>
+              <div className='grid place-items-center h-full'>
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    status.state === 'running' ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                ></div>
               </div>
+              <p className='text-2xl font-semibold dark:text-white'>
+                {capitalize(status.state)}
+              </p>
             </div>
-            <div>
-              <p>CPU Usage</p>
-              <p>{Math.floor(status.cpu * 100)}%</p>
+          </div>
+          <div>
+            <p>CPU Usage</p>
+            <p>{Math.floor(status.cpu * 100)}%</p>
+          </div>
+          <div>
+            <p>Memory Usage</p>
+            <div className='flex space-x-2 items-end mt-1'>
+              <p className='text-2xl font-semibold dark:text-white'>
+                {memory.used.size} {memory.used.unit}
+              </p>
+              <p className='text-sm font-semibold description mb-[0.3rem]'>
+                / {memory.total.size} {memory.total.unit}
+              </p>
             </div>
-            <div>
-              <p>Memory Usage</p>
-              <div className='flex space-x-2 items-end mt-1'>
-                <p className='text-2xl font-semibold dark:text-white'>
-                  {memory.used.size} {memory.used.unit}
-                </p>
-                <p className='text-sm font-semibold description mb-[0.3rem]'>
-                  / {memory.total.size} {memory.total.unit}
-                </p>
-              </div>
+          </div>
+          <div>
+            <p>Uptime</p>
+            <div className='flex space-x-2 items-end mt-1'>
+              <p className='text-2xl font-semibold dark:text-white'>
+                {Math.floor(uptime.time)}
+              </p>
+              <p className='text-sm font-semibold description mb-[0.3rem]'>
+                {uptime.unit}
+              </p>
             </div>
-            <div>
-              <p>Uptime</p>
-              <div className='flex space-x-2 items-end mt-1'>
-                <p className='text-2xl font-semibold dark:text-white'>
-                  {Math.floor(uptime.time)}
-                </p>
-                <p className='text-sm font-semibold description mb-[0.3rem]'>
-                  {uptime.unit}
-                </p>
-              </div>
-            </div>
-          </StatRow>
-
-          <Card className='flex flex-col justify-between items-center col-span-10 lg:col-span-2'>
-            <h5 className='h5'>Bandwidth Usage</h5>
-            <div className='grid place-items-center mt-5'>
-              <h4 className='absolute text-3xl font-semibold text-auto'>
-                {Math.floor(bandwidth.percentage)}
-              </h4>
-              <RingProgress
-                size={128}
-                thickness={12}
-                roundCaps
-                sections={[{ value: bandwidth.percentage, color: bandwidth.percentage < 100 ? 'green' : 'yellow' }]}
-              />
-            </div>
-            <Badge
-              className='!normal-case'
-              size='lg'
-              color='gray'
-              variant='outline'
-            >
-              {bandwidth.used.size} {bandwidth.used.unit} /{' '}
-              {bandwidth.total
-                ? `${bandwidth.total.size} ${bandwidth.total.unit}`
-                : 'unlimited'}
-            </Badge>
-          </Card>
-
-          <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
-            <h5 className='h5'>CPU</h5>
-            <Line {...cpuGraph.props} />
-          </Card>
-          <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
-            <h5 className='h5'>Memory</h5>
-            <Line {...memoryGraph.props} />
-          </Card>
-        </>
+          </div>
+        </StatRow>
       )}
+
+      <Card className='flex flex-col justify-between items-center col-span-10 lg:col-span-2'>
+        <h5 className='h5'>Bandwidth Usage</h5>
+        <div className='grid place-items-center mt-5'>
+          <h4 className='absolute text-3xl font-semibold text-auto'>
+            {Math.floor(bandwidth.percentage)}
+          </h4>
+          <RingProgress
+            size={128}
+            thickness={12}
+            roundCaps
+            sections={[
+              {
+                value: bandwidth.percentage,
+                color: bandwidth.percentage < 100 ? 'green' : 'yellow',
+              },
+            ]}
+          />
+        </div>
+        <Badge
+          className='!normal-case'
+          size='lg'
+          color='gray'
+          variant='outline'
+        >
+          {bandwidth.used.size} {bandwidth.used.unit} /{' '}
+          {bandwidth.total
+            ? `${bandwidth.total.size} ${bandwidth.total.unit}`
+            : 'unlimited'}
+        </Badge>
+      </Card>
+
+      <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
+        <h5 className='h5'>CPU</h5>
+        <Line {...cpuGraph.props} />
+      </Card>
+      <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
+        <h5 className='h5'>Memory</h5>
+        <Line {...memoryGraph.props} />
+      </Card>
     </div>
   )
 }
