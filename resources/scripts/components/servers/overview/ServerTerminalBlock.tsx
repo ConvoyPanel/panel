@@ -1,6 +1,6 @@
 import Card from '@/components/elements/Card'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/20/solid'
-import { ActionIcon, Button, UnstyledButton } from '@mantine/core'
+import { Button } from '@mantine/core'
 
 const ServerTerminalBlock = () => {
   return (
