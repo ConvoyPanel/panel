@@ -101,8 +101,8 @@ function getEmptyData(
             fill: true,
             label,
             data: Array(20).fill(-5),
-            borderColor: theme('colors.blue.400'),
-            backgroundColor: hexToRgba(theme('colors.blue.700'), 0.5),
+            borderColor: theme('colors.blue.500'),
+            backgroundColor: hexToRgba(theme('colors.blue.600'), 0.5),
           },
           index
         )

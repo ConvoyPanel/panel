@@ -17,4 +17,5 @@ Route::group([
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('api:client:servers.show');
 
     Route::get('/status', [Client\Servers\ServerController::class, 'status']);
+    Route::post('/status', [Client\Servers\ServerController::class, 'sendPowerCommand']);
 });
