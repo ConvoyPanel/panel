@@ -132,7 +132,7 @@ const ServerDetailsBlock = () => {
   }, [status])
 
   return (
-    <div className='grid grid-cols-10 gap-6'>
+    <>
       {!status ? (
         <Skeleton className='w-full col-span-10 !h-[421px] md:!h-[211px] lg:!h-[106px]' />
       ) : (
@@ -220,7 +220,7 @@ const ServerDetailsBlock = () => {
         <h5 className='h5'>Memory</h5>
         <Line {...memoryGraph.props} />
       </Card>
-    </div>
+    </>
   )
 }
 

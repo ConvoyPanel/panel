@@ -42,6 +42,10 @@ body {
   @apply text-base font-semibold text-black dark:text-white;
 }
 
+.h6 {
+  @apply text-base font-semibold
+}
+
 .fade-enter,
 .fade-exit,
 .fade-appear {
