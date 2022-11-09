@@ -43,7 +43,7 @@ body {
 }
 
 .h6 {
-  @apply text-base font-semibold
+  @apply text-base font-medium text-stone-800 dark:text-stone-300
 }
 
 .fade-enter,
