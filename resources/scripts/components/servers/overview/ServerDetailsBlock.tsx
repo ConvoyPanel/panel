@@ -142,7 +142,7 @@ const ServerDetailsBlock = () => {
             <div className='flex space-x-2 items-center mt-1'>
               <div className='grid place-items-center h-full'>
                 <div
-                  className={`w-3 h-3 rounded-full ${
+                  className={`w-3 h-3 rounded-full transition-colors ${
                     status.state === 'running' ? 'bg-green-500' : 'bg-red-500'
                   }`}
                 ></div>
