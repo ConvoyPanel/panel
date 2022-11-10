@@ -1,8 +1,20 @@
 import Card from '@/components/elements/Card'
+import { ServerContext } from '@/state/server'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/20/solid'
 import { Button } from '@mantine/core'
+import { useNavigate } from 'react-router-dom'
 
 const ServerTerminalBlock = () => {
+  const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid)
+
+  const launch = (useXterm: boolean = false, popup: boolean = false) => {
+    if (popup) {
+      window.open(`/servers/${uuid}/terminal?type=${useXterm ? 'xterm' : 'novnc'}`, 'Terminal', 'width=800,height=600')
+    } else {
+      window.open(`/servers/${uuid}/terminal?type=${useXterm ? 'xterm' : 'novnc'}`, '_blank')
+    }
+  }
+
   return (
     <Card className='flex flex-col col-span-10 md:col-span-5'>
       <h5 className='h5'>Terminal</h5>
@@ -18,8 +30,8 @@ const ServerTerminalBlock = () => {
             </p>
           </div>
           <Button.Group className='mt-6'>
-            <Button className='grow' variant='outline'>Launch</Button>
-            <Button variant='outline'>
+            <Button className='grow' variant='outline' onClick={() => launch()}>Launch</Button>
+            <Button variant='outline' onClick={() => launch(false, true)}>
               <ArrowTopRightOnSquareIcon className='w-4 h-4' />
             </Button>
           </Button.Group>
@@ -27,13 +39,13 @@ const ServerTerminalBlock = () => {
         <div className='flex flex-col justify-between lg:pl-5 pt-5 lg:py-5'>
           <div>
             <h6 className='h6'>xTerm.js</h6>
-            <p className='description-small mt-1'>Best for performance.</p>
+            <p className='description-small mt-1'>Best for performance. But doesn't work for every operating system.</p>
           </div>
           <Button.Group className='mt-6'>
-            <Button variant='outline' className='grow'>
+            <Button variant='outline' className='grow' onClick={() => launch(true)}>
               Launch
             </Button>
-            <Button variant='outline'>
+            <Button variant='outline' onClick={() => launch(true, true)}>
               <ArrowTopRightOnSquareIcon className='w-4 h-4' />
             </Button>
           </Button.Group>

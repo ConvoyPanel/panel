@@ -16,6 +16,8 @@ Route::group([
 ], function () {
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('api:client:servers.show');
 
-    Route::get('/status', [Client\Servers\ServerController::class, 'status']);
+    Route::get('/status', [Client\Servers\ServerController::class, 'getStatus']);
     Route::post('/status', [Client\Servers\ServerController::class, 'sendPowerCommand']);
+
+    Route::get('/terminal', [Client\Servers\ServerController::class, 'authorizeTerminal']);
 });

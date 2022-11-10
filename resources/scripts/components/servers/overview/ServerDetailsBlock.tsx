@@ -99,20 +99,19 @@ const ServerDetailsBlock = () => {
     [status]
   )
 
-  const bandwidth = useMemo(
-    () => ({
-      used: formatBytes(server.usages.bandwidth),
-      total: server.limits.bandwidth
-        ? formatBytes(server.limits.bandwidth)
-        : undefined,
-      percentage: server.limits.bandwidth
-        ? Math.floor(
-            (server.usages.bandwidth / server.limits.bandwidth) * 10000
-          ) / 100
-        : 0,
-    }),
-    [server]
-  )
+  const bandwidth = useMemo(() => {
+    const total = server.limits.bandwidth
+      ? formatBytes(server.limits.bandwidth)
+      : undefined
+    const percentage = server.limits.bandwidth
+      ? Math.floor(
+          (server.usages.bandwidth / server.limits.bandwidth) * 10000
+        ) / 100
+      : 0
+    const used = formatBytes(server.usages.bandwidth, undefined, total?.unit ? total.unit : undefined)
+
+    return {used, total, percentage}
+  }, [server])
 
   const cpuGraph = useChartTickLabel('CPU', 100, '%', 2)
   const memoryGraph = useChartTickLabel(
@@ -205,7 +204,7 @@ const ServerDetailsBlock = () => {
           color='gray'
           variant='outline'
         >
-          {bandwidth.used.size} {bandwidth.used.unit} /{' '}
+          {bandwidth.used.size} /{' '}
           {bandwidth.total
             ? `${bandwidth.total.size} ${bandwidth.total.unit}`
             : 'unlimited'}

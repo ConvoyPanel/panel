@@ -8,12 +8,14 @@ use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Services\Servers\VncService;
 use Convoy\Transformers\Client\ServerStatusTransformer;
+use Convoy\Transformers\Client\ServerTerminalTransformer;
 use Convoy\Transformers\Client\ServerTransformer;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDetailService $detailService, private ProxmoxServerRepository $serverRepository, private ProxmoxPowerRepository $powerRepository)
+    public function __construct(private VncService $vncService, private ServerDetailService $detailService, private ProxmoxServerRepository $serverRepository, private ProxmoxPowerRepository $powerRepository)
     {
     }
 
@@ -22,7 +24,7 @@ class ServerController extends ApplicationApiController
         return fractal($this->detailService->getByEloquent($server), new ServerTransformer)->respond();
     }
 
-    public function status(Server $server)
+    public function getStatus(Server $server)
     {
         return fractal()->item($this->serverRepository->setServer($server)->getStatus(), new ServerStatusTransformer)->respond();
     }
@@ -47,5 +49,18 @@ class ServerController extends ApplicationApiController
         }
 
         return $this->returnNoContent();
+    }
+
+    public function authorizeTerminal(Server $server)
+    {
+        $data = $this->vncService->generateCredentials($server);
+
+        return fractal()->item([
+            'token' => $data,
+            'node' => $server->node->cluster,
+            'vmid' => $server->vmid,
+            'hostname' => $server->node->hostname,
+            'port' => $server->node->port,
+        ], new ServerTerminalTransformer)->respond();
     }
 }

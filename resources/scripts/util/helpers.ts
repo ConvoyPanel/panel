@@ -26,7 +26,7 @@ export const stringToHexColor = (str: string) => {
 
 export interface FormattedBytes {
   size: number
-  unit: string
+  unit: Sizes
 }
 
 export type Sizes = 'B' | 'KiB' | 'MiB' | 'GiB' | 'TiB' | 'PiB' | 'EiB' | 'ZiB' | 'YiB'

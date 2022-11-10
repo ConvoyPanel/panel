@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react'
 import {
   Route,
   Routes,
-  useLocation,
   useMatch,
 } from 'react-router-dom'
 import { ArrowPathIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
@@ -24,7 +23,7 @@ const navRoutes = [
 ]
 
 const ServerRouter = () => {
-  const match = useMatch('/servers/:id')
+  const match = useMatch('/servers/:id/*')
   const [error, setError] = useState<string>()
   const server = ServerContext.useStoreState((state) => state.server.data)
   const getServer = ServerContext.useStoreActions(

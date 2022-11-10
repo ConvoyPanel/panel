@@ -7,12 +7,11 @@ import useFlash from '@/util/useFlash'
 import { useEffect } from 'react'
 
 const LoginContainer = () => {
-  const { clearFlashes, clearAndAddHttpError } = useFlash();
+  const { clearFlashes, clearAndAddHttpError } = useFlash()
 
   useEffect(() => {
     document.title = 'Login | Convoy'
   }, [])
-
 
   const rules = yup.object({
     email: yup
@@ -20,7 +19,7 @@ const LoginContainer = () => {
       .email('Enter a valid email')
       .required('Email is required'),
     password: yup.string().required('Password is required'),
-  });
+  })
 
   const form = useFormik({
     initialValues: {
@@ -31,20 +30,26 @@ const LoginContainer = () => {
     onSubmit: (values) => {
       clearFlashes()
 
-      login(values).then(response => {
-        window.location.replace('/')
+      login(values)
+        .then((response) => {
+          // @ts-expect-error
+          window.location = '/'
+        })
+        .catch((error) => {
+          console.error(error)
 
-      }).catch((error) => {
-        console.log(error)
-
-        form.setSubmitting(false)
-        clearAndAddHttpError({ error })
-      })
-    }
+          form.setSubmitting(false)
+          clearAndAddHttpError({ error })
+        })
+    },
   })
   return (
     <form onSubmit={form.handleSubmit}>
-      <LoginFormContainer title='Convoy' description='Sign in to your account' submitting={form.isSubmitting}>
+      <LoginFormContainer
+        title='Convoy'
+        description='Sign in to your account'
+        submitting={form.isSubmitting}
+      >
         <TextInput
           label='Email'
           name='email'

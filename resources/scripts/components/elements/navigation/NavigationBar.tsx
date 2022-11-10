@@ -80,7 +80,8 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
   const logout = () => {
     setIsLoggingOut(true)
     http.post('/logout').finally(() => {
-      window.location.replace('/')
+      // @ts-expect-error
+      window.location = '/'
     })
   }
 
@@ -165,7 +166,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
       </div>
       <div
         ref={placeholder}
-        className='hidden h-12 w-full bg-white dark:bg-black'
+        className='hidden h-[43px] w-full bg-white dark:bg-black'
       />
     </div>
   )
