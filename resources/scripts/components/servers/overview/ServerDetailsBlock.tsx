@@ -204,7 +204,7 @@ const ServerDetailsBlock = () => {
           color='gray'
           variant='outline'
         >
-          {bandwidth.used.size} /{' '}
+          {bandwidth.used.size} {bandwidth.total ? '' : bandwidth.used.unit} /{' '}
           {bandwidth.total
             ? `${bandwidth.total.size} ${bandwidth.total.unit}`
             : 'unlimited'}
