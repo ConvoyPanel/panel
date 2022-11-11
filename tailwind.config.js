@@ -15,7 +15,18 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                primary: '#111111',
+                foreground: 'var(--color-foreground)',
+                background: 'var(--color-background)',
+                accent: {
+                    100: 'var(--color-accent-1)',
+                    200: 'var(--color-accent-2)',
+                    300: 'var(--color-accent-3)',
+                    400: 'var(--color-accent-4)',
+                    500: 'var(--color-accent-5)',
+                    600: 'var(--color-accent-6)',
+                    700: 'var(--color-accent-7)',
+                    800: 'var(--color-accent-8)',
+                },
             },
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -25,6 +36,9 @@ module.exports = {
             },
             screens: {
                 'xs': '512px'
+            },
+            borderRadius: {
+                DEFAULT: '5px',
             }
         },
     },

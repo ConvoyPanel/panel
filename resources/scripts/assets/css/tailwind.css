@@ -2,8 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-foreground: #000;
+    --color-background: #fff;
+    --color-accent-1: #fafafa;
+    --color-accent-2: #eaeaea;
+    --color-accent-3: #999999;
+    --color-accent-4: #888888;
+    --color-accent-5: #666666;
+    --color-accent-6: #444444;
+    --color-accent-7: #333333;
+    --color-accent-8: #111111;
+  }
+
+  .dark {
+    --color-foreground: #fff;
+    --color-background: #000;
+    --color-accent-1: #111111;
+    --color-accent-2: #333333;
+    --color-accent-3: #444444;
+    --color-accent-4: #666666;
+    --color-accent-5: #888888;
+    --color-accent-6: #999999;
+    --color-accent-7: #eaeaea;
+    --color-accent-8: #fafafa;
+  }
+}
+
 body {
-  @apply bg-[#fafafa] dark:bg-primary dark:text-stone-400;
+  @apply bg-[#fafafa] dark:bg-accent-100 dark:text-stone-400;
 }
 
 .description {
