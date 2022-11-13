@@ -20,6 +20,7 @@
     "laravel/fortify": "^1.13",
     "laravel/framework": "9.21",
     "laravel/helpers": "^1.5",
+    "laravel/horizon": "^5.10",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
     "pusher/pusher-php-server": "^7.0",

@@ -8,6 +8,7 @@ import NavigationDropdown from '@/components/elements/navigation/NavigationDropd
 import { Link, matchPath, useLocation, useNavigate } from 'react-router-dom'
 import http from '@/api/http'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid'
+import NavLink from '@/components/elements/navigation/NavLink'
 
 interface RouteDefinition {
   name: string
@@ -127,11 +128,11 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
       <NavigationDropdown logout={logout} visible={menuVisible} />
       <div
         ref={bottomBar}
-        className='bg-white pt-1.5 shadow-none transition-shadow dark:bg-black flex w-full border-b border-colors z-[2000]'
+        className='bg-white shadow-none transition-shadow dark:bg-black w-full border-b border-colors z-[2000]'
       >
         <ContentContainer className='flex w-full'>
           <div
-            className='grid place-items-center transition-all w-0 h-full overflow-hidden'
+            className='grid place-items-center transition-all w-0 h-6 overflow-hidden'
             ref={logo}
             style={{
               transition: 'width 0.25s ease',
@@ -139,29 +140,9 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
           >
             <img src={Logo} className='w-6 h-6 dark:invert' alt='Convoy logo' />
           </div>
-          <Tabs
-            value={activeRoute || ''}
-            styles={{
-              root: {
-                overflowX: 'auto',
-                '&::-webkit-scrollbar': { display: 'none' },
-                scrollbarWidth: 'none',
-                marginTop: '0 !important',
-              },
-              tabsList: {
-                flexWrap: 'nowrap',
-                borderBottom: '2px solid transparent',
-              },
-            }}
-          >
-            <Tabs.List>
-              {routes.map((route) => (
-                <Tabs.Tab key={route.name} value={route.path}>
-                  {route.name}
-                </Tabs.Tab>
-              ))}
-            </Tabs.List>
-          </Tabs>
+          <div className='flex z-[2000]'>
+            <NavLink to='/'>Overview</NavLink>
+          </div>
         </ContentContainer>
       </div>
       <div

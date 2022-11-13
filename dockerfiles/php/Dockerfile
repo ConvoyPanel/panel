@@ -3,7 +3,6 @@ FROM php:8.1-fpm-alpine3.16
 ARG WITH_XDEBUG=false
 ARG APP_ENV=local
 
-#COPY ./php.ini-development /usr/local/etc/php/php.ini
 COPY ./php.ini-* /usr/local/etc/php
 
 RUN if [ $APP_ENV = "production" ]; then \
@@ -14,7 +13,7 @@ RUN if [ $APP_ENV = "production" ]; then \
         fi
 
 RUN apk add --no-cache bash
-RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_mysql pcntl
 RUN apk add --no-cache pcre-dev $PHPIZE_DEPS \
         && pecl install redis \
         && docker-php-ext-enable redis.so

@@ -72,6 +72,7 @@ const ServerContainer = () => {
           search()
         }}
         placeholder='Search...'
+        className='mt-3'
       />
       <div className='pt-6'>
         {!data ? (

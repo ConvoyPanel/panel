@@ -74,6 +74,30 @@ body {
   @apply text-base font-medium text-stone-800 dark:text-stone-300
 }
 
+.nav-link::before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 110%;
+  height: 70%;
+  @apply bg-transparent -z-[1] rounded transition-colors
+}
+
+.nav-link:hover::before {
+  @apply bg-accent-200
+}
+
+.nav-link-active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 0;
+  height: 0;
+  border-bottom: 2px solid;
+}
+
 .fade-enter,
 .fade-exit,
 .fade-appear {
