@@ -22,7 +22,7 @@ const ServerTerminalBlock = () => {
         Remotely manage your server from the web.
       </p>
       <div className='grid lg:grid-cols-2 mt-6'>
-        <div className='flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-colors lg:pr-5 pb-5 lg:py-5'>
+        <div className='flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-accent-200 lg:pr-5 pb-5 lg:py-5'>
           <div>
             <h6 className='h6'>noVNC</h6>
             <p className='description-small mt-1'>

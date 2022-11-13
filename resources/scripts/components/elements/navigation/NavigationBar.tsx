@@ -28,12 +28,6 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
   const bottomBar = useRef<HTMLDivElement>(null)
   const placeholder = useRef<HTMLDivElement>(null)
   const logo = useRef<HTMLDivElement>(null)
-  const location = useLocation()
-  const activeRoute = useMemo(
-    () =>
-      routes.find((route) => matchPath(route.path, location.pathname))?.path,
-    [location.pathname, routes]
-  )
 
   const visibilityObserver = useMemo(
     () =>
@@ -107,7 +101,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
                 <div className='py-1.5 h-full'>
                   <div className='rotate-[25deg] w-[2px] h-full bg-[#eaeaea] dark:bg-[#333] rounded-full' />
                 </div>
-                <p className='font-medium text-sm text-auto text-ellipsis overflow-hidden'>
+                <p className='font-medium text-sm text-foreground text-ellipsis overflow-hidden'>
                   {breadcrumb}
                 </p>
               </>
@@ -128,11 +122,11 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
       <NavigationDropdown logout={logout} visible={menuVisible} />
       <div
         ref={bottomBar}
-        className='bg-white shadow-none transition-shadow dark:bg-black w-full border-b border-colors z-[2000]'
+        className='bg-white shadow-none transition-shadow dark:bg-black w-full border-b border-accent-200 z-[2000]'
       >
         <ContentContainer className='flex w-full'>
           <div
-            className='grid place-items-center transition-all w-0 h-6 overflow-hidden'
+            className='grid place-items-center transition-all w-0 inset-y-0 overflow-hidden'
             ref={logo}
             style={{
               transition: 'width 0.25s ease',
@@ -140,14 +134,15 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
           >
             <img src={Logo} className='w-6 h-6 dark:invert' alt='Convoy logo' />
           </div>
-          <div className='flex z-[2000]'>
-            <NavLink to='/'>Overview</NavLink>
+          <div className='flex z-[2000] overflow-x-auto scrollbar-hide'>
+            { routes.map(route => <NavLink key={route.path} to={route.path}>{route.name}</NavLink>) }
+
           </div>
         </ContentContainer>
       </div>
       <div
         ref={placeholder}
-        className='hidden h-[43px] w-full bg-white dark:bg-black'
+        className='hidden h-[49px] w-full bg-white dark:bg-black'
       />
     </div>
   )

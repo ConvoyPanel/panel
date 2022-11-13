@@ -24,14 +24,14 @@ const ServerCard = ({ server }: Props) => {
   const disk = useMemo(() => formatBytes(server.limits.disk, 0), [server])
 
   return (
-    <Link to={`/servers/${server.id}`} className='bg-auto p-6 shadow-light hover:shadow-lg border border-colors border-colors-hover dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
+    <Link to={`/servers/${server.id}`} className='bg-background p-6 shadow-light hover:shadow-lg border border-accent-200 dark:hover:border-foreground dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
       <div className='flex items-center space-x-3'>
         <Avatar color='blue' size='md' radius='xl'>
           {getInitials(server.name, ' ', 2)}
         </Avatar>
         <div>
           <div className='flex items-center space-x-3'>
-            <p className='font-medium text-auto'>{server.name}</p>{' '}
+            <p className='font-medium text-foreground'>{server.name}</p>{' '}
             {server.status === 'suspended' && (
               <Badge color='orange' radius='sm'>
                 Suspended

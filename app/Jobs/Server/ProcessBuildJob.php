@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Jobs\Servers;
+namespace Convoy\Jobs\Server;
 
 use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
@@ -12,8 +12,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Webmozart\Assert\Assert;
 
-class ProcessRebuild implements ShouldQueue
+class ProcessBuildJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -22,7 +23,7 @@ class ProcessRebuild implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 3000;
+    public $timeout = 1000;
 
     /**
      * The number of times the job may be attempted.
@@ -36,9 +37,8 @@ class ProcessRebuild implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId)
+    public function __construct(protected int $serverId, protected int $templateId)
     {
-        //
     }
 
     /**
@@ -58,14 +58,14 @@ class ProcessRebuild implements ShouldQueue
      */
     public function handle(BuildService $builder)
     {
+        Assert::isInstanceOf($this->server, Server::class);
+
         $server = Server::findOrFail($this->serverId);
-        $template = Template::findOrFail($this->templateId);
 
         try {
-
             $server->update(['status' => Status::INSTALLING->value]);
 
-            $builder->setServer($server)->rebuild($template);
+            $builder->setServer($server)->build(Template::findOrFail($this->templateId));
 
             $server->update(['status' => null]);
         } catch (\Exception $e) {

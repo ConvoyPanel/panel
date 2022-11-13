@@ -20,4 +20,8 @@ Route::group([
     Route::post('/status', [Client\Servers\ServerController::class, 'sendPowerCommand']);
 
     Route::get('/terminal', [Client\Servers\ServerController::class, 'authorizeTerminal']);
+
+    Route::prefix('/backups')->group(function () {
+        Route::get('/', [Client\Servers\BackupController::class, 'index']);
+    });
 });

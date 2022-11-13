@@ -17,7 +17,7 @@ import { useChartTickLabel } from '@/util/chart'
 export const StatRow = styled.div`
   ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
 
-  &>div {
+  & > div {
     ${tw`border-[#eaeaea] dark:border-[#333333] p-6`}
   }
 
@@ -42,7 +42,7 @@ export const StatRow = styled.div`
   }
 
   & > div > p:nth-of-type(2) {
-    ${tw`text-2xl font-semibold mt-1 dark:text-white`}
+    ${tw`text-2xl font-semibold mt-1 text-foreground`}
   }
 `
 
@@ -146,7 +146,7 @@ const ServerDetailsBlock = () => {
                   }`}
                 ></div>
               </div>
-              <p className='text-2xl font-semibold dark:text-white'>
+              <p className='text-2xl font-semibold text-foreground'>
                 {capitalize(status.state)}
               </p>
             </div>
@@ -158,7 +158,7 @@ const ServerDetailsBlock = () => {
           <div>
             <p>Memory Usage</p>
             <div className='flex space-x-2 items-end mt-1'>
-              <p className='text-2xl font-semibold dark:text-white'>
+              <p className='text-2xl font-semibold text-foreground'>
                 {memory.used.size} {memory.used.unit}
               </p>
               <p className='text-sm font-semibold description mb-[0.3rem]'>
@@ -169,7 +169,7 @@ const ServerDetailsBlock = () => {
           <div>
             <p>Uptime</p>
             <div className='flex space-x-2 items-end mt-1'>
-              <p className='text-2xl font-semibold dark:text-white'>
+              <p className='text-2xl font-semibold text-foreground'>
                 {Math.floor(uptime.time)}
               </p>
               <p className='text-sm font-semibold description mb-[0.3rem]'>
@@ -183,7 +183,7 @@ const ServerDetailsBlock = () => {
       <Card className='flex flex-col justify-between items-center col-span-10 lg:col-span-2'>
         <h5 className='h5'>Bandwidth Usage</h5>
         <div className='grid place-items-center mt-5'>
-          <h4 className='absolute text-3xl font-semibold text-auto'>
+          <h4 className='absolute text-3xl font-semibold text-foreground'>
             {Math.floor(bandwidth.percentage)}
           </h4>
           <RingProgress

@@ -1,3 +1,4 @@
+import BackupsContainer from '@/components/servers/backups/BackupsContainer'
 import ServerOverviewContainer from '@/components/servers/overview/ServerOverviewContainer'
 import ServerTerminalContainer from '@/components/servers/terminal/ServerTerminalContainer'
 
@@ -18,6 +19,11 @@ export default {
       path: '/',
       name: 'Overview',
       component: ServerOverviewContainer,
+    },
+    {
+      path: '/backups',
+      name: 'Backups',
+      component: BackupsContainer,
     },
     {
       path: '/terminal',

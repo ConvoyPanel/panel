@@ -68,6 +68,11 @@ class Server extends Model
         return $this->hasOne(Template::class);
     }
 
+    public function backups()
+    {
+        return $this->hasMany(Backup::class);
+    }
+
     /**
      * Returns all of the activity log entries where the server is the subject.
      */

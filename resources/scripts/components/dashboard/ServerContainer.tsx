@@ -35,7 +35,6 @@ const ServerContainer = () => {
       })
   )
 
-
   useEffect(() => {
     // Don't use react-router to handle changing this part of the URL, otherwise it
     // triggers a needless re-render. We just want to track this in the URL incase the
@@ -57,13 +56,15 @@ const ServerContainer = () => {
 
   return (
     <>
-      <div className='flex space-x-3 items-center justify-end'>
-        <p className='description-small'>Show all servers</p>
-        <Switch
-          checked={showOnlyAdmin}
-          onChange={() => setShowOnlyAdmin(!showOnlyAdmin)}
-        />
-      </div>
+      {rootAdmin && (
+        <div className='flex space-x-3 items-center justify-end mb-3'>
+          <p className='description-small'>Show all servers</p>
+          <Switch
+            checked={showOnlyAdmin}
+            onChange={() => setShowOnlyAdmin(!showOnlyAdmin)}
+          />
+        </div>
+      )}
       <TextInput
         icon={<MagnifyingGlassIcon className='w-4 h-4' />}
         value={query}
@@ -72,7 +73,6 @@ const ServerContainer = () => {
           search()
         }}
         placeholder='Search...'
-        className='mt-3'
       />
       <div className='pt-6'>
         {!data ? (

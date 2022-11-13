@@ -19,7 +19,7 @@ const NavigationDropdown = ({ logout, visible }: Props) => {
   return (
     <>
       {visible && (
-        <div className='inset-x-0 top-[56px] pt-1.5 bottom-0 block fixed bg-auto z-[2000] overflow-y-scroll'>
+        <div className='inset-x-0 top-[56px] pt-1.5 bottom-0 block fixed bg-foreground z-[2000] overflow-y-scroll'>
           <ContentContainer>
             <div className='flex flex-col w-full'>
               <Button variant='subtle' color='red' onClick={logout}>

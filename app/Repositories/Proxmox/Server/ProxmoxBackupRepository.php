@@ -23,12 +23,12 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         'zstd',
     ];
 
-    public function getBackups(string $storage = 'local')
+    public function getBackups()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $storage), [
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $this->node->storage), [
                 'query' => [
                     'content' => 'backup',
                     'vmid' => $this->server->vmid,

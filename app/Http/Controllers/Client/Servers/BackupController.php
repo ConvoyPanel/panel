@@ -5,47 +5,41 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
+use Convoy\Models\Backup;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Services\Servers\Backups\BackupCreationService;
-use Convoy\Services\Servers\Backups\BackupDeletionService;
-use Inertia\Inertia;
+use Convoy\Transformers\Client\BackupTransformer;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(protected ProxmoxBackupRepository $repository, protected BackupCreationService $creationService, protected BackupDeletionService $deletionService)
+    public function __construct(private BackupCreationService $creationService, private BackupRepository $repository)
     {
     }
 
-    public function index(Server $server)
+    public function index(Server $server, Request $request)
     {
-        $backups = $this->repository->setServer($server)->getBackups();
+        $backups = QueryBuilder::for(Backup::query())
+            ->where('backups.server_id', $server->id)
+            ->allowedFilters(['name'])
+            ->paginate(min($request->query('per_page') ?? 20, 50));
 
-        return Inertia::render('servers/backups/Index', [
-            'server' => $server,
-            'backups' => $backups,
-            'can_create' => isset($server->backup_limit) ? count($backups) < $server->backup_limit : true,
-        ]);
+        return fractal($backups, new BackupTransformer)->addMeta([
+            'backup_count' => $this->repository->getNonFailedBackups($server)->count(),
+        ])->respond();
     }
 
     public function store(Server $server, StoreBackupRequest $request)
     {
-        $this->creationService->setServer($server)->handle($request->mode, $request->compressionType);
-
-        return back();
     }
 
     public function restore(Server $server, RollbackBackupRequest $request)
     {
-        $this->repository->setServer($server)->restore($request->archive);
-
-        return back();
     }
 
     public function destroy(Server $server, RollbackBackupRequest $request)
     {
-        $this->deletionService->setServer($server)->handle($request->archive);
-
-        return back();
     }
 }

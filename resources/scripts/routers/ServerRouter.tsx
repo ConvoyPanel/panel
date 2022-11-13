@@ -7,7 +7,7 @@ import ScreenBlock, {
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/routes'
 import { ServerContext } from '@/state/server'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Route,
   Routes,
@@ -16,15 +16,9 @@ import {
 } from 'react-router-dom'
 import { ArrowPathIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
 
-const navRoutes = [
-  {
-    name: 'Overview',
-    path: '/servers/:id',
-  },
-]
-
 const ServerRouter = () => {
   const match = useMatch('/servers/:id/*')
+  const id = match!.params.id
   const [error, setError] = useState<string>()
   const server = ServerContext.useStoreState((state) => state.server.data)
   const getServer = ServerContext.useStoreActions(
@@ -33,6 +27,17 @@ const ServerRouter = () => {
   const clearServerState = ServerContext.useStoreActions(
     (actions) => actions.clearServerState
   )
+
+  const visibleRoutes = useMemo(() => [
+    {
+      name: 'Overview',
+      path: `/servers/${id}`,
+    },
+    {
+      name: 'Backups',
+      path: `/servers/${id}/backups`,
+    },
+  ], [match?.params.id])
 
   useEffect(() => {
     setError(undefined)
@@ -49,7 +54,7 @@ const ServerRouter = () => {
 
   return (
     <>
-      <NavigationBar routes={navRoutes} breadcrumb={server?.name} />
+      <NavigationBar routes={visibleRoutes} breadcrumb={server?.name} />
       {!server ? (
         error ? (
           <ServerError message={error} />
