@@ -21,7 +21,7 @@ const LoginFormContainer = ({ title, description, children, submitting }: Props)
         <FlashMessageRender className='px-6 sm:px-0 mb-3' />
         <div className='px-6 py-4 sm:bg-white dark:sm:bg-accent-100 sm:shadow-md overflow-hidden sm:rounded-md relative'>
           <LoadingOverlay visible={submitting || false} />
-          <h1 className='text-3xl font-bold dark:text-white'>{title}</h1>
+          <h1 className='text-3xl font-bold text-foreground'>{title}</h1>
           <p className='description'>{description}</p>
           <div className='mt-3'>
             { children }

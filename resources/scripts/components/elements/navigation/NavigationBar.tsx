@@ -94,7 +94,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
                 className='w-7 h-7 dark:invert'
                 alt='Convoy logo'
               />
-              <h1 className='font-semibold text-lg dark:text-white'>Convoy</h1>
+              <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
             </Link>
             {breadcrumb && (
               <>
