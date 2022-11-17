@@ -5,7 +5,7 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "@headlessui/react": "^1.4.2",
+        "@headlessui/react": "^1.7.4",
         "@mantine/core": "^5.3.3",
         "@mantine/form": "^5.3.3",
         "@mantine/hooks": "^5.3.3",
