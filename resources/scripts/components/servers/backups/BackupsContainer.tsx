@@ -23,7 +23,7 @@ const BackupsContainer = () => {
         title='Create a Backup'
         description='Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.'
       >
-        <TextInput label='Name'/>
+        <TextInput type='text' label='Name' autoFocus={false}/>
       </Modal>
       <div className='flex justify-end mb-3'>
         <Button onClick={() => setOpen(true)}>New Backup</Button>

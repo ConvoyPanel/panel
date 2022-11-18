@@ -119,23 +119,3 @@ body {
   @apply opacity-0 transition-opacity ease-in;
   transition-duration: 150ms;
 }
-
-.modal {
-  --cubic-bezier-modal-open: cubic-bezier(0,1,0.58,1);
-  --cubic-bezier-modal-close: cubic-bezier(0.58,0,1,1);
-}
-
-@media (max-width: 768px) {
-  .modal.enter-from {
-    @apply translate-y-[100vh]
-  }
-  .modal.enter-to {
-    @apply translate-y-[0%]
-  }
-  .modal.leave-from {
-    @apply translate-y-[0%]
-  }
-  .modal.leave-to {
-    @apply translate-y-[100vh]
-  }
-}

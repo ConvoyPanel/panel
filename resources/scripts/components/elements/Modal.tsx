@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
+import { useRef } from 'react'
 import { Fragment, ReactNode } from 'react'
 
 interface Props {
@@ -10,39 +11,43 @@ interface Props {
 }
 
 const Modal = ({ open, onClose, title, description, children}: Props) => {
+  const ref = useRef(null)
+
   return (
-    <Transition appear show={open} as={Fragment}>
-      <Dialog as='div' className='relative z-[3000]' onClose={onClose}>
+    <Transition.Root appear={false} show={open} as={Fragment}>
+      <Dialog as='div' initialFocus={ref} className='relative z-[3000]' onClose={onClose}>
         <Transition.Child
           as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
+          enter="ease-in-out duration-500"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in-out duration-500"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
         >
-          <div className='fixed inset-0 bg-black bg-opacity-25' />
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
         </Transition.Child>
-        <div className='fixed inset-0 overflow-y-hidden'>
-          <div className='flex min-h-full items-end md:items-center justify-center'>
-            <Transition.Child
-          as={Fragment}
-              enter='modal ease-in-out duration-[400ms] md:duration-200'
-              enterFrom='enter-from opacity-0 md:scale-95'
-              enterTo='enter-to opacity-100 md:scale-100'
-              leave='modal ease-in-out duration-[400ms] md:duration-200'
-              leaveFrom='leave-from opacity-100 md:scale-100'
-              leaveTo='leave-to opacity-0 md:scale-95'
+
+        <div className="fixed inset-0 z-10 overflow-hidden">
+          <div className="flex min-h-full items-end justify-center sm:items-center p-0">
+          <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-[100vh] sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-[100vh] sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className='w-full md:max-w-[500px] bg-background rounded-t-lg md:rounded-lg overflow-hidden'>
-                <Dialog.Title className='p-8 md:p-6 text-xl font-medium border-b border-accent-200 text-foreground text-center'>
+              <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden'>
+                <Dialog.Title className='p-8 sm:p-6 text-xl font-medium border-b border-accent-200 text-foreground text-center'>
                   { title }
                 </Dialog.Title>
                 <div className='p-6 bg-accent-100'>
                   <Dialog.Description className={`text-accent-600 text-sm ${children && 'mb-5'}`}>
                     { description }
                   </Dialog.Description>
+                  <input type="hidden" ref={ref} autoFocus />
                   { children }
                 </div>
               </Dialog.Panel>
@@ -50,7 +55,7 @@ const Modal = ({ open, onClose, title, description, children}: Props) => {
           </div>
         </div>
       </Dialog>
-    </Transition>
+    </Transition.Root>
   )
 }
 
