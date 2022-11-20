@@ -36,17 +36,6 @@ const ServerContainer = () => {
       })
   )
 
-  useEffect(() => {
-    // Don't use react-router to handle changing this part of the URL, otherwise it
-    // triggers a needless re-render. We just want to track this in the URL incase the
-    // user refreshes the page.
-    window.history.replaceState(
-      null,
-      document.title,
-      `/${page <= 1 ? '' : `?page=${page}`}`
-    )
-  }, [page])
-
   const search = useCallback(
     debounce(() => {
       setPage(1)
@@ -67,7 +56,7 @@ const ServerContainer = () => {
         </div>
       )}
       <TextInput
-        icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
+        prefix={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
         value={query}
         onChange={(e) => {
           setQuery(e.currentTarget.value)

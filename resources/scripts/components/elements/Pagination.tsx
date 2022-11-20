@@ -37,6 +37,17 @@ const Pagination = <T,>({ data: { items, pagination }, onPageSelect, children }:
         }
     }, [])
 
+    useEffect(() => {
+        // Don't use react-router to handle changing this part of the URL, otherwise it
+        // triggers a needless re-render. We just want to track this in the URL incase the
+        // user refreshes the page.
+        window.history.replaceState(
+          null,
+          document.title,
+          `/${pagination.currentPage <= 1 ? '' : `?page=${pagination.currentPage}`}`
+        )
+      }, [pagination])
+
     return (
         <>
             {children({ items, isFirstPage, isLastPage })}

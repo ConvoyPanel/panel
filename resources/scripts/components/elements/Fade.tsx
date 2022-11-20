@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import tw from 'twin.macro'
 import styled from '@emotion/styled'
 import CSSTransition, {
@@ -37,13 +37,22 @@ const Container = styled.div<{ timeout: number }>`
   }
 `
 
-const Fade: React.FC<Props> = ({ timeout, children, ...props }) => (
-  <Container timeout={timeout}>
-    <CSSTransition timeout={timeout} classNames='fade' {...props}>
-      {children}
-    </CSSTransition>
-  </Container>
-)
+const Fade: React.FC<Props> = ({ timeout, children, ...props }) => {
+  const ref = useRef(null)
+
+  return (
+    <Container timeout={timeout}>
+      <CSSTransition
+        nodeRef={ref}
+        timeout={timeout}
+        classNames='fade'
+        {...props}
+      >
+        <div ref={ref}>{children}</div>
+      </CSSTransition>
+    </Container>
+  )
+}
 Fade.displayName = 'Fade'
 
 export default Fade

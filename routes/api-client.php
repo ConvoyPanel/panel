@@ -23,5 +23,6 @@ Route::group([
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
+        Route::post('/', [Client\Servers\BackupController::class, 'store']);
     });
 });

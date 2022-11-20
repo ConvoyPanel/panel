@@ -4,6 +4,7 @@ namespace Convoy\Services\Servers\Backups;
 
 use Convoy\Exceptions\Service\Backup\TooManyBackupsException;
 use Convoy\Jobs\Server\MonitorBackupJob;
+use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
@@ -25,7 +26,7 @@ class BackupCreationService
         return $this;
     }
 
-    public function handle(Server $server, string $name, string $mode, string $compressionType): ?string
+    public function handle(Server $server, string $name, string $mode, string $compressionType): ?Backup
     {
         $successful = $this->eloquentRepository->getNonFailedBackups($server);
         if (! $server->backup_limit || $successful->count() >= $server->backup_limit) {

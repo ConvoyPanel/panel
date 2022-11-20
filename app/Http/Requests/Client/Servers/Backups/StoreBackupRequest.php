@@ -30,7 +30,7 @@ class StoreBackupRequest extends FormRequest
             'name' => $rules['name'],
             'locked' => $rules['locked'],
             'mode' => 'required|in:snapshot,suspend,stop',
-            'compressionType' => 'required|in:none,lzo,gzip,zstd',
+            'compression_type' => 'required|in:none,lzo,gzip,zstd',
         ];
     }
 }

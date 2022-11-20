@@ -19,6 +19,7 @@ const ProgressBar = () => {
   const progress = useStoreState((state) => state.progress.progress)
   const continuous = useStoreState((state) => state.progress.continuous)
   const setProgress = useStoreActions((actions) => actions.progress.setProgress)
+  const ref = useRef(null)
 
   useEffect(() => {
     return () => {
@@ -68,9 +69,11 @@ const ProgressBar = () => {
         in={visible}
         unmountOnExit
         classNames={'fade'}
+        nodeRef={ref}
       >
         <BarFill
           style={{ width: progress === undefined ? '100%' : `${progress}%` }}
+          ref={ref}
         />
       </CSSTransition>
     </div>

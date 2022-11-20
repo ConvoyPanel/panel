@@ -24,6 +24,8 @@ class BackupController extends ApplicationApiController
         $backups = QueryBuilder::for(Backup::query())
             ->where('backups.server_id', $server->id)
             ->allowedFilters(['name'])
+            ->defaultSort('-created_at')
+            ->allowedSorts('created_at', 'completed_at')
             ->paginate(min($request->query('per_page') ?? 20, 50));
 
         return fractal($backups, new BackupTransformer)->addMeta([
@@ -33,6 +35,11 @@ class BackupController extends ApplicationApiController
 
     public function store(Server $server, StoreBackupRequest $request)
     {
+        $backup = $this->creationService
+            ->setIsLocked($request->input('locked', false))
+            ->handle($server, $request->name, $request->mode, $request->compression_type);
+
+        return fractal($backup, new BackupTransformer)->respond();
     }
 
     public function restore(Server $server, RollbackBackupRequest $request)

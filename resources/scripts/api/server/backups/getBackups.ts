@@ -6,7 +6,7 @@ interface QueryParams {
     perPage?: number
 }
 
-interface Backup {
+export interface Backup {
     uuid: string
     successful: boolean
     locked: boolean
@@ -26,11 +26,11 @@ export const rawDataToBackupObject = (data: FractalResponseData): Backup => ({
     createdAt: new Date(data.created_at),
 })
 
-type BackupResponse = PaginatedResult<Backup> & { backupCount: number }
+export type BackupResponse = PaginatedResult<Backup> & { backupCount: number }
 
 export default (uuid: string, {
     query,
-    perPage = 50,
+    perPage = 10,
     ...params
 }: QueryParams): Promise<BackupResponse> => {
     return new Promise((resolve, reject) => {

@@ -21,6 +21,7 @@ const PageContentBlock = ({
 }: PageContentBlockProps) => {
   const theme = useStoreState((state) => state.settings.data!.theme)
   const setTheme = useStoreActions((actions) => actions.settings.setTheme)
+  const ref = useRef(null)
 
   useEffect(() => {
     if (title) {
@@ -29,8 +30,8 @@ const PageContentBlock = ({
   }, [title])
 
   return (
-    <CSSTransition timeout={150} classNames='fade' appear in>
-      <>
+    <CSSTransition nodeRef={ref} timeout={150} classNames='fade' appear in>
+      <div ref={ref}>
         <ContentContainer className={`${className}`} padding>
           {showFlashKey && (
             <FlashMessageRender byKey={showFlashKey} className='mb-4' />
@@ -55,7 +56,7 @@ const PageContentBlock = ({
             />
           </div>
         </ContentContainer>
-      </>
+      </div>
     </CSSTransition>
   )
 }
