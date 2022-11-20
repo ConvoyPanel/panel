@@ -16,7 +16,7 @@ const getBorderStyles = (variant: Props['variant'], color: Props['color']) => {
       case 'danger':
         return tw`border-error`
       default:
-        return tw`bg-accent-500 text-white border-accent-500`
+        return tw`border-foreground`
     }
   }
 
