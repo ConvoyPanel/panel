@@ -47,6 +47,14 @@ body {
   @apply bg-accent-100 text-accent-500;
 }
 
+input,
+textarea,
+button,
+select,
+a {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
 .description {
   @apply text-accent-500;
 }
