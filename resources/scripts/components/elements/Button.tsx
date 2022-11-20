@@ -34,21 +34,21 @@ const getBackgroundStyles = (variant: Props['variant'], color: Props['color']) =
   if (variant === 'filled') {
     switch (color) {
       case 'success':
-        return tw`text-white sm:hover:text-success active:text-success bg-success sm:hover:bg-background active:bg-success-lighter`
+        return tw`text-white sm:hover:text-success active:text-success bg-success sm:hover:bg-background active:!bg-success-lighter`
       case 'danger':
-        return tw`text-white sm:hover:text-error active:text-error bg-error sm:hover:bg-background active:bg-error-lighter`
+        return tw`text-white sm:hover:text-error active:text-error bg-error sm:hover:bg-background active:!bg-error-lighter`
       default:
-        return tw`text-background sm:hover:text-foreground active:text-foreground bg-foreground sm:hover:bg-background active:bg-accent-200`
+        return tw`text-background sm:hover:text-foreground active:text-foreground bg-foreground sm:hover:bg-background active:!bg-accent-200`
     }
   }
 
   switch (color) {
     case 'success':
-      return tw`text-success bg-background active:bg-success-lighter`
+      return tw`text-success bg-background active:!bg-success-lighter`
     case 'danger':
-      return tw`text-error bg-background active:bg-error-lighter`
+      return tw`text-error bg-background active:!bg-error-lighter`
     default:
-      return tw`text-accent-500 sm:hover:text-foreground active:text-foreground active:bg-accent-200 bg-background`
+      return tw`text-accent-500 sm:hover:text-foreground active:text-foreground active:!bg-accent-200 bg-background`
   }
 }
 
