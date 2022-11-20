@@ -40,7 +40,7 @@ const Modal = ({ open, onClose, title, description, children, footer}: Props) =>
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]"
             >
-              <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden border border-accent-200'>
+              <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden border-t border-x sm:border-b border-accent-200'>
                 <Dialog.Title className='p-8 sm:p-6 text-xl font-medium border-b border-accent-200 text-foreground text-center'>
                   { title }
                 </Dialog.Title>
