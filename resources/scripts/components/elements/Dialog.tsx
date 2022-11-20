@@ -14,7 +14,7 @@ interface Props {
 }
 
 const ModalAction = styled.button`
-  ${tw`py-6 uppercase text-xs text-accent-500 hover:text-foreground active:text-foreground bg-background hover:bg-accent-100 active:bg-accent-100 transition-colors`}
+  ${tw`py-6 uppercase text-xs text-accent-500 sm:hover:text-foreground active:text-foreground bg-background sm:hover:bg-accent-100 active:bg-accent-100 transition-colors`}
 `
 
 const Dialog = ({ onSubmit, submitText, children, ...props }: Props) => {
