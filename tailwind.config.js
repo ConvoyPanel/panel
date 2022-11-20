@@ -15,6 +15,18 @@ module.exports = {
     theme: {
         extend: {
             colors: {
+                error: {
+                    lighter: 'var(--color-error-lighter)',
+                    light: 'var(--color-error-light)',
+                    DEFAULT: 'var(--color-error)',
+                    dark: 'var(--color-error-dark)',
+                },
+                success: {
+                    lighter: 'var(--color-success-lighter)',
+                    light: 'var(--color-success-light)',
+                    DEFAULT: 'var(--color-success)',
+                    dark: 'var(--color-success-dark)',
+                },
                 foreground: 'var(--color-foreground)',
                 background: 'var(--color-background)',
                 accent: {

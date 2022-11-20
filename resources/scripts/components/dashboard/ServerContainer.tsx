@@ -4,11 +4,12 @@ import Pagination from '@/components/elements/Pagination'
 import { useStoreState } from '@/state'
 import { usePersistedState } from '@/util/usePersistedState'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Skeleton, Switch, TextInput } from '@mantine/core'
+import { Skeleton, Switch } from '@mantine/core'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import useSWR from 'swr'
 import debounce from 'debounce'
+import TextInput from '@/components/elements/inputs/TextInput'
 
 const ServerContainer = () => {
   const { search: location } = useLocation()
@@ -66,7 +67,7 @@ const ServerContainer = () => {
         </div>
       )}
       <TextInput
-        icon={<MagnifyingGlassIcon className='w-4 h-4' />}
+        icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
         value={query}
         onChange={(e) => {
           setQuery(e.currentTarget.value)

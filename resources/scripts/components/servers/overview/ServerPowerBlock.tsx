@@ -1,7 +1,7 @@
 import updateStatus, { PowerAction } from '@/api/server/updateStatus'
+import Button from '@/components/elements/Button'
 import { ServerContext } from '@/state/server'
 import useNotify from '@/util/useNotify'
-import { Button } from '@mantine/core'
 
 const ServerPowerBlock = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data?.uuid)
@@ -18,7 +18,6 @@ const ServerPowerBlock = () => {
     <div className='grid grid-cols-2 gap-3 xs:gap-0 xs:flex justify-end xs:space-x-3 mb-3'>
       <Button
         className='transition-colors'
-        variant='default'
         disabled={!state || state === 'running'}
         onClick={() => update('start')}
       >
@@ -26,7 +25,6 @@ const ServerPowerBlock = () => {
       </Button>
       <Button
         className='transition-colors'
-        variant='default'
         disabled={state !== 'running'}
         onClick={() => update('restart')}
       >
@@ -34,7 +32,7 @@ const ServerPowerBlock = () => {
       </Button>
       <Button
         className='transition-colors'
-        color='red'
+        color='danger'
         variant='outline'
         disabled={!state || state === 'stopped'}
         onClick={() => update('kill')}
@@ -43,7 +41,8 @@ const ServerPowerBlock = () => {
       </Button>
       <Button
         className='transition-colors'
-        color='red'
+        color='danger'
+        variant='filled'
         disabled={state !== 'running'}
         onClick={() => update('shutdown')}
       >

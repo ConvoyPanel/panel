@@ -8,9 +8,10 @@ interface Props {
     title: string
     description: string
     children?: ReactNode
+    footer?: ReactNode
 }
 
-const Modal = ({ open, onClose, title, description, children}: Props) => {
+const Modal = ({ open, onClose, title, description, children, footer}: Props) => {
   const ref = useRef(null)
 
   return (
@@ -25,7 +26,7 @@ const Modal = ({ open, onClose, title, description, children}: Props) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-hidden">
@@ -33,13 +34,13 @@ const Modal = ({ open, onClose, title, description, children}: Props) => {
           <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-[100vh] sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              enterFrom="opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]"
+              enterTo="opacity-100 translate-y-0"
               leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-[100vh] sm:translate-y-0 sm:scale-95"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]"
             >
-              <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden'>
+              <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden border border-accent-200'>
                 <Dialog.Title className='p-8 sm:p-6 text-xl font-medium border-b border-accent-200 text-foreground text-center'>
                   { title }
                 </Dialog.Title>
@@ -50,6 +51,7 @@ const Modal = ({ open, onClose, title, description, children}: Props) => {
                   <input type="hidden" ref={ref} autoFocus />
                   { children }
                 </div>
+                { footer }
               </Dialog.Panel>
             </Transition.Child>
           </div>

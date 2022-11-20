@@ -4,7 +4,14 @@
 
 @layer base {
   :root {
+    --color-success-lighter: #d3e5ff;
+    --color-success-light: #3291ff;
     --color-success: #0070f3;
+    --color-success-dark: #0761d1;
+    --color-error-lighter: #f7d4d6;
+    --color-error-light: #ff1a1a;
+    --color-error: #e00;
+    --color-error-dark: #c50000;
     --color-foreground: #000;
     --color-background: #fff;
     --color-accent-1: #fafafa;
@@ -18,6 +25,11 @@
   }
 
   .dark {
+    --color-success-lighter: #001d7a;
+    --color-error-lighter: rgb(85, 0, 0);
+    --color-error-light: #f33;
+    --color-error: red;
+    --color-error-dark: #e60000;
     --color-foreground: #fff;
     --color-background: #000;
     --color-accent-1: #111111;

@@ -1,11 +1,12 @@
 import getBackups from '@/api/server/backups/getBackups'
+import Button from '@/components/elements/Button'
+import Dialog from '@/components/elements/Dialog'
 import Display from '@/components/elements/displays/DisplayRow'
-import Modal from '@/components/elements/Modal'
+import TextInput from '@/components/elements/inputs/TextInput'
 import Spinner from '@/components/elements/Spinner'
 import ServerContentBlock from '@/components/servers/ServerContentBlock'
 import { ServerContext } from '@/state/server'
 import { bytesToString } from '@/util/helpers'
-import { Button, TextInput } from '@mantine/core'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import useSWR from 'swr'
@@ -17,16 +18,18 @@ const BackupsContainer = () => {
 
   return (
     <ServerContentBlock title='Backups'>
-      <Modal
+      <Dialog
         open={open}
+        onSubmit={() => setOpen(false)}
         onClose={() => setOpen(false)}
+        submitText='Create'
         title='Create a Backup'
         description='Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.'
       >
-        <TextInput type='text' label='Name' autoFocus={false}/>
-      </Modal>
+        <TextInput placeholder='Name' />
+      </Dialog>
       <div className='flex justify-end mb-3'>
-        <Button onClick={() => setOpen(true)}>New Backup</Button>
+        <Button onClick={() => setOpen(true)} variant='filled'>New Backup</Button>
       </div>
       {!data ? (
         <Spinner />
