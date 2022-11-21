@@ -8,6 +8,7 @@ import Pagination from '@/components/elements/Pagination'
 import usePagination from '@/util/usePagination'
 import BackupRow from '@/components/servers/backups/BackupRow'
 import CreateBackupButton from '@/components/servers/backups/CreateBackupButton'
+import Menu from '@/components/elements/Menu'
 
 const BackupsContainer = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid)
@@ -23,6 +24,7 @@ const BackupsContainer = () => {
 
   return (
     <ServerContentBlock title='Backups'>
+      <Menu />
       <CreateBackupButton swr={{ mutate }} />
       {!data ? (
         <Spinner />

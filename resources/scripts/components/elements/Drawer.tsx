@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useRef } from 'react'
+import { forwardRef, Fragment, ReactNode, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 
 interface Props {
@@ -7,14 +7,14 @@ interface Props {
     children: ReactNode
 }
 
-const Drawer = ({ open, onClose, children }: Props) => {
-    const ref = useRef(null)
+const Drawer = forwardRef<HTMLDivElement, Props>(({ open, onClose, children }: Props, ref) => {
+    const focusTrapRef = useRef(null)
 
     return (
         <Transition.Root appear={false} show={open} as={Fragment}>
           <Dialog
             as='div'
-            initialFocus={ref}
+            initialFocus={focusTrapRef}
             className='relative z-[3000]'
             onClose={onClose}
           >
@@ -41,8 +41,8 @@ const Drawer = ({ open, onClose, children }: Props) => {
                   leaveFrom='opacity-100 translate-y-0'
                   leaveTo='opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]'
                 >
-                  <Dialog.Panel className='absolute w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg border-t border-x sm:border-b border-accent-200'>
-                    <input type='hidden' ref={ref} autoFocus />
+                  <Dialog.Panel ref={ref} className='absolute w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg border-t border-x sm:border-b border-accent-200'>
+                    <input type='hidden' ref={focusTrapRef} autoFocus />
                     {children}
                   </Dialog.Panel>
                 </Transition.Child>
@@ -51,6 +51,6 @@ const Drawer = ({ open, onClose, children }: Props) => {
           </Dialog>
         </Transition.Root>
       )
-}
+})
 
 export default Drawer

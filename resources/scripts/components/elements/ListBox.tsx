@@ -77,7 +77,7 @@ const ListBox = ({ label, size, data, selected, onSelect }: Props) => {
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <div className='absolute mt-1 w-full p-2 overflow-auto rounded bg-white shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm'>
+          <div className='absolute mt-1 w-full p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm'>
             {data.map((datum) => (
               <div
                 key={datum.value}
