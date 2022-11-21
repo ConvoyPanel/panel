@@ -10,6 +10,7 @@ import Modal from '@/components/elements/Modal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
+import ListBox, { Datum } from '@/components/elements/ListBox'
 
 interface Props {
   swr: {
@@ -25,6 +26,8 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
   const form = useFormik({
     initialValues: {
       name: '',
+      compressionType: 'zstd',
+      mode: 'snapshot'
     },
     validationSchema: yup.object({
       name: yup.string().required('A name is required').max(40),
@@ -67,6 +70,19 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
     if (!form.isSubmitting) setOpen(false)
   }
 
+  const compressionTypes = [
+    { label: 'None', value: 'none' },
+    { label: 'LZO', value: 'lzo' },
+    { label: 'GZip', value: 'gzip' },
+    { label: 'ZSTD', value: 'zstd' },
+  ]
+
+  const modes = [
+    { label: 'Snapshot', value: 'snapshot' },
+    { label: 'Suspend', value: 'suspend' },
+    { label: 'Stop', value: 'stop' },
+  ]
+
   return (
     <>
       <Modal open={open} onClose={handleClose}>
@@ -89,6 +105,25 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
               name='name'
               placeholder='Name'
             />
+
+            <div className='grid sm:grid-cols-2 mt-3 gap-3'>
+              <ListBox
+                label='Compression Type'
+                data={compressionTypes}
+                selected={form.values.compressionType}
+                onSelect={(value) =>
+                  form.setFieldValue('compressionType', value)
+                }
+              />
+              <ListBox
+                label='Mode'
+                data={modes}
+                selected={form.values.mode}
+                onSelect={(value) =>
+                  form.setFieldValue('mode', value)
+                }
+              />
+            </div>
           </Modal.Body>
           <Modal.Actions>
             <Modal.Action onClick={handleClose}>Cancel</Modal.Action>

@@ -61,12 +61,16 @@ Modal.Description = ({ children, bottomMargin }) => {
 Modal.Actions = styled.div`
   ${tw`flex border-t border-accent-200`}
 
+  & > button:is(:first-of-type) {
+    ${tw`rounded-bl`}
+  }
+
   & > button:not(:last-child) {
     ${tw`border-r border-accent-200`}
   }
 
   & > button:is(:last-child) {
-    ${tw`!text-foreground`}
+    ${tw`!text-foreground rounded-br`}
   }
 `
 

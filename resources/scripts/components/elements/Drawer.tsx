@@ -41,7 +41,7 @@ const Drawer = ({ open, onClose, children }: Props) => {
                   leaveFrom='opacity-100 translate-y-0'
                   leaveTo='opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]'
                 >
-                  <Dialog.Panel className='absolute sm:w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg overflow-hidden border-t border-x sm:border-b border-accent-200'>
+                  <Dialog.Panel className='absolute w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg border-t border-x sm:border-b border-accent-200'>
                     <input type='hidden' ref={ref} autoFocus />
                     {children}
                   </Dialog.Panel>
