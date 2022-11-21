@@ -51,6 +51,7 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
               } as BackupResponse),
             false
           )
+          setOpen(false)
           setSubmitting(false)
         })
         .catch((error) => {
