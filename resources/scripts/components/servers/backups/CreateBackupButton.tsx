@@ -1,7 +1,7 @@
 import useFlash from '@/util/useFlash'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import createBackup from '@/api/server/backups/createBackup'
+import createBackup, { RequestParameters } from '@/api/server/backups/createBackup'
 import { useEffect, useState } from 'react'
 import { ServerContext } from '@/state/server'
 import { KeyedMutator } from 'swr'
@@ -38,11 +38,10 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
       createBackup(uuid, {
         name: values.name,
         locked: false,
-        mode: 'snapshot',
-        compressionType: 'zstd',
+        mode: values.mode as RequestParameters['mode'],
+        compressionType: values.compressionType as RequestParameters['compressionType'],
       })
         .then((backup) => {
-          console.log({ backup })
           mutate(
             (data) =>
               ({

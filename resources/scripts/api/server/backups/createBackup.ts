@@ -1,7 +1,7 @@
 import http from '@/api/http';
 import { Backup, rawDataToBackupObject } from '@/api/server/backups/getBackups';
 
-interface RequestParameters {
+export interface RequestParameters {
     name: string;
     locked?: boolean;
     mode: 'snapshot' | 'suspend' | 'stop'
