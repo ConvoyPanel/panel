@@ -12,7 +12,7 @@ class PruneOrphanedBackupsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'p:maintenance:prune-backups {--prune-age=}';
+    protected $signature = 'c:maintenance:prune-backups {--prune-age=}';
 
     /**
      * @var string

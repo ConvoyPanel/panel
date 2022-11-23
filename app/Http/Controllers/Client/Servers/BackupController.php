@@ -4,9 +4,8 @@ namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
-use Convoy\Jobs\Server\MonitorBackupRestoreJob;
+use Convoy\Jobs\Server\MonitorBackupRestorationJob;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
@@ -72,7 +71,7 @@ class BackupController extends ApplicationApiController
 
             $upid = $this->proxmoxRepository->setServer($server)->restore($backup);
 
-            MonitorBackupRestoreJob::dispatch($server->id, $upid);
+            MonitorBackupRestorationJob::dispatch($server->id, $upid);
         });
     }
 
