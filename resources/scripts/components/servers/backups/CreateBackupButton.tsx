@@ -10,7 +10,7 @@ import Modal from '@/components/elements/Modal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
-import ListBox, { Datum } from '@/components/elements/ListBox'
+import ListBox from '@/components/elements/ListBox'
 
 interface Props {
   swr: {

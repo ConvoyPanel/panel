@@ -24,7 +24,6 @@ const BackupsContainer = () => {
 
   return (
     <ServerContentBlock title='Backups'>
-      <Menu />
       <CreateBackupButton swr={{ mutate }} />
       {!data ? (
         <Spinner />

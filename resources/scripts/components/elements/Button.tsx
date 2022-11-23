@@ -2,7 +2,7 @@ import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
 
-interface Props {
+export interface Props {
   variant?: 'outline' | 'filled'
   color?: 'success' | 'danger' | 'accent'
   size?: 'sm'
