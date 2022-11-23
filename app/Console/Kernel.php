@@ -2,6 +2,7 @@
 
 namespace Convoy\Console;
 
+use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
 use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
 use Convoy\Console\Commands\Server\UpdateUsagesCommand;
@@ -20,6 +21,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        if (config('backups.prune_age')) {
+            // Every 30 minutes, run the backup pruning command so that any abandoned backups can be deleted.
+            $schedule->command(PruneOrphanedBackupsCommand::class)->everyThirtyMinutes();
+        }
+
         if (config('activity.prune_days')) {
             $schedule->command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
         }

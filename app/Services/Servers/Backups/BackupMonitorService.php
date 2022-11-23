@@ -16,7 +16,7 @@ class BackupMonitorService
 
     }
 
-    public function handle(Backup $backup, string $upid, ?\Closure $callback = null)
+    public function checkCreationProgress(Backup $backup, string $upid, ?\Closure $callback = null)
     {
         $status = $this->repository->setServer($backup->server)->getStatus($upid);
         $logs = $this->repository->setServer($backup->server)->getLog($upid);
@@ -57,5 +57,22 @@ class BackupMonitorService
                 'completed_at' => Carbon::now(),
             ]);
         }
+    }
+
+    public function checkRestorationProgress(Backup $backup, string $upid, ?\Closure $callback = null)
+    {
+        $status = $this->repository->setServer($backup->server)->getStatus($upid);
+
+        if (Arr::get($status, 'status') === 'running') {
+            if ($callback) {
+                $callback();
+            }
+
+            return;
+        }
+
+        $backup->server->update([
+            'status' => null,
+        ]);
     }
 }
