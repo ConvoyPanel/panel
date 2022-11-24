@@ -24,5 +24,7 @@ Route::group([
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
         Route::post('/', [Client\Servers\BackupController::class, 'store']);
+        Route::post('/{backup}/restore', [Client\Servers\BackupController::class, 'restore']);
+        Route::delete('/{backup}', [Client\Servers\BackupController::class, 'destroy']);
     });
 });

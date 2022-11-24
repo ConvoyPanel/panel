@@ -106,8 +106,7 @@ class Server extends Model
     public function validateCurrentState()
     {
         if (
-            $this->isSuspended() ||
-            !$this->isInstalled()
+            !is_null($this->status)
         ) {
             throw new ServerStateConflictException($this);
         }

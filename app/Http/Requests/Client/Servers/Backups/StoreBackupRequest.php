@@ -28,7 +28,7 @@ class StoreBackupRequest extends FormRequest
 
         return [
             'name' => $rules['name'],
-            'locked' => $rules['locked'],
+            'is_locked' => $rules['is_locked'],
             'mode' => 'required|in:snapshot,suspend,stop',
             'compression_type' => 'required|in:none,lzo,gzip,zstd',
         ];

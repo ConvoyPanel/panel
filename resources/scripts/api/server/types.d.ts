@@ -1,1 +1,1 @@
-export type EloquentStatus = 'installing' | 'suspended' | null
+export type EloquentStatus = 'installing' | 'suspended' | 'restoring_backup' | 'restoring_snapshot' | null

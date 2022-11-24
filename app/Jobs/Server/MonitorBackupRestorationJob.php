@@ -3,6 +3,7 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Backup;
+use Convoy\Models\Server;
 use Convoy\Services\Servers\Backups\BackupMonitorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -25,14 +26,14 @@ class MonitorBackupRestorationJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $backupId, protected string $upid)
+    public function __construct(protected int $serverId, protected string $upid)
     {
         //
     }
 
     public function middleware()
     {
-        return [new WithoutOverlapping($this->backupId)];
+        return [new WithoutOverlapping($this->serverId)];
     }
 
     /**
@@ -42,8 +43,8 @@ class MonitorBackupRestorationJob implements ShouldQueue
      */
     public function handle(BackupMonitorService $service)
     {
-        $backup = Backup::findOrFail($this->backupId);
+        $server = Server::findOrFail($this->serverId);
 
-        $service->checkRestorationProgress($backup, $this->upid, fn () => $this->release(3));
+        $service->checkRestorationProgress($server, $this->upid, fn () => $this->release(3));
     }
 }

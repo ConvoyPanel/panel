@@ -64,7 +64,7 @@ class BackupController extends ApplicationApiController
             throw new BadRequestHttpException('This backup cannot be restored at this time: not completed or failed.');
         }
 
-        return $this->connection->transaction(function () use ($server, $backup) {
+        $this->connection->transaction(function () use ($server, $backup) {
             $server->update([
                 'status' => Status::RESTORING_BACKUP->value,
             ]);
@@ -73,12 +73,14 @@ class BackupController extends ApplicationApiController
 
             MonitorBackupRestorationJob::dispatch($server->id, $upid);
         });
+
+        return $this->returnNoContent();
     }
 
     public function destroy(Server $server, Backup $backup)
     {
         $this->deletionService->handle($backup);
 
-        return new JsonResponse([], JsonResponse::HTTP_NO_CONTENT);
+        return $this->returnNoContent();
     }
 }

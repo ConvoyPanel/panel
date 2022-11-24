@@ -37,7 +37,7 @@ class BackupRepository extends EloquentRepository
     {
         return $server->backups()->where(function ($query) {
             $query->whereNull('completed_at')
-                ->orWhere('successful', true);
+                ->orWhere('is_successful', true);
         });
     }
 }

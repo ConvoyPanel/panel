@@ -4,6 +4,7 @@ namespace Convoy\Services\Servers\Backups;
 
 use Carbon\Carbon;
 use Convoy\Models\Backup;
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Illuminate\Support\Arr;
@@ -43,10 +44,10 @@ class BackupMonitorService
         if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok')
         {
             $archives = $this->backupRepository->setServer($backup->server)->getBackups();
-            $archive = collect($archives)->where('volid', "{$backup->server->node->storage}:backup/{$fileName}")->first();
+            $archive = collect($archives)->where('volid', "{$backup->server->node->backup_storage}:backup/{$fileName}")->first();
 
             $backup->update([
-                'successful' => true,
+                'is_successful' => true,
                 'file_name' => $fileName,
                 'size' => Arr::get($archive, 'size', 0),
                 'completed_at' => Carbon::now(),
@@ -59,9 +60,9 @@ class BackupMonitorService
         }
     }
 
-    public function checkRestorationProgress(Backup $backup, string $upid, ?\Closure $callback = null)
+    public function checkRestorationProgress(Server $server, string $upid, ?\Closure $callback = null)
     {
-        $status = $this->repository->setServer($backup->server)->getStatus($upid);
+        $status = $this->repository->setServer($server)->getStatus($upid);
 
         if (Arr::get($status, 'status') === 'running') {
             if ($callback) {
@@ -71,7 +72,7 @@ class BackupMonitorService
             return;
         }
 
-        $backup->server->update([
+        $server->update([
             'status' => null,
         ]);
     }

@@ -23,7 +23,7 @@ const BackupsContainer = () => {
   )
 
   return (
-    <ServerContentBlock title='Backups'>
+    <ServerContentBlock showFlashKey='backups' title='Backups'>
       <CreateBackupButton swr={{ mutate }} />
       {!data ? (
         <Spinner />
@@ -34,7 +34,7 @@ const BackupsContainer = () => {
           {({ items }) => (
             <Display.Group>
               {items.map((backup) => (
-                <BackupRow key={backup.uuid} backup={backup} />
+                <BackupRow swr={{mutate}} key={backup.uuid} backup={backup} />
               ))}
             </Display.Group>
           )}

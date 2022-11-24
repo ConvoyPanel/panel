@@ -3,9 +3,12 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MegabytesAndBytes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected $casts = [
@@ -19,8 +22,8 @@ class Backup extends Model
     public static $validationRules = [
         'uuid' => 'required|uuid',
         'server_id' => 'required|exists:servers,id',
-        'successful' => 'sometimes|boolean',
-        'locked' => 'sometimes|boolean',
+        'is_successful' => 'sometimes|boolean',
+        'is_locked' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',
         'file_name' => 'nullable|string',
         'size' => 'sometimes|numeric|min:0',

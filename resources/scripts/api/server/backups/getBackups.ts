@@ -8,8 +8,8 @@ interface QueryParams {
 
 export interface Backup {
     uuid: string
-    successful: boolean
-    locked: boolean
+    isSuccessful: boolean
+    isLocked: boolean
     name: string
     size: number
     completedAt?: Date
@@ -18,8 +18,8 @@ export interface Backup {
 
 export const rawDataToBackupObject = (data: FractalResponseData): Backup => ({
     uuid: data.uuid,
-    successful: data.successful,
-    locked: data.locked,
+    isSuccessful: data.is_successful,
+    isLocked: data.is_locked,
     name: data.name,
     size: data.size,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,

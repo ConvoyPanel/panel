@@ -69,6 +69,12 @@ const ServerRouter = () => {
           {server.status === 'installing' && (
             <ScreenBlock center icon={ArrowPathIcon} message='Your server is being reinstalled. This can take from 1-15 minutes.' title='Installing' />
           )}
+          {server.status === 'restoring_backup' && (
+            <ScreenBlock center icon={ArrowPathIcon} message='Your server is being restored from a backup. This can take from 1-15 minutes.' title='Restoring Backup' />
+          )}
+          {server.status === 'restoring_snapshot' && (
+            <ScreenBlock center icon={ArrowPathIcon} message='Your server is being restored from a snapshot. This can take from 1-15 minutes.' title='Restoring Snapshot' />
+          )}
           {server.status === null || server.status === undefined ? (
             <Routes>
               {routes.server.map((route) => (

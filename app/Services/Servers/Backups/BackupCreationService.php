@@ -54,7 +54,7 @@ class BackupCreationService
                 'uuid' => Uuid::uuid4()->toString(),
                 'server_id' => $server->id,
                 'name' => $name,
-                'locked' => $this->isLocked,
+                'is_locked' => $this->isLocked,
             ]);
 
             $upid = $this->proxmoxRepository->setServer($server)->backup($mode, $compressionType);

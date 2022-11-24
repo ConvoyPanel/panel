@@ -46,7 +46,7 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
             (data) =>
               ({
                 ...data,
-                items: data!.items.concat(backup),
+                items: [backup].concat(data!.items),
                 backupCount: data!.backupCount + 1,
               } as BackupResponse),
             false

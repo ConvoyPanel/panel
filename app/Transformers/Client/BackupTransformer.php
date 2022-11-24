@@ -34,8 +34,8 @@ class BackupTransformer extends TransformerAbstract
     {
         return [
             'uuid' => $backup->uuid,
-            'successful' => $backup->successful,
-            'locked' => $backup->locked,
+            'is_successful' => $backup->is_successful,
+            'is_locked' => $backup->is_locked,
             'name' => $backup->name,
             'size' => $backup->size,
             'completed_at' => $backup->completed_at,
