@@ -27,7 +27,7 @@ const BackupsContainer = () => {
       <CreateBackupButton swr={{ mutate }} />
       {!data ? (
         <Spinner />
-      ) : data.pagination.total === 0 ? (
+      ) : data.backupCount === 0 ? (
         <p className='text-sm text-center'>There are no backups</p>
       ) : (
         <Pagination data={data} onPageSelect={setPage}>
