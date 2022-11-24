@@ -31,6 +31,7 @@ class Server extends Model
         'node_id' => 'required|exists:nodes,id',
         'user_id' => 'required|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
+        'hostname' => 'required|string',
         'status' => 'nullable|string',
         'installing' => 'sometimes|boolean',
         'addresses' => 'sometimes|array',

@@ -2,19 +2,17 @@
 
 namespace Convoy\Transformers\Client;
 
-use Convoy\Data\Server\Eloquent\ServerEloquentData;
-use Convoy\Enums\Network\AddressType;
-use Convoy\Models\Server;
+use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use League\Fractal\TransformerAbstract;
 
-class ServerTransformer extends TransformerAbstract
+class ServerDetailTransformer extends TransformerAbstract
 {
     /**
      * A Fractal transformer.
      *
      * @return array
      */
-    public function transform(ServerEloquentData $server)
+    public function transform(ServerProxmoxData $server)
     {
         $data = $server->toArray();
 

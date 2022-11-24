@@ -67,19 +67,14 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    public function updateSpecifications(array $specs)
+    public function updateHardware(Server $server, int $cpu, int $memory)
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        $payload = [
+            'cores' => $cpu,
+            'memory' => $memory / 1048576
+        ];
 
-        $payload = [];
-        if (! empty(Arr::get($specs, 'cpu'))) {
-            $payload['cores'] = Arr::get($specs, 'cpu');
-        }
-        if (! empty(Arr::get($specs, 'memory'))) {
-            $payload['memory'] = floor(Arr::get($specs, 'memory') / 1048576);
-        }
-
-        return $this->repository->setServer($this->server)->update($payload);
+        return $this->repository->setServer($server)->update($payload);
     }
 
     public function formatDisk(array $rawDisk): array

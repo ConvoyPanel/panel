@@ -15,6 +15,7 @@ Route::group([
     ],
 ], function () {
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('api:client:servers.show');
+    Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
     Route::get('/status', [Client\Servers\ServerController::class, 'getStatus']);
     Route::post('/status', [Client\Servers\ServerController::class, 'sendPowerCommand']);
@@ -29,6 +30,6 @@ Route::group([
     });
 
     Route::group(['prefix' => '/settings'], function () {
-
+        Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
     });
 });

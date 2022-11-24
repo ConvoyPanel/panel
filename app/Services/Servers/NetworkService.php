@@ -56,7 +56,7 @@ class NetworkService extends ProxmoxService
     {
         $details = $this->detailService->getByProxmox($server);
 
-        return $details->config->mac_address;
+        return $details->limits->mac_address ?? $details->config->mac_address;
     }
 
     public function syncSettings(Server $server)

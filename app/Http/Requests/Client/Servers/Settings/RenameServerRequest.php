@@ -1,10 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Backups;
+namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Models\Server;
+use Convoy\Rules\Network\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RollbackBackupRequest extends FormRequest
+class RenameServerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +26,8 @@ class RollbackBackupRequest extends FormRequest
     public function rules()
     {
         return [
-            'archive' => 'string|required',
+            'name' => Server::getRules()['name'],
+            'hostname' => [...Server::getRules()['hostname'], ...[new Hostname]],
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
+use Convoy\Data\Server\Eloquent\ServerAddressesData;
 use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Enums\Server\Cloudinit\BiosType;
@@ -58,9 +60,9 @@ class CloudinitService extends ProxmoxService
      * @param  array  $params
      * @return mixed
      */
-    public function changeHostname(string $hostname)
+    public function changeHostname(Server $server, string $hostname)
     {
-        return $this->repository->setServer($this->server)->update(['searchdomain' => $hostname]);
+        return $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
     /**
@@ -118,34 +120,24 @@ class CloudinitService extends ProxmoxService
      *
      * @throws ProxmoxConnectionException
      */
-    public function updateIpConfig(string|array $config)
+    public function updateIpConfig(Server $server, CloudinitAddressConfigData $addresses)
     {
-        $this->repository->setServer($this->server);
+        $payload = [];
 
-        if (gettype($config) === 'string') {
-            return $this->repository->update([
-                'ipconfig0' => $config,
-            ]);
+        if ($addresses?->ipv4) {
+            $ipv4 = $addresses->ipv4;
+            $payload[] = "ip={$ipv4->address}/{$ipv4->cidr}";
+            $payload[] = 'gw=' . $ipv4->gateway;
         }
 
-        if (gettype($config) === 'array') {
-            $payload = [];
-
-            if (isset($config['ipv4'])) {
-                $ipv4 = $config['ipv4'];
-                $payload[] = "ip={$ipv4['address']}/{$ipv4['cidr']}";
-                $payload[] = 'gw='.$ipv4['gateway'];
-            }
-
-            if (isset($config['ipv6'])) {
-                $ipv6 = $config['ipv6'];
-                $payload[] = "ip6={$ipv6['address']}/{$ipv6['cidr']}";
-                $payload[] = 'gw6='.$ipv6['gateway'];
-            }
-
-            return $this->repository->update([
-                'ipconfig0' => Arr::join($payload, ','),
-            ]);
+        if ($addresses?->ipv6) {
+            $ipv6 = $addresses->ipv6;
+            $payload[] = "ip6={$ipv6->address}/{$ipv6->cidr}";
+            $payload[] = 'gw6=' . $ipv6->gateway;
         }
+
+        return $this->repository->setServer($server)->update([
+            'ipconfig0' => Arr::join($payload, ','),
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
+use Convoy\Enums\Server\Power;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
@@ -10,23 +11,12 @@ use Webmozart\Assert\Assert;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {
-    public $actions = [
-        'reboot',
-        'reset',
-        'resume',
-        'shutdown',
-        'start',
-        'stop',
-        'suspend',
-    ];
-
-    public function send(string $action)
+    public function send(Power $action)
     {
         Assert::isInstanceOf($this->server, Server::class);
-        Assert::inArray($action, $this->actions, 'Invalid action');
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $action), [
+            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $action->value), [
                 'json' => [
                     ...($action !== 'suspend' ? ['timeout' => 30] : ['skiplock' => 0])
                 ],

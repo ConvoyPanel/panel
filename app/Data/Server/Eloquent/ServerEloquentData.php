@@ -11,6 +11,7 @@ class ServerEloquentData extends Data
         public string $uuid_short,
         public string $uuid,
         public int $node_id,
+        public string $hostname,
         public string $name,
         public ?string $description,
         public ?string $status,

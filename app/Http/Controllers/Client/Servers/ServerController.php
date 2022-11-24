@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Enums\Server\Power;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use Convoy\Models\Server;
@@ -9,6 +10,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\VncService;
+use Convoy\Transformers\Client\ServerDetailTransformer;
 use Convoy\Transformers\Client\ServerStatusTransformer;
 use Convoy\Transformers\Client\ServerTerminalTransformer;
 use Convoy\Transformers\Client\ServerTransformer;
@@ -24,6 +26,11 @@ class ServerController extends ApplicationApiController
         return fractal($this->detailService->getByEloquent($server), new ServerTransformer)->respond();
     }
 
+    public function details(Server $server)
+    {
+        return fractal($this->detailService->getByProxmox($server), new ServerDetailTransformer)->respond();
+    }
+
     public function getStatus(Server $server)
     {
         return fractal()->item($this->serverRepository->setServer($server)->getStatus(), new ServerStatusTransformer)->respond();
@@ -33,20 +40,7 @@ class ServerController extends ApplicationApiController
     {
         $this->powerRepository->setServer($server);
 
-        switch ($request->state) {
-            case 'start':
-                $this->powerRepository->send('start');
-                break;
-            case 'restart':
-                $this->powerRepository->send('reboot');
-                break;
-            case 'kill':
-                $this->powerRepository->send('stop');
-                break;
-            case 'shutdown':
-                $this->powerRepository->send('shutdown');
-                break;
-        }
+        $this->powerRepository->send(Power::from($request->state));
 
         return $this->returnNoContent();
     }
