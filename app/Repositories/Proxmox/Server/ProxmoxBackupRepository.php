@@ -55,7 +55,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
                     'storage' => $this->node->backup_storage,
                     'mode' => $mode,
                     'remove' => 0,
-                    'compress' => $compressionType,
+                    'compress' => $compressionType === 'none' ? 0 : $compressionType,
                 ],
             ]);
         } catch (GuzzleException $e) {
