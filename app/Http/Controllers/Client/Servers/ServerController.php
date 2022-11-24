@@ -40,7 +40,20 @@ class ServerController extends ApplicationApiController
     {
         $this->powerRepository->setServer($server);
 
-        $this->powerRepository->send(Power::from($request->state));
+        switch ($request->state) {
+            case 'start':
+                $this->powerRepository->send(Power::START);
+                break;
+            case 'restart':
+                $this->powerRepository->send(Power::RESTART);
+                break;
+            case 'kill':
+                $this->powerRepository->send(Power::KILL);
+                break;
+            case 'shutdown':
+                $this->powerRepository->send(Power::SHUTDOWN);
+                break;
+        }
 
         return $this->returnNoContent();
     }
