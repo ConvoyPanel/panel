@@ -12,6 +12,7 @@ use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Convoy\Services\Servers\ServerDetailService;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class BackupService
 {
-    public function __construct(private ConnectionInterface $connection, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
+    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
     {
     }
 
