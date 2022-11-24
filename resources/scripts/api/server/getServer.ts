@@ -14,6 +14,7 @@ export interface Server {
   id: string
   internalId: number
   uuid: string
+  hostname: string
   name: string
   description?: string
   status: EloquentStatus
@@ -50,6 +51,7 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
   id: data.id,
   internalId: data.internal_id,
   uuid: data.uuid,
+  hostname: data.hostname,
   name: data.name,
   status: data.status,
   node_id: data.node_id,

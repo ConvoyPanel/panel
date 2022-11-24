@@ -31,14 +31,14 @@ const ServerCard = ({ server }: Props) => {
         </Avatar>
         <div>
           <div className='flex items-center space-x-3'>
-            <p className='font-medium text-foreground'>{server.name}</p>{' '}
+            <p className='font-medium text-foreground text-ellipsis overflow-hidden whitespace-nowrap'>{server.name}</p>{' '}
             {server.status === 'suspended' && (
               <Badge color='orange' radius='sm'>
                 Suspended
               </Badge>
             )}
           </div>
-          {/* <p className='text-sm description'>A lovely server</p> */}
+          <p className='text-sm description text-ellipsis overflow-hidden whitespace-nowrap'>{server.hostname}</p>
         </div>
       </div>
 
