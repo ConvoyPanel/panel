@@ -10,8 +10,7 @@ use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use Convoy\Services\Servers\Backups\BackupCreationService;
-use Convoy\Services\Servers\Backups\BackupDeletionService;
+use Convoy\Services\Servers\Backups\BackupService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\BackupTransformer;
 use Illuminate\Database\ConnectionInterface;
@@ -22,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private BackupCreationService $creationService, private BackupDeletionService $deletionService, private BackupRepository $backupRepository, private ProxmoxBackupRepository $proxmoxRepository)
+    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private BackupService $backupService, private BackupRepository $backupRepository, private ProxmoxBackupRepository $proxmoxRepository)
     {
     }
 
@@ -42,44 +41,22 @@ class BackupController extends ApplicationApiController
 
     public function store(Server $server, StoreBackupRequest $request)
     {
-        $backup = $this->creationService
-            ->setIsLocked($request->input('locked', false))
-            ->handle($server, $request->name, $request->mode, $request->compression_type);
+        $backup = $this->backupService
+            ->create($server, $request->name, $request->mode, $request->compression_type, $request->input('locked', false));
 
         return fractal($backup, new BackupTransformer)->respond();
     }
 
     public function restore(Server $server, Backup $backup)
     {
-        if (!is_null($server->status)) {
-            throw new BadRequestHttpException('This server is not currently in a state that allows for a backup to be restored.');
-        }
-
-        $details = $this->detailService->getByProxmox($server);
-        if ($details->state !== 'stopped') {
-            throw new BadRequestHttpException('The server needs to be stopped before a backup can be restored.');
-        }
-
-        if (!$backup->successful && is_null($backup->completed_at)) {
-            throw new BadRequestHttpException('This backup cannot be restored at this time: not completed or failed.');
-        }
-
-        $this->connection->transaction(function () use ($server, $backup) {
-            $server->update([
-                'status' => Status::RESTORING_BACKUP->value,
-            ]);
-
-            $upid = $this->proxmoxRepository->setServer($server)->restore($backup);
-
-            MonitorBackupRestorationJob::dispatch($server->id, $upid);
-        });
+        $this->backupService->restore($server, $backup);
 
         return $this->returnNoContent();
     }
 
     public function destroy(Server $server, Backup $backup)
     {
-        $this->deletionService->handle($backup);
+        $this->backupService->delete($backup);
 
         return $this->returnNoContent();
     }
