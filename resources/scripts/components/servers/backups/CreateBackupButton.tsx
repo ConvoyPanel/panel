@@ -140,13 +140,13 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
       </Modal>
       <div className='flex justify-end items-center space-x-3 mb-3'>
       <Tooltip
-      label={`You have made ${backupCount} backups. You are currently at ${backupCount} of ${backupLimit || 'unlimited'} backups.`}
+      label={`You have made ${backupCount} backups. You are currently at ${backupCount} of ${backupLimit !== undefined ? backupLimit : 'unlimited'} backups.`}
       position="bottom"
       withArrow
     >
-        <Badge color={theme === 'dark' ? 'gray' : 'dark'} variant='outline'>{backupCount || 0}/{backupLimit || 'unlimited'}</Badge>
+        <Badge color={theme === 'dark' ? 'gray' : 'dark'} variant='outline'>{backupCount || 0}/{backupLimit !== undefined ? backupLimit : 'unlimited'}</Badge>
         </Tooltip>
-        <Button disabled={backupCount !== undefined ? backupLimit ? backupCount >= backupLimit : false : true} onClick={() => setOpen(true)} variant='filled'>
+        <Button disabled={backupCount !== undefined ? backupLimit !== undefined ? backupCount >= backupLimit : false : true} onClick={() => setOpen(true)} variant='filled'>
           New Backup
         </Button>
       </div>

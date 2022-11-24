@@ -2,10 +2,8 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
-use Convoy\Jobs\Server\MonitorBackupRestorationJob;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
@@ -14,10 +12,8 @@ use Convoy\Services\Servers\Backups\BackupService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\BackupTransformer;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BackupController extends ApplicationApiController
 {
