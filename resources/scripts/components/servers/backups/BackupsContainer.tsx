@@ -8,11 +8,9 @@ import Pagination from '@/components/elements/Pagination'
 import usePagination from '@/util/usePagination'
 import BackupRow from '@/components/servers/backups/BackupRow'
 import CreateBackupButton from '@/components/servers/backups/CreateBackupButton'
-import Menu from '@/components/elements/Menu'
 
 const BackupsContainer = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid)
-  const backupLimit = ServerContext.useStoreState((state) => state.server.data!.limits.backups)
 
   const [page, setPage] = usePagination()
 
@@ -24,7 +22,7 @@ const BackupsContainer = () => {
 
   return (
     <ServerContentBlock showFlashKey='backups' title='Backups'>
-      <CreateBackupButton swr={{ mutate }} />
+      <CreateBackupButton backupCount={data?.backupCount} swr={{ mutate }} />
       {!data ? (
         <Spinner />
       ) : data.backupCount === 0 ? (

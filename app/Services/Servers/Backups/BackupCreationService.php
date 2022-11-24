@@ -43,7 +43,7 @@ class BackupCreationService
 
         $successful = $this->eloquentRepository->getNonFailedBackups($server);
         if (! $server->backup_limit || $successful->count() >= $server->backup_limit) {
-            if ((int) $server->backup_limit <= 0 && isset($server->backup_limit)) {
+            if (isset($server->backup_limit)) {
                 throw new TooManyBackupsException((int) $server->backup_limit);
             }
         }

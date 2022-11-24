@@ -48,7 +48,7 @@ const Pagination = <T,>({ data: { items, pagination }, onPageSelect, children }:
         <>
             {children({ items, isFirstPage, isLastPage })}
             {pages.length > 1 && (
-                <div className='flex justify-end mt-6'>
+                <div className='flex justify-end mt-3'>
                     <MantinePagination onChange={onPageSelect} page={pagination.currentPage} total={pagination.totalPages}/>
                 </div>
             )}

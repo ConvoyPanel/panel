@@ -11,17 +11,22 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
 import ListBox from '@/components/elements/ListBox'
+import { Badge, RingProgress, Tooltip } from '@mantine/core'
+import { useStoreState } from '@/state'
 
 interface Props {
   swr: {
     mutate: KeyedMutator<BackupResponse>
   }
+  backupCount?: number
 }
 
-const CreateBackupButton = ({ swr: { mutate } }: Props) => {
+const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid)
   const [open, setOpen] = useState(false)
   const { clearFlashes, clearAndAddHttpError } = useFlash()
+  const backupLimit = ServerContext.useStoreState((state) => state.server.data!.limits.backups)
+  const theme = useStoreState((state) => state.settings.data?.theme)
 
   const form = useFormik({
     initialValues: {
@@ -133,8 +138,15 @@ const CreateBackupButton = ({ swr: { mutate } }: Props) => {
           </Modal.Actions>
         </form>
       </Modal>
-      <div className='flex justify-end mb-3'>
-        <Button onClick={() => setOpen(true)} variant='filled'>
+      <div className='flex justify-end items-center space-x-3 mb-3'>
+      <Tooltip
+      label={`You have made ${backupCount} backups. You are currently at ${backupCount} of ${backupLimit || 'unlimited'} backups.`}
+      position="bottom"
+      withArrow
+    >
+        <Badge color={theme === 'dark' ? 'gray' : 'dark'} variant='outline'>{backupCount || 0}/{backupLimit || 'unlimited'}</Badge>
+        </Tooltip>
+        <Button disabled={backupCount !== undefined ? backupLimit ? backupCount >= backupLimit : false : true} onClick={() => setOpen(true)} variant='filled'>
           New Backup
         </Button>
       </div>
