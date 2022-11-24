@@ -55,7 +55,7 @@ Menu.Item = ({ children, color, ...props }) => {
   return (
     <HMenu.Item
       as='button'
-      className={`w-full text-left px-2 h-12 sm:h-9 ${
+      className={`w-full text-left px-2 h-12 sm:h-9 disabled:!text-accent-300 disabled:!bg-transparent ${
         color === 'danger'
           ? 'text-error sm:hover:bg-error-lighter active:bg-error-lighter sm:active:bg-error-lighter'
           : 'text-accent-500 sm:hover:bg-accent-200 sm:active:bg-accent-200 active:bg-accent-200'
