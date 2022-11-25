@@ -10,12 +10,12 @@ interface Props {
   server: Server
 }
 
-const Dt = styled.dt`
-${tw`dark:text-stone-400 text-stone-500 text-xs`}
+export const Dt = styled.dt`
+${tw`text-accent-500 font-medium text-xs`}
 `
 
-const Dd = styled.dt`
-${tw`text-sm font-medium`}
+export const Dd = styled.dt`
+${tw`text-sm text-foreground font-medium`}
 `
 
 const ServerCard = ({ server }: Props) => {
@@ -44,16 +44,16 @@ const ServerCard = ({ server }: Props) => {
 
       <div className='grid grid-cols-3 gap-3 mt-3'>
         <dl>
-          <Dt className='dt-small'>CPU</Dt>
-          <Dd className='dd-small'>{ server.limits.cpu }</Dd>
+          <Dt>CPU</Dt>
+          <Dd>{ server.limits.cpu }</Dd>
         </dl>
         <dl>
-          <Dt className='dt-small'>Memory</Dt>
-          <Dd className='dd-small'>{memory.size} {memory.unit}</Dd>
+          <Dt>Memory</Dt>
+          <Dd>{memory.size} {memory.unit}</Dd>
         </dl>
         <dl>
-          <Dt className='dt-small'>Disk</Dt>
-          <Dd className='dd-small'>{disk.size} {disk.unit}</Dd>
+          <Dt>Disk</Dt>
+          <Dd>{disk.size} {disk.unit}</Dd>
         </dl>
       </div>
     </Link>

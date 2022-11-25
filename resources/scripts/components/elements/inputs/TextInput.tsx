@@ -11,6 +11,7 @@ interface Props {
     error?: string
     label?: string
     size?: Size
+    wrapperClassNames?: string
 }
 
 const StyledTextInput = styled.input<{
@@ -24,10 +25,10 @@ const StyledTextInput = styled.input<{
     ${({ size }) => size === 'lg' ? tw`h-12`: tw`h-9 text-sm`})}
 `
 
-const TextInput = ({label, className, prefix, suffix, error, ...props}: Omit<ComponentProps<'input'>, 'size' | 'ref' | 'prefix' | 'onFocus' | 'onBlur'> & Props) => {
+const TextInput = ({label, className, prefix, suffix, wrapperClassNames, error, ...props}: Omit<ComponentProps<'input'>, 'size' | 'ref' | 'prefix' | 'onFocus' | 'onBlur'> & Props) => {
     const [focused, setFocused] = useState(false)
 
-    return <div>
+    return <div className={wrapperClassNames}>
         { label && <label className='text-xs font-medium text-accents-500'>{label}</label>}
         <div className={`flex border ${error ? 'border-error' : focused ? 'border-accent-500' : 'border-accent-200'} bg-background transition-colors rounded ${label && 'mt-1'} ${props.disabled && 'bg-accent-100 cursor-not-allowed'} ${className}`}>
             { prefix && <div className='grid place-items-center px-3 -mr-3'>{ prefix }</div>}

@@ -10,6 +10,7 @@ use Convoy\Enums\Server\Cloudinit\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
 use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
@@ -19,7 +20,7 @@ use Illuminate\Support\Arr;
  */
 class CloudinitService extends ProxmoxService
 {
-    public function __construct(protected ProxmoxCloudinitRepository $repository)
+    public function __construct(private ProxmoxCloudinitRepository $repository, private ProxmoxAllocationRepository $allocationRepository)
     {
     }
 
@@ -60,8 +61,12 @@ class CloudinitService extends ProxmoxService
      * @param  array  $params
      * @return mixed
      */
-    public function changeHostname(Server $server, string $hostname)
+    public function updateHostname(Server $server, string $hostname)
     {
+        $this->allocationRepository->setServer($server)->update([
+            'name' => $hostname,
+        ]);
+
         return $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 

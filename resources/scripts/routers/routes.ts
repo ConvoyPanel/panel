@@ -1,6 +1,4 @@
-import BackupsContainer from '@/components/servers/backups/BackupsContainer'
-import ServerOverviewContainer from '@/components/servers/overview/ServerOverviewContainer'
-import ServerTerminalContainer from '@/components/servers/terminal/ServerTerminalContainer'
+import { lazy } from 'react'
 
 interface RouteDefinition {
   path: string
@@ -13,22 +11,36 @@ interface Routes {
   server: RouteDefinition[]
 }
 
+/*
+|--------------------------------------------------------------------------
+| Server Routes
+|--------------------------------------------------------------------------
+|
+| Route: /servers/<id>
+|
+*/
+
 export default {
   server: [
     {
       path: '/',
       name: 'Overview',
-      component: ServerOverviewContainer,
+      component: lazy(() => import('@/components/servers/overview/ServerOverviewContainer')),
     },
     {
       path: '/backups',
       name: 'Backups',
-      component: BackupsContainer,
+      component: lazy(() => import('@/components/servers/backups/BackupsContainer')),
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: lazy(() => import('@/components/servers/settings/ServerSettingsContainer')),
     },
     {
       path: '/terminal',
       name: 'Terminal',
-      component: ServerTerminalContainer
+      component: lazy(() => import('@/components/servers/terminal/ServerTerminalContainer')),
     },
   ],
 } as Routes

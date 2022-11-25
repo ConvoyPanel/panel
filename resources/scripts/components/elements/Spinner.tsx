@@ -9,6 +9,7 @@ interface Props {
 interface Spinner extends React.FC<Props> {
   Suspense: React.FC<{
     children: ReactNode
+    screen?: boolean
   }>
 }
 
@@ -20,8 +21,8 @@ const Spinner: Spinner = ({ screen, flat }: Props) => {
   )
 }
 
-Spinner.Suspense = ({ children }) => {
-  return <Suspense fallback={<Spinner screen />}>{children}</Suspense>
+Spinner.Suspense = ({ children, screen }) => {
+  return <Suspense fallback={<Spinner screen={ screen } />}>{children}</Suspense>
 }
 
 export default Spinner

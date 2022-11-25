@@ -31,10 +31,7 @@ class BuildModificationService
         $this->allocationService->updateHardware($server, $deployment->limits->cpu, $deployment->limits->memory);
 
         /* Sync metadata */
-        $this->cloudinitService->changeHostname($server, $deployment->hostname);
-        $this->allocationRepository->setServer($server)->update([
-            'name' => $deployment->hostname,
-        ]);
+        $this->cloudinitService->updateHostname($server, $deployment->hostname);
 
         /* Sync network configuration */
         $this->networkService->clearIpsets();

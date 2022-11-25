@@ -37,6 +37,10 @@ const ServerRouter = () => {
       name: 'Backups',
       path: `/servers/${id}/backups`,
     },
+    {
+      name: 'Settings',
+      path: `/servers/${id}/settings`,
+    },
   ], [match?.params.id])
 
   useEffect(() => {
@@ -81,7 +85,8 @@ const ServerRouter = () => {
                 <Route
                   key={route.path}
                   path={route.path}
-                  element={<route.component />}
+                  element={
+                    <Spinner.Suspense screen={false}><route.component /></Spinner.Suspense>}
                 />
               ))}
 
