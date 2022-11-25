@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { ExclaimationCircleIcon } from '@heroicons/react/24/outline';
-import { ComponentProps, ReactNode, useState } from 'react';
+import { ComponentProps, ReactNode, useEffect, useState } from 'react';
 import tw from 'twin.macro';
 
 export type Size = 'md' | 'lg'
@@ -27,6 +27,12 @@ const StyledTextInput = styled.input<{
 
 const TextInput = ({label, className, prefix, suffix, wrapperClassName, error, ...props}: Omit<ComponentProps<'input'>, 'size' | 'ref' | 'prefix' | 'onFocus' | 'onBlur'> & Props) => {
     const [focused, setFocused] = useState(false)
+
+    useEffect(() => {
+        if (props.disabled) {
+            setFocused(false)
+        }
+    }, [props.disabled])
 
     return <div className={wrapperClassName}>
         { label && <label className='text-xs font-medium text-accents-500'>{label}</label>}

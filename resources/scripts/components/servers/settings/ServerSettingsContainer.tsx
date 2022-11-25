@@ -18,7 +18,7 @@ const ServerSettingsContainer = () => {
               <FormCard.Title>gaming</FormCard.Title>
               <p>gaming</p>
             </FormCard.Body>
-            <FormCard.Footer className='flex justify-end'>
+            <FormCard.Footer>
               <Button variant='filled' color='success' size='sm'>
                 Save
               </Button>
@@ -32,7 +32,7 @@ const ServerSettingsContainer = () => {
               <FormCard.Title>gaming</FormCard.Title>
               <p>gaming</p>
             </FormCard.Body>
-            <FormCard.Footer className='flex justify-end'>
+            <FormCard.Footer>
               <Button variant='filled' color='success' size='sm'>
                 Save
               </Button>

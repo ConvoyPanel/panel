@@ -25,7 +25,7 @@ FormCard.Body = styled.div`
   ${tw`p-6 rounded-t bg-background`}
 `
 FormCard.Footer = styled.div`
-  ${tw`px-6 py-3 rounded-b border-t border-accent-200 bg-accent-100`}
+  ${tw`px-6 py-3 rounded-b border-t border-accent-200 bg-accent-100 flex justify-center md:justify-end`}
 `
 
 export default FormCard
