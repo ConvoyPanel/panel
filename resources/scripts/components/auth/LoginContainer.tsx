@@ -1,11 +1,11 @@
 import login from '@/api/auth/login'
 import LoginFormContainer from '@/components/auth/LoginFormContainer'
-import { Button } from '@mantine/core'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import useFlash from '@/util/useFlash'
 import { useEffect } from 'react'
 import TextInput from '@/components/elements/inputs/TextInput'
+import Button from '@/components/elements/Button'
 
 const LoginContainer = () => {
   const { clearFlashes, clearAndAddHttpError } = useFlash()
@@ -73,7 +73,7 @@ const LoginContainer = () => {
           required
         />
         <div className='flex items-center justify-end mt-6'>
-          <Button type='submit'>Sign in</Button>
+          <Button variant='filled' color='success' type='submit'>Sign in</Button>
         </div>
       </LoginFormContainer>
     </form>
