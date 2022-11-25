@@ -28,7 +28,7 @@ const DottedButton = forwardRef<
   Omit<ComponentProps<'button'>, 'children'>
 >(({ className, ...props }, ref) => {
   return (
-    <button ref={ref} className={`px-2 ${className}`} {...props}>
+    <button ref={ref} className={`px-2 bg-transparent ${className}`} {...props}>
       <img
         src={Dots}
         className='w-4 h-4 dark:invert'

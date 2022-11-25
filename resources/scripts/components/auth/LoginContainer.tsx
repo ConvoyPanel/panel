@@ -73,7 +73,7 @@ const LoginContainer = () => {
           required
         />
         <div className='flex items-center justify-end mt-6'>
-          <Button variant='filled' color='success' type='submit'>Sign in</Button>
+          <Button type='submit' variant='filled' color='success' >Sign in</Button>
         </div>
       </LoginFormContainer>
     </form>
