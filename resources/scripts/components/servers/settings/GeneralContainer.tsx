@@ -82,7 +82,7 @@ const GeneralContainer = () => {
                 error={form.touched.hostname ? form.errors.hostname : undefined}
                 disabled={form.isSubmitting}
                 name='hostname'
-                wrapperClassNames='mt-3'
+                wrapperClassName='mt-3'
                 label='Hostname'
               />
             </div>

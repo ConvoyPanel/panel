@@ -1,10 +1,11 @@
 import login from '@/api/auth/login'
 import LoginFormContainer from '@/components/auth/LoginFormContainer'
-import { Button, TextInput } from '@mantine/core'
+import { Button } from '@mantine/core'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import useFlash from '@/util/useFlash'
 import { useEffect } from 'react'
+import TextInput from '@/components/elements/inputs/TextInput'
 
 const LoginContainer = () => {
   const { clearFlashes, clearAndAddHttpError } = useFlash()
@@ -54,10 +55,7 @@ const LoginContainer = () => {
         <TextInput
           label='Email'
           name='email'
-          styles={{
-            required: { display: 'none' },
-          }}
-          className='mt-1 block w-full'
+          wrapperClassName='mt-1 block w-full'
           value={form.values.email}
           onChange={form.handleChange}
           error={form.touched.email ? form.errors.email : undefined}
@@ -67,14 +65,11 @@ const LoginContainer = () => {
         <TextInput
           label='Password'
           name='password'
-          styles={{
-            required: { display: 'none' },
-          }}
           value={form.values.password}
           onChange={form.handleChange}
           error={form.touched.password ? form.errors.password : undefined}
           type='password'
-          className='mt-1 block w-full'
+          wrapperClassName='mt-1 block w-full'
           required
         />
         <div className='flex items-center justify-end mt-6'>
