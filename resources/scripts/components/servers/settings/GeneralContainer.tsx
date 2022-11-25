@@ -88,7 +88,7 @@ const GeneralContainer = () => {
             </div>
           </FormCard.Body>
           <FormCard.Footer className='flex justify-center md:justify-end'>
-            <Button type='submit' variant='filled' color='success' size='sm'>
+            <Button loading={form.isSubmitting} type='submit' variant='filled' color='success' size='sm'>
               Save
             </Button>
           </FormCard.Footer>

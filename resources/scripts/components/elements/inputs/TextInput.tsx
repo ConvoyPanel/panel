@@ -30,7 +30,7 @@ const TextInput = ({label, className, prefix, suffix, wrapperClassName, error, .
 
     return <div className={wrapperClassName}>
         { label && <label className='text-xs font-medium text-accents-500'>{label}</label>}
-        <div className={`flex border ${error ? 'border-error' : focused ? 'border-accent-500' : 'border-accent-200'} bg-background transition-colors rounded ${label && 'mt-1'} ${props.disabled && 'bg-accent-100 cursor-not-allowed'} ${className}`}>
+        <div className={`flex border ${error ? 'border-error' : focused ? 'border-accent-500' : 'border-accent-200'} transition-colors rounded ${label && 'mt-1'} ${props.disabled ? 'bg-accent-100 cursor-not-allowed' : 'bg-background'} ${className}`}>
             { prefix && <div className='grid place-items-center px-3 -mr-3'>{ prefix }</div>}
             <StyledTextInput onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} error={error} {...props} />
             { suffix && <div className='grid place-items-center px-3 -ml-3'>{ suffix }</div>}
