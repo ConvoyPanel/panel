@@ -13,23 +13,25 @@ import * as yup from 'yup'
 import Textarea from '@/components/elements/inputs/Textarea'
 import { SegmentedControl } from '@mantine/core'
 import updateSecurity from '@/api/server/settings/updateSecurity'
+import { useState } from 'react'
+
+type AuthType = 'cipassword' | 'sshkeys'
 
 const SecurityContainer = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const notify = useNotify()
+    const [type, setType] = useState<AuthType>('cipassword')
 
     const { data, mutate } = useSWR(['server:settings:security', uuid], () => getSecurity(uuid))
 
     const form = useFormik({
         enableReinitialize: true,
         initialValues: {
-            type: 'cipassword',
             sshKeys: data?.sshKeys ?? '',
             password: '',
         },
         validationSchema: yup.object({
-            type: yup.string().required(),
             password: yup
                 .string()
                 .when('type', {
@@ -42,11 +44,10 @@ const SecurityContainer = () => {
                 ),
                 sshKeys: yup.string(),
         }),
-        onSubmit: ({ type, password, sshKeys }, { setSubmitting }) => {
+        onSubmit: ({ password, sshKeys }, { setSubmitting }) => {
             clearFlashes('server:settings:auth')
 
             updateSecurity(uuid, {
-                // @ts-expect-error
                 type,
                 password: type === 'cipassword' ? password : undefined,
                 sshKeys: type === 'sshkeys' ? sshKeys : undefined,
@@ -79,14 +80,14 @@ const SecurityContainer = () => {
                             <SegmentedControl
                                 className='!w-full md:!w-auto'
                                 disabled={form.isSubmitting}
-                                value={form.values.type}
-                                onChange={val => form.setFieldValue('type', val)}
+                                value={type}
+                                onChange={val => setType(val as AuthType)}
                                 data={[
                                     { value: 'cipassword', label: 'Password' },
-                                    { value: 'sshkeys', label: 'SSH Key' },
+                                    { value: 'sshkeys', label: 'SSH Keys' },
                                 ]}
                             />
-                            {form.values.type === 'cipassword' && (
+                            {type === 'cipassword' && (
                                 <TextInput
                                     value={form.values.password}
                                     onChange={form.handleChange}
@@ -96,7 +97,7 @@ const SecurityContainer = () => {
                                     label='Password'
                                 />
                             )}
-                            {form.values.type === 'sshkeys' && (
+                            {type === 'sshkeys' && (
                                 <Textarea
                                     value={form.values.sshKeys}
                                     onChange={form.handleChange}
