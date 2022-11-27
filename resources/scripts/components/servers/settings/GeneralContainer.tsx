@@ -36,7 +36,7 @@ const GeneralContainer = () => {
         ),
     }),
     onSubmit: ({ name, hostname }, { setSubmitting }) => {
-      clearFlashes('servers:settings:general')
+      clearFlashes('server:settings:general')
 
       renameServer(server.uuid, { name, hostname })
         .then(() => {
@@ -49,13 +49,8 @@ const GeneralContainer = () => {
           setSubmitting(false)
         })
         .catch((error) => {
-          clearAndAddHttpError({ key: 'servers:settings:general', error })
+          clearAndAddHttpError({ key: 'server:settings:general', error })
           setSubmitting(false)
-          notify({
-            title: 'Error',
-            message: 'Failed to update general settings',
-            color: 'red',
-          })
         })
     },
   })
@@ -67,7 +62,7 @@ const GeneralContainer = () => {
           <FormCard.Body>
             <FormCard.Title>Server Name</FormCard.Title>
             <div className='mt-3'>
-              <FlashMessageRender byKey='servers:settings:general' />
+              <FlashMessageRender byKey='server:settings:general' />
               <TextInput
                 value={form.values.name}
                 onChange={form.handleChange}

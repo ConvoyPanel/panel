@@ -3,10 +3,9 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Rules\Network\Domain;
-use Convoy\Rules\Network\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateNetworkConfigRequest extends FormRequest
+class UpdateNetworkRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +25,7 @@ class UpdateNetworkConfigRequest extends FormRequest
     public function rules()
     {
         return [
-            'hostname' => [new Hostname, 'nullable'],
-            'nameservers' => ['array', 'nullable'],
+            'nameservers' => ['array', 'required'],
             'nameservers.*' => ['string', new Domain, 'nullable'],
         ];
     }

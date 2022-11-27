@@ -36,7 +36,7 @@ const HardwareContainer = () => {
         ),
     }),
     onSubmit: ({ name, hostname }, { setSubmitting }) => {
-      clearFlashes('servers:settings:hardware')
+      clearFlashes('server:settings:hardware')
     },
   })
 

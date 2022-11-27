@@ -4,6 +4,7 @@ import FormSection from '@/components/elements/FormSection'
 import ServerContentBlock from '@/components/servers/ServerContentBlock'
 import GeneralContainer from '@/components/servers/settings/GeneralContainer'
 import HardwareContainer from '@/components/servers/settings/HardwareContainer'
+import NetworkingContainer from '@/components/servers/settings/NetworkingContainer'
 
 const ServerSettingsContainer = () => {
   return (
@@ -26,19 +27,7 @@ const ServerSettingsContainer = () => {
           </FormCard>
         </FormSection>
         <FormSection.Divider />
-        <FormSection title='Networking'>
-          <FormCard className='w-full'>
-            <FormCard.Body>
-              <FormCard.Title>gaming</FormCard.Title>
-              <p>gaming</p>
-            </FormCard.Body>
-            <FormCard.Footer>
-              <Button variant='filled' color='success' size='sm'>
-                Save
-              </Button>
-            </FormCard.Footer>
-          </FormCard>
-        </FormSection>
+        <NetworkingContainer />
     </ServerContentBlock>
   )
 }

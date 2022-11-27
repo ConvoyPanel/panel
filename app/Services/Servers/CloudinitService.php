@@ -44,18 +44,6 @@ class CloudinitService extends ProxmoxService
         }
     }
 
-    // Generally needed for Windows VM's with over 2TB disk, still WIP since I still need to add EFI disk
-    /**
-     * @param  BiosType  $type
-     * @return mixed
-     *
-     * @throws ProxmoxConnectionException
-     */
-    public function changeBIOS(BiosType $type)
-    {
-        return $this->repository->setServer($this->server)->update(['bios' => $type->value]);
-    }
-
     /**
      * @param  string  $hostname
      * @param  array  $params
@@ -70,14 +58,16 @@ class CloudinitService extends ProxmoxService
         return $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
-    /**
-     * @param  string  $dns
-     * @param  array  $params
-     * @return mixed
-     */
-    public function changeNameserver(string $nameserver)
+    public function getNameservers(Server $server)
     {
-        return $this->repository->setServer($this->server)->update(['nameserver' => $nameserver]);
+        $nameservers = Arr::get($this->repository->setServer($server)->getConfig(), 'nameserver');
+
+        return $nameservers ? explode(' ', $nameservers) : [];
+    }
+
+    public function updateNameservers(Server $server, array $nameservers)
+    {
+        return $this->repository->setServer($server)->update(['nameserver' => implode(' ', $nameservers)]);
     }
 
     public function getIpConfig(Server $server): AddressConfigData
