@@ -67,7 +67,12 @@ class CloudinitService extends ProxmoxService
 
     public function updateNameservers(Server $server, array $nameservers)
     {
-        return $this->repository->setServer($server)->update(['nameserver' => implode(' ', $nameservers)]);
+        $payload = [
+           ...(count($nameservers) > 0 ? ['nameserver' => implode(' ', $nameservers)] : []),
+           ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : [])
+        ];
+
+        return $this->repository->setServer($server)->update($payload);
     }
 
     public function getIpConfig(Server $server): AddressConfigData

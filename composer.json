@@ -23,6 +23,7 @@
     "laravel/horizon": "^5.10",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
+    "phpseclib/phpseclib": "~3.0",
     "pusher/pusher-php-server": "^7.0",
     "spatie/laravel-data": "^2.0",
     "spatie/laravel-fractal": "^6.0",

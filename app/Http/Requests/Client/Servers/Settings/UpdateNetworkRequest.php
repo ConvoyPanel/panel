@@ -25,8 +25,8 @@ class UpdateNetworkRequest extends FormRequest
     public function rules()
     {
         return [
-            'nameservers' => ['array', 'required'],
-            'nameservers.*' => ['string', new Domain, 'nullable'],
+            'nameservers' => ['array', 'present'],
+            'nameservers.*' => ['string', new Domain],
         ];
     }
 }

@@ -31,7 +31,11 @@ Route::group([
 
     Route::group(['prefix' => '/settings'], function () {
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
+
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetwork']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetwork']);
+
+        Route::get('/security', [Client\Servers\SettingsController::class, 'getSecurity']);
+        Route::put('/security', [Client\Servers\SettingsController::class, 'updateSecurity']);
     });
 });

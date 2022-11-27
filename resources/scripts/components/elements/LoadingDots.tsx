@@ -6,7 +6,7 @@ const loadingDotsAnimation = keyframes`
 0% {
     opacity: .2
 }
-25% {
+20% {
     opacity: 1
 }
 to {
