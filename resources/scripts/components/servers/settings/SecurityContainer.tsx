@@ -77,6 +77,7 @@ const SecurityContainer = () => {
                         <div className='space-y-3 mt-3'>
                             <FlashMessageRender byKey='server:settings:auth' />
                             <SegmentedControl
+                                className='!w-full md:!w-auto'
                                 disabled={form.isSubmitting}
                                 value={form.values.type}
                                 onChange={val => form.setFieldValue('type', val)}
