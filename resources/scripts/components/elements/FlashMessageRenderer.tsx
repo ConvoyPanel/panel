@@ -1,16 +1,15 @@
-import React from 'react';
-import MessageBox from '@/components/elements/MessageBox';
-import { useStoreState } from '@/state';
+import React from 'react'
+import MessageBox from '@/components/elements/MessageBox'
+import { useStoreState } from '@/state'
+import tw from 'twin.macro'
 
 type Props = Readonly<{
-    byKey?: string;
-    className?: string;
-}>;
+    byKey?: string
+    className?: string
+}>
 
 const FlashMessageRender = ({ byKey, className }: Props) => {
-    const flashes = useStoreState((state) =>
-        state.flashes.items.filter((flash) => (byKey ? flash.key === byKey : true))
-    );
+    const flashes = useStoreState(state => state.flashes.items.filter(flash => (byKey ? flash.key === byKey : true)))
 
     return flashes.length ? (
         <div className={className}>
@@ -23,7 +22,7 @@ const FlashMessageRender = ({ byKey, className }: Props) => {
                 </React.Fragment>
             ))}
         </div>
-    ) : null;
-};
+    ) : null
+}
 
-export default FlashMessageRender;
+export default FlashMessageRender

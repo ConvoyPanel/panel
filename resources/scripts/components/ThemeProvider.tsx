@@ -28,6 +28,7 @@ const ThemeProvider = ({ children }: Props) => {
       emotionCache={emotionCache}
       theme={{
         colorScheme: theme === 'dark' ? 'dark' : 'light',
+        fontFamily: `Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";`
       }}
     >
       <NotificationsProvider>{children}</NotificationsProvider>
