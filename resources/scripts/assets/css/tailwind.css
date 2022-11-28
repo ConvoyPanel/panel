@@ -79,17 +79,19 @@ a {
   @apply text-base font-medium text-accent-700
 }
 
-.nav-link::before {
-  content: '';
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 70%;
-  @apply bg-transparent -z-[1] rounded transition-colors
-}
+@media screen and (min-width: 640px) {
+  .nav-link::before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    @apply bg-transparent -z-[1] rounded transition-colors
+  }
 
-.nav-link:hover::before {
-  @apply bg-accent-200
+  .nav-link:hover::before {
+    @apply bg-accent-200
+  }
 }
 
 .nav-link-active::after {
