@@ -93,6 +93,7 @@ const SecurityContainer = () => {
                                     onChange={form.handleChange}
                                     error={form.touched.password ? form.errors.password : undefined}
                                     disabled={form.isSubmitting}
+                                    type='password'
                                     name='password'
                                     label='Password'
                                 />
