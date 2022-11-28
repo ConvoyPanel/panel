@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import { keyframes } from '@emotion/react'
 import tw from 'twin.macro'
+import { css } from '@emotion/react'
 
 const loadingDotsAnimation = keyframes`
 0% {
@@ -23,6 +24,7 @@ const StyledLoadingDots = styled.span<Props>`
         animation-name: ${loadingDotsAnimation};
         animation-iteration-count: infinite;
         animation-duration: 1.4s;
+        animation-fill-mode: both;
 
 
         ${({ size = 2 }) => `
@@ -34,14 +36,6 @@ const StyledLoadingDots = styled.span<Props>`
     & > span:not(:last-child) {
         margin-right: ${({ size = 2 }) => size / 2}px;
     }
-
-    & > span:nth-of-type(2) {
-        animation-delay: 0.2s;
-    }
-
-    & > span:nth-of-type(3) {
-        animation-delay: 0.4s;
-    }
 `
 
 interface Props {
@@ -51,8 +45,8 @@ interface Props {
 const LoadingDots = (props: Props) => {
     return <StyledLoadingDots {...props}>
         <span />
-        <span />
-        <span />
+        <span style={{animationDelay: '0.2s'}} />
+        <span style={{animationDelay: '0.4s'}} />
     </StyledLoadingDots>
 }
 

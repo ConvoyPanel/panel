@@ -24,7 +24,7 @@ const ServerCard = ({ server }: Props) => {
   const disk = useMemo(() => formatBytes(server.limits.disk, 0), [server])
 
   return (
-    <Link to={`/servers/${server.id}`} className='bg-background p-6 shadow-light hover:shadow-lg border border-accent-200 dark:hover:border-foreground dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
+    <Link to={`/servers/${server.id}`} className='bg-background p-6 shadow-light hover:shadow-lg border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'>
       <div className='flex items-center space-x-3'>
         <Avatar color='blue' size='md' radius='xl'>
           {getInitials(server.name, ' ', 2)}

@@ -67,7 +67,7 @@ const StyledButton = styled.button<Props>`
 
 const Button = ({ loading, disabled, ...props}: Props) => {
   return <StyledButton disabled={loading || disabled} {...props}>
-    {loading ? <div className='w-full h-full grid place-items-center'><LoadingDots size={4} /></div> : props.children}
+    {loading ? <div className='w-full h-full grid place-items-center'><LoadingDots size={5} /></div> : props.children}
   </StyledButton>
 }
 
