@@ -72,33 +72,8 @@ class ServerDetailService
             'uuid_short' => $server->uuid_short,
             'uuid' => $server->uuid,
             'node_id' => $server->node_id,
-            'hostname' => $server->hostname,
-            'name' => $server->name,
-            'description' => $server->description,
-            'status' => $server->status,
             'state' => Arr::get($resources, 'status'),
             'locked' => Arr::get($resources, 'lock', false),
-            'usages' => [
-                'bandwidth' => $server->bandwidth_usage,
-                'network' => [
-                    'in' => Arr::get($resources, 'netin', 0),
-                    'out' => Arr::get($resources, 'netout', 0),
-                ],
-                'disk' => [
-                    'read' => Arr::get($resources, 'diskread', 0),
-                    'write' => Arr::get($resources, 'diskwrite', 0),
-                ],
-            ],
-            'limits' => [
-                'cpu' => $server->cpu,
-                'memory' => $server->memory,
-                'disk' => $server->disk,
-                'snapshots' => $server->snapshot_limit,
-                'backups' => $server->backup_limit,
-                'bandwidth' => $server->bandwidth_limit,
-                'addresses' => $addresses,
-                'mac_address' => Arr::first($addresses['ipv4'], default: null)?->mac_address ?? Arr::first($addresses['ipv6'], default: null)?->mac_address,
-            ],
             'config' => [
                 'mac_address' => $mac_address,
                 'boot_order' => $this->allocationService->getBootOrder($server),

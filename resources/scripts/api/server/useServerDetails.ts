@@ -1,0 +1,64 @@
+import { ServerContext } from '@/state/server'
+import { Server } from '@/api/server/getServer'
+import { ServerState } from '@/api/server/getStatus'
+import useSWR from 'swr'
+import { rawDataToServerObject } from '@/api/server/getServer'
+import http from '@/api/http'
+
+export interface Disk {
+    name: string
+    size: number
+}
+
+export interface Address {
+    address: string
+    cidr: number
+    gateway: string
+}
+
+export interface ServerDetails {
+    id: string
+    internalId: number
+    uuid: string
+    nodeId: number
+    state: ServerState
+    locked: boolean
+    config: {
+        macAddress: string
+        bootOrder: string
+        disks: Disk[]
+        addresses: {
+            ipv4?: Address
+            ipv6?: Address
+        }
+    }
+}
+
+const rawDataToServerDetails = (data: any): ServerDetails => ({
+    id: data.id,
+    internalId: data.internal_id,
+    uuid: data.uuid,
+    nodeId: data.node_id,
+    state: data.state,
+    locked: data.locked,
+    config: {
+        macAddress: data.config.mac_address,
+        bootOrder: data.config.boot_order,
+        disks: data.config.disks,
+        addresses: data.config.addresses,
+    },
+})
+
+const useProxmoxDetails = () => {
+    const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
+
+    return useSWR<ServerDetails>(['server:details', uuid], async () => {
+        const {
+            data: { data },
+        } = await http.get(`/api/client/servers/${uuid}/details`)
+
+        return rawDataToServerDetails(data)
+    })
+}
+
+export default useProxmoxDetails

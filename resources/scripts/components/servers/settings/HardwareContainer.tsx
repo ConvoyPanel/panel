@@ -1,23 +1,18 @@
-import renameServer from '@/api/server/settings/renameServer'
+import useServerDetails from '@/api/server/useServerDetails'
 import { Dd, Dt } from '@/components/dashboard/ServerCard'
-import Button from '@/components/elements/Button'
 import Display from '@/components/elements/displays/DisplayRow'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import FormSection from '@/components/elements/FormSection'
-import TextInput from '@/components/elements/inputs/TextInput'
 import { ServerContext } from '@/state/server'
 import { bytesToString } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
 import { useFormik } from 'formik'
+import { useEffect } from 'react'
 import * as yup from 'yup'
 
 const HardwareContainer = () => {
   const server = ServerContext.useStoreState((state) => state.server.data!)
-  const setServer = ServerContext.useStoreActions(
-    (actions) => actions.server.setServer
-  )
   const { clearFlashes, clearAndAddHttpError } = useFlash()
   const notify = useNotify()
 
@@ -106,6 +101,12 @@ const HardwareContainer = () => {
       </FormCard>
     </FormSection>
   )
+}
+
+const BootOrderContainer = () => {
+  const { data } = useServerDetails()
+
+
 }
 
 export default HardwareContainer
