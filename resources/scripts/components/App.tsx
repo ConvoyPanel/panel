@@ -1,7 +1,6 @@
 import { store } from '@/state'
 import { StoreProvider } from 'easy-peasy'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import ProgressBar from '@/components/elements/navigation/ProgressBar'
 import ThemeProvider from '@/components/ThemeProvider'
 import { lazy, Suspense } from 'react'
 import Spinner from '@/components/elements/Spinner'
@@ -9,6 +8,7 @@ import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import { ServerContext } from '@/state/server'
+import { NavigationProgress } from '@mantine/nprogress'
 
 interface ExtendedWindow extends Window {
   ConvoyUser?: {
@@ -63,7 +63,7 @@ const App = () => {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-        <ProgressBar />
+        <NavigationProgress />
         <BrowserRouter>
           <Routes>
             <Route

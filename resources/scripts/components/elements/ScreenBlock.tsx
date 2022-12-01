@@ -1,7 +1,7 @@
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import { Button } from '@mantine/core'
 import { ComponentType } from 'react'
-import { ExclaimationCircleIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { ExclamationCircleIcon, LinkIcon } from '@heroicons/react/24/outline'
 
 export interface IconProps {
   className?: string
@@ -67,7 +67,7 @@ type ServerErrorProps = (Omit<PropsWithBack, 'icon' | 'title'> | Omit<PropsWithR
 };
 
 export const ServerError = ({ title, ...props }: ServerErrorProps) => (
-  <ScreenBlock title={title || 'Something went wrong'} center icon={ExclaimationCircleIcon} {...props} />
+  <ScreenBlock title={title || 'Something went wrong'} center icon={ExclamationCircleIcon} {...props} />
 );
 
 export const NotFound = ({

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { ExclaimationCircleIcon } from '@heroicons/react/24/outline';
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ComponentProps, ReactNode, useEffect, useState } from 'react';
 import tw from 'twin.macro';
 
@@ -42,7 +42,7 @@ const TextInput = ({label, className, prefix, suffix, wrapperClassName, error, .
             { suffix && <div className='grid place-items-center px-3 -ml-3'>{ suffix }</div>}
         </div>
         { error && <div className='flex space-x-1 mt-2'>
-            <ExclaimationCircleIcon className='h-5 w-5 text-error'/> <p className='text-sm text-error'>{error}</p>
+            <ExclamationCircleIcon className='h-5 w-5 text-error'/> <p className='text-sm text-error'>{error}</p>
         </div>}
     </div>
 }

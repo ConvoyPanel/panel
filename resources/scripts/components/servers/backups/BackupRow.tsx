@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import Dots from '@/assets/images/icons/dots-vertical.svg'
 import { ComponentProps, forwardRef, useState } from 'react'
 import Menu from '@/components/elements/Menu'
-import { ExclaimationCircleIcon } from '@heroicons/react/20/solid'
+import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import useFlash from '@/util/useFlash'
 import restoreBackup from '@/api/server/backups/restoreBackup'
 import { ServerContext } from '@/state/server'
@@ -165,7 +165,7 @@ const BackupRow = ({ backup, swr: { mutate } }: Props) => {
                     {!backup.completedAt ? (
                         <Loader size='xs' />
                     ) : (
-                        !backup.isSuccessful && <ExclaimationCircleIcon className='h-5 w-5 text-error' />
+                        !backup.isSuccessful && <ExclamationCircleIcon className='h-5 w-5 text-error' />
                     )}
                 </div>
 

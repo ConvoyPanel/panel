@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { ExclaimationCircleIcon } from '@heroicons/react/24/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { ComponentProps, useEffect, useState } from 'react'
 import tw from 'twin.macro'
 
@@ -58,7 +58,7 @@ const Textarea = ({
             </div>
             {error && (
                 <div className='flex space-x-1 mt-2'>
-                    <ExclaimationCircleIcon className='h-5 w-5 text-error' />{' '}
+                    <ExclamationCircleIcon className='h-5 w-5 text-error' />{' '}
                     <p className='text-sm text-error'>{error}</p>
                 </div>
             )}
