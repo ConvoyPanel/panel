@@ -24,8 +24,7 @@ SOFTWARE.
 */
 
 import axios, { AxiosInstance } from 'axios'
-import { store } from '@/state'
-import { startNavigationProgress } from '@mantine/nprogress'
+import { startNavigationProgress, completeNavigationProgress, resetNavigationProgress } from '@mantine/nprogress'
 
 const http: AxiosInstance = axios.create({
   withCredentials: true,
@@ -39,6 +38,7 @@ const http: AxiosInstance = axios.create({
 
 http.interceptors.request.use((req) => {
   if (!req.url?.endsWith('/status')) {
+    resetNavigationProgress()
     startNavigationProgress()
   }
 
@@ -48,13 +48,13 @@ http.interceptors.request.use((req) => {
 http.interceptors.response.use(
   (resp) => {
     if (!resp.request?.url?.endsWith('/status')) {
-      //completeNavigationProgress()
+      completeNavigationProgress()
     }
 
     return resp
   },
   (error) => {
-    //completeNavigationProgress()
+    completeNavigationProgress()
 
     throw error
   }
