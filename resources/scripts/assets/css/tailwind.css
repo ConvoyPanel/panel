@@ -12,6 +12,10 @@
     --color-error-light: #ff1a1a;
     --color-error: #e00;
     --color-error-dark: #c50000;
+    --color-warning-lighter: #ffefcf;
+    --color-warning-light: #f7b955;
+    --color-warning: #f5a623;
+    --color-warning-dark: #ab570a;
     --color-foreground: #000;
     --color-background: #fff;
     --color-accent-1: #fafafa;
@@ -44,7 +48,7 @@
 }
 
 body {
-  @apply bg-accent-100 text-accent-500;
+  @apply bg-accent-100 text-accent-500 overflow-x-hidden;
 }
 
 input,

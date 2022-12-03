@@ -1,8 +1,6 @@
 import { ServerContext } from '@/state/server'
-import { Server } from '@/api/server/getServer'
 import { ServerState } from '@/api/server/getStatus'
 import useSWR from 'swr'
-import { rawDataToServerObject } from '@/api/server/getServer'
 import http from '@/api/http'
 
 export interface Disk {

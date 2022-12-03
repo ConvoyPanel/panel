@@ -26,11 +26,13 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    public function getDisks(Server $server)
+    public function getDisks(Server $server, bool $filterOutMediaDisks = true)
     {
-        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) {
-            if (str_contains(Arr::get($disk, 'value'), 'media')) {
-                return false;
+        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) use ($filterOutMediaDisks) {
+            if ($filterOutMediaDisks) {
+                if (str_contains(Arr::get($disk, 'value'), 'media')) {
+                    return false;
+                }
             }
 
             return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
@@ -58,11 +60,9 @@ class AllocationService extends ProxmoxService
         return $disks;
     }
 
-    public function setBootOrder(array $disks)
+    public function setBootOrder(Server $server, array $disks)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        return $this->repository->setServer($this->server)->update([
+        return $this->repository->setServer($server)->update([
             'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }

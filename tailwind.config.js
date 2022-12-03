@@ -27,6 +27,12 @@ module.exports = {
                     DEFAULT: 'var(--color-success)',
                     dark: 'var(--color-success-dark)',
                 },
+                warning: {
+                    lighter: 'var(--color-warning-lighter)',
+                    light: 'var(--color-warning-light)',
+                    DEFAULT: 'var(--color-warning)',
+                    dark: 'var(--color-warning-dark)',
+                },
                 foreground: 'var(--color-foreground)',
                 background: 'var(--color-background)',
                 accent: {

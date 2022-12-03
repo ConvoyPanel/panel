@@ -32,6 +32,9 @@ Route::group([
     Route::group(['prefix' => '/settings'], function () {
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
 
+        Route::get('/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder']);
+        Route::put('/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder']);
+
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetwork']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetwork']);
 

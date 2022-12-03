@@ -17,4 +17,6 @@ RUN php composer-setup.php
 RUN php -r "unlink('composer-setup.php');"
 RUN sudo mv composer.phar /usr/local/bin/composer
 
+RUN echo "alias art='php artisan'" >> ~/.bashrc
+
 WORKDIR /var/www

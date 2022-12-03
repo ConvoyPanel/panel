@@ -105,7 +105,7 @@ const SecurityContainer = () => {
                                     error={form.touched.sshKeys ? form.errors.sshKeys : undefined}
                                     disabled={form.isSubmitting}
                                     name='sshKeys'
-                                    label='Contents'
+                                    label='SSH Keys'
                                 />
                             )}
                         </div>

@@ -5,20 +5,22 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
+use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Transformers\Client\ServerNetworkTransformer;
 use Convoy\Transformers\Client\ServerSecurityTransformer;
 use Illuminate\Support\Arr;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository)
+    public function __construct(private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository, private AllocationService $allocationService)
     {
-
     }
 
     public function rename(RenameServerRequest $request, Server $server)
@@ -26,6 +28,25 @@ class SettingsController extends ApplicationApiController
         $server->update($request->validated());
 
         $this->cloudinitService->updateHostname($server, $request->hostname);
+
+        return $this->returnNoContent();
+    }
+
+    public function getBootOrder(Server $server)
+    {
+        $availableDevices = array_map(fn ($device) => $device['name'], $this->allocationService->getDisks($server, filterOutMediaDisks: false)->toArray());
+        $configuredDevices = $this->allocationService->getBootOrder($server);
+        $unconfiguredDevices = array_values(array_filter($availableDevices, fn ($device) => !in_array($device, $configuredDevices)));
+
+        return fractal()->item([
+            'unused_devices' => $unconfiguredDevices,
+            'boot_order' => $configuredDevices,
+        ], new ServerBootOrderTransformer)->respond();
+    }
+
+    public function updateBootOrder(UpdateBootOrderRequest $request, Server $server)
+    {
+        $this->allocationService->setBootOrder($server, $request->order);
 
         return $this->returnNoContent();
     }
