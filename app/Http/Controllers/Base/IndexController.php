@@ -5,7 +5,6 @@ namespace Convoy\Http\Controllers\Base;
 use Illuminate\View\View;
 use Illuminate\View\Factory as ViewFactory;
 use Convoy\Http\Controllers\Controller;
-use Pterodactyl\Contracts\Repository\ServerRepositoryInterface;
 
 class IndexController extends Controller
 {
@@ -22,6 +21,10 @@ class IndexController extends Controller
      */
     public function index(): View
     {
-        return $this->view->make('app');
+        return $this->view->make('app', [
+            'siteConfiguration' => [
+                'version' => config('app.version')
+            ]
+        ]);
     }
 }

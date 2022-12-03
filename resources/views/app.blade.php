@@ -13,10 +13,16 @@
 
         <!-- Inject Data -->
         @if(!is_null(Auth::user()))
-                <script>
-                    window.ConvoyUser = {!! json_encode(Auth::user()->toReactObject()) !!};
-                </script>
-            @endif
+            <script>
+                window.ConvoyUser = {!! json_encode(Auth::user()->toReactObject()) !!};
+            </script>
+        @endif
+
+        @if(!empty($siteConfiguration))
+            <script>
+                window.SiteConfiguration = {!! json_encode($siteConfiguration) !!};
+            </script>
+        @endif
 
         <!-- Scripts -->
         @viteReactRefresh
