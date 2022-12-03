@@ -221,7 +221,7 @@ const BootOrderContainer = () => {
                                 {bootOrder.map(id => (
                                     <SortableItem
                                         handle
-                                        className='flex items-center space-x-3 p-2 border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none bg-background shadow-light hover:shadow-lg rounded'
+                                        className='select-none flex items-center space-x-3 p-2 border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none bg-background shadow-light hover:shadow-lg rounded'
                                         key={id}
                                         id={id}
                                     >
