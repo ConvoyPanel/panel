@@ -47,7 +47,7 @@ class AllocationService extends ProxmoxService
     {
         $raw = collect($this->repository->setServer($server)->getAllocations())->where('key', 'boot')->firstOrFail();
 
-        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', Arr::get($raw, 'value')))), function ($disk) {
+        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
             return ! ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
