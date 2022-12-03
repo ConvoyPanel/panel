@@ -1,6 +1,6 @@
 import LoginContainer from '@/components/auth/LoginContainer'
 import { NotFound } from '@/components/elements/ScreenBlock'
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 
 const AuthenticationRouter = () => {
   const navigate = useNavigate()

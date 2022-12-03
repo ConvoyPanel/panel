@@ -1,0 +1,59 @@
+import ContentContainer from '@/components/elements/ContentContainer'
+import NavigationBar from '@/components/elements/navigation/NavigationBar'
+import Spinner from '@/components/elements/Spinner'
+import TransitionRouter from '@/routers/TransitionRouter'
+import { Suspense } from 'react'
+import { Link, Route, Routes } from 'react-router-dom'
+import routes from '@/routers/routes'
+import { NotFound } from '@/components/elements/ScreenBlock'
+
+const navRoutes = [
+    {
+        name: 'Overview',
+        path: '/admin',
+    },
+    {
+        name: 'Locations',
+        path: '/admin/locations',
+    },
+    {
+        name: 'Nodes',
+        path: '/admin/nodes',
+    },
+    {
+        name: 'Servers',
+        path: '/admin/servers',
+    },
+    {
+        name: 'Users',
+        path: '/admin/users',
+    },
+    {
+        name: 'Tokens',
+        path: '/admin/tokens',
+    },
+]
+
+const DashboardRouter = () => {
+    return (
+        <>
+            <div className='bg-success py-1'><ContentContainer><Link to='/'><p className='text-white text-xs font-medium uppercase tracking-wide'>Exit Administration</p></Link></ContentContainer></div>
+            <NavigationBar routes={navRoutes} />
+
+            <Routes>
+              {routes.admin.dashboard.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    <Spinner.Suspense screen={false}><route.component /></Spinner.Suspense>}
+                />
+              ))}
+
+              <Route path={'*'} element={<NotFound full />} />
+            </Routes>
+        </>
+    )
+}
+
+export default DashboardRouter

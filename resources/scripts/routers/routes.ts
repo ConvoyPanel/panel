@@ -9,6 +9,9 @@ interface RouteDefinition {
 interface Routes {
   // All of the routes available under "/servers/:id"
   server: RouteDefinition[]
+  admin: {
+    dashboard: RouteDefinition[]
+  }
 }
 
 /*
@@ -20,7 +23,7 @@ interface Routes {
 |
 */
 
-export default {
+const routes: Routes = {
   server: [
     {
       path: '/',
@@ -43,4 +46,15 @@ export default {
       component: lazy(() => import('@/components/servers/terminal/ServerTerminalContainer')),
     },
   ],
-} as Routes
+  admin: {
+    dashboard: [
+      {
+        path: '/',
+        name: 'Overview',
+        component: lazy(() => import('@/components/admin/overview/OverviewContainer')),
+      }
+    ]
+  }
+}
+
+export default routes

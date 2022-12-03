@@ -2,8 +2,8 @@ import DashboardContainer from '@/components/dashboard/DashboardContainer'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import Spinner from '@/components/elements/Spinner'
 import TransitionRouter from '@/routers/TransitionRouter'
-import { Suspense, useEffect } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Suspense } from 'react'
+import { Route, Routes } from 'react-router-dom'
 
 
 const routes = [
@@ -14,15 +14,13 @@ const routes = [
 ]
 
 const DashboardRouter = () => {
-  const location = useLocation()
-
   return (
     <>
       <NavigationBar routes={routes} />
 
       <TransitionRouter>
         <Suspense fallback={<Spinner />}>
-          <Routes location={location}>
+          <Routes>
             <Route path={'/'} element={<DashboardContainer />} />
           </Routes>
         </Suspense>

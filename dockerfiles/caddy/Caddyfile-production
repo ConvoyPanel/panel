@@ -3,13 +3,4 @@
     php_fastcgi php:9000
     encode gzip
     file_server
-
-    @websockets {
-        header Connection *Upgrade*
-        header Upgrade websocket
-    }
-
-    handle @websockets {
-        reverse_proxy soketi:6001
-    }
 }
