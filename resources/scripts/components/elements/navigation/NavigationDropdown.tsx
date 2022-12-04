@@ -1,6 +1,6 @@
 import ContentContainer from '@/components/elements/ContentContainer'
 import { ReactNode, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useMatch, useNavigate } from 'react-router-dom'
 
 interface LinkProps {
   children: ReactNode
@@ -17,6 +17,7 @@ interface Props {
 
 const NavigationDropdown = ({ logout, visible }: Props) => {
   const navigate = useNavigate()
+  const isAdminArea = useMatch('/admin/*')
 
   useEffect(() => {
     if (visible) {
@@ -29,7 +30,7 @@ const NavigationDropdown = ({ logout, visible }: Props) => {
   return (
     <>
       {visible && (
-        <div className='inset-x-0 top-[56px] pt-1.5 bottom-0 block fixed bg-background z-[3000] overflow-y-scroll'>
+        <div className={`inset-x-0 ${isAdminArea ? 'top-[80px]' : 'top-[56px]'} pt-1.5 bottom-0 block fixed bg-background z-[3000] overflow-y-scroll`}>
           <ContentContainer>
             <div className='flex flex-col w-full'>
               <NavLink to='/admin'>

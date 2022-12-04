@@ -47,8 +47,12 @@
   }
 }
 
+html, #root {
+  @apply h-full
+}
+
 body {
-  @apply bg-accent-100 text-accent-500 overflow-x-hidden;
+  @apply bg-accent-100 text-accent-500 overflow-x-hidden h-full;
 }
 
 input,
