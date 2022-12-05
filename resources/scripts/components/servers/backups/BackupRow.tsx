@@ -23,11 +23,11 @@ interface Props {
     }
 }
 
-const DottedButton = forwardRef<HTMLButtonElement, Omit<ComponentProps<'button'>, 'children'>>(
+export const DottedButton = forwardRef<HTMLButtonElement, Omit<ComponentProps<'button'>, 'children'>>(
     ({ className, ...props }, ref) => {
         return (
             <button ref={ref} className={`px-2 bg-transparent ${className}`} {...props}>
-                <img src={Dots} className='w-4 h-4 dark:invert' alt='3 vertical dots meant for activating a menu' />
+                <img src={Dots} className='w-4 h-4 min-w-[1rem] dark:invert' alt='3 vertical dots meant for activating a menu' />
             </button>
         )
     }

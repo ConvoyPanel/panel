@@ -27,6 +27,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
     const bottomBar = useRef<HTMLDivElement>(null)
     const placeholder = useRef<HTMLDivElement>(null)
     const logo = useRef<HTMLDivElement>(null)
+    const isAdminArea = useMatch('/admin/*')
 
     const visibilityObserver = useMemo(
         () => new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting)),
@@ -81,7 +82,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
             <ContentContainer ref={topBar} className='pt-3 pb-1.5 relative'>
                 <div className='flex justify-between'>
                     <div className='flex space-x-5 items-center'>
-                        <Link to='/' className='flex items-center space-x-3'>
+                        <Link to={isAdminArea ? '/admin' : '/'} className='flex items-center space-x-3'>
                             <img src={Logo} className='w-7 h-7 dark:invert' alt='Convoy logo' />
                             <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
                         </Link>

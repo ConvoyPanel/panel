@@ -14,15 +14,16 @@ interface Menu extends React.FC<MenuProps> {
 
 interface MenuProps {
   children: ReactNode
+  className?: string
 }
 
 interface ItemProps extends Omit<ComponentProps<'button'>, 'className'> {
   color?: 'accent' | 'danger'
 }
 
-const Menu: Menu = ({ children }) => {
+const Menu: Menu = ({ children, className }) => {
   return (
-    <HMenu as='div' className='relative'>
+    <HMenu as='div' className={`relative ${className}`}>
       {children}
     </HMenu>
   )
