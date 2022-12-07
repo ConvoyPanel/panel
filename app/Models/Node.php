@@ -37,6 +37,16 @@ class Node extends Model
         return $this->hasMany(IPAddress::class);
     }
 
+    /**
+     * Gets the location associated with a node.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'id';
