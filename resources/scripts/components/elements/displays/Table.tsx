@@ -103,23 +103,21 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                     id: 'actions',
                     header: () =>
                         headerActions ? (
-                                <Menu className='grid place-items-center'>
+                                <Menu className='flex justify-center items-center'>
                                     <Menu.Button>
                                         <DottedButton className='relative' />
                                     </Menu.Button>{' '}
-                                    <Menu.Items>{headerActions({ rows: rowSelection })}</Menu.Items>
+                                    <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
                                 </Menu>
                         ) : null,
                     cell: ({ row }) =>
                         rowActions ? (
-                            <div className='flex items-center justify-center'>
-                                <Menu>
+                            <Menu className='flex justify-center items-center'>
                                     <Menu.Button>
                                         <DottedButton className='relative mr-[1px]' />
                                     </Menu.Button>{' '}
-                                    <Menu.Items>{rowActions({ row: row.index })}</Menu.Items>
+                                    <Menu.Items marginTop='3rem'>{rowActions({ row: row.index })}</Menu.Items>
                                 </Menu>
-                            </div>
                         ) : null,
                 }),
             ]

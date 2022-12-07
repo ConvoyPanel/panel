@@ -7,6 +7,7 @@ interface Menu extends React.FC<MenuProps> {
   }>
   Items: React.FC<{
     children: ReactNode
+    marginTop?: number | string
   }>
   Item: React.FC<ItemProps>
   Divider: React.FC
@@ -33,7 +34,7 @@ Menu.Button = ({ children }) => {
   return <HMenu.Button as={Fragment}>{children}</HMenu.Button>
 }
 
-Menu.Items = ({ children }) => {
+Menu.Items = ({ children, marginTop }) => {
   return (
     <Transition
       as={Fragment}
@@ -45,7 +46,9 @@ Menu.Items = ({ children }) => {
       leaveTo='opacity-0 -translate-y-[1rem]'
     >
       {/* TODO: figure out how to automatically change position of menu based on available space */}
-      <HMenu.Items className='right-0 flex flex-col absolute mt-1 w-56 p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm z-[1000]'>
+      <HMenu.Items style={{
+        marginTop: marginTop ?? '0.25rem'
+      }} className='right-0 flex flex-col absolute w-56 p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm z-[1000]'>
         {children}
       </HMenu.Items>
     </Transition>

@@ -206,6 +206,7 @@ return [
         Convoy\Providers\HorizonServiceProvider::class,
         Convoy\Providers\RouteServiceProvider::class,
         Convoy\Providers\RepositoryServiceProvider::class,
+        Convoy\Providers\FortifyServiceProvider::class,
     ],
 
     /*
