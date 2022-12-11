@@ -25,6 +25,11 @@ class Location extends Model
         'description' => 'string|nullable|between:1,191',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return $this->getKeyName();
+    }
+
     /**
      * Gets the nodes in a specified location.
      *

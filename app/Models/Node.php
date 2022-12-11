@@ -2,25 +2,35 @@
 
 namespace Convoy\Models;
 
+use Convoy\Casts\MegabytesAndBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Node extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name', 'cluster', 'hostname', 'token_id', 'secret', 'port', 'network', 'storage',
+    protected $casts = [
+        'memory' => MegabytesAndBytes::class,
+        'disk' => MegabytesAndBytes::class,
     ];
 
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
     public static $validationRules = [
+        'location_id' => 'required|integer|exists:locations,id',
         'name' => 'required|string|max:191',
         'cluster' => 'required|string|max:191',
         'hostname' => 'required|string',
         'token_id' => 'required|string',
         'secret' => 'required|string',
         'port' => 'required|integer',
+        'memory' => 'required|integer',
+        'memory_overallocate' => 'required|integer',
+        'disk' => 'required|integer',
+        'disk_overallocate' => 'required|integer',
+        'vm_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
     ];
 
     protected $hidden = [

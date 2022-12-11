@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
@@ -17,8 +18,9 @@ class ServerSeeder extends Seeder
      */
     public function run(ServerCreationService $service)
     {
+        $location = Location::factory()->create();
         $user = User::factory()->create();
-        $node = Node::factory()->create();
+        $node = Node::factory()->for($location)->create();
 
         Server::factory()->count(10)->create(function() use ($user, $node, $service) {
             $uuid = $service->generateUniqueUuidCombo();

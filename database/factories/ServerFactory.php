@@ -5,7 +5,9 @@ namespace Database\Factories;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
+use Convoy\Services\Servers\ServerCreationService;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\App;
 
 class ServerFactory extends Factory
 {
@@ -23,11 +25,19 @@ class ServerFactory extends Factory
      */
     public function definition()
     {
+        $uuid = App::make(ServerCreationService::class)->generateUniqueUuidCombo();
+
         return [
-            'name' => $this->faker->firstName(),
+            'uuid' => $uuid,
+            'uuid_short' => substr($uuid, 0, 8),
             'user_id' => User::factory(),
             'node_id' => Node::factory(),
+            'hostname' => $this->faker->domainName(),
+            'name' => $this->faker->word(),
             'vmid' => rand(100, 5000),
+            'cpu' => 2,
+            'memory' => 17179869184,
+            'disk' => 17179869184,
         ];
     }
 }

@@ -48,7 +48,7 @@
 }
 
 html, #root {
-  @apply h-full
+  @apply min-h-screen
 }
 
 body {

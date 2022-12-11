@@ -38,8 +38,15 @@ const Pagination = <T,>({ data: { items, pagination }, onPageSelect, children }:
     }, [])
 
     useEffect(() => {
-        // add page parameter in url
         const url = new URL(window.location.href);
+
+        // don't add page param if it's the first page
+        if (pagination.currentPage === 1) {
+            url.searchParams.delete('page');
+            window.history.pushState({}, '', url.toString());
+            return;
+        }
+
         url.searchParams.set('page', pagination.currentPage.toString());
         window.history.pushState({}, '', url.toString());
       }, [pagination])

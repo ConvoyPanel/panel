@@ -2,6 +2,7 @@
 
 namespace Convoy\Providers;
 
+use Convoy\Http\Middleware\AdminAuthenticate;
 use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -45,15 +46,12 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['auth'])->prefix('/api/client')
                     ->group(base_path('routes/api-client.php'));
 
+                Route::middleware(['auth', AdminAuthenticate::class])
+                    ->prefix('/api/admin')
+                    ->group(base_path('routes/api-admin.php'));
+
                 Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
             });
-
-            // Route::middleware(['web', 'auth'])
-            //     ->group(base_path('routes/client.php'));
-
-            // Route::middleware(['web', 'auth', AdminAuthenticate::class])
-            //     ->prefix('/admin')
-            //     ->group(base_path('routes/admin.php'));
         });
     }
 

@@ -14,11 +14,14 @@ import Scroller from '@/components/elements/Scroller'
 import { DottedButton } from '@/components/servers/backups/BackupRow'
 import Menu from '@/components/elements/Menu'
 
-interface Column<T> {
+export type Alignment = 'left' | 'center' | 'right'
+
+export interface Column<T> {
     header: string
     accessor: string
-    align?: 'left' | 'center' | 'right'
+    align?: Alignment
     cell?: ({ value }: { value: T }) => ReactNode
+    overflow?: boolean
 }
 
 interface HeaderActionsProps {
@@ -35,6 +38,7 @@ interface Props<T> {
     selectable?: boolean
     headerActions?: (payload: HeaderActionsProps) => ReactNode
     rowActions?: (payload: RowActionsProps) => ReactNode
+    minWidth?: number
 }
 
 const StyledTr = styled.tr`
@@ -46,27 +50,51 @@ const StyledTr = styled.tr`
     }
 `
 
-const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, rowActions }: Props<T>) => {
+type ThType = 'actions' | 'select'
+
+const getThClasses = (type: ThType, align?: Alignment) => {
+    let classes = 'font-normal whitespace-nowrap m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200'
+
+    switch (type) {
+        case 'actions':
+            classes += ' right-0 sticky'
+            break
+        case 'select':
+            classes += ' w-10 text-left'
+            break
+    }
+
+    switch (align) {
+        case 'center':
+            classes += ' text-center'
+            break
+        case 'right':
+            classes += ' text-right'
+            break
+        default:
+            classes += ' text-left'
+            break
+    }
+
+    return classes
+}
+
+const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, rowActions, minWidth }: Props<T>) => {
     const columnHelper = createColumnHelper<T>()
 
     const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({})
 
     const columns = useMemo(() => {
-        let parsedColumns = unparsedColumns.map(column =>
-            columnHelper.accessor(column.accessor as unknown as AccessorFn<T, any>, {
-                id: column.accessor,
-                header: () => (
-                    <div
-                        className={`${column.align === undefined || column.align == 'left' ? 'text-left' : ''} ${
-                            column.align === 'center' && 'text-center'
-                        } ${column.align === 'right' && 'text-right'}`}
-                    >
-                        {column.header}
-                    </div>
-                ),
-                cell: info => (column?.cell ? column.cell({ value: info.getValue() }) : info.getValue()),
+        let parsedColumns = unparsedColumns.map(column => {
+            const { accessor, header, cell, ...rest } = column
+
+            return columnHelper.accessor(accessor as unknown as AccessorFn<T, any>, {
+                id: accessor,
+                header,
+                cell: info => (cell ? cell({ value: info.getValue() }) : info.getValue()),
+                meta: rest,
             })
-        )
+        })
 
         if (selectable) {
             parsedColumns = [
@@ -103,21 +131,21 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                     id: 'actions',
                     header: () =>
                         headerActions ? (
-                                <Menu className='flex justify-center items-center'>
-                                    <Menu.Button>
-                                        <DottedButton className='relative' />
-                                    </Menu.Button>{' '}
-                                    <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
-                                </Menu>
+                            <Menu className='flex justify-center items-center'>
+                                <Menu.Button>
+                                    <DottedButton className='relative' />
+                                </Menu.Button>{' '}
+                                <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
+                            </Menu>
                         ) : null,
                     cell: ({ row }) =>
                         rowActions ? (
                             <Menu className='flex justify-center items-center'>
-                                    <Menu.Button>
-                                        <DottedButton className='relative mr-[1px]' />
-                                    </Menu.Button>{' '}
-                                    <Menu.Items marginTop='3rem'>{rowActions({ row: row.index })}</Menu.Items>
-                                </Menu>
+                                <Menu.Button>
+                                    <DottedButton className='relative mr-[1px]' />
+                                </Menu.Button>{' '}
+                                <Menu.Items marginTop='3rem'>{rowActions({ row: row.index })}</Menu.Items>
+                            </Menu>
                         ) : null,
                 }),
             ]
@@ -137,17 +165,20 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
     })
 
     return (
-        <div className='overflow-auto scrollbar-hide'>
-            <table className='border-separate w-full border-spacing-0'>
+        <div  className='overflow-auto scrollbar-hide'>
+            <table style={{
+            minWidth: minWidth ? `${minWidth}px` : '650px',
+        }} className='border-separate w-full border-spacing-0'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <StyledTr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
                                 <th
                                     scope='col'
-                                    className={`${header.id === 'select' && 'w-10 text-left'} ${
-                                        header.id === 'actions' && 'right-0 sticky '
-                                    } font-normal m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200`}
+                                    className={getThClasses(
+                                        header.column.columnDef.id as ThType,
+                                        header.column.columnDef.meta?.align
+                                    )}
                                     key={header.id}
                                 >
                                     {header.isPlaceholder
@@ -163,7 +194,17 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
                                 <td
-                                    className='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-accent-600 px-3 h-[50px] border-b border-accent-200'
+                                    className={`${
+                                        cell.column.columnDef.meta?.overflow
+                                            ? ''
+                                            : 'overflow-hidden text-ellipsis whitespace-nowrap'
+                                    } ${
+                                        cell.column.columnDef.meta?.align === 'center'
+                                            ? 'text-center'
+                                            : cell.column.columnDef.meta?.align == 'right'
+                                            ? 'text-right'
+                                            : ''
+                                    } text-sm text-accent-600 px-3 h-[50px] border-b border-accent-200`}
                                     key={cell.id}
                                 >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
