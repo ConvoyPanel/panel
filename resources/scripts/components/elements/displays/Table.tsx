@@ -28,8 +28,8 @@ interface HeaderActionsProps {
     rows: Record<number, boolean>
 }
 
-interface RowActionsProps {
-    row: number
+export interface RowActionsProps<T> {
+    row: T
 }
 
 interface Props<T> {
@@ -37,7 +37,7 @@ interface Props<T> {
     data: T[]
     selectable?: boolean
     headerActions?: (payload: HeaderActionsProps) => ReactNode
-    rowActions?: (payload: RowActionsProps) => ReactNode
+    rowActions?: (payload: RowActionsProps<T>) => ReactNode
     minWidth?: number
 }
 
@@ -53,7 +53,8 @@ const StyledTr = styled.tr`
 type ThType = 'actions' | 'select'
 
 const getThClasses = (type: ThType, align?: Alignment) => {
-    let classes = 'font-normal whitespace-nowrap m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200'
+    let classes =
+        'font-normal whitespace-nowrap m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200'
 
     switch (type) {
         case 'actions':
@@ -144,9 +145,13 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                 <Menu.Button>
                                     <DottedButton className='relative mr-[1px]' />
                                 </Menu.Button>{' '}
-                                <Menu.Items marginTop='3rem'>{rowActions({ row: row.index })}</Menu.Items>
+                                <Menu.Items marginTop='8rem'>{rowActions({ row: row.original })}</Menu.Items>
                             </Menu>
                         ) : null,
+
+                    meta: {
+                        overflow: true,
+                    },
                 }),
             ]
         }
@@ -165,10 +170,13 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
     })
 
     return (
-        <div  className='overflow-auto scrollbar-hide'>
-            <table style={{
-            minWidth: minWidth ? `${minWidth}px` : '650px',
-        }} className='border-separate w-full border-spacing-0'>
+        <div className='overflow-auto scrollbar-hide'>
+            <table
+                style={{
+                    minWidth: minWidth ? `${minWidth}px` : '650px',
+                }}
+                className='border-separate w-full border-spacing-0'
+            >
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <StyledTr key={headerGroup.id}>

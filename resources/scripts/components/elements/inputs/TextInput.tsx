@@ -1,22 +1,18 @@
 import styled from '@emotion/styled'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { ChangeEventHandler, ComponentProps, ReactNode, useEffect, useState } from 'react'
+import { ChangeEventHandler, ComponentProps, FocusEvent, ReactNode, useEffect, useState } from 'react'
 import tw from 'twin.macro'
 
 export type Size = 'md' | 'lg'
 
-interface Input extends React.FC<InputProps> {}
+interface Input extends React.FC<TextInputProps> {}
 
-interface InputProps {
+export interface TextInputProps extends Omit<ComponentProps<'input'>, 'size' | 'prefix'> {
     prefix?: ReactNode
     suffix?: ReactNode
     error?: string
     label?: string
-    className?: string
-    disabled?: boolean
-    value?: string
     onChange?: ChangeEventHandler<HTMLInputElement>
-    name?: string
     placeholder?: string
     size?: Size
     wrapperClassName?: string
@@ -34,7 +30,7 @@ const StyledTextInput = styled.input<{
     ${({ _size }) => (_size === 'lg' ? tw`h-12` : tw`h-9 text-sm`)})}
 `
 
-const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, size, error, ...props }) => {
+const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, size, error, onBlur, onFocus, ...props }) => {
     const [focused, setFocused] = useState(false)
 
     useEffect(() => {
@@ -42,6 +38,16 @@ const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, 
             setFocused(false)
         }
     }, [props.disabled])
+
+    const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+        setFocused(false)
+        onBlur && onBlur(e)
+    }
+
+    const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+        setFocused(true)
+        onFocus && onFocus(e)
+    }
 
     return (
         <div className={wrapperClassName}>
@@ -56,8 +62,8 @@ const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, 
                 {prefix && <div className='grid place-items-center px-3 -mr-3'>{prefix}</div>}
                 <StyledTextInput
                     _size={size}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     error={error}
                     {...props}
                 />

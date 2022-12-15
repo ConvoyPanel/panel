@@ -48,22 +48,23 @@ Menu.Items = ({ children, marginTop }) => {
       {/* TODO: figure out how to automatically change position of menu based on available space */}
       <HMenu.Items style={{
         marginTop: marginTop ?? '0.25rem'
-      }} className='right-0 flex flex-col absolute w-56 p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm z-[1000]'>
+      }} className='right-0 flex flex-col absolute w-56 p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm z-[3000]'>
         {children}
       </HMenu.Items>
     </Transition>
   )
 }
 
-Menu.Item = ({ children, color, ...props }) => {
+Menu.Item = ({ children, color, disabled, ...props }) => {
   return (
     <HMenu.Item
       as='button'
-      className={`w-full text-left px-2 h-12 sm:h-9 disabled:!text-accent-300 bg-transparent disabled:!bg-transparent ${
-        color === 'danger'
-          ? 'text-error sm:hover:bg-error-lighter active:bg-error-lighter sm:active:bg-error-lighter'
-          : 'text-accent-500 sm:hover:bg-accent-200 sm:active:bg-accent-200 active:bg-accent-200'
+      className={`w-full text-left px-2 h-12 sm:h-9 bg-transparent ${
+        disabled ? 'text-accent-300 cursor-not-allowed' : color === 'danger'
+        ? 'text-error sm:hover:bg-error-lighter active:bg-error-lighter sm:active:bg-error-lighter'
+        : 'text-accent-500 sm:hover:bg-accent-200 sm:active:bg-accent-200 active:bg-accent-200'
       } rounded`}
+      disabled={disabled}
       {...props}
     >
       {children}

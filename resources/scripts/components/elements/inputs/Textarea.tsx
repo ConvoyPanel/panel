@@ -1,11 +1,11 @@
 import styled from '@emotion/styled'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { ComponentProps, useEffect, useState } from 'react'
+import { ComponentProps, FocusEvent, useEffect, useState } from 'react'
 import tw from 'twin.macro'
 
 export type Size = 'md' | 'lg'
 
-interface Props {
+export interface TextareaProps extends ComponentProps<'textarea'> {
     error?: string
     label?: string
     size?: Size
@@ -29,8 +29,10 @@ const Textarea = ({
     className,
     wrapperClassName,
     error,
+    onBlur,
+    onFocus,
     ...props
-}: Omit<ComponentProps<'textarea'>, 'size' | 'ref' | 'prefix' | 'onFocus' | 'onBlur'> & Props) => {
+}: Omit<ComponentProps<'textarea'>, 'size' | 'ref' | 'prefix' | 'onFocus' | 'onBlur'> & TextareaProps) => {
     const [focused, setFocused] = useState(false)
 
     useEffect(() => {
@@ -38,6 +40,16 @@ const Textarea = ({
             setFocused(false)
         }
     }, [props.disabled])
+
+    const handleBlur = (e: FocusEvent<HTMLTextAreaElement>) => {
+        setFocused(false)
+        onBlur && onBlur(e)
+    }
+
+    const handleFocus = (e: FocusEvent<HTMLTextAreaElement>) => {
+        setFocused(true)
+        onFocus && onFocus(e)
+    }
 
     return (
         <div className={wrapperClassName}>
@@ -50,8 +62,8 @@ const Textarea = ({
                 } ${className}`}
             >
                 <StyledTextarea
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     error={error}
                     {...props}
                 />
