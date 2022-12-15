@@ -170,12 +170,12 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
     })
 
     return (
-        <div className='overflow-auto scrollbar-hide'>
+        <div className='overflow-y-visible overflow-x-auto scrollbar-hide'>
             <table
                 style={{
                     minWidth: minWidth ? `${minWidth}px` : '650px',
                 }}
-                className='border-separate w-full border-spacing-0'
+                className='relative border-separate w-full border-spacing-0'
             >
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
