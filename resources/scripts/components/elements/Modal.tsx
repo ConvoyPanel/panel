@@ -47,7 +47,7 @@ Modal.Title = styled.h3`
 `
 
 Modal.Body = styled.div`
-${tw`p-6 bg-accent-100`}
+${tw`max-h-[50vh] overflow-y-auto p-6 bg-accent-100`}
 `
 
 Modal.Description = ({ children, bottomMargin }) => {

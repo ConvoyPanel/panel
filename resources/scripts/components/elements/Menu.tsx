@@ -1,6 +1,6 @@
-import { Menu as HMenu, Transition } from '@headlessui/react'
-import { ComponentProps, forwardRef, Fragment, ReactElement, ReactNode } from 'react'
-import { Float, FloatProps } from '@headlessui-float/react'
+import { Menu as HMenu } from '@headlessui/react'
+import { ComponentProps, forwardRef, ReactElement, ReactNode } from 'react'
+import { Float } from '@headlessui-float/react'
 
 interface ButtonProps {
     children?: ReactNode
