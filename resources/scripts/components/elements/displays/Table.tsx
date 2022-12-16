@@ -1,12 +1,11 @@
 import {
     useReactTable,
-    ColumnDef,
     getCoreRowModel,
     flexRender,
     createColumnHelper,
     AccessorFn,
 } from '@tanstack/react-table'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
 import Checkbox from '@/components/elements/inputs/Checkbox'
@@ -15,13 +14,15 @@ import Menu from '@/components/elements/Menu'
 
 export type Alignment = 'left' | 'center' | 'right'
 
-export interface Column<T, K extends keyof T = keyof T> {
+export interface Column<T, K extends keyof T> {
     header: string
     accessor: K
     align?: Alignment
     cell?: (payload: { value: T[K] }) => ReactNode
     overflow?: boolean
 }
+
+export type ColumnArray<T> = { [K in keyof T]-?: Column<T, K> }[keyof T][]
 
 interface HeaderActionsProps {
     rows: Record<number, boolean>
@@ -32,7 +33,7 @@ export interface RowActionsProps<T> {
 }
 
 interface Props<T> {
-    columns: Column<T>[]
+    columns: ColumnArray<T>
     data: T[]
     selectable?: boolean
     headerActions?: (payload: HeaderActionsProps) => ReactNode

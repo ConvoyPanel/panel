@@ -2,7 +2,7 @@ import { Node } from '@/api/admin/nodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import NewNodeModal from '@/components/admin/nodes/NewNodeModal'
 import Button from '@/components/elements/Button'
-import Table, { Column } from '@/components/elements/displays/Table'
+import Table, { Column, ColumnArray } from '@/components/elements/displays/Table'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
@@ -10,7 +10,7 @@ import { bytesToString } from '@/util/helpers'
 import usePagination from '@/util/usePagination'
 import { useState } from 'react'
 
-const columns: Column<Node>[] = [
+const columns: ColumnArray<Node> = [
     {
         accessor: 'name',
         header: 'Name',
@@ -22,12 +22,12 @@ const columns: Column<Node>[] = [
     {
         accessor: 'memory',
         header: 'Memory',
-        cell: ({ value }) => bytesToString(value as number),
+        cell: ({ value }) => bytesToString(value),
     },
     {
         accessor: 'disk',
         header: 'Disk',
-        cell: ({ value }) => bytesToString(value as number),
+        cell: ({ value }) => bytesToString(value),
     },
     {
         accessor: 'serversCount',
