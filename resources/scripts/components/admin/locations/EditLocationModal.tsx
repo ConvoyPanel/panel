@@ -8,6 +8,7 @@ import createLocation from '@/api/admin/locations/createLocation'
 import useFlash from '@/util/useFlash'
 import TextInputFormik from '@/components/elements/forms/TextInputFormik'
 import TextareaFormik from '@/components/elements/forms/TextareaFormik'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 
 interface Props {
     location?: Location
@@ -31,7 +32,7 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
         }),
         onSubmit: ({ shortCode, description }, { setSubmitting }) => {
             setSubmitting(true)
-            clearFlashes('admin:locations')
+            clearFlashes('admin:locations:edit')
 
             if (location) {
                 updateLocation(location.id, shortCode, description as string | undefined)
@@ -50,7 +51,7 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
                         )
                     })
                     .catch(error => {
-                        clearAndAddHttpError({ key: 'admin:locations', error })
+                        clearAndAddHttpError({ key: 'admin:locations:edit', error })
                         setSubmitting(false)
                     })
             } else {
@@ -68,7 +69,7 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
                         )
                     })
                     .catch(error => {
-                        clearAndAddHttpError({ key: 'admin:locations', error })
+                        clearAndAddHttpError({ key: 'admin:locations:edit', error })
                         setSubmitting(false)
                     })
             }
@@ -89,18 +90,14 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <TextInputFormik
-                            name='shortCode'
-                            placeholder='Name'
-                        />
-                        <TextareaFormik
-                            name='description'
-                            placeholder='Description'
-                            wrapperClassName='mt-3'
-                        />
+                        <FlashMessageRender className='mb-5' byKey={'admin:locations:edit'} />
+                        <TextInputFormik name='shortCode' placeholder='Name' />
+                        <TextareaFormik name='description' placeholder='Description' wrapperClassName='mt-3' />
                     </Modal.Body>
                     <Modal.Actions>
-                        <Modal.Action type='button' onClick={handleClose}>Cancel</Modal.Action>
+                        <Modal.Action type='button' onClick={handleClose}>
+                            Cancel
+                        </Modal.Action>
                         <Modal.Action type='submit' loading={form.isSubmitting}>
                             {location ? 'Update' : 'Create'}
                         </Modal.Action>
