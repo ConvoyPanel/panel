@@ -27,7 +27,7 @@ const LoginFormContainer = ({ title, description, children, submitting }: Props)
             { children }
           </div>
         </div>
-        <div className='flex justify-between items-center px-6 sm:px-0 py-3 w-full'>
+        <div className='flex justify-between px-6 sm:px-0 py-3 w-full'>
           <p className='text-xs text-stone-500'>&copy; 2020 - {new Date().getFullYear()} <a href='https://performave.com' target='_blank'>Performave</a></p>
           <Switch
             size='md'

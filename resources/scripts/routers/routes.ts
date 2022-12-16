@@ -57,6 +57,11 @@ const routes: Routes = {
         path: '/locations',
         name: 'Locations',
         component: lazy(() => import('@/components/admin/locations/LocationsContainer')),
+      },
+      {
+        path: '/nodes',
+        name: 'Nodes',
+        component: lazy(() => import('@/components/admin/nodes/NodesContainer')),
       }
     ]
   }

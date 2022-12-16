@@ -39,7 +39,7 @@ const PageContentBlock = ({
           {children}
         </ContentContainer>
         <ContentContainer>
-          <div className='flex items-center justify-between pb-8'>
+          <div className='flex justify-between pb-8'>
             <p className='text-xs text-stone-500'>
               &copy; 2020 - {new Date().getFullYear()}{' '}
               <a className='dark:hover:text-stone-400 hover:text-black' href='https://performave.com' target='_blank'>

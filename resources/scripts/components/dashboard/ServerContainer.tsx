@@ -40,7 +40,7 @@ const ServerContainer = () => {
     return (
         <>
             {rootAdmin && (
-                <div className='flex space-x-3 items-center justify-end mb-3'>
+                <div className='flex space-x-3 justify-end mb-3'>
                     <p className='description-small'>Show all servers</p>
                     <Switch checked={showOnlyAdmin} onChange={() => setShowOnlyAdmin(!showOnlyAdmin)} />
                 </div>
