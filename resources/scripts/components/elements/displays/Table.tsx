@@ -10,7 +10,6 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
 import Checkbox from '@/components/elements/inputs/Checkbox'
-import Scroller from '@/components/elements/Scroller'
 import { DottedButton } from '@/components/servers/backups/BackupRow'
 import Menu from '@/components/elements/Menu'
 
@@ -20,7 +19,7 @@ export interface Column<T, K extends keyof T = keyof T> {
     header: string
     accessor: K
     align?: Alignment
-    cell?: (payload: { value: T[K]}) => ReactNode
+    cell?: (payload: { value: T[K] }) => ReactNode
     overflow?: boolean
 }
 
@@ -52,13 +51,14 @@ const StyledTr = styled.tr`
 
 type ThType = 'actions' | 'select'
 
-const getThClasses = (type: ThType, align?: Alignment) => {
+const getThClasses = (type: ThType, align?: Alignment, hasHeaderActions?: boolean) => {
     let classes =
         'font-normal whitespace-nowrap m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200'
 
     switch (type) {
         case 'actions':
-            classes += ' right-0 sticky'
+            // only add if hasHeaderActions
+            if (hasHeaderActions) classes += ' sticky right-0'
             break
         case 'select':
             classes += ' w-10 text-left'
@@ -136,7 +136,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                             <Menu className='flex justify-center items-center'>
                                 <Menu.Button>
                                     <DottedButton className='relative' />
-                                </Menu.Button>{' '}
+                                </Menu.Button>
                                 <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
                             </Menu>
                         ) : null,
@@ -145,7 +145,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                             <Menu className='flex justify-center items-center'>
                                 <Menu.Button>
                                     <DottedButton className='relative mr-[1px]' />
-                                </Menu.Button>{' '}
+                                </Menu.Button>
                                 <Menu.Items marginTop='8rem'>{rowActions({ row: row.original })}</Menu.Items>
                             </Menu>
                         ) : null,
@@ -186,7 +186,8 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                     scope='col'
                                     className={getThClasses(
                                         header.column.columnDef.id as ThType,
-                                        header.column.columnDef.meta?.align
+                                        header.column.columnDef.meta?.align,
+                                        Boolean(headerActions)
                                     )}
                                     key={header.id}
                                 >
@@ -213,6 +214,8 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                             : cell.column.columnDef.meta?.align == 'right'
                                             ? 'text-right'
                                             : ''
+                                    } ${
+                                        cell.column.id === 'actions' && rowActions ? 'bg-background sticky right-0' : ''
                                     } text-sm text-accent-600 px-3 h-[50px] border-b border-accent-200`}
                                     key={cell.id}
                                 >

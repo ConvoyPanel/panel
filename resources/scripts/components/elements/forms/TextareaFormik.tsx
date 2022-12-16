@@ -5,8 +5,8 @@ import { forwardRef } from 'react'
 
 const TextareaFormik = forwardRef<HTMLInputElement, Omit<TextareaProps, 'error'>>(({ name, ...props }, ref) => (
     <FormikField innerRef={ref} name={name}>
-        {({ field, form: { errors, touched } }: FieldProps) => (
-            <Textarea {...field} {...props} error={touched[field.name] ? (errors[field.name] as string) : undefined} />
+        {({ field, meta: { error, touched } }: FieldProps) => (
+            <Textarea {...field} {...props} error={touched ? error : undefined} />
         )}
     </FormikField>
 ))

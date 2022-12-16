@@ -3,6 +3,7 @@ import updateNetwork from '@/api/server/settings/updateNetwork'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
+import TextInputFormik from '@/components/elements/forms/TextInputFormik'
 import FormSection from '@/components/elements/FormSection'
 import TextInput from '@/components/elements/inputs/TextInput'
 import { ServerContext } from '@/state/server'
@@ -31,7 +32,7 @@ const NetworkingContainer = () => {
                 yup
                     .string()
                     .matches(/(^(\d{1,3}\.){3}(\d{1,3})$)/, 'Invalid IPv4')
-                    .required('A name is required')
+                    .required('A nameserver is required')
             ),
         }),
         onSubmit: ({ nameservers }, { setSubmitting }) => {
@@ -69,15 +70,8 @@ const NetworkingContainer = () => {
                                         render={arrayHelpers => (
                                             <>
                                                 {form.values.nameservers.map((nameserver, idx) => (
-                                                    <TextInput
+                                                    <TextInputFormik
                                                         key={idx}
-                                                        value={form.values.nameservers[idx]}
-                                                        onChange={form.handleChange}
-                                                        error={
-                                                            form.errors.nameservers
-                                                                ? form.errors.nameservers[idx]
-                                                                : undefined
-                                                        }
                                                         disabled={form.isSubmitting}
                                                         name={`nameservers[${idx}]`}
                                                         label={`Nameserver ${idx + 1}`}
@@ -94,7 +88,7 @@ const NetworkingContainer = () => {
                                                 ))}
 
                                                 {form.values.nameservers.length < 2 && (
-                                                    <Button onClick={() => arrayHelpers.push('')}>
+                                                    <Button type='button' onClick={() => arrayHelpers.push('')}>
                                                         New Nameserver
                                                     </Button>
                                                 )}
