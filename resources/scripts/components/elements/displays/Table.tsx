@@ -16,11 +16,11 @@ import Menu from '@/components/elements/Menu'
 
 export type Alignment = 'left' | 'center' | 'right'
 
-export interface Column<T> {
+export interface Column<T, K extends keyof T = keyof T> {
     header: string
-    accessor: string
+    accessor: K
     align?: Alignment
-    cell?: ({ value }: { value: T }) => ReactNode
+    cell?: (payload: { value: T[K]}) => ReactNode
     overflow?: boolean
 }
 
@@ -90,6 +90,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
             const { accessor, header, cell, ...rest } = column
 
             return columnHelper.accessor(accessor as unknown as AccessorFn<T, any>, {
+                // @ts-expect-error
                 id: accessor,
                 header,
                 cell: info => (cell ? cell({ value: info.getValue() }) : info.getValue()),

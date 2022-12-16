@@ -24,7 +24,7 @@ const ServerTerminalContainer = () => {
 
     getTerminalToken(uuid).then((data) => {
       // @ts-expect-error
-      window.location = `https://${data.hostname}:${
+      window.location = `https://${data.fqdn}:${
         data.port
       }/novnc/novnc.html?console=qemu&virtualization=qemu&node=${encodeURIComponent(
         data.node

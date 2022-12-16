@@ -66,7 +66,7 @@ class ServerController extends ApplicationApiController
             'token' => $data,
             'node' => $server->node->cluster,
             'vmid' => $server->vmid,
-            'hostname' => $server->node->hostname,
+            'fqdn' => $server->node->fqdn,
             'port' => $server->node->port,
         ], new ServerTerminalTransformer)->respond();
     }

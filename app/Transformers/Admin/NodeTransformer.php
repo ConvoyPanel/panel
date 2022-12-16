@@ -7,32 +7,23 @@ use League\Fractal\TransformerAbstract;
 
 class NodeTransformer extends TransformerAbstract
 {
-    /**
-     * List of resources possible to include
-     *
-     * @var array
-     */
-    protected array $availableIncludes = [
-        //
-    ];
-
-    /**
-     * A Fractal transformer.
-     *
-     * @return array
-     */
-    public function transform(Node $node)
+    public function transform(Node $node): array
     {
         return [
             'id' => $node->id,
+            'location_id' => $node->location_id,
             'name' => $node->name,
             'cluster' => $node->cluster,
-            'hostname' => $node->hostname,
+            'fqdn' => $node->fqdn,
             'port' => $node->port,
-            'latency' => $node->latency,
-            'last_pinged' => $node->last_pinged,
-            'created_at' => $node->created_at,
-            'updated_at' => $node->updated_at,
+            'memory' => $node->memory,
+            'memory_overallocate' => $node->memory_overallocate,
+            'disk' => $node->disk,
+            'disk_overallocate' => $node->disk_overallocate,
+            'vm_storage' => $node->vm_storage,
+            'backup_storage' => $node->backup_storage,
+            'network' => $node->network,
+            'servers_count' => $node->servers_count
         ];
     }
 }

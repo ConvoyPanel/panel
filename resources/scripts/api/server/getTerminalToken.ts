@@ -4,7 +4,7 @@ interface Response {
     token: string
     node: string
     vmid: number
-    hostname: string
+    fqdn: string
     port: number
 }
 
