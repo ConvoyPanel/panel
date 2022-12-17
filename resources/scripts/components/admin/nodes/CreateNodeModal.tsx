@@ -134,7 +134,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>New Node</Modal.Title>
+                <Modal.Title>Create a Node</Modal.Title>
             </Modal.Header>
 
             <FormikProvider value={form}>
