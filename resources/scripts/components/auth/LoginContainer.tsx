@@ -6,9 +6,12 @@ import useFlash from '@/util/useFlash'
 import { useEffect } from 'react'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const LoginContainer = () => {
   const { clearFlashes, clearAndAddHttpError } = useFlash()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     document.title = 'Login | Convoy'
@@ -32,9 +35,8 @@ const LoginContainer = () => {
       clearFlashes()
 
       login(values)
-        .then((response) => {
-          // @ts-expect-error
-          window.location = '/'
+        .then(() => {
+          window.location = location.state?.from.pathname || '/'
         })
         .catch((error) => {
           console.error(error)
