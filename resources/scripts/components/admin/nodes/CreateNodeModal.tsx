@@ -56,9 +56,9 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             secret: '',
             fqdn: '',
             port: 8006,
-            memory: 0,
+            memory: undefined as number | undefined,
             memoryOverallocate: 0,
-            disk: 0,
+            disk: undefined as number | undefined,
             diskOverallocate: 0,
             vmStorage: '',
             backupStorage: '',
@@ -105,8 +105,8 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             clearFlashes('admin:nodes:create')
             createNode({
                 locationId: locationId!,
-                memory: memory * 1048576,
-                disk: disk * 1048576,
+                memory: memory! * 1048576,
+                disk: disk! * 1048576,
                 ...values,
             })
                 .then(node => {
