@@ -143,7 +143,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                     <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
                     <SelectFormik
                         label='Location Group'
-                        placeholder='Pick one'
+                        placeholder='fuk u chit'
                         data={locations}
                         searchable
                         searchValue={query}
