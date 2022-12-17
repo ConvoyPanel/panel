@@ -20,8 +20,8 @@ class LocationTransformer extends TransformerAbstract
             'id' => $location->id,
             'short_code' => $location->short_code,
             'description' => $location->description,
-            'nodes_count' => $location->nodes_count,
-            'servers_count' => $location->servers_count,
+            'nodes_count' => (int) $location->nodes_count,
+            'servers_count' => (int) $location->servers_count,
         ];
     }
 }

@@ -23,7 +23,7 @@ class NodeTransformer extends TransformerAbstract
             'vm_storage' => $node->vm_storage,
             'backup_storage' => $node->backup_storage,
             'network' => $node->network,
-            'servers_count' => $node->servers_count
+            'servers_count' => (int) $node->servers_count
         ];
     }
 }

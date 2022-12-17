@@ -1,4 +1,4 @@
-import Table, { RowActionsProps } from '@/components/elements/displays/Table'
+import Table, { ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import useSWR from 'swr'
 import usePagination from '@/util/usePagination'
@@ -12,7 +12,7 @@ import { useState } from 'react'
 import Menu from '@/components/elements/Menu'
 import deleteLocation from '@/api/admin/locations/deleteLocation'
 
-const columns: Column<Location>[] = [
+const columns: ColumnArray<Location> = [
     {
         header: 'Short Code',
         accessor: 'shortCode',

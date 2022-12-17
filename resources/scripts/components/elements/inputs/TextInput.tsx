@@ -1,3 +1,4 @@
+import ErrorMessage from '@/components/elements/ErrorMessage'
 import styled from '@emotion/styled'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { ChangeEventHandler, ComponentProps, FocusEvent, ReactNode, useEffect, useState } from 'react'
@@ -51,7 +52,7 @@ const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, 
 
     return (
         <div className={wrapperClassName}>
-            {label && <label className='text-xs font-medium text-accents-500'>{label}</label>}
+            {label && <label className='text-xs font-medium text-accent-500'>{label}</label>}
             <div
                 className={`flex border ${
                     error ? 'border-error' : focused ? 'border-accent-500' : 'border-accent-200'
@@ -70,10 +71,7 @@ const TextInput: Input = ({ label, className, prefix, suffix, wrapperClassName, 
                 {suffix && <div className='grid place-items-center px-3 -ml-3'>{suffix}</div>}
             </div>
             {error && (
-                <div className='flex space-x-1 mt-2'>
-                    <ExclamationCircleIcon className='h-5 w-5 text-error' />{' '}
-                    <p className='text-sm text-error'>{error}</p>
-                </div>
+                <ErrorMessage>{ error }</ErrorMessage>
             )}
         </div>
     )

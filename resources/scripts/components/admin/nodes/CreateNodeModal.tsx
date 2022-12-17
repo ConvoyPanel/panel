@@ -1,7 +1,15 @@
+import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
+import { createNode, NodeResponse } from '@/api/admin/nodes'
+import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import SelectFormik from '@/components/elements/forms/SelectFormik'
 import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import Select from '@/components/elements/inputs/Select'
 import Modal from '@/components/elements/Modal'
 import useFlash from '@/util/useFlash'
+import { debounce } from 'debounce'
 import { FormikProvider, useFormik } from 'formik'
+import { useCallback, useMemo, useState } from 'react'
 import * as yup from 'yup'
 
 interface Props {
@@ -9,8 +17,35 @@ interface Props {
     onClose: () => void
 }
 
-const NewNodeModal = ({ open, onClose }: Props) => {
+const CreateNodeModal = ({ open, onClose }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
+
+    const [loadingQuery, setLoadingQuery] = useState(false)
+    const [query, setQuery] = useState('')
+    const { mutate: mutateNodes } = useNodesSWR({page:1})
+    const { data, mutate } = useLocationsSWR({ query })
+
+    const locations = useMemo(
+        () =>
+            data?.items.map(location => ({
+                value: location.id.toString(),
+                label: location.shortCode,
+            })) ?? [],
+        [data]
+    )
+
+    const search = useCallback(
+        debounce(() => {
+            setLoadingQuery(true)
+            mutate().then(() => setLoadingQuery(false))
+        }, 500),
+        []
+    )
+
+    const handleOnSearch = (query: string) => {
+        setQuery(query)
+        search()
+    }
 
     const form = useFormik({
         initialValues: {
@@ -65,7 +100,30 @@ const NewNodeModal = ({ open, onClose }: Props) => {
                 .max(191, 'Please limit up to 191 characters'),
             network: yup.string().required('Specify a network').max(191, 'Please limit up to 191 characters'),
         }),
-        onSubmit: (values, { setSubmitting }) => {},
+        onSubmit: ({ memory, disk, locationId, ...values }, { setSubmitting }) => {
+            setSubmitting(true)
+            clearFlashes('admin:nodes:create')
+            createNode({
+                locationId: locationId!,
+                memory: memory * 1048576,
+                disk: disk * 1048576,
+                ...values,
+            })
+                .then(node => {
+                    mutateNodes(
+                        data =>
+                            ({
+                                ...data,
+                                items: [node].concat(data!.items),
+                            } as NodeResponse), false
+                    )
+                    handleClose()
+                })
+                .catch(error => {
+                    clearAndAddHttpError({ key: 'admin:nodes:create', error })
+                    setSubmitting(false)
+                })
+        },
     })
 
     const handleClose = () => {
@@ -80,7 +138,20 @@ const NewNodeModal = ({ open, onClose }: Props) => {
             </Modal.Header>
 
             <FormikProvider value={form}>
+                <form onSubmit={form.handleSubmit}>
                 <Modal.Body>
+                    <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
+                    <SelectFormik
+                        label='Location Group'
+                        placeholder='Pick one'
+                        data={locations}
+                        searchable
+                        searchValue={query}
+                        onSearchChange={handleOnSearch}
+                        loading={data === undefined || loadingQuery}
+                        nothingFound='No locations found'
+                        name='locationId'
+                    />
                     <TextInputFormik name='name' label='Display Name' />
                     <TextInputFormik name='cluster' label='Cluster' />
                     <div className='grid gap-3 grid-cols-2'>
@@ -111,9 +182,10 @@ const NewNodeModal = ({ open, onClose }: Props) => {
                         Create
                     </Modal.Action>
                 </Modal.Actions>
+                </form>
             </FormikProvider>
         </Modal>
     )
 }
 
-export default NewNodeModal
+export default CreateNodeModal

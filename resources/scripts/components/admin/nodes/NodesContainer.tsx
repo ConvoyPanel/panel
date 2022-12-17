@@ -1,6 +1,6 @@
 import { Node } from '@/api/admin/nodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import NewNodeModal from '@/components/admin/nodes/NewNodeModal'
+import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
 import Button from '@/components/elements/Button'
 import Table, { Column, ColumnArray } from '@/components/elements/displays/Table'
 import PageContentBlock from '@/components/elements/PageContentBlock'
@@ -45,7 +45,7 @@ const NodesContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <PageContentBlock title='Nodes' showFlashKey='admin:nodes'>
-                <NewNodeModal open={open} onClose={() => setOpen(false)} />
+                <CreateNodeModal open={open} onClose={() => setOpen(false)} />
                 <div className='flex justify-end items-center mb-3'>
                     <Button onClick={() => setOpen(true)} variant='filled'>
                         New Node

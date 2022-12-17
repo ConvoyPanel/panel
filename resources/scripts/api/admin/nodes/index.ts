@@ -11,8 +11,8 @@ export interface Node {
     memoryOverallocate: number
     disk: number
     diskOverallocate: number
-    vmStorage: number
-    backupStorage: number
+    vmStorage: string
+    backupStorage: string
     network: string
     serversCount: number
 }
@@ -61,4 +61,30 @@ export const getNodes = async ({
         ),
         pagination: getPaginationSet(data.meta.pagination),
     }
+}
+
+interface CreateNodeParameters extends Omit<Node, 'id' | 'serversCount'> {
+    tokenId: string
+    secret: string
+}
+
+export const createNode = async (data: CreateNodeParameters): Promise<Node> => {
+    const { data: { data: responseData } } = await http.post('/api/admin/nodes', {
+        location_id: data.locationId,
+        name: data.name,
+        cluster: data.cluster,
+        fqdn: data.fqdn,
+        token_id: data.tokenId,
+        secret: data.secret,
+        port: data.port,
+        memory: data.memory,
+        memory_overallocate: data.memoryOverallocate,
+        disk: data.disk,
+        disk_overallocate: data.diskOverallocate,
+        vm_storage: data.vmStorage,
+        backup_storage: data.backupStorage,
+        network: data.network,
+    })
+
+    return rawDataToNode(responseData)
 }

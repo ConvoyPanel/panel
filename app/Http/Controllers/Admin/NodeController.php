@@ -3,6 +3,7 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Models\Node;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
@@ -18,6 +19,13 @@ class NodeController extends ApplicationApiController
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($nodes, new NodeTransformer())->respond();
+    }
+
+    public function store(StoreNodeRequest $request)
+    {
+        $node = Node::create($request->validated());
+
+        return fractal($node, new NodeTransformer)->respond();
     }
 
     public function destroy(Node $node)

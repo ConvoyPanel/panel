@@ -1,3 +1,4 @@
+import ErrorMessage from '@/components/elements/ErrorMessage'
 import styled from '@emotion/styled'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { ComponentProps, FocusEvent, useEffect, useState } from 'react'
@@ -69,10 +70,7 @@ const Textarea = ({
                 />
             </div>
             {error && (
-                <div className='flex space-x-1 mt-2'>
-                    <ExclamationCircleIcon className='h-5 w-5 text-error' />{' '}
-                    <p className='text-sm text-error'>{error}</p>
-                </div>
+                <ErrorMessage>{ error }</ErrorMessage>
             )}
         </div>
     )

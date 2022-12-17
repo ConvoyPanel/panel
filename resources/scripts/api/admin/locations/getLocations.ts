@@ -16,7 +16,7 @@ export const rawDataToLocation = (data: FractalResponseData): Location => ({
     serversCount: data.servers_count,
 })
 
-interface QueryParams {
+export interface QueryParams {
     query?: string
     page?: number
     perPage?: number
@@ -33,7 +33,7 @@ export default ({
         http
             .get('/api/admin/locations', {
                 params: {
-                    'filter[name]': query,
+                    'filter[short_code]': query,
                     per_page: perPage,
                     ...params,
                 },
