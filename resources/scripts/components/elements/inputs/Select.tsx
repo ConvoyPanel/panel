@@ -31,7 +31,7 @@ const StyledSelect = styled(MantineSelect)`
         !itemComponent
             ? css`
                   & .mantine-Select-item {
-                      ${tw`px-2 h-12 sm:h-9 hover:bg-accent-200 text-accent-500`}
+                      ${tw`px-2 h-12 sm:h-9 hover:bg-accent-200 text-accent-500 flex items-center`}
                   }
 
                   & .mantine-Select-item[data-selected] {
