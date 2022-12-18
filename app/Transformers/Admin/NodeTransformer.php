@@ -18,12 +18,14 @@ class NodeTransformer extends TransformerAbstract
             'port' => $node->port,
             'memory' => $node->memory,
             'memory_overallocate' => $node->memory_overallocate,
+            'memory_allocated' => $node->memory_allocated,
             'disk' => $node->disk,
             'disk_overallocate' => $node->disk_overallocate,
+            'disk_allocated' => $node->disk_allocated,
             'vm_storage' => $node->vm_storage,
             'backup_storage' => $node->backup_storage,
             'network' => $node->network,
-            'servers_count' => (int) $node->servers_count
+            'servers_count' => (int) $node->servers_count,
         ];
     }
 }

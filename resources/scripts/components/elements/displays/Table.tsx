@@ -81,7 +81,7 @@ interface ActionProps {
 
 export const Actions = ({ children }: ActionProps) => (
     <Menu className='flex justify-end items-center'>
-        <Menu.Button>
+        <Menu.Button className='grid place-items-center'>
             <DottedButton className='relative mr-[1px]' />
         </Menu.Button>
         <Menu.Items marginTop='8rem'>{children}</Menu.Items>

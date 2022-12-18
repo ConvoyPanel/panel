@@ -4,6 +4,7 @@ import { Float } from '@headlessui-float/react'
 
 interface ButtonProps {
     children?: ReactNode
+    className?: string
 }
 
 interface ItemsProps {
@@ -48,9 +49,9 @@ const Menu: Menu = ({ children, className }) => {
     )
 }
 
-Menu.Button = forwardRef<HTMLDivElement, ButtonProps>(({ children }, ref) => {
+Menu.Button = forwardRef<HTMLDivElement, ButtonProps>(({ children, className }, ref) => {
     return (
-        <HMenu.Button ref={ref} as='div'>
+        <HMenu.Button className={className} ref={ref} as='div'>
             {children}
         </HMenu.Button>
     )

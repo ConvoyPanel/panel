@@ -9,8 +9,10 @@ export interface Node {
     port: number
     memory: number
     memoryOverallocate: number
+    memoryAllocated: number
     disk: number
     diskOverallocate: number
+    diskAllocated: number
     vmStorage: string
     backupStorage: string
     network: string
@@ -26,8 +28,10 @@ export const rawDataToNode = (data: any): Node => ({
     port: data.port,
     memory: data.memory,
     memoryOverallocate: data.memory_overallocate,
+    memoryAllocated: data.memory_allocated,
     disk: data.disk,
     diskOverallocate: data.disk_overallocate,
+    diskAllocated: data.disk_allocated,
     vmStorage: data.vm_storage,
     backupStorage: data.backup_storage,
     network: data.network,

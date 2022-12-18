@@ -15,10 +15,6 @@ class Node extends Model
         'disk' => MegabytesAndBytes::class,
     ];
 
-    protected $appends = [
-        'disk_usage',
-    ];
-
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     public static $validationRules = [
@@ -67,12 +63,12 @@ class Node extends Model
         return 'id';
     }
 
-    public function getDiskUsageAttribute()
+    public function getDiskAllocatedAttribute()
     {
         return $this->servers->sum('disk');
     }
 
-    public function getMemoryUsageAttribute()
+    public function getMemoryAllocatedAttribute()
     {
         return $this->servers->sum('memory');
     }

@@ -15,6 +15,7 @@ class NodeController extends ApplicationApiController
     public function index(Request $request)
     {
         $nodes = QueryBuilder::for(Node::query())
+            ->with('servers')
             ->withCount(['servers'])
             ->allowedFilters(['name', 'hostname'])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
@@ -24,6 +25,8 @@ class NodeController extends ApplicationApiController
 
     public function show(Node $node)
     {
+        $node->append(['memory_allocated', 'disk_allocated']);
+
         return fractal($node, new NodeTransformer())->respond();
     }
 
