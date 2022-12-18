@@ -167,3 +167,7 @@ a {
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.link {
+  @apply border-b border-dashed border-accent-300
+}

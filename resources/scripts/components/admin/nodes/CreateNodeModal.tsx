@@ -1,5 +1,6 @@
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
-import { createNode, NodeResponse } from '@/api/admin/nodes'
+import createNode from '@/api/admin/nodes/createNode'
+import { NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import SelectFormik from '@/components/elements/forms/SelectFormik'

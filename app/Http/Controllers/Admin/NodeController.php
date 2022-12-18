@@ -8,6 +8,7 @@ use Convoy\Models\Node;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class NodeController extends ApplicationApiController
 {
@@ -30,6 +31,12 @@ class NodeController extends ApplicationApiController
 
     public function destroy(Node $node)
     {
+        $node->loadCount('servers');
+
+        if ($node->servers_count > 0) {
+            throw new BadRequestHttpException('The node cannot be deleted with servers still associated.');
+        }
+
         $node->delete();
 
         return $this->returnNoContent();

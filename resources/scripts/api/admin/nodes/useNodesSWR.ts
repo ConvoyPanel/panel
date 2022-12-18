@@ -1,4 +1,4 @@
-import { getNodes, NodeResponse, QueryParams } from '@/api/admin/nodes'
+import getNodes, { NodeResponse, QueryParams } from '@/api/admin/nodes/getNodes'
 import useSWR from 'swr'
 
 const useNodesSWR = ({page, ...params}: QueryParams) => {

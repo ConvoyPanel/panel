@@ -29,7 +29,7 @@ interface ItemProps extends Omit<ComponentProps<'button'>, 'className'> {
 
 const Menu: Menu = ({ children, className }) => {
     return (
-        <HMenu>
+        <HMenu as='div' className={className}>
             <Float
                 placement='bottom-end'
                 flip

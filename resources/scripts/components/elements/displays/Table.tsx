@@ -18,7 +18,7 @@ export interface Column<T, K extends keyof T> {
     header: string
     accessor: K
     align?: Alignment
-    cell?: (payload: { value: T[K] }) => ReactNode
+    cell?: (payload: { value: T[K], row: T }) => ReactNode
     overflow?: boolean
 }
 
@@ -94,7 +94,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                 // @ts-expect-error
                 id: accessor,
                 header,
-                cell: info => (cell ? cell({ value: info.getValue() }) : info.getValue()),
+                cell: info => (cell ? cell({ value: info.getValue(), row: info.row.original }) : info.getValue()),
                 meta: rest,
             })
         })
@@ -134,7 +134,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                     id: 'actions',
                     header: () =>
                         headerActions ? (
-                            <Menu className='flex justify-center items-center'>
+                            <Menu className='flex justify-end items-center'>
                                 <Menu.Button>
                                     <DottedButton className='relative' />
                                 </Menu.Button>
@@ -143,7 +143,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                         ) : null,
                     cell: ({ row }) =>
                         rowActions ? (
-                            <Menu className='flex justify-center items-center'>
+                            <Menu className='flex justify-end items-center'>
                                 <Menu.Button>
                                     <DottedButton className='relative mr-[1px]' />
                                 </Menu.Button>

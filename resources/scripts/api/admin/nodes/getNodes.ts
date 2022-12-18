@@ -34,15 +34,16 @@ export const rawDataToNode = (data: any): Node => ({
     serversCount: data.servers_count,
 })
 
+export type NodeResponse = PaginatedResult<Node>
+
 export interface QueryParams {
     query?: string
     page?: number
     perPage?: number
 }
 
-export type NodeResponse = PaginatedResult<Node>
 
-export const getNodes = async ({
+const getNodes = async ({
     query,
     perPage = 50,
     ...params
@@ -63,28 +64,4 @@ export const getNodes = async ({
     }
 }
 
-interface CreateNodeParameters extends Omit<Node, 'id' | 'serversCount'> {
-    tokenId: string
-    secret: string
-}
-
-export const createNode = async (data: CreateNodeParameters): Promise<Node> => {
-    const { data: { data: responseData } } = await http.post('/api/admin/nodes', {
-        location_id: data.locationId,
-        name: data.name,
-        cluster: data.cluster,
-        fqdn: data.fqdn,
-        token_id: data.tokenId,
-        secret: data.secret,
-        port: data.port,
-        memory: data.memory,
-        memory_overallocate: data.memoryOverallocate,
-        disk: data.disk,
-        disk_overallocate: data.diskOverallocate,
-        vm_storage: data.vmStorage,
-        backup_storage: data.backupStorage,
-        network: data.network,
-    })
-
-    return rawDataToNode(responseData)
-}
+export default getNodes

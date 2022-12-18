@@ -11,6 +11,7 @@ import EditLocationModal from '@/components/admin/locations/EditLocationModal'
 import { useState } from 'react'
 import Menu from '@/components/elements/Menu'
 import deleteLocation from '@/api/admin/locations/deleteLocation'
+import useFlash from '@/util/useFlash'
 
 const columns: ColumnArray<Location> = [
     {
@@ -37,6 +38,7 @@ const columns: ColumnArray<Location> = [
 const LocationsContainer = () => {
     const [page, setPage] = usePagination()
     const [open, setOpen] = useState(false)
+    const { clearFlashes, clearAndAddHttpError } = useFlash()
 
     const { data, mutate } = useSWR(['admin:locations', page], () => getLocations({ page }))
 
@@ -44,13 +46,13 @@ const LocationsContainer = () => {
 
     const rowActions = ({ row: loc }: RowActionsProps<Location>) => {
         const handleEdit = () => {
-            console.log(loc)
             setLocation(loc)
             setOpen(true)
         }
 
         const handleDelete = () => {
-            console.log(loc)
+            clearFlashes('admin:locations')
+
             deleteLocation(loc.id)
                 .then(() => {
                     mutate(
@@ -62,7 +64,7 @@ const LocationsContainer = () => {
                     )
                 })
                 .catch(error => {
-                    console.error(error)
+                    clearAndAddHttpError({ key: 'admin:locations', error })
                 })
         }
 

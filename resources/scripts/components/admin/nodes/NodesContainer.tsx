@@ -1,19 +1,24 @@
-import { Node } from '@/api/admin/nodes'
+import deleteNode from '@/api/admin/nodes/deleteNode'
+import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
 import Button from '@/components/elements/Button'
-import Table, { Column, ColumnArray } from '@/components/elements/displays/Table'
+import Table, { Column, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import Menu from '@/components/elements/Menu'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
 import { bytesToString } from '@/util/helpers'
+import useFlash from '@/util/useFlash'
 import usePagination from '@/util/usePagination'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const columns: ColumnArray<Node> = [
     {
         accessor: 'name',
         header: 'Name',
+        cell: ({ value, row }) => <Link to={`/admin/nodes/${row.id}`} className='link text-foreground'>{value}</Link>
     },
     {
         accessor: 'fqdn',
@@ -39,8 +44,36 @@ const columns: ColumnArray<Node> = [
 const NodesContainer = () => {
     const [page, setPage] = usePagination()
     const [open, setOpen] = useState(false)
+    const { clearFlashes, clearAndAddHttpError } = useFlash()
 
-    const { data } = useNodesSWR({ page })
+    const { data, mutate } = useNodesSWR({ page })
+
+    const rowActions = ({ row: node }: RowActionsProps<Node>) => {
+        const handleDelete = () => {
+            clearFlashes('admin:nodes')
+
+            deleteNode(node.id)
+                .then(() => {
+                    mutate(
+                        mutateData =>
+                            ({
+                                ...mutateData,
+                                items: mutateData!.items.filter(n => n.id !== node.id),
+                            } as NodeResponse),
+                        false
+                    )
+                })
+                .catch(error => {
+                    clearAndAddHttpError({ key: 'admin:nodes', error })
+                })
+        }
+
+        return (
+            <Menu.Item color='danger' disabled={node.serversCount > 0} onClick={handleDelete}>
+                Delete
+            </Menu.Item>
+        )
+    }
 
     return (
         <div className='bg-background min-h-screen'>
@@ -55,7 +88,7 @@ const NodesContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table columns={columns} data={items} />}
+                        {({ items }) => <Table rowActions={rowActions} columns={columns} data={items} />}
                     </Pagination>
                 )}
             </PageContentBlock>
