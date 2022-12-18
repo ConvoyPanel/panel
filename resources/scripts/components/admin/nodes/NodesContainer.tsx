@@ -3,7 +3,7 @@ import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
 import Button from '@/components/elements/Button'
-import Table, { Column, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import Table, { Actions, Column, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
 import Menu from '@/components/elements/Menu'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
@@ -18,7 +18,11 @@ const columns: ColumnArray<Node> = [
     {
         accessor: 'name',
         header: 'Name',
-        cell: ({ value, row }) => <Link to={`/admin/nodes/${row.id}`} className='link text-foreground'>{value}</Link>
+        cell: ({ value, row }) => (
+            <Link to={`/admin/nodes/${row.id}`} className='link text-foreground'>
+                {value}
+            </Link>
+        ),
     },
     {
         accessor: 'fqdn',
@@ -69,9 +73,11 @@ const NodesContainer = () => {
         }
 
         return (
-            <Menu.Item color='danger' disabled={node.serversCount > 0} onClick={handleDelete}>
-                Delete
-            </Menu.Item>
+            <Actions>
+                <Menu.Item color='danger' disabled={node.serversCount > 0} onClick={handleDelete}>
+                    Delete
+                </Menu.Item>
+            </Actions>
         )
     }
 

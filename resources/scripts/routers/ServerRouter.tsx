@@ -2,7 +2,7 @@ import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, {
   NotFound,
-  ServerError,
+  ErrorMessage,
 } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/routes'
@@ -60,7 +60,7 @@ const ServerRouter = () => {
       <NavigationBar routes={visibleRoutes} breadcrumb={server?.name} />
       {!server ? (
         error ? (
-          <ServerError message={error} />
+          <ErrorMessage message={error} />
         ) : (
           <Spinner />
         )

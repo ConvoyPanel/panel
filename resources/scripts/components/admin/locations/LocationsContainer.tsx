@@ -1,4 +1,4 @@
-import Table, { ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import useSWR from 'swr'
 import usePagination from '@/util/usePagination'
@@ -69,13 +69,13 @@ const LocationsContainer = () => {
         }
 
         return (
-            <>
+            <Actions>
                 <Menu.Item onClick={handleEdit}>Edit</Menu.Item>
                 <Menu.Divider />
                 <Menu.Item color='danger' disabled={loc.nodesCount > 0} onClick={handleDelete}>
                     Delete
                 </Menu.Item>
-            </>
+            </Actions>
         )
     }
 

@@ -23,7 +23,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
 
     const [loadingQuery, setLoadingQuery] = useState(false)
     const [query, setQuery] = useState('')
-    const { mutate: mutateNodes } = useNodesSWR({page:1})
+    const { mutate: mutateNodes } = useNodesSWR({ page: 1 })
     const { data, mutate } = useLocationsSWR({ query })
 
     const locations = useMemo(
@@ -81,17 +81,20 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                 .max(191, 'Please limit up to 191 characters'),
             port: yup
                 .number()
+                .integer()
                 .required('Specify a port')
                 .min(1, 'Please specify a valid port')
                 .max(65535, 'Please specify a valid port'),
-            memory: yup.number().required('Specify a memory').min(0, 'Please specify a valid memory'),
+            memory: yup.number().integer().required('Specify a memory').min(0, 'Please specify a valid memory'),
             memoryOverallocate: yup
                 .number()
+                .integer()
                 .required('Specify a memory overallocate')
                 .min(0, 'Please specify a valid memory overallocate'),
-            disk: yup.number().required('Specify a disk').min(0, 'Please specify a valid disk'),
+            disk: yup.number().integer().required('Specify a disk').min(0, 'Please specify a valid disk'),
             diskOverallocate: yup
                 .number()
+                .integer()
                 .required('Specify a disk overallocate')
                 .min(0, 'Please specify a valid disk overallocate'),
             vmStorage: yup.string().required('Specify a VM storage').max(191, 'Please limit up to 191 characters'),
@@ -116,7 +119,8 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                             ({
                                 ...data,
                                 items: [node].concat(data!.items),
-                            } as NodeResponse), false
+                            } as NodeResponse),
+                        false
                     )
                     handleClose()
                 })
@@ -140,49 +144,49 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
 
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
-                <Modal.Body>
-                    <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
-                    <SelectFormik
-                        label='Location Group'
-                        placeholder='fuk u chit'
-                        data={locations}
-                        searchable
-                        searchValue={query}
-                        onSearchChange={handleOnSearch}
-                        loading={data === undefined || loadingQuery}
-                        nothingFound='No locations found'
-                        name='locationId'
-                    />
-                    <TextInputFormik name='name' label='Display Name' />
-                    <TextInputFormik name='cluster' label='Cluster' />
-                    <div className='grid gap-3 grid-cols-2'>
-                        <TextInputFormik name='tokenId' label='Token ID' />
-                        <TextInputFormik name='secret' label='Secret' />
-                    </div>
-                    <TextInputFormik name='fqdn' label='FQDN' />
-                    <TextInputFormik name='port' label='Port' />
-                    <div className='grid gap-3 grid-cols-2'>
-                        <TextInputFormik name='memory' label='Memory (MiB)' />
-                        <TextInputFormik name='memoryOverallocate' label='Memory Overallocate' />
-                    </div>
-                    <div className='grid gap-3 grid-cols-2'>
-                        <TextInputFormik name='disk' label='Disk (MiB)' />
-                        <TextInputFormik name='diskOverallocate' label='Disk Overallocate' />
-                    </div>
-                    <div className='grid gap-3 grid-cols-3'>
-                        <TextInputFormik name='vmStorage' label='VM Storage' placeholder='local' />
-                        <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
-                        <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
-                    </div>
-                </Modal.Body>
-                <Modal.Actions>
-                    <Modal.Action type='button' onClick={handleClose}>
-                        Cancel
-                    </Modal.Action>
-                    <Modal.Action type='submit' loading={form.isSubmitting}>
-                        Create
-                    </Modal.Action>
-                </Modal.Actions>
+                    <Modal.Body>
+                        <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
+                        <SelectFormik
+                            label='Location Group'
+                            placeholder='fuk u chit'
+                            data={locations}
+                            searchable
+                            searchValue={query}
+                            onSearchChange={handleOnSearch}
+                            loading={data === undefined || loadingQuery}
+                            nothingFound='No locations found'
+                            name='locationId'
+                        />
+                        <TextInputFormik name='name' label='Display Name' />
+                        <TextInputFormik name='cluster' label='Cluster' />
+                        <div className='grid gap-3 grid-cols-2'>
+                            <TextInputFormik name='tokenId' label='Token ID' />
+                            <TextInputFormik name='secret' label='Secret' />
+                        </div>
+                        <TextInputFormik name='fqdn' label='FQDN' />
+                        <TextInputFormik name='port' label='Port' />
+                        <div className='grid gap-3 grid-cols-2'>
+                            <TextInputFormik name='memory' label='Memory (MiB)' />
+                            <TextInputFormik name='memoryOverallocate' label='Memory Overallocate (%)' />
+                        </div>
+                        <div className='grid gap-3 grid-cols-2'>
+                            <TextInputFormik name='disk' label='Disk (MiB)' />
+                            <TextInputFormik name='diskOverallocate' label='Disk Overallocate (%)' />
+                        </div>
+                        <div className='grid gap-3 grid-cols-3'>
+                            <TextInputFormik name='vmStorage' label='VM Storage' placeholder='local' />
+                            <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
+                            <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
+                        </div>
+                    </Modal.Body>
+                    <Modal.Actions>
+                        <Modal.Action type='button' onClick={handleClose}>
+                            Cancel
+                        </Modal.Action>
+                        <Modal.Action type='submit' loading={form.isSubmitting}>
+                            Create
+                        </Modal.Action>
+                    </Modal.Actions>
                 </form>
             </FormikProvider>
         </Modal>

@@ -62,11 +62,11 @@ const ScreenBlock = ({
   )
 }
 
-type ServerErrorProps = (Omit<PropsWithBack, 'icon' | 'title'> | Omit<PropsWithRetry, 'icon' | 'title'>) & {
+type ErrorMessageProps = (Omit<PropsWithBack, 'icon' | 'title'> | Omit<PropsWithRetry, 'icon' | 'title'>) & {
   title?: string;
 };
 
-export const ServerError = ({ title, ...props }: ServerErrorProps) => (
+export const ErrorMessage = ({ title, ...props }: ErrorMessageProps) => (
   <ScreenBlock title={title || 'Something went wrong'} center icon={ExclamationCircleIcon} {...props} />
 );
 

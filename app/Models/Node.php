@@ -4,6 +4,7 @@ namespace Convoy\Models;
 
 use Convoy\Casts\MegabytesAndBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class Node extends Model
 {
@@ -12,6 +13,10 @@ class Node extends Model
     protected $casts = [
         'memory' => MegabytesAndBytes::class,
         'disk' => MegabytesAndBytes::class,
+    ];
+
+    protected $appends = [
+        'disk_usage',
     ];
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -60,5 +65,15 @@ class Node extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    public function getDiskUsageAttribute()
+    {
+        return $this->servers->sum('disk');
+    }
+
+    public function getMemoryUsageAttribute()
+    {
+        return $this->servers->sum('memory');
     }
 }

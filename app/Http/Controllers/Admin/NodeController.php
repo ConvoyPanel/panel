@@ -22,6 +22,11 @@ class NodeController extends ApplicationApiController
         return fractal($nodes, new NodeTransformer())->respond();
     }
 
+    public function show(Node $node)
+    {
+        return fractal($node, new NodeTransformer())->respond();
+    }
+
     public function store(StoreNodeRequest $request)
     {
         $node = Node::create($request->validated());

@@ -11,6 +11,7 @@ interface Routes {
   server: RouteDefinition[]
   admin: {
     dashboard: RouteDefinition[]
+    node: RouteDefinition[]
   }
 }
 
@@ -62,6 +63,13 @@ const routes: Routes = {
         path: '/nodes',
         name: 'Nodes',
         component: lazy(() => import('@/components/admin/nodes/NodesContainer')),
+      }
+    ],
+    node: [
+      {
+        path: '/',
+        name: 'Overview',
+        component: lazy(() => import('@/components/admin/nodes/overview/NodeOverviewContainer')),
       }
     ]
   }

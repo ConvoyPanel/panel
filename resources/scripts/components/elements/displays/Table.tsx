@@ -1,10 +1,4 @@
-import {
-    useReactTable,
-    getCoreRowModel,
-    flexRender,
-    createColumnHelper,
-    AccessorFn,
-} from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, flexRender, createColumnHelper, AccessorFn } from '@tanstack/react-table'
 import { ReactNode, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
@@ -18,7 +12,7 @@ export interface Column<T, K extends keyof T> {
     header: string
     accessor: K
     align?: Alignment
-    cell?: (payload: { value: T[K], row: T }) => ReactNode
+    cell?: (payload: { value: T[K]; row: T }) => ReactNode
     overflow?: boolean
 }
 
@@ -81,6 +75,19 @@ const getThClasses = (type: ThType, align?: Alignment, hasHeaderActions?: boolea
     return classes
 }
 
+interface ActionProps {
+    children?: ReactNode
+}
+
+export const Actions = ({ children }: ActionProps) => (
+    <Menu className='flex justify-end items-center'>
+        <Menu.Button>
+            <DottedButton className='relative mr-[1px]' />
+        </Menu.Button>
+        <Menu.Items marginTop='8rem'>{children}</Menu.Items>
+    </Menu>
+)
+
 const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, rowActions, minWidth }: Props<T>) => {
     const columnHelper = createColumnHelper<T>()
 
@@ -141,15 +148,7 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                 <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
                             </Menu>
                         ) : null,
-                    cell: ({ row }) =>
-                        rowActions ? (
-                            <Menu className='flex justify-end items-center'>
-                                <Menu.Button>
-                                    <DottedButton className='relative mr-[1px]' />
-                                </Menu.Button>
-                                <Menu.Items marginTop='8rem'>{rowActions({ row: row.original })}</Menu.Items>
-                            </Menu>
-                        ) : null,
+                    cell: ({ row }) => (rowActions ? rowActions({ row: row.original }) : null),
 
                     meta: {
                         overflow: true,

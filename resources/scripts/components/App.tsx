@@ -9,6 +9,7 @@ import GuestRoutes from '@/routers/middleware/GuestRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import { ServerContext } from '@/state/server'
 import { NavigationProgress } from '@mantine/nprogress'
+import { NodeContext } from '@/state/admin/node'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -25,6 +26,7 @@ const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'))
 const ServerRouter = lazy(() => import('@/routers/ServerRouter'))
 
 const AdminDashboardRouter = lazy(() => import('@/routers/admin/DashboardRouter'))
+const NodeRouter = lazy(() => import('@/routers/admin/NodeRouter'))
 
 const App = () => {
     const { ConvoyUser } = window as ExtendedWindow
@@ -97,6 +99,17 @@ const App = () => {
                                         <AdminDashboardRouter />
                                     </Spinner.Suspense>
                                 </AuthenticatedRoutes>
+                            }
+                        />
+
+                        <Route
+                            path='/admin/nodes/:id/*'
+                            element={
+                                <Suspense fallback={<Spinner />}>
+                                    <NodeContext.Provider>
+                                        <NodeRouter />
+                                    </NodeContext.Provider>
+                                </Suspense>
                             }
                         />
 
