@@ -1,9 +1,11 @@
 import http, { FractalResponseData } from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
+export type AddressType = 'ipv4' | 'ipv6'
+
 export interface Address {
   id: number
-  type: 'ipv4' | 'ipv6'
+  type: AddressType
   address: string
   cidr: number
   gateway: string

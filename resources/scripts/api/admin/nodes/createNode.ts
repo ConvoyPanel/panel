@@ -1,7 +1,7 @@
 import { Node, rawDataToNode } from '@/api/admin/nodes/getNodes'
 import http from '@/api/http'
 
-interface CreateNodeParameters extends Omit<Node, 'id' | 'serversCount'> {
+interface CreateNodeParameters extends Omit<Node, 'id' | 'serversCount' | 'memoryAllocated' | 'diskAllocated'> {
     tokenId: string
     secret: string
 }

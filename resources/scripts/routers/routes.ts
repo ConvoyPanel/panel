@@ -63,6 +63,11 @@ const routes: Routes = {
         path: '/nodes',
         name: 'Nodes',
         component: lazy(() => import('@/components/admin/nodes/NodesContainer')),
+      },
+      {
+        path: '/servers',
+        name: 'Servers',
+        component: lazy(() => import('@/components/admin/servers/ServersContainer')),
       }
     ],
     node: [

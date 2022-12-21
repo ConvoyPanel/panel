@@ -42,8 +42,11 @@ const Pagination = <T,>({ data: { items, pagination }, onPageSelect, children }:
 
         // don't add page param if it's the first page
         if (pagination.currentPage === 1) {
-            url.searchParams.delete('page');
-            window.history.pushState({}, '', url.toString());
+            const page = url.searchParams.get('page')
+            if (page && parseInt(page) !== 1) {
+                url.searchParams.delete('page');
+                window.history.pushState({}, '', url.toString());
+            }
             return;
         }
 
