@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import * as yup from 'yup'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import SortableItem from '@/components/elements/dnd/SortableItem'
 //@ts-ignore
 import DragVerticalIcon from '@/assets/images/icons/drag-vertical.svg'

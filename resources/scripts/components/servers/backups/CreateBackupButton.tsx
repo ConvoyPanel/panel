@@ -1,5 +1,5 @@
 import useFlash from '@/util/useFlash'
-import { useFormik } from 'formik'
+import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
 import createBackup, { RequestParameters } from '@/api/server/backups/createBackup'
 import { useEffect, useState } from 'react'
@@ -10,9 +10,10 @@ import Modal from '@/components/elements/Modal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
-import ListBox from '@/components/elements/ListBox'
 import { Badge, RingProgress, Tooltip } from '@mantine/core'
 import { useStoreState } from '@/state'
+import Select from '@/components/elements/inputs/Select'
+import SelectFormik from '@/components/elements/forms/SelectFormik'
 
 interface Props {
   swr: {
@@ -94,6 +95,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
         <Modal.Header>
           <Modal.Title>Create a Backup</Modal.Title>
         </Modal.Header>
+        <FormikProvider value={form}>
         <form onSubmit={form.handleSubmit}>
           <Modal.Body>
             <Modal.Description bottomMargin>
@@ -112,21 +114,15 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
             />
 
             <div className='grid sm:grid-cols-2 mt-3 gap-3'>
-              <ListBox
+              <SelectFormik
                 label='Compression Type'
+                name='compressionType'
                 data={compressionTypes}
-                selected={form.values.compressionType}
-                onSelect={(value) =>
-                  form.setFieldValue('compressionType', value)
-                }
               />
-              <ListBox
+              <SelectFormik
                 label='Mode'
+                name='mode'
                 data={modes}
-                selected={form.values.mode}
-                onSelect={(value) =>
-                  form.setFieldValue('mode', value)
-                }
               />
             </div>
           </Modal.Body>
@@ -137,6 +133,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
             </Modal.Action>
           </Modal.Actions>
         </form>
+        </FormikProvider>
       </Modal>
       <div className='flex justify-end items-center space-x-3 mb-3'>
       <Tooltip

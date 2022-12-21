@@ -50,8 +50,8 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
 
     const form = useFormik({
         initialValues: {
-            locationId: undefined as number | undefined,
             name: '',
+            locationId: undefined as number | undefined,
             cluster: '',
             tokenId: '',
             secret: '',
@@ -66,8 +66,8 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             network: '',
         },
         validationSchema: yup.object({
-            locationId: yup.number().required('Specify a location'),
             name: yup.string().required('Specify a name').max(191, 'Please limit up to 191 characters'),
+            locationId: yup.number().required('Specify a location'),
             cluster: yup.string().required('Specify a cluster').max(191, 'Please limit up to 191 characters'),
             tokenId: yup.string().required('Specify a token ID').max(191, 'Please limit up to 191 characters'),
             secret: yup.string().required('Specify a secret').max(191, 'Please limit up to 191 characters'),
@@ -146,6 +146,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
+                        <TextInputFormik name='name' label='Display Name' />
                         <SelectFormik
                             label='Location Group'
                             placeholder='fuk u chit'
@@ -157,7 +158,6 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                             nothingFound='No locations found'
                             name='locationId'
                         />
-                        <TextInputFormik name='name' label='Display Name' />
                         <TextInputFormik name='cluster' label='Cluster' />
                         <div className='grid gap-3 grid-cols-2'>
                             <TextInputFormik name='tokenId' label='Token ID' />

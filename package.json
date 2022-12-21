@@ -2,7 +2,8 @@
     "private": true,
     "scripts": {
         "build": "vite build",
-        "dev": "vite --host 0.0.0.0"
+        "dev": "vite --host 0.0.0.0",
+        "tc": "tsc --noEmit --project ./"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.0.5",

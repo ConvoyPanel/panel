@@ -57,7 +57,7 @@ const LoginContainer = () => {
         <TextInput
           label='Email'
           name='email'
-          wrapperClassName='mt-1 block w-full'
+          className='mt-1 block w-full'
           value={form.values.email}
           onChange={form.handleChange}
           error={form.touched.email ? form.errors.email : undefined}
@@ -71,7 +71,7 @@ const LoginContainer = () => {
           onChange={form.handleChange}
           error={form.touched.password ? form.errors.password : undefined}
           type='password'
-          wrapperClassName='mt-1 block w-full'
+          className='mt-1 block w-full'
           required
         />
         <div className='flex items-center justify-end mt-6'>

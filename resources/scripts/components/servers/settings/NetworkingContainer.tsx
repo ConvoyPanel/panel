@@ -75,7 +75,7 @@ const NetworkingContainer = () => {
                                                         disabled={form.isSubmitting}
                                                         name={`nameservers[${idx}]`}
                                                         label={`Nameserver ${idx + 1}`}
-                                                        suffix={
+                                                        rightSection={
                                                             <button
                                                                 type='button'
                                                                 onClick={() => arrayHelpers.remove(idx)}

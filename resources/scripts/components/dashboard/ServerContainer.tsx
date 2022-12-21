@@ -46,7 +46,7 @@ const ServerContainer = () => {
                 </div>
             )}
             <TextInput
-                prefix={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
+                icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
                 value={query}
                 onChange={e => {
                     setQuery(e.currentTarget.value)

@@ -1,4 +1,5 @@
-import TextInput, { TextInputProps } from '@/components/elements/inputs/TextInput'
+import TextInput from '@/components/elements/inputs/TextInput'
+import { TextInputProps } from '@mantine/core'
 import { Field as FormikField, FieldProps } from 'formik'
 import { forwardRef } from 'react'
 
