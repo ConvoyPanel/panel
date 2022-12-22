@@ -54,7 +54,7 @@ class BackupMonitorService
             ]);
         } else {
             $backup->update([
-                'successful' => false,
+                'is_successful' => false,
                 'completed_at' => Carbon::now(),
             ]);
         }

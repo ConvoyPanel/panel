@@ -31,6 +31,7 @@ class Node extends Model
         'disk_overallocate' => 'required|integer',
         'vm_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
     ];
 

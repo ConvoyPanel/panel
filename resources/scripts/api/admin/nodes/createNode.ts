@@ -21,6 +21,7 @@ const createNode = async (data: CreateNodeParameters): Promise<Node> => {
         disk_overallocate: data.diskOverallocate,
         vm_storage: data.vmStorage,
         backup_storage: data.backupStorage,
+        iso_storage: data.isoStorage,
         network: data.network,
     })
 

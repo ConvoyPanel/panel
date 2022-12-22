@@ -63,6 +63,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             diskOverallocate: 0,
             vmStorage: '',
             backupStorage: '',
+            isoStorage: '',
             network: '',
         },
         validationSchema: yup.object({
@@ -102,6 +103,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                 .string()
                 .required('Specify a backup storage')
                 .max(191, 'Please limit up to 191 characters'),
+            isoStorage: yup.string().required('Specify a ISO storage').max(191, 'Please limit up to 191 characters'),
             network: yup.string().required('Specify a network').max(191, 'Please limit up to 191 characters'),
         }),
         onSubmit: ({ memory, disk, locationId, ...values }, { setSubmitting }) => {
@@ -176,8 +178,9 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                         <div className='grid gap-3 grid-cols-3'>
                             <TextInputFormik name='vmStorage' label='VM Storage' placeholder='local' />
                             <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
-                            <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
+                            <TextInputFormik name='isoStorage' label='ISO Storage' placeholder='local' />
                         </div>
+                            <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

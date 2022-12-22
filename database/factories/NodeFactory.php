@@ -24,7 +24,7 @@ class NodeFactory extends Factory
         return [
             'name' => $this->faker->word(),
             'cluster' => 'proxmox',
-            'hostname' => $this->faker->word(),
+            'fqdn' => $this->faker->word(),
             'token_id' => $this->faker->word(),
             'secret' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'port' => 8006,
@@ -34,7 +34,8 @@ class NodeFactory extends Factory
             'disk_overallocate' => 0,
             'vm_storage' => 'local',
             'backup_storage' => 'local',
-            'network' => 'vmbr1',
+            'iso_storage' => 'local',
+            'network' => 'vmbr0',
         ];
     }
 }

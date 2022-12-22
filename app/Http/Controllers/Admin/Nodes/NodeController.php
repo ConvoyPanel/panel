@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin;
+namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;

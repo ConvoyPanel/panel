@@ -30,7 +30,7 @@ class MonitorBackupJob implements ShouldQueue
 
     public function middleware()
     {
-        return [new WithoutOverlapping($this->backupId)];
+        return [new WithoutOverlapping("server:backup.create-{$this->backupId}")];
     }
 
     /**

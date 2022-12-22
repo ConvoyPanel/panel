@@ -7,10 +7,10 @@ use Convoy\Http\Controllers\Admin;
 Route::resource('locations', Admin\LocationController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
-Route::resource('nodes', Admin\NodeController::class)
+Route::resource('nodes', Admin\Nodes\NodeController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
-Route::resource('isos', Admin\ISOController::class)
+Route::resource('nodes/{node}/isos', Admin\Nodes\ISOController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
 Route::resource('servers', Admin\ServerController::class)

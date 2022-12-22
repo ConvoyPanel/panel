@@ -15,19 +15,22 @@ use Convoy\Services\Servers\CloudinitService;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Transformers\Client\ServerNetworkTransformer;
 use Convoy\Transformers\Client\ServerSecurityTransformer;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository, private AllocationService $allocationService)
+    public function __construct(private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository, private AllocationService $allocationService)
     {
     }
 
     public function rename(RenameServerRequest $request, Server $server)
     {
-        $server->update($request->validated());
+        $this->connection->transaction(function () use ($server, $request) {
+            $this->cloudinitService->updateHostname($server, $request->hostname);
 
-        $this->cloudinitService->updateHostname($server, $request->hostname);
+            $server->update($request->validated());
+        });
 
         return $this->returnNoContent();
     }

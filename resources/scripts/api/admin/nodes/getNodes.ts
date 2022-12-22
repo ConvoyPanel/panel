@@ -15,6 +15,7 @@ export interface Node {
     diskAllocated: number
     vmStorage: string
     backupStorage: string
+    isoStorage: string
     network: string
     serversCount: number
 }
@@ -34,6 +35,7 @@ export const rawDataToNode = (data: any): Node => ({
     diskAllocated: data.disk_allocated,
     vmStorage: data.vm_storage,
     backupStorage: data.backup_storage,
+    isoStorage: data.iso_storage,
     network: data.network,
     serversCount: data.servers_count,
 })
