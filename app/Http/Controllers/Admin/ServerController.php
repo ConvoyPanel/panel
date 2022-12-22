@@ -19,10 +19,20 @@ class ServerController extends Controller
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
-            ->with('addresses')
+            ->with(['addresses', 'user', 'node'])
             ->allowedFilters([AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name',])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-        return fractal($servers->through(fn($server) => $this->detailService->getByEloquent($server)), new ServerTransformer())->respond();
+        return fractal($servers, new ServerTransformer())->parseIncludes($request->includes)->respond();
+    }
+
+    public function suspend()
+    {
+
+    }
+
+    public function unsuspend()
+    {
+
     }
 }

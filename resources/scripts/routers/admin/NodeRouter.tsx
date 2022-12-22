@@ -22,6 +22,10 @@ const NodeRouter = () => {
                 name: 'Overview',
                 path: `/admin/nodes/${id}`,
             },
+            {
+                name: 'Servers',
+                path: `/admin/nodes/${id}/servers`,
+            },
         ],
         [match?.params.id]
     )

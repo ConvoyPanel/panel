@@ -10,6 +10,9 @@ Route::resource('locations', Admin\LocationController::class)
 Route::resource('nodes', Admin\NodeController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
+Route::resource('isos', Admin\ISOController::class)
+    ->only(['index', 'store', 'update', 'destroy']);
+
 Route::resource('servers', Admin\ServerController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 

@@ -1,3 +1,4 @@
+import ServersTable from '@/components/admin/servers/ServersTable'
 import Button from '@/components/elements/Button'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import { useState } from 'react'
@@ -13,6 +14,7 @@ const ServersContainer = () => {
                         New Server
                     </Button>
                 </div>
+                <ServersTable />
             </PageContentBlock>
         </div>
     )

@@ -35,6 +35,6 @@ class IndexController extends ApplicationApiController
 
         $servers = $builder->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-        return fractal($servers->through(fn($server) => $this->service->getByEloquent($server)), new ServerTransformer)->respond();
+        return fractal($servers, new ServerTransformer)->respond();
     }
 }

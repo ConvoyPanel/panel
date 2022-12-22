@@ -54,7 +54,7 @@ class Server extends Model
         return $this->belongsTo(Node::class);
     }
 
-    public function owner()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

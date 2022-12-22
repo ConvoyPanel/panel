@@ -1,3 +1,5 @@
+import { Node } from '@/api/admin/nodes/getNodes'
+import { User } from '@/api/admin/users/getUsers'
 import http, { FractalResponseData } from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
@@ -37,6 +39,8 @@ export interface Server {
     }
     macAddress?: string
   }
+  user?: User
+  node?: Node
 }
 
 export const rawDataToAddressObject = (data: any): Address => ({
@@ -82,6 +86,8 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
     },
     macAddress: data.limits.mac_address,
   },
+  user: data?.user?.data,
+  node: data?.node?.data,
 })
 
 export default (uuid: string): Promise<Server> => {

@@ -23,7 +23,7 @@ class ServerController extends ApplicationApiController
 
     public function index(Server $server)
     {
-        return fractal($this->detailService->getByEloquent($server), new ServerTransformer)->respond();
+        return fractal($server, new ServerTransformer)->respond();
     }
 
     public function details(Server $server)

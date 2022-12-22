@@ -4,11 +4,12 @@ import { FormikProvider, useFormik } from 'formik';
 import * as yup from 'yup'
 
 interface Props {
+    nodeId?: number
     open: boolean
     onClose: () => void
 }
 
-const CreateServerModal = ({ open, onClose}: Props) => {
+const CreateServerModal = ({ nodeId, open, onClose}: Props) => {
     const form = useFormik({
         initialValues: {
             name: '',

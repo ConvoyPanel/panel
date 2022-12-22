@@ -95,14 +95,9 @@ export function httpErrorToHuman(error: any): string {
 
 export interface FractalResponseData {
   [k: string]: any
-  relationships?: Record<
-    string,
-    FractalResponseData | FractalResponseList | null | undefined
-  >
 }
 
 export interface FractalResponseList {
-  object: 'list'
   data: FractalResponseData[]
 }
 

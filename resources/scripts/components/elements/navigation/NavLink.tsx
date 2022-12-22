@@ -9,7 +9,7 @@ interface Props extends Omit<NavLinkProps, 'className'> {
 
 const NavLink = ({ children, ...props }: Props) => {
   const defaultClasses =
-    'text-sm transition-colors leading-4 py-4 px-3 hover:text-foreground relative grid place-items-center nav-link'
+    'text-sm transition-colors leading-4 py-4 px-3 sm:hover:text-foreground relative grid place-items-center nav-link'
 
   return (
     <RouterLink

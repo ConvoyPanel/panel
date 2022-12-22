@@ -98,3 +98,8 @@ export const hexToRgba = (hex: string, alpha = 1): string => {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+
+export const classNames = (...classes: (string | undefined)[]) => {
+  return classes.filter(Boolean).join(' ')
+}
