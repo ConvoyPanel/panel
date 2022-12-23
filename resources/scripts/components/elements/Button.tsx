@@ -4,14 +4,14 @@ import styled from '@emotion/styled'
 import { ComponentProps } from 'react'
 import tw from 'twin.macro'
 
-export interface Props extends ComponentProps<'button'> {
+export interface ButtonProps extends ComponentProps<'button'> {
   variant?: 'outline' | 'filled'
   color?: 'success' | 'danger' | 'accent'
   size?: 'sm'
   loading?: boolean
 }
 
-const getBorderStyles = (variant: Props['variant'], color: Props['color']) => {
+const getBorderStyles = (variant: ButtonProps['variant'], color: ButtonProps['color']) => {
   if (variant === 'filled') {
     switch (color) {
       case 'success':
@@ -33,7 +33,7 @@ const getBorderStyles = (variant: Props['variant'], color: Props['color']) => {
   }
 }
 
-const getBackgroundStyles = (variant: Props['variant'], color: Props['color']) => {
+const getBackgroundStyles = (variant: ButtonProps['variant'], color: ButtonProps['color']) => {
   if (variant === 'filled') {
     switch (color) {
       case 'success':
@@ -55,7 +55,7 @@ const getBackgroundStyles = (variant: Props['variant'], color: Props['color']) =
   }
 }
 
-const StyledButton = styled.button<Props>`
+const StyledButton = styled.button<ButtonProps>`
   ${tw`border text-sm transition-colors rounded font-medium disabled:!text-accent-400 disabled:!bg-accent-100 disabled:!border-accent-200 disabled:cursor-not-allowed disabled:!bg-accent-100 disabled:!border-accent-200 disabled:!text-accent-400`}
 
   ${({ size }) => (size === 'sm' ? tw`px-3 h-8 min-w-[5rem]` : tw`px-5 h-9`)}
@@ -65,7 +65,7 @@ const StyledButton = styled.button<Props>`
   ${({ variant = 'outline', color = 'accent' }) => css`${getBackgroundStyles(variant, color)}`}
 `
 
-const Button = ({ loading, disabled, ...props}: Props) => {
+const Button = ({ loading, disabled, ...props}: ButtonProps) => {
   return <StyledButton disabled={loading || disabled} {...props}>
     {loading ? <div className='w-full h-full grid place-items-center'><LoadingDots size={5} /></div> : props.children}
   </StyledButton>

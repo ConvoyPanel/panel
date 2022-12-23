@@ -12,6 +12,8 @@ import * as yup from 'yup'
 import createIso, { ChecksumAlgorithm } from '@/api/admin/nodes/isos/createIso'
 import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
 import Button from '@/components/elements/Button'
+import QueryFileButton from '@/components/admin/nodes/isoLibrary/QueryFileButton'
+import { FileMetadata } from '@/components/admin/tools/queryRemoteFile'
 
 interface Props {
     open: boolean
@@ -35,7 +37,7 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
         validationSchema: yup.object().shape({
             name: yup.string().required('Name is required.'),
             link: yup.string().url('Invalid link').required('Link is required.'),
-            fileName: yup.string().max(40, 'Limit up to 40 characters').required('File name is required.'),
+            fileName: yup.string().matches(/\.iso$/, 'File extension must end in .iso').max(40, 'Limit up to 40 characters').required('File name is required.'),
             hidden: yup.boolean(),
             checksumAlgorithm: yup
                 .string()
@@ -87,6 +89,14 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
         { value: 'sha512', label: 'SHA512' },
     ]
 
+    const handleQuery = (meta: FileMetadata) => {
+        form.setFieldValue('fileName', meta.fileName)
+    }
+
+    const handleQueryFail = () => {
+        form.setFieldError('link', 'Invalid remote file')
+    }
+
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
@@ -101,7 +111,7 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
                         <TextInputFormik name='name' label='Display Name' />
                         <div className={`grid grid-cols-4 gap-3 ${form.errors.link ? 'items-center' : 'items-end'}`}>
                             <TextInputFormik className='col-span-3' name='link' label='Link' />
-                            <Button disabled={!form.touched.link || Boolean(form.errors.link)} className={form.errors.link ? '-mt-0.5' : ''} variant='filled'>Query</Button>
+                            <QueryFileButton onQuery={handleQuery} onFail={handleQueryFail} link={form.values.link} disabled={Boolean(form.errors.link) || form.values.link.length === 0} className={form.errors.link ? '-mt-0.5' : ''} />
                         </div>
                         <TextInputFormik name='fileName' label='File Name' />
                         <SelectFormik data={checksumAlgorithms} name='checksumAlgorithm' label='Checksum Algorithm' />

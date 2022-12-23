@@ -10,6 +10,7 @@ use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class IsoService
 {
@@ -18,7 +19,7 @@ class IsoService
     }
     public function create(Node $node, string $name, ?string $fileName = null, string $link, ?ChecksumData $checksumData = null, ?bool $hidden = false)
     {
-        $queriedFileMetadata = $this->repository->getFileMetadata($link);
+        $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(function () use ($queriedFileMetadata, $node, $hidden, $fileName, $link, $name, $checksumData) {
             $iso = ISO::create([
@@ -35,6 +36,21 @@ class IsoService
             MonitorIsoDownloadJob::dispatch($iso->id, $upid);
 
             return $iso;
+        });
+    }
+
+    public function delete(Node $node, ISO $iso)
+    {
+        if (is_null($iso->completed_at)) {
+            throw new BadRequestHttpException('This ISO cannot be restored at this time: not completed.');
+        }
+
+        $this->connection->transaction(function () use ($node, $iso) {
+            if ($iso->is_successful) {
+                $this->repository->setNode($node)->deleteFile(ContentType::ISO, $iso->file_name);
+            }
+
+            $iso->delete();
         });
     }
 }

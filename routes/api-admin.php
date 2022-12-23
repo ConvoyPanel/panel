@@ -13,6 +13,8 @@ Route::resource('nodes', Admin\Nodes\NodeController::class)
 Route::resource('nodes/{node}/isos', Admin\Nodes\IsoController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
+Route::get('nodes/{node}/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
+
 Route::resource('servers', Admin\ServerController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
