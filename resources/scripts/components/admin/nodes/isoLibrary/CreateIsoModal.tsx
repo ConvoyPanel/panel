@@ -109,8 +109,8 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
                         <FlashMessageRender className='mb-5' byKey={'admin:node:isos.create'} />
 
                         <TextInputFormik name='name' label='Display Name' />
-                        <div className={`grid grid-cols-4 gap-3 ${form.errors.link ? 'items-center' : 'items-end'}`}>
-                            <TextInputFormik className='col-span-3' name='link' label='Link' />
+                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${form.errors.link ? 'items-center' : 'items-end'}`}>
+                            <TextInputFormik className='col-span-2 sm:col-span-3' name='link' label='Link' />
                             <QueryFileButton onQuery={handleQuery} onFail={handleQueryFail} link={form.values.link} disabled={Boolean(form.errors.link) || form.values.link.length === 0} className={form.errors.link ? '-mt-0.5' : ''} />
                         </div>
                         <TextInputFormik name='fileName' label='File Name' />
