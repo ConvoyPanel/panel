@@ -108,7 +108,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
         }),
         onSubmit: ({ memory, disk, locationId, ...values }, { setSubmitting }) => {
             setSubmitting(true)
-            clearFlashes('admin:nodes:create')
+            clearFlashes('admin:nodes.create')
             createNode({
                 locationId: locationId!,
                 memory: memory! * 1048576,
@@ -127,7 +127,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                     handleClose()
                 })
                 .catch(error => {
-                    clearAndAddHttpError({ key: 'admin:nodes:create', error })
+                    clearAndAddHttpError({ key: 'admin:nodes.create', error })
                     setSubmitting(false)
                 })
         },
@@ -147,7 +147,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:nodes:create'} />
+                        <FlashMessageRender className='mb-5' byKey={'admin:nodes.create'} />
                         <TextInputFormik name='name' label='Display Name' />
                         <SelectFormik
                             label='Location Group'

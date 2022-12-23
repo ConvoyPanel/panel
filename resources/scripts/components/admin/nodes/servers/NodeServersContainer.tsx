@@ -11,7 +11,7 @@ const NodeServersContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <NodeContentBlock title='Servers' showFlashKey='admin:node:servers'>
-            <div className='flex justify-end items-center mb-3'>
+                <div className='flex justify-end items-center mb-3'>
                     <Button onClick={() => setOpen(true)} variant='filled'>
                         New Server
                     </Button>

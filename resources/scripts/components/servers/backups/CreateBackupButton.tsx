@@ -39,7 +39,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
       name: yup.string().required('A name is required').max(40),
     }),
     onSubmit: (values, { setSubmitting }) => {
-      clearFlashes('backups:create')
+      clearFlashes('server:backups.create')
 
       createBackup(uuid, {
         name: values.name,
@@ -61,14 +61,14 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
           setSubmitting(false)
         })
         .catch((error) => {
-          clearAndAddHttpError({ key: 'backups:create', error })
+          clearAndAddHttpError({ key: 'server:backups.create', error })
           setSubmitting(false)
         })
     },
   })
 
   useEffect(() => {
-    clearFlashes('backups:create')
+    clearFlashes('server:backups.create')
     form.resetForm()
   }, [open])
 
@@ -103,7 +103,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
               take a while depending on the size of your server.
             </Modal.Description>
 
-            <FlashMessageRender byKey={'backups:create'} className='mb-5' />
+            <FlashMessageRender byKey={'server:backups.create'} className='mb-5' />
 
             <TextInput
               value={form.values.name}

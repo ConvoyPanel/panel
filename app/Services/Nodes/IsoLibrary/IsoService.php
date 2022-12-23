@@ -16,7 +16,7 @@ class IsoService
     public function __construct(private ConnectionInterface $connection, private ProxmoxStorageRepository $repository)
     {
     }
-    public function create(Node $node, string $name, ?bool $hidden = false, ?string $fileName = null, string $link, ?ChecksumData $checksumData = null)
+    public function create(Node $node, string $name, ?string $fileName = null, string $link, ?ChecksumData $checksumData = null, ?bool $hidden = false)
     {
         $queriedFileMetadata = $this->repository->getFileMetadata($link);
 
