@@ -20,7 +20,7 @@ class StoreIsoRequest extends FormRequest
 
         $rules = [
             'name' => $isoRules['name'],
-            'file_name' => 'required|string|ends_with:.iso',
+            'file_name' => $isoRules['file_name'],
             'hidden' => $isoRules['hidden'],
             'link' => 'required|url',
             'checksum_algorithm' => ['sometimes', new Enum(ChecksumAlgorithm::class)],
