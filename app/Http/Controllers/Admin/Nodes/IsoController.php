@@ -7,6 +7,7 @@ use Convoy\Enums\Helpers\ChecksumAlgorithm;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
+use Convoy\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
@@ -41,6 +42,13 @@ class IsoController extends ApplicationApiController
         ]) : null;
 
         $iso = $this->isoService->create($node, $request->name, $request->file_name, $request->link, $checksumData, $request->hidden);
+
+        return fractal($iso, new IsoTransformer)->respond();
+    }
+
+    public function update(UpdateIsoRequest $request, Node $node, ISO $iso)
+    {
+        $iso->update($request->validated());
 
         return fractal($iso, new IsoTransformer)->respond();
     }

@@ -14,6 +14,7 @@ import { Loader } from '@mantine/core'
 import { ExclamationCircleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'
 import Menu from '@/components/elements/Menu'
 import deleteIso from '@/api/admin/nodes/isos/deleteIso'
+import EditIsoModal from '@/components/admin/nodes/isoLibrary/EditIsoModal'
 
 const columns: ColumnArray<ISO> = [
     {
@@ -54,6 +55,8 @@ const IsoLibraryContainer = () => {
     const [open, setOpen] = useState(false)
 
     const rowActions = ({ row: iso }: RowActionsProps<ISO>) => {
+        const [open, setOpen] = useState(false)
+
         const handleDelete = () => {
             deleteIso(nodeId, iso.uuid)
                 .then(() => {
@@ -67,11 +70,18 @@ const IsoLibraryContainer = () => {
                 })
         }
         return (
+            <>
+            <EditIsoModal open={open} onClose={() => setOpen(false)} iso={iso} />
             <Actions>
+                <Menu.Item onClick={() => setOpen(true)}>
+                    Edit
+                </Menu.Item>
+                <Menu.Divider />
                 <Menu.Item color='danger' onClick={handleDelete}>
                     Delete
                 </Menu.Item>
             </Actions>
+            </>
         )
     }
 

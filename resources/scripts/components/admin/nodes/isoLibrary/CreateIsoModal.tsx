@@ -13,7 +13,7 @@ import createIso, { ChecksumAlgorithm } from '@/api/admin/nodes/isos/createIso'
 import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
 import Button from '@/components/elements/Button'
 import QueryFileButton from '@/components/admin/nodes/isoLibrary/QueryFileButton'
-import { FileMetadata } from '@/components/admin/tools/queryRemoteFile'
+import { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
 
 interface Props {
     open: boolean
@@ -65,6 +65,7 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
                             } as typeof data),
                         false
                     )
+                    setSubmitting(false)
                     handleClose()
                 })
                 .catch(error => {
@@ -109,9 +110,9 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
                         <FlashMessageRender className='mb-5' byKey={'admin:node:isos.create'} />
 
                         <TextInputFormik name='name' label='Display Name' />
-                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${form.errors.link ? 'items-center' : 'items-end'}`}>
+                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${form.touched.link && form.errors.link ? 'items-center' : 'items-end'}`}>
                             <TextInputFormik className='col-span-2 sm:col-span-3' name='link' label='Link' />
-                            <QueryFileButton onQuery={handleQuery} onFail={handleQueryFail} link={form.values.link} disabled={Boolean(form.errors.link) || form.values.link.length === 0} className={form.errors.link ? '-mt-0.5' : ''} />
+                            <QueryFileButton onQuery={handleQuery} onFail={handleQueryFail} link={form.values.link} disabled={Boolean(form.errors.link) || form.values.link.length === 0} className={form.touched.link && form.errors.link ? '-mt-0.5' : ''} />
                         </div>
                         <TextInputFormik name='fileName' label='File Name' />
                         <SelectFormik data={checksumAlgorithms} name='checksumAlgorithm' label='Checksum Algorithm' />

@@ -17,7 +17,7 @@ export const rawDataToISO = (rawData: any): ISO => ({
     name: rawData.name,
     fileName: rawData.file_name,
     size: rawData.size,
-    hidden: rawData.hidden,
+    hidden: Boolean(rawData.hidden),
     completedAt: rawData.completed_at ? new Date(rawData.completed_at) : undefined,
     createdAt: new Date(rawData.created_at),
 })

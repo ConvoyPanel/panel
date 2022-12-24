@@ -1,4 +1,4 @@
-import queryRemoteFile, { FileMetadata } from '@/components/admin/tools/queryRemoteFile'
+import queryRemoteFile, { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
 import Button, { ButtonProps } from '@/components/elements/Button'
 import { NodeContext } from '@/state/admin/node'
 import { useState } from 'react'
