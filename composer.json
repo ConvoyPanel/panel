@@ -22,6 +22,7 @@
     "laravel/horizon": "^5.10",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
+    "performave/eloquent-sortable": "^1.0.0",
     "phpseclib/phpseclib": "~3.0",
     "pusher/pusher-php-server": "^7.0",
     "spatie/laravel-data": "^2.0",
@@ -40,6 +41,12 @@
     "phpunit/phpunit": "^9.5.10",
     "spatie/laravel-ignition": "^1.0"
   },
+  "repositories": [
+      {
+          "type": "vcs",
+          "url": "https://github.com/Performave/eloquent-sortable"
+      }
+  ],
   "autoload": {
     "psr-4": {
       "Convoy\\": "app/",

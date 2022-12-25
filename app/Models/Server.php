@@ -28,8 +28,8 @@ class Server extends Model
     public static $validationRules = [
         'type' => 'sometimes|in:new,existing',
         'name' => 'required|string|min:1|max:40',
-        'node_id' => 'required|exists:nodes,id',
-        'user_id' => 'required|exists:users,id',
+        'node_id' => 'required|integer|exists:nodes,id',
+        'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
         'status' => 'nullable|string',

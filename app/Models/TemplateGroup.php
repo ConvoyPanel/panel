@@ -5,16 +5,15 @@ namespace Convoy\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Performave\EloquentSortable\SortableTrait;
 
-class Template extends Model
+class TemplateGroup extends Model
 {
     use HasFactory, SortableTrait;
 
     public static $validationRules = [
-        'template_group_id' => 'required|integer|exists:template_groups,id',
+        'node_id' => 'required|integer|exists:nodes,id',
         'uuid' => 'required|uuid',
         'name' => 'required|string|max:40',
-        'vmid' => 'required|numeric|min:100|max:999999999',
-        'hidden' => 'required|boolean',
+        'hidden' => 'sometimes|boolean',
     ];
 
     protected $guarded = [
@@ -23,9 +22,4 @@ class Template extends Model
         'created_at',
         'updated_at',
     ];
-
-    public function server()
-    {
-        return $this->belongsTo(Server::class);
-    }
 }
