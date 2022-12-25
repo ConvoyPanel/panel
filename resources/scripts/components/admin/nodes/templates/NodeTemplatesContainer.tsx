@@ -29,7 +29,7 @@ const NodeTemplatesContainer = () => {
             ) : (
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
                     {data.map(templateGroups => (
-                        <Card overridePadding className='px-4 py-3 min-h-[9rem]' key={templateGroups.id}>
+                        <Card overridePadding className='px-4 pt-3 pb-4 min-h-[9rem]' key={templateGroups.id}>
                             <p className='font-medium text-foreground'>{templateGroups.name}</p>
                             <div className='flex flex-col space-y-3 mt-2'>
                                 {templateGroups.templates.map(template => (
