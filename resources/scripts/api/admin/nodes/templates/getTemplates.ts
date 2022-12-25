@@ -26,7 +26,7 @@ export const rawDataToTemplateGroup = (data: any): TemplateGroup => ({
     uuid: data.uuid,
     name: data.name,
     hidden: data.hidden,
-    templates: data.templates.map(rawDataToTemplate),
+    templates: data.templates.data.map(rawDataToTemplate),
     order_column: data.order_column,
 })
 
@@ -40,7 +40,7 @@ export const rawDataToTemplate = (data: any): Template => ({
     order_column: data.order_column,
 })
 
-const getTemplates = async (nodeId: number) => {
+const getTemplates = async (nodeId: number): Promise<TemplateGroup[]> => {
     const {
         data: { data },
     } = await http.get(`/api/admin/nodes/${nodeId}/templates`)
