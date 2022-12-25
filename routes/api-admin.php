@@ -10,10 +10,15 @@ Route::resource('locations', Admin\LocationController::class)
 Route::resource('nodes', Admin\Nodes\NodeController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
-Route::resource('nodes/{node}/isos', Admin\Nodes\IsoController::class)
+Route::prefix('/nodes/{node}')->group(function () {
+    Route::resource('/isos', Admin\Nodes\IsoController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
-Route::get('nodes/{node}/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
+    Route::resource('/templates', Admin\Nodes\TemplateController::class)
+    ->only(['index', 'store', 'update', 'destroy']);
+
+    Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
+});
 
 Route::resource('servers', Admin\ServerController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);

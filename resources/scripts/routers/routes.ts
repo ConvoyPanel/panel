@@ -86,6 +86,11 @@ const routes: Routes = {
         name: 'ISOs',
         component: lazy(() => import('@/components/admin/nodes/isoLibrary/IsoLibraryContainer')),
       },
+      {
+        path: '/templates',
+        name: 'Templates',
+        component: lazy(() => import('@/components/admin/nodes/templates/NodeTemplatesContainer')),
+      },
     ]
   }
 }

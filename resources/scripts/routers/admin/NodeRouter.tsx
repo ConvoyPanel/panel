@@ -30,6 +30,10 @@ const NodeRouter = () => {
                 name: 'ISO Library',
                 path: `/admin/nodes/${id}/isos`,
             },
+            {
+                name: 'Templates',
+                path: `/admin/nodes/${id}/templates`,
+            },
         ],
         [match?.params.id]
     )

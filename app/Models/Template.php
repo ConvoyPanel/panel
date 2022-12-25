@@ -24,8 +24,8 @@ class Template extends Model
         'updated_at',
     ];
 
-    public function server()
+    public function group()
     {
-        return $this->belongsTo(Server::class);
+        return $this->belongsTo(TemplateGroup::class, 'template_group_id');
     }
 }
