@@ -39,13 +39,13 @@ const NodeTemplatesContainer = () => {
                                     </div>
                                 ))}
 
-                                <button className='text-sm bg-accent-100 text-foreground border border-accent-400 border-dashed rounded py-2'>
+                                <button className='text-sm bg-transparent active:bg-accent-200 sm:hover:bg-accent-100 transition-colors text-foreground border border-accent-400 border-dashed rounded py-2'>
                                     New Template
                                 </button>
                             </div>
                         </Card>
                     ))}
-                    <button className='text-center border border-accent-400 border-dashed bg-transparent hover:bg-accent-200 hover:text-foreground transition-colors rounded p-12'>
+                    <button className='text-center border border-accent-400 border-dashed bg-transparent active:bg-accent-200 sm:hover:bg-accent-200 hover:text-foreground transition-colors rounded p-12'>
                         New Template Group
                     </button>
                 </div>
