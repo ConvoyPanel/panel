@@ -105,11 +105,13 @@ const App = () => {
                         <Route
                             path='/admin/nodes/:id/*'
                             element={
-                                <Suspense fallback={<Spinner />}>
-                                    <NodeContext.Provider>
-                                        <NodeRouter />
-                                    </NodeContext.Provider>
-                                </Suspense>
+                                <AuthenticatedRoutes requireRootAdmin>
+                                    <Suspense fallback={<Spinner />}>
+                                        <NodeContext.Provider>
+                                            <NodeRouter />
+                                        </NodeContext.Provider>
+                                    </Suspense>
+                                </AuthenticatedRoutes>
                             }
                         />
 

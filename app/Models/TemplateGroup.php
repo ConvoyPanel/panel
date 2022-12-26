@@ -3,9 +3,10 @@
 namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Performave\EloquentSortable\Sortable;
 use Performave\EloquentSortable\SortableTrait;
 
-class TemplateGroup extends Model
+class TemplateGroup extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
 
@@ -26,5 +27,10 @@ class TemplateGroup extends Model
     public function templates()
     {
         return $this->hasMany(Template::class);
+    }
+
+    public function buildSortQuery()
+    {
+        return static::query()->where('node_id', $this->node_id);
     }
 }

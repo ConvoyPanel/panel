@@ -49,6 +49,11 @@ class Node extends Model
         return $this->hasMany(IPAddress::class);
     }
 
+    public function templateGroups()
+    {
+        return $this->hasMany(TemplateGroup::class);
+    }
+
     /**
      * Gets the location associated with a node.
      *

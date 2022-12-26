@@ -17,6 +17,10 @@ Route::prefix('/nodes/{node}')->group(function () {
     Route::resource('/templates', Admin\Nodes\TemplateController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
+    Route::prefix('/templates')->group(function () {
+        Route::post('/reorder', [Admin\Nodes\TemplateController::class, 'updateGroupOrder']);
+    });
+
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
 });
 

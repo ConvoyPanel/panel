@@ -37,7 +37,7 @@ const SortableItem = ({ id, handle, className, children }: PropsWithoutHandle | 
   const rootAttributes = !handle ? {...attributes, ...listeners} : undefined
 
   return (
-    <div ref={setNodeRef} className={`${className} touch-none ${active?.id === id && 'z-[2000]'}`} style={style} {...rootAttributes}>
+    <div ref={setNodeRef} className={`${className} ${!handle && 'touch-none'} ${active?.id === id && 'z-[2000]'}`} style={style} {...rootAttributes}>
       { handle === true ? children(attributes, listeners) : children}
     </div>
   );

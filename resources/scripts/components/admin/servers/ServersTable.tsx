@@ -22,8 +22,8 @@ const columns: ColumnArray<Server> = [
         ),
     },
     {
-        accessor: 'uuid',
-        header: 'UUID',
+        accessor: 'hostname',
+        header: 'Hostname',
     },
     {
         accessor: 'user',
