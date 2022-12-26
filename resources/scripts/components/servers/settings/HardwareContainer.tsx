@@ -14,7 +14,7 @@ import useSWR from 'swr'
 import * as yup from 'yup'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import SortableItem from '@/components/elements/dnd/SortableItem'
+import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
 //@ts-ignore
 import DragVerticalIcon from '@/assets/images/icons/drag-vertical.svg'
 
@@ -225,7 +225,7 @@ const BootOrderContainer = () => {
                                         key={id}
                                         id={id}
                                     >
-                                        {(attributes, listeners) => (
+                                        {({attributes, listeners}: ChildrenPropsWithHandle) => (
                                             <>
                                                 <button className='bg-transparent p-1' {...attributes} {...listeners}>
                                                     <img
