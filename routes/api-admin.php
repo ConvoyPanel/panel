@@ -14,11 +14,11 @@ Route::prefix('/nodes/{node}')->group(function () {
     Route::resource('/isos', Admin\Nodes\IsoController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::resource('/templates', Admin\Nodes\TemplateController::class)
+    Route::resource('/template-groups', Admin\Nodes\TemplateGroupController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::prefix('/templates')->group(function () {
-        Route::post('/reorder', [Admin\Nodes\TemplateController::class, 'updateGroupOrder']);
+    Route::prefix('/template-groups')->group(function () {
+        Route::post('/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateGroupOrder']);
     });
 
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);

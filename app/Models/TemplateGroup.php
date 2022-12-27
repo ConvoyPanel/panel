@@ -5,6 +5,7 @@ namespace Convoy\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Performave\EloquentSortable\Sortable;
 use Performave\EloquentSortable\SortableTrait;
+use Ramsey\Uuid\Uuid;
 
 class TemplateGroup extends Model implements Sortable
 {
@@ -12,7 +13,6 @@ class TemplateGroup extends Model implements Sortable
 
     public static $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
-        'uuid' => 'required|uuid',
         'name' => 'required|string|max:40',
         'hidden' => 'sometimes|boolean',
     ];
@@ -32,5 +32,14 @@ class TemplateGroup extends Model implements Sortable
     public function buildSortQuery()
     {
         return static::query()->where('node_id', $this->node_id);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->uuid = Uuid::uuid4()->toString();
+        });
     }
 }

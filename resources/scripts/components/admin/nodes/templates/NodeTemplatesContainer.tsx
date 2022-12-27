@@ -1,5 +1,5 @@
-import { TemplateGroup } from '@/api/admin/nodes/templates/getTemplates'
-import useTemplatesSWR from '@/api/admin/nodes/templates/useTemplatesSWR'
+import { TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
+import useTemplatesGroupSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import Button from '@/components/elements/Button'
 import Card from '@/components/elements/Card'
@@ -20,18 +20,27 @@ import {
 import { arrayMove, SortableContext } from '@dnd-kit/sortable'
 import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
-import reorderTemplateGroups from '@/api/admin/nodes/templates/reorderTemplateGroups'
+import reorderTemplateGroups from '@/api/admin/nodes/templateGroups/reorderTemplateGroups'
 import useNotify from '@/util/useNotify'
 import { updateNotification } from '@mantine/notifications'
 import TemplateGroupCard from '@/components/admin/nodes/templates/TemplateGroupCard'
+import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
+import useFlash from '@/util/useFlash'
 
 const NodeTemplatesContainer = () => {
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { data, mutate } = useTemplatesSWR(nodeId, [])
+    const { data, mutate } = useTemplatesGroupSWR(nodeId, [])
     const notify = useNotify()
+    const [showCreateModal, setShowCreateModal] = useState(false)
     const [activeId, setActiveId] = useState<TemplateGroup | undefined>()
+    const { clearFlashes, clearAndAddHttpError } = useFlash()
 
-    const mouseSensor = useSensor(MouseSensor)
+    const mouseSensor = useSensor(MouseSensor, {
+        activationConstraint: {
+            delay: 100,
+            tolerance: 5,
+        }
+    })
     const keyboardSensor = useSensor(KeyboardSensor)
     const touchSensor = useSensor(TouchSensor, {
         activationConstraint: {
@@ -47,21 +56,33 @@ const NodeTemplatesContainer = () => {
     const sensors = useSensors(mouseSensor, keyboardSensor, touchSensor)
 
     const updateGroupOrder = (groups: number[]) => {
+        clearFlashes('admin:node:template-groups')
+
         notify({
-            id: 'admin:node:templates.reorder',
+            id: 'admin:node:template-groups.reorder',
             loading: true,
             message: 'Saving changes...',
             autoClose: false,
             disallowClose: true,
         })
 
-        reorderTemplateGroups(nodeId, groups).then(() => {
-            updateNotification({
-                id: 'admin:node:templates.reorder',
-                message: 'Saved order',
-                autoClose: 1000,
+        reorderTemplateGroups(nodeId, groups)
+            .then(() => {
+                updateNotification({
+                    id: 'admin:node:template-groups.reorder',
+                    message: 'Saved order',
+                    autoClose: 1000,
+                })
             })
-        })
+            .catch(error => {
+                updateNotification({
+                    id: 'admin:node:template-groups.reorder',
+                    color: 'red',
+                    message: error,
+                    autoClose: 5000,
+                })
+                clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+            })
     }
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -84,9 +105,12 @@ const NodeTemplatesContainer = () => {
     }
 
     return (
-        <NodeContentBlock title='Templates' showFlashKey='admin:node:templates'>
+        <NodeContentBlock title='Templates' showFlashKey='admin:node:template-groups'>
+            <EditTemplateGroupModal open={showCreateModal} onClose={() => setShowCreateModal(false)} />
             <div className='flex justify-end items-center mb-3'>
-                <Button variant='filled'>New Template Group</Button>
+                <Button onClick={() => setShowCreateModal(true)} disabled={data!.length >= 50} variant='filled'>
+                    New Template Group
+                </Button>
             </div>
             {!data ? (
                 <Spinner />
@@ -103,12 +127,16 @@ const NodeTemplatesContainer = () => {
                                 <TemplateGroupCard group={group} key={group.id} />
                             ))}
                         </SortableContext>
-                    <DragOverlay>{activeId && <TemplateGroupCard group={activeId} className='z-20' />}</DragOverlay>
+                        <DragOverlay>{activeId && <TemplateGroupCard group={activeId} className='z-20' />}</DragOverlay>
                     </DndContext>
-                    <button className='text-center border border-accent-400 border-dashed bg-transparent active:bg-accent-200 sm:hover:bg-accent-200 hover:text-foreground transition-colors rounded p-12'>
-                        New Template Group
-                    </button>
-
+                    {data.length < 50 && (
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className='text-center border border-accent-400 border-dashed bg-transparent active:bg-accent-200 sm:hover:bg-accent-200 hover:text-foreground transition-colors rounded p-12'
+                        >
+                            New Template Group
+                        </button>
+                    )}
                 </div>
             )}
         </NodeContentBlock>

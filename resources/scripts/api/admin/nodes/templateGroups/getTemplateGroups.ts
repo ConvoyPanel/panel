@@ -6,7 +6,7 @@ export interface TemplateGroup {
     uuid: string
     name: string
     hidden: boolean
-    templates: Template[]
+    templates?: Template[]
     order_column: number
 }
 
@@ -25,8 +25,8 @@ export const rawDataToTemplateGroup = (data: any): TemplateGroup => ({
     nodeId: data.node_id,
     uuid: data.uuid,
     name: data.name,
-    hidden: data.hidden,
-    templates: data.templates.data.map(rawDataToTemplate),
+    hidden: Boolean(data.hidden),
+    templates: data?.templates?.data.map(rawDataToTemplate),
     order_column: data.order_column,
 })
 
@@ -36,16 +36,16 @@ export const rawDataToTemplate = (data: any): Template => ({
     uuid: data.uuid,
     name: data.name,
     vmid: data.vmid,
-    hidden: data.hidden,
+    hidden: Boolean(data.hidden),
     order_column: data.order_column,
 })
 
-const getTemplates = async (nodeId: number): Promise<TemplateGroup[]> => {
+const getTemplateGroups = async (nodeId: number): Promise<TemplateGroup[]> => {
     const {
         data: { data },
-    } = await http.get(`/api/admin/nodes/${nodeId}/templates`)
+    } = await http.get(`/api/admin/nodes/${nodeId}/template-groups`)
 
     return data.map(rawDataToTemplateGroup)
 }
 
-export default getTemplates
+export default getTemplateGroups
