@@ -43,18 +43,12 @@ const NodeTemplatesContainer = () => {
         }
     })
     const keyboardSensor = useSensor(KeyboardSensor)
-    const touchSensor = useSensor(TouchSensor, {
-        activationConstraint: {
-            delay: 250,
-            tolerance: 5,
-        },
-    })
+    const sensors = useSensors(mouseSensor, keyboardSensor)
 
     const handleDragStart = (event: DragStartEvent) => {
-        setActiveId(data!.find(group => group.uuid === event.active.id)!)
+        setActiveId(data!.find(group => group.id === event.active.id)!)
     }
 
-    const sensors = useSensors(mouseSensor, keyboardSensor, touchSensor)
 
     const updateGroupOrder = (groups: number[]) => {
         clearFlashes('admin:node:template-groups')

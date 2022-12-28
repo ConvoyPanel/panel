@@ -1,6 +1,6 @@
 import http from '@/api/http'
 
 const deleteTemplate = (nodeId: number, groupUuid: string, templateUuid: string) =>
-    http.delete(`/admin/nodes/${nodeId}/template_groups/${groupUuid}/templates/${templateUuid}`)
+    http.delete(`/api/admin/nodes/${nodeId}/template-groups/${groupUuid}/templates/${templateUuid}`)
 
 export default deleteTemplate

@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
+use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
 use Convoy\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
@@ -10,7 +11,7 @@ use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
 use Convoy\Transformers\Admin\TemplateTransformer;
 
-class TemplateController extends Controller
+class TemplateController extends ApplicationApiController
 {
     public function store(TemplateRequest $request, Node $node, TemplateGroup $templateGroup)
     {

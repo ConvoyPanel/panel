@@ -100,6 +100,6 @@ export const hexToRgba = (hex: string, alpha = 1): string => {
 }
 
 
-export const classNames = (...classes: (string | undefined)[]) => {
+export const classNames = (...classes: (string | undefined | null)[]) => {
   return classes.filter(Boolean).join(' ')
 }
