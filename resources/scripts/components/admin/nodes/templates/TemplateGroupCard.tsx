@@ -24,10 +24,14 @@ import {
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
+import { arrayMove, SortableContext } from '@dnd-kit/sortable'
 import TemplateCard from '@/components/admin/nodes/templates/TemplateCard'
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers'
 import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
+import useNotify from '@/util/useNotify'
+import reorderTemplates from '@/api/admin/nodes/templateGroups/templates/reorderTemplates'
+import { updateNotification } from '@mantine/notifications'
+import { httpErrorToHuman } from '@/api/http'
 
 interface Props {
     group: TemplateGroup
@@ -41,6 +45,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const { mutate } = useTemplateGroupsSWR(nodeId)
     const [activeTemplate, setActiveTemplate] = useState<Template | undefined>()
+    const notify = useNotify()
 
     const mouseSensor = useSensor(MouseSensor, {
         activationConstraint: {
@@ -66,14 +71,66 @@ const TemplateGroupCard = ({ group, className }: Props) => {
             })
     }
 
+    const updateTemplateOrder = (templates: number[]) => {
+        clearFlashes('admin:node:template-groups')
+
+        notify({
+            id: 'admin:node:template-group:templates.reorder',
+            loading: true,
+            message: 'Saving changes...',
+            autoClose: false,
+            disallowClose: true,
+        })
+
+        reorderTemplates(nodeId, group.uuid, templates)
+            .then(() => {
+                updateNotification({
+                    id: 'admin:node:template-group:templates.reorder',
+                    message: 'Saved order',
+                    autoClose: 1000,
+                })
+            })
+            .catch(error => {
+                updateNotification({
+                    id: 'admin:node:template-group:templates.reorder',
+                    color: 'red',
+                    message: httpErrorToHuman(error),
+                    autoClose: 5000,
+                })
+                clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+            })
+    }
+
     const handleDragStart = (event: DragStartEvent) => {
         setActiveTemplate(group.templates!.find(template => template.id === event.active.id)!)
-
     }
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
         setActiveTemplate(undefined)
         if (over && active.id !== over.id) {
+            mutate(groups => {
+
+                // find the group that the template is being dragged from and move it to the new position and push everything down by 1
+                const newGroups = groups!.map(g => {
+                    if (g.id === group.id) {
+                        // use arrayMove
+                        const newTemplates = arrayMove(g.templates!, g.templates!.findIndex(template => template.id === active.id), g.templates!.findIndex(template => template.id === over.id))
+
+                        newTemplates.forEach((group, index) => (group.order_column = index + 1))
+
+                        updateTemplateOrder(newTemplates.map(t => t.id))
+
+                        return {
+                            ...g,
+                            templates: newTemplates,
+                        }
+                    }
+
+                    return g
+                })
+
+                return newGroups
+            }, false)
         }
     }
 
@@ -124,7 +181,12 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                     <div className='px-4 pb-4 relative'>
                         <div className='flex flex-col space-y-3 mt-2'>
                             {group.templates!.length > 0 ? (
-                                <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis, restrictToWindowEdges]} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+                                <DndContext
+                                    sensors={sensors}
+                                    modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+                                    onDragEnd={handleDragEnd}
+                                    onDragStart={handleDragStart}
+                                >
                                     <SortableContext items={group.templates!}>
                                         {group.templates!.map(template => (
                                             <TemplateCard group={group} key={template.uuid} template={template} />
@@ -132,14 +194,21 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                     </SortableContext>
 
                                     <DragOverlay>
-                                        {activeTemplate ? <TemplateCard template={activeTemplate} className='z-20' /> : null}
+                                        {activeTemplate ? (
+                                            <TemplateCard template={activeTemplate} className='z-20' />
+                                        ) : null}
                                     </DragOverlay>
                                 </DndContext>
                             ) : null}
 
-                            {group.templates!.length < 6 ? <button onClick={() => setShowCreateModal(true)} className='text-sm bg-transparent active:bg-accent-200 sm:hover:bg-accent-100 transition-colors text-foreground border border-accent-400 border-dashed rounded py-2'>
-                                New Template
-                            </button> : null}
+                            {group.templates!.length < 6 ? (
+                                <button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className='text-sm bg-transparent active:bg-accent-200 sm:hover:bg-accent-100 transition-colors text-foreground border border-accent-400 border-dashed rounded py-2'
+                                >
+                                    New Template
+                                </button>
+                            ) : null}
                         </div>
                     </div>
                 </Card>
