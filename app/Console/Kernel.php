@@ -2,7 +2,7 @@
 
 namespace Convoy\Console;
 
-use Convoy\Console\Commands\Maintenance\RefreshActivityRunnersCommand;
+use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
 use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
 use Convoy\Console\Commands\Server\UpdateUsagesCommand;
@@ -21,14 +21,18 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(RefreshActivityRunnersCommand::class)->everyMinute()->withoutOverlapping();
-        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
-        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
-        $schedule->command(ResetUsagesCommand::class)->daily();
+        if (config('backups.prune_age')) {
+            // Every 30 minutes, run the backup pruning command so that any abandoned backups can be deleted.
+            $schedule->command(PruneOrphanedBackupsCommand::class)->everyThirtyMinutes();
+        }
 
         if (config('activity.prune_days')) {
             $schedule->command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
         }
+
+        $schedule->command(ResetUsagesCommand::class)->daily();
+        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
     }
 
     /**

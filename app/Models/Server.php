@@ -28,9 +28,10 @@ class Server extends Model
     public static $validationRules = [
         'type' => 'sometimes|in:new,existing',
         'name' => 'required|string|min:1|max:40',
-        'node_id' => 'required|exists:nodes,id',
-        'user_id' => 'required|exists:users,id',
+        'node_id' => 'required|integer|exists:nodes,id',
+        'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
+        'hostname' => 'required|string|min:1|max:191',
         'status' => 'nullable|string',
         'installing' => 'sometimes|boolean',
         'addresses' => 'sometimes|array',
@@ -53,7 +54,7 @@ class Server extends Model
         return $this->belongsTo(Node::class);
     }
 
-    public function owner()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -66,6 +67,11 @@ class Server extends Model
     public function template()
     {
         return $this->hasOne(Template::class);
+    }
+
+    public function backups()
+    {
+        return $this->hasMany(Backup::class);
     }
 
     /**
@@ -91,12 +97,6 @@ class Server extends Model
         return $this->status === Status::SUSPENDED->value;
     }
 
-    public function getRouteKeyName(): string
-    {
-        return 'id';
-    }
-
-
     /**
      * Checks if the server is currently in a user-accessible state. If not, an
      * exception is raised. This should be called whenever something needs to make
@@ -107,8 +107,7 @@ class Server extends Model
     public function validateCurrentState()
     {
         if (
-            $this->isSuspended() ||
-            !$this->isInstalled()
+            !is_null($this->status)
         ) {
             throw new ServerStateConflictException($this);
         }

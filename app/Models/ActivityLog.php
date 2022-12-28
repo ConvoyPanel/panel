@@ -3,25 +3,26 @@
 namespace Convoy\Models;
 
 use Carbon\Carbon;
-use Convoy\Events\Activity\ActivityLogged;
-use Convoy\Events\Activity\ActivityUpdated;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Event;
 use LogicException;
 
 class ActivityLog extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $guarded = [
         'id',
+        'timestamp',
     ];
 
     protected $casts = [
         'properties' => 'collection',
+        'timestamp' => 'datetime',
     ];
 
     protected $with = ['subjects'];
@@ -32,21 +33,6 @@ class ActivityLog extends Model
         'ip' => ['required', 'string'],
         'description' => ['nullable', 'string'],
         'properties' => ['array'],
-    ];
-
-    public static $eventTypes = [
-        'server:details.update' => [
-            'timeout' => 240, // seconds
-        ],
-        'server:install' => [
-            'timeout' => false, // determined by status of UPID
-        ],
-        'server:uninstall' => [
-            'timeout' => false,
-        ],
-        'server:rebuild' => [
-            'timeout' => 1000,
-        ],
     ];
 
     public function actor(): MorphTo
@@ -89,22 +75,5 @@ class ActivityLog extends Model
         }
 
         return static::where('created_at', '<=', Carbon::now()->subDays(config('activity.prune_days')));
-    }
-
-    /**
-     * Boots the model event listeners. This will trigger an activity log event every
-     * time a new model is inserted which can then be captured and worked with as needed.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::created(function (self $model) {
-            Event::dispatch(new ActivityLogged($model));
-        });
-
-        static::updated(function (self $model) {
-            Event::dispatch(new ActivityUpdated($model));
-        });
     }
 }

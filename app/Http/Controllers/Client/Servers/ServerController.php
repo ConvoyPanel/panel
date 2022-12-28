@@ -2,48 +2,72 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Convoy\Enums\Activity\Status;
+use Convoy\Enums\Server\Power;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Models\ActivityLog;
+use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\ServerDetailService;
-use Inertia\Inertia;
+use Convoy\Services\Servers\VncService;
+use Convoy\Transformers\Client\ServerDetailTransformer;
+use Convoy\Transformers\Client\ServerStatusTransformer;
+use Convoy\Transformers\Client\ServerTerminalTransformer;
+use Convoy\Transformers\Client\ServerTransformer;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDetailService $detailService)
+    public function __construct(private VncService $vncService, private ServerDetailService $detailService, private ProxmoxServerRepository $serverRepository, private ProxmoxPowerRepository $powerRepository)
     {
     }
 
-    public function show(Server $server)
+    public function index(Server $server)
     {
-        return Inertia::render('servers/Show', [
-            'server' => $server->toArray(),
-        ]);
+        return fractal($server, new ServerTransformer)->respond();
     }
 
-    public function showBuilding(Server $server)
+    public function details(Server $server)
     {
-        $deployment = $server->activity()->where([['event', '=', 'server:rebuild'], ['status', '=', Status::RUNNING->value]])
-            ->orWhere([['event', '=', 'server:build'], ['status', '=', Status::RUNNING->value]])->first();
-
-        return Inertia::render('servers/Building', [
-            'server' => $server->toArray(),
-            'batch' => $deployment?->batch,
-            'batch_type' => (bool) $deployment?->batch ? $deployment->event : null,
-            'events' => (bool) $deployment?->batch ? ActivityLog::where('batch', '=', $deployment->batch)->get() : [],
-        ]);
+        return fractal($this->detailService->getByProxmox($server), new ServerDetailTransformer)->respond();
     }
 
-    public function showSuspended(Server $server)
+    public function getStatus(Server $server)
     {
-        return Inertia::render('servers/Suspended', [
-            'server' => $server->toArray(),
-        ]);
+        return fractal()->item($this->serverRepository->setServer($server)->getStatus(), new ServerStatusTransformer)->respond();
     }
 
-    public function getDetails(Server $server)
+    public function sendPowerCommand(Server $server, SendPowerCommandRequest $request)
     {
-        return $this->detailService->setServer($server)->getDetails();
+        $this->powerRepository->setServer($server);
+
+        switch ($request->state) {
+            case 'start':
+                $this->powerRepository->send(Power::START);
+                break;
+            case 'restart':
+                $this->powerRepository->send(Power::RESTART);
+                break;
+            case 'kill':
+                $this->powerRepository->send(Power::KILL);
+                break;
+            case 'shutdown':
+                $this->powerRepository->send(Power::SHUTDOWN);
+                break;
+        }
+
+        return $this->returnNoContent();
+    }
+
+    public function authorizeTerminal(Server $server)
+    {
+        $data = $this->vncService->generateCredentials($server);
+
+        return fractal()->item([
+            'token' => $data,
+            'node' => $server->node->cluster,
+            'vmid' => $server->vmid,
+            'fqdn' => $server->node->fqdn,
+            'port' => $server->node->port,
+        ], new ServerTerminalTransformer)->respond();
     }
 }

@@ -3,8 +3,7 @@
 namespace Convoy\Providers;
 
 use Convoy\Http\Middleware\AdminAuthenticate;
-use Convoy\Http\Middleware\AuthorizeProprietaryToken;
-use Convoy\Http\Middleware\ForceJsonResponse;
+use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -29,24 +28,30 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //Route::model('server', Server::class);
+        Route::bind('server', function ($value) {
+            return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
+        });
 
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware([ForceJsonResponse::class, AuthorizeProprietaryToken::class, 'api'])
-                ->prefix('/api/application')
-                ->group(base_path('routes/api-application.php'));
+            Route::middleware('web')->group(function () {
+                /* Route::middleware([ForceJsonResponse::class, AuthorizeProprietaryToken::class, 'api'])
+                    ->prefix('/api/application')
+                    ->group(base_path('routes/api-application.php'));
+ */
+                Route::middleware(['auth.session'])
+                    ->group(base_path('routes/base.php'));
 
-            Route::middleware('web')
-                ->group(base_path('routes/auth.php'));
+                Route::middleware(['auth'])->prefix('/api/client')
+                    ->group(base_path('routes/api-client.php'));
 
-            Route::middleware(['web', 'auth'])
-                ->group(base_path('routes/client.php'));
+                Route::middleware(['auth', AdminAuthenticate::class])
+                    ->prefix('/api/admin')
+                    ->group(base_path('routes/api-admin.php'));
 
-            Route::middleware(['web', 'auth', AdminAuthenticate::class])
-                ->prefix('/admin')
-                ->group(base_path('routes/admin.php'));
+                Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
+            });
         });
     }
 

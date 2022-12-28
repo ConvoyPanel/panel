@@ -3,72 +3,50 @@
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateNodeRequest;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Models\Node;
-use Convoy\Transformers\Admin\NodeTransformer as AdminNodeTransformer;
-use Convoy\Transformers\Application\NodeTransformer;
+use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class NodeController extends ApplicationApiController
 {
     public function index(Request $request)
     {
-        return Inertia::render('admin/nodes/Index', ['nodes' => fractal(Node::paginate($request->query('per_page') ?? 50), new AdminNodeTransformer)]);
-    }
+        $nodes = QueryBuilder::for(Node::query())
+            ->with('servers')
+            ->withCount(['servers'])
+            ->allowedFilters(['name', 'hostname'])
+            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-    public function create()
-    {
-        return Inertia::render('admin/nodes/Create');
+        return fractal($nodes, new NodeTransformer())->respond();
     }
 
     public function show(Node $node)
     {
-        return Inertia::render('admin/nodes/Show', [
-            'node' => $node,
-        ]);
+        $node->append(['memory_allocated', 'disk_allocated']);
+
+        return fractal($node, new NodeTransformer())->respond();
     }
 
     public function store(StoreNodeRequest $request)
     {
         $node = Node::create($request->validated());
 
-        return redirect()->route('admin.nodes.show', [$node->id]);
-    }
-
-    public function search(Request $request)
-    {
-        $nodes = QueryBuilder::for(Node::query())
-            ->allowedFilters(['name', 'cluster', 'hostname', 'port'])
-            ->allowedSorts(['id'])
-            ->paginate($request->query('per_page') ?? 50);
-
-        return fractal($nodes, new NodeTransformer())->respond();
-    }
-
-    public function update(Node $node, UpdateNodeRequest $request)
-    {
-        $payload = $request->safe()->except(['token_id', 'secret']);
-
-        if (isset($request->token_id)) {
-            $payload['token_id'] = $request->safe()->only(['token_id']);
-        }
-
-        if (isset($request->secret)) {
-            $payload['secret'] = $request->safe()->only(['secret']);
-        }
-
-        $node->update($payload);
-
-        return back();
+        return fractal($node, new NodeTransformer)->respond();
     }
 
     public function destroy(Node $node)
     {
+        $node->loadCount('servers');
+
+        if ($node->servers_count > 0) {
+            throw new BadRequestHttpException('The node cannot be deleted with servers still associated.');
+        }
+
         $node->delete();
 
-        return back();
+        return $this->returnNoContent();
     }
 }

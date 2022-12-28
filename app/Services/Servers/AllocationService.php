@@ -2,7 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Objects\Server\Allocations\Storage\DiskObject;
+use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Services\ProxmoxService;
@@ -26,30 +26,28 @@ class AllocationService extends ProxmoxService
         ]);
     }
 
-    public function getDisks()
+    public function getDisks(Server $server, bool $filterOutMediaDisks = true)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $disks = array_values(array_filter($this->repository->setServer($this->server)->getAllocations(), function ($disk) {
-            if (str_contains(Arr::get($disk, 'value'), 'media')) {
-                return false;
+        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) use ($filterOutMediaDisks) {
+            if ($filterOutMediaDisks) {
+                if (str_contains(Arr::get($disk, 'value'), 'media')) {
+                    return false;
+                }
             }
 
             return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
         }));
 
-        return DiskObject::collection(Arr::map($disks, function ($value) {
+        return DiskData::collection(Arr::map($disks, function ($value) {
             return $this->formatDisk($value);
         }));
     }
 
-    public function getBootOrder(bool $filterNonLocalDisks = false): array
+    public function getBootOrder(Server $server, bool $filterNonLocalDisks = false): array
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        $raw = collect($this->repository->setServer($server)->getAllocations())->where('key', 'boot')->firstOrFail();
 
-        $raw = collect($this->repository->setServer($this->server)->getAllocations())->where('key', 'boot')->firstOrFail();
-
-        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', Arr::get($raw, 'value')))), function ($disk) {
+        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
             return ! ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
@@ -62,34 +60,27 @@ class AllocationService extends ProxmoxService
         return $disks;
     }
 
-    public function setBootOrder(array $disks)
+    public function setBootOrder(Server $server, array $disks)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        return $this->repository->setServer($this->server)->update([
+        return $this->repository->setServer($server)->update([
             'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }
 
-    public function updateSpecifications(array $specs)
+    public function updateHardware(Server $server, int $cpu, int $memory)
     {
-        Assert::isInstanceOf($this->server, Server::class);
+        $payload = [
+            'cores' => $cpu,
+            'memory' => $memory / 1048576
+        ];
 
-        $payload = [];
-        if (! empty(Arr::get($specs, 'cpu'))) {
-            $payload['cores'] = Arr::get($specs, 'cpu');
-        }
-        if (! empty(Arr::get($specs, 'memory'))) {
-            $payload['memory'] = floor(Arr::get($specs, 'memory') / 1048576);
-        }
-
-        return $this->repository->setServer($this->server)->update($payload);
+        return $this->repository->setServer($server)->update($payload);
     }
 
     public function formatDisk(array $rawDisk): array
     {
         $disk = [
-            'disk' => Arr::get($rawDisk, 'key'),
+            'name' => Arr::get($rawDisk, 'key'),
             'size' => 0,
         ];
 

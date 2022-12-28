@@ -8,7 +8,7 @@ RUN apt-get -y install software-properties-common curl sudo unzip
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 RUN apt-get install -y nodejs
-RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_mysql pcntl
 RUN pecl install redis \
             && docker-php-ext-enable redis.so
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -16,5 +16,7 @@ RUN php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611
 RUN php composer-setup.php
 RUN php -r "unlink('composer-setup.php');"
 RUN sudo mv composer.phar /usr/local/bin/composer
+
+RUN echo "alias art='php artisan'" >> ~/.bashrc
 
 WORKDIR /var/www

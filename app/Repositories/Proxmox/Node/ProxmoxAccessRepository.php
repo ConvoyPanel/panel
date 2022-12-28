@@ -25,7 +25,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
         ];
 
         try {
-            $response = $this->getHttpClient()->post('/api2/json/access/users', [
+            $this->getHttpClient()->post('/api2/json/access/users', [
                 'json' => $payload,
             ]);
         } catch (GuzzleException $e) {
@@ -45,7 +45,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
         ];
 
         try {
-            $response = $this->getHttpClient()->post('/api2/json/access/roles', [
+            $this->getHttpClient()->post('/api2/json/access/roles', [
                 'json' => $payload,
             ]);
         } catch (GuzzleException $e) {

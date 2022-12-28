@@ -27,7 +27,7 @@ class StoreNodeRequest extends FormRequest
     {
         $rules = Node::getRules();
 
-        $rules['hostname'][] = Fqdn::make();
+        $rules['fqdn'][] = Fqdn::make();
 
         return $rules;
     }

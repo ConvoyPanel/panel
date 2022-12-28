@@ -203,8 +203,10 @@ return [
         Convoy\Providers\AuthServiceProvider::class,
         Convoy\Providers\BroadcastServiceProvider::class,
         Convoy\Providers\EventServiceProvider::class,
+        Convoy\Providers\HorizonServiceProvider::class,
         Convoy\Providers\RouteServiceProvider::class,
         Convoy\Providers\RepositoryServiceProvider::class,
+        Convoy\Providers\FortifyServiceProvider::class,
     ],
 
     /*

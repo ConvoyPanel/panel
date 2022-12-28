@@ -3,6 +3,7 @@
 namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use GuzzleHttp\Exception\GuzzleException;
@@ -23,12 +24,12 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         'zstd',
     ];
 
-    public function getBackups(string $storage = 'local')
+    public function getBackups()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $storage), [
+            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/storage/%s/content', $this->node->cluster, $this->node->backup_storage), [
                 'query' => [
                     'content' => 'backup',
                     'vmid' => $this->server->vmid,
@@ -51,10 +52,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/vzdump', $this->node->cluster), [
                 'json' => [
                     'vmid' => $this->server->vmid,
-                    'storage' => $this->node->storage,
+                    'storage' => $this->node->backup_storage,
                     'mode' => $mode,
                     'remove' => 0,
-                    'compress' => $compressionType,
+                    'compress' => $compressionType === 'none' ? 0 : $compressionType,
                 ],
             ]);
         } catch (GuzzleException $e) {
@@ -64,7 +65,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function restore(string $archive)
+    public function restore(Backup $backup)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -73,7 +74,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
                 'json' => [
                     'vmid' => $this->server->vmid,
                     'force' => 1,
-                    'archive' => $archive,
+                    'archive' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
                 ],
             ]);
         } catch (GuzzleException $e) {
@@ -83,12 +84,12 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function delete(string $archive)
+    public function delete(Backup $backup)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/storage/%s/content/%s', $this->node->cluster, $this->node->storage, $archive));
+            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/storage/%s/content/%s', $this->node->cluster, $this->node->backup_storage, "{$this->node->backup_storage}:backup/{$backup->file_name}"));
         } catch (GuzzleException $e) {
             throw new ProxmoxConnectionException($e);
         }

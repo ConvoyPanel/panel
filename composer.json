@@ -16,16 +16,18 @@
     "php": "^8.1",
     "doctrine/dbal": "^3.4",
     "guzzlehttp/guzzle": "7.4.5",
-    "inertiajs/inertia-laravel": "^0.5.4",
-    "laravel/framework": "9.21",
+    "laravel/fortify": "^1.13",
+    "laravel/framework": "9.43.0",
     "laravel/helpers": "^1.5",
+    "laravel/horizon": "^5.10",
     "laravel/sanctum": "^2.8",
     "laravel/tinker": "^2.7",
+    "performave/eloquent-sortable": "^1.0.0",
+    "phpseclib/phpseclib": "~3.0",
     "pusher/pusher-php-server": "^7.0",
     "spatie/laravel-data": "^2.0",
     "spatie/laravel-fractal": "^6.0",
     "spatie/laravel-query-builder": "^5.0",
-    "tightenco/ziggy": "^1.0",
     "webmozart/assert": "^1.11"
   },
   "require-dev": {
@@ -39,6 +41,12 @@
     "phpunit/phpunit": "^9.5.10",
     "spatie/laravel-ignition": "^1.0"
   },
+  "repositories": [
+      {
+          "type": "vcs",
+          "url": "https://github.com/Performave/eloquent-sortable"
+      }
+  ],
   "autoload": {
     "psr-4": {
       "Convoy\\": "app/",

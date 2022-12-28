@@ -80,7 +80,7 @@ abstract class ProxmoxRepository
 
         return new Client([
             'verify' => $this->app->environment('production'),
-            'base_uri' => "https://{$this->node->hostname}:{$this->node->port}/",
+            'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
             'headers' => array_merge($headers, [

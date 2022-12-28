@@ -127,14 +127,6 @@ class ActivityLogService
         ]);
     }
 
-    public function runner(?string $upid = null): self
-    {
-        $this->getActivity()->upid = $upid;
-        $this->activity->status = Status::RUNNING;
-
-        return $this;
-    }
-
     /**
      * Logs an activity log entry with the set values and then returns the
      * model instance to the caller. If there is an exception encountered while

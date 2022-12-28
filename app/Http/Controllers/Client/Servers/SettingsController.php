@@ -2,54 +2,86 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Activity;
-use Convoy\Enums\Server\Status;
+use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateBasicInfoRequest;
-use Convoy\Jobs\Servers\ProcessRebuild;
+use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\Activity\ActivityLogBatchService;
-use Convoy\Services\Nodes\TemplateService;
-use Inertia\Inertia;
+use Convoy\Services\Servers\AllocationService;
+use Convoy\Services\Servers\CloudinitService;
+use Convoy\Transformers\Client\ServerBootOrderTransformer;
+use Convoy\Transformers\Client\ServerNetworkTransformer;
+use Convoy\Transformers\Client\ServerSecurityTransformer;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Arr;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private TemplateService $templateService, private ProxmoxCloudinitRepository $repository, private ActivityLogBatchService $batch)
+    public function __construct(private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository, private AllocationService $allocationService)
     {
     }
 
-    public function index(Server $server)
+    public function rename(RenameServerRequest $request, Server $server)
     {
-        return Inertia::render('servers/settings/Index', [
-            'server' => $server,
-            'config' => $this->repository->setServer($server)->getConfig(),
-        ]);
-    }
+        $this->connection->transaction(function () use ($server, $request) {
+            $this->cloudinitService->updateHostname($server, $request->hostname);
 
-    public function updateBasicInfo(Server $server, UpdateBasicInfoRequest $request)
-    {
-        $server->update(['name' => $request->name]);
+            $server->update($request->validated());
+        });
 
         return $this->returnNoContent();
     }
 
-    public function getTemplates(Server $server)
+    public function getBootOrder(Server $server)
     {
-        return $this->templateService->setServer($server)->getTemplates(true);
+        $availableDevices = array_map(fn ($device) => $device['name'], $this->allocationService->getDisks($server, filterOutMediaDisks: false)->toArray());
+        $configuredDevices = $this->allocationService->getBootOrder($server);
+        $unconfiguredDevices = array_values(array_filter($availableDevices, fn ($device) => !in_array($device, $configuredDevices)));
+
+        return fractal()->item([
+            'unused_devices' => $unconfiguredDevices,
+            'boot_order' => $configuredDevices,
+        ], new ServerBootOrderTransformer)->respond();
     }
 
-    public function rebuild(Server $server, ReinstallServerRequest $request)
+    public function updateBootOrder(UpdateBootOrderRequest $request, Server $server)
     {
-        $this->batch->transaction(function (string $uuid) use ($server, $request) {
-            $server->update(['status' => Status::INSTALLING->value]);
+        $this->allocationService->setBootOrder($server, $request->order);
 
-            $activity = Activity::event('server:rebuild')->runner()->log();
+        return $this->returnNoContent();
+    }
 
-            ProcessRebuild::dispatch($server->id, $request->template_id, $uuid, $activity->id);
-        });
+    public function getNetwork(Server $server)
+    {
+        return fractal()->item([
+            'nameservers' => $this->cloudinitService->getNameservers($server),
+        ], new ServerNetworkTransformer())->respond();
+    }
 
-        return redirect()->route('servers.show.building', [$server->id]);
+    public function updateNetwork(UpdateNetworkRequest $request, Server $server)
+    {
+        $this->cloudinitService->updateNameservers($server, $request->nameservers);
+
+        return $this->returnNoContent();
+    }
+
+    public function getSecurity(Server $server)
+    {
+
+        return fractal()->item([
+            'ssh_keys' => rawurldecode(Arr::get($this->repository->setServer($server)->getConfig(), 'sshkeys')) ?? ''
+        ], new ServerSecurityTransformer)->respond();
+    }
+
+    public function updateSecurity(UpdateSecurityRequest $request, Server $server)
+    {
+        if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
+            $this->cloudinitService->setServer($server)->changePassword($request->ssh_keys, AuthenticationType::from($request->type));
+        } else {
+            $this->cloudinitService->setServer($server)->changePassword($request->password, AuthenticationType::from($request->type));
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Backups;
 
+use Convoy\Models\Backup;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBackupRequest extends FormRequest
@@ -23,9 +24,13 @@ class StoreBackupRequest extends FormRequest
      */
     public function rules()
     {
+        $rules = Backup::getRules();
+
         return [
+            'name' => $rules['name'],
+            'is_locked' => $rules['is_locked'],
             'mode' => 'required|in:snapshot,suspend,stop',
-            'compressionType' => 'required|in:none,lzo,gzip,zstd',
+            'compression_type' => 'required|in:none,lzo,gzip,zstd',
         ];
     }
 }

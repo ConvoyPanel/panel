@@ -5,6 +5,7 @@ namespace Convoy\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -34,6 +35,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verified_at',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at'
     ];
 
     /**
@@ -44,6 +49,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function toReactObject(): array
+    {
+        return Collection::make($this->toArray())->except(['id'])->toArray();
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

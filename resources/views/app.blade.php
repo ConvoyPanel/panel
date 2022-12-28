@@ -4,18 +4,31 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Laravel') }}</title>
+
+        <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+        <!-- Inject Data -->
+        @if(!is_null(Auth::user()))
+            <script>
+                window.ConvoyUser = {!! json_encode(Auth::user()->toReactObject()) !!};
+            </script>
+        @endif
+
+        @if(!empty($siteConfiguration))
+            <script>
+                window.SiteConfiguration = {!! json_encode($siteConfiguration) !!};
+            </script>
+        @endif
 
         <!-- Scripts -->
-        @routes
         @viteReactRefresh
-        @vite('resources/js/app.tsx')
-        @inertiaHead
+        @vite('resources/scripts/main.tsx')
     </head>
     <body class="font-sans antialiased">
-        @inertia
+        <div id="root"></div>
     </body>
 </html>

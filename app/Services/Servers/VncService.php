@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\ProxmoxService;
@@ -14,10 +15,10 @@ class VncService extends ProxmoxService
     {
     }
 
-    public function getTemporaryVncCredentials()
+    public function generateCredentials(Server $server)
     {
-        $this->accessRepository->setServer($this->server);
-        $this->serverRepository->setServer($this->server);
+        $this->accessRepository->setServer($server);
+        $this->serverRepository->setServer($server);
 
         $user = $this->accessRepository->createUser();
 

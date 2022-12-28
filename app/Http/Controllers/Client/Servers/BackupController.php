@@ -3,49 +3,57 @@
 namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Client\Servers\Backups\RollbackBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
+use Convoy\Models\Backup;
 use Convoy\Models\Server;
+use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use Convoy\Services\Servers\Backups\BackupCreationService;
-use Convoy\Services\Servers\Backups\BackupDeletionService;
-use Inertia\Inertia;
+use Convoy\Services\Servers\Backups\BackupService;
+use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Transformers\Client\BackupTransformer;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(protected ProxmoxBackupRepository $repository, protected BackupCreationService $creationService, protected BackupDeletionService $deletionService)
+    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private BackupService $backupService, private BackupRepository $backupRepository, private ProxmoxBackupRepository $proxmoxRepository)
     {
     }
 
-    public function index(Server $server)
+    public function index(Server $server, Request $request)
     {
-        $backups = $this->repository->setServer($server)->getBackups();
+        $backups = QueryBuilder::for(Backup::query())
+            ->where('backups.server_id', $server->id)
+            ->allowedFilters(['name'])
+            ->defaultSort('-created_at')
+            ->allowedSorts('created_at', 'completed_at')
+            ->paginate(min($request->query('per_page') ?? 20, 50));
 
-        return Inertia::render('servers/backups/Index', [
-            'server' => $server,
-            'backups' => $backups,
-            'can_create' => isset($server->backup_limit) ? count($backups) < $server->backup_limit : true,
-        ]);
+        return fractal($backups, new BackupTransformer)->addMeta([
+            'backup_count' => $this->backupRepository->getNonFailedBackups($server)->count(),
+        ])->respond();
     }
 
     public function store(Server $server, StoreBackupRequest $request)
     {
-        $this->creationService->setServer($server)->handle($request->mode, $request->compressionType);
+        $backup = $this->backupService
+            ->create($server, $request->name, $request->mode, $request->compression_type, $request->input('locked', false));
 
-        return back();
+        return fractal($backup, new BackupTransformer)->respond();
     }
 
-    public function restore(Server $server, RollbackBackupRequest $request)
+    public function restore(Server $server, Backup $backup)
     {
-        $this->repository->setServer($server)->restore($request->archive);
+        $this->backupService->restore($server, $backup);
 
-        return back();
+        return $this->returnNoContent();
     }
 
-    public function destroy(Server $server, RollbackBackupRequest $request)
+    public function destroy(Server $server, Backup $backup)
     {
-        $this->deletionService->setServer($server)->handle($request->archive);
+        $this->backupService->delete($backup);
 
-        return back();
+        return $this->returnNoContent();
     }
 }

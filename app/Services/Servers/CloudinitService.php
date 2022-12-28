@@ -2,10 +2,15 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
+use Convoy\Data\Server\Eloquent\ServerAddressesData;
+use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Enums\Server\Cloudinit\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
@@ -15,7 +20,7 @@ use Illuminate\Support\Arr;
  */
 class CloudinitService extends ProxmoxService
 {
-    public function __construct(protected ProxmoxCloudinitRepository $repository)
+    public function __construct(private ProxmoxCloudinitRepository $repository, private ProxmoxAllocationRepository $allocationRepository)
     {
     }
 
@@ -39,41 +44,40 @@ class CloudinitService extends ProxmoxService
         }
     }
 
-    // Generally needed for Windows VM's with over 2TB disk, still WIP since I still need to add EFI disk
-    /**
-     * @param  BiosType  $type
-     * @return mixed
-     *
-     * @throws ProxmoxConnectionException
-     */
-    public function changeBIOS(BiosType $type)
-    {
-        return $this->repository->setServer($this->server)->update(['bios' => $type->value]);
-    }
-
     /**
      * @param  string  $hostname
      * @param  array  $params
      * @return mixed
      */
-    public function changeHostname(string $hostname)
+    public function updateHostname(Server $server, string $hostname)
     {
-        return $this->repository->setServer($this->server)->update(['searchdomain' => $hostname]);
+        $this->allocationRepository->setServer($server)->update([
+            'name' => $hostname,
+        ]);
+
+        return $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
-    /**
-     * @param  string  $dns
-     * @param  array  $params
-     * @return mixed
-     */
-    public function changeNameserver(string $nameserver)
+    public function getNameservers(Server $server)
     {
-        return $this->repository->setServer($this->server)->update(['nameserver' => $nameserver]);
+        $nameservers = Arr::get($this->repository->setServer($server)->getConfig(), 'nameserver');
+
+        return $nameservers ? explode(' ', $nameservers) : [];
     }
 
-    public function getIpConfig(): AddressConfigObject
+    public function updateNameservers(Server $server, array $nameservers)
     {
-        $data = $this->repository->setServer($this->server)->getConfig();
+        $payload = [
+           ...(count($nameservers) > 0 ? ['nameserver' => implode(' ', $nameservers)] : []),
+           ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : [])
+        ];
+
+        return $this->repository->setServer($server)->update($payload);
+    }
+
+    public function getIpConfig(Server $server): AddressConfigData
+    {
+        $data = $this->repository->setServer($server)->getConfig();
 
         $config = [
             'ipv4' => null,
@@ -85,18 +89,13 @@ class CloudinitService extends ProxmoxService
         if ($rawConfig) {
             $configs = explode(',', $rawConfig);
 
-            Arr::map($configs, function ($value) use (&$config, $data) {
+            Arr::map($configs, function ($value) use (&$config) {
                 $property = explode('=', $value);
 
                 if ($property[0] === 'ip') {
                     $cidr = explode('/', $property[1]);
                     $config['ipv4']['address'] = $cidr[0];
                     $config['ipv4']['cidr'] = $cidr[1];
-
-                    $matches = [];
-                    preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($data, 'net0', ''), $matches);
-
-                    $config['ipv4']['mac_address'] = $matches[0] ?? null;
                 }
                 if ($property[0] === 'ip6') {
                     $cidr = explode('/', $property[1]);
@@ -112,7 +111,7 @@ class CloudinitService extends ProxmoxService
             });
         }
 
-        return AddressConfigObject::from($config);
+        return AddressConfigData::from($config);
     }
 
     /**
@@ -121,34 +120,24 @@ class CloudinitService extends ProxmoxService
      *
      * @throws ProxmoxConnectionException
      */
-    public function updateIpConfig(string|array $config)
+    public function updateIpConfig(Server $server, CloudinitAddressConfigData $addresses)
     {
-        $this->repository->setServer($this->server);
+        $payload = [];
 
-        if (gettype($config) === 'string') {
-            return $this->repository->update([
-                'ipconfig0' => $config,
-            ]);
+        if ($addresses?->ipv4) {
+            $ipv4 = $addresses->ipv4;
+            $payload[] = "ip={$ipv4->address}/{$ipv4->cidr}";
+            $payload[] = 'gw=' . $ipv4->gateway;
         }
 
-        if (gettype($config) === 'array') {
-            $payload = [];
-
-            if (isset($config['ipv4'])) {
-                $ipv4 = $config['ipv4'];
-                $payload[] = "ip={$ipv4['address']}/{$ipv4['cidr']}";
-                $payload[] = 'gw='.$ipv4['gateway'];
-            }
-
-            if (isset($config['ipv6'])) {
-                $ipv6 = $config['ipv6'];
-                $payload[] = "ip6={$ipv6['address']}/{$ipv6['cidr']}";
-                $payload[] = 'gw6='.$ipv6['gateway'];
-            }
-
-            return $this->repository->update([
-                'ipconfig0' => Arr::join($payload, ','),
-            ]);
+        if ($addresses?->ipv6) {
+            $ipv6 = $addresses->ipv6;
+            $payload[] = "ip6={$ipv6->address}/{$ipv6->cidr}";
+            $payload[] = 'gw6=' . $ipv6->gateway;
         }
+
+        return $this->repository->setServer($server)->update([
+            'ipconfig0' => Arr::join($payload, ','),
+        ]);
     }
 }
