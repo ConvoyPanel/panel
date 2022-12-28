@@ -8,6 +8,7 @@ import { DottedButton } from '@/components/servers/backups/BackupRow'
 import { NodeContext } from '@/state/admin/node'
 import { classNames } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
+import { EyeSlashIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 
 interface Props {
@@ -28,22 +29,25 @@ const TemplateCard = ({ template, group, className }: Props) => {
         try {
             await deleteTemplate(nodeId, group!.uuid, template.uuid)
 
-            mutate(groups => groups!.map(g => {
-                if (g.id === group!.id) {
-                    // return it
-                    return {
-                        ...g,
-                        templates: g.templates!.filter(t => t.id !== template.id)
-                    }
-                }
+            mutate(
+                groups =>
+                    groups!.map(g => {
+                        if (g.id === group!.id) {
+                            // return it
+                            return {
+                                ...g,
+                                templates: g.templates!.filter(t => t.id !== template.id),
+                            }
+                        }
 
-                return g
-            }), false)
+                        return g
+                    }),
+                false
+            )
         } catch (error) {
             clearAndAddHttpError({ key: 'admin:node:template-groups', error })
         }
     }
-
 
     return (
         <SortableItem overrideZIndex handle id={template.id}>
@@ -55,9 +59,17 @@ const TemplateCard = ({ template, group, className }: Props) => {
                         className
                     )}
                 >
-                    <EditTemplateModal group={group!} template={template} open={showEditModal} onClose={() => setShowEditModal(false)} />
+                    <EditTemplateModal
+                        group={group!}
+                        template={template}
+                        open={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                    />
                     <div className={classNames('grow', isDragging ? 'invisible' : null)} {...attributes} {...listeners}>
-                        <p className='font-medium text-sm text-foreground'>{template.name}</p>
+                        <div className='flex space-x-3 items-center'>
+                            <p className='font-medium text-sm text-foreground'>{template.name}</p>
+                            {template.hidden && <EyeSlashIcon title='hidden' className='h-4 w-4 text-foreground' />}
+                        </div>
                         <p className='description-small !text-xs'>vmid: {template.vmid}</p>
                     </div>
                     <Menu>
@@ -65,9 +77,7 @@ const TemplateCard = ({ template, group, className }: Props) => {
                             <DottedButton />
                         </Menu.Button>
                         <Menu.Items>
-                            <Menu.Item onClick={() => setShowEditModal(true)}>
-                                Edit
-                            </Menu.Item>
+                            <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
                             <Menu.Divider />
                             <Menu.Item color='danger' onClick={handleDelete}>
                                 Delete

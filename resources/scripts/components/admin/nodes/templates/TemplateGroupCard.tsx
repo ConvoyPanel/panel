@@ -154,7 +154,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                     <div className='flex justify-between items-center pt-3 px-4'>
                         <div className='flex items-center space-x-3 grow' {...attributes} {...listeners}>
                             <p className='font-medium text-foreground'>{group.name}</p>
-                            {group.hidden && <EyeSlashIcon title='hidden' className='h-5 w-5 text-foreground' />}
+                            {group.hidden && <EyeSlashIcon title='hidden' className='h-4 w-4 text-foreground' />}
                         </div>
                         <Menu>
                             <Menu.Button>
