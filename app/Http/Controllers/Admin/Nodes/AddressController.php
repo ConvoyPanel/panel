@@ -7,6 +7,7 @@ use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Node;
+use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -14,6 +15,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController extends Controller
 {
+    public function __construct(private NetworkService $networkService)
+    {
+    }
+
     public function index(Request $request, Node $node)
     {
         $addresses = QueryBuilder::for(IPAddress::query())
@@ -29,8 +34,8 @@ class AddressController extends Controller
     {
         $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->safe()->except('sync_server_config')))->load('server');
 
-        if ($request->sync_server_config) {
-
+        if ($request->sync_server_config && $request->server_id) {
+            $this->networkService->syncSettings($address->server);
         }
 
         return fractal($address, new AddressTransformer)->respond();
@@ -38,14 +43,32 @@ class AddressController extends Controller
 
     public function update(UpdateAddressRequest $request, Node $node, IPAddress $address)
     {
+        $oldServer = $address->server;
+
         $address->update($request->safe()->except('sync_server_config'));
+
+        $newServer = $address->server;
+
+        if ($request->sync_server_config && $oldServer?->id !== $newServer?->id) {
+            if ($oldServer)
+                $this->networkService->syncSettings($oldServer);
+
+            if ($newServer)
+                $this->networkService->syncSettings($newServer);
+        }
 
         return fractal($address, new AddressTransformer)->respond();
     }
 
     public function destroy(Request $request, Node $node, IPAddress $address)
     {
+        $server = $address->server;
+
         $address->delete();
+
+        if ($request->sync_server_config && $server) {
+            $this->networkService->syncSettings($server);
+        }
 
         return response()->noContent();
     }

@@ -40,7 +40,7 @@ class ServerDetailService
                 'backups' => $server->backup_limit,
                 'bandwidth' => $server->bandwidth_limit,
                 'addresses' => $addresses,
-                'mac_address' => $addresses->ipv4->first()?->mac_address ?? $addresses->ipv6->first()?->mac_address,
+                'mac_address' => $this->networkService->getMacAddresses($server)->eloquent,
             ]
         ]);
     }
@@ -49,18 +49,7 @@ class ServerDetailService
     {
         $server = $server->loadMissing(['addresses', 'node']);
 
-        $addresses = [
-            'ipv4' => $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
-            'ipv6' => $server->addresses->where('type', AddressType::IPV6->value)->toArray()
-        ];
-
         $resources = $this->allocationRepository->setServer($server)->getResources();
-        $config = $this->cloudinitRepository->setServer($server)->getConfig();
-
-        $mac_address = null;
-        if (preg_match("/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su", Arr::get($config, 'net0', ''), $matches)) {
-            $mac_address = $matches[0];
-        }
 
         return ServerProxmoxData::from([
             'id' => $server->id,
@@ -70,7 +59,7 @@ class ServerDetailService
             'state' => Arr::get($resources, 'status'),
             'locked' => Arr::get($resources, 'lock', false),
             'config' => [
-                'mac_address' => $mac_address,
+                'mac_address' => $this->networkService->getMacAddresses($server, false, true)->proxmox,
                 'boot_order' => $this->allocationService->getBootOrder($server),
                 'disks' => $this->allocationService->getDisks($server),
                 'addresses' => $this->cloudinitService->getIpConfig($server),
