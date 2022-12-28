@@ -12,13 +12,18 @@ use Illuminate\Support\Arr;
 
 class ServerDetailService
 {
-    public function __construct(private NetworkService $networkService, private ProxmoxAllocationRepository $allocationRepository, private ProxmoxCloudinitRepository $cloudinitRepository, private AllocationService $allocationService, private CloudinitService $cloudinitService)
+    public function __construct(protected ProxmoxAllocationRepository $allocationRepository, protected ProxmoxCloudinitRepository $cloudinitRepository, protected AllocationService $allocationService, protected CloudinitService $cloudinitService)
     {
     }
 
     public function getByEloquent(Server $server): ServerEloquentData
     {
-        $addresses = $this->networkService->getAddresses($server);
+        $server = $server->loadMissing('addresses');
+
+        $addresses = [
+            'ipv4' => $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
+            'ipv6' => $server->addresses->where('type', AddressType::IPV6->value)->toArray()
+        ];
 
         return ServerEloquentData::from([
             'id' => $server->id,
@@ -40,7 +45,7 @@ class ServerDetailService
                 'backups' => $server->backup_limit,
                 'bandwidth' => $server->bandwidth_limit,
                 'addresses' => $addresses,
-                'mac_address' => $addresses->ipv4->first()?->mac_address ?? $addresses->ipv6->first()?->mac_address,
+                'mac_address' => Arr::first($addresses['ipv4'], default: null)?->mac_address ?? Arr::first($addresses['ipv6'], default: null)?->mac_address,
             ]
         ]);
     }

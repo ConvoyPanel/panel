@@ -18,7 +18,6 @@ class ServerController extends Controller
 
     public function index(Request $request)
     {
-        return 't';
         $servers = QueryBuilder::for(Server::query())
             ->with(['addresses', 'user', 'node'])
             ->allowedFilters([AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name',])

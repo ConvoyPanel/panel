@@ -34,7 +34,13 @@ class BuildModificationService
         $this->cloudinitService->updateHostname($server, $deployment->hostname);
 
         /* Sync network configuration */
-        $this->networkService->syncSettings($server, $deployment);
+        $this->networkService->clearIpsets();
+            $this->cloudinitService->updateIpConfig($server, CloudinitAddressConfigData::from([
+                'ipv4' => $deployment->limits->addresses->ipv4->first()?->toArray(),
+                'ipv6' => $deployment->limits->addresses->ipv6->first()?->toArray(),
+            ]));
+        $this->networkService->lockIps(Arr::flatten($server->addresses()->get(['address'])->toArray()));
+        $this->networkService->syncSettings($server);
 
         /* Sync disk configuration */
 
@@ -54,7 +60,8 @@ class BuildModificationService
 
         /* Persist configuration immediately */
 
-        if ($shouldUpdateState) {
+        if ($shouldUpdateState)
+        {
             $this->powerRepository->setServer($server)->send(Power::KILL);
         }
     }

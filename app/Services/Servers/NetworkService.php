@@ -2,9 +2,6 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Data\Server\Eloquent\ServerAddressesData;
-use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Server;
@@ -16,7 +13,7 @@ use Webmozart\Assert\Assert;
 
 class NetworkService extends ProxmoxService
 {
-    public function __construct(private CloudinitService $cloudinitService,private ProxmoxAllocationRepository $allocationRepository, private ConnectionInterface $connection, private ServerDetailService $detailService)
+    public function __construct(private ProxmoxAllocationRepository $allocationRepository, private ConnectionInterface $connection, private ServerDetailService $detailService)
     {
     }
 
@@ -62,28 +59,11 @@ class NetworkService extends ProxmoxService
         return $details->limits->mac_address ?? $details->config->mac_address;
     }
 
-    public function getAddresses(Server $server): ServerAddressesData
-    {
-        $server = $server->loadMissing('addresses');
-
-        return ServerAddressesData::from([
-            'ipv4' => $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
-            'ipv6' => $server->addresses->where('type', AddressType::IPV6->value)->toArray()
-        ]);
-    }
-
-    public function syncSettings(Server $server, ServerProxmoxData $deployment)
+    public function syncSettings(Server $server)
     {
         $macAddress = $this->getPrimaryMacAddress($server);
 
-        $this->clearIpsets();
-        $this->cloudinitService->updateIpConfig($server, CloudinitAddressConfigData::from([
-            'ipv4' => $deployment->limits->addresses->ipv4->first()?->toArray(),
-            'ipv6' => $deployment->limits->addresses->ipv6->first()?->toArray(),
-        ]));
-        $this->lockIps(Arr::flatten($server->addresses()->get(['address'])->toArray()));
-
-        $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$macAddress},bridge={$this->node->network}"]);
+        return $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$macAddress},bridge={$this->node->network}"]);
     }
 
     public function updateRateLimit(Server $server, ?int $mebibytes = null)
