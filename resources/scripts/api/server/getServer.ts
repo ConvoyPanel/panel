@@ -12,6 +12,7 @@ export interface Address {
   cidr: number
   gateway: string
   macAddress?: string
+  server?: Server
 }
 
 export interface Server {
@@ -50,6 +51,7 @@ export const rawDataToAddressObject = (data: any): Address => ({
   cidr: data.cidr,
   gateway: data.gateway,
   macAddress: data.mac_address,
+  server: data.server ? rawDataToServerObject(data.server.data) : undefined,
 })
 
 export const rawDataToServerObject = (data: FractalResponseData): Server => ({

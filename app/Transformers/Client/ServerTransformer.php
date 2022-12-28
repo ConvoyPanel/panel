@@ -2,8 +2,6 @@
 
 namespace Convoy\Transformers\Client;
 
-use Convoy\Data\Server\Eloquent\ServerEloquentData;
-use Convoy\Enums\Network\AddressType;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Admin\NodeTransformer;

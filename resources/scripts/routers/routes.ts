@@ -91,6 +91,11 @@ const routes: Routes = {
         name: 'Templates',
         component: lazy(() => import('@/components/admin/nodes/templates/NodeTemplatesContainer')),
       },
+      {
+        path: '/addresses',
+        name: 'Addresses',
+        component: lazy(() => import('@/components/admin/nodes/addresses/NodeAddressesContainer')),
+      },
     ]
   }
 }

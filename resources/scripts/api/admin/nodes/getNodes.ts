@@ -48,7 +48,6 @@ export interface QueryParams {
     perPage?: number
 }
 
-
 const getNodes = async ({
     query,
     perPage = 50,

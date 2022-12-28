@@ -16,7 +16,7 @@ const columns: ColumnArray<Server> = [
         accessor: 'name',
         header: 'Name',
         cell: ({ value, row }) => (
-            <Link to={`/admin/servers/${row.internalId}`} className='link text-foreground'>
+            <Link to={`/admin/servers/${row.id}`} className='link text-foreground'>
                 {value}
             </Link>
         ),
