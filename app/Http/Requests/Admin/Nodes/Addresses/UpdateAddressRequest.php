@@ -4,6 +4,7 @@ namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Http\Requests\Admin\AdminFormRequest;
 use Convoy\Models\IPAddress;
+use Illuminate\Support\Arr;
 
 class UpdateAddressRequest extends AdminFormRequest
 {
@@ -24,6 +25,9 @@ class UpdateAddressRequest extends AdminFormRequest
      */
     public function rules()
     {
-        return IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class));
+        return [
+            ...Arr::except(IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class)), ['node_id']),
+            'sync_server_config' => 'sometimes|boolean',
+        ];
     }
 }

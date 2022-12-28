@@ -22,8 +22,8 @@ Route::prefix('/nodes/{node}')->group(function () {
         ->only(['store', 'update', 'destroy']);
     Route::post('/template-groups/{template_group}/templates/reorder', [Admin\Nodes\TemplateController::class, 'updateOrder']);
 
-    Route::resource('addresses', Admin\Nodes\AddressController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+    /* Route::resource('addresses', Admin\Nodes\AddressController::class)
+        ->only(['index', 'store', 'update', 'destroy']); */
 
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
 });
