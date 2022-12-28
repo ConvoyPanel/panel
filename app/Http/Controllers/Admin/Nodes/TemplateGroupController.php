@@ -26,7 +26,7 @@ class TemplateGroupController extends ApplicationApiController
         return fractal($templateGroups, new TemplateGroupTransformer)->parseIncludes(['templates'])->respond();
     }
 
-    public function updateGroupOrder(UpdateGroupOrderRequest $request, Node $node)
+    public function updateOrder(UpdateGroupOrderRequest $request, Node $node)
     {
         TemplateGroup::setNewOrder($request->order);
 
@@ -47,5 +47,12 @@ class TemplateGroupController extends ApplicationApiController
         $templateGroup->update($request->validated());
 
         return fractal($templateGroup, new TemplateGroupTransformer)->respond();
+    }
+
+    public function destroy(Node $node, TemplateGroup $templateGroup)
+    {
+        $templateGroup->delete();
+
+        return $this->returnNoContent();
     }
 }

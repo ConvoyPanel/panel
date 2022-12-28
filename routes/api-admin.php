@@ -12,14 +12,16 @@ Route::resource('nodes', Admin\Nodes\NodeController::class)
 
 Route::prefix('/nodes/{node}')->group(function () {
     Route::resource('/isos', Admin\Nodes\IsoController::class)
-    ->only(['index', 'store', 'update', 'destroy']);
+        ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::resource('/template-groups', Admin\Nodes\TemplateGroupController::class)
-    ->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('template-groups', Admin\Nodes\TemplateGroupController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
+    Route::post('/template-groups/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateOrder']);
 
-    Route::prefix('/template-groups')->group(function () {
-        Route::post('/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateGroupOrder']);
-    });
+    Route::resource('template-groups.templates', Admin\Nodes\TemplateController::class)
+        ->only(['store', 'update', 'destroy']);
+    Route::post('/template-groups/{template_group}/templates/reorder', [Admin\Nodes\TemplateController::class, 'updateOrder']);
+
 
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
 });

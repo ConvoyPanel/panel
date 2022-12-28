@@ -26,6 +26,7 @@ import { updateNotification } from '@mantine/notifications'
 import TemplateGroupCard from '@/components/admin/nodes/templates/TemplateGroupCard'
 import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
 import useFlash from '@/util/useFlash'
+import { httpErrorToHuman } from '@/api/http'
 
 const NodeTemplatesContainer = () => {
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
@@ -50,7 +51,7 @@ const NodeTemplatesContainer = () => {
     })
 
     const handleDragStart = (event: DragStartEvent) => {
-        setActiveId(data!.find(group => group.id === event.active.id)!)
+        setActiveId(data!.find(group => group.uuid === event.active.id)!)
     }
 
     const sensors = useSensors(mouseSensor, keyboardSensor, touchSensor)
@@ -78,7 +79,7 @@ const NodeTemplatesContainer = () => {
                 updateNotification({
                     id: 'admin:node:template-groups.reorder',
                     color: 'red',
-                    message: error,
+                    message: httpErrorToHuman(error),
                     autoClose: 5000,
                 })
                 clearAndAddHttpError({ key: 'admin:node:template-groups', error })
