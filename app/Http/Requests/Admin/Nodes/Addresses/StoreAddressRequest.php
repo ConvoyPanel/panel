@@ -4,6 +4,7 @@ namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Models\IPAddress;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 
 class StoreAddressRequest extends FormRequest
 {
@@ -24,6 +25,9 @@ class StoreAddressRequest extends FormRequest
      */
     public function rules()
     {
-        return IPAddress::getRules();
+        return [
+            ...Arr::except(IPAddress::getRules(), ['node_id']),
+            'sync_server_config' => 'sometimes|boolean',
+        ];
     }
 }
