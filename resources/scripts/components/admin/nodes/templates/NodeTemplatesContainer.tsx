@@ -36,12 +36,7 @@ const NodeTemplatesContainer = () => {
     const [activeId, setActiveId] = useState<TemplateGroup | undefined>()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
 
-    const mouseSensor = useSensor(MouseSensor, {
-        activationConstraint: {
-            delay: 100,
-            tolerance: 5,
-        }
-    })
+    const mouseSensor = useSensor(MouseSensor)
     const keyboardSensor = useSensor(KeyboardSensor)
     const sensors = useSensors(mouseSensor, keyboardSensor)
 
