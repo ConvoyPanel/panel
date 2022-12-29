@@ -1,5 +1,6 @@
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import { Address } from '@/api/server/getServer'
+import EditAddressModal from '@/components/admin/nodes/addresses/EditAddressModal'
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import Button from '@/components/elements/Button'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
@@ -47,6 +48,7 @@ const NodeAddressesContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <NodeContentBlock title='Addresses' showFlashKey='admin:node:addresses'>
+                <EditAddressModal open={open} onClose={() => setOpen(false)} />
                 <div className='flex justify-end items-center mb-3'>
                     <Button onClick={() => setOpen(true)} variant='filled'>
                         New Address

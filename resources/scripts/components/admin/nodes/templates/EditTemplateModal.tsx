@@ -41,7 +41,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
         }),
         onSubmit: async ({ vmid, ...values }, { setSubmitting }) => {
             setSubmitting(true)
-            clearFlashes('admin:template-group:templates.edit')
+            clearFlashes('admin:node:template-group:templates.edit')
 
             try {
                 if (template) {
@@ -101,7 +101,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
                     )
                 }
             } catch (error) {
-                clearAndAddHttpError({ key: 'admin:template-group:templates.edit', error })
+                clearAndAddHttpError({ key: 'admin:node:template-group:templates.edit', error })
             }
 
             setSubmitting(false)
@@ -122,7 +122,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:template-group:templates.edit'} />
+                        <FlashMessageRender className='mb-5' byKey={'admin:node:template-group:templates.edit'} />
                         <TextInputFormik name='name' label='Display Name' />
                         <TextInputFormik name='vmid' label='VMID' />
                         <CheckboxFormik className='mt-3' name='hidden' label='Hidden' />

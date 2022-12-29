@@ -34,7 +34,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
         }),
         onSubmit: (values, { setSubmitting }) => {
             setSubmitting(true)
-            clearFlashes('admin:template-groups.edit')
+            clearFlashes('admin:node:template-groups.edit')
 
             if (group) {
                 updateTemplateGroup(nodeId, group.uuid, values)
@@ -44,7 +44,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                         // @ts-expect-error - groups should be defined. Though, it might not when there's a network error
                         mutate(groups => groups.map(g => g.uuid === group.uuid ? { ...g, name, hidden } : g), false)
                     }).catch(error => {
-                        clearAndAddHttpError({ key: 'admin:template-groups.edit', error })
+                        clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })
                         setSubmitting(false)
                     })
             } else {
@@ -59,7 +59,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                         }], false)
                     })
                     .catch(error => {
-                        clearAndAddHttpError({ key: 'admin:template-groups.edit', error })
+                        clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })
                         setSubmitting(false)
                     })
             }
@@ -80,7 +80,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:template-groups.edit'} />
+                        <FlashMessageRender className='mb-5' byKey={'admin:node:template-groups.edit'} />
                         <TextInputFormik name='name' label='Display Name' />
                         <CheckboxFormik className='mt-3' name='hidden' label='Hidden' />
                     </Modal.Body>
