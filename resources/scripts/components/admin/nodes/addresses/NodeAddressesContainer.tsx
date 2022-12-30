@@ -1,9 +1,11 @@
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import { Address } from '@/api/server/getServer'
+import DeleteAddressModal from '@/components/admin/nodes/addresses/DeleteAddressModal'
 import EditAddressModal from '@/components/admin/nodes/addresses/EditAddressModal'
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import Button from '@/components/elements/Button'
-import Table, { ColumnArray } from '@/components/elements/displays/Table'
+import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
 import { NodeContext } from '@/state/admin/node'
@@ -35,7 +37,12 @@ const columns: ColumnArray<Address> = [
     {
         accessor: 'server',
         header: 'Server',
-        cell: ({ value }) => (value ? <Link to={`/admin/servers/${value.id}`} className='link text-foreground'>{value.hostname}</Link> : null),
+        cell: ({ value }) =>
+            value ? (
+                <Link to={`/admin/servers/${value.id}`} className='link text-foreground'>
+                    {value.hostname}
+                </Link>
+            ) : null,
     },
 ]
 
@@ -44,6 +51,23 @@ const NodeAddressesContainer = () => {
     const [page, setPage] = usePagination()
     const { mutate, data } = useAddressesSWR(nodeId, { page, includes: ['server'] })
     const [open, setOpen] = useState(false)
+
+    const rowActions = ({ row }: RowActionsProps<Address>) => {
+        const [showEditModal, setShowEditModal] = useState(false)
+        const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+        return (
+            <>
+                <EditAddressModal address={row} open={showEditModal} onClose={() => setShowEditModal(false)} />
+                <DeleteAddressModal address={row} open={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
+                <Actions>
+                    <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item color='danger' onClick={() => setShowDeleteModal(true)}>Delete</Menu.Item>
+                </Actions>
+            </>
+        )
+    }
 
     return (
         <div className='bg-background min-h-screen'>
@@ -58,7 +82,7 @@ const NodeAddressesContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table columns={columns} data={items} />}
+                        {({ items }) => <Table rowActions={rowActions} columns={columns} data={items} />}
                     </Pagination>
                 )}
             </NodeContentBlock>

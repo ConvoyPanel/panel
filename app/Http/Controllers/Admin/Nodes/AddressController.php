@@ -32,32 +32,40 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request, Node $node)
     {
-        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->safe()->except('sync_server_config')))->load('server');
+        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->safe()->except('sync_network_config')))->load('server');
 
-        if ($request->sync_server_config && $request->server_id) {
-            $this->networkService->syncSettings($address->server);
+        try {
+            if ($request->sync_network_config && $request->server_id) {
+                $this->networkService->syncSettings($address->server);
+            }
+        } catch (\Exception $e) {
+            // do nothing
         }
 
-        return fractal($address, new AddressTransformer)->respond();
+        return fractal($address, new AddressTransformer)->parseIncludes('server')->respond();
     }
 
     public function update(UpdateAddressRequest $request, Node $node, IPAddress $address)
     {
         $oldServer = $address->server;
 
-        $address->update($request->safe()->except('sync_server_config'));
+        $address->update($request->safe()->except('sync_network_config'));
 
         $newServer = $address->server;
 
-        if ($request->sync_server_config && $oldServer?->id !== $newServer?->id) {
-            if ($oldServer)
-                $this->networkService->syncSettings($oldServer);
+        try {
+            if ($request->sync_network_config && $oldServer?->id !== $newServer?->id) {
+                if ($oldServer)
+                    $this->networkService->syncSettings($oldServer);
 
-            if ($newServer)
-                $this->networkService->syncSettings($newServer);
+                if ($newServer)
+                    $this->networkService->syncSettings($newServer);
+            }
+        } catch (\Exception $e) {
+            // do nothing
         }
 
-        return fractal($address, new AddressTransformer)->respond();
+        return fractal($address, new AddressTransformer)->parseIncludes('server')->respond();
     }
 
     public function destroy(Request $request, Node $node, IPAddress $address)
@@ -66,8 +74,12 @@ class AddressController extends Controller
 
         $address->delete();
 
-        if ($request->sync_server_config && $server) {
-            $this->networkService->syncSettings($server);
+        try {
+            if ($request->sync_network_config && $server) {
+                $this->networkService->syncSettings($server);
+            }
+        } catch (\Exception $e) {
+            // do nothing
         }
 
         return response()->noContent();

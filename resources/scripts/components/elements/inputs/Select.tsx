@@ -3,8 +3,9 @@ import { Select as MantineSelect } from '@mantine/core'
 import tw from 'twin.macro'
 import { css } from '@emotion/react'
 import LoadingDots from '@/components/elements/LoadingDots'
-import { ComponentProps } from 'react'
+import { ComponentProps, ComponentPropsWithoutRef, forwardRef } from 'react'
 import ErrorMessage from '@/components/elements/ErrorMessage'
+import { CheckIcon } from '@heroicons/react/20/solid'
 
 const StyledSelect = styled(MantineSelect)`
     & .mantine-Select-label {
@@ -26,8 +27,9 @@ const StyledSelect = styled(MantineSelect)`
     & .mantine-Select-itemsWrapper {
         ${tw`p-2`}
     }
+`
 
-    ${({ itemComponent }) =>
+    /* ${({ itemComponent }) =>
         !itemComponent
             ? css`
                   & .mantine-Select-item {
@@ -38,18 +40,48 @@ const StyledSelect = styled(MantineSelect)`
                       ${tw`font-medium text-foreground bg-background hover:bg-accent-200`}
                   }
               `
-            : null}
-`
+            : null} */
+
 
 export interface SelectProps extends ComponentProps<typeof StyledSelect> {
     loading?: boolean
 }
 
-const Select = ({ loading, error, ...props }: SelectProps) => (
+interface SelectItemProps extends ComponentPropsWithoutRef<'div'> {
+    label: string
+}
+
+const StyledSelectItem = styled.div`
+    ${tw`text-sm p-2 hover:bg-accent-200 text-accent-500 flex items-center justify-between cursor-pointer`}
+
+    & .select-item-icon {
+        ${tw`hidden`}
+    }
+
+    &[data-selected] {
+        ${tw`font-medium text-foreground bg-background hover:bg-accent-200`}
+    }
+
+    &[data-selected] .select-item-icon {
+        ${tw`block`}
+    }
+`
+
+const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(({ label, className, ...props }, ref) => (
+    <StyledSelectItem ref={ref} {...props}>
+        <span>
+            {label}
+        </span>
+        <CheckIcon className='h-4 w-4 text-foreground select-item-icon' title='checked' />
+    </StyledSelectItem>
+))
+
+const Select = ({ loading, nothingFound, error, ...props }: SelectProps) => (
     <StyledSelect
         error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
-        nothingFound={loading && 'Loading...'}
+        nothingFound={loading ? 'Loading...' : nothingFound}
         rightSection={loading && <LoadingDots size={4} />}
+        itemComponent={SelectItem}
         {...props}
     />
 )
