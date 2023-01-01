@@ -1,3 +1,4 @@
+import updateNode from '@/api/admin/nodes/updateNode'
 import LocationsSelectFormik from '@/components/admin/nodes/LocationsSelectFormik'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
@@ -5,11 +6,15 @@ import FormCard from '@/components/elements/FormCard'
 import TextInputFormik from '@/components/elements/forms/TextInputFormik'
 import FormSection from '@/components/elements/FormSection'
 import { NodeContext } from '@/state/admin/node'
+import useFlash, { useFlashKey } from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
 
 const GeneralContainer = () => {
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:node:settings:general')
+
     const node = NodeContext.useStoreState(state => state.node.data!)
+    const setNode = NodeContext.useStoreActions(actions => actions.node.setNode)
 
     const form = useFormik({
         initialValues: {
@@ -69,7 +74,22 @@ const GeneralContainer = () => {
             isoStorage: yup.string().required('Specify a ISO storage').max(191, 'Please limit up to 191 characters'),
             network: yup.string().required('Specify a network').max(191, 'Please limit up to 191 characters'),
         }),
-        onSubmit: () => {},
+        onSubmit: async ({locationId, ...values}, { setSubmitting }) => {
+            clearFlashes()
+            setSubmitting(true)
+            try {
+                const updatedNode = await updateNode(node.id, {
+                    ...values,
+                    locationId: parseInt(locationId),
+                })
+
+                setNode(updatedNode)
+            } catch (error) {
+                clearAndAddHttpError(error as Error)
+            }
+
+            setSubmitting(false)
+        },
     })
     return (
         <FormSection title='General Settings'>

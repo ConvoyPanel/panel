@@ -4,6 +4,7 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
+use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
 use Convoy\Models\Node;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
@@ -27,12 +28,21 @@ class NodeController extends ApplicationApiController
     {
         $node->append(['memory_allocated', 'disk_allocated']);
 
+        $node->loadCount('servers');
+
         return fractal($node, new NodeTransformer())->respond();
     }
 
     public function store(StoreNodeRequest $request)
     {
         $node = Node::create($request->validated());
+
+        return fractal($node, new NodeTransformer)->respond();
+    }
+
+    public function update(UpdateNodeRequest $request, Node $node)
+    {
+        $node->update($request->validated());
 
         return fractal($node, new NodeTransformer)->respond();
     }
