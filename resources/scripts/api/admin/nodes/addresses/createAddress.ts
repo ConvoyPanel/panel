@@ -9,7 +9,6 @@ export interface AddressParameters {
     gateway: string
     macAddress?: string
     type: AddressType
-    syncNetworkConfig: boolean
 }
 
 const createAddress = async (nodeId: number, payload: AddressParameters): Promise<Address> => {
@@ -20,7 +19,6 @@ const createAddress = async (nodeId: number, payload: AddressParameters): Promis
         gateway: payload.gateway,
         mac_address: payload.macAddress,
         type: payload.type,
-        sync_network_config: payload.syncNetworkConfig,
     })
 
     return rawDataToAddressObject(data)

@@ -10,7 +10,6 @@ const updateAddress = async (nodeId: number, addressId: number, payload: Address
         gateway: payload.gateway,
         mac_address: payload.macAddress,
         type: payload.type,
-        sync_network_config: payload.syncNetworkConfig,
     })
 
     return rawDataToAddressObject(data)

@@ -2,6 +2,7 @@ import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
 import createNode from '@/api/admin/nodes/createNode'
 import { NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+import LocationsSelectFormik from '@/components/admin/nodes/LocationsSelectFormik'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
 import TextInputFormik from '@/components/elements/forms/TextInputFormik'
@@ -20,38 +21,12 @@ interface Props {
 
 const CreateNodeModal = ({ open, onClose }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-
-    const [loadingQuery, setLoadingQuery] = useState(false)
-    const [query, setQuery] = useState('')
     const { mutate: mutateNodes } = useNodesSWR({ page: 1 })
-    const { data, mutate } = useLocationsSWR({ query })
-
-    const locations = useMemo(
-        () =>
-            data?.items.map(location => ({
-                value: location.id.toString(),
-                label: location.shortCode,
-            })) ?? [],
-        [data]
-    )
-
-    const search = useCallback(
-        debounce(() => {
-            setLoadingQuery(true)
-            mutate().then(() => setLoadingQuery(false))
-        }, 500),
-        []
-    )
-
-    const handleOnSearch = (query: string) => {
-        setQuery(query)
-        search()
-    }
 
     const form = useFormik({
         initialValues: {
             name: '',
-            locationId: undefined as number | undefined,
+            locationId: '',
             cluster: '',
             tokenId: '',
             secret: '',
@@ -110,7 +85,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             setSubmitting(true)
             clearFlashes('admin:nodes.create')
             createNode({
-                locationId: locationId!,
+                locationId: parseInt(locationId),
                 memory: memory! * 1048576,
                 disk: disk! * 1048576,
                 ...values,
@@ -149,17 +124,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:nodes.create'} />
                         <TextInputFormik name='name' label='Display Name' />
-                        <SelectFormik
-                            label='Location Group'
-                            placeholder='fuk u chit'
-                            data={locations}
-                            searchable
-                            searchValue={query}
-                            onSearchChange={handleOnSearch}
-                            loading={data === undefined || loadingQuery}
-                            nothingFound='No locations found'
-                            name='locationId'
-                        />
+                        <LocationsSelectFormik />
                         <TextInputFormik name='cluster' label='Cluster' />
                         <div className='grid gap-3 grid-cols-2'>
                             <TextInputFormik name='tokenId' label='Token ID' />
@@ -180,7 +145,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                             <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
                             <TextInputFormik name='isoStorage' label='ISO Storage' placeholder='local' />
                         </div>
-                            <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
+                        <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

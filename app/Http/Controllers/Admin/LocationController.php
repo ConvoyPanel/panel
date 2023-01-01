@@ -3,11 +3,12 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\LocationFormRequest;
+use Convoy\Models\Filters\FiltersLocation;
 use Convoy\Models\Location;
 use Convoy\Transformers\Admin\LocationTransformer;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -17,7 +18,7 @@ class LocationController extends ApplicationApiController
     {
         $locations = QueryBuilder::for(Location::query())
             ->withCount(['nodes', 'servers'])
-            ->allowedFilters(['short_code'])
+            ->allowedFilters(['short_code', AllowedFilter::custom('*', new FiltersLocation)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($locations, new LocationTransformer())->respond();

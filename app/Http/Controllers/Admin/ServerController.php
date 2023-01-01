@@ -3,6 +3,7 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\ServerTransformer;
@@ -20,7 +21,7 @@ class ServerController extends Controller
     {
         $servers = QueryBuilder::for(Server::query())
             ->with(['addresses', 'user', 'node'])
-            ->allowedFilters([AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name',])
+            ->allowedFilters([AllowedFilter::custom('*', new FiltersServer), AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name'])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($servers, new ServerTransformer())->parseIncludes($request->includes)->respond();
@@ -28,11 +29,9 @@ class ServerController extends Controller
 
     public function suspend()
     {
-
     }
 
     public function unsuspend()
     {
-
     }
 }

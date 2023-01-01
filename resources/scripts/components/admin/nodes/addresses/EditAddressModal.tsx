@@ -30,30 +30,29 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
     const form = useFormik({
         enableReinitialize: true,
         initialValues: {
-            serverId: address?.server!.internalId ?? (undefined as number | undefined),
+            serverId: address?.server?.internalId.toString() ?? '',
             address: address?.address ?? '',
-            cidr: address?.cidr as number | undefined,
+            cidr: address?.cidr ?? '',
             gateway: address?.gateway ?? '',
             macAddress: address?.macAddress ?? '',
             type: address?.type ?? 'ipv4',
-            syncNetworkConfig: true,
         },
         validationSchema: yup.object({
-            serverId: yup.number().optional(),
             address: yup.string().required('Specify an address'),
             cidr: yup.number().required('Specify a CIDR'),
             gateway: yup.string().required('Specify a gateway'),
             macAddress: yup.string().optional(),
             type: yup.string().required('Specify a type'),
         }),
-        onSubmit: async ({cidr, ...values}, { setSubmitting }) => {
+        onSubmit: async ({cidr, serverId, ...values}, { setSubmitting }) => {
             clearFlashes('admin:node:addresses.edit')
             setSubmitting(true)
             try {
                 if (address) {
                     const updatedAddress = await updateAddress(nodeId, address.id, {
                         ...values,
-                        cidr: cidr as number,
+                        serverId: parseInt(serverId as string),
+                        cidr: parseInt(cidr as string),
                     })
 
                     mutate(data => {
@@ -74,7 +73,8 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
                 } else {
                     const address = await createAddress(nodeId, {
                         ...values,
-                        cidr: cidr as number,
+                        serverId: parseInt(serverId as string),
+                        cidr: parseInt(cidr as string),
                     })
 
                     mutate(data => {
@@ -120,7 +120,6 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
                         <TextInputFormik name='gateway' label='Gateway' />
                         <TextInputFormik name='macAddress' label='Mac Address (optional)' />
                         <ServersSelectFormik />
-                        <CheckboxFormik name='syncNetworkConfig' label='Sync Network Configuration' className='mt-3' />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

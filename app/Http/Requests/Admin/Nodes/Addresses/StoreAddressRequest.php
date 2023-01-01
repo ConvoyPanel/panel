@@ -26,10 +26,7 @@ class StoreAddressRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            ...Arr::except(IPAddress::getRules(), ['node_id']),
-            'sync_network_config' => 'sometimes|boolean',
-        ];
+        return Arr::except(IPAddress::getRules(), ['node_id']);
     }
 
     public function withValidator(Validator $validator)

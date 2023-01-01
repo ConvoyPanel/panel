@@ -3,10 +3,13 @@ import DescriptiveItemComponent from '@/components/elements/DescriptiveItemCompo
 import SelectFormik from '@/components/elements/forms/SelectFormik';
 import { NodeContext } from '@/state/admin/node';
 import { debounce } from 'debounce';
-import { useCallback, useMemo, useState } from 'react';
+import { useField } from 'formik';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const ServersSelectFormik = () => {
-    const [query, setQuery] = useState('')
+    const [{ value }] = useField('serverId')
+    const [query, setQuery] = useState(value as string)
+
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id);
 
     const {data, mutate, isLoading, isValidating} = useServersSWR({ nodeId, query})
@@ -15,6 +18,10 @@ const ServersSelectFormik = () => {
         label: server.name,
         description: server.hostname,
     })) ?? [], [data])
+
+    useEffect(() => {
+        setQuery(value as string)
+    }, [value])
 
     const search = useCallback(
         debounce(() => {

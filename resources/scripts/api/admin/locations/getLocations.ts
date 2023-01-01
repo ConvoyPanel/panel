@@ -33,7 +33,7 @@ export default ({
         http
             .get('/api/admin/locations', {
                 params: {
-                    'filter[short_code]': query,
+                    'filter[*]': query,
                     per_page: perPage,
                     ...params,
                 },

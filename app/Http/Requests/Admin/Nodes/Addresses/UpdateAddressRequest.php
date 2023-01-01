@@ -26,10 +26,7 @@ class UpdateAddressRequest extends AdminFormRequest
      */
     public function rules()
     {
-        return [
-            ...Arr::except(IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class)), ['node_id']),
-            'sync_network_config' => 'sometimes|boolean',
-        ];
+        return Arr::except(IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class)), ['node_id']);
     }
 
     public function withValidator(Validator $validator)

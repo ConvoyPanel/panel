@@ -38,6 +38,10 @@ const NodeRouter = () => {
                 name: 'Addresses',
                 path: `/admin/nodes/${id}/addresses`,
             },
+            {
+                name: 'Settings',
+                path: `/admin/nodes/${id}/settings`,
+            },
         ],
         [match?.params.id]
     )

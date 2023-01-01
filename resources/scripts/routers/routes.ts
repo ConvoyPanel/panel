@@ -96,6 +96,11 @@ const routes: Routes = {
         name: 'Addresses',
         component: lazy(() => import('@/components/admin/nodes/addresses/NodeAddressesContainer')),
       },
+      {
+        path: '/settings',
+        name: 'Settings',
+        component: lazy(() => import('@/components/admin/nodes/settings/NodeSettingsContainer')),
+      },
     ]
   }
 }

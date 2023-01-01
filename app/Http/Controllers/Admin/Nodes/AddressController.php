@@ -32,29 +32,31 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request, Node $node)
     {
-        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->safe()->except('sync_network_config')))->load('server');
+        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->validated()))->load('server');
 
         try {
-            if ($request->sync_network_config && $request->server_id) {
+            if ($request->server_id) {
                 $this->networkService->syncSettings($address->server);
             }
         } catch (\Exception $e) {
             // do nothing
         }
 
-        return fractal($address, new AddressTransformer)->parseIncludes('server')->respond();
+        $address->load('server');
+
+        return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
     public function update(UpdateAddressRequest $request, Node $node, IPAddress $address)
     {
         $oldServer = $address->server;
 
-        $address->update($request->safe()->except('sync_network_config'));
+        $address->update($request->validated());
 
         $newServer = $address->server;
 
         try {
-            if ($request->sync_network_config && $oldServer?->id !== $newServer?->id) {
+            if ($oldServer?->id !== $newServer?->id) {
                 if ($oldServer)
                     $this->networkService->syncSettings($oldServer);
 
@@ -65,17 +67,19 @@ class AddressController extends Controller
             // do nothing
         }
 
-        return fractal($address, new AddressTransformer)->parseIncludes('server')->respond();
+        $address->load('server');
+
+        return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
-    public function destroy(Request $request, Node $node, IPAddress $address)
+    public function destroy(Node $node, IPAddress $address)
     {
         $server = $address->server;
 
         $address->delete();
 
         try {
-            if ($request->sync_network_config && $server) {
+            if ($server) {
                 $this->networkService->syncSettings($server);
             }
         } catch (\Exception $e) {

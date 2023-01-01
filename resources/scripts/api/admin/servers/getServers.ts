@@ -26,7 +26,7 @@ const getServers = async ({
         params: {
             'filter[node_id]': nodeId,
             'filter[user_id]': userId,
-            'filter[name]': query,
+            'filter[*]': query,
             includes: includes?.join(','),
             per_page: perPage,
             ...params,
