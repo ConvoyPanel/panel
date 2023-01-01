@@ -81,14 +81,37 @@ const GeneralContainer = () => {
                             <div className='space-y-3 mt-3'>
                                 <FlashMessageRender byKey='admin:node:settings:general' />
                                 <TextInputFormik name='name' label='Display Name' />
-
                                 <LocationsSelectFormik />
                                 <TextInputFormik name='fqdn' label='FQDN' />
+                                <TextInputFormik name='port' label='Port' />
+                                <div className='grid gap-3 grid-cols-2'>
+                                    <TextInputFormik
+                                        name='tokenId'
+                                        label='Token ID'
+                                        placeholder='Override credentials'
+                                    />
+                                    <TextInputFormik name='secret' label='Secret' placeholder='Override credentials' />
+                                </div>
+                                <div className='grid gap-3 grid-cols-2'>
+                                    <TextInputFormik name='memory' label='Memory (MiB)' />
+                                    <TextInputFormik name='memoryOverallocate' label='Memory Overallocate (%)' />
+                                </div>
+                                <div className='grid gap-3 grid-cols-2'>
+                                    <TextInputFormik name='disk' label='Disk (MiB)' />
+                                    <TextInputFormik name='diskOverallocate' label='Disk Overallocate (%)' />
+                                </div>
+                                <div className='grid gap-3 grid-cols-3'>
+                                    <TextInputFormik name='vmStorage' label='VM Storage' placeholder='local' />
+                                    <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
+                                    <TextInputFormik name='isoStorage' label='ISO Storage' placeholder='local' />
+                                </div>
+                                <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
                             </div>
                         </FormCard.Body>
                         <FormCard.Footer>
                             <Button
                                 loading={form.isSubmitting}
+                                disabled={!form.dirty}
                                 type='submit'
                                 variant='filled'
                                 color='success'

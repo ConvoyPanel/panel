@@ -24,6 +24,7 @@ class NodeTransformer extends TransformerAbstract
             'disk_allocated' => $node->disk_allocated,
             'vm_storage' => $node->vm_storage,
             'backup_storage' => $node->backup_storage,
+            'iso_storage' => $node->iso_storage,
             'network' => $node->network,
             'servers_count' => (int) $node->servers_count,
         ];
