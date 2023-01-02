@@ -18,7 +18,7 @@ const LocationsSelectFormik = () => {
     )
 
     useEffect(() => {
-        setQuery(value as string)
+        handleOnSearch(value as string)
     }, [value])
 
     const search = useCallback(

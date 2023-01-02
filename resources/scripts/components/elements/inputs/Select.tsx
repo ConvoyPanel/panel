@@ -29,7 +29,7 @@ const StyledSelect = styled(MantineSelect)`
     }
 `
 
-    /* ${({ itemComponent }) =>
+/* ${({ itemComponent }) =>
         !itemComponent
             ? css`
                   & .mantine-Select-item {
@@ -42,7 +42,6 @@ const StyledSelect = styled(MantineSelect)`
               `
             : null} */
 
-
 export interface SelectProps extends ComponentProps<typeof StyledSelect> {
     loading?: boolean
 }
@@ -52,7 +51,7 @@ interface SelectItemProps extends ComponentPropsWithoutRef<'div'> {
 }
 
 const StyledSelectItem = styled.div`
-    ${tw`text-sm p-2 hover:bg-accent-200 text-accent-500 flex items-center justify-between cursor-pointer`}
+    ${tw`text-sm p-2 hover:bg-accent-200 text-accent-500 flex items-center justify-between cursor-pointer rounded`}
 
     & .select-item-icon {
         ${tw`hidden`}
@@ -69,9 +68,7 @@ const StyledSelectItem = styled.div`
 
 const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(({ label, className, ...props }, ref) => (
     <StyledSelectItem ref={ref} {...props}>
-        <span>
-            {label}
-        </span>
+        <span>{label}</span>
         <CheckIcon className='h-4 w-4 text-foreground select-item-icon' title='checked' />
     </StyledSelectItem>
 ))

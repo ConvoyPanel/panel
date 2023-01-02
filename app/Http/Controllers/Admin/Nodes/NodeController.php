@@ -5,9 +5,11 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use Convoy\Models\Filters\FiltersNode;
 use Convoy\Models\Node;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -18,7 +20,7 @@ class NodeController extends ApplicationApiController
         $nodes = QueryBuilder::for(Node::query())
             ->with('servers')
             ->withCount(['servers'])
-            ->allowedFilters(['name', 'hostname'])
+            ->allowedFilters(['name', 'hostname', AllowedFilter::custom('*', new FiltersNode)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($nodes, new NodeTransformer())->respond();

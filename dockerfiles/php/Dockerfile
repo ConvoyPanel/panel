@@ -25,6 +25,7 @@ RUN if [ $WITH_XDEBUG = "true" ]; then \
             echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
             echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
             echo "xdebug.mode=develop,coverage,debug,profile" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
+            echo "start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
         fi;
 
 RUN echo 'pm.max_children = 100' >> /usr/local/etc/php-fpm.d/zz-docker.conf
