@@ -32,7 +32,6 @@ class Server extends Model
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
         'status' => 'sometimes|nullable|string',
-        'installing' => 'sometimes|boolean',
         'address_ids' => 'sometimes|array',
         'address_ids.*' => 'exists:ip_addresses,id',
         'cpu' => 'required|numeric|min:1',
@@ -42,9 +41,6 @@ class Server extends Model
         'snapshot_limit' => 'present|nullable|integer|min:0',
         'backup_limit' => 'present|nullable|integer|min:0',
         'bandwidth_limit' => 'present|nullable|integer|min:0',
-        'template' => 'required_if:type,existing|boolean',
-        'visible' => 'required_with:template|boolean',
-        'template_id' => 'required_if:type,new|exists:templates,id',
         'hydrated_at' => 'nullable|date',
     ];
 
