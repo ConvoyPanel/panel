@@ -10,9 +10,20 @@ use Convoy\Models\Node;
 use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
 use Convoy\Transformers\Admin\TemplateTransformer;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class TemplateController extends ApplicationApiController
 {
+    public function index(Node $node, TemplateGroup $templateGroup)
+    {
+        $templates = QueryBuilder::for(Template::query())
+            ->where('templates.template_group_id', $templateGroup->id)
+            ->defaultSort('order_column')
+            ->get();
+
+        return fractal($templates, new TemplateTransformer)->respond();
+    }
+
     public function store(TemplateRequest $request, Node $node, TemplateGroup $templateGroup)
     {
         $template = Template::create(array_merge($request->validated(), [

@@ -4,7 +4,11 @@ import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import { debounce } from 'debounce'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
 
-const NodesSelectFormik = () => {
+interface Props {
+    disabled?: boolean
+}
+
+const NodesSelectFormik = ({ disabled }: Props) => {
     const [{ value }] = useField('nodeId')
     const [query, setQuery] = useState(value as string)
     const { data, mutate, isValidating, isLoading } = useNodesSWR({ query })
@@ -44,6 +48,7 @@ const NodesSelectFormik = () => {
             loading={isValidating || isLoading}
             nothingFound={'No nodes found'}
             name={'nodeId'}
+            disabled={disabled}
         />
     )
 }

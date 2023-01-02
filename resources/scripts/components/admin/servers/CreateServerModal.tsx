@@ -9,6 +9,7 @@ import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
 import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
 import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
 import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
+import TemplatesSelectFormik from '@/components/admin/servers/TemplatesSelectFormik'
 
 interface Props {
     nodeId?: number
@@ -22,7 +23,7 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
     const form = useFormik({
         initialValues: {
             name: '',
-            nodeId: '',
+            nodeId: nodeId?.toString() ?? '',
             userId: '',
             vmid: '',
             hostname: '',
@@ -35,7 +36,7 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
             bandwidthLimit: '',
             createServer: true,
             startAfterCompletion: false,
-            template: '',
+            templateUuid: '',
         },
         validationSchema: yup.object({
             name: yup.string().max(40, 'Do not exceed 40 characters').required('A name is required.'),
@@ -50,7 +51,7 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
             backupsLimit: yup.number().min(0),
             bandwidthLimit: yup.number().min(0),
             createServer: yup.boolean(),
-            template: yup.number().when('createServer', {
+            templateUuid: yup.string().when('createServer', {
                 is: true,
                 then: yup.string().required('Specify a template'),
             }),
@@ -74,16 +75,16 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:servers.create'} />
                         <TextInputFormik name={'name'} label={'Display Name'} />
-                        <NodesSelectFormik />
+                        <NodesSelectFormik disabled={nodeId !== undefined} />
                         <UsersSelectFormik />
                         <TextInputFormik name={'vmid'} label={'VMID'} placeholder={'Leave blank to generate'} />
                         <TextInputFormik name={'hostname'} label={'Hostname'} />
                         <AddressesMultiSelectFormik disabled={form.values.nodeId === ''} />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputFormik name={'cpu'} label={'CPUs'} />
-                            <TextInputFormik name={'memory'} label={'Memory'} />
+                            <TextInputFormik name={'memory'} label={'Memory (MiB)'} />
                         </div>
-                        <TextInputFormik name={'disk'} label={'Disk'} />
+                        <TextInputFormik name={'disk'} label={'Disk (MiB)'} />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputFormik
                                 name={'backupsLimit'}
@@ -97,6 +98,12 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                             />
                         </div>
                         <CheckboxFormik name={'createServer'} label={'Create Server'} className={'mt-3'} />
+                        <TemplatesSelectFormik disabled={!form.values.createServer} />
+                        <CheckboxFormik
+                            name={'startAfterCompletion'}
+                            label={'Start Server After Completion'}
+                            className={'mt-3 relative'}
+                        />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

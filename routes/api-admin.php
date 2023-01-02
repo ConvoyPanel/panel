@@ -19,7 +19,7 @@ Route::prefix('/nodes/{node}')->group(function () {
     Route::post('/template-groups/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateOrder']);
 
     Route::resource('template-groups.templates', Admin\Nodes\TemplateController::class)
-        ->only(['store', 'update', 'destroy']);
+        ->only(['index', 'store', 'update', 'destroy']);
     Route::post('/template-groups/{template_group}/templates/reorder', [Admin\Nodes\TemplateController::class, 'updateOrder']);
 
     Route::resource('addresses', Admin\Nodes\AddressController::class)

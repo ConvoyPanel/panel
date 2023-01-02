@@ -25,9 +25,9 @@ const GeneralContainer = () => {
             secret: undefined as string | undefined,
             fqdn: node.fqdn,
             port: node.port,
-            memory: node.memory,
+            memory: node.memory / 1048576,
             memoryOverallocate: node.memoryOverallocate,
-            disk: node.disk,
+            disk: node.disk / 1048576,
             diskOverallocate: node.diskOverallocate,
             vmStorage: node.vmStorage,
             backupStorage: node.backupStorage,
@@ -74,12 +74,14 @@ const GeneralContainer = () => {
             isoStorage: yup.string().required('Specify a ISO storage').max(191, 'Please limit up to 191 characters'),
             network: yup.string().required('Specify a network').max(191, 'Please limit up to 191 characters'),
         }),
-        onSubmit: async ({locationId, ...values}, { setSubmitting }) => {
+        onSubmit: async ({ locationId, memory, disk, ...values }, { setSubmitting }) => {
             clearFlashes()
             setSubmitting(true)
             try {
                 const updatedNode = await updateNode(node.id, {
                     ...values,
+                    memory: memory * 1048576,
+                    disk: disk * 1048576,
                     locationId: parseInt(locationId),
                 })
 
