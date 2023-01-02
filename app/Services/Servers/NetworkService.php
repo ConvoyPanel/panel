@@ -120,26 +120,24 @@ class NetworkService extends ProxmoxService
         return $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
     }
 
-    public function updateAddresses(array $addressIds)
+    public function updateAddresses(Server $server, array $addressIds)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $currentAddresses = $this->server->addresses()->get()->pluck('id')->toArray();
+        $currentAddresses = $server->addresses()->get()->pluck('id')->toArray();
 
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_filter($currentAddresses, fn ($id) => !in_array($id, $addressIds));
 
         if (!empty($addressesToAdd)) {
             IPAddress::query()
-                ->where('node_id', $this->server->node_id)
+                ->where('node_id', $server->node_id)
                 ->whereIn('id', $addressesToAdd)
                 ->whereNull('server_id')
-                ->update(['server_id' => $this->server->id]);
+                ->update(['server_id' => $server->id]);
         }
 
         if (!empty($addressesToRemove)) {
             IPAddress::query()
-                ->where('server_id', $this->server->id)
+                ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)
                 ->update(['server_id' => null]);
         }

@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 use Convoy\Facades\Activity;
@@ -25,70 +26,48 @@ class ServerCreationService extends ProxmoxService
     {
     }
 
-    public function handle(ServerDeploymentObject $deployment)
+    public function handle(array $data)
     {
-        Assert::inArray($deployment->type, ['existing', 'new']);
-
         $uuid = $this->generateUniqueUuidCombo();
 
-        if ($deployment->type === 'existing') {
-            $server = Server::create([
-                'uuid' => $uuid,
-                'uuid_short' => substr($uuid, 0, 8),
-                'name' => $deployment->name,
-                'user_id' => $deployment->user_id,
-                'node_id' => $deployment->node_id,
-                'vmid' => $deployment->vmid,
-                'cpu' => $deployment->limits->cpu,
-                'memory' => $deployment->limits->memory,
-                'disk' => $deployment->limits->disk,
-                'snapshot_limit' => $deployment->limits->snapshot_limit,
-                'backup_limit' => $deployment->limits->backup_limit,
-                'bandwidth_limit' => $deployment->limits->bandwidth_limit,
-            ]);
+        $shouldCreateServer = Arr::get($data, 'create_server');
+        $template = $shouldCreateServer ? Template::findOrFail(Arr::get($data, 'template_id')) : null;
 
-            if ((bool) $deployment->config->template) {
-                Template::create([
-                    'server_id' => $server->id,
-                    'visible' => (bool) $deployment->config->visible,
-                ]);
-            }
-
-            return $server;
-        }
-
-        if ($deployment->type === 'new') {
-            $template = Template::findOrFail($deployment->template_id);
-
-            if ($template->server->node->id !== intval($deployment->node_id)) {
+        if ($template) {
+            if ($template->server->node->id !== intval(Arr::get($data, 'node_id'))) {
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
-
-            $server = Server::create([
-                'uuid' => $uuid,
-                'uuid_short' => substr($uuid, 0, 8),
-                'name' => $deployment->name,
-                'user_id' => $deployment->user_id,
-                'node_id' => $deployment->node_id,
-                'vmid' => $deployment->vmid ?? random_int(100, 999999999),
-                'cpu' => $deployment->limits->cpu,
-                'memory' => $deployment->limits->memory,
-                'disk' => $deployment->limits->disk,
-                'snapshot_limit' => $deployment->limits->snapshot_limit,
-                'backup_limit' => $deployment->limits->backup_limit,
-                'bandwidth_limit' => $deployment->limits->bandwidth_limit,
-            ]);
-
-            LogTarget::setSubject($server);
-
-            $this->networkService->setServer($server)->updateAddresses($deployment->limits->address_ids ?? []);
-
-            $server->update(['status' => Status::INSTALLING->value]);
-
-            ProcessBuild::dispatch($server->id, $deployment->template_id);
-
-            return $server;
         }
+
+        $server = Server::create([
+            'uuid' => $uuid,
+            'uuid_short' => substr($uuid, 0, 8),
+            'status' => $shouldCreateServer ? Status::INSTALLING->value : null,
+            'name' => Arr::get($data, 'name'),
+            'user_id' => Arr::get($data, 'user_id'),
+            'node_id' => Arr::get($data, 'node_id'),
+            'vmid' => Arr::get($data, 'vmid', random_int(100, 999999999)),
+            'hostname' => Arr::get($data, 'hostname'),
+            'cpu' => Arr::get($data, 'limits.cpu'),
+            'memory' => Arr::get($data, 'limits.memory'),
+            'disk' => Arr::get($data, 'limits.disk'),
+            'snapshot_limit' => Arr::get($data, 'limits.snapshots'),
+            'backup_limit' => Arr::get($data, 'limits.backups'),
+            'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
+        ]);
+
+        $deployment = ServerDeploymentData::from([
+            'server' => $server,
+            'template' => $template,
+            'should_create_server' => $shouldCreateServer,
+            'start_after_completion' => Arr::get($data, 'start_after_completion')
+        ]);
+
+        $this->networkService->updateAddresses($server, Arr::get($data, 'address_ids'));
+
+        // TODO: add the dispatch command
+
+        return $server;
     }
 
     /**

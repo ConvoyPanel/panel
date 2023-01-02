@@ -8,6 +8,7 @@ import { Text } from '@mantine/core'
 import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
 import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
 import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
+import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
 
 interface Props {
     nodeId?: number
@@ -22,28 +23,37 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
         initialValues: {
             name: '',
             nodeId: '',
+            userId: '',
             vmid: '',
             hostname: '',
             addressIds: [],
             cpu: '',
             memory: '',
             disk: '',
+            snapshotsLimit: '0',
             backupsLimit: '',
             bandwidthLimit: '',
             createServer: true,
+            startAfterCompletion: false,
+            template: '',
         },
         validationSchema: yup.object({
             name: yup.string().max(40, 'Do not exceed 40 characters').required('A name is required.'),
             nodeId: yup.number().required('A node is required.'),
-            vmid: yup.number(),
+            vmid: yup.number().min(100).max(999999999),
             hostname: yup.string().max(191, 'Do not exceed 191 characters'),
             addressIds: yup.array().of(yup.number()),
             cpu: yup.number().min(1, "Can't have zero cpus lol").required('A CPU value is required.'),
             memory: yup.number().min(16, 'Please specify at least 16 MiB').required('A memory value is required.'),
             disk: yup.number().min(1, "Can't have no disk lol").required('A disk value is required.'),
-            backupsLimit: yup.number(),
-            bandwidthLimit: yup.number(),
+            snapshotsLimit: yup.number().min(0),
+            backupsLimit: yup.number().min(0),
+            bandwidthLimit: yup.number().min(0),
             createServer: yup.boolean(),
+            template: yup.number().when('createServer', {
+                is: true,
+                then: yup.string().required('Specify a template'),
+            }),
         }),
         onSubmit: values => {},
     })
@@ -65,11 +75,14 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                         <FlashMessageRender className='mb-5' byKey={'admin:servers.create'} />
                         <TextInputFormik name={'name'} label={'Display Name'} />
                         <NodesSelectFormik />
+                        <UsersSelectFormik />
                         <TextInputFormik name={'vmid'} label={'VMID'} placeholder={'Leave blank to generate'} />
                         <TextInputFormik name={'hostname'} label={'Hostname'} />
                         <AddressesMultiSelectFormik disabled={form.values.nodeId === ''} />
-                        <TextInputFormik name={'cpu'} label={'CPUs'} />
-                        <TextInputFormik name={'memory'} label={'Memory'} />
+                        <div className={'grid grid-cols-2 gap-3'}>
+                            <TextInputFormik name={'cpu'} label={'CPUs'} />
+                            <TextInputFormik name={'memory'} label={'Memory'} />
+                        </div>
                         <TextInputFormik name={'disk'} label={'Disk'} />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputFormik

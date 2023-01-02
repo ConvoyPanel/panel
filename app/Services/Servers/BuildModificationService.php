@@ -36,8 +36,6 @@ class BuildModificationService
         /* Sync network configuration */
         $this->networkService->syncSettings($server, $deployment);
 
-        /* Sync disk configuration */
-
         // find a disk that has a corresponding disk in the deployment
         $disks = collect($deployment->config->disks->toArray())->pluck('name')->all();
         $bootOrder = array_filter($deployment->config->boot_order, fn ($disk) => in_array($disk, $disks));

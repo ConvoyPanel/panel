@@ -4,6 +4,7 @@ namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
+use Convoy\Models\Filters\FiltersUser;
 use Convoy\Models\User;
 use Convoy\Transformers\Admin\UserTransformer;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class UserController extends Controller
     {
         $users = QueryBuilder::for(User::query())
             ->withCount(['servers'])
-            ->allowedFilters([AllowedFilter::exact('id'), 'name', AllowedFilter::exact('email')])
+            ->allowedFilters([AllowedFilter::exact('id'), 'name', AllowedFilter::exact('email'), AllowedFilter::custom('*', new FiltersUser)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($users, new UserTransformer())->respond();
