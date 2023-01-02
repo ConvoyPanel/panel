@@ -17,7 +17,7 @@ class ServerTerminalTransformer extends TransformerAbstract
             'token' => array_get($data, 'token'),
             'node' => array_get($data, 'node'),
             'vmid' => array_get($data, 'vmid'),
-            'hostname' => array_get($data, 'hostname'),
+            'fqdn' => array_get($data, 'fqdn'),
             'port' => array_get($data, 'port'),
         ];
     }
