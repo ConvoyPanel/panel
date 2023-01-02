@@ -16,7 +16,7 @@ const ServersSelectFormik = () => {
     const servers = useMemo(
         () =>
             data?.items.map(server => ({
-                value: server.internalId as unknown as string,
+                value: server.internalId.toString(),
                 label: server.name,
                 description: server.hostname,
             })) ?? [],
