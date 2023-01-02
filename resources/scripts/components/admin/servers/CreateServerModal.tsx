@@ -10,21 +10,27 @@ import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
 import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
 import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
 import TemplatesSelectFormik from '@/components/admin/servers/TemplatesSelectFormik'
+import createServer from '@/api/admin/servers/createServer'
+import useServersSWR from '@/api/admin/servers/useServersSWR'
+import usePagination from '@/util/usePagination'
 
 interface Props {
     nodeId?: number
+    userId?: number
     open: boolean
     onClose: () => void
 }
 
-const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
+const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
+    const [page] = usePagination()
+    const { mutate } = useServersSWR({ nodeId, userId, page, includes: ['node', 'user'] })
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:servers.create')
 
     const form = useFormik({
         initialValues: {
             name: '',
             nodeId: nodeId?.toString() ?? '',
-            userId: '',
+            userId: userId?.toString() ?? '',
             vmid: '',
             hostname: '',
             addressIds: [],
@@ -34,7 +40,7 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
             snapshotsLimit: '0',
             backupsLimit: '',
             bandwidthLimit: '',
-            createServer: true,
+            shouldCreateServer: true,
             startAfterCompletion: false,
             templateUuid: '',
         },
@@ -50,16 +56,66 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
             snapshotsLimit: yup.number().min(0),
             backupsLimit: yup.number().min(0),
             bandwidthLimit: yup.number().min(0),
-            createServer: yup.boolean(),
+            shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {
                 is: true,
                 then: yup.string().required('Specify a template'),
             }),
         }),
-        onSubmit: values => {},
+        onSubmit: async (
+            {
+                userId,
+                nodeId,
+                vmid,
+                cpu,
+                memory,
+                disk,
+                snapshotsLimit,
+                backupsLimit,
+                bandwidthLimit,
+                addressIds,
+                ...values
+            },
+            { setSubmitting }
+        ) => {
+            clearFlashes()
+            try {
+                const server = await createServer({
+                    ...values,
+                    vmid: vmid !== '' ? parseInt(vmid) : null,
+                    nodeId: parseInt(nodeId),
+                    userId: parseInt(userId),
+                    limits: {
+                        cpu: parseInt(cpu),
+                        memory: parseInt(memory) * 1048576,
+                        disk: parseInt(disk) * 1048576,
+                        snapshots: snapshotsLimit !== '' ? parseInt(snapshotsLimit) : null,
+                        backups: backupsLimit !== '' ? parseInt(backupsLimit) : null,
+                        bandwidth: bandwidthLimit !== '' ? parseInt(bandwidthLimit) : null,
+                        addressIds,
+                    },
+                })
+
+                mutate(data => {
+                    if (!data) return data
+
+                    return {
+                        ...data,
+                        items: [server, ...data.items],
+                    }
+                }, false)
+
+                handleClose()
+            } catch (e) {
+                clearAndAddHttpError(e as Error)
+            }
+
+            setSubmitting(false)
+        },
     })
 
     const handleClose = () => {
+        clearFlashes()
         form.resetForm()
         onClose()
     }
@@ -75,8 +131,8 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:servers.create'} />
                         <TextInputFormik name={'name'} label={'Display Name'} />
-                        <NodesSelectFormik disabled={nodeId !== undefined} />
-                        <UsersSelectFormik />
+                        {nodeId ? null : <NodesSelectFormik />}
+                        {userId ? null : <UsersSelectFormik />}
                         <TextInputFormik name={'vmid'} label={'VMID'} placeholder={'Leave blank to generate'} />
                         <TextInputFormik name={'hostname'} label={'Hostname'} />
                         <AddressesMultiSelectFormik disabled={form.values.nodeId === ''} />
@@ -97,8 +153,10 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                                 placeholder={'Leave blank for no limit'}
                             />
                         </div>
-                        <CheckboxFormik name={'createServer'} label={'Create Server'} className={'mt-3'} />
-                        <TemplatesSelectFormik disabled={!form.values.createServer || form.values.nodeId === ''} />
+                        <CheckboxFormik name={'shouldCreateServer'} label={'Create Server'} className={'mt-3'} />
+                        <TemplatesSelectFormik
+                            disabled={!form.values.shouldCreateServer || form.values.nodeId === ''}
+                        />
                         <CheckboxFormik
                             name={'startAfterCompletion'}
                             label={'Start Server After Completion'}

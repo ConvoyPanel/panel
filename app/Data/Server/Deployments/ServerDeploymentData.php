@@ -12,6 +12,6 @@ class ServerDeploymentData extends Data
         public Server $server,
         public ?Template $template,
         public bool $should_create_server,
-        public bool $start_after_completion,
+        public bool $start_on_completion,
     ){}
 }

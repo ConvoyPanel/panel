@@ -2,7 +2,6 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
 use Convoy\Enums\Server\Power;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
@@ -25,25 +24,27 @@ class BuildModificationService
     {
         $this->networkService->setServer($server);
         $this->allocationService->setServer($server);
+        $this->allocationRepository->setServer($server);
 
-        $deployment = $this->detailService->getByProxmox($server);
+        $eloquentDetails = $this->detailService->getByEloquent($server);
+        $proxmoxDetails = $this->detailService->getByProxmox($server);
 
-        $this->allocationService->updateHardware($server, $deployment->limits->cpu, $deployment->limits->memory);
+        $this->allocationService->updateHardware($server, $eloquentDetails->limits->cpu, $eloquentDetails->limits->memory);
 
         /* Sync metadata */
-        $this->cloudinitService->updateHostname($server, $deployment->hostname);
+        $this->cloudinitService->updateHostname($server, $eloquentDetails->hostname);
 
         /* Sync network configuration */
-        $this->networkService->syncSettings($server, $deployment);
+        $this->networkService->syncSettings($server);
 
         // find a disk that has a corresponding disk in the deployment
-        $disks = collect($deployment->config->disks->toArray())->pluck('name')->all();
-        $bootOrder = array_filter($deployment->config->boot_order, fn ($disk) => in_array($disk, $disks));
+        $disks = collect($proxmoxDetails->config->disks->toArray())->pluck('name')->all();
+        $bootOrder = array_filter($proxmoxDetails->config->boot_order, fn ($disk) => in_array($disk, $disks));
 
         if (count($bootOrder) > 0) {
-            $disk = $deployment->config->disks->where('name', '=', Arr::first($bootOrder))->first();
+            $disk = $proxmoxDetails->config->disks->where('name', '=', Arr::first($bootOrder))->first();
 
-            $diff = $deployment->limits->disk - $disk->size;
+            $diff = $eloquentDetails->limits->disk - $disk->size;
 
             if ($diff > 0) {
                 $this->allocationRepository->resizeDisk($diff, $disk->name);

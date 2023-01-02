@@ -50,6 +50,11 @@ class StoreAddressRequest extends FormRequest
                     $validator->errors()->add('gateway', 'The gateway must be a valid IPv6 address.');
                 }
             }
+
+            // check for duplicate addresses
+            if (IPAddress::where('address', $this->address)->exists()) {
+                $validator->errors()->add('address', 'The address has already been imported.');
+            }
         });
     }
 }

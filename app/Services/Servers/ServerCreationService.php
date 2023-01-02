@@ -7,6 +7,7 @@ use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 use Convoy\Facades\Activity;
 use Convoy\Facades\LogTarget;
+use Convoy\Jobs\Server\ProcessBuildJob;
 use Convoy\Jobs\Servers\ProcessBuild;
 use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
@@ -14,6 +15,7 @@ use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
 
@@ -30,11 +32,11 @@ class ServerCreationService extends ProxmoxService
     {
         $uuid = $this->generateUniqueUuidCombo();
 
-        $shouldCreateServer = Arr::get($data, 'create_server');
-        $template = $shouldCreateServer ? Template::findOrFail(Arr::get($data, 'template_id')) : null;
+        $shouldCreateServer = Arr::get($data, 'should_create_server');
+        $template = $shouldCreateServer ? Template::where('uuid', '=', Arr::get($data, 'template_uuid'))->firstOrFail() : null;
 
         if ($template) {
-            if ($template->server->node->id !== intval(Arr::get($data, 'node_id'))) {
+            if ($template->group->node_id !== intval(Arr::get($data, 'node_id'))) {
                 throw new InvalidTemplateException('This template is inaccessible to the specified node');
             }
         }
@@ -46,7 +48,7 @@ class ServerCreationService extends ProxmoxService
             'name' => Arr::get($data, 'name'),
             'user_id' => Arr::get($data, 'user_id'),
             'node_id' => Arr::get($data, 'node_id'),
-            'vmid' => Arr::get($data, 'vmid', random_int(100, 999999999)),
+            'vmid' => Arr::get($data, 'vmid') ?? random_int(100, 999999999),
             'hostname' => Arr::get($data, 'hostname'),
             'cpu' => Arr::get($data, 'limits.cpu'),
             'memory' => Arr::get($data, 'limits.memory'),
@@ -56,16 +58,20 @@ class ServerCreationService extends ProxmoxService
             'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
         ]);
 
+        $server->refresh();
+
         $deployment = ServerDeploymentData::from([
             'server' => $server,
             'template' => $template,
             'should_create_server' => $shouldCreateServer,
-            'start_after_completion' => Arr::get($data, 'start_after_completion')
+            'start_on_completion' => Arr::get($data, 'start_on_completion')
         ]);
 
-        $this->networkService->updateAddresses($server, Arr::get($data, 'address_ids'));
+        if ($addressIds = Arr::get($data, 'limits.address_ids')) {
+            $this->networkService->updateAddresses($server, $addressIds);
+        }
 
-        // TODO: add the dispatch command
+        ProcessBuildJob::dispatch($deployment);
 
         return $server;
     }
@@ -82,30 +88,5 @@ class ServerCreationService extends ProxmoxService
         }
 
         return $uuid;
-    }
-
-    public function createDeployment(Request $request): array
-    {
-        return [
-            'type' => $request->input('type'),
-            'user_id' => $request->input('user_id'),
-            'node_id' => $request->input('node_id'),
-            'template_id' => $request->input('template_id'),
-            'name' => $request->input('name'),
-            'vmid' => $request->input('vmid'),
-            'limits' => [
-                'cpu' => $request->input('limits.cpu'),
-                'memory' => $request->input('limits.memory'),
-                'address_ids' => $request->input('limits.addresses'),
-                'disk' => $request->input('limits.disk'),
-                'snapshot_limit' => $request->input('limits.snapshot_limit'),
-                'backup_limit' => $request->input('limits.backup_limit'),
-                'bandwidth_limit' => $request->input('limits.bandwidth_limit'),
-            ],
-            'config' => [
-                'template' => $request->input('config.template'),
-                'visible' => $request->input('config.visible'),
-            ],
-        ];
     }
 }

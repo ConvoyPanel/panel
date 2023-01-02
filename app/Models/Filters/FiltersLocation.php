@@ -9,6 +9,7 @@ class FiltersLocation implements Filter
 {
     public function __invoke(Builder $query, $value, string $property)
     {
-        $query->where('id', $value)->orWhere('short_code', $value);
+        $query->where('id', $value)
+            ->orWhereRaw('LOWER(short_code) LIKE ?', ["%$value%"]);
     }
 }

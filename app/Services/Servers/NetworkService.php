@@ -11,6 +11,7 @@ use Convoy\Models\IPAddress;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
@@ -18,7 +19,7 @@ use Webmozart\Assert\Assert;
 
 class NetworkService extends ProxmoxService
 {
-    public function __construct(private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $cloudinitRepository, private ProxmoxAllocationRepository $allocationRepository, private ConnectionInterface $connection)
+    public function __construct(private ProxmoxFirewallRepository $firewallRepository, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $cloudinitRepository, private ProxmoxAllocationRepository $allocationRepository, private ConnectionInterface $connection)
     {
     }
 
@@ -100,7 +101,12 @@ class NetworkService extends ProxmoxService
             'ipv4' => $addresses->ipv4->first()?->toArray(),
             'ipv6' => $addresses->ipv6->first()?->toArray(),
         ]));
-        $this->lockIps(Arr::flatten($server->addresses()->get(['address'])->toArray()));
+        $this->lockIps(array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())));
+        $this->firewallRepository->setServer($server)->updateOptions([
+            'ipfilter' => true,
+            'policy_in' => 'ACCEPT',
+            'policy_out' => 'ACCEPT',
+        ]);
 
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
 

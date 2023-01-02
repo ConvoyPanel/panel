@@ -32,8 +32,6 @@ class Server extends Model
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
         'status' => 'sometimes|nullable|string',
-        'address_ids' => 'sometimes|array',
-        'address_ids.*' => 'exists:ip_addresses,id',
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',

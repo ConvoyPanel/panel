@@ -2,10 +2,11 @@
 
 namespace Convoy\Jobs\Server;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Services\Servers\BuildService;
+use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,7 +38,7 @@ class ProcessBuildJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId, protected int $templateId)
+    public function __construct(protected ServerDeploymentData $deployment)
     {
     }
 
@@ -48,7 +49,7 @@ class ProcessBuildJob implements ShouldQueue
      */
     public function middleware()
     {
-        return [new WithoutOverlapping($this->serverId)];
+        return [new WithoutOverlapping("server.build-{$this->deployment->server->id}")];
     }
 
     /**
@@ -56,20 +57,16 @@ class ProcessBuildJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(BuildService $builder)
+    public function handle(ServerBuildService $buildService)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
-        $server = Server::findOrFail($this->serverId);
-
         try {
-            $server->update(['status' => Status::INSTALLING->value]);
+            $this->deployment->server->update(['status' => Status::INSTALLING->value]);
 
-            $builder->setServer($server)->build(Template::findOrFail($this->templateId));
+            $buildService->build($this->deployment);
 
-            $server->update(['status' => null]);
+            $this->deployment->server->update(['status' => null]);
         } catch (\Exception $e) {
-            $server->update(['status' => Status::INSTALL_FAILED->value]);
+            $this->deployment->server->update(['status' => Status::INSTALL_FAILED->value]);
 
             throw $e;
         }

@@ -4,6 +4,7 @@ namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
+use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
@@ -26,12 +27,12 @@ class ProxmoxServerRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function create(int $template, array $params = [])
+    public function create(Template $template, array $params = [])
     {
         Assert::isInstanceOf($this->server, Server::class);
 
         try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/clone', $this->node->cluster, $template), [
+            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/clone', $this->node->cluster, $template->vmid), [
                 'json' => array_merge([
                     'target' => $this->node->cluster,
                     'newid' => $this->server->vmid,

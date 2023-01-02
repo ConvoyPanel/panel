@@ -21,8 +21,6 @@ const AddressesMultiSelectFormik = ({ disabled }: Props) => {
         id: 'selected-addresses',
     })
 
-    console.log({ data, selectedAddresses })
-
     const addresses = useMemo(() => {
         const available =
             data && selectedAddresses
