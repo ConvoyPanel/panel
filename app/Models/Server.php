@@ -26,16 +26,15 @@ class Server extends Model
     ];
 
     public static $validationRules = [
-        'type' => 'sometimes|in:new,existing',
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|integer|exists:nodes,id',
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'status' => 'nullable|string',
+        'status' => 'sometimes|nullable|string',
         'installing' => 'sometimes|boolean',
-        'addresses' => 'sometimes|array',
-        'addresses.*' => 'exists:ip_addresses,id',
+        'address_ids' => 'sometimes|array',
+        'address_ids.*' => 'exists:ip_addresses,id',
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
