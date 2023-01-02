@@ -24,7 +24,7 @@ const ServersSelectFormik = () => {
     )
 
     useEffect(() => {
-        setQuery(value as string)
+        setQuery(value as string|null ?? '')
         search()
     }, [value])
 
