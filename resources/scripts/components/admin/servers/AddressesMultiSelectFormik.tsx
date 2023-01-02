@@ -15,18 +15,20 @@ const AddressesMultiSelectFormik = ({ disabled }: Props) => {
     const [{ value: nodeId }] = useField('nodeId')
 
     const [query, setQuery] = useState('')
-    const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, { query })
+    const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, { query, serverId: null })
     const { data: selectedAddresses } = useAddressesSWR(nodeId ?? -1, {
         query: ((addressIds as number[]).length > 0 ? (addressIds as number[]) : [-1]).join(','),
         id: 'selected-addresses',
     })
+
+    console.log({ data, selectedAddresses })
 
     const addresses = useMemo(() => {
         const available =
             data && selectedAddresses
                 ? data.items
                       .filter(address => {
-                          return !selectedAddresses.items.find(selected => selected.id === address.id)
+                          return !selectedAddresses.items.find(selectedAddress => selectedAddress.id === address.id)
                       })
                       .map(address => ({
                           value: address.id.toString(),
@@ -42,7 +44,7 @@ const AddressesMultiSelectFormik = ({ disabled }: Props) => {
             : []
 
         return [...selected, ...available]
-    }, [data])
+    }, [data, selectedAddresses])
 
     const search = useCallback(
         debounce(() => {

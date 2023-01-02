@@ -5,6 +5,7 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
+use Convoy\Models\Filters\AllowedNullableFilter;
 use Convoy\Models\Filters\FiltersAddress;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Node;
@@ -25,7 +26,7 @@ class AddressController extends Controller
         $addresses = QueryBuilder::for(IPAddress::query())
             ->with('server')
             ->where('ip_addresses.node_id', $node->id)
-            ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress)])
+            ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress), AllowedNullableFilter::exact('server_id')])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($addresses, new AddressTransformer)->parseIncludes($request->includes)->respond();

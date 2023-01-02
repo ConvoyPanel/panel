@@ -6,6 +6,7 @@ export type AddressIncludes = 'server'
 export type AddressResponse = PaginatedResult<Address>
 
 export interface QueryParams {
+    serverId?: number | null
     type?: AddressType
     address?: string
     query?: string
@@ -16,10 +17,11 @@ export interface QueryParams {
 
 const getAddresses = async (
     nodeId: number,
-    { type, address, query, perPage = 50, includes, ...params }: QueryParams
+    { serverId, type, address, query, perPage = 50, includes, ...params }: QueryParams
 ): Promise<AddressResponse> => {
     const { data } = await http.get(`/api/admin/nodes/${nodeId}/addresses`, {
         params: {
+            'filter[server_id]': serverId === null ? '' : serverId,
             'filter[type]': type,
             'filter[address]': address,
             'filter[*]': query,

@@ -98,7 +98,7 @@ const CreateServerModal = ({ nodeId, open, onClose }: Props) => {
                             />
                         </div>
                         <CheckboxFormik name={'createServer'} label={'Create Server'} className={'mt-3'} />
-                        <TemplatesSelectFormik disabled={!form.values.createServer} />
+                        <TemplatesSelectFormik disabled={!form.values.createServer || form.values.nodeId === ''} />
                         <CheckboxFormik
                             name={'startAfterCompletion'}
                             label={'Start Server After Completion'}
