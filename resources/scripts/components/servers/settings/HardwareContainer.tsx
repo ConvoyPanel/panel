@@ -9,7 +9,7 @@ import { bytesToString } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
 import { useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import * as yup from 'yup'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
@@ -23,6 +23,7 @@ import MessageBox from '@/components/elements/MessageBox'
 import { PlusIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import updateBootOrder from '@/api/server/settings/updateBootOrder'
+import { Disk } from '@/api/server/useServerDetails'
 
 const HardwareContainer = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
@@ -148,14 +149,17 @@ const BootOrderContainer = () => {
         refreshInterval: 0,
     })
 
-    const [bootOrder, setBootOrder] = useState<string[]>([])
-    const [unusedDevices, setUnusedDevices] = useState<string[]>([])
+    const [bootOrder, setBootOrder] = useState<Disk[]>([])
+    const bootOrderIds = useMemo(() => bootOrder.map(disk => disk.name), [bootOrder])
+    const [unusedDevices, setUnusedDevices] = useState<Disk[]>([])
     const notify = useNotify()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
 
     useEffect(() => {
         setBootOrder(data?.bootOrder ?? [])
         setUnusedDevices(data?.unusedDevices ?? [])
+
+        console.log(data)
     }, [data])
 
     function handleDragEnd(event: DragEndEvent) {
@@ -171,14 +175,14 @@ const BootOrderContainer = () => {
         }
     }
 
-    const removeDevice = (device: string) => {
-        setBootOrder(items => items.filter(item => item !== device))
-        setUnusedDevices(items => [...items, device])
+    const removeDevice = (device: Disk) => {
+        setBootOrder(bootOrder.filter(disk => disk.name !== device.name))
+        setUnusedDevices([...unusedDevices, device])
     }
 
-    const addDevice = (device: string) => {
-        setBootOrder(items => [...items, device])
-        setUnusedDevices(items => items.filter(item => item !== device))
+    const addDevice = (device: Disk) => {
+        setBootOrder([...bootOrder, device])
+        setUnusedDevices(unusedDevices.filter(disk => disk.name !== device.name))
     }
 
     const [loading, setLoading] = useState(false)
@@ -187,17 +191,22 @@ const BootOrderContainer = () => {
         setLoading(true)
         clearFlashes('server:settings:hardware:boot-order')
 
-        updateBootOrder(uuid, bootOrder).then(() => {
-            setLoading(false)
-            notify({
-                title: 'Updated',
-                message: 'Updated boot order',
-                color: 'green',
+        updateBootOrder(
+            uuid,
+            bootOrder.map(disk => disk.name)
+        )
+            .then(() => {
+                setLoading(false)
+                notify({
+                    title: 'Updated',
+                    message: 'Updated boot order',
+                    color: 'green',
+                })
             })
-        }).catch(error => {
-            clearAndAddHttpError({ key: 'server:settings:hardware:boot-order', error })
-            setLoading(false)
-        })
+            .catch(error => {
+                clearAndAddHttpError({ key: 'server:settings:hardware:boot-order', error })
+                setLoading(false)
+            })
     }
 
     return (
@@ -217,15 +226,15 @@ const BootOrderContainer = () => {
                             onDragEnd={handleDragEnd}
                             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                         >
-                            <SortableContext items={bootOrder} strategy={verticalListSortingStrategy}>
-                                {bootOrder.map(id => (
+                            <SortableContext items={bootOrderIds} strategy={verticalListSortingStrategy}>
+                                {bootOrder.map(disk => (
                                     <SortableItem
                                         handle
                                         className='select-none flex items-center space-x-3 p-2 border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none bg-background shadow-light hover:shadow-lg rounded'
-                                        key={id}
-                                        id={id}
+                                        key={disk.name}
+                                        id={disk.name}
                                     >
-                                        {({attributes, listeners}: ChildrenPropsWithHandle) => (
+                                        {({ attributes, listeners }: ChildrenPropsWithHandle) => (
                                             <>
                                                 <button className='bg-transparent p-1' {...attributes} {...listeners}>
                                                     <img
@@ -235,10 +244,16 @@ const BootOrderContainer = () => {
                                                     />
                                                 </button>
                                                 <div className='flex justify-between w-full items-center'>
-                                                    <span className='text-foreground'>{id}</span>
+                                                    {disk.displayName ? (
+                                                        <div>
+                                                            <span className='text-foreground'>{disk.displayName}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className='text-foreground'>{disk.name}</span>
+                                                    )}
 
                                                     <button
-                                                        onClick={() => removeDevice(id)}
+                                                        onClick={() => removeDevice(disk)}
                                                         className='bg-transparent p-1'
                                                     >
                                                         <XMarkIcon className='h-6 w-6 text-accent-500' />
@@ -257,9 +272,9 @@ const BootOrderContainer = () => {
                             <p className='text-sm text-center'>There are no unused devices</p>
                         )}
                         {unusedDevices.map(device => (
-                            <div key={device} className='py-2 pl-4 pr-2 border border-accent-200 rounded'>
+                            <div key={device.name} className='py-2 pl-4 pr-2 border border-accent-200 rounded'>
                                 <div className='flex justify-between w-full items-center'>
-                                    <span className='text-foreground'>{device}</span>
+                                    <span className='text-foreground'>{device.name}</span>
                                     <button onClick={() => addDevice(device)} className='bg-transparent p-1'>
                                         <PlusIcon className='h-6 w-6 text-accent-500' />
                                     </button>

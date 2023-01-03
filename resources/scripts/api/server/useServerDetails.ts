@@ -6,6 +6,7 @@ import http from '@/api/http'
 export interface Disk {
     name: string
     size: number
+    displayName: string | null
 }
 
 export interface Address {
@@ -32,7 +33,13 @@ export interface ServerDetails {
     }
 }
 
-const rawDataToServerDetails = (data: any): ServerDetails => ({
+export const rawDataToDisk = (data: any): Disk => ({
+    name: data.name,
+    size: data.size,
+    displayName: data.display_name,
+})
+
+export const rawDataToServerDetails = (data: any): ServerDetails => ({
     id: data.id,
     internalId: data.internal_id,
     uuid: data.uuid,
@@ -42,7 +49,7 @@ const rawDataToServerDetails = (data: any): ServerDetails => ({
     config: {
         macAddress: data.config.mac_address,
         bootOrder: data.config.boot_order,
-        disks: data.config.disks,
+        disks: data.config.disks.map(rawDataToDisk),
         addresses: data.config.addresses,
     },
 })

@@ -22,48 +22,76 @@ class AllocationService extends ProxmoxService
         Assert::inArray($disk, ProxmoxAllocationRepository::$validDisks, 'Invalid disk type');
 
         return $this->repository->setServer($this->server)->update([
-            $disk => 'local:'.($bytes / 11073741824).',format='.$format,
+            $disk => 'local:' . ($bytes / 11073741824) . ',format=' . $format,
         ]);
     }
 
-    public function getDisks(Server $server, bool $filterOutMediaDisks = true)
+    public function getDisks(Server $server)
     {
-        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) use ($filterOutMediaDisks) {
-            if ($filterOutMediaDisks) {
-                if (str_contains(Arr::get($disk, 'value'), 'media')) {
-                    return false;
-                }
-            }
+        $isos = $server->node->isos;
 
+        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) {
             return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
         }));
 
-        return DiskData::collection(Arr::map($disks, function ($value) {
-            return $this->formatDisk($value);
+        return DiskData::collection(Arr::map($disks, function ($rawDisk) use ($isos, $server) {
+            $disk = [
+                'name' => Arr::get($rawDisk, 'key'),
+                'size' => 0,
+            ];
+
+            $value = Arr::get($rawDisk, 'pending') ?? Arr::get($rawDisk, 'value');
+
+            preg_match("/size=(\d+\w?)/s", $value, $sizeMatches);
+
+            $disk['size'] = $this->convertToBytes($sizeMatches[1]);
+
+            if (str_contains($value, 'media')) {
+                // this piece of code adds the name of the mounted ISO
+                if (preg_match("/\/(.*\.iso)/s", $value, $fileNameMatches)) {
+                    if ($iso = $isos->where('file_name', $fileNameMatches[1])->first()) {
+                        $disk['display_name'] = $iso->name;
+                    }
+                }
+            } else {
+                // if its not the ISO, we'll check if its the boot disk by comparing the size to the disk size on the eloquent record of the server
+                $upperBound = $server->disk + 1024;
+                $lowerBound = $server->disk - 1024;
+
+                if ($disk['size'] < $upperBound && $disk['size'] > $lowerBound) {
+                    $disk['display_name'] = 'Primary';
+                }
+            }
+
+            return $disk;
         }));
     }
 
-    public function getBootOrder(Server $server, bool $filterNonLocalDisks = false): array
+    public function getBootOrder(Server $server)
     {
+        $disks = $this->getDisks($server);
+
         $raw = collect($this->repository->setServer($server)->getAllocations())->where('key', 'boot')->firstOrFail();
 
-        $disks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
-            return ! ctype_space($disk); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+        $untaggedDisks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
+            return !ctype_space($disk) && in_array($disk, ProxmoxAllocationRepository::$validDisks); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
-        if ($filterNonLocalDisks) {
-            return array_values(array_filter($disks, function ($disk) {
-                return in_array($disk, $this->repository->validDisks);
-            }));
+        $taggedDisks = [];
+
+        foreach ($untaggedDisks as $untaggedDisk) {
+            if ($disk = $disks->where('name', '=', $untaggedDisk)->first()) {
+                array_push($taggedDisks, $disk);
+            }
         }
 
-        return $disks;
+        return DiskData::collection($taggedDisks);
     }
 
     public function setBootOrder(Server $server, array $disks)
     {
         return $this->repository->setServer($server)->update([
-            'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
+            'boot' => count($disks) > 0 ? 'order=' . Arr::join($disks, ';') : '',
         ]);
     }
 
@@ -77,24 +105,10 @@ class AllocationService extends ProxmoxService
         return $this->repository->setServer($server)->update($payload);
     }
 
-    public function formatDisk(array $rawDisk): array
-    {
-        $disk = [
-            'name' => Arr::get($rawDisk, 'key'),
-            'size' => 0,
-        ];
-
-        preg_match("/size=(\d+\w?)/s", Arr::get($rawDisk, 'value'), $matches);
-
-        $disk['size'] = $this->convertToBytes($matches[1]);
-
-        return $disk;
-    }
-
     public function convertToBytes(string $from): ?int
     {
         $units = ['B', 'K', 'M', 'G', 'T', 'P'];
-        $number = (int) substr($from, 0, -1);
+        $number = (int)substr($from, 0, -1);
         $suffix = strtoupper(substr($from, -1));
 
         //B or no suffix

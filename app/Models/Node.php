@@ -54,6 +54,11 @@ class Node extends Model
         return $this->hasMany(TemplateGroup::class);
     }
 
+    public function isos()
+    {
+        return $this->hasMany(ISO::class);
+    }
+
     /**
      * Gets the location associated with a node.
      *

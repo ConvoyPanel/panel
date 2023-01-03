@@ -49,7 +49,13 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             name: yup.string().max(40, 'Do not exceed 40 characters').required('A name is required.'),
             nodeId: yup.number().required('A node is required.'),
             vmid: yup.number().min(100).max(999999999),
-            hostname: yup.string().max(191, 'Do not exceed 191 characters'),
+            hostname: yup
+                .string()
+                .max(191, 'Do not exceed 191 characters')
+                .matches(
+                    /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+                    'Enter a valid hostname'
+                ),
             addressIds: yup.array().of(yup.number()),
             cpu: yup.number().min(1, "Can't have zero cpus lol").required('A CPU value is required.'),
             memory: yup.number().min(16, 'Please specify at least 16 MiB').required('A memory value is required.'),

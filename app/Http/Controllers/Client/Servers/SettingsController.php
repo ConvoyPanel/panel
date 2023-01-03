@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
@@ -37,12 +38,18 @@ class SettingsController extends ApplicationApiController
 
     public function getBootOrder(Server $server)
     {
-        $availableDevices = array_map(fn ($device) => $device['name'], $this->allocationService->getDisks($server, filterOutMediaDisks: false)->toArray());
+        $availableDevices = $this->allocationService->getDisks($server);
         $configuredDevices = $this->allocationService->getBootOrder($server);
-        $unconfiguredDevices = array_values(array_filter($availableDevices, fn ($device) => !in_array($device, $configuredDevices)));
+        $unconfiguredDevices = [];
+
+        foreach ($availableDevices as $device) {
+            if ($configuredDevices->where('name', '=', $device->name)->first() === null) {
+                array_push($unconfiguredDevices, $device->toArray());
+            }
+        }
 
         return fractal()->item([
-            'unused_devices' => $unconfiguredDevices,
+            'unused_devices' => DiskData::collection($unconfiguredDevices),
             'boot_order' => $configuredDevices,
         ], new ServerBootOrderTransformer)->respond();
     }
