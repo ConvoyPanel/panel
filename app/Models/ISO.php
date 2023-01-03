@@ -12,6 +12,11 @@ class ISO extends Model
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
+    protected $casts = [
+        'is_successful' => 'boolean',
+        'hidden' => 'boolean',
+    ];
+
     public static $validationRules = [
         'uuid' => 'required|uuid',
         'node_id' => 'required|integer|exists:nodes,id',

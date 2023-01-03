@@ -35,6 +35,8 @@ Route::group([
         Route::get('/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder']);
         Route::put('/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder']);
 
+        Route::get('/hardware/media', [Client\Servers\SettingsController::class, 'getMedia']);
+
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetwork']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetwork']);
 

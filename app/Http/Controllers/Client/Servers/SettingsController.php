@@ -13,10 +13,12 @@ use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
+use Convoy\Transformers\Client\MediaTransformer;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Transformers\Client\ServerNetworkTransformer;
 use Convoy\Transformers\Client\ServerSecurityTransformer;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class SettingsController extends ApplicationApiController
@@ -59,6 +61,32 @@ class SettingsController extends ApplicationApiController
         $this->allocationService->setBootOrder($server, $request->order);
 
         return $this->returnNoContent();
+    }
+
+    public function getMedia(Request $request, Server $server)
+    {
+        $disks = $this->allocationService->getDisks($server);
+        if ($request->user()->root_admin) {
+            $media = $server->node->isos()->where('is_successful', '=', true)->get()->toArray();
+        } else {
+            $media = $server->node->isos()->where(['hidden', '=', false], ['is_successful', '=', true])->get()->toArray();
+        }
+
+        $media = array_map(function ($iso) use ($disks) {
+            if ($disks->where('display_name', '=', $iso['name'])->first()) {
+                return [
+                    'mounted' => true,
+                    ...$iso,
+                ];
+            } else {
+                return [
+                    'mounted' => false,
+                    ...$iso
+                ];
+            }
+        }, $media);
+
+        return fractal($media, new MediaTransformer())->respond();
     }
 
     public function getNetwork(Server $server)
