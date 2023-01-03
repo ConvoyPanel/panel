@@ -40,6 +40,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             snapshotsLimit: '0',
             backupsLimit: '',
             bandwidthLimit: '',
+            accountPassword: '',
             shouldCreateServer: true,
             startAfterCompletion: false,
             templateUuid: '',
@@ -56,6 +57,13 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             snapshotsLimit: yup.number().min(0),
             backupsLimit: yup.number().min(0),
             bandwidthLimit: yup.number().min(0),
+            accountPassword: yup
+                .string()
+                .matches(
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+                    'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
+                )
+                .optional(),
             shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {
                 is: true,
@@ -153,6 +161,12 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                                 placeholder={'Leave blank for no limit'}
                             />
                         </div>
+                        <TextInputFormik
+                            name={'accountPassword'}
+                            label={'Account Password'}
+                            placeholder={'Leave blank for no change'}
+                            type={'password'}
+                        />
                         <CheckboxFormik name={'shouldCreateServer'} label={'Create Server'} className={'mt-3'} />
                         <TemplatesSelectFormik
                             disabled={!form.values.shouldCreateServer || form.values.nodeId === ''}

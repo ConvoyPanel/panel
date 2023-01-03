@@ -5,9 +5,9 @@ interface ServerLimits {
     cpu: number
     memory: number
     disk: number
-    snapshots: number|null
-    backups: number|null
-    bandwidth: number|null
+    snapshots: number | null
+    backups: number | null
+    bandwidth: number | null
     addressIds: number[]
 }
 
@@ -18,31 +18,33 @@ interface CreateServerParameters {
     vmid: number | null
     hostname: string
     limits: ServerLimits
+    accountPassword: string
     shouldCreateServer: boolean
-    templateUuid?: string
+    templateUuid: string | null
     startAfterCompletion: boolean
 }
 
 const createServer = async ({
     nodeId,
     userId,
+    accountPassword,
     shouldCreateServer,
     templateUuid,
     startAfterCompletion,
-    limits: {
-        addressIds,
-        ...limits
-    },
+    limits: { addressIds, ...limits },
     ...params
 }: CreateServerParameters) => {
-    const { data: { data: responseData } } = await http.post('/api/admin/servers', {
+    const {
+        data: { data: responseData },
+    } = await http.post('/api/admin/servers', {
         node_id: nodeId,
         user_id: userId,
         ...params,
         limits: {
             ...limits,
-            address_ids: addressIds
+            address_ids: addressIds,
         },
+        account_password: accountPassword,
         should_create_server: shouldCreateServer,
         ...(shouldCreateServer && {
             template_uuid: templateUuid,

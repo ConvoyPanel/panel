@@ -37,6 +37,7 @@ class StoreServerRequest extends AdminFormRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'present|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
+            'account_password' => ['sometimes', 'nullable', 'string', 'min:10', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u'],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',

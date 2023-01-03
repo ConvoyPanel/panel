@@ -11,12 +11,12 @@ use Illuminate\Support\Arr;
 class BuildModificationService
 {
     public function __construct(
-        protected AllocationService $allocationService,
-        protected CloudinitService $cloudinitService,
-        protected NetworkService $networkService,
-        protected ServerDetailService $detailService,
-        protected ProxmoxPowerRepository $powerRepository,
-        protected ProxmoxAllocationRepository $allocationRepository,
+        private AllocationService $allocationService,
+        private CloudinitService $cloudinitService,
+        private NetworkService $networkService,
+        private ServerDetailService $detailService,
+        private ProxmoxPowerRepository $powerRepository,
+        private ProxmoxAllocationRepository $allocationRepository,
     ) {
     }
 

@@ -3,6 +3,7 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Enums\Server\Power;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
@@ -24,6 +25,7 @@ class ServerBuildService extends ProxmoxService
         private ProxmoxServerRepository $serverRepository,
         private ProxmoxPowerRepository $powerRepository,
         private BuildModificationService $buildModificationService,
+        private CloudinitService $cloudinitService,
     ) {
     }
 
@@ -90,6 +92,10 @@ class ServerBuildService extends ProxmoxService
                     $intermissionDetails = null;
                 }
             } while (empty($intermissionDetails) || $intermissionDetails->locked);
+        }
+
+        if(!empty($deployment->account_password)) {
+            $this->cloudinitService->setServer($deployment->server)->changePassword($deployment->account_password, AuthenticationType::PASSWORD);
         }
 
         $this->runUpdate($this->buildModificationService, $deployment);

@@ -63,6 +63,7 @@ class ServerCreationService extends ProxmoxService
         $deployment = ServerDeploymentData::from([
             'server' => $server,
             'template' => $template,
+            'account_password' => Arr::get($data, 'account_password'),
             'should_create_server' => $shouldCreateServer,
             'start_on_completion' => Arr::get($data, 'start_on_completion')
         ]);
