@@ -3,7 +3,10 @@ import { ServerState } from '@/api/server/getStatus'
 import useSWR from 'swr'
 import http from '@/api/http'
 
+export type DiskType = 'disk' | 'media'
+
 export interface Disk {
+    type: DiskType
     name: string
     size: number
     displayName: string | null
@@ -34,6 +37,7 @@ export interface ServerDetails {
 }
 
 export const rawDataToDisk = (data: any): Disk => ({
+    type: data.type,
     name: data.name,
     size: data.size,
     displayName: data.display_name,

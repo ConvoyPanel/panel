@@ -24,6 +24,7 @@ import { PlusIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import updateBootOrder from '@/api/server/settings/updateBootOrder'
 import { Disk } from '@/api/server/useServerDetails'
+import { Badge } from '@mantine/core'
 
 const HardwareContainer = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
@@ -167,8 +168,8 @@ const BootOrderContainer = () => {
 
         if (over && active.id !== over.id) {
             setBootOrder(items => {
-                const oldIndex = items.indexOf(active.id as string)
-                const newIndex = items.indexOf(over.id as string)
+                const oldIndex = items.findIndex(disk => disk.name === (active.id as string))
+                const newIndex = items.findIndex(disk => disk.name === (over.id as string))
 
                 return arrayMove(items, oldIndex, newIndex)
             })
@@ -236,7 +237,11 @@ const BootOrderContainer = () => {
                                     >
                                         {({ attributes, listeners }: ChildrenPropsWithHandle) => (
                                             <>
-                                                <button className='bg-transparent p-1' {...attributes} {...listeners}>
+                                                <button
+                                                    className='bg-transparent touch-none p-1'
+                                                    {...attributes}
+                                                    {...listeners}
+                                                >
                                                     <img
                                                         src={DragVerticalIcon}
                                                         className='h-6 w-6 dark:invert'
@@ -245,11 +250,29 @@ const BootOrderContainer = () => {
                                                 </button>
                                                 <div className='flex justify-between w-full items-center'>
                                                     {disk.displayName ? (
-                                                        <div>
-                                                            <span className='text-foreground'>{disk.displayName}</span>
+                                                        <div className={'flex flex-col'}>
+                                                            <div className={'flex space-x-3'}>
+                                                                <span className='text-foreground'>
+                                                                    {disk.displayName}
+                                                                </span>
+                                                                {disk.type === 'media' ? <Badge>Media</Badge> : null}
+                                                            </div>
+
+                                                            <span className='description-small'>
+                                                                {disk.name}, {bytesToString(disk.size)}
+                                                            </span>
                                                         </div>
                                                     ) : (
-                                                        <span className='text-foreground'>{disk.name}</span>
+                                                        <div className={'flex flex-col'}>
+                                                            <div className={'flex space-x-3'}>
+                                                                <span className='text-foreground'>{disk.name}</span>
+                                                                {disk.type === 'media' ? <Badge>Media</Badge> : null}
+                                                            </div>
+
+                                                            <span className='description-small'>
+                                                                {bytesToString(disk.size)}
+                                                            </span>
+                                                        </div>
                                                     )}
 
                                                     <button
@@ -274,7 +297,27 @@ const BootOrderContainer = () => {
                         {unusedDevices.map(device => (
                             <div key={device.name} className='py-2 pl-4 pr-2 border border-accent-200 rounded'>
                                 <div className='flex justify-between w-full items-center'>
-                                    <span className='text-foreground'>{device.name}</span>
+                                    {device.displayName ? (
+                                        <div className={'flex flex-col'}>
+                                            <div className={'flex space-x-3'}>
+                                                <span className='text-foreground'>{device.displayName}</span>
+                                                {device.type === 'media' ? <Badge>Media</Badge> : null}
+                                            </div>
+
+                                            <span className='description-small'>
+                                                {device.name}, {bytesToString(device.size)}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className={'flex flex-col'}>
+                                            <div className={'flex space-x-3'}>
+                                                <span className='text-foreground'>{device.name}</span>
+                                                {device.type === 'media' ? <Badge>Media</Badge> : null}
+                                            </div>
+
+                                            <span className='description-small'>{bytesToString(device.size)}</span>
+                                        </div>
+                                    )}
                                     <button onClick={() => addDevice(device)} className='bg-transparent p-1'>
                                         <PlusIcon className='h-6 w-6 text-accent-500' />
                                     </button>

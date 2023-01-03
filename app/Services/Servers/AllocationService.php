@@ -36,6 +36,7 @@ class AllocationService extends ProxmoxService
 
         return DiskData::collection(Arr::map($disks, function ($rawDisk) use ($isos, $server) {
             $disk = [
+                'type' => 'disk',
                 'name' => Arr::get($rawDisk, 'key'),
                 'size' => 0,
             ];
@@ -47,6 +48,7 @@ class AllocationService extends ProxmoxService
             $disk['size'] = $this->convertToBytes($sizeMatches[1]);
 
             if (str_contains($value, 'media')) {
+                $disk['type'] = 'media';
                 // this piece of code adds the name of the mounted ISO
                 if (preg_match("/\/(.*\.iso)/s", $value, $fileNameMatches)) {
                     if ($iso = $isos->where('file_name', $fileNameMatches[1])->first()) {
@@ -59,7 +61,7 @@ class AllocationService extends ProxmoxService
                 $lowerBound = $server->disk - 1024;
 
                 if ($disk['size'] < $upperBound && $disk['size'] > $lowerBound) {
-                    $disk['display_name'] = 'Primary';
+                    $disk['display_name'] = 'Primary Disk';
                 }
             }
 
