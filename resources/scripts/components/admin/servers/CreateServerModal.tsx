@@ -42,7 +42,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             bandwidthLimit: '',
             accountPassword: '',
             shouldCreateServer: true,
-            startAfterCompletion: false,
+            startOnCompletion: false,
             templateUuid: '',
         },
         validationSchema: yup.object({

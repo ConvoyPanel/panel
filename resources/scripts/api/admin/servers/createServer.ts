@@ -21,7 +21,7 @@ interface CreateServerParameters {
     accountPassword: string
     shouldCreateServer: boolean
     templateUuid: string | null
-    startAfterCompletion: boolean
+    startOnCompletion: boolean
 }
 
 const createServer = async ({
@@ -30,7 +30,7 @@ const createServer = async ({
     accountPassword,
     shouldCreateServer,
     templateUuid,
-    startAfterCompletion,
+    startOnCompletion,
     limits: { addressIds, ...limits },
     ...params
 }: CreateServerParameters) => {
@@ -49,7 +49,7 @@ const createServer = async ({
         ...(shouldCreateServer && {
             template_uuid: templateUuid,
         }),
-        start_on_completion: startAfterCompletion,
+        start_on_completion: startOnCompletion,
     })
 
     return rawDataToServerObject(responseData)

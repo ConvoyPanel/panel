@@ -11,13 +11,13 @@ import useNotify from '@/util/useNotify'
 import { useFormik } from 'formik'
 import { useState } from 'react'
 import * as yup from 'yup'
+import ReinstallServerContainer from '@/components/servers/settings/ReinstallServerContainer'
 
 const GeneralContainer = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
     const setServer = ServerContext.useStoreActions(actions => actions.server.setServer)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const notify = useNotify()
-    const [isModalOpen, setIsModalOpen] = useState(false)
 
     const form = useFormik({
         initialValues: {
@@ -34,7 +34,7 @@ const GeneralContainer = () => {
                 ),
         }),
         onSubmit: ({ name, hostname }, { setSubmitting }) => {
-            clearFlashes('server:settings:general')
+            clearFlashes('server:settings:general:rename')
 
             renameServer(server.uuid, { name, hostname })
                 .then(() => {
@@ -47,7 +47,7 @@ const GeneralContainer = () => {
                     setSubmitting(false)
                 })
                 .catch(error => {
-                    clearAndAddHttpError({ key: 'server:settings:general', error })
+                    clearAndAddHttpError({ key: 'server:settings:general:rename', error })
                     setSubmitting(false)
                 })
         },
@@ -60,7 +60,7 @@ const GeneralContainer = () => {
                     <FormCard.Body>
                         <FormCard.Title>Server Name</FormCard.Title>
                         <div className='mt-3'>
-                            <FlashMessageRender byKey='server:settings:general' />
+                            <FlashMessageRender byKey='server:settings:general:rename' />
                             <TextInput
                                 value={form.values.name}
                                 onChange={form.handleChange}
@@ -87,34 +87,7 @@ const GeneralContainer = () => {
                     </FormCard.Footer>
                 </form>
             </FormCard>
-            <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <Modal.Header>
-                    <Modal.Title>Reinstall Server?</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Modal.Description bottomMargin>
-                        Are you sure you want to reinstall this server? This is a destructive action and will remove all
-                        data on your server.
-                    </Modal.Description>
-                </Modal.Body>
-                <Modal.Actions>
-                    <Modal.Action onClick={() => setIsModalOpen(false)}>Cancel</Modal.Action>
-                    <Modal.Action type='submit'>Reinstall</Modal.Action>
-                </Modal.Actions>
-            </Modal>
-            <FormCard className='w-full'>
-                <FormCard.Body>
-                    <FormCard.Title>Reinstall Server</FormCard.Title>
-                    <p className='description-small mt-3'>
-                        Start your server on a fresh slate. Select a template and confirm the reinstallation.
-                    </p>
-                </FormCard.Body>
-                <FormCard.Footer className='flex justify-center md:justify-end'>
-                    <Button onClick={() => setIsModalOpen(true)} variant='filled' color='danger' size='sm'>
-                        Reinstall
-                    </Button>
-                </FormCard.Footer>
-            </FormCard>
+            <ReinstallServerContainer />
         </FormSection>
     )
 }

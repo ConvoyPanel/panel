@@ -33,13 +33,13 @@ class ServerBuildService extends ProxmoxService
     {
         /* 1. Power off the server */
         try {
-            $this->powerRepository->send(Power::KILL);
+            $this->powerRepository->setServer($server)->send(Power::KILL);
         } catch (\Exception $e) {
             // do nothing.
         }
 
         // Wait for server to turn off
-        $intermissionStatus = $this->serverRepository->getStatus();
+        $intermissionStatus = $this->serverRepository->setServer($server)->getStatus();
 
         if (Arr::get($intermissionStatus, 'status') !== 'stopped') {
             do {

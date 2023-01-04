@@ -104,14 +104,17 @@ const TemplateGroupCard = ({ group, className }: Props) => {
         setActiveTemplate(undefined)
         if (over && active.id !== over.id) {
             mutate(groups => {
-
                 // find the group that the template is being dragged from and move it to the new position and push everything down by 1
                 const newGroups = groups!.map(g => {
                     if (g.id === group.id) {
                         // use arrayMove
-                        const newTemplates = arrayMove(g.templates!, g.templates!.findIndex(template => template.id === active.id), g.templates!.findIndex(template => template.id === over.id))
+                        const newTemplates = arrayMove(
+                            g.templates!,
+                            g.templates!.findIndex(template => template.id === active.id),
+                            g.templates!.findIndex(template => template.id === over.id)
+                        )
 
-                        newTemplates.forEach((group, index) => (group.order_column = index + 1))
+                        newTemplates.forEach((group, index) => (group.orderColumn = index + 1))
 
                         updateTemplateOrder(newTemplates.map(t => t.id))
 

@@ -10,7 +10,8 @@ class ServerConfigData extends Data
 {
     public function __construct(
       public string $mac_address,
-      public array $boot_order,
+      #[DataCollectionOf(DiskData::class)]
+      public DataCollection $boot_order,
       #[DataCollectionOf(DiskData::class)]
       public DataCollection $disks,
       public AddressConfigData $addresses

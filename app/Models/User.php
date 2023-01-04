@@ -48,6 +48,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'root_admin' => 'boolean',
     ];
 
     public function toReactObject(): array

@@ -2,10 +2,11 @@
 
 namespace Convoy\Jobs\Server;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Services\Servers\BuildService;
+use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,7 +23,7 @@ class ProcessRebuildJob implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 3000;
+    public $timeout = 1000;
 
     /**
      * The number of times the job may be attempted.
@@ -36,7 +37,7 @@ class ProcessRebuildJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected $serverId, protected $templateId)
+    public function __construct(protected ServerDeploymentData $deployment)
     {
         //
     }
@@ -48,7 +49,7 @@ class ProcessRebuildJob implements ShouldQueue
      */
     public function middleware()
     {
-        return [new WithoutOverlapping($this->serverId)];
+        return [new WithoutOverlapping("server.rebuild-{$this->deployment->server->id}")];
     }
 
     /**
@@ -56,20 +57,16 @@ class ProcessRebuildJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(BuildService $builder)
+    public function handle(ServerBuildService $buildService)
     {
-        $server = Server::findOrFail($this->serverId);
-        $template = Template::findOrFail($this->templateId);
-
         try {
+            $this->deployment->server->update(['status' => Status::INSTALLING->value]);
 
-            $server->update(['status' => Status::INSTALLING->value]);
+            $buildService->rebuild($this->deployment);
 
-            $builder->setServer($server)->rebuild($template);
-
-            $server->update(['status' => null]);
+            $this->deployment->server->update(['status' => null]);
         } catch (\Exception $e) {
-            $server->update(['status' => Status::INSTALL_FAILED->value]);
+            $this->deployment->server->update(['status' => Status::INSTALL_FAILED->value]);
 
             throw $e;
         }

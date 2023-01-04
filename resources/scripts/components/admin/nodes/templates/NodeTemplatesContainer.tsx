@@ -44,7 +44,6 @@ const NodeTemplatesContainer = () => {
         setActiveId(data!.find(group => group.id === event.active.id)!)
     }
 
-
     const updateGroupOrder = (groups: number[]) => {
         clearFlashes('admin:node:template-groups')
 
@@ -85,7 +84,7 @@ const NodeTemplatesContainer = () => {
                     groups!.findIndex(group => group.id === active.id),
                     groups!.findIndex(group => group.id === over.id)
                 )
-                newGroups.forEach((group, index) => (group.order_column = index + 1))
+                newGroups.forEach((group, index) => (group.orderColumn = index + 1))
 
                 updateGroupOrder(newGroups.map(group => group.id))
 

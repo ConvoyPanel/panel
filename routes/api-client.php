@@ -31,6 +31,8 @@ Route::group([
 
     Route::group(['prefix' => '/settings'], function () {
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
+        Route::get('/template-groups', [Client\Servers\SettingsController::class, 'getTemplateGroups']);
+        Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall']);
 
         Route::get('/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder']);
         Route::put('/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder']);

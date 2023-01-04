@@ -2,16 +2,22 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
+use Convoy\Jobs\Server\ProcessRebuildJob;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
+use Convoy\Models\Template;
+use Convoy\Models\TemplateGroup;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
@@ -19,9 +25,11 @@ use Convoy\Transformers\Client\MediaTransformer;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Transformers\Client\ServerNetworkTransformer;
 use Convoy\Transformers\Client\ServerSecurityTransformer;
+use Convoy\Transformers\Client\TemplateGroupTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class SettingsController extends ApplicationApiController
@@ -36,6 +44,46 @@ class SettingsController extends ApplicationApiController
             $this->cloudinitService->updateHostname($server, $request->hostname);
 
             $server->update($request->validated());
+        });
+
+        return $this->returnNoContent();
+    }
+
+    public function getTemplateGroups(Request $request, Server $server)
+    {
+        $templateGroups = QueryBuilder::for(TemplateGroup::query())
+            ->defaultSort('order_column')
+            ->allowedFilters(['name']);
+
+        if (!$request->user()->root_admin) {
+            $templateGroups = $templateGroups->where([['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]])
+                ->with(['templates' => function ($query) {
+                    $query->where('hidden', '=', false)->orderBy('order_column');
+                }])->get();
+        } else {
+            $templateGroups = $templateGroups->where('template_groups.node_id', '=', $server->node->id)
+                ->with(['templates' => function ($query) {
+                    $query->orderBy('order_column');
+                }])->get();
+        }
+
+        return fractal($templateGroups, new TemplateGroupTransformer)->respond();
+    }
+
+    public function reinstall(ReinstallServerRequest $request, Server $server)
+    {
+        $this->connection->transaction(function () use ($server, $request) {
+            $server->update(['status' => Status::INSTALLING->value]);
+
+            $deployment = ServerDeploymentData::from([
+                'server' => $server,
+                'template' => Template::where('uuid', '=', $request->template_uuid)->firstOrFail(),
+                'account_password' => $request->account_password,
+                'should_create_server' => true,
+                'start_on_completion' => $request->boolean('start_on_completion')
+            ]);
+
+            ProcessRebuildJob::dispatch($deployment);
         });
 
         return $this->returnNoContent();

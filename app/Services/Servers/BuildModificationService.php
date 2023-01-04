@@ -39,7 +39,7 @@ class BuildModificationService
 
         // find a disk that has a corresponding disk in the deployment
         $disks = collect($proxmoxDetails->config->disks->toArray())->pluck('name')->all();
-        $bootOrder = array_filter($proxmoxDetails->config->boot_order, fn ($disk) => in_array($disk, $disks));
+        $bootOrder = array_filter(collect($proxmoxDetails->config->boot_order->filter(fn ($disk) => $disk->type !== 'media')->toArray())->pluck('name')->toArray(), fn ($disk) => in_array($disk, $disks));
 
         if (count($bootOrder) > 0) {
             $disk = $proxmoxDetails->config->disks->where('name', '=', Arr::first($bootOrder))->first();
