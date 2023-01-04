@@ -19,10 +19,11 @@ import { Badge } from '@mantine/core'
 import { bytesToString } from '@/util/helpers'
 import { PlusIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import Button from '@/components/elements/Button'
+import useBootOrderSWR from '@/api/server/settings/useBootOrderSWR'
 
 const BootOrderContainer = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
-    const { data } = useSWR(['server:settings:hardware:boot-order', uuid], () => getBootOrder(uuid), {
+    const { data } = useBootOrderSWR(uuid, {
         revalidateOnFocus: false,
         revalidateOnMount: true,
         revalidateOnReconnect: false,
@@ -40,8 +41,6 @@ const BootOrderContainer = () => {
     useEffect(() => {
         setBootOrder(data?.bootOrder ?? [])
         setUnusedDevices(data?.unusedDevices ?? [])
-
-        console.log(data)
     }, [data])
 
     function handleDragEnd(event: DragEndEvent) {

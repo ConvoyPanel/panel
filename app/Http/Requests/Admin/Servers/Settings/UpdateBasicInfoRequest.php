@@ -2,10 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Server;
 
-class UpdateBasicInfoRequest extends AdminFormRequest
+class UpdateBasicInfoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

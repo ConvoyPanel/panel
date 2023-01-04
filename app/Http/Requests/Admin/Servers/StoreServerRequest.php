@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Admin\Servers;
 
-use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
@@ -11,7 +11,7 @@ use Illuminate\Validation\Validator;
 /**
  * @property mixed $type
  */
-class StoreServerRequest extends AdminFormRequest
+class StoreServerRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

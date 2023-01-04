@@ -36,6 +36,8 @@ Route::group([
         Route::put('/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder']);
 
         Route::get('/hardware/media', [Client\Servers\SettingsController::class, 'getMedia']);
+        Route::post('/hardware/media/{iso}/mount', [Client\Servers\SettingsController::class, 'mountMedia']);
+        Route::post('/hardware/media/{iso}/unmount', [Client\Servers\SettingsController::class, 'unmountMedia']);
 
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetwork']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetwork']);

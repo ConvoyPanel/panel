@@ -2,11 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Isos;
 
-use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\ISO;
-use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateIsoRequest extends AdminFormRequest
+class UpdateIsoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -5,10 +5,12 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
 use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
+use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Servers\AllocationService;
@@ -20,6 +22,7 @@ use Convoy\Transformers\Client\ServerSecurityTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class SettingsController extends ApplicationApiController
 {
@@ -87,6 +90,20 @@ class SettingsController extends ApplicationApiController
         }, $media);
 
         return fractal($media, new MediaTransformer())->respond();
+    }
+
+    public function mountMedia(MountMediaRequest $request, Server $server, ISO $iso)
+    {
+        $this->allocationService->mountIso($server, $iso);
+
+        return $this->returnNoContent();
+    }
+
+    public function unmountMedia(Server $server, ISO $iso)
+    {
+        $this->allocationService->unmountIso($server, $iso);
+
+        return $this->returnNoContent();
     }
 
     public function getNetwork(Server $server)

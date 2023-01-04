@@ -3,6 +3,10 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Proxmox\Config\DiskData;
+use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
+use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
+use Convoy\Exceptions\Service\Server\Allocation\NoAvailableBusException;
+use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Services\ProxmoxService;
@@ -13,17 +17,6 @@ class AllocationService extends ProxmoxService
 {
     public function __construct(protected ProxmoxAllocationRepository $repository)
     {
-    }
-
-    public function createDisk(int $bytes, string $disk, string $format = 'qcow2')
-    {
-        Assert::isInstanceOf($this->server, Server::class);
-        Assert::inArray($format, ProxmoxAllocationRepository::$diskFormats, 'Invalid disk format');
-        Assert::inArray($disk, ProxmoxAllocationRepository::$validDisks, 'Invalid disk type');
-
-        return $this->repository->setServer($this->server)->update([
-            $disk => 'local:' . ($bytes / 11073741824) . ',format=' . $format,
-        ]);
     }
 
     public function getDisks(Server $server)
@@ -105,6 +98,42 @@ class AllocationService extends ProxmoxService
         ];
 
         return $this->repository->setServer($server)->update($payload);
+    }
+
+    public function mountIso(Server $server, ISO $iso)
+    {
+        // we'll be using IDE by default for now
+        $ideIndex = 0; // max IDE index is '3'
+        $disks = $this->getDisks($server);
+        if ($disks->where('display_name', '=', $iso->name)->first()) {
+            throw new IsoAlreadyMountedException();
+        }
+
+        $arrayToCheckForAvailableIdeIndex = Arr::pluck($this->repository->setServer($server)->getAllocations(), 'key');
+        for ($i = 0; $i <= 4; $i++) {
+            if ($i === 4) {
+                throw new NoAvailableBusException();
+            }
+
+            if (!in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
+                $ideIndex = $i;
+                break;
+            }
+        }
+
+        $this->repository->update([
+            "ide$ideIndex" => "{$server->node->iso_storage}:iso/{$iso->file_name},media=cdrom"
+        ]);
+    }
+
+    public function unmountIso(Server $server, ISO $iso)
+    {
+        $disks = $this->getDisks($server);
+        if ($disk = $disks->where('display_name', '=', $iso->name)->first()) {
+            $this->repository->update(['delete' => $disk->name]);
+        } else {
+            throw new IsoAlreadyUnmountedException();
+        }
     }
 
     public function convertToBytes(string $from): ?int

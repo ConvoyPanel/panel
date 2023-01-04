@@ -2,12 +2,12 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
-use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\IPAddress;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
 
-class UpdateAddressRequest extends AdminFormRequest
+class UpdateAddressRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

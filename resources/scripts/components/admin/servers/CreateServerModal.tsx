@@ -47,6 +47,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
         },
         validationSchema: yup.object({
             name: yup.string().max(40, 'Do not exceed 40 characters').required('A name is required.'),
+            userId: yup.number().required('A user is required.'),
             nodeId: yup.number().required('A node is required.'),
             vmid: yup.number().min(100).max(999999999),
             hostname: yup
@@ -55,7 +56,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                 .matches(
                     /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
                     'Enter a valid hostname'
-                ),
+                )
+                .required(),
             addressIds: yup.array().of(yup.number()),
             cpu: yup.number().min(1, "Can't have zero cpus lol").required('A CPU value is required.'),
             memory: yup.number().min(16, 'Please specify at least 16 MiB').required('A memory value is required.'),
@@ -173,7 +175,11 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                             placeholder={'Leave blank for no change'}
                             type={'password'}
                         />
-                        <CheckboxFormik name={'shouldCreateServer'} label={'Create Server'} className={'mt-3'} />
+                        <CheckboxFormik
+                            name={'shouldCreateServer'}
+                            label={'Create Server'}
+                            className={'mt-3 relative'}
+                        />
                         <TemplatesSelectFormik
                             disabled={!form.values.shouldCreateServer || form.values.nodeId === ''}
                         />

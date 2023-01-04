@@ -11,10 +11,10 @@ export interface Media {
 // it looks stupid but I wrote this for in the future
 export const rawDataToMedia = (data: any): Media => data
 
-const getMedia = async (uuid: string): Promise<Media[]> => {
+const getMedia = async (serverUuid: string): Promise<Media[]> => {
     const {
         data: { data },
-    } = await http.get(`/api/client/servers/${uuid}/settings/hardware/media`)
+    } = await http.get(`/api/client/servers/${serverUuid}/settings/hardware/media`)
 
     return data.map(rawDataToMedia)
 }

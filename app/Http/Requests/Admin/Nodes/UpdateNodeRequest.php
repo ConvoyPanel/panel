@@ -2,12 +2,12 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes;
 
-use Convoy\Http\Requests\Admin\AdminFormRequest;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Node;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
 
-class UpdateNodeRequest extends AdminFormRequest
+class UpdateNodeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

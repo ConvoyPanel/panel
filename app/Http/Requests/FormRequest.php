@@ -1,13 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin;
+namespace Convoy\Http\Requests;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
+use Illuminate\Foundation\Http\FormRequest as BaseFormRequest;
 use Webmozart\Assert\Assert;
 
-abstract class AdminFormRequest extends FormRequest
+abstract class FormRequest extends BaseFormRequest
 {
     /**
      * The rules to apply to the incoming form request.
@@ -22,25 +21,14 @@ abstract class AdminFormRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
-    {
-        if (is_null($this->user())) {
-            return false;
-        }
-
-        return (bool) $this->user()->root_admin;
-    }
-
-    public function convertRule(string $rule, array $rules, string $replaceWith)
-    {
-        return Arr::map($rules, function ($entry) use ($rule, $replaceWith) {
-            if ($entry === $rule) {
-                return $replaceWith;
-            }
-
-            return $entry;
-        });
-    }
+//    public function authorize()
+//    {
+//        if (is_null($this->user())) {
+//            return false;
+//        }
+//
+//        return (bool) $this->user()->root_admin;
+//    }
 
     /**
      * Returns the named route parameter and asserts that it is a real model that
