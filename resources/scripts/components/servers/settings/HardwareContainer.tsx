@@ -120,8 +120,8 @@ const HardwareContainer = () => {
                     </FormCard.Body>
                 </form>
             </FormCard>
-            <BootOrderContainer />
             <MediaContainer />
+            <BootOrderContainer />
         </FormSection>
     )
 }
