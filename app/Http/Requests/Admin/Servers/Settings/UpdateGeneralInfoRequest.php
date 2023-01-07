@@ -4,8 +4,9 @@ namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Server;
+use Convoy\Rules\Network\Hostname;
 
-class UpdateBasicInfoRequest extends FormRequest
+class UpdateGeneralInfoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,11 +29,11 @@ class UpdateBasicInfoRequest extends FormRequest
 
         return [
             'name' => $rules['name'],
+            'hostname' => [...$rules['hostname'], ...[new Hostname]],
             'node_id' => $rules['node_id'],
             'user_id' => $rules['user_id'],
             'vmid' => $rules['vmid'],
-            'template' => $rules['template'],
-            'visible' => $rules['visible'],
+            'status' => $rules['status']
         ];
     }
 }

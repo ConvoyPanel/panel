@@ -1,5 +1,5 @@
 import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToServerObject, Server } from '@/api/server/getServer'
+import { rawDataToAdminServer, Server } from '@/api/admin/servers/getServer'
 
 export type ServerIncludes = 'user' | 'node'
 
@@ -27,14 +27,14 @@ const getServers = async ({
             'filter[node_id]': nodeId,
             'filter[user_id]': userId,
             'filter[*]': query,
-            includes: includes?.join(','),
-            per_page: perPage,
+            'includes': includes?.join(','),
+            'per_page': perPage,
             ...params,
         },
     })
 
     return {
-        items: data.data.map(rawDataToServerObject),
+        items: data.data.map(rawDataToAdminServer),
         pagination: getPaginationSet(data.meta.pagination),
     }
 }

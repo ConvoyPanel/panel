@@ -10,6 +10,7 @@ import { NotFound } from '@/components/elements/ScreenBlock'
 import { ServerContext } from '@/state/server'
 import { NavigationProgress } from '@mantine/nprogress'
 import { NodeContext } from '@/state/admin/node'
+import { AdminServerContext } from '@/state/admin/server'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -26,7 +27,8 @@ const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'))
 const ServerRouter = lazy(() => import('@/routers/ServerRouter'))
 
 const AdminDashboardRouter = lazy(() => import('@/routers/admin/DashboardRouter'))
-const NodeRouter = lazy(() => import('@/routers/admin/NodeRouter'))
+const AdminNodeRouter = lazy(() => import('@/routers/admin/NodeRouter'))
+const AdminServerRouter = lazy(() => import('@/routers/admin/ServerRouter'))
 
 const App = () => {
     const { ConvoyUser } = window as ExtendedWindow
@@ -108,8 +110,21 @@ const App = () => {
                                 <AuthenticatedRoutes requireRootAdmin>
                                     <Suspense fallback={<Spinner />}>
                                         <NodeContext.Provider>
-                                            <NodeRouter />
+                                            <AdminNodeRouter />
                                         </NodeContext.Provider>
+                                    </Suspense>
+                                </AuthenticatedRoutes>
+                            }
+                        />
+
+                        <Route
+                            path='/admin/servers/:id/*'
+                            element={
+                                <AuthenticatedRoutes requireRootAdmin>
+                                    <Suspense fallback={<Spinner />}>
+                                        <AdminServerContext.Provider>
+                                            <AdminServerRouter />
+                                        </AdminServerContext.Provider>
                                     </Suspense>
                                 </AuthenticatedRoutes>
                             }
