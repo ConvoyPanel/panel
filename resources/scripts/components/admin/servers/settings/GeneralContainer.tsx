@@ -19,6 +19,7 @@ const GeneralContainer = () => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:general')
 
     const form = useFormik({
+        enableReinitialize: true,
         initialValues: {
             name: server.name,
             hostname: server.hostname,
