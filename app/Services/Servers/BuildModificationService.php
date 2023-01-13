@@ -29,7 +29,7 @@ class BuildModificationService
         $eloquentDetails = $this->detailService->getByEloquent($server);
         $proxmoxDetails = $this->detailService->getByProxmox($server);
 
-        $this->allocationService->updateHardware($server, $eloquentDetails->limits->cpu, $eloquentDetails->limits->memory);
+        $this->allocationService->syncSettings($server);
 
         /* Sync metadata */
         $this->cloudinitService->updateHostname($server, $eloquentDetails->hostname);

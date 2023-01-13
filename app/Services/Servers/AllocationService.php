@@ -19,6 +19,11 @@ class AllocationService extends ProxmoxService
     {
     }
 
+    public function syncSettings(Server $server)
+    {
+        return $this->updateHardware($server, $server->cpu, $server->memory);
+    }
+
     public function getDisks(Server $server)
     {
         $isos = $server->node->isos;

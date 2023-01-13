@@ -31,5 +31,12 @@ Route::prefix('/nodes/{node}')->group(function () {
 Route::resource('servers', Admin\ServerController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
+Route::prefix('/servers/{server}/settings')->group(function () {
+    Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);
+
+    Route::post('/suspend', [Admin\ServerController::class, 'suspend']);
+    Route::post('/unsuspend', [Admin\ServerController::class, 'unsuspend']);
+});
+
 Route::resource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);

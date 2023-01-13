@@ -13,6 +13,7 @@ import TemplatesSelectFormik from '@/components/admin/servers/TemplatesSelectFor
 import createServer from '@/api/admin/servers/createServer'
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import usePagination from '@/util/usePagination'
+import { ServerResponse } from '@/api/admin/servers/getServers'
 
 interface Props {
     nodeId?: number
@@ -37,8 +38,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             cpu: '',
             memory: '',
             disk: '',
-            snapshotsLimit: '0',
-            backupsLimit: '',
+            snapshotLimit: '0',
+            backupLimit: '',
             bandwidthLimit: '',
             accountPassword: '',
             shouldCreateServer: true,
@@ -62,8 +63,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             cpu: yup.number().min(1, "Can't have zero cpus lol").required('A CPU value is required.'),
             memory: yup.number().min(16, 'Please specify at least 16 MiB').required('A memory value is required.'),
             disk: yup.number().min(1, "Can't have no disk lol").required('A disk value is required.'),
-            snapshotsLimit: yup.number().min(0),
-            backupsLimit: yup.number().min(0),
+            snapshotLimit: yup.number().min(0),
+            backupLimit: yup.number().min(0),
             bandwidthLimit: yup.number().min(0),
             accountPassword: yup
                 .string()
@@ -86,8 +87,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                 cpu,
                 memory,
                 disk,
-                snapshotsLimit,
-                backupsLimit,
+                snapshotLimit,
+                backupLimit,
                 bandwidthLimit,
                 addressIds,
                 ...values
@@ -105,8 +106,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                         cpu: parseInt(cpu),
                         memory: parseInt(memory) * 1048576,
                         disk: parseInt(disk) * 1048576,
-                        snapshots: snapshotsLimit !== '' ? parseInt(snapshotsLimit) : null,
-                        backups: backupsLimit !== '' ? parseInt(backupsLimit) : null,
+                        snapshots: snapshotLimit !== '' ? parseInt(snapshotLimit) : null,
+                        backups: backupLimit !== '' ? parseInt(backupLimit) : null,
                         bandwidth: bandwidthLimit !== '' ? parseInt(bandwidthLimit) : null,
                         addressIds,
                     },
@@ -118,7 +119,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                     return {
                         ...data,
                         items: [server, ...data.items],
-                    }
+                    } as ServerResponse
                 }, false)
 
                 handleClose()
@@ -159,8 +160,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                         <TextInputFormik name={'disk'} label={'Disk (MiB)'} />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputFormik
-                                name={'backupsLimit'}
-                                label={'Backups Limit'}
+                                name={'backupLimit'}
+                                label={'Backup Limit'}
                                 placeholder={'Leave blank for no limit'}
                             />
                             <TextInputFormik

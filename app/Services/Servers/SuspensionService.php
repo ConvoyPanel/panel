@@ -16,27 +16,25 @@ class SuspensionService extends ProxmoxService
     {
     }
 
-    public function toggle(SuspensionAction $action = SuspensionAction::SUSPEND)
+    public function toggle(Server $server, SuspensionAction $action = SuspensionAction::SUSPEND)
     {
-        Assert::isInstanceOf($this->server, Server::class);
-
         $isSuspending = $action === SuspensionAction::SUSPEND;
 
         // Nothing needs to happen if we're suspending the server and it is already
         // suspended in the database. Additionally, nothing needs to happen if the server
         // is not suspended and we try to un-suspend the instance.
-        if ($isSuspending === $this->server->isSuspended()) {
+        if ($isSuspending === $server->isSuspended()) {
             return;
         }
 
-        $this->server->update([
+        $server->update([
             'status' => $isSuspending ? Status::SUSPENDED->value : null,
         ]);
 
         try {
-            $this->powerRepository->setServer($this->server)->send(Power::KILL);
+            $this->powerRepository->setServer($server)->send(Power::KILL);
         } catch (\Exception $exception) {
-            $this->server->update([
+            $server->update([
                 'status' => $isSuspending ? null : Status::SUSPENDED->value,
             ]);
 

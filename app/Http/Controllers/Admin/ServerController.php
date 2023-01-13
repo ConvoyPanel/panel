@@ -2,23 +2,29 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
+use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Controllers\Controller;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
 use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
+use Convoy\Services\Servers\AllocationService;
+use Convoy\Services\Servers\BuildModificationService;
 use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Services\Servers\SuspensionService;
 use Convoy\Transformers\Admin\ServerTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class ServerController extends Controller
+class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDetailService $detailService, private ServerCreationService $creationService, private CloudinitService $cloudinitService)
+    public function __construct(private SuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
     {
     }
 
@@ -63,11 +69,37 @@ class ServerController extends Controller
         return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])->respond();
     }
 
-    public function suspend()
+    public function updateBuild(UpdateBuildRequest $request, Server $server)
     {
+        $server->update($request->validated());
+
+        try {
+            $this->buildModificationService->handle($server, false);
+        } catch (ProxmoxConnectionException $e) {
+            // do nothing
+        }
+
+        $server->load(['addresses', 'user', 'node']);
+
+        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])->respond();
     }
 
-    public function unsuspend()
+    public function suspend(Server $server)
     {
+        $this->suspensionService->toggle($server);
+
+        return $this->returnNoContent();
+    }
+
+    public function unsuspend(Server $server)
+    {
+        $this->suspensionService->toggle($server, SuspensionAction::UNSUSPEND);
+
+        return $this->returnNoContent();
+    }
+
+    public function destroy(Server $server)
+    {
+
     }
 }
