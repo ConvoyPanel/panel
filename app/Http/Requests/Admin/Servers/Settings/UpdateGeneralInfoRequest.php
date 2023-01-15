@@ -27,13 +27,13 @@ class UpdateGeneralInfoRequest extends FormRequest
     {
         $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
 
-        return [
+        return $this->requiredToOptional([
             'name' => $rules['name'],
             'hostname' => [...$rules['hostname'], ...[new Hostname]],
             'node_id' => $rules['node_id'],
             'user_id' => $rules['user_id'],
             'vmid' => $rules['vmid'],
             'status' => $rules['status']
-        ];
+        ]);
     }
 }

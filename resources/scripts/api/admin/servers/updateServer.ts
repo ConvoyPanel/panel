@@ -3,12 +3,12 @@ import http from '@/api/http'
 import { rawDataToAdminServer } from '@/api/admin/servers/getServer'
 
 interface UpdateServerParameters {
-    name: string
-    hostname: string
-    vmid: number
-    userId: number
-    nodeId: number
-    status: EloquentStatus
+    name?: string
+    hostname?: string
+    vmid?: number
+    userId?: number
+    nodeId?: number
+    status?: EloquentStatus
 }
 
 const updateServer = async (serverUuid: string, { userId, nodeId, ...params }: UpdateServerParameters) => {

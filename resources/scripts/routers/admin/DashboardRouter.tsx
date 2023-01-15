@@ -35,13 +35,15 @@ const navRoutes = [
     },
 ]
 
-export const AdminBanner = () => (<div className='bg-success py-1'>
-<ContentContainer>
-    <Link to='/'>
-        <p className='text-white text-xs font-medium uppercase tracking-wide'>Exit Administration</p>
-    </Link>
-</ContentContainer>
-</div>)
+export const AdminBanner = () => (
+    <div className='bg-foreground py-1'>
+        <ContentContainer>
+            <Link to='/'>
+                <p className='text-background text-xs font-medium uppercase tracking-wide'>Exit Administration</p>
+            </Link>
+        </ContentContainer>
+    </div>
+)
 
 const DashboardRouter = () => {
     return (

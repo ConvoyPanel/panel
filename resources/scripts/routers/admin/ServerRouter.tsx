@@ -9,6 +9,7 @@ import { Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
 import { AdminBanner } from '@/routers/admin/DashboardRouter'
+import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 
 const ServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
@@ -56,21 +57,38 @@ const ServerRouter = () => {
                     <Spinner />
                 )
             ) : (
-                <Routes>
-                    {routes.admin.server.map(route => (
-                        <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                                <Spinner.Suspense screen={false}>
-                                    <route.component />
-                                </Spinner.Suspense>
+                <>
+                    {server.status === 'deleting' || server.status === 'deletion_failed' ? (
+                        <ScreenBlock
+                            center
+                            icon={ExclamationCircleIcon}
+                            message={
+                                server.status === 'deleting'
+                                    ? "This server is being deleted. If you think this is an error, click below to make the server accessible. Clicking the button will not stop the server from being deleted if it's in progress"
+                                    : 'This server failed to delete. if you think this is an error, click below to make the server accessible. The server MAY not be in a usable state.'
                             }
-                        />
-                    ))}
+                            title={server.status === 'deleting' ? 'Deleting' : 'Failed to Delete'}
+                        >
+                            <FixServerStatusButton />
+                        </ScreenBlock>
+                    ) : (
+                        <Routes>
+                            {routes.admin.server.map(route => (
+                                <Route
+                                    key={route.path}
+                                    path={route.path}
+                                    element={
+                                        <Spinner.Suspense screen={false}>
+                                            <route.component />
+                                        </Spinner.Suspense>
+                                    }
+                                />
+                            ))}
 
-                    <Route path={'*'} element={<NotFound full />} />
-                </Routes>
+                            <Route path={'*'} element={<NotFound full />} />
+                        </Routes>
+                    )}
+                </>
             )}
         </>
     )

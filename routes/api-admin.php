@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Convoy\Http\Controllers\Admin;
+use Convoy\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
 
 
 Route::resource('locations', Admin\LocationController::class)
@@ -28,14 +29,19 @@ Route::prefix('/nodes/{node}')->group(function () {
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
 });
 
-Route::resource('servers', Admin\ServerController::class)
-    ->only(['index', 'show', 'store', 'update', 'destroy']);
+Route::get('/servers', [Admin\ServerController::class, 'index']);
+Route::post('/servers', [Admin\ServerController::class, 'store']);
+Route::group(['prefix' => '/servers/{server}', 'middleware' => [ValidateServerStatusMiddleware::class]], function () {
+    Route::get('/', [Admin\ServerController::class, 'show'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
+    Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
+    Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
-Route::prefix('/servers/{server}/settings')->group(function () {
-    Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);
+    Route::prefix('/settings')->group(function () {
+        Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);
 
-    Route::post('/suspend', [Admin\ServerController::class, 'suspend']);
-    Route::post('/unsuspend', [Admin\ServerController::class, 'unsuspend']);
+        Route::post('/suspend', [Admin\ServerController::class, 'suspend']);
+        Route::post('/unsuspend', [Admin\ServerController::class, 'unsuspend']);
+    });
 });
 
 Route::resource('users', Admin\UserController::class)

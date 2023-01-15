@@ -6,20 +6,17 @@ use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
 use Convoy\Jobs\Server\ProcessDeletionJob;
 use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\BuildModificationService;
 use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDeletionService;
-use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\SuspensionService;
 use Convoy\Transformers\Admin\ServerTransformer;
 use Illuminate\Database\ConnectionInterface;
@@ -63,10 +60,12 @@ class ServerController extends ApplicationApiController
     {
         $server->update($request->validated());
 
-        try {
-            $this->cloudinitService->updateHostname($server, $request->hostname);
-        } catch (ProxmoxConnectionException $e) {
-            // do nothing
+        if ($request->hostname) {
+            try {
+                $this->cloudinitService->updateHostname($server, $request->hostname);
+            } catch (ProxmoxConnectionException $e) {
+                // do nothing
+            }
         }
 
         $server->load(['addresses', 'user', 'node']);
@@ -105,14 +104,14 @@ class ServerController extends ApplicationApiController
         return $this->returnNoContent();
     }
 
-    public function destroy(Server $server)
+    public function destroy(Request $request, Server $server)
     {
         $this->deletionService->validateStatus($server);
 
-        $this->connection->transaction(function () use ($server) {
-            $server->update(['status' => Status::DELETING]);
+        $this->connection->transaction(function () use ($server, $request) {
+            $server->update(['status' => Status::DELETING->value]);
 
-            ProcessDeletionJob::dispatch($server->id);
+            ProcessDeletionJob::dispatch($server->id, $request->input('no_purge', false));
         });
 
         return $this->returnNoContent();

@@ -1,0 +1,29 @@
+import Button from '@/components/elements/Button'
+import { useState } from 'react'
+import updateServer from '@/api/admin/servers/updateServer'
+import { AdminServerContext } from '@/state/admin/server'
+
+const FixServerStatusButton = () => {
+    const [loading, setLoading] = useState(false)
+    const server = AdminServerContext.useStoreState(state => state.server.data!)
+    const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
+
+    const handle = async () => {
+        setLoading(true)
+        await updateServer(server.uuid, { status: null })
+
+        setServer({
+            ...server,
+            status: null,
+        })
+        setLoading(false)
+    }
+
+    return (
+        <Button onClick={handle} loading={loading} variant={'filled'} className={'mt-6'}>
+            Fix Status
+        </Button>
+    )
+}
+
+export default FixServerStatusButton

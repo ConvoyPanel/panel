@@ -30,6 +30,21 @@ abstract class FormRequest extends BaseFormRequest
 //        return (bool) $this->user()->root_admin;
 //    }
 
+    public function requiredToOptional(array $rules): array
+    {
+        foreach ($rules as &$rule) {
+            if (is_string($rule)) {
+                $rule = str_replace('required', 'sometimes', $rule);
+            }
+
+            if (is_array($rule)) {
+                $rule = $this->requiredToOptional($rule);
+            }
+        }
+
+        return $rules;
+    }
+
     /**
      * Returns the named route parameter and asserts that it is a real model that
      * exists in the database.

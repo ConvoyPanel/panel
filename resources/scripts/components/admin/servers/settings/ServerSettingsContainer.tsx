@@ -3,6 +3,7 @@ import GeneralContainer from '@/components/admin/servers/settings/GeneralContain
 import ServerBuildSettingsContainer from '@/components/admin/servers/settings/ServerBuildSettingsContainer'
 import FormCard from '@/components/elements/FormCard'
 import FormSection from '@/components/elements/FormSection'
+import DangerZoneContainer from '@/components/admin/servers/settings/DangerZoneContainer'
 
 const ServerSettingsContainer = () => {
     return (
@@ -10,6 +11,8 @@ const ServerSettingsContainer = () => {
             <GeneralContainer />
             <FormSection.Divider />
             <ServerBuildSettingsContainer />
+            <FormSection.Divider />
+            <DangerZoneContainer />
         </ServerContentBlock>
     )
 }

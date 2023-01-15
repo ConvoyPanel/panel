@@ -19,34 +19,43 @@ class ServerDeletionService
 
     }
 
-    public function handle(Server $server)
+    public function handle(Server $server, bool $noPurge = false)
     {
         $this->validateStatus($server);
 
         $server->update(['status' => Status::DELETING->value]);
 
-        $this->powerRepository->setServer($server)->send(Power::KILL);
+        if (!$noPurge) {
+            $this->powerRepository->setServer($server)->send(Power::KILL);
 
-        $backups = $this->backupRepository->getNonFailedBackups($server)->get();
+            $backups = $this->backupRepository->getNonFailedBackups($server)->get();
 
-        $backups->each(function (Backup $backup) {
-            $this->backupService->delete($backup);
-        });
+            $backups->each(function (Backup $backup) {
+                $this->backupService->delete($backup);
+            });
 
-        // TODO: add snapshot deletion
+            // TODO: add snapshot deletion
 
-        $this->serverRepository->setServer($server)->delete();
+            $this->serverRepository->setServer($server)->delete();
+        }
+
         $server->delete();
 
         $server->update(['status' => null]);
     }
 
-    public function validateStatus(Server $server)
+    public function validateStatus(Server $server, bool $verifyStatusOnly = false)
     {
-        $server->validateCurrentState();
-
-        if ($server->backups()->whereNull('completed_at')->exists()) {
+        if (
+            !is_null($server->status) && $server->status !== Status::DELETING->value
+        ) {
             throw new ServerStateConflictException($server);
+        }
+
+        if (!$verifyStatusOnly) {
+            if ($server->backups()->whereNull('completed_at')->exists()) {
+                throw new ServerStateConflictException($server);
+            }
         }
     }
 }

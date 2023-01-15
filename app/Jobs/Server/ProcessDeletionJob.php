@@ -46,7 +46,7 @@ class ProcessDeletionJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId)
+    public function __construct(protected int $serverId, protected bool $noPurge)
     {
         //
     }
@@ -61,9 +61,9 @@ class ProcessDeletionJob implements ShouldQueue
         $server = Server::findOrFail($this->serverId);
 
         try {
-            $service->handle($server);
+            $service->handle($server, $this->noPurge);
         } catch (\Exception $e) {
-            $server->update(['status' => Status::DELETION_FAILED]);
+            $server->update(['status' => Status::DELETION_FAILED->value]);
 
             throw $e;
         }
@@ -73,6 +73,6 @@ class ProcessDeletionJob implements ShouldQueue
     {
         $server = Server::findOrFail($this->serverId);
 
-        $server->update(['status' => Status::DELETION_FAILED]);
+        $server->update(['status' => Status::DELETION_FAILED->value]);
     }
 }
