@@ -2,17 +2,19 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Enums\Server\Power;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\Backups\BackupService;
 
 class ServerDeletionService
 {
-    public function __construct(private BackupRepository $backupRepository, private BackupService $backupService, private ProxmoxServerRepository $serverRepository)
+    public function __construct(private ProxmoxPowerRepository $powerRepository, private BackupRepository $backupRepository, private BackupService $backupService, private ProxmoxServerRepository $serverRepository)
     {
 
     }
@@ -22,6 +24,8 @@ class ServerDeletionService
         $this->validateStatus($server);
 
         $server->update(['status' => Status::DELETING->value]);
+
+        $this->powerRepository->setServer($server)->send(Power::KILL);
 
         $backups = $this->backupRepository->getNonFailedBackups($server)->get();
 

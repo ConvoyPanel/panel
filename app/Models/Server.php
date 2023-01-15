@@ -106,4 +106,13 @@ class Server extends Model
             throw new ServerStateConflictException($this);
         }
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            IPAddress::where('server_id', $model->id)->update(['server_id' => null]);
+        });
+    }
 }

@@ -112,7 +112,7 @@ class ServerController extends ApplicationApiController
         $this->connection->transaction(function () use ($server) {
             $server->update(['status' => Status::DELETING]);
 
-            ProcessDeletionJob::dispatch($server);
+            ProcessDeletionJob::dispatch($server->id);
         });
 
         return $this->returnNoContent();
