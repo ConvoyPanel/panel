@@ -24,13 +24,13 @@ const SuspensionContainer = () => {
         setLoading(true)
         try {
             if (server.status === 'suspended') {
-                unsuspendServer(server.uuid)
+                await unsuspendServer(server.uuid)
                 setServer({
                     ...server,
                     status: null,
                 })
             } else {
-                suspendServer(server.uuid)
+                await suspendServer(server.uuid)
                 setServer({
                     ...server,
                     status: 'suspended',

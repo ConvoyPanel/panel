@@ -13,11 +13,20 @@ import updateServer from '@/api/admin/servers/updateServer'
 import { EloquentStatus } from '@/api/server/types'
 import updateBuild from '@/api/admin/servers/updateBuild'
 import * as yup from 'yup'
+import { useMemo } from 'react'
+import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
 
 const ServerBuildSettingsContainer = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:build')
+
+    const pluckedAddressIds = useMemo(() => {
+        return [
+            ...server.limits.addresses.ipv4.map(address => address.id.toString()),
+            ...server.limits.addresses.ipv6.map(address => address.id.toString()),
+        ]
+    }, [server])
 
     const form = useFormik({
         enableReinitialize: true,
@@ -25,6 +34,7 @@ const ServerBuildSettingsContainer = () => {
             cpu: server.limits.cpu.toString(),
             memory: (server.limits.memory / 1048576).toString(),
             disk: (server.limits.disk / 1048576).toString(),
+            addressIds: pluckedAddressIds,
             snapshotLimit: server.limits.snapshots?.toString() ?? '',
             backupLimit: server.limits.backups?.toString() ?? '',
             bandwidthLimit: server.limits.bandwidth ? (server.limits.bandwidth / 1048576).toString() : '',
@@ -39,35 +49,30 @@ const ServerBuildSettingsContainer = () => {
             bandwidthLimit: yup.number().min(0),
             bandwidthUsage: yup.number().min(0),
         }),
-        onSubmit: async ({ snapshotLimit, backupLimit, bandwidthLimit, bandwidthUsage, memory, disk, cpu }) => {
+        onSubmit: async ({
+            addressIds,
+            snapshotLimit,
+            backupLimit,
+            bandwidthLimit,
+            bandwidthUsage,
+            memory,
+            disk,
+            cpu,
+        }) => {
             clearFlashes()
             try {
-                const payload = {
+                const newServer = await updateBuild(server.uuid, {
                     cpu: parseInt(cpu),
                     memory: parseInt(memory) * 1048576,
                     disk: parseInt(disk) * 1048576,
+                    addressIds: addressIds.map(id => parseInt(id)),
                     snapshotLimit: snapshotLimit !== '' ? parseInt(snapshotLimit) : null,
                     backupLimit: backupLimit !== '' ? parseInt(backupLimit) : null,
                     bandwidthLimit: bandwidthLimit !== '' ? parseInt(bandwidthLimit) * 1048576 : null,
                     bandwidthUsage: parseInt(bandwidthUsage) * 1048576,
-                }
-                await updateBuild(server.uuid, payload)
-
-                setServer({
-                    ...server,
-                    limits: {
-                        ...server.limits,
-                        cpu: payload.cpu,
-                        memory: payload.memory,
-                        disk: payload.disk,
-                        snapshots: payload.snapshotLimit,
-                        backups: payload.backupLimit,
-                        bandwidth: payload.bandwidthLimit,
-                    },
-                    usages: {
-                        bandwidth: payload.bandwidthUsage,
-                    },
                 })
+
+                setServer(newServer)
             } catch (error) {
                 clearAndAddHttpError(error as any)
             }
@@ -86,6 +91,7 @@ const ServerBuildSettingsContainer = () => {
                                 <TextInputFormik name='cpu' label='CPU' />
                                 <TextInputFormik name='memory' label='Memory (MiB)' />
                                 <TextInputFormik name='disk' label='Disk (MiB)' />
+                                <AddressesMultiSelectFormik nodeId={server.nodeId} />
                                 <TextInputFormik
                                     name='snapshotLimit'
                                     label='Snapshots Limit'

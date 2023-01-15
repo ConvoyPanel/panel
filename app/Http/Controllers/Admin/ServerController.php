@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
+use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Controllers\ApplicationApiController;
@@ -9,22 +10,26 @@ use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Jobs\Server\ProcessDeletionJob;
 use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\BuildModificationService;
 use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\NetworkService;
 use Convoy\Services\Servers\ServerCreationService;
+use Convoy\Services\Servers\ServerDeletionService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\SuspensionService;
 use Convoy\Transformers\Admin\ServerTransformer;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private SuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
+    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private SuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
     {
     }
 
@@ -71,7 +76,9 @@ class ServerController extends ApplicationApiController
 
     public function updateBuild(UpdateBuildRequest $request, Server $server)
     {
-        $server->update($request->validated());
+        $server->update($request->safe()->except('address_ids'));
+
+        $this->networkService->updateAddresses($server, $request->address_ids ?? []);
 
         try {
             $this->buildModificationService->handle($server, false);
@@ -100,6 +107,14 @@ class ServerController extends ApplicationApiController
 
     public function destroy(Server $server)
     {
+        $this->deletionService->validateStatus($server);
 
+        $this->connection->transaction(function () use ($server) {
+            $server->update(['status' => Status::DELETING]);
+
+            ProcessDeletionJob::dispatch($server);
+        });
+
+        return $this->returnNoContent();
     }
 }

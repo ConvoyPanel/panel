@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
+import { AdminBanner } from '@/routers/admin/DashboardRouter'
 
 const ServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
@@ -46,6 +47,7 @@ const ServerRouter = () => {
 
     return (
         <>
+            <AdminBanner />
             <NavigationBar routes={visibleRoutes} breadcrumb={server?.name} />
             {!server ? (
                 error ? (

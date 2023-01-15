@@ -5,9 +5,13 @@ namespace Convoy\Repositories\Proxmox;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use Illuminate\Contracts\Foundation\Application;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
+use GuzzleRetry\GuzzleRetryMiddleware;
 
 abstract class ProxmoxRepository
 {
@@ -83,11 +87,28 @@ abstract class ProxmoxRepository
             'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
+            'handler' => $this->getHandlerStack(),
             'headers' => array_merge($headers, [
                 'Authorization' => $authorize ? "PVEAPIToken={$this->node->token_id}={$this->node->secret}" : null,
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
+                'User-Agent' => null,
             ]),
         ]);
+    }
+
+    public function getHandlerStack()
+    {
+        $stack = HandlerStack::create();
+
+        $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
+            return $request->withoutHeader('User-Agent');
+        }));
+        $stack->push(GuzzleRetryMiddleware::factory([
+            'max_retry_attempts' => 3,
+            'retry_on_timeout' => true,
+        ]));
+
+        return $stack;
     }
 }

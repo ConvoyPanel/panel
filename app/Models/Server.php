@@ -7,11 +7,11 @@ use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Server extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $casts = [
         'memory' => MegabytesAndBytes::class,
@@ -32,7 +32,7 @@ class Server extends Model
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'status' => ['sometimes', 'nullable', 'string', 'in:installing,install_failed,suspended,restoring_backup,restoring_snapshot'],
+        'status' => ['sometimes', 'nullable', 'string', 'in:installing,install_failed,suspended,restoring_backup,restoring_snapshot,deleting,deletion_failed'],
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',

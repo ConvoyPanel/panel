@@ -9,4 +9,6 @@ enum Status: string
     case SUSPENDED = 'suspended';
     case RESTORING_BACKUP = 'restoring_backup';
     case RESTORING_SNAPSHOT = 'restoring_snapshot';
+    case DELETING = 'deleting';
+    case DELETION_FAILED = 'deletion_failed';
 }

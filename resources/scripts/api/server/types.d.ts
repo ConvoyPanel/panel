@@ -4,4 +4,6 @@ export type EloquentStatus =
     | 'suspended'
     | 'restoring_backup'
     | 'restoring_snapshot'
+    | 'deleting'
+    | 'deletion_failed'
     | null

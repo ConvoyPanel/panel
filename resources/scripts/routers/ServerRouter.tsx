@@ -7,6 +7,7 @@ import { ServerContext } from '@/state/server'
 import { useEffect, useMemo, useState } from 'react'
 import { Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { EloquentStatus } from '@/api/server/types'
 
 const ServerRouter = () => {
     const match = useMatch('/servers/:id/*')
@@ -47,6 +48,67 @@ const ServerRouter = () => {
         }
     }, [match?.params.id])
 
+    const getScreenBlock = (status: EloquentStatus) => {
+        switch (status) {
+            case 'suspended':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={NoSymbolIcon}
+                        message='This server is suspended. Contact your provider or system administrator for help.'
+                        title='Suspended'
+                    />
+                )
+            case 'installing':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ArrowPathIcon}
+                        message='Your server is being installed. This can take from 1-15 minutes.'
+                        title='Installing'
+                    />
+                )
+            case 'restoring_backup':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ArrowPathIcon}
+                        message='Your server is being restored from a backup. This can take from 1-15 minutes.'
+                        title='Restoring Backup'
+                    />
+                )
+            case 'restoring_snapshot':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ArrowPathIcon}
+                        message='Your server is being restored from a snapshot. This can take from 1-15 minutes.'
+                        title='Restoring Snapshot'
+                    />
+                )
+            case 'install_failed':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ExclamationCircleIcon}
+                        message='Your server failed to install. Please contact your administrator.'
+                        title='Install failed'
+                    />
+                )
+            case null:
+                return null
+            default:
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ExclamationCircleIcon}
+                        message='Your server is in an unusable state. Please contact your administrator.'
+                        title='Unusable'
+                    />
+                )
+        }
+    }
+
     return (
         <>
             <NavigationBar routes={visibleRoutes} breadcrumb={server?.name} />
@@ -58,46 +120,8 @@ const ServerRouter = () => {
                 )
             ) : (
                 <>
-                    {server.status === 'suspended' && (
-                        <ScreenBlock
-                            center
-                            icon={NoSymbolIcon}
-                            message='This server is suspended. Contact your provider or system administrator for help.'
-                            title='Suspended'
-                        />
-                    )}
-                    {server.status === 'installing' && (
-                        <ScreenBlock
-                            center
-                            icon={ArrowPathIcon}
-                            message='Your server is being installed. This can take from 1-15 minutes.'
-                            title='Installing'
-                        />
-                    )}
-                    {server.status === 'restoring_backup' && (
-                        <ScreenBlock
-                            center
-                            icon={ArrowPathIcon}
-                            message='Your server is being restored from a backup. This can take from 1-15 minutes.'
-                            title='Restoring Backup'
-                        />
-                    )}
-                    {server.status === 'restoring_snapshot' && (
-                        <ScreenBlock
-                            center
-                            icon={ArrowPathIcon}
-                            message='Your server is being restored from a snapshot. This can take from 1-15 minutes.'
-                            title='Restoring Snapshot'
-                        />
-                    )}
-                    {server.status === 'install_failed' && (
-                        <ScreenBlock
-                            center
-                            icon={ExclamationCircleIcon}
-                            message='Your server failed to install. Please contact your administrator.'
-                            title='Install failed'
-                        />
-                    )}
+                    {getScreenBlock(server.status)}
+
                     {typeof server.status !== 'string' ? (
                         <Routes>
                             {routes.server.map(route => (

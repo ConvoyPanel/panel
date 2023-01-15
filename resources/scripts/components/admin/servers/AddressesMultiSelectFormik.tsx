@@ -8,11 +8,13 @@ import MultiSelectFormik from '@/components/elements/forms/MultiSelectFormik'
 
 interface Props {
     disabled?: boolean
+    nodeId?: number
 }
 
-const AddressesMultiSelectFormik = ({ disabled }: Props) => {
+const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => {
     const [{ value: addressIds }] = useField('addressIds')
-    const [{ value: nodeId }] = useField('nodeId')
+    const [{ value: formNodeId }] = useField('nodeId')
+    const nodeId = propNodeId ?? formNodeId
 
     const [query, setQuery] = useState('')
     const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, { query, serverId: null })

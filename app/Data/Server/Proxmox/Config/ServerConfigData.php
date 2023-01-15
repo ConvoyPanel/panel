@@ -14,6 +14,6 @@ class ServerConfigData extends Data
       public DataCollection $boot_order,
       #[DataCollectionOf(DiskData::class)]
       public DataCollection $disks,
-      public AddressConfigData $addresses
+      /* public AddressConfigData $addresses */
     ) {}
 }

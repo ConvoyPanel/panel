@@ -62,7 +62,7 @@ class ServerDetailService
                 'mac_address' => $this->networkService->getMacAddresses($server, false, true)->proxmox,
                 'boot_order' => $this->allocationService->getBootOrder($server),
                 'disks' => $this->allocationService->getDisks($server),
-                'addresses' => $this->cloudinitService->getIpConfig($server),
+                /* 'addresses' => $this->cloudinitService->getIpConfig($server), */
             ]
         ]);
     }

@@ -71,4 +71,9 @@ class ProcessRebuildJob implements ShouldQueue
             throw $e;
         }
     }
+
+    public function failed()
+    {
+        $this->deployment->server->update(['status' => Status::INSTALL_FAILED->value]);
+    }
 }
