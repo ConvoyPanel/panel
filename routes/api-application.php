@@ -5,25 +5,25 @@ use Convoy\Http\Controllers\Admin;
 use Convoy\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
 
 
-Route::resource('locations', Admin\LocationController::class)
+Route::apiResource('locations', Admin\LocationController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 
-Route::resource('nodes', Admin\Nodes\NodeController::class)
+Route::apiResource('nodes', Admin\Nodes\NodeController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
 Route::prefix('/nodes/{node}')->group(function () {
-    Route::resource('/isos', Admin\Nodes\IsoController::class)
+    Route::apiResource('/isos', Admin\Nodes\IsoController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::resource('template-groups', Admin\Nodes\TemplateGroupController::class)
+    Route::apiResource('template-groups', Admin\Nodes\TemplateGroupController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::post('/template-groups/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateOrder']);
 
-    Route::resource('template-groups.templates', Admin\Nodes\TemplateController::class)
+    Route::apiResource('template-groups.templates', Admin\Nodes\TemplateController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::post('/template-groups/{template_group}/templates/reorder', [Admin\Nodes\TemplateController::class, 'updateOrder']);
 
-    Route::resource('addresses', Admin\Nodes\AddressController::class)
+    Route::apiResource('addresses', Admin\Nodes\AddressController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
@@ -44,8 +44,7 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [ValidateServerSt
     });
 });
 
-Route::resource('users', Admin\UserController::class)
+Route::apiResource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
-Route::resource('tokens', Admin\TokenController::class)
-    ->only(['index', 'store', 'destroy']);
+Route::post('/users/{user}/generate-sso-token', [Admin\UserController::class, 'getSSOToken']);

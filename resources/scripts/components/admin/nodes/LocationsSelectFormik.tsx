@@ -36,7 +36,6 @@ const LocationsSelectFormik = () => {
     return (
         <SelectFormik
             label='Location Group'
-            placeholder='fuk u chit'
             data={locations}
             searchable
             searchValue={query}
