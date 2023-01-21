@@ -1,6 +1,6 @@
 ![Banner Logo](https://imgur.com/oAGZ7fb.png)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/convoypanel/panel/Tests?label=Tests)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/convoypanel/panel/tests.yml?branch=develop)
 ![Discord](https://img.shields.io/discord/746612878261616700?label=Discord&logo=Discord&logoColor=white)
 ![GitHub Releases](https://img.shields.io/github/downloads/convoypanel/panel/latest/total)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel?ref=badge_shield)
