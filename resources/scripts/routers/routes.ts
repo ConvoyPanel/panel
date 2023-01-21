@@ -12,6 +12,7 @@ interface Routes {
         dashboard: RouteDefinition[]
         node: RouteDefinition[]
         server: RouteDefinition[]
+        user: RouteDefinition[]
     }
 }
 
@@ -61,6 +62,10 @@ const routes: Routes = {
                 path: '/servers',
                 component: lazy(() => import('@/components/admin/servers/ServersContainer')),
             },
+            {
+                path: '/users',
+                component: lazy(() => import('@/components/admin/users/UsersContainer')),
+            },
         ],
         node: [
             {
@@ -96,6 +101,16 @@ const routes: Routes = {
             {
                 path: '/settings',
                 component: lazy(() => import('@/components/admin/servers/settings/ServerSettingsContainer')),
+            },
+        ],
+        user: [
+            {
+                path: '/settings',
+                component: lazy(() => import('@/components/admin/users/settings/UserSettingsContainer')),
+            },
+            {
+                path: '/servers',
+                component: lazy(() => import('@/components/admin/users/servers/UserServersContainer')),
             },
         ],
     },

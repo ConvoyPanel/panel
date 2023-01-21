@@ -11,6 +11,7 @@ import Button from '@/components/elements/Button'
 interface Props {
     className?: string
     nodeId?: number
+    userId?: number
 }
 
 const columns: ColumnArray<Server> = [
@@ -39,9 +40,9 @@ const columns: ColumnArray<Server> = [
     },
 ]
 
-const ServersTable = ({ className, nodeId }: Props) => {
+const ServersTable = ({ className, nodeId, userId }: Props) => {
     const [page, setPage] = usePagination()
-    const { data, mutate } = useServersSWR({ page, nodeId, includes: ['node', 'user'] })
+    const { data, mutate } = useServersSWR({ page, nodeId, userId, includes: ['node', 'user'] })
 
     return (
         <div className={className}>

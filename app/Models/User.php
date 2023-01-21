@@ -2,18 +2,22 @@
 
 namespace Convoy\Models;
 
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
 /**
  * @mixin \Eloquent
  */
-class User extends Authenticatable
+class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Authenticatable, Authorizable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +29,16 @@ class User extends Authenticatable
         'email',
         'password',
         'root_admin',
+    ];
+
+    /**
+     * Rules verifying that the data being stored matches the expectations of the database.
+     */
+    public static $validationRules = [
+        'email' => 'required|email|between:1,191|unique:users,email',
+        'name' => 'required|between:1,191',
+        'password' => ['sometimes', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'string'],
+        'root_admin' => 'boolean',
     ];
 
     /**
@@ -62,5 +76,10 @@ class User extends Authenticatable
     public function servers()
     {
         return $this->hasMany(Server::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
     }
 }

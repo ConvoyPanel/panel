@@ -11,6 +11,7 @@ import { ServerContext } from '@/state/server'
 import { NavigationProgress } from '@mantine/nprogress'
 import { NodeContext } from '@/state/admin/node'
 import { AdminServerContext } from '@/state/admin/server'
+import { AdminUserContext } from '@/state/admin/user'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -29,6 +30,7 @@ const ServerRouter = lazy(() => import('@/routers/ServerRouter'))
 const AdminDashboardRouter = lazy(() => import('@/routers/admin/DashboardRouter'))
 const AdminNodeRouter = lazy(() => import('@/routers/admin/NodeRouter'))
 const AdminServerRouter = lazy(() => import('@/routers/admin/ServerRouter'))
+const AdminUserRouter = lazy(() => import('@/routers/admin/UserRouter'))
 
 const App = () => {
     const { ConvoyUser } = window as ExtendedWindow
@@ -125,6 +127,19 @@ const App = () => {
                                         <AdminServerContext.Provider>
                                             <AdminServerRouter />
                                         </AdminServerContext.Provider>
+                                    </Suspense>
+                                </AuthenticatedRoutes>
+                            }
+                        />
+
+                        <Route
+                            path='/admin/users/:id/*'
+                            element={
+                                <AuthenticatedRoutes requireRootAdmin>
+                                    <Suspense fallback={<Spinner />}>
+                                        <AdminUserContext.Provider>
+                                            <AdminUserRouter />
+                                        </AdminUserContext.Provider>
                                     </Suspense>
                                 </AuthenticatedRoutes>
                             }

@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Requests\Admin\Users;
 
+use Convoy\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,11 +25,13 @@ class StoreUserRequest extends FormRequest
      */
     public function rules()
     {
+        $rules = User::getRules();
+
         return [
-            'name' => 'string|max:40|required',
-            'email' => 'email|required',
+            'name' => $rules['name'],
+            'email' => $rules['email'],
             'password' => ['required', Password::defaults()],
-            'root_admin' => 'boolean|required',
+            'root_admin' => $rules['root_admin'],
         ];
     }
 }

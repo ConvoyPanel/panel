@@ -1,8 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Users\Settings;
+namespace Convoy\Http\Requests\Admin\Users;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Http\Requests\FormRequest;
+use Convoy\Models\User;
 use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
@@ -24,11 +25,15 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
+        $user = $this->parameter('user', User::class);
+
+        $rules = User::getRulesForUpdate($user);
+
         return [
-            'name' => 'string|max:40|required',
-            'email' => 'email|required',
+            'name' => $rules['name'],
+            'email' => $rules['email'],
             'password' => [Password::defaults(), 'nullable'],
-            'root_admin' => 'boolean|required',
+            'root_admin' => $rules['root_admin'],
         ];
     }
 }

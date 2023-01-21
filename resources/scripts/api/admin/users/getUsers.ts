@@ -4,16 +4,16 @@ export interface User {
     id: number
     name: string
     email: string
-    emailVerifiedAt?: Date
+    emailVerifiedAt: Date | null
     rootAdmin: boolean
     serversCount: number
 }
 
-const rawDataToUser = (data: any) => ({
+export const rawDataToUser = (data: any): User => ({
     id: data.id,
     name: data.name,
     email: data.email,
-    emailVerifiedAt: data.email_verified_at ? new Date(data.email_verified_at) : undefined,
+    emailVerifiedAt: data.email_verified_at ? new Date(data.email_verified_at) : null,
     rootAdmin: data.root_admin,
     serversCount: data.servers_count,
 })
