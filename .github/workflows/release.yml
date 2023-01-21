@@ -34,7 +34,7 @@ jobs:
 
       - name: Create release archive
         run: |
-          rm -rf node_modules/ test/ codecov.yml CONTRIBUTOR_LICENSE_AGREEMENT CODE_OF_CONDUCT.md CONTRIBUTING.md phpunit.xml
+          rm -rf node_modules/ test/ codecov.yml CONTRIBUTOR_LICENSE_AGREEMENT CODE_OF_CONDUCT.md CONTRIBUTING.md phpunit.xml phpstan.neon
           tar -czf panel.tar.gz * .env.example
 
       - name: Extract changelog
