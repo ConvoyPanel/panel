@@ -3,6 +3,24 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.0.0-beta (Tuxedo)
+### Fixed
+* Server installs
+* a bunch of other stuff
+
+### Changed
+* from proprietary hard-coded api tokens to Bearer tokens for the application/external api
+* the whole entire frontend
+
+### Added
+* Server hostnames
+* Node location grouping
+
+### Notes
+* This release is so big that I can't really summarize everything
+
+![The maxwell cat meme is the mascot for v3](https://imgur.com/mowvogE.png)
+
 ## v2.0.3-beta
 ### Fixed
 * Inability to delete IP address from the admin user interface

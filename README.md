@@ -10,7 +10,7 @@ Convoy is a modern and performant KVM server management panel for hosting busine
 
 Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a license to use Convoy today for $6/node/mo
 
-![Screenshot of Convoy](https://imgur.com/pFj0kvO.png)
+![Screenshot of Convoy](https://imgur.com/GsORIRQ.png)
 
 ## Documentation
 * [Panel Documentation](https://docs.convoypanel.com)
