@@ -66,6 +66,10 @@ const routes: Routes = {
                 path: '/users',
                 component: lazy(() => import('@/components/admin/users/UsersContainer')),
             },
+            {
+                path: '/tokens',
+                component: lazy(() => import('@/components/admin/tokens/TokensContainer')),
+            },
         ],
         node: [
             {

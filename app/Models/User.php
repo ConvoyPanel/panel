@@ -39,7 +39,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public static $validationRules = [
         'email' => 'required|email|between:1,191|unique:users,email',
-        'name' => 'required|between:1,191',
+        'name' => 'required|string|between:1,191',
         'password' => ['sometimes', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'string'],
         'root_admin' => 'boolean',
     ];

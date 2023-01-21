@@ -47,4 +47,7 @@ Route::group(['prefix' => '/servers/{server}', 'middleware' => [ValidateServerSt
 Route::resource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
+Route::resource('tokens', Admin\TokenController::class)
+    ->only(['index', 'store', 'destroy']);
+
 Route::post('/users/{user}/generate-sso-token', [Admin\UserController::class, 'getSSOToken']);
