@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.1.1-beta
+
+### Fixed
+
+-   Conflicting named routes that would break route optimization/caching
+
 ## v3.1.0-beta
 
 ### Fixed
