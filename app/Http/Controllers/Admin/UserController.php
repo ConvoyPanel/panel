@@ -7,10 +7,13 @@ use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Models\Filters\FiltersUser;
+use Convoy\Models\SSOToken;
 use Convoy\Models\User;
 use Convoy\Transformers\Admin\UserTransformer;
+use Convoy\Transformers\Application\SSOTokenTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -71,5 +74,15 @@ class UserController extends ApplicationApiController
         $user->delete();
 
         return $this->returnNoContent();
+    }
+
+    public function getSSOToken(User $user)
+    {
+        $SSOToken = SSOToken::create([
+            'user_id' => $user->id,
+            'token' => hash('sha256', Str::random(50)),
+        ]);
+
+        return fractal($SSOToken, new SSOTokenTransformer)->respond();
     }
 }
