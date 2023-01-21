@@ -24,6 +24,7 @@ jobs:
           sed -i "s/    'version' => 'canary',/    'version' => '${REF:11}',/" config/app.php
           git add config/app.php
           git commit -m "bump version for release"
+          git pull
           git push
 
       - name: Build assets
