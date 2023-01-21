@@ -44,6 +44,6 @@ class LoginController extends Controller
 
         $SSOToken->update(['used' => true]);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('index');
     }
 }

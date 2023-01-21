@@ -3,6 +3,7 @@
 namespace Convoy\Providers;
 
 use Convoy\Http\Middleware\AdminAuthenticate;
+use Convoy\Http\Middleware\ForceJsonResponse;
 use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -36,10 +37,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::middleware('web')->group(function () {
-                /* Route::middleware([ForceJsonResponse::class, AuthorizeProprietaryToken::class, 'api'])
-                    ->prefix('/api/application')
-                    ->group(base_path('routes/api-application.php'));
- */
+                Route::middleware('guest')->group(base_path('routes/auth.php'));
+
                 Route::middleware(['auth.session'])
                     ->group(base_path('routes/base.php'));
 
@@ -49,8 +48,12 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['auth', AdminAuthenticate::class])
                     ->prefix('/api/admin')
                     ->group(base_path('routes/api-admin.php'));
+            });
 
-                Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
+            Route::middleware(['api'])->group(function() {
+                Route::middleware(['auth:sanctum'])
+                    ->prefix('/api/application')
+                    ->group(base_path('routes/api-admin.php'));
             });
         });
     }

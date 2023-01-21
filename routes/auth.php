@@ -1,6 +1,7 @@
 <?php
 
 use Convoy\Http\Controllers\Auth;
+use Convoy\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +13,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/auth/login', [Auth\LoginController::class, 'index']);
-
-Route::get('/sso/authorize', [Auth\LoginController::class, 'authorizeToken']);
+Route::get('/authenticate', [LoginController::class, 'authorizeToken']);

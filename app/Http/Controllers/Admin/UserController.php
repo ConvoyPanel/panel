@@ -71,6 +71,8 @@ class UserController extends ApplicationApiController
             throw new BadRequestHttpException('The user cannot be deleted with servers still associated.');
         }
 
+        $user->tokens()->delete();
+
         $user->delete();
 
         return $this->returnNoContent();

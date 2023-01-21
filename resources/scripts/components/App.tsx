@@ -21,6 +21,9 @@ interface ExtendedWindow extends Window {
         created_at: string
         updated_at: string
     }
+    SiteConfiguration?: {
+        version: string
+    }
 }
 
 const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'))
@@ -33,7 +36,7 @@ const AdminServerRouter = lazy(() => import('@/routers/admin/ServerRouter'))
 const AdminUserRouter = lazy(() => import('@/routers/admin/UserRouter'))
 
 const App = () => {
-    const { ConvoyUser } = window as ExtendedWindow
+    const { ConvoyUser, SiteConfiguration } = window as ExtendedWindow
 
     if (ConvoyUser && !store.getState().user.data) {
         store.getActions().user.setUserData({
@@ -52,6 +55,7 @@ const App = () => {
                 (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
                     ? 'dark'
                     : 'light',
+            version: SiteConfiguration!.version,
         })
     }
 
