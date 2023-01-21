@@ -1,4 +1,5 @@
 ![Banner Logo](https://imgur.com/oAGZ7fb.png)
+![version 3 release banner](https://imgur.com/OEncExI.png)
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/convoypanel/panel/tests.yml?branch=develop)
 ![Discord](https://img.shields.io/discord/746612878261616700?label=Discord&logo=Discord&logoColor=white)
