@@ -51,8 +51,10 @@ class UpdateAddressRequest extends FormRequest
                 }
             }
 
+            $address = $this->parameter('address', IPAddress::class);
+
             // check for duplicate addresses
-            if (IPAddress::where('address', $this->address)->exists()) {
+            if (IPAddress::where('address', $this->address)->exists() && $address->address !== $this->address) {
                 $validator->errors()->add('address', 'The address has already been imported.');
             }
         });

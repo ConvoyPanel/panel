@@ -57,7 +57,6 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:node:addresses.delete'} />
-                        <CheckboxFormik name='syncNetworkConfig' label='Sync Network Config' />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={onClose}>

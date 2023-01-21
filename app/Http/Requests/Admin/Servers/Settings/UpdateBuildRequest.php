@@ -35,15 +35,17 @@ class UpdateBuildRequest extends FormRequest
 
             $addresses = IPAddress::whereIn('id', $addressIds)->get();
 
+            $server = $this->parameter('server', Server::class);
+
             foreach ($addresses as $address) {
-                if ($address->server_id !== null) {
+                if ($address->server_id !== null && $address->server_id !== $server->id) {
                     $validator->errors()->add('address_ids', 'One or more of the selected addresses are already in use');
                     break;
                 }
             }
 
             // check if the memory and disk isn't exceeding the node limits
-            $node = Node::findOrFail($this->input('node_id'))->load('servers');
+            $node = Node::findOrFail($server->node_id)->load('servers');
 
             $nodeMemoryLimit = ($node->memory * (($node->memory_overallocate / 100) + 1)) - $node->memory_allocated;
             $nodeDiskLimit = ($node->disk * (($node->disk_overallocate / 100) + 1)) - $node->disk_allocated;
