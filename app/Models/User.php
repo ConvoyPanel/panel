@@ -2,15 +2,18 @@
 
 namespace Convoy\Models;
 
+use Convoy\Enums\Api\ApiKeyType;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Laravel\Sanctum\NewAccessToken;
 
 /**
  * @mixin \Eloquent
@@ -68,6 +71,18 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function toReactObject(): array
     {
         return Collection::make($this->toArray())->except(['id'])->toArray();
+    }
+
+    public function createToken(string $name, ApiKeyType $type, array $abilities = ['*'])
+    {
+        $token = $this->tokens()->create([
+            'type' => $type,
+            'name' => $name,
+            'token' => hash('sha256', $plainTextToken = Str::random(40)),
+            'abilities' => $abilities,
+        ]);
+
+        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 
     /**
