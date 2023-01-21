@@ -100,6 +100,7 @@ const NetworkingContainer = () => {
                         </FormCard.Body>
                         <FormCard.Footer>
                             <Button
+                                disabled={!form.dirty}
                                 loading={form.isSubmitting}
                                 type='submit'
                                 variant='filled'

@@ -81,7 +81,7 @@ const GeneralContainer = () => {
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>
-                        <Button loading={form.isSubmitting} type='submit' variant='filled' color='success' size='sm'>
+                        <Button disabled={!form.dirty} loading={form.isSubmitting} type='submit' variant='filled' color='success' size='sm'>
                             Save
                         </Button>
                     </FormCard.Footer>
