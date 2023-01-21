@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.1.2-beta
+
+### Fixed
+
+-   Scoped routing bindings in RouteServiceProvider that were breaking some routes
+
 ## v3.1.1-beta
 
 ### Fixed
