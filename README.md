@@ -25,6 +25,7 @@ Convoy wouldn't have been possible without these organizations and people
 * Kjartann - donated $250 to support Convoy development and encouraged me to keep on working on this panel!
 * Pterodactyl Panel - provided the architecture and a lot of backend/boilerplate code for Convoy.
 * FastKVM.EU - for reporting bugs and testing the panel
+* Just Code Cats - https://code-cats.com/
 
 ## License
 Convoy is licensed under the Business Source License. Production use of Convoy without an active license from Performave is strictly disallowed.
