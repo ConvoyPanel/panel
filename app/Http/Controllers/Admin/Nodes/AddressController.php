@@ -34,7 +34,9 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request, Node $node)
     {
-        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->validated()))->load('server');
+        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->validated()));
+
+        $address->load('server');
 
         try {
             if ($request->server_id) {
@@ -44,16 +46,18 @@ class AddressController extends Controller
             // do nothing
         }
 
-        $address->load('server');
-
         return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
     public function update(UpdateAddressRequest $request, Node $node, IPAddress $address)
     {
+        $address->load('server');
+
         $oldServer = $address->server;
 
         $address->update($request->validated());
+
+        $address->refresh();
 
         $newServer = $address->server;
 
@@ -76,6 +80,8 @@ class AddressController extends Controller
 
     public function destroy(Node $node, IPAddress $address)
     {
+        $address->load('server');
+
         $server = $address->server;
 
         $address->delete();

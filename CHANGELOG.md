@@ -4,6 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.2.0-beta
+
+### Fixed
+
+-   Broken network syncing when updating an address's assigned server
+-   Text alignment for server counter on the users table in the admin area
+
+### Added
+
+-   Hyperlinks to the owner on the servers table
+
 ## v3.1.2-beta
 
 ### Fixed

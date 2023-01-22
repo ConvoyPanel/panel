@@ -31,7 +31,11 @@ const columns: ColumnArray<Server> = [
     {
         accessor: 'user',
         header: 'Owner',
-        cell: ({ value }) => value!.name,
+        cell: ({ value }) => (
+            <Link to={`/admin/users/${value!.id}/settings`} className='link text-foreground'>
+                {value!.email}
+            </Link>
+        ),
     },
     {
         accessor: 'node',

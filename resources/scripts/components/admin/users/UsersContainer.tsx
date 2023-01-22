@@ -36,6 +36,7 @@ const columns: ColumnArray<User> = [
     {
         accessor: 'serversCount',
         header: 'Servers',
+        align: 'center',
         cell: ({ value, row }) => (
             <Link to={`/admin/users/${row.id}/servers`} className='link text-foreground'>
                 {value}
