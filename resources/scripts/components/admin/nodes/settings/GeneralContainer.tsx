@@ -104,6 +104,7 @@ const GeneralContainer = () => {
                                 <FlashMessageRender byKey='admin:node:settings:general' />
                                 <TextInputFormik name='name' label='Display Name' />
                                 <LocationsSelectFormik />
+                                <TextInputFormik name='cluster' label='Node Name In Proxmox' />
                                 <TextInputFormik name='fqdn' label='FQDN' />
                                 <TextInputFormik name='port' label='Port' />
                                 <div className='grid gap-3 grid-cols-2'>

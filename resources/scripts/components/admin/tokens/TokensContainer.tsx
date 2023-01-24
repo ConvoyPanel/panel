@@ -85,6 +85,7 @@ const TokensContainer = () => {
                         </Modal.Description>
                     </Modal.Body>
                     <Modal.Actions>
+                        <Modal.Action onClick={() => setOpen(false)}>Cancel</Modal.Action>
                         <Modal.Action onClick={handleDelete}>Delete</Modal.Action>
                     </Modal.Actions>
                 </Modal>

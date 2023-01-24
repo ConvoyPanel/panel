@@ -7,6 +7,7 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
 import TextInputFormik from '@/components/elements/forms/TextInputFormik'
 import Select from '@/components/elements/inputs/Select'
+import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
 import useFlash from '@/util/useFlash'
 import { debounce } from 'debounce'
@@ -125,7 +126,10 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                         <FlashMessageRender className='mb-5' byKey={'admin:nodes.create'} />
                         <TextInputFormik name='name' label='Display Name' />
                         <LocationsSelectFormik />
-                        <TextInputFormik name='cluster' label='Cluster' />
+                        <TextInputFormik name='cluster' label='Node Name In Proxmox' />
+                        <MessageBox className='mt-3' title='Warning' type='warning'>
+                            Please disable privilege separation and grant root privileges
+                        </MessageBox>
                         <div className='grid gap-3 grid-cols-2'>
                             <TextInputFormik name='tokenId' label='Token ID' />
                             <TextInputFormik name='secret' label='Secret' />

@@ -4,6 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.3.0-beta
+
+### Fixed
+
+-   Lack of cancel button when deleting an API key
+
+### Added
+
+-   Ability for administrators to impersonate the client view for a server and also visit the server's configuration in the admin area.
+-   Warnings when creating a new node to disable privilege separation and grant root permissions.
+
 ## v3.2.0-beta
 
 ### Fixed

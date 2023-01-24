@@ -1,7 +1,7 @@
 import LoadingDots from '@/components/elements/LoadingDots'
 import { css } from '@emotion/react'
 import styled from '@emotion/styled'
-import { ComponentProps } from 'react'
+import { ComponentProps, ElementType } from 'react'
 import tw from 'twin.macro'
 
 export interface ButtonProps extends ComponentProps<'button'> {
@@ -9,6 +9,7 @@ export interface ButtonProps extends ComponentProps<'button'> {
   color?: 'success' | 'danger' | 'accent'
   size?: 'sm'
   loading?: boolean
+  as?: ElementType<any>
 }
 
 const getBorderStyles = (variant: ButtonProps['variant'], color: ButtonProps['color']) => {
@@ -67,7 +68,8 @@ const StyledButton = styled.button<ButtonProps>`
 
 const Button = ({ loading, disabled, ...props}: ButtonProps) => {
   return <StyledButton disabled={loading || disabled} {...props}>
-    {loading ? <div className='w-full h-full grid place-items-center'><LoadingDots size={5} /></div> : props.children}
+    {loading ? <div className='w-full h-full grid place-items-center'><LoadingDots size={5} /></div> : null}
+    <span className={loading ? 'invisible' : undefined}>{props.children}</span>
   </StyledButton>
 }
 
