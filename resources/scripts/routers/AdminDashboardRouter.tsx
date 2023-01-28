@@ -1,7 +1,7 @@
 import ContentContainer from '@/components/elements/ContentContainer'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import { useContext, useEffect } from 'react'
-import { Link, Outlet, Route, Routes, useMatches } from 'react-router-dom'
+import { Link, Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
 
 const navRoutes = [
     {
@@ -42,13 +42,14 @@ export const AdminBanner = () => (
 
 const AdminDashboardRouter = () => {
     const { setRoutes } = useContext(NavigationBarContext)
-    const matches = useMatches()
+    const isDashboardArea = useMatch('/admin/:id/')
+    const isDashboardArea2 = useMatch('/admin')
 
     useEffect(() => {
-        if (matches[1]?.pathname === '/admin') {
+        if (Boolean(isDashboardArea) || Boolean(isDashboardArea2)) {
             setRoutes(navRoutes)
         }
-    }, [matches])
+    }, [isDashboardArea, isDashboardArea2])
 
     return (
         <>
