@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
-import { AdminBanner } from '@/routers/admin/DashboardRouter'
+import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 import { AdminUserContext } from '@/state/admin/user'
 

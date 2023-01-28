@@ -5,10 +5,10 @@ import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/routes'
 import { ServerContext } from '@/state/server'
 import { useEffect, useMemo, useState } from 'react'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
-import { AdminBanner } from '@/routers/admin/DashboardRouter'
+import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 
 const ServerRouter = () => {
@@ -72,21 +72,7 @@ const ServerRouter = () => {
                             <FixServerStatusButton />
                         </ScreenBlock>
                     ) : (
-                        <Routes>
-                            {routes.admin.server.map(route => (
-                                <Route
-                                    key={route.path}
-                                    path={route.path}
-                                    element={
-                                        <Spinner.Suspense screen={false}>
-                                            <route.component />
-                                        </Spinner.Suspense>
-                                    }
-                                />
-                            ))}
-
-                            <Route path={'*'} element={<NotFound full />} />
-                        </Routes>
+                        <Outlet />
                     )}
                 </>
             )}

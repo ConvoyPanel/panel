@@ -3,7 +3,7 @@ import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import Spinner from '@/components/elements/Spinner'
 import TransitionRouter from '@/routers/TransitionRouter'
 import { lazy, Suspense } from 'react'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Outlet, Route, Routes } from 'react-router-dom'
 import routes from '@/routers/routes'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import { NodeContext } from '@/state/admin/node'
@@ -51,21 +51,7 @@ const DashboardRouter = () => {
             <AdminBanner />
             <NavigationBar routes={navRoutes} />
 
-            <Routes>
-                {routes.admin.dashboard.map(route => (
-                    <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                            <Spinner.Suspense screen={false}>
-                                <route.component />
-                            </Spinner.Suspense>
-                        }
-                    />
-                ))}
-
-                <Route path={'*'} element={<NotFound full />} />
-            </Routes>
+            <Outlet />
         </>
     )
 }
