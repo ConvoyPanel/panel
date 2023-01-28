@@ -4,6 +4,16 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.4.0-beta
+
+### Changed
+
+- Refactored routes
+
+### Added
+
+- Navigation Bar Context. Now switching pages are even more seamless
+
 ## v3.3.0-beta
 
 ### Fixed
