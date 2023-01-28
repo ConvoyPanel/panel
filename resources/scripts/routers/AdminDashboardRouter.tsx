@@ -1,12 +1,7 @@
 import ContentContainer from '@/components/elements/ContentContainer'
-import NavigationBar from '@/components/elements/navigation/NavigationBar'
-import Spinner from '@/components/elements/Spinner'
-import TransitionRouter from '@/routers/TransitionRouter'
-import { lazy, Suspense } from 'react'
-import { Link, Outlet, Route, Routes } from 'react-router-dom'
-import routes from '@/routers/router'
-import { NotFound } from '@/components/elements/ScreenBlock'
-import { NodeContext } from '@/state/admin/node'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import { useContext, useEffect } from 'react'
+import { Link, Outlet, Route, Routes, useMatches } from 'react-router-dom'
 
 const navRoutes = [
     {
@@ -46,11 +41,17 @@ export const AdminBanner = () => (
 )
 
 const AdminDashboardRouter = () => {
+    const { setRoutes } = useContext(NavigationBarContext)
+    const matches = useMatches()
+
+    useEffect(() => {
+        if (matches[1]?.pathname === '/admin') {
+            setRoutes(navRoutes)
+        }
+    }, [matches])
+
     return (
         <>
-            <AdminBanner />
-            <NavigationBar routes={navRoutes} />
-
             <Outlet />
         </>
     )

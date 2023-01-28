@@ -9,7 +9,7 @@ const ServerOverviewContainer = () => {
     return (
         <ServerContentBlock title={'Overview'}>
             <Link to={`/servers/${server.id}`}>
-                <Button className='inline-flex items-center' as={'a'}>
+                <Button className='inline-flex items-center' as={'span'}>
                     Enter Server Console
                 </Button>
             </Link>

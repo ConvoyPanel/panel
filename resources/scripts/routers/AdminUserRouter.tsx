@@ -1,14 +1,14 @@
 import { httpErrorToHuman } from '@/api/http'
-import NavigationBar from '@/components/elements/navigation/NavigationBar'
+import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
-import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
+import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 import { AdminUserContext } from '@/state/admin/user'
 
@@ -47,10 +47,20 @@ const AdminUserRouter = () => {
         }
     }, [match?.params.id])
 
+    const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
+
+    useEffect(() => {
+        setRoutes(visibleRoutes)
+
+        return () => setBreadcrumb(null)
+    }, [])
+
+    useEffect(() => {
+        setBreadcrumb(user?.name)
+    }, [user])
+
     return (
         <>
-            <AdminBanner />
-            <NavigationBar routes={visibleRoutes} breadcrumb={user?.name} />
             {!user ? (
                 error ? (
                     <ErrorMessage message={error} />

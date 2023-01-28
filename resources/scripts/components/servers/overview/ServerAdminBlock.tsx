@@ -15,7 +15,7 @@ const ServerAdminBlock = () => {
             </p>
             <div className='flex mt-auto justify-end'>
                 <Link to={`/admin/servers/${serverId}`}>
-                    <Button className='inline-flex items-center' as={'a'}>
+                    <Button className='inline-flex items-center' as={'span'}>
                         Configure Server
                     </Button>
                 </Link>

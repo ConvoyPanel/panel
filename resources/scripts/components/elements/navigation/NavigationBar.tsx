@@ -3,23 +3,34 @@ import ContentContainer from '@/components/elements/ContentContainer'
 import Logo from '@/assets/images/logo.svg'
 import { Burger, LoadingOverlay } from '@mantine/core'
 import UserDropdown from '@/components/elements/navigation/UserDropdown'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import NavigationDropdown from '@/components/elements/navigation/NavigationDropdown'
 import { Link, useMatch } from 'react-router-dom'
 import http from '@/api/http'
 import NavLink from '@/components/elements/navigation/NavLink'
+import { AdminBanner } from '@/routers/AdminDashboardRouter'
 
-interface RouteDefinition {
+export interface RouteDefinition {
     name: string
     path: string
 }
 
-interface Props {
+interface NavigationBarContextInterface {
     routes: RouteDefinition[]
-    breadcrumb?: string
+    setRoutes: (routes: RouteDefinition[]) => void
+    breadcrumb?: string | null
+    setBreadcrumb: (breadcrumb: string | null | undefined) => void
 }
 
-const NavigationBar = ({ routes, breadcrumb }: Props) => {
+export const NavigationBarContext = createContext<NavigationBarContextInterface>({
+    routes: [],
+    setRoutes: () => {},
+    breadcrumb: null,
+    setBreadcrumb: () => {},
+})
+
+const NavigationBar = () => {
+    const {routes, breadcrumb} = useContext(NavigationBarContext)
     const [isVisible, setIsVisible] = useState(true)
     const [menuVisible, setMenuVisible] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -78,6 +89,7 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
 
     return (
         <div className='bg-white w-full dark:bg-black'>
+            {isAdminArea && <AdminBanner />}
             <LoadingOverlay visible={isLoggingOut} zIndex={4000} />
             <ContentContainer ref={topBar} className='pt-3 pb-1.5 relative'>
                 <div className='flex justify-between'>
@@ -98,8 +110,12 @@ const NavigationBar = ({ routes, breadcrumb }: Props) => {
                         )}
                     </div>
 
-                        <UserDropdown logout={logout} />
-                        <Burger className='block sm:hidden' opened={menuVisible} onClick={() => setMenuVisible(!menuVisible)} />
+                    <UserDropdown logout={logout} />
+                    <Burger
+                        className='block sm:hidden'
+                        opened={menuVisible}
+                        onClick={() => setMenuVisible(!menuVisible)}
+                    />
                 </div>
             </ContentContainer>
             <NavigationDropdown logout={logout} visible={menuVisible} />

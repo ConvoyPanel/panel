@@ -1,10 +1,10 @@
 import { httpErrorToHuman } from '@/api/http'
-import NavigationBar from '@/components/elements/navigation/NavigationBar'
+import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
@@ -109,9 +109,20 @@ const ServerRouter = () => {
         }
     }
 
+    const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
+
+    useEffect(() => {
+        setRoutes(visibleRoutes)
+
+        return () => setBreadcrumb(null)
+    }, [])
+
+    useEffect(() => {
+        setBreadcrumb(server?.name)
+    }, [server])
+
     return (
         <>
-            <NavigationBar routes={visibleRoutes} breadcrumb={server?.name} />
             {!server ? (
                 error ? (
                     <ErrorMessage message={error} />

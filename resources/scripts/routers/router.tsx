@@ -8,6 +8,9 @@ import { NotFound } from '@/components/elements/ScreenBlock'
 import { NodeContext } from '@/state/admin/node'
 import { AdminServerContext } from '@/state/admin/server'
 import { AdminUserContext } from '@/state/admin/user'
+import GuestRoutes from '@/routers/middleware/GuestRoutes'
+import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import NavigationBarProvider from '@/components/NavigationBarProvider'
 
 export interface Route {
     path: string
@@ -25,10 +28,27 @@ export const lazyLoad = (LazyElement: LazyExoticComponent<() => JSX.Element>) =>
 
 const router = createBrowserRouter([
     {
+        path: '/auth',
+        element: (
+            <GuestRoutes>
+                <Outlet />
+            </GuestRoutes>
+        ),
+        children: [
+            {
+                path: 'login',
+                element: lazyLoad(lazy(() => import('@/components/auth/LoginContainer'))),
+            },
+        ],
+    },
+    {
         path: '/',
         element: (
             <AuthenticatedRoutes>
-                <Outlet />
+                <NavigationBarProvider>
+                    <NavigationBar />
+                    <Outlet />
+                </NavigationBarProvider>
             </AuthenticatedRoutes>
         ),
         children: [
@@ -61,7 +81,7 @@ const router = createBrowserRouter([
                 path: '/admin',
                 element: (
                     <AuthenticatedRoutes requireRootAdmin>
-                        {lazyLoad(lazy(() => import('@/routers/admin/AdminDashboardRouter')))}
+                        {lazyLoad(lazy(() => import('@/routers/AdminDashboardRouter')))}
                     </AuthenticatedRoutes>
                 ),
                 children: [
@@ -84,7 +104,7 @@ const router = createBrowserRouter([
                                 path: ':id',
                                 element: (
                                     <NodeContext.Provider>
-                                        {lazyLoad(lazy(() => import('@/routers/admin/NodeRouter')))}
+                                        {lazyLoad(lazy(() => import('@/routers/AdminNodeRouter')))}
                                     </NodeContext.Provider>
                                 ),
                                 children: [
@@ -151,7 +171,7 @@ const router = createBrowserRouter([
                                 path: ':id',
                                 element: (
                                     <AdminServerContext.Provider>
-                                        {lazyLoad(lazy(() => import('@/routers/admin/AdminServerRouter')))}
+                                        {lazyLoad(lazy(() => import('@/routers/AdminServerRouter')))}
                                     </AdminServerContext.Provider>
                                 ),
                                 children: [
@@ -192,7 +212,7 @@ const router = createBrowserRouter([
                                 path: ':id',
                                 element: (
                                     <AdminUserContext.Provider>
-                                        {lazyLoad(lazy(() => import('./admin/AdminUserRouter')))}
+                                        {lazyLoad(lazy(() => import('./AdminUserRouter')))}
                                     </AdminUserContext.Provider>
                                 ),
                                 children: [
