@@ -1,6 +1,6 @@
 import { store } from '@/state'
 import { StoreProvider } from 'easy-peasy'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } from 'react-router-dom'
 import ThemeProvider from '@/components/ThemeProvider'
 import { lazy, Suspense } from 'react'
 import Spinner from '@/components/elements/Spinner'
@@ -9,9 +9,8 @@ import GuestRoutes from '@/routers/middleware/GuestRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import { ServerContext } from '@/state/server'
 import { NavigationProgress } from '@mantine/nprogress'
-import { NodeContext } from '@/state/admin/node'
-import { AdminServerContext } from '@/state/admin/server'
-import { AdminUserContext } from '@/state/admin/user'
+import routes, { lazyLoad, Route as RouteDefinition } from '@/routers/routes'
+import ServerRouter from '@/routers/ServerRouter'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -26,14 +25,35 @@ interface ExtendedWindow extends Window {
     }
 }
 
-const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'))
-const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'))
-const ServerRouter = lazy(() => import('@/routers/ServerRouter'))
+const renderRoutes = (routes: RouteDefinition[]) => {
+    return routes.map((route, i) => {
+        if (!route.children) {
+            return <Route key={i} path={route.path} element={<route.component />} />
+        } else {
+            return (
+                <Route key={i} element={<route.component />}>
+                    {renderRoutes(route.children)}
+                </Route>
+            )
+        }
+    })
+}
 
-const AdminDashboardRouter = lazy(() => import('@/routers/admin/DashboardRouter'))
-const AdminNodeRouter = lazy(() => import('@/routers/admin/NodeRouter'))
-const AdminServerRouter = lazy(() => import('@/routers/admin/ServerRouter'))
-const AdminUserRouter = lazy(() => import('@/routers/admin/UserRouter'))
+const router = createBrowserRouter([
+    {
+        element: (
+            <ServerContext.Provider>
+                <ServerRouter />
+            </ServerContext.Provider>
+        ),
+        children: [
+            {
+                path: '/servers/:id/*',
+                element: lazyLoad(lazy(() => import('@/components/servers/overview/ServerOverviewContainer'))),
+            },
+        ],
+    },
+])
 
 const App = () => {
     const { ConvoyUser, SiteConfiguration } = window as ExtendedWindow
@@ -63,9 +83,10 @@ const App = () => {
         <StoreProvider store={store}>
             <ThemeProvider>
                 <NavigationProgress />
-                <BrowserRouter>
-                    <Routes>
-                        <Route
+                <RouterProvider router={router} />
+                {/*<BrowserRouter>
+                    <Routes>{renderRoutes(routes)}</Routes>
+                    <Route
                             path='/auth/*'
                             element={
                                 <GuestRoutes>
@@ -149,9 +170,8 @@ const App = () => {
                             }
                         />
 
-                        <Route path='*' element={<NotFound full />} />
-                    </Routes>
-                </BrowserRouter>
+                    <Route path='*' element={<NotFound full />} />
+                </BrowserRouter>*/}
             </ThemeProvider>
         </StoreProvider>
     )

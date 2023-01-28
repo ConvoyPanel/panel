@@ -4,8 +4,8 @@ import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/Scree
 import Spinner from '@/components/elements/Spinner'
 import routes from '@/routers/routes'
 import { ServerContext } from '@/state/server'
-import { useEffect, useMemo, useState } from 'react'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
 
@@ -16,6 +16,8 @@ const ServerRouter = () => {
     const server = ServerContext.useStoreState(state => state.server.data)
     const getServer = ServerContext.useStoreActions(actions => actions.server.getServer)
     const clearServerState = ServerContext.useStoreActions(actions => actions.clearServerState)
+    const matches = useMatches()
+    console.log({ matches })
 
     const visibleRoutes = useMemo(
         () => [
@@ -122,25 +124,7 @@ const ServerRouter = () => {
                 <>
                     {getScreenBlock(server.status)}
 
-                    {typeof server.status !== 'string' ? (
-                        <Routes>
-                            {routes.server.map(route => (
-                                <Route
-                                    key={route.path}
-                                    path={route.path}
-                                    element={
-                                        <Spinner.Suspense screen={false}>
-                                            <route.component />
-                                        </Spinner.Suspense>
-                                    }
-                                />
-                            ))}
-
-                            <Route path={'*'} element={<NotFound full />} />
-                        </Routes>
-                    ) : (
-                        ''
-                    )}
+                    {typeof server.status !== 'string' ? <Outlet /> : null}
                 </>
             )}
         </>

@@ -1,31 +1,68 @@
-import { lazy } from 'react'
+import { ComponentType, FC, FunctionComponent, lazy, LazyExoticComponent, ReactNode } from 'react'
+import ServerRouter from './ServerRouter'
+import DashboardRouter from '@/routers/DashboardRouter'
+import { ServerContext } from '@/state/server'
+import Spinner from '@/components/elements/Spinner'
+import ServerOverviewContainer from '@/components/servers/overview/ServerOverviewContainer'
 
-interface RouteDefinition {
+export interface Route {
     path: string
-    component: React.ComponentType
+    component: FunctionComponent<{ children?: ReactNode }>
+    children?: Route[]
 }
 
-interface Routes {
-    // All of the routes available under "/servers/:id"
-    server: RouteDefinition[]
-    admin: {
-        dashboard: RouteDefinition[]
-        node: RouteDefinition[]
-        server: RouteDefinition[]
-        user: RouteDefinition[]
-    }
+export const lazyLoad = (LazyElement: LazyExoticComponent<() => JSX.Element>) => {
+    return (
+        <Spinner.Suspense>
+            <LazyElement />
+        </Spinner.Suspense>
+    )
 }
 
-/*
-|--------------------------------------------------------------------------
-| Server Routes
-|--------------------------------------------------------------------------
-|
-| Route: /servers/<id>
-|
-*/
+const routes: Route[] = [
+    {
+        path: '/',
+        component: DashboardRouter,
+    },
+    {
+        path: '/servers/:id/*',
+        component: ({ children }) => (
+            <ServerContext.Provider>
+                <Spinner.Suspense>
+                    <ServerRouter />
+                </Spinner.Suspense>
+            </ServerContext.Provider>
+        ),
+        children: [
+            {
+                path: '/servers/:id/*',
+                component: () => (
+                    <ServerContext.Provider>
+                        <Spinner.Suspense>
+                            <ServerRouter>
+                                <ServerOverviewContainer />
+                            </ServerRouter>
+                        </Spinner.Suspense>
+                    </ServerContext.Provider>
+                ) /*lazy(() => import('@/components/servers/overview/ServerOverviewContainer')),*/,
+            },
+            {
+                path: '/backups',
+                component: lazy(() => import('@/components/servers/backups/BackupsContainer')),
+            },
+            {
+                path: '/settings',
+                component: lazy(() => import('@/components/servers/settings/ServerSettingsContainer')),
+            },
+            {
+                path: '/terminal',
+                component: lazy(() => import('@/components/servers/terminal/ServerTerminalContainer')),
+            },
+        ],
+    },
+]
 
-const routes: Routes = {
+const oldroutes = {
     server: [
         {
             path: '/',
