@@ -2,7 +2,7 @@ import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/routes'
+import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
 import { useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
@@ -11,7 +11,7 @@ import { AdminServerContext } from '@/state/admin/server'
 import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 
-const ServerRouter = () => {
+const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
     const id = match!.params.id
     const [error, setError] = useState<string>()
@@ -80,4 +80,4 @@ const ServerRouter = () => {
     )
 }
 
-export default ServerRouter
+export default AdminServerRouter

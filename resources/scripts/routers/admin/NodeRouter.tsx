@@ -2,11 +2,10 @@ import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import { ErrorMessage, NotFound } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import { AdminBanner } from '@/routers/admin/DashboardRouter'
-import routes from '@/routers/routes'
+import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
 import { NodeContext } from '@/state/admin/node'
 import { useEffect, useMemo, useState } from 'react'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
 
 const NodeRouter = () => {
     const match = useMatch('/admin/nodes/:id/*')
@@ -63,29 +62,7 @@ const NodeRouter = () => {
         <>
             <AdminBanner />
             <NavigationBar routes={visibleRoutes} breadcrumb={node?.name} />
-            {!node ? (
-                error ? (
-                    <ErrorMessage message={error} />
-                ) : (
-                    <Spinner />
-                )
-            ) : (
-                <Routes>
-                    {routes.admin.node.map(route => (
-                        <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                                <Spinner.Suspense screen={false}>
-                                    <route.component />
-                                </Spinner.Suspense>
-                            }
-                        />
-                    ))}
-
-                    <Route path={'*'} element={<NotFound full />} />
-                </Routes>
-            )}
+            {!node ? error ? <ErrorMessage message={error} /> : <Spinner /> : <Outlet />}
         </>
     )
 }

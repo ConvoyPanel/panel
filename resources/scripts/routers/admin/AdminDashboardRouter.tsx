@@ -4,7 +4,7 @@ import Spinner from '@/components/elements/Spinner'
 import TransitionRouter from '@/routers/TransitionRouter'
 import { lazy, Suspense } from 'react'
 import { Link, Outlet, Route, Routes } from 'react-router-dom'
-import routes from '@/routers/routes'
+import routes from '@/routers/router'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import { NodeContext } from '@/state/admin/node'
 
@@ -45,7 +45,7 @@ export const AdminBanner = () => (
     </div>
 )
 
-const DashboardRouter = () => {
+const AdminDashboardRouter = () => {
     return (
         <>
             <AdminBanner />
@@ -56,4 +56,4 @@ const DashboardRouter = () => {
     )
 }
 
-export default DashboardRouter
+export default AdminDashboardRouter

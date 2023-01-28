@@ -2,17 +2,17 @@ import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/routes'
+import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
 import { useEffect, useMemo, useState } from 'react'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
 import { AdminBanner } from '@/routers/admin/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 import { AdminUserContext } from '@/state/admin/user'
 
-const UserRouter = () => {
+const AdminUserRouter = () => {
     const match = useMatch('/admin/users/:id/*')
     const id = match!.params.id
     const [error, setError] = useState<string>()
@@ -58,24 +58,10 @@ const UserRouter = () => {
                     <Spinner />
                 )
             ) : (
-                <Routes>
-                    {routes.admin.user.map(route => (
-                        <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                                <Spinner.Suspense screen={false}>
-                                    <route.component />
-                                </Spinner.Suspense>
-                            }
-                        />
-                    ))}
-
-                    <Route path={'*'} element={<NotFound full />} />
-                </Routes>
+                <Outlet />
             )}
         </>
     )
 }
 
-export default UserRouter
+export default AdminUserRouter

@@ -2,7 +2,7 @@ import { httpErrorToHuman } from '@/api/http'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/routes'
+import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
@@ -10,14 +10,12 @@ import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@
 import { EloquentStatus } from '@/api/server/types'
 
 const ServerRouter = () => {
-    const match = useMatch('/servers/:id/*')
-    const id = match!.params.id
+    const matches = useMatches()
+    const id = matches[0].params.id
     const [error, setError] = useState<string>()
     const server = ServerContext.useStoreState(state => state.server.data)
     const getServer = ServerContext.useStoreActions(actions => actions.server.getServer)
     const clearServerState = ServerContext.useStoreActions(actions => actions.clearServerState)
-    const matches = useMatches()
-    console.log({ matches })
 
     const visibleRoutes = useMemo(
         () => [
@@ -34,13 +32,13 @@ const ServerRouter = () => {
                 path: `/servers/${id}/settings`,
             },
         ],
-        [match?.params.id]
+        [id]
     )
 
     useEffect(() => {
         setError(undefined)
 
-        getServer(match!.params.id as string).catch((error: any) => {
+        getServer(id as string).catch((error: any) => {
             console.error(error)
             setError(httpErrorToHuman(error))
         })
@@ -48,7 +46,7 @@ const ServerRouter = () => {
         return () => {
             clearServerState()
         }
-    }, [match?.params.id])
+    }, [id])
 
     const getScreenBlock = (status: EloquentStatus) => {
         switch (status) {
