@@ -50,12 +50,14 @@ class StoreServerRequest extends FormRequest
         $validator->after(function ($validator) {
             $addressIds = $this->input('limits.address_ids');
 
-            $addresses = IPAddress::whereIn('id', $addressIds)->get();
+            if (!is_null($addressIds)) {
+                $addresses = IPAddress::whereIn('id', $addressIds)->get();
 
-            foreach ($addresses as $address) {
-                if ($address->server_id !== null) {
-                    $validator->errors()->add('limits.address_ids', 'One or more of the selected addresses are already in use');
-                    break;
+                foreach ($addresses as $address) {
+                    if ($address->server_id !== null) {
+                        $validator->errors()->add('limits.address_ids', 'One or more of the selected addresses are already in use');
+                        break;
+                    }
                 }
             }
 

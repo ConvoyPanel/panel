@@ -53,7 +53,7 @@ const HardwareContainer = () => {
     })
 
     return (
-        <FormSection title='Hardware'>
+        <>
             <FormCard className='w-full'>
                 <form onSubmit={form.handleSubmit}>
                     <FormCard.Body>
@@ -122,7 +122,7 @@ const HardwareContainer = () => {
             </FormCard>
             <MediaContainer />
             <BootOrderContainer />
-        </FormSection>
+        </>
     )
 }
 

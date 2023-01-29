@@ -22,6 +22,7 @@ const ServerRouter = () => {
             {
                 name: 'Overview',
                 path: `/servers/${id}`,
+                end: true,
             },
             {
                 name: 'Backups',

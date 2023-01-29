@@ -70,7 +70,7 @@ const SecurityContainer = () => {
     })
 
     return (
-        <FormSection title='Security'>
+        <>
             <FormCard className='w-full'>
                 <form onSubmit={form.handleSubmit}>
                     <FormCard.Body>
@@ -117,7 +117,7 @@ const SecurityContainer = () => {
                     </FormCard.Footer>
                 </form>
             </FormCard>
-        </FormSection>
+        </>
     )
 }
 

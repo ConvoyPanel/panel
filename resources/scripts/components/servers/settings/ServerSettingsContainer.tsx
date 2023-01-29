@@ -1,21 +1,31 @@
-import FormSection from '@/components/elements/FormSection'
 import ServerContentBlock from '@/components/servers/ServerContentBlock'
-import GeneralContainer from '@/components/servers/settings/GeneralContainer'
-import HardwareContainer from '@/components/servers/settings/HardwareContainer'
-import NetworkingContainer from '@/components/servers/settings/NetworkingContainer'
-import SecurityContainer from '@/components/servers/settings/SecurityContainer'
+import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
 
 const ServerSettingsContainer = () => {
     return (
-        <ServerContentBlock title='Settings' showFlashKey='settings'>
-            <GeneralContainer />
-            <FormSection.Divider />
-            <HardwareContainer />
-            <FormSection.Divider />
-            <SecurityContainer />
-            <FormSection.Divider />
-            <NetworkingContainer />
-        </ServerContentBlock>
+        <SettingsLayout
+            indexPattern='/servers/:id/settings'
+            defaultUrl='/servers/:id/settings/general'
+            contentBlock={(props) => <ServerContentBlock title='Server Settings' showFlashKey='server:settings' {...props}/>}
+            routes={[
+                {
+                    path: '/servers/:id/settings/general',
+                    name: 'General'
+                },
+                {
+                    path: '/servers/:id/settings/hardware',
+                    name: 'Hardware'
+                },
+                {
+                    path: '/servers/:id/settings/network',
+                    name: 'Network'
+                },
+                {
+                    path: '/servers/:id/settings/security',
+                    name: 'Security'
+                },
+            ]}
+        />
     )
 }
 

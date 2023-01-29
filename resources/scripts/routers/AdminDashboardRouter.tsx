@@ -7,6 +7,7 @@ const navRoutes = [
     {
         name: 'Overview',
         path: '/admin',
+        end: true,
     },
     {
         name: 'Locations',

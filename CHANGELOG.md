@@ -4,15 +4,25 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.5.0-beta
+
+### Changed
+
+-   Settings layout for client side server settings
+
+### Fixed
+
+-   possibility that `address_ids` will cause an exception when it's null when creating a new server
+
 ## v3.4.0-beta
 
 ### Changed
 
-- Refactored routes
+-   Refactored routes
 
 ### Added
 
-- Navigation Bar Context. Now switching pages are even more seamless
+-   Navigation Bar Context. Now switching pages are even more seamless
 
 ## v3.3.0-beta
 
@@ -58,7 +68,7 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 ### Removed
 
 -   Option to sync or not sync network settings when deleting an IP address
-    - The default behavior is always to sync
+    -   The default behavior is always to sync
 
 ## v3.0.0-beta (Tuxedo)
 

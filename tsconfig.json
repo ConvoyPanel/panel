@@ -11,6 +11,7 @@
         "forceConsistentCasingInFileNames": true,
         "module": "ESNext",
         "moduleResolution": "Node",
+        "jsxImportSource": "@emotion/react",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,

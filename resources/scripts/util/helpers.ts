@@ -1,3 +1,5 @@
+import { Params } from 'react-router-dom'
+
 export const randomInt = (low: number, high: number) =>
   Math.floor(Math.random() * (high - low) + low)
 
@@ -102,4 +104,12 @@ export const hexToRgba = (hex: string, alpha = 1): string => {
 
 export const classNames = (...classes: (string | undefined | null)[]) => {
   return classes.filter(Boolean).join(' ')
+}
+
+export const bindUrlParams = (url: string, params: Params<string>) => {
+  Object.keys(params).forEach((key) => {
+    url = url.replace(`:${key}`, params[key]!)
+  })
+
+  return url
 }

@@ -70,6 +70,30 @@ const router = createBrowserRouter([
                     {
                         path: 'settings',
                         element: lazyLoad(lazy(() => import('@/components/servers/settings/ServerSettingsContainer'))),
+                        children: [
+                            {
+                                path: 'general',
+                                element: lazyLoad(lazy(() => import('@/components/servers/settings/GeneralContainer'))),
+                            },
+
+                            {
+                                path: 'hardware',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/servers/settings/HardwareContainer'))
+                                ),
+                            },
+
+                            {
+                                path: 'network',
+                                element: lazyLoad(lazy(() => import('@/components/servers/settings/NetworkContainer'))),
+                            },
+                            {
+                                path: 'security',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/servers/settings/SecurityContainer'))
+                                ),
+                            },
+                        ],
                     },
                     {
                         path: 'terminal',

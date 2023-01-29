@@ -22,9 +22,13 @@ const MediaContainer = () => {
                 <FlashMessageRender byKey='server:settings:hardware:media' />
 
                 <div className={'flex flex-col space-y-3 mt-3'}>
-                    {data?.map(iso => (
-                        <MediaRow media={iso} key={iso.uuid} />
-                    ))}
+                    {data ? (
+                        data.length === 0 ? (
+                            <p className='text-sm text-center'>There are no media</p>
+                        ) : (
+                            data.map(iso => <MediaRow media={iso} key={iso.uuid} />)
+                        )
+                    ) : null}
                 </div>
             </FormCard.Body>
         </FormCard>

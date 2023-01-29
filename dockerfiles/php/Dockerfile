@@ -1,7 +1,7 @@
 FROM php:8.1-fpm-alpine3.16
 
-ARG WITH_XDEBUG=false
-ARG APP_ENV=local
+ARG WITH_XDEBUG
+ARG APP_ENV
 
 COPY ./php.ini-* /usr/local/etc/php
 

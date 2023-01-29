@@ -14,7 +14,7 @@ import { FieldArray, FormikProvider, useFormik } from 'formik'
 import useSWR from 'swr'
 import * as yup from 'yup'
 
-const NetworkingContainer = () => {
+const NetworkContainer = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
 
     const { clearFlashes, clearAndAddHttpError } = useFlash()
@@ -56,7 +56,7 @@ const NetworkingContainer = () => {
     })
 
     return (
-        <FormSection title='Networking'>
+        <>
             <FormCard className='w-full'>
                 <FormikProvider value={form}>
                     <form onSubmit={form.handleSubmit}>
@@ -113,8 +113,8 @@ const NetworkingContainer = () => {
                     </form>
                 </FormikProvider>
             </FormCard>
-        </FormSection>
+        </>
     )
 }
 
-export default NetworkingContainer
+export default NetworkContainer

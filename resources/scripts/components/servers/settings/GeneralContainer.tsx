@@ -54,7 +54,7 @@ const GeneralContainer = () => {
     })
 
     return (
-        <FormSection title='General Settings'>
+        <>
             <FormCard className='w-full'>
                 <form onSubmit={form.handleSubmit}>
                     <FormCard.Body>
@@ -81,14 +81,21 @@ const GeneralContainer = () => {
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>
-                        <Button disabled={!form.dirty} loading={form.isSubmitting} type='submit' variant='filled' color='success' size='sm'>
+                        <Button
+                            disabled={!form.dirty}
+                            loading={form.isSubmitting}
+                            type='submit'
+                            variant='filled'
+                            color='success'
+                            size='sm'
+                        >
                             Save
                         </Button>
                     </FormCard.Footer>
                 </form>
             </FormCard>
             <ReinstallServerContainer />
-        </FormSection>
+        </>
     )
 }
 

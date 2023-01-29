@@ -13,6 +13,7 @@ import { AdminBanner } from '@/routers/AdminDashboardRouter'
 export interface RouteDefinition {
     name: string
     path: string
+    end?: boolean
 }
 
 interface NavigationBarContextInterface {
@@ -135,7 +136,7 @@ const NavigationBar = () => {
                     </div>
                     <div className='flex z-[2000] overflow-x-auto scrollbar-hide'>
                         {routes.map(route => (
-                            <NavLink key={route.path} to={route.path}>
+                            <NavLink end={route.end} key={route.path} to={route.path}>
                                 {route.name}
                             </NavLink>
                         ))}

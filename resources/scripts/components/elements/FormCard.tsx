@@ -11,7 +11,7 @@ interface FormCard
 
 const FormCard: FormCard = ({ children, className }) => {
   return (
-    <div className={`rounded border border-accent-200 bg-background dark:shadow-none shadow-lg ${className}`}>
+    <div className={`rounded border border-accent-200 bg-background dark:shadow-none ${className}`}>
       {children}
     </div>
   )

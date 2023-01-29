@@ -14,7 +14,6 @@ const NavLink = ({ children, ...props }: Props) => {
   return (
     <RouterLink
       {...props}
-      end={true}
       className={({ isActive }) =>
         isActive
           ? `${defaultClasses} nav-link-active text-foreground`
