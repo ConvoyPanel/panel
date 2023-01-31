@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.5.1-beta
+
+### Added
+
+- Support for hosting Convoy without a hostname
+
 ## v3.5.0-beta
 
 ### Changed
