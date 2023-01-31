@@ -10,6 +10,10 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 - Support for hosting Convoy without a hostname
 
+### Changed
+
+- Default redis configuration in .env because some people were getting confused by the documentation
+
 ## v3.5.0-beta
 
 ### Changed
