@@ -9,24 +9,10 @@ import { bytesToString } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
 import { useFormik } from 'formik'
-import { useEffect, useMemo, useState } from 'react'
-import useSWR from 'swr'
 import * as yup from 'yup'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
-//@ts-ignore
-import DragVerticalIcon from '@/assets/images/icons/drag-vertical.svg'
-
-import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers'
-import MessageBox from '@/components/elements/MessageBox'
-import { PlusIcon, XMarkIcon } from '@heroicons/react/20/solid'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import updateBootOrder from '@/api/server/settings/updateBootOrder'
-import { Disk } from '@/api/server/useServerDetails'
-import { Badge } from '@mantine/core'
 import MediaContainer from '@/components/servers/settings/MediaContainer'
 import BootOrderContainer from '@/components/servers/settings/BootOrderContainer'
+import { useMemo } from 'react'
 
 const HardwareContainer = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
@@ -51,6 +37,11 @@ const HardwareContainer = () => {
             clearFlashes('server:settings:hardware')
         },
     })
+
+    const addresses = useMemo(() => [
+        ...server.limits.addresses.ipv4,
+        ...server.limits.addresses.ipv6,
+    ], [server.limits.addresses])
 
     return (
         <>
@@ -88,12 +79,11 @@ const HardwareContainer = () => {
 
                             <dl>
                                 <Dt>IP Addresses</Dt>
-                                {server.limits.addresses.ipv4.length === 0 &&
-                                server.limits.addresses.ipv6.length === 0 ? (
+                                {addresses.length === 0 ? (
                                     <Dd>There are no addresses associated with this server.</Dd>
                                 ) : (
                                     <Display.Group className='mt-3'>
-                                        {server.limits.addresses.ipv4.map(ip => (
+                                        {addresses.map(ip => (
                                             <Display.Row key={ip.id} className='grid-cols-1 md:grid-cols-3 text-sm'>
                                                 <div>
                                                     <p className='description-small !text-xs'>Address</p>

@@ -173,7 +173,6 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                         <TextInputFormik
                             name={'accountPassword'}
                             label={'Account Password'}
-                            placeholder={'Leave blank for no change'}
                             type={'password'}
                         />
                         <CheckboxFormik
