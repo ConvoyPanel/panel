@@ -1,4 +1,4 @@
-FROM caddy:2.6.1-alpine
+FROM caddy:2.6-alpine
 
 ARG APP_ENV
 ARG APP_URL

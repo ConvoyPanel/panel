@@ -14,6 +14,8 @@ services:
       - 80:80
       - 443:443
       - 6001:6001
+    depends_on:
+      - php
     env_file: .env
   php:
     build:
@@ -26,6 +28,9 @@ services:
        - .:/var/www/
     expose:
       - 9000
+    depends_on:
+      - database
+      - redis
     env_file: .env
   workspace:
     build: ./dockerfiles/workspace
@@ -47,6 +52,9 @@ services:
     working_dir: /var/www/
     volumes:
       - .:/var/www/
+    depends_on:
+      - database
+      - redis
   database:
     image: mysql:8.0.29
     restart: unless-stopped

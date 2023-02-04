@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine3.16
+FROM php:8.2-fpm-alpine
 
 ARG WITH_XDEBUG
 ARG APP_ENV

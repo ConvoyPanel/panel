@@ -24,6 +24,7 @@ const AdminServerRouter = () => {
             {
                 name: 'Overview',
                 path: `/admin/servers/${id}`,
+                end: true,
             },
             {
                 name: 'Settings',

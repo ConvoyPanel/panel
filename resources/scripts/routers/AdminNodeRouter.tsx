@@ -20,6 +20,7 @@ const AdminNodeRouter = () => {
             {
                 name: 'Overview',
                 path: `/admin/nodes/${id}`,
+                end: true,
             },
             {
                 name: 'Servers',
