@@ -166,7 +166,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                             />
                             <TextInputFormik
                                 name={'bandwidthLimit'}
-                                label={'Bandwidth Limit'}
+                                label={'Bandwidth Limit (MiB)'}
                                 placeholder={'Leave blank for no limit'}
                             />
                         </div>
