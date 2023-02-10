@@ -2,14 +2,14 @@ import styled from '@emotion/styled'
 import tw from 'twin.macro'
 
 const Row = styled.div`
-  ${tw`grid p-4 items-stretch justify-center bg-background border border-accent-200 rounded`}
+  ${tw`flex flex-col md:flex-row p-4 gap-4 bg-background border border-accent-200 rounded`}
 
   & > div {
-    ${tw`pt-4 md:pt-0 mt-4 md:mt-0 border-t md:border-t-0 border-accent-200`}
+    ${tw`border-t pt-4 md:pt-0 md:border-t-0 border-accent-200`}
   }
 
   & > div:is(:first-of-type) {
-    ${tw`border-t-0 pt-0 mt-0`}
+    ${tw`border-t-0 pt-0`}
   }
 `
 

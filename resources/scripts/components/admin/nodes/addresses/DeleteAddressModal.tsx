@@ -20,7 +20,7 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
     const [page] = usePagination()
-    const { mutate } = useAddressesSWR(nodeId, {page, includes: ['server'] })
+    const { mutate } = useAddressesSWR(nodeId, { page, includes: ['server'] })
 
     const form = useFormik({
         initialValues: {
@@ -51,12 +51,16 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
     return (
         <Modal open={open} onClose={onClose}>
             <Modal.Header>
-                <Modal.Title>{address ? 'Edit' : 'New'} Address</Modal.Title>
+                <Modal.Title>Delete Address</Modal.Title>
             </Modal.Header>
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin:node:addresses.delete'} />
+
+                        <Modal.Description>
+                            Are you sure you want to delete this address? This action cannot be undone.
+                        </Modal.Description>
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={onClose}>

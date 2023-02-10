@@ -159,7 +159,7 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
 const BackupRow = ({ backup, swr: { mutate } }: Props) => {
     return (
         <Display.Row key={backup.uuid} className='grid-cols-1 md:grid-cols-8 text-sm'>
-            <div className='flex justify-between items-center md:col-span-5'>
+            <div className='flex justify-between items-center grow'>
                 <div className='flex items-center space-x-3'>
                     <p className='overflow-hidden text-ellipsis font-semibold text-foreground'>{backup.name}</p>
                     {!backup.completedAt ? (
