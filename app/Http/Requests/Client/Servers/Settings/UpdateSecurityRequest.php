@@ -30,7 +30,7 @@ class UpdateSecurityRequest extends FormRequest
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
             'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,sshkeys'],
-            'password' => ['string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'exclude_unless:type,cipassword'],
+            'password' => ['string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'regex:/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/', 'exclude_unless:type,cipassword'],
         ];
     }
 

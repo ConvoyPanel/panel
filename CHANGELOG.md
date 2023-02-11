@@ -4,6 +4,24 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.6.2-beta
+
+### Fixed
+
+- IP Addresses being clipped if too long in the UI (x2)
+- Hostname validation regex in frontend
+- Viewport glitch when a server name or hostname is too long
+- Validation rule not catching special characters from other languages for OS password validation
+
+### Note
+
+If you are developing automation software for Convoy, please implement these regular expressions in your code. Otherwise, your code will error when you send invalid requests.
+- server `account_password` validation
+    - `/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/` to detect special characters from other language
+    - `/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u` minimum password requirements
+- server `hostname` validation
+    - `/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/`
+
 ## v3.6.1-beta
 
 ### Fixed

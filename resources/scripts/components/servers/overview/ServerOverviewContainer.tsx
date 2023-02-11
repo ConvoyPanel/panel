@@ -13,8 +13,8 @@ const ServerOverviewContainer = () => {
       <ServerPowerBlock />
       <div className='grid grid-cols-10 gap-6'>
         <ServerDetailsBlock />
-        <ServerTerminalBlock />
         <ServerNetworkBlock />
+        <ServerTerminalBlock />
         {rootAdmin && <ServerAdminBlock />}
       </div>
     </ServerContentBlock>

@@ -39,7 +39,7 @@ class AuthenticateServerAccess
         try {
             $server->validateCurrentState();
         } catch (ServerStateConflictException $exception) {
-            if ($request->routeIs('api:client:servers.show')) {
+            if ($request->routeIs('client.servers.show')) {
                 return $next($request);
             }
 

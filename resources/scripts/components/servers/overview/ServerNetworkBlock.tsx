@@ -13,7 +13,7 @@ const ServerNetworkBlock = () => {
     )
 
     return (
-        <Card className='flex flex-col col-span-10 md:col-span-5 relative'>
+        <Card className='flex flex-col col-span-10 relative'>
             <h5 className='h5'>Network</h5>
             <div className='flex flex-col space-y-3 mt-3'>
                 <dl>

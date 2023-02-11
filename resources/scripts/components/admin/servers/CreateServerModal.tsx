@@ -55,7 +55,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                 .string()
                 .max(191, 'Do not exceed 191 characters')
                 .matches(
-                    /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+                    /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
                     'Enter a valid hostname'
                 )
                 .required(),
@@ -72,6 +72,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
                     'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
                 )
+                .matches(/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/, 'Must not contain special characters from other languages')
                 .optional(),
             shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {
@@ -170,11 +171,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                                 placeholder={'Leave blank for no limit'}
                             />
                         </div>
-                        <TextInputFormik
-                            name={'accountPassword'}
-                            label={'Account Password'}
-                            type={'password'}
-                        />
+                        <TextInputFormik name={'accountPassword'} label={'Account Password'} type={'password'} />
                         <CheckboxFormik
                             name={'shouldCreateServer'}
                             label={'Create Server'}

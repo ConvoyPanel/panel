@@ -94,7 +94,7 @@ const NavigationBar = () => {
             <LoadingOverlay visible={isLoggingOut} zIndex={4000} />
             <ContentContainer ref={topBar} className='pt-3 pb-1.5 relative'>
                 <div className='flex justify-between'>
-                    <div className='flex space-x-5 items-center'>
+                    <div className='flex shrink overflow-hidden space-x-5 items-center'>
                         <Link to={isAdminArea ? '/admin' : '/'} className='flex items-center space-x-3'>
                             <img src={Logo} className='w-7 h-7 dark:invert' alt='Convoy logo' />
                             <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
@@ -104,7 +104,7 @@ const NavigationBar = () => {
                                 <div className='py-1.5 h-full'>
                                     <div className='rotate-[25deg] w-[2px] h-full bg-[#eaeaea] dark:bg-[#333] rounded-full' />
                                 </div>
-                                <p className='font-medium text-sm text-foreground text-ellipsis overflow-hidden whitespace-nowrap'>
+                                <p className='shrink font-medium text-sm text-foreground truncate text-ellipsis overflow-hidden whitespace-nowrap'>
                                     {breadcrumb}
                                 </p>
                             </>

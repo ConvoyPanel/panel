@@ -37,7 +37,7 @@ class StoreServerRequest extends FormRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['sometimes', 'nullable', 'string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u'],
+            'account_password' => ['sometimes', 'nullable', 'string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'regex:/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/'],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',

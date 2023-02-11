@@ -28,8 +28,10 @@ const GeneralContainer = () => {
             name: yup.string().required('A name is required').max(40),
             hostname: yup
                 .string()
+                .required()
+                .max(191)
                 .matches(
-                    /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+                    /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
                     'Enter a valid hostname'
                 ),
         }),

@@ -26,15 +26,15 @@ const ServerCard = ({ server }: Props) => {
     return (
         <Link
             to={`/servers/${server.id}`}
-            className='bg-background p-6 shadow-light hover:shadow-lg border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'
+            className='overflow-hidden bg-background p-6 shadow-light hover:shadow-lg border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none transition-shadow rounded-lg'
         >
             <div className='flex items-center space-x-3'>
                 <Avatar color='dark' size='md' radius='xl'>
                     {getInitials(server.name, ' ', 2)}
                 </Avatar>
-                <div>
+                <div className='overflow-hidden'>
                     <div className='flex items-center space-x-3'>
-                        <p className='font-medium text-foreground text-ellipsis overflow-hidden whitespace-nowrap'>
+                        <p className='font-medium text-foreground truncate'>
                             {server.name}
                         </p>{' '}
                         {server.status === 'suspended' && (
