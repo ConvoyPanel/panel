@@ -1,8 +1,8 @@
 import { useField } from 'formik'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import { debounce } from 'debounce'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
+import { useDebouncedValue } from '@mantine/hooks'
 
 interface Props {
     disabled?: boolean
@@ -11,7 +11,9 @@ interface Props {
 const NodesSelectFormik = ({ disabled }: Props) => {
     const [{ value }] = useField('nodeId')
     const [query, setQuery] = useState(value as string)
-    const { data, mutate, isValidating, isLoading } = useNodesSWR({ query })
+
+    const [debouncedQuery] = useDebouncedValue(query, 200)
+    const { data, isValidating, isLoading } = useNodesSWR({ query: debouncedQuery })
     const nodes = useMemo(
         () =>
             data?.items.map(node => ({
@@ -23,20 +25,8 @@ const NodesSelectFormik = ({ disabled }: Props) => {
     )
 
     useEffect(() => {
-        handleOnSearch(value as string)
+        setQuery(value as string)
     }, [value])
-
-    const search = useCallback(
-        debounce(() => {
-            mutate()
-        }, 500),
-        []
-    )
-
-    const handleOnSearch = (query: string) => {
-        setQuery(query)
-        search()
-    }
 
     return (
         <SelectFormik
@@ -44,7 +34,7 @@ const NodesSelectFormik = ({ disabled }: Props) => {
             data={nodes}
             searchable
             searchValue={query}
-            onSearchChange={handleOnSearch}
+            onSearchChange={query => setQuery(query)}
             loading={isValidating || isLoading}
             nothingFound={'No nodes found'}
             name={'nodeId'}

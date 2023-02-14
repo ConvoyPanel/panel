@@ -2,11 +2,14 @@ import { User } from '@/api/admin/users/getUsers'
 import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import CreateUserButton from '@/components/admin/users/CreateUserButton'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
+import TextInput from '@/components/elements/inputs/TextInput'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
 import usePagination from '@/util/usePagination'
-import { CheckIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { useDebouncedValue } from '@mantine/hooks'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const columns: ColumnArray<User> = [
@@ -46,13 +49,24 @@ const columns: ColumnArray<User> = [
 ]
 
 const UsersContainer = () => {
+    const [query, setQuery] = useState('')
+    const [debouncedQuery] = useDebouncedValue(query, 200)
     const [page, setPage] = usePagination()
-    const { data, mutate } = useUsersSWR({ page })
+    const { data } = useUsersSWR({ page, query: debouncedQuery })
 
     return (
         <div className='bg-background min-h-screen'>
             <PageContentBlock title='Users' showFlashKey='admin:users'>
-                <CreateUserButton />
+                <div className='flex space-x-2 items-center mb-3'>
+                    <TextInput
+                        icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
+                        className='grow'
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                        placeholder='Search...'
+                    />
+                    <CreateUserButton />
+                </div>
                 {!data ? (
                     <Spinner />
                 ) : (

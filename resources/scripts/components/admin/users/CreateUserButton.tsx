@@ -13,6 +13,7 @@ import createUser from '@/api/admin/users/createUser'
 import { ServerResponse } from '@/api/admin/servers/getServers'
 import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import { UserResponse } from '@/api/admin/users/getUsers'
+import { PlusIcon } from '@heroicons/react/20/solid'
 
 const CreateUserButton = () => {
     const [open, setOpen] = useState(false)
@@ -67,8 +68,16 @@ const CreateUserButton = () => {
     }
 
     return (
-        <div className='flex justify-end items-center mb-3'>
-            <Button onClick={() => setOpen(true)} variant='filled'>
+        <>
+            <Button
+                className='grid sm:hidden place-items-center'
+                onClick={() => setOpen(true)}
+                shape='square'
+                variant='filled'
+            >
+                <PlusIcon className='w-5 h-5 block sm:hidden' />
+            </Button>
+            <Button className='hidden sm:block' onClick={() => setOpen(true)} variant='filled'>
                 New User
             </Button>
             <Modal open={open} onClose={handleClose}>
@@ -101,7 +110,7 @@ const CreateUserButton = () => {
                     </form>
                 </FormikProvider>
             </Modal>
-        </div>
+        </>
     )
 }
 

@@ -4,11 +4,13 @@ import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import { debounce } from 'debounce'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
+import { useDebouncedValue } from '@mantine/hooks'
 
 const UsersSelectFormik = () => {
     const [{ value }] = useField('userId')
     const [query, setQuery] = useState(value as string)
-    const { data, mutate, isValidating, isLoading } = useUsersSWR({ query })
+    const [debouncedQuery] = useDebouncedValue(query, 200)
+    const { data, isValidating, isLoading } = useUsersSWR({ query: debouncedQuery })
     const users = useMemo(
         () =>
             data?.items.map(user => ({
@@ -20,20 +22,8 @@ const UsersSelectFormik = () => {
     )
 
     useEffect(() => {
-        handleOnSearch(value as string)
+        setQuery(value as string)
     }, [value])
-
-    const search = useCallback(
-        debounce(() => {
-            mutate()
-        }, 500),
-        []
-    )
-
-    const handleOnSearch = (query: string) => {
-        setQuery(query)
-        search()
-    }
 
     return (
         <SelectFormik
@@ -41,7 +31,7 @@ const UsersSelectFormik = () => {
             data={users}
             searchable
             searchValue={query}
-            onSearchChange={handleOnSearch}
+            onSearchChange={(val) => setQuery(val)}
             loading={isValidating || isLoading}
             nothingFound={'No users found'}
             name={'userId'}

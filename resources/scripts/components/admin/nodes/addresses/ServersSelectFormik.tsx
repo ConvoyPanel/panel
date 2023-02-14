@@ -2,6 +2,7 @@ import useServersSWR from '@/api/admin/servers/useServersSWR'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
 import { NodeContext } from '@/state/admin/node'
+import { useDebouncedValue } from '@mantine/hooks'
 import { debounce } from 'debounce'
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -11,8 +12,9 @@ const ServersSelectFormik = () => {
     const [query, setQuery] = useState(value as string)
 
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const [debouncedQuery] = useDebouncedValue(query, 200)
 
-    const { data, mutate, isLoading, isValidating } = useServersSWR({ nodeId, query })
+    const { data, isLoading, isValidating } = useServersSWR({ nodeId, query: debouncedQuery })
     const servers = useMemo(
         () =>
             data?.items.map(server => ({
@@ -24,21 +26,8 @@ const ServersSelectFormik = () => {
     )
 
     useEffect(() => {
-        setQuery(value as string|null ?? '')
-        search()
+        setQuery((value as string | null) ?? '')
     }, [value])
-
-    const search = useCallback(
-        debounce(() => {
-            mutate()
-        }, 500),
-        []
-    )
-
-    const handleOnSearch = (query: string) => {
-        setQuery(query)
-        search()
-    }
 
     return (
         <SelectFormik
@@ -46,7 +35,7 @@ const ServersSelectFormik = () => {
             data={servers}
             searchable
             searchValue={query}
-            onSearchChange={handleOnSearch}
+            onSearchChange={val => setQuery(val)}
             itemComponent={DescriptiveItemComponent}
             nothingFound='No servers found'
             loading={isLoading || isValidating}

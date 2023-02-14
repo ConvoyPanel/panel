@@ -1,10 +1,10 @@
-import ServerContainer from '@/components/dashboard/ServerContainer'
+import ServersContainer from '@/components/dashboard/ServersContainer'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 
 const DashboardContainer = () => {
   return (
     <PageContentBlock title='Dashboard' showFlashKey='dashboard'>
-      <ServerContainer />
+      <ServersContainer />
     </PageContentBlock>
   )
 }

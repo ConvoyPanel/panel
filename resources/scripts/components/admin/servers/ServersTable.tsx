@@ -9,6 +9,7 @@ import { useState } from 'react'
 import Button from '@/components/elements/Button'
 
 interface Props {
+    query?: string
     className?: string
     nodeId?: number
     userId?: number
@@ -44,9 +45,9 @@ const columns: ColumnArray<Server> = [
     },
 ]
 
-const ServersTable = ({ className, nodeId, userId }: Props) => {
+const ServersTable = ({query, className, nodeId, userId }: Props) => {
     const [page, setPage] = usePagination()
-    const { data, mutate } = useServersSWR({ page, nodeId, userId, includes: ['node', 'user'] })
+    const { data } = useServersSWR({ page, query, nodeId, userId, includes: ['node', 'user'] })
 
     return (
         <div className={className}>
