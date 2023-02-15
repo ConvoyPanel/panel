@@ -1,11 +1,14 @@
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import ServersTable from '@/components/admin/servers/ServersTable'
-import Button from '@/components/elements/Button'
 import { NodeContext } from '@/state/admin/node'
 import { useState } from 'react'
 import CreateServerModal from '@/components/admin/servers/CreateServerModal'
+import SearchBar from '@/components/admin/SearchBar'
+import { useDebouncedValue } from '@mantine/hooks'
 
 const NodeServersContainer = () => {
+    const [query, setQuery] = useState('')
+    const [debouncedQuery] = useDebouncedValue(query, 200)
     const [open, setOpen] = useState(false)
     const node = NodeContext.useStoreState(state => state.node.data!)
 
@@ -13,12 +16,8 @@ const NodeServersContainer = () => {
         <div className='bg-background min-h-screen'>
             <CreateServerModal open={open} onClose={() => setOpen(false)} nodeId={node.id} />
             <NodeContentBlock title='Servers' showFlashKey='admin:node:servers'>
-                <div className='flex justify-end items-center mb-3'>
-                    <Button onClick={() => setOpen(true)} variant='filled'>
-                        New Server
-                    </Button>
-                </div>
-                <ServersTable nodeId={node.id} />
+                <SearchBar value={query} onChange={e => setQuery(e.target.value)} buttonText='New Server' onClick={() => setOpen(true)} />
+                <ServersTable query={debouncedQuery} nodeId={node.id} />
             </NodeContentBlock>
         </div>
     )

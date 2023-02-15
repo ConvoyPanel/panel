@@ -15,8 +15,12 @@ import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import { UserResponse } from '@/api/admin/users/getUsers'
 import { PlusIcon } from '@heroicons/react/20/solid'
 
-const CreateUserButton = () => {
-    const [open, setOpen] = useState(false)
+interface Props {
+    open: boolean
+    onClose: () => void
+}
+
+const CreateUserButton = ({ open, onClose}: Props) => {
     const [page] = usePagination()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:users.create')
     const { mutate } = useUsersSWR({ page })
@@ -64,22 +68,11 @@ const CreateUserButton = () => {
     const handleClose = () => {
         clearFlashes()
         form.resetForm()
-        setOpen(false)
+        onClose()
     }
 
     return (
         <>
-            <Button
-                className='grid sm:hidden place-items-center'
-                onClick={() => setOpen(true)}
-                shape='square'
-                variant='filled'
-            >
-                <PlusIcon className='w-5 h-5 block sm:hidden' />
-            </Button>
-            <Button className='hidden sm:block' onClick={() => setOpen(true)} variant='filled'>
-                New User
-            </Button>
             <Modal open={open} onClose={handleClose}>
                 <Modal.Header>
                     <Modal.Title>Create a User</Modal.Title>

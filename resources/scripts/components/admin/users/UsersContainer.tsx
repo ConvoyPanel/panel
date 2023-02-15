@@ -1,6 +1,7 @@
 import { User } from '@/api/admin/users/getUsers'
 import useUsersSWR from '@/api/admin/users/useUsersSWR'
-import CreateUserButton from '@/components/admin/users/CreateUserButton'
+import SearchBar from '@/components/admin/SearchBar'
+import CreateUserModal from '@/components/admin/users/CreateUserModal'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
 import TextInput from '@/components/elements/inputs/TextInput'
 import PageContentBlock from '@/components/elements/PageContentBlock'
@@ -49,6 +50,7 @@ const columns: ColumnArray<User> = [
 ]
 
 const UsersContainer = () => {
+    const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const [page, setPage] = usePagination()
@@ -56,17 +58,9 @@ const UsersContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
+            <CreateUserModal open={open} onClose={() => setOpen(false)} />
             <PageContentBlock title='Users' showFlashKey='admin:users'>
-                <div className='flex space-x-2 items-center mb-3'>
-                    <TextInput
-                        icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
-                        className='grow'
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        placeholder='Search...'
-                    />
-                    <CreateUserButton />
-                </div>
+                <SearchBar value={query} onChange={e => setQuery(e.target.value)} buttonText='New User' onClick={() => setOpen(true)} />
                 {!data ? (
                     <Spinner />
                 ) : (
