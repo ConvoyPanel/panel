@@ -32,7 +32,7 @@ const PageContentBlock = ({
   return (
     <CSSTransition nodeRef={ref} timeout={150} classNames='fade' appear in>
       <div ref={ref}>
-        <ContentContainer className={`${className}`} padding>
+        <ContentContainer className={`${className} min-h-[75vh]`} padding>
           {showFlashKey && (
             <FlashMessageRender byKey={showFlashKey} className='mb-4' />
           )}

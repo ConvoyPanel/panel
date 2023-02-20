@@ -29,27 +29,38 @@ const DeleteNodeContainer = () => {
     }
 
     return (
-        <FormSection title='Danger Zone' description='ayo. be careful'>
-            <FormCard className='w-full border-error'>
-                <FormCard.Body>
-                    <FormCard.Title>Delete Node</FormCard.Title>
-                    <div className='space-y-3 mt-3'>
-                        <FlashMessageRender byKey='admin:node:settings:delete' />
+        <FormCard className='w-full border-error'>
+            <FormCard.Body>
+                <FormCard.Title>Delete Node</FormCard.Title>
+                <div className='space-y-3 mt-3'>
+                    <FlashMessageRender byKey='admin:node:settings:delete' />
 
-                        <p className='description-small !text-foreground'>The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.</p>
+                    <p className='description-small !text-foreground'>
+                        The node will be permanently deleted from Convoy. This action is irreversible and can not be
+                        undone.
+                    </p>
 
-                        {node.serversCount > 0 && <MessageBox title='Error' type='error'>
+                    {node.serversCount > 0 && (
+                        <MessageBox title='Error' type='error'>
                             You cannot delete a node that has servers assigned to it.
-                        </MessageBox>}
-                    </div>
-                </FormCard.Body>
-                <FormCard.Footer>
-                    <Button onClick={handleDelete} loading={loading} disabled={node.serversCount > 0} type='submit' variant='filled' color='danger' size='sm'>
-                        Delete
-                    </Button>
-                </FormCard.Footer>
-            </FormCard>
-        </FormSection>
+                        </MessageBox>
+                    )}
+                </div>
+            </FormCard.Body>
+            <FormCard.Footer>
+                <Button
+                    onClick={handleDelete}
+                    loading={loading}
+                    disabled={node.serversCount > 0}
+                    type='submit'
+                    variant='filled'
+                    color='danger'
+                    size='sm'
+                >
+                    Delete
+                </Button>
+            </FormCard.Footer>
+        </FormCard>
     )
 }
 

@@ -179,6 +179,17 @@ const router = createBrowserRouter([
                                                 () => import('@/components/admin/nodes/settings/NodeSettingsContainer')
                                             )
                                         ),
+                                        children: [
+                                            {
+                                                path: 'general',
+                                                element: lazyLoad(
+                                                    lazy(
+                                                        () =>
+                                                            import('@/components/admin/nodes/settings/GeneralContainer')
+                                                    )
+                                                ),
+                                            },
+                                        ],
                                     },
                                 ],
                             },
@@ -220,6 +231,30 @@ const router = createBrowserRouter([
                                                     )
                                             )
                                         ),
+                                        children: [
+                                            {
+                                                path: 'general',
+                                                element: lazyLoad(
+                                                    lazy(
+                                                        () =>
+                                                            import(
+                                                                '@/components/admin/servers/settings/GeneralContainer'
+                                                            )
+                                                    )
+                                                ),
+                                            },
+                                            {
+                                                path: 'hardware',
+                                                element: lazyLoad(
+                                                    lazy(
+                                                        () =>
+                                                            import(
+                                                                '@/components/admin/servers/settings/ServerHardwareContainer'
+                                                            )
+                                                    )
+                                                ),
+                                            },
+                                        ],
                                     },
                                 ],
                             },
@@ -247,6 +282,17 @@ const router = createBrowserRouter([
                                                 () => import('@/components/admin/users/settings/UserSettingsContainer')
                                             )
                                         ),
+                                        children: [
+                                            {
+                                                path: 'general',
+                                                element: lazyLoad(
+                                                    lazy(
+                                                        () =>
+                                                            import('@/components/admin/users/settings/GeneralContainer')
+                                                    )
+                                                ),
+                                            },
+                                        ],
                                     },
                                     {
                                         path: 'servers',

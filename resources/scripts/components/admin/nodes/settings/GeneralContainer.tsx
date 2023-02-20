@@ -1,5 +1,6 @@
 import updateNode from '@/api/admin/nodes/updateNode'
 import LocationsSelectFormik from '@/components/admin/nodes/LocationsSelectFormik'
+import DeleteNodeContainer from '@/components/admin/nodes/settings/DeleteNodeContainer'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
@@ -94,7 +95,7 @@ const GeneralContainer = () => {
         },
     })
     return (
-        <FormSection title='General Settings'>
+        <>
             <FormCard className='w-full'>
                 <FormikProvider value={form}>
                     <form onSubmit={form.handleSubmit}>
@@ -146,7 +147,8 @@ const GeneralContainer = () => {
                     </form>
                 </FormikProvider>
             </FormCard>
-        </FormSection>
+            <DeleteNodeContainer />
+        </>
     )
 }
 

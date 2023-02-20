@@ -14,13 +14,16 @@ import updateServer from '@/api/admin/servers/updateServer'
 import { EloquentStatus } from '@/api/server/types'
 import ServerInformationContainer from '@/components/admin/servers/settings/ServerInformationContainer'
 import SuspensionContainer from '@/components/admin/servers/settings/SuspensionContainer'
+import DeleteServerContainer from '@/components/admin/servers/settings/DeleteServerContainer'
 
 const GeneralContainer = () => {
     return (
-        <FormSection title='General Settings'>
+        <>
             <ServerInformationContainer />
             <SuspensionContainer />
-        </FormSection>
+
+            <DeleteServerContainer />
+        </>
     )
 }
 

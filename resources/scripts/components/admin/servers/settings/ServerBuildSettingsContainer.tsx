@@ -80,7 +80,6 @@ const ServerBuildSettingsContainer = () => {
     })
 
     return (
-        <FormSection title='Hardware'>
             <FormCard className='w-full'>
                 <FormikProvider value={form}>
                     <form onSubmit={form.handleSubmit}>
@@ -125,7 +124,6 @@ const ServerBuildSettingsContainer = () => {
                     </form>
                 </FormikProvider>
             </FormCard>
-        </FormSection>
     )
 }
 

@@ -1,16 +1,19 @@
-import UserContentBlock from '@/components/admin/users/UserContentBlock'
-import GeneralContainer from '@/components/admin/users/settings/GeneralContainer'
-import FormSection from '@/components/elements/FormSection'
-import DangerZoneContainer from '@/components/admin/users/settings/DangerZoneContainer'
+import ServerContentBlock from '@/components/admin/servers/ServerContentBlock';
+import UserContentBlock from '@/components/admin/users/UserContentBlock';
+import SettingsLayout from '@/components/elements/layouts/SettingsLayout';
 
 const UserSettingsContainer = () => {
-    return (
-        <UserContentBlock title={'Settings'}>
-            <GeneralContainer />
-            <FormSection.Divider />
-            <DangerZoneContainer />
-        </UserContentBlock>
-    )
+    return <SettingsLayout
+    indexPattern='/admin/users/:id/settings'
+    defaultUrl='/admin/users/:id/settings/general'
+    contentBlock={(props) => <UserContentBlock title='Server Settings' showFlashKey='admin:user:settings' {...props}/>}
+    routes={[
+        {
+            path: '/admin/users/:id/settings/general',
+            name: 'General'
+        },
+    ]}
+/>
 }
 
-export default UserSettingsContainer
+export default UserSettingsContainer;

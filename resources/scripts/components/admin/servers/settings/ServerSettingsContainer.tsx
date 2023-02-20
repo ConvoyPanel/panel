@@ -1,19 +1,23 @@
 import ServerContentBlock from '@/components/admin/servers/ServerContentBlock'
-import GeneralContainer from '@/components/admin/servers/settings/GeneralContainer'
-import ServerBuildSettingsContainer from '@/components/admin/servers/settings/ServerBuildSettingsContainer'
-import FormCard from '@/components/elements/FormCard'
-import FormSection from '@/components/elements/FormSection'
-import DangerZoneContainer from '@/components/admin/servers/settings/DangerZoneContainer'
+import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
 
 const ServerSettingsContainer = () => {
     return (
-        <ServerContentBlock title={'Settings'}>
-            <GeneralContainer />
-            <FormSection.Divider />
-            <ServerBuildSettingsContainer />
-            <FormSection.Divider />
-            <DangerZoneContainer />
-        </ServerContentBlock>
+        <SettingsLayout
+            indexPattern='/admin/servers/:id/settings'
+            defaultUrl='/admin/servers/:id/settings/general'
+            contentBlock={(props) => <ServerContentBlock title='Settings' {...props}/>}
+            routes={[
+                {
+                    path: '/admin/servers/:id/settings/general',
+                    name: 'General'
+                },
+                {
+                    path: '/admin/servers/:id/settings/hardware',
+                    name: 'Hardware'
+                },
+            ]}
+        />
     )
 }
 
