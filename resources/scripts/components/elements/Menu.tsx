@@ -1,94 +1,49 @@
-import { Menu as HMenu } from '@headlessui/react'
-import { ComponentProps, forwardRef, ReactElement, ReactNode } from 'react'
-import { Float } from '@headlessui-float/react'
+import styled from '@emotion/styled'
+import { Menu as MantineMenu, MenuProps, MenuDropdownProps, MenuItemProps } from '@mantine/core'
+import { FC, MouseEventHandler } from 'react'
+import tw from 'twin.macro'
 
-interface ButtonProps {
-    children?: ReactNode
-    className?: string
+interface Menu extends FC<MenuProps> {
+    Dropdown: typeof StyledMenuDropdown
+    Target: typeof MantineMenu.Target
+    Divider: typeof StyledDivider
+    Item: typeof StyledMenuItem
 }
 
-interface ItemsProps {
-    children: ReactNode
-    marginTop?: number | string
-}
+const StyledMenuDropdown = styled(MantineMenu.Dropdown)`
+    &.mantine-Menu-dropdown {
+        ${tw`p-2 bg-background border border-accent-200 shadow-lg dark:shadow-none sm:text-sm rounded`}
+    }
+`
 
-interface Menu extends React.FC<MenuProps> {
-    Button: React.FC<ButtonProps>
-    Items: React.FC<ItemsProps>
-    Item: React.FC<ItemProps>
-    Divider: React.FC
-}
+const StyledMenuItem = styled(MantineMenu.Item)<
+    MenuItemProps & {
+        onClick?: MouseEventHandler<HTMLButtonElement>
+        disabled?: boolean
+    }
+>`
+    &.mantine-Menu-item {
+        ${tw`w-full text-left px-2 h-9 bg-transparent disabled:text-accent-300 disabled:cursor-not-allowed`}
 
-interface MenuProps {
-    children: ReactElement[]
-    className?: string
-}
+        ${({ color }) =>
+            color === 'red'
+                ? tw`text-error sm:hover:bg-error-lighter active:bg-error-lighter sm:active:bg-error-lighter`
+                : tw`text-accent-500 sm:hover:bg-accent-200 sm:active:bg-accent-200 active:bg-accent-200`}
+    }
+`
 
-interface ItemProps extends Omit<ComponentProps<'button'>, 'className'> {
-    color?: 'accent' | 'danger'
-}
+const StyledDivider = styled(MantineMenu.Divider)`
+    ${tw`my-[6px] mx-auto w-[93%] bg-accent-200`}
+`
 
-const Menu: Menu = ({ children, className }) => {
-    return (
-        <HMenu as='div' className={className}>
-            <Float
-                placement='bottom-end'
-                flip
-                portal
-                enter='transition ease-out duration-100'
-                enterFrom='opacity-0 -translate-y-[1rem]'
-                enterTo='opacity-100 ranslate-y-0'
-                leave='ease-in duration-75'
-                leaveFrom='opacity-100 translate-y-0'
-                leaveTo='opacity-0 -translate-y-[1rem]'
-                tailwindcssOriginClass
-            >
-                {children}
-            </Float>
-        </HMenu>
-    )
-}
+const Menu: Menu = props => <MantineMenu {...props} />
 
-Menu.Button = forwardRef<HTMLDivElement, ButtonProps>(({ children, className }, ref) => {
-    return (
-        <HMenu.Button className={className} ref={ref} as='div'>
-            {children}
-        </HMenu.Button>
-    )
-})
+Menu.Dropdown = StyledMenuDropdown
 
-Menu.Items = forwardRef<HTMLDivElement, ItemsProps>(({ children, marginTop }, ref) => {
-    return (
-        <HMenu.Items
-            ref={ref}
-            className='right-0 flex flex-col absolute w-56 p-2 overflow-auto rounded bg-background shadow-lg dark:shadow-none border border-accent-200 focus:outline-none sm:text-sm z-[3000]'
-        >
-            {children}
-        </HMenu.Items>
-    )
-})
+Menu.Target = MantineMenu.Target
 
-Menu.Item = ({ children, color, disabled, ...props }) => {
-    return (
-        <HMenu.Item
-            as='button'
-            className={`w-full text-left px-2 h-12 sm:h-9 bg-transparent ${
-                disabled
-                    ? 'text-accent-300 cursor-not-allowed'
-                    : color === 'danger'
-                    ? 'text-error sm:hover:bg-error-lighter active:bg-error-lighter sm:active:bg-error-lighter'
-                    : 'text-accent-500 sm:hover:bg-accent-200 sm:active:bg-accent-200 active:bg-accent-200'
-            } rounded`}
-            disabled={disabled}
-            {...props}
-        >
-            {children}
-        </HMenu.Item>
-    )
-}
+Menu.Divider = StyledDivider
 
-Menu.Divider = () => {
-    return <div className='w-full my-1 h-[1px] bg-accent-200' />
-}
+Menu.Item = StyledMenuItem
 
 export default Menu

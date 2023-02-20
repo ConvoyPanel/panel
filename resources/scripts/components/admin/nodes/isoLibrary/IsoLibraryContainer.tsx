@@ -77,7 +77,7 @@ const IsoLibraryContainer = () => {
                     Edit
                 </Menu.Item>
                 <Menu.Divider />
-                <Menu.Item color='danger' onClick={handleDelete}>
+                <Menu.Item color='red' onClick={handleDelete}>
                     Delete
                 </Menu.Item>
             </Actions>

@@ -80,7 +80,7 @@ const NodesContainer = () => {
 
         return (
             <Actions>
-                <Menu.Item color='danger' disabled={node.serversCount > 0} onClick={handleDelete}>
+                <Menu.Item color='red' disabled={node.serversCount > 0} onClick={handleDelete}>
                     Delete
                 </Menu.Item>
             </Actions>

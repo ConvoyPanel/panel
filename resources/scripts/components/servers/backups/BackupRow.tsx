@@ -139,18 +139,18 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                     <Modal.Action onClick={handleRestore}>Restore</Modal.Action>
                 </Modal.Actions>
             </Modal>
-            <Menu>
-                <Menu.Button>
+            <Menu width={200}>
+                <Menu.Target>
                     <DottedButton className={className} />
-                </Menu.Button>
-                <Menu.Items>
+                </Menu.Target>
+                <Menu.Dropdown>
                     {backup.isSuccessful ? (
                         <Menu.Item onClick={() => setRestoreModalOpen(true)}>Restore</Menu.Item>
                     ) : null}
-                    <Menu.Item color='danger' onClick={() => setDeleteModalOpen(true)}>
+                    <Menu.Item color='red' onClick={() => setDeleteModalOpen(true)}>
                         Delete
                     </Menu.Item>
-                </Menu.Items>
+                </Menu.Dropdown>
             </Menu>
         </>
     )

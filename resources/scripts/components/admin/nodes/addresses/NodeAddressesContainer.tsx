@@ -63,7 +63,7 @@ const NodeAddressesContainer = () => {
                 <Actions>
                     <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item color='danger' onClick={() => setShowDeleteModal(true)}>Delete</Menu.Item>
+                    <Menu.Item color='red' onClick={() => setShowDeleteModal(true)}>Delete</Menu.Item>
                 </Actions>
             </>
         )

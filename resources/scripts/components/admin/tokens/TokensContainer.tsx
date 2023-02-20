@@ -90,7 +90,7 @@ const TokensContainer = () => {
                     </Modal.Actions>
                 </Modal>
                 <Actions>
-                    <Menu.Item color='danger' onClick={() => setOpen(true)}>
+                    <Menu.Item color='red' onClick={() => setOpen(true)}>
                         Delete
                     </Menu.Item>
                 </Actions>

@@ -66,23 +66,23 @@ const TemplateCard = ({ template, group, className }: Props) => {
                         onClose={() => setShowEditModal(false)}
                     />
                     <div className={classNames('grow', isDragging ? 'invisible' : null)} {...attributes} {...listeners}>
-                        <div className='flex space-x-3 items-center'>
-                            <p className='font-medium text-sm text-foreground'>{template.name}</p>
+                        <div className='flex space-x-3 items-center overflow-hidden'>
+                            <p className='font-medium text-sm text-foreground truncate'>{template.name}</p>
                             {template.hidden && <EyeSlashIcon title='hidden' className='h-4 w-4 text-foreground' />}
                         </div>
                         <p className='description-small !text-xs'>vmid: {template.vmid}</p>
                     </div>
-                    <Menu>
-                        <Menu.Button>
+                    <Menu width={200}>
+                        <Menu.Target>
                             <DottedButton />
-                        </Menu.Button>
-                        <Menu.Items>
+                        </Menu.Target>
+                        <Menu.Dropdown>
                             <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
                             <Menu.Divider />
-                            <Menu.Item color='danger' onClick={handleDelete}>
+                            <Menu.Item color='red' onClick={handleDelete}>
                                 Delete
                             </Menu.Item>
-                        </Menu.Items>
+                        </Menu.Dropdown>
                     </Menu>
                 </div>
             )}

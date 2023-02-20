@@ -159,21 +159,21 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                             <p className='font-medium text-foreground'>{group.name}</p>
                             {group.hidden && <EyeSlashIcon title='hidden' className='h-4 w-4 text-foreground' />}
                         </div>
-                        <Menu>
-                            <Menu.Button>
+                        <Menu width={200}>
+                            <Menu.Target>
                                 <img
                                     src={Dots}
                                     className='w-4 h-4 min-w-[1rem] dark:invert cursor-pointer'
                                     alt='3 vertical dots meant for activating a menu'
                                 />
-                            </Menu.Button>
-                            <Menu.Items>
+                            </Menu.Target>
+                            <Menu.Dropdown>
                                 <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
                                 <Menu.Divider />
-                                <Menu.Item color='danger' onClick={handleDelete}>
+                                <Menu.Item color='red' onClick={handleDelete}>
                                     Delete
                                 </Menu.Item>
-                            </Menu.Items>
+                            </Menu.Dropdown>
                         </Menu>
                     </div>
                     <div className='px-4 pb-4 relative'>

@@ -1,13 +1,14 @@
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
 import SelectFormik from '@/components/elements/forms/SelectFormik'
-import { debounce } from 'debounce'
+import { useDebouncedValue } from '@mantine/hooks'
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 const LocationsSelectFormik = () => {
     const [{ value }] = useField('locationId')
     const [query, setQuery] = useState(value as string)
-    const { data, mutate, isValidating, isLoading } = useLocationsSWR({ query })
+    const [debouncedQuery] = useDebouncedValue(query, 200)
+    const { data, mutate, isValidating, isLoading } = useLocationsSWR({ query: debouncedQuery })
     const locations = useMemo(
         () =>
             data?.items.map(location => ({
@@ -18,20 +19,8 @@ const LocationsSelectFormik = () => {
     )
 
     useEffect(() => {
-        handleOnSearch(value as string)
+        setQuery(value as string)
     }, [value])
-
-    const search = useCallback(
-        debounce(() => {
-            mutate()
-        }, 500),
-        []
-    )
-
-    const handleOnSearch = (query: string) => {
-        setQuery(query)
-        search()
-    }
 
     return (
         <SelectFormik
@@ -39,7 +28,7 @@ const LocationsSelectFormik = () => {
             data={locations}
             searchable
             searchValue={query}
-            onSearchChange={handleOnSearch}
+            onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
             nothingFound='No locations found'
             name='locationId'

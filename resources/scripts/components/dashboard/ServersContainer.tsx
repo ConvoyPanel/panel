@@ -5,37 +5,34 @@ import { useStoreState } from '@/state'
 import { usePersistedState } from '@/util/usePersistedState'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Skeleton, Switch } from '@mantine/core'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import useSWR from 'swr'
-import debounce from 'debounce'
 import TextInput from '@/components/elements/inputs/TextInput'
+import { useDebouncedValue } from '@mantine/hooks'
 
 const ServerContainer = () => {
     const { search: location } = useLocation()
     const defaultPage = Number(new URLSearchParams(location).get('page') || '1')
     const [page, setPage] = useState(!isNaN(defaultPage) && defaultPage > 0 ? defaultPage : 1)
     const [query, setQuery] = useState('')
+    const [debouncedQuery] = useDebouncedValue(query, 200)
 
     const uuid = useStoreState(state => state.user.data!.email)
     const rootAdmin = useStoreState(state => state.user.data!.rootAdmin)
     const [showOnlyAdmin, setShowOnlyAdmin] = usePersistedState(`${uuid}:show_all_servers`, false)
-    const { data, mutate } = useSWR(['/api/client/servers', showOnlyAdmin && rootAdmin, page], () =>
+    const { data } = useSWR(['/api/client/servers', showOnlyAdmin && rootAdmin, page, debouncedQuery], () =>
         getServers({
-            query: query.length > 0 ? query : undefined,
+            query: debouncedQuery,
             page,
             type: showOnlyAdmin && rootAdmin ? 'all' : undefined,
             perPage: 51,
         })
     )
 
-    const search = useCallback(
-        debounce(() => {
-            setPage(1)
-            mutate()
-        }, 500),
-        []
-    )
+    useEffect(() => {
+        setPage(1)
+    }, [debouncedQuery])
 
     return (
         <>
@@ -48,10 +45,7 @@ const ServerContainer = () => {
             <TextInput
                 icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
                 value={query}
-                onChange={e => {
-                    setQuery(e.currentTarget.value)
-                    search()
-                }}
+                onChange={e => setQuery(e.currentTarget.value)}
                 placeholder='Search...'
             />
             <div className='pt-6'>
@@ -62,7 +56,9 @@ const ServerContainer = () => {
                         ))}
                     </div>
                 ) : data.pagination.total === 0 ? (
-                    <p className='text-sm text-center'>{ showOnlyAdmin ? 'There are no servers.' : 'You have no servers.' }</p>
+                    <p className='text-sm text-center'>
+                        {showOnlyAdmin ? 'There are no servers.' : 'You have no servers.'}
+                    </p>
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
                         {({ items }) => (

@@ -80,11 +80,11 @@ interface ActionProps {
 }
 
 export const Actions = ({ children }: ActionProps) => (
-    <Menu className='flex justify-end items-center'>
-        <Menu.Button className='grid place-items-center'>
-            <DottedButton className='relative mr-[1px]' />
-        </Menu.Button>
-        <Menu.Items marginTop='8rem'>{children}</Menu.Items>
+    <Menu position='bottom-end' width={200} withinPortal>
+        <Menu.Target>
+            <DottedButton />
+        </Menu.Target>
+        <Menu.Dropdown>{children}</Menu.Dropdown>
     </Menu>
 )
 
@@ -141,11 +141,11 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                     id: 'actions',
                     header: () =>
                         headerActions ? (
-                            <Menu className='flex justify-end items-center'>
-                                <Menu.Button>
+                            <Menu width={200} withinPortal>
+                                <Menu.Target>
                                     <DottedButton className='relative' />
-                                </Menu.Button>
-                                <Menu.Items marginTop='3rem'>{headerActions({ rows: rowSelection })}</Menu.Items>
+                                </Menu.Target>
+                                <Menu.Dropdown>{headerActions({ rows: rowSelection })}</Menu.Dropdown>
                             </Menu>
                         ) : null,
                     cell: ({ row }) => (rowActions ? rowActions({ row: row.original }) : null),

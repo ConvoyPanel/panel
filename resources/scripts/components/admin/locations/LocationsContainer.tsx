@@ -80,7 +80,7 @@ const LocationsContainer = () => {
             <Actions>
                 <Menu.Item onClick={handleEdit}>Edit</Menu.Item>
                 <Menu.Divider />
-                <Menu.Item color='danger' disabled={loc.nodesCount > 0} onClick={handleDelete}>
+                <Menu.Item color='red' disabled={loc.nodesCount > 0} onClick={handleDelete}>
                     Delete
                 </Menu.Item>
             </Actions>
