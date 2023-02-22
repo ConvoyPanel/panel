@@ -11,7 +11,7 @@ class MegabytesAndBytes implements CastsAttributes
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
-     * @param  int  $value
+     * @param  int|null  $value
      * @param  array  $attributes
      * @return ?int
      */
@@ -25,7 +25,7 @@ class MegabytesAndBytes implements CastsAttributes
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
-     * @param  int  $value
+     * @param  int|null  $value
      * @param  array  $attributes
      * @return ?int
      */

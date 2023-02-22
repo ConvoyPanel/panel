@@ -10,7 +10,7 @@ export default defineConfig({
             jsxImportSource: '@emotion/react',
         }),
         laravel(['resources/scripts/main.tsx']),
-        macrosPlugin() , visualizer(),
+        macrosPlugin() /* , visualizer(), */
     ],
     build: {
         target: ['es2020'],

@@ -18,6 +18,7 @@ class LocationController extends ApplicationApiController
     {
         $locations = QueryBuilder::for(Location::query())
             ->withCount(['nodes', 'servers'])
+            // @phpstan-ignore-next-line
             ->allowedFilters(['short_code', AllowedFilter::custom('*', new FiltersLocation)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
@@ -42,6 +43,7 @@ class LocationController extends ApplicationApiController
     {
         $location->loadCount('nodes');
 
+        // @phpstan-ignore-next-line
         if ($location->nodes_count > 0) {
             throw new BadRequestHttpException('The location cannot be deleted with nodes still associated.');
         }

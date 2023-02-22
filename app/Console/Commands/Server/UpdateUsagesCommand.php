@@ -28,7 +28,7 @@ class UpdateUsagesCommand extends Command
         $servers = Server::all();
 
         foreach ($servers as $server) {
-            with(new Task($this->output))->render("Server #{$server->id}", function () use ($repository, $server) {
+            (new Task($this->output))->render("Server #{$server->id}", function () use ($repository, $server) {
                 try {
 
                     $metrics = $repository->setServer($server)->getMetrics('hour');

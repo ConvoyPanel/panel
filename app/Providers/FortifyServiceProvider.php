@@ -2,10 +2,10 @@
 
 namespace Convoy\Providers;
 
-use App\Actions\Fortify\CreateNewUser;
-use App\Actions\Fortify\ResetUserPassword;
-use App\Actions\Fortify\UpdateUserPassword;
-use App\Actions\Fortify\UpdateUserProfileInformation;
+use Convoy\Actions\Fortify\CreateNewUser;
+use Convoy\Actions\Fortify\ResetUserPassword;
+use Convoy\Actions\Fortify\UpdateUserPassword;
+use Convoy\Actions\Fortify\UpdateUserProfileInformation;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

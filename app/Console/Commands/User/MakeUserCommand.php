@@ -39,7 +39,7 @@ class MakeUserCommand extends Command
      * Handle command request to create a new user.
      *
      * @throws \Exception
-     * @throws \Pterodactyl\Exceptions\Model\DataValidationException
+     * @throws \Convoy\Exceptions\Model\DataValidationException
      */
     public function handle()
     {
