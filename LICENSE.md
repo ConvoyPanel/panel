@@ -3,7 +3,7 @@ License text copyright © 2017 MariaDB Corporation Ab, All Rights Reserved. "Bus
 
 Additional Use Grant
 
-The licensee may use this code in production if they have an active subscription from Performave. However, the licensee must remain within the limits defined by the subscription.
+The license may use this code in production if they have an active subscription from Performave. However, the licensee must remain within the limits defined by the subscription.
 
 Change License
 
