@@ -3,6 +3,7 @@
 namespace Convoy\Console;
 
 use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
+use Convoy\Console\Commands\Maintenance\PruneUsersCommand;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
 use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
 use Convoy\Console\Commands\Server\UpdateUsagesCommand;
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command(ResetUsagesCommand::class)->daily();
+        $schedule->command(PruneUsersCommand::class)->daily();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
     }
