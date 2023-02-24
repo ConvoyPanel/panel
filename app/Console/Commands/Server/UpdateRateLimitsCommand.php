@@ -2,46 +2,38 @@
 
 namespace Convoy\Console\Commands\Server;
 
-use Carbon\Carbon;
-use Convoy\Models\Server;
-use Convoy\Services\Servers\NetworkService;
+use Convoy\Jobs\Node\SyncServerRateLimitsJob;
+use Convoy\Models\Node;
 use Illuminate\Console\Command;
+use Illuminate\Console\View\Components\Task;
 
 class UpdateRateLimitsCommand extends Command
 {
     /**
      * @var string
      */
-    protected $description = 'Update the network rate limits of all servers.';
+    protected $description = 'Sync the network rate limits of all servers.';
 
     /**
      * @var string
      */
-    protected $signature = 'c:server:update-rate-limits';
+    protected $signature = 'c:servers:sync-rate-limits';
 
     /**
      * Handle command execution.
      */
-    public function handle(NetworkService $service)
+    public function handle()
     {
-        $servers = Server::all();
+        $this->info('Queuing rate limits sync request.');
 
-        foreach ($servers as $server) {
-            echo "Updating id {$server->id}...    ";
+        $nodes = Node::all();
 
-            try {
-                if ($server->bandwidth_usage >= $server->bandwidth_limit && isset($server->bandwidth_limit)) {
-                    $service->updateRateLimit($server, 1);
+        $nodes->each(function (Node $node) {
+            (new Task($this->output))->render("Node {$node->fqdn}", function () use ($node) {
+                SyncServerRateLimitsJob::dispatch($node->id);
+            });
+        });
 
-                    echo 'LIMITED' . PHP_EOL;
-                } else {
-                    $service->setServer($server)->updateRateLimit($server);
-
-                    echo 'UNLIMITED' . PHP_EOL;
-                }
-            } catch (\Exception $e) {
-                echo 'FAILED' . PHP_EOL;
-            }
-        }
+        return Command::SUCCESS;
     }
 }

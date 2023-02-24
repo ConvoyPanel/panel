@@ -11,9 +11,9 @@ import { useFormik } from 'formik'
 import useSWR from 'swr'
 import * as yup from 'yup'
 import Textarea from '@/components/elements/inputs/Textarea'
-import { SegmentedControl } from '@mantine/core'
 import updateSecurity from '@/api/server/settings/updateSecurity'
 import { useState } from 'react'
+import SegmentedControl from '@/components/elements/SegmentedControl'
 
 type AuthType = 'cipassword' | 'sshkeys'
 

@@ -73,7 +73,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                     'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
                 )
                 .matches(/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/, 'Must not contain special characters from other languages')
-                .optional(),
+                .required(),
             shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {
                 is: true,
@@ -171,7 +171,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                                 placeholder={'Leave blank for no limit'}
                             />
                         </div>
-                        <TextInputFormik name={'accountPassword'} label={'Account Password'} type={'password'} />
+                        <TextInputFormik name={'accountPassword'} label={'System OS Password'} type={'password'} />
                         <CheckboxFormik
                             name={'shouldCreateServer'}
                             label={'Create Server'}

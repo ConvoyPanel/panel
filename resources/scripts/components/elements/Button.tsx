@@ -6,17 +6,19 @@ import tw from 'twin.macro'
 
 export type ButtonSize = 'sm'
 export type ButtonShape = 'square'
+export type ButtonVariant = 'outline' | 'filled'
+export type ButtonColor = 'success' | 'danger' | 'accent'
 
 export interface ButtonProps extends ComponentProps<'button'> {
-    variant?: 'outline' | 'filled'
-    color?: 'success' | 'danger' | 'accent'
+    variant?: ButtonVariant
+    color?: ButtonColor
     size?: ButtonSize
     loading?: boolean
     shape?: ButtonShape
     as?: ElementType<any>
 }
 
-const getBorderStyles = (variant: ButtonProps['variant'], color: ButtonProps['color']) => {
+const getBorderStyles = (variant: ButtonVariant, color: ButtonColor) => {
     if (variant === 'filled') {
         switch (color) {
             case 'success':
@@ -38,7 +40,7 @@ const getBorderStyles = (variant: ButtonProps['variant'], color: ButtonProps['co
     }
 }
 
-const getBackgroundStyles = (variant: ButtonProps['variant'], color: ButtonProps['color']) => {
+const getBackgroundStyles = (variant: ButtonVariant, color: ButtonColor) => {
     if (variant === 'filled') {
         switch (color) {
             case 'success':

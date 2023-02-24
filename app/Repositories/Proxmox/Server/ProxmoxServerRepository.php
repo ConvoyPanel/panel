@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
+use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
@@ -61,7 +62,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function addUser(string $userid, string $roleid)
+    public function addUser(RealmType $realmType, string $userid, string $roleid)
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -69,7 +70,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
             $response = $this->getHttpClient()->put('/api2/json/access/acl', [
                 'json' => [
                     'path' => '/vms/'.$this->server->vmid,
-                    'users' => $userid,
+                    'users' => $userid.'@'.$realmType->value,
                     'roles' => $roleid,
                 ],
             ]);

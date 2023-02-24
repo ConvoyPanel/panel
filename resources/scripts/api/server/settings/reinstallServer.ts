@@ -2,7 +2,7 @@ import http from '@/api/http'
 
 interface ReinstallServerParameters {
     templateUuid: string
-    accountPassword?: string | null
+    accountPassword: string
     startOnCompletion: boolean
 }
 

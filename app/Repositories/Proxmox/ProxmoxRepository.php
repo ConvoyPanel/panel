@@ -15,26 +15,16 @@ use GuzzleRetry\GuzzleRetryMiddleware;
 
 abstract class ProxmoxRepository
 {
-    /**
-     * @var Application
-     */
-    //protected $app;
+    protected Server $server;
 
-    /**
-     * @var Server|null
-     */
-    protected $server;
-
-    /**
-     * @var Node|null
-     */
-    protected $node;
+    protected Node $node;
 
     /**
      * BaseWingsRepository constructor.
      */
-    public function __construct(protected Application $app)
+    public function __construct(private Application $app)
     {
+
     }
 
     /**

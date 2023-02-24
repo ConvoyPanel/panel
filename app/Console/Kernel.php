@@ -31,8 +31,8 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command(ResetUsagesCommand::class)->daily();
-        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes()->withoutOverlapping();
-        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes()->withoutOverlapping();
+        $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
+        $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
     }
 
     /**

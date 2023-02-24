@@ -9,6 +9,8 @@ use Closure;
 use DateInterval;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Fractalistic\Fractal;
+use Illuminate\Container\Container;
 
 /**
  * ProxmoxService class
@@ -16,10 +18,9 @@ use Illuminate\Support\Facades\Cache;
 abstract class ProxmoxService
 {
     protected Server $server;
-
     protected Node $node;
-
     protected bool $useCache = false;
+
 
     /**
      * Set the server model this request is stemming from.

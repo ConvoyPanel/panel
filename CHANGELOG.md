@@ -4,6 +4,22 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.7.0-beta
+
+### Changed
+
+- Made account_password required by default for creating new servers and server installations
+- Refactored all settings pages
+- Refactored menu component to reduce bundle size
+- Refactored Server Usages and Rate Limit sync for better scaling
+- Minor frontend styling
+
+### Added
+
+- Search bars in the administrator area
+- Log rotation for Laravel log file
+- Proxmox user pruning to prune expired temporary NoVNC users
+
 ## v3.6.2-beta
 
 ### Fixed

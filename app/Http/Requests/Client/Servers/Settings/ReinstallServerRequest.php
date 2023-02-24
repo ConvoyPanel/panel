@@ -27,7 +27,7 @@ class ReinstallServerRequest extends FormRequest
     {
         return [
             'template_uuid' => 'required|string|exists:templates,uuid',
-            'account_password' => ['sometimes', 'nullable', 'string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u'],
+            'account_password' => ['required', 'string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u'],
             'start_on_completion' => 'present|boolean',
         ];
     }

@@ -3,6 +3,9 @@
 namespace Convoy\Repositories\Proxmox\Node;
 
 use Carbon\Carbon;
+use Convoy\Data\Node\Access\CreateUserData;
+use Convoy\Data\Node\Access\UserData;
+use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
@@ -13,15 +16,43 @@ use Webmozart\Assert\Assert;
 
 class ProxmoxAccessRepository extends ProxmoxRepository
 {
-    public function createUser(array $data = [])
+    public function getUsers()
+    {
+        Assert::isInstanceOf($this->node, Node::class);
+
+        try {
+            $response = $this->getHttpClient()->get('/api2/json/access/users');
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException($e);
+        }
+
+        $users = array_map(fn ($user) => UserData::fromRaw($user), $this->getData($response));
+
+        return UserData::collection($users);
+    }
+
+    public function getUser(string $id)
+    {
+        Assert::isInstanceOf($this->node, Node::class);
+
+        try {
+            $response = $this->getHttpClient()->get('/api2/json/access/users/' . $id);
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException($e);
+        }
+
+        return UserData::fromRaw($this->getData($response));
+    }
+
+    public function createUser(CreateUserData $data)
     {
         Assert::isInstanceOf($this->node, Node::class);
 
         $payload = [
-            'enable' => Arr::get($data, 'enable', true),
-            'userid' => Arr::get($data, 'userid', 'convoy-'.Str::random(50)).'@'.Arr::get($data, 'authType', 'pve'),
-            'password' => Arr::get($data, 'password', Str::random(60)),
-            'expire' => Arr::get($data, 'expire', Carbon::now()->addDay()->timestamp),
+            'enable' => $data->enabled,
+            'userid' => ($data->id ?? 'convoy-' . Str::random(53)) . '@' . $data->realm_type->value,
+            'password' => $data->password ?? Str::random(64),
+            'expire' => $data->expires_at?->timestamp ?? false,
         ];
 
         try {
@@ -32,7 +63,24 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        return $payload;
+        return CreateUserData::from([
+            'id' => explode('@', $payload['userid'])[0],
+            'realm_type' => $data->realm_type,
+            'password' => $payload['password'],
+            'enabled' => $payload['enable'],
+            'expires_at' => $data->expires_at,
+        ]);
+    }
+
+    public function deleteUser(string $id, RealmType $realmType)
+    {
+        Assert::isInstanceOf($this->node, Node::class);
+
+        try {
+            $this->getHttpClient()->delete('/api2/json/access/users/' . $id . '@' . $realmType->value);
+        } catch (GuzzleException $e) {
+            throw new ProxmoxConnectionException($e);
+        }
     }
 
     public function createRole(string $name, string $privileges)
@@ -55,7 +103,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
         return $payload;
     }
 
-    public function getTicket(string $userid, string $password, string $realm = 'pve')
+    public function getTicket(RealmType $realmType, string $userid, string $password)
     {
         Assert::isInstanceOf($this->node, Node::class);
 
@@ -64,7 +112,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
                 'json' => [
                     'username' => $userid,
                     'password' => $password,
-                    'realm' => $realm,
+                    'realm' => $realmType->value,
                 ],
             ]);
         } catch (GuzzleException $e) {

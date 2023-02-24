@@ -31,7 +31,7 @@ const ReinstallServerContainer = () => {
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
                     'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
                 )
-                .optional(),
+                .required(),
         }),
         onSubmit: async (values, { setSubmitting }) => {
             setSubmitting(true)
@@ -85,8 +85,7 @@ const ReinstallServerContainer = () => {
                         <TemplatesSelectFormik disabled={form.isSubmitting} />
                         <TextInputFormik
                             name={'accountPassword'}
-                            label={'Account Password'}
-                            placeholder={'Leave blank for no change'}
+                            label={'System OS Password'}
                             type={'password'}
                         />
                         <CheckboxFormik
