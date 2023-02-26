@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MegabytesAndBytes;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStateConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,10 +14,10 @@ class Server extends Model
     use HasFactory, SoftDeletes;
 
     protected $casts = [
-        'memory' => MegabytesAndBytes::class,
-        'disk' => MegabytesAndBytes::class,
-        'bandwidth_usage' => MegabytesAndBytes::class,
-        'bandwidth_limit' => MegabytesAndBytes::class,
+        'memory' => MebibytesToAndFromBytes::class,
+        'disk' => MebibytesToAndFromBytes::class,
+        'bandwidth_usage' => MebibytesToAndFromBytes::class,
+        'bandwidth_limit' => MebibytesToAndFromBytes::class,
     ];
 
     protected $guarded = [

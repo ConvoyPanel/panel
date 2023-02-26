@@ -4,7 +4,7 @@ namespace Convoy\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class MegabytesAndBytes implements CastsAttributes
+class MebibytesToAndFromBytes implements CastsAttributes
 {
     /**
      * Cast the given value.

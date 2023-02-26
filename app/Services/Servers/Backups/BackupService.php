@@ -87,20 +87,14 @@ class BackupService
         });
     }
 
-    public function delete(Backup $backup, ?bool $force = false)
+    public function delete(Backup $backup)
     {
         if (is_null($backup->completed_at)) {
             throw new BadRequestHttpException('This backup cannot be restored at this time: not completed.');
         }
 
-        $this->connection->transaction(function () use ($backup, $force) {
-            try {
-                $this->proxmoxRepository->setServer($backup->server)->delete($backup);
-            } catch (ProxmoxConnectionException $exception) {
-                if (!$force) {
-                    throw $exception;
-                }
-            }
+        $this->connection->transaction(function () use ($backup) {
+            $this->proxmoxRepository->setServer($backup->server)->delete($backup);
 
             $backup->delete();
         });

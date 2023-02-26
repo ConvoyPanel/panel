@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MegabytesAndBytes;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
@@ -12,7 +12,7 @@ class Backup extends Model
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected $casts = [
-        'size' => MegabytesAndBytes::class,
+        'size' => MebibytesToAndFromBytes::class,
     ];
 
     protected $dates = [
