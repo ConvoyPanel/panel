@@ -47,12 +47,11 @@ class UpdateBuildRequest extends FormRequest
             // check if the memory and disk isn't exceeding the node limits
             $node = Node::findOrFail($server->node_id)->load('servers');
 
-            $nodeMemoryLimit = ($node->memory * (($node->memory_overallocate / 100) + 1)) - $node->memory_allocated;
-            $nodeDiskLimit = ($node->disk * (($node->disk_overallocate / 100) + 1)) - $node->disk_allocated;
+            $nodeMemoryLimit = ($node->memory * (($node->memory_overallocate / 100) + 1)) - ($node->memory_allocated - $server->memory);
+            $nodeDiskLimit = ($node->disk * (($node->disk_overallocate / 100) + 1)) - ($node->disk_allocated - $server->disk);
 
             $memory = intval($this->input('memory'));
             $disk = intval($this->input('disk'));
-
             if ($memory > $nodeMemoryLimit || $memory < 0) {
                 $validator->errors()->add('memory', 'The memory value exceeds the node\'s limit.');
             }

@@ -3,14 +3,23 @@ import { ServerState } from '@/api/server/getStatus'
 import useSWR from 'swr'
 import http from '@/api/http'
 
-export type DiskType = 'disk' | 'media'
-
-export interface Disk {
-    type: DiskType
-    name: string
+export interface BaseDisk {
+    interface: string
+    isPrimaryDisk: boolean
     size: number
-    displayName: string | null
 }
+
+export interface DiskWithMedia extends BaseDisk {
+    isMedia: true
+    mediaName: string
+}
+
+export interface DiskWithoutMedia extends BaseDisk {
+    isMedia: false
+    mediaName?: null
+}
+
+export type Disk = DiskWithMedia | DiskWithoutMedia
 
 export interface Address {
     address: string
@@ -37,10 +46,11 @@ export interface ServerDetails {
 }
 
 export const rawDataToDisk = (data: any): Disk => ({
-    type: data.type,
-    name: data.name,
+    interface: data.interface,
+    isPrimaryDisk: data.is_primary_disk,
+    isMedia: data.is_media,
+    mediaName: data?.media_name,
     size: data.size,
-    displayName: data.display_name,
 })
 
 export const rawDataToServerDetails = (data: any): ServerDetails => ({

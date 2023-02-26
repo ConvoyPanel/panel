@@ -5,7 +5,7 @@ namespace Convoy\Services\Servers;
 use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
-use Convoy\Exceptions\Service\Server\Allocation\NoAvailableBusException;
+use Convoy\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
@@ -34,8 +34,10 @@ class AllocationService extends ProxmoxService
 
         return DiskData::collection(Arr::map($disks, function ($rawDisk) use ($isos, $server) {
             $disk = [
-                'type' => 'disk',
-                'name' => Arr::get($rawDisk, 'key'),
+                'interface' => Arr::get($rawDisk, 'key'),
+                'is_primary_disk' => false,
+                'is_media' => false,
+                'media_name' => null,
                 'size' => 0,
             ];
 
@@ -46,12 +48,14 @@ class AllocationService extends ProxmoxService
             $disk['size'] = $this->convertToBytes($sizeMatches[1]);
 
             if (str_contains($value, 'media')) {
-                $disk['type'] = 'media';
+                $disk['is_media'] = true;
                 // this piece of code adds the name of the mounted ISO
                 if (preg_match("/\/(.*\.iso)/s", $value, $fileNameMatches)) {
                     if ($iso = $isos->where('file_name', $fileNameMatches[1])->first()) {
-                        $disk['display_name'] = $iso->name;
+                        $disk['media_name'] = $iso->name;
                     }
+                } elseif (str_contains($value, 'cloudinit')) {
+                    $disk['media_name'] = 'Cloudinit';
                 }
             } else {
                 // if its not the ISO, we'll check if its the boot disk by comparing the size to the disk size on the eloquent record of the server
@@ -59,7 +63,7 @@ class AllocationService extends ProxmoxService
                 $lowerBound = $server->disk - 1024;
 
                 if ($disk['size'] < $upperBound && $disk['size'] > $lowerBound) {
-                    $disk['display_name'] = 'Primary Disk';
+                    $disk['is_primary_disk'] = true;
                 }
             }
 
@@ -80,7 +84,7 @@ class AllocationService extends ProxmoxService
         $taggedDisks = [];
 
         foreach ($untaggedDisks as $untaggedDisk) {
-            if ($disk = $disks->where('name', '=', $untaggedDisk)->first()) {
+            if ($disk = $disks->where('interface', '=', $untaggedDisk)->first()) {
                 array_push($taggedDisks, $disk);
             }
         }
@@ -110,14 +114,14 @@ class AllocationService extends ProxmoxService
         // we'll be using IDE by default for now
         $ideIndex = 0; // max IDE index is '3'
         $disks = $this->getDisks($server);
-        if ($disks->where('display_name', '=', $iso->name)->first()) {
+        if ($disks->where('media_name', '=', $iso->name)->first()) {
             throw new IsoAlreadyMountedException();
         }
 
         $arrayToCheckForAvailableIdeIndex = Arr::pluck($this->repository->setServer($server)->getAllocations(), 'key');
         for ($i = 0; $i <= 4; $i++) {
             if ($i === 4) {
-                throw new NoAvailableBusException();
+                throw new NoAvailableDiskInterfaceException();
             }
 
             if (!in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
@@ -134,7 +138,7 @@ class AllocationService extends ProxmoxService
     public function unmountIso(Server $server, ISO $iso)
     {
         $disks = $this->getDisks($server);
-        if ($disk = $disks->where('display_name', '=', $iso->name)->first()) {
+        if ($disk = $disks->where('media_name', '=', $iso->name)->first()) {
             $this->repository->update(['delete' => $disk->name]);
         } else {
             throw new IsoAlreadyUnmountedException();

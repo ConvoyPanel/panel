@@ -3,7 +3,7 @@
 namespace Convoy\Jobs\Node;
 
 use Convoy\Models\Node;
-use Convoy\Services\Nodes\Access\UserPruneService;
+use Convoy\Services\Nodes\UserPruneService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -38,11 +38,10 @@ const SecurityContainer = () => {
                     is: 'cipassword',
                     then: yup.string().required('Must enter a password'),
                 })
-                .matches(
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
-                    'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
-                )
-                .matches(/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/, 'Must not contain special characters from other languages'),
+                // @ts-ignore
+                .passwordRequirements()
+                // @ts-ignore
+                .englishKeyboardCharacters(),
             sshKeys: yup.string(),
         }),
         onSubmit: ({ password, sshKeys }, { setSubmitting }) => {

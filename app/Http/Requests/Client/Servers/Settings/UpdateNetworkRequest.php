@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Rules\Network\Domain;
+use Convoy\Rules\Domain;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateNetworkRequest extends FormRequest
@@ -26,7 +26,7 @@ class UpdateNetworkRequest extends FormRequest
     {
         return [
             'nameservers' => ['array', 'present'],
-            'nameservers.*' => ['string', new Domain],
+            'nameservers.*' => ['string', 'ip'],
         ];
     }
 }

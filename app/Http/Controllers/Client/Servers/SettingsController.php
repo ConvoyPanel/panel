@@ -96,8 +96,8 @@ class SettingsController extends ApplicationApiController
         $unconfiguredDevices = [];
 
         foreach ($availableDevices as $device) {
-            if ($configuredDevices->where('name', '=', $device->name)->first() === null) {
-                array_push($unconfiguredDevices, $device->toArray());
+            if ($configuredDevices->where('interface', '=', $device->interface)->first() === null) {
+                array_push($unconfiguredDevices, $device);
             }
         }
 
@@ -124,7 +124,7 @@ class SettingsController extends ApplicationApiController
         }
 
         $media = array_map(function ($iso) use ($disks) {
-            if ($disks->where('display_name', '=', $iso['name'])->first()) {
+            if ($disks->where('media_name', '=', $iso['name'])->first()) {
                 return [
                     'mounted' => true,
                     ...$iso,

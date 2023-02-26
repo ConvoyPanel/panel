@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\Power;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
@@ -38,16 +39,17 @@ class BuildModificationService
         $this->networkService->syncSettings($server);
 
         // find a disk that has a corresponding disk in the deployment
-        $disks = collect($proxmoxDetails->config->disks->toArray())->pluck('name')->all();
-        $bootOrder = array_filter(collect($proxmoxDetails->config->boot_order->filter(fn ($disk) => $disk->type !== 'media')->toArray())->pluck('name')->toArray(), fn ($disk) => in_array($disk, $disks));
+        $disks = collect($proxmoxDetails->config->disks->toArray())->pluck('interface')->all();
+        $bootOrder = array_filter(collect($proxmoxDetails->config->boot_order->filter(fn (DiskData $disk) => !$disk->is_media)->toArray())->pluck('interface')->toArray(), fn ($disk) => in_array($disk, $disks));
 
         if (count($bootOrder) > 0) {
-            $disk = $proxmoxDetails->config->disks->where('name', '=', Arr::first($bootOrder))->first();
+            /** @var DiskData */
+            $disk = $proxmoxDetails->config->disks->where('interface', '=', Arr::first($bootOrder))->first();
 
             $diff = $eloquentDetails->limits->disk - $disk->size;
 
             if ($diff > 0) {
-                $this->allocationRepository->resizeDisk($diff, $disk->name);
+                $this->allocationRepository->resizeDisk($diff, $disk->interface);
             }
         }
 

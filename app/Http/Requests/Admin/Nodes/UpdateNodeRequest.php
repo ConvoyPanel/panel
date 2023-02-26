@@ -37,7 +37,6 @@ class UpdateNodeRequest extends FormRequest
 
     public function withValidator(Validator $validator)
     {
-
         $validator->after(function (Validator $validator) {
             $node = $this->parameter('node', Node::class);
             // multiply memory by memory_overallocate (which indicates how much you can go over) percentage

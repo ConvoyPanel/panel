@@ -6,6 +6,11 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ## v3.7.0-beta
 
+### Fixed
+
+- Overallocation check logic whenever an administrator tries to update a server's build #16
+- Issue where you can't use IPv6 for nameservers
+
 ### Changed
 
 - Made account_password required by default for creating new servers and server installations
@@ -13,6 +18,12 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 - Refactored menu component to reduce bundle size
 - Refactored Server Usages and Rate Limit sync for better scaling
 - Minor frontend styling
+- Refactored disk data transfer object
+- All password inputs (except for Convoy user account password) has these two validation rules:
+    1. `/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;\':",.\/<>?\\ ]*$/` for checking if the password contains only characters on
+       the U.S. English keyboard.
+    2. `/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/` for checking if the password contains 8
+       characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.
 
 ### Added
 
@@ -31,7 +42,9 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ### Note
 
-If you are developing automation software for Convoy, please implement these regular expressions in your code. Otherwise, your code will error when you send invalid requests.
+If you are developing automation software for Convoy, please implement these regular expressions in your code.
+Otherwise, your code will error when you send invalid requests.
+
 - server `account_password` validation
     - `/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/` to detect special characters from other language
     - `/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u` minimum password requirements
@@ -70,88 +83,89 @@ If you are developing automation software for Convoy, please implement these reg
 
 ### Changed
 
--   Settings layout for client side server settings
+- Settings layout for client side server settings
 
 ### Fixed
 
--   possibility that `address_ids` will cause an exception when it's null when creating a new server
+- possibility that `address_ids` will cause an exception when it's null when creating a new server
 
 ## v3.4.0-beta
 
 ### Changed
 
--   Refactored routes
+- Refactored routes
 
 ### Added
 
--   Navigation Bar Context. Now switching pages are even more seamless
+- Navigation Bar Context. Now switching pages are even more seamless
 
 ## v3.3.0-beta
 
 ### Fixed
 
--   Lack of cancel button when deleting an API key
+- Lack of cancel button when deleting an API key
 
 ### Added
 
--   Ability for administrators to impersonate the client view for a server and also visit the server's configuration in the admin area.
--   Warnings when creating a new node to disable privilege separation and grant root permissions.
+- Ability for administrators to impersonate the client view for a server and also visit the server's configuration in
+  the admin area.
+- Warnings when creating a new node to disable privilege separation and grant root permissions.
 
 ## v3.2.0-beta
 
 ### Fixed
 
--   Broken network syncing when updating an address's assigned server
--   Text alignment for server counter on the users table in the admin area
+- Broken network syncing when updating an address's assigned server
+- Text alignment for server counter on the users table in the admin area
 
 ### Added
 
--   Hyperlinks to the owner on the servers table
+- Hyperlinks to the owner on the servers table
 
 ## v3.1.2-beta
 
 ### Fixed
 
--   Scoped routing bindings in RouteServiceProvider that were breaking some routes
+- Scoped routing bindings in RouteServiceProvider that were breaking some routes
 
 ## v3.1.1-beta
 
 ### Fixed
 
--   Conflicting named routes that would break route optimization/caching
+- Conflicting named routes that would break route optimization/caching
 
 ## v3.1.0-beta
 
 ### Fixed
 
--   IP Address updating
--   Server build updating
+- IP Address updating
+- Server build updating
 
 ### Removed
 
--   Option to sync or not sync network settings when deleting an IP address
-    -   The default behavior is always to sync
+- Option to sync or not sync network settings when deleting an IP address
+    - The default behavior is always to sync
 
 ## v3.0.0-beta (Tuxedo)
 
 ### Fixed
 
--   Server installs
--   a bunch of other stuff
+- Server installs
+- a bunch of other stuff
 
 ### Changed
 
--   from proprietary hard-coded api tokens to Bearer tokens for the application/external api
--   the whole entire frontend
+- from proprietary hard-coded api tokens to Bearer tokens for the application/external api
+- the whole entire frontend
 
 ### Added
 
--   Server hostnames
--   Node location grouping
+- Server hostnames
+- Node location grouping
 
 ### Notes
 
--   This release is so big that I can't really summarize everything
+- This release is so big that I can't really summarize everything
 
 ![The maxwell cat meme is the mascot for v3](https://imgur.com/mowvogE.png)
 
@@ -159,43 +173,47 @@ If you are developing automation software for Convoy, please implement these reg
 
 ### Fixed
 
--   Inability to delete IP address from the admin user interface
+- Inability to delete IP address from the admin user interface
 
 ## v2.0.2-beta
 
 ### Fixed
 
--   FQDN validator for the hostname field when adding a new node
+- FQDN validator for the hostname field when adding a new node
 
 ## v2.0.1-beta
 
 ### Fixed
 
--   Problem where validation errors for the SSH key wouldn't show up
--   Bug where user couldn't unset a SSH key after saving one
+- Problem where validation errors for the SSH key wouldn't show up
+- Bug where user couldn't unset a SSH key after saving one
 
 ## v2.0.0-beta (Bombay)
 
 ### Added
 
--   Storing of CPU, memory, disk, snapshots, backups, and bandwidth limits
--   Added server suspensions
--   Added real-time status updates of server installs (though it will be deprecated in v3.x.x)
--   Automatic bandwidth throttler when a user exceeds the bandwidth limit
+- Storing of CPU, memory, disk, snapshots, backups, and bandwidth limits
+- Added server suspensions
+- Added real-time status updates of server installs (though it will be deprecated in v3.x.x)
+- Automatic bandwidth throttler when a user exceeds the bandwidth limit
 
 ### Changed
 
--   Internally, server details are now passed around the application using Laravel Data by Spatie. Though in v3.x.x, we are planning on switching to Data Transfer Objects by Spatie. We pulled the wrong package and didn't realize until one month in using the package LOL.
--   Virtual machines are now limited to one disk. Multiple disks may be supported when a daemon is available in the future.
--   The built-in web server is now Caddy instead of Nginx. This provides auto SSL out of the box.
+- Internally, server details are now passed around the application using Laravel Data by Spatie. Though in v3.x.x, we
+  are planning on switching to Data Transfer Objects by Spatie. We pulled the wrong package and didn't realize until one
+  month in using the package LOL.
+- Virtual machines are now limited to one disk. Multiple disks may be supported when a daemon is available in the
+  future.
+- The built-in web server is now Caddy instead of Nginx. This provides auto SSL out of the box.
 
 ### Fixed
 
--   The commands in the node viewing page for installing the VNC Broker and templates.
+- The commands in the node viewing page for installing the VNC Broker and templates.
 
 ### Known Bugs
 
--   The real-time server installation communication is known to be buggy and will be resolved in v3.x.x
--   Editing the server field for IP Addresses will sometime result in the first server of the node to be used. This will be resolved in v3.x.x
+- The real-time server installation communication is known to be buggy and will be resolved in v3.x.x
+- Editing the server field for IP Addresses will sometime result in the first server of the node to be used. This will
+  be resolved in v3.x.x
 
 ![The Bombay cat breed is the mascot for v2](https://imgur.com/fP6oxn9.png)

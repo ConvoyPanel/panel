@@ -3,6 +3,8 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Rules\EnglishKeyboardCharacters;
+use Convoy\Rules\Password;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
@@ -30,7 +32,7 @@ class UpdateSecurityRequest extends FormRequest
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
             'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,sshkeys'],
-            'password' => ['string', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'regex:/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/', 'exclude_unless:type,cipassword'],
+            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(), 'exclude_unless:type,cipassword'],
         ];
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Services\Nodes\Access;
+namespace Convoy\Services\Nodes;
 
 use Convoy\Data\Node\Access\UserData;
 use Convoy\Models\Node;

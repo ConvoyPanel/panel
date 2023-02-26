@@ -4,7 +4,7 @@ namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Server;
-use Convoy\Rules\Network\Hostname;
+use Convoy\Rules\Hostname;
 
 class UpdateGeneralInfoRequest extends FormRequest
 {

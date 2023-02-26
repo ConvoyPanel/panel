@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Rules\Network;
+namespace Convoy\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class Hostname implements Rule
+class Password implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -15,7 +15,7 @@ class Hostname implements Rule
      */
     public function passes($attribute, $value)
     {
-        return (bool) filter_var($value, FILTER_VALIDATE_DOMAIN);
+        return (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/', $value);
     }
 
     /**
@@ -25,6 +25,6 @@ class Hostname implements Rule
      */
     public function message()
     {
-        return ':attribute is invalid.';
+        return 'The :attribute must contain 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.';
     }
 }

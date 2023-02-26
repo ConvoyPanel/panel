@@ -3,7 +3,7 @@
 namespace Convoy\Http\Requests\Admin\Nodes;
 
 use Convoy\Models\Node;
-use Convoy\Rules\Network\Fqdn;
+use Convoy\Rules\Fqdn;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreNodeRequest extends FormRequest

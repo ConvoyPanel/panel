@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Rules\Network;
+namespace Convoy\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class Domain implements Rule
+class EnglishKeyboardCharacters implements Rule
 {
     /**
      * Create a new rule instance.
@@ -25,11 +25,7 @@ class Domain implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (strlen($value) === 0) {
-            return true;
-        }
-
-        return preg_match("/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/", $value);
+        return (bool) preg_match('/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;\':",.\/<>?\\ ]*$/', $value);
     }
 
     /**
@@ -39,6 +35,6 @@ class Domain implements Rule
      */
     public function message()
     {
-        return ':attribute can only contain letters, numbers, and periods.';
+        return 'The :attribute must contain characters from the English keyboard.';
     }
 }

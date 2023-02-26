@@ -1,16 +1,10 @@
 import FormCard from '@/components/elements/FormCard'
-import Button from '@/components/elements/Button'
-import useSWR from 'swr'
 import { ServerContext } from '@/state/server'
-import getMedia from '@/api/server/settings/getMedia'
-import { EyeSlashIcon } from '@heroicons/react/20/solid'
-import { bytesToString } from '@/util/helpers'
-import { useMemo } from 'react'
 import useMediaSWR from '@/api/server/settings/useMediaSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import MediaRow from '@/components/servers/settings/MediaRow'
+import MediaRow from '@/components/servers/settings/partials/hardware/MediaRow'
 
-const MediaContainer = () => {
+const MediaCard = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { data } = useMediaSWR(uuid)
 
@@ -35,4 +29,4 @@ const MediaContainer = () => {
     )
 }
 
-export default MediaContainer
+export default MediaCard

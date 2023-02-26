@@ -3,7 +3,7 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Models\Server;
-use Convoy\Rules\Network\Hostname;
+use Convoy\Rules\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RenameServerRequest extends FormRequest
