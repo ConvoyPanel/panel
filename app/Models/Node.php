@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MegabytesAndBytes;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
@@ -11,8 +11,8 @@ class Node extends Model
     use HasFactory;
 
     protected $casts = [
-        'memory' => MegabytesAndBytes::class,
-        'disk' => MegabytesAndBytes::class,
+        'memory' => MebibytesToAndFromBytes::class,
+        'disk' => MebibytesToAndFromBytes::class,
     ];
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
