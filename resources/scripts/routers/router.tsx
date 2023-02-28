@@ -1,7 +1,6 @@
-import { ComponentType, FC, FunctionComponent, lazy, LazyExoticComponent, ReactNode } from 'react'
+import { FunctionComponent, lazy, LazyExoticComponent, ReactNode } from 'react'
 import { ServerContext } from '@/state/server'
 import Spinner from '@/components/elements/Spinner'
-import ServerOverviewContainer from '@/components/servers/overview/ServerOverviewContainer'
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
@@ -9,7 +8,7 @@ import { NodeContext } from '@/state/admin/node'
 import { AdminServerContext } from '@/state/admin/server'
 import { AdminUserContext } from '@/state/admin/user'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
-import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import NavigationBarProvider from '@/components/NavigationBarProvider'
 
 export interface Route {

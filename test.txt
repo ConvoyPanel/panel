@@ -1,0 +1,72 @@
+When I say sync, it means that the function pulls information to sync from the database the code specifying the payload to sync.
+On the other hand, "update" means that the function requires a payload to update.
+
+app/
+├── Actions
+├── Casts
+├── Console
+├── Contracts
+│   └── Repository
+│       ├── ActivityRepositoryInterface.php
+│       ├── RepositoryInterface.php
+│       └── ServerRepositoryInterface.php
+├── Enums
+│   ├── Activity
+│   │   └── Status.php
+│   ├── Api
+│   │   └── ApiKeyType.php
+│   ├── Cache
+│   ├── Helpers
+│   │   └── ChecksumAlgorithm.php
+│   ├── Network
+│   │   └── AddressType.php
+│   ├── Node
+│   │   ├── Access
+│   │   │   └── RealmType.php
+│   │   └── Storage
+│   │       └── ContentType.php
+│   └── Server
+│       ├── Cloudinit
+│       │   ├── AuthenticationType.php
+│       │   └── BiosType.php
+│       ├── Power.php
+│       ├── Status.php
+│       ├── SuspensionAction.php
+│       └── ThrottleAction.php
+├── Events
+├── Exceptions
+├── Facades
+├── Http
+├── Jobs
+├── Models
+├── Providers
+├── Repositories
+├── Rules
+├── Services
+│   ├── Activity
+│   ├── Nodes
+│   │   ├── IsoLibrary
+│   │   │   ├── IsoMonitorService.php (monitors the progress of the iso download)
+│   │   │   └── IsoService.php (creates and deletes isos)
+│   │   ├── ServerRateLimitsSyncService.php (updates server rate limits if they are over their data limit)
+│   │   ├── ServerUsagesSyncService.php (fetches the server usages from the nodes)
+│   │   └── UserPruneService.php (prunes expired users)
+│   ├── ProxmoxService.php
+│   └── Servers
+│       ├── AllocationService.php (syncs server cpu and memory allocations, updates the server hardware [used by the sync hardware method], fetches the server disks, fetches the servers boot order, sets the boot order, mounts ISOs, unmounts ISOs)
+│       ├── Backups
+│       │   ├── BackupMonitorService.php (monitors the backup progress)
+│       │   └── BackupService.php (creates, deletes, and restores backups)
+│       ├── BuildModificationService.php (syncs all of the server allocations like cpu, memory, disk, network, and metadata)
+│       ├── CloudinitService.php (changes password, updates hostname, gets nameservers, updates nameservers, gets ipconfig, updates ipconfig)
+│       ├── NetworkService.php (deletes ipsets, clears ipsets, locks ips, gets macaddresses, gets addresses [but from the database not what's currently allocated on the server], sync network settings, update ratelimit, update address allocations in the database)
+│       ├── ServerBuildService.php (build and deletes the virtual machine [doesn't delete the server from the database])
+│       ├── ServerCreationService.php (creates the server in the database and sends a request to ServerBuildService to start building the vm)
+│       ├── ServerDeletionService.php (deletes the server from the database and sends a request to ServerBuildService to delete the vm)
+│       ├── ServerDetailService.php (gets the server details from the database, and also another option to get server details of the VM)
+│       ├── Snapshots
+│       │   ├── SnapshotCreationService.php (creates snapshots)
+│       │   ├── SnapshotDeletionService.php (deletes snapshots)
+│       ├── SuspensionService.php (toggles the suspension status on the server)
+│       └── VncService.php (generates credentials for the vnc console)
+└── Transformers

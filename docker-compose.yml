@@ -21,8 +21,8 @@ services:
     build:
       context: ./dockerfiles/php
       args:
-        - WITH_XDEBUG=$DEV_XDEBUG
         - APP_ENV=$APP_ENV
+        - PHP_XDEBUG=$PHP_XDEBUG
     restart: unless-stopped
     volumes:
        - .:/var/www/
@@ -32,13 +32,20 @@ services:
       - database
       - redis
     env_file: .env
+    extra_hosts:
+      host.docker.internal: host-gateway
   workspace:
-    build: ./dockerfiles/workspace
+    build:
+      context: ./dockerfiles/workspace
+      args:
+        - PHP_XDEBUG=$PHP_XDEBUG
     tty: true
     ports:
       - 1234:1234
     volumes:
       - .:/var/www/
+    extra_hosts:
+      host.docker.internal: host-gateway
   redis:
     image: redis:7.0.4-alpine3.16
     restart: unless-stopped
@@ -46,7 +53,10 @@ services:
     ports:
       - 6379:6379
   workers:
-    build: ./dockerfiles/workers
+    build:
+      context: ./dockerfiles/workers
+      args:
+        - APP_ENV=$APP_ENV
     tty: true
     restart: unless-stopped
     working_dir: /var/www/
