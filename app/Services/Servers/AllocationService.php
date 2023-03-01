@@ -139,7 +139,7 @@ class AllocationService extends ProxmoxService
     {
         $disks = $this->getDisks($server);
         if ($disk = $disks->where('media_name', '=', $iso->name)->first()) {
-            $this->repository->update(['delete' => $disk->name]);
+            $this->repository->update(['delete' => $disk->interface]);
         } else {
             throw new IsoAlreadyUnmountedException();
         }

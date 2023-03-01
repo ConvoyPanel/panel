@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.7.2-beta
+
+### Fixed
+
+- Error unmounting media (or ISOs) in the server control panel in the client area
+
 ## v3.7.1-beta
 
 ### Fixed
