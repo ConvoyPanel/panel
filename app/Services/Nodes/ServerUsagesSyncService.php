@@ -23,7 +23,8 @@ class ServerUsagesSyncService
             $bandwidth = $server->bandwidth_usage;
 
             foreach ($metrics as $metric) {
-                if (Carbon::createFromTimestamp($metric['time'])->gt(Carbon::parse($server->hydrated_at))) {
+                $endingDate = $server->hydrated_at ? Carbon::parse($server->hydrated_at) : Carbon::now()->firstOfMonth();
+                if (Carbon::createFromTimestamp($metric['time'])->gt($endingDate)) {
                     // we multiply it by 60 seconds because each metric is
                     // recorded every 1 minute but the values like netin and
                     // netout are in bytes/sec
