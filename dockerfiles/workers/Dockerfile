@@ -9,7 +9,7 @@ RUN if [ $APP_ENV = "local" ]; then \
                 echo "opcache.validate_timestamps=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache-cli.ini; \
         fi;
 
-RUN apk add --no-cache bash logrotate
+RUN apk add --no-cache bash logrotate supervisor
 
 COPY supervisord.conf /etc/supervisord.conf
 COPY laravel-logrotate /etc/logrotate.d/laravel

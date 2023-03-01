@@ -17,7 +17,7 @@ use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDeletionService;
-use Convoy\Services\Servers\SuspensionService;
+use Convoy\Services\Servers\ServerSuspensionService;
 use Convoy\Transformers\Admin\ServerTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private SuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
+    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
     {
     }
 
