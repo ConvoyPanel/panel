@@ -21,9 +21,9 @@ class ServerUsagesSyncService
             $metrics = $this->repository->setServer($server)->getMetrics('hour');
 
             $bandwidth = $server->bandwidth_usage;
+            $endingDate = $server->hydrated_at ? Carbon::parse($server->hydrated_at) : Carbon::now()->firstOfMonth();
 
             foreach ($metrics as $metric) {
-                $endingDate = $server->hydrated_at ? Carbon::parse($server->hydrated_at) : Carbon::now()->firstOfMonth();
                 if (Carbon::createFromTimestamp($metric['time'])->gt($endingDate)) {
                     // we multiply it by 60 seconds because each metric is
                     // recorded every 1 minute but the values like netin and
