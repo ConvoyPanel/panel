@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.7.1-beta
+
+### Fixed
+
+- Server bandwidth statistic not updating #14
+
 ## v3.7.0-beta
 
 ### Fixed
