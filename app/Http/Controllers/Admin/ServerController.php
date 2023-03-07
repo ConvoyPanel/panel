@@ -106,12 +106,10 @@ class ServerController extends ApplicationApiController
 
     public function destroy(Request $request, Server $server)
     {
-        $this->deletionService->validateStatus($server);
-
         $this->connection->transaction(function () use ($server, $request) {
             $server->update(['status' => Status::DELETING->value]);
 
-            ProcessDeletionJob::dispatch($server->id, $request->input('no_purge', false));
+            $this->deletionService->handle($server, $request->input('no_purge', false));
         });
 
         return $this->returnNoContent();

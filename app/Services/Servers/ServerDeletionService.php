@@ -27,34 +27,19 @@ class ServerDeletionService
         $server->update(['status' => Status::DELETING->value]);
 
         if (!$noPurge) {
-            Bus::batch([
+            Bus::chain([
                 new SendPowerCommandJob($server->id, PowerAction::KILL),
                 new MonitorStateJob($server->id, State::STOPPED),
                 new PurgeBackupsJob($server->id),
                 new DeleteServerJob($server->id),
             ])
                 ->catch(fn() => $server->update(['status' => Status::DELETION_FAILED->value]))
-                ->name('Delete server')
                 ->dispatch();
+
+            return;
         }
 
         $server->delete();
-
-//        if (!$noPurge) {
-//            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
-//
-//            $backups = $this->backupRepository->getNonFailedBackups($server)->get();
-//
-//            $backups->each(function (Backup $backup) {
-//                $this->backupDeletionService->handle($backup);
-//            });
-//
-//            // TODO: add snapshot deletion
-//
-//            $this->serverRepository->setServer($server)->delete();
-//        }
-//
-//        $server->delete();
     }
 
     public function validateStatus(Server $server, bool $verifyStatusOnly = false)
