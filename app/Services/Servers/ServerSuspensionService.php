@@ -2,7 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Enums\Server\Power;
+use Convoy\Enums\Server\PowerAction;
 use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Models\Server;
@@ -32,7 +32,7 @@ class ServerSuspensionService extends ProxmoxService
         ]);
 
         try {
-            $this->powerRepository->setServer($server)->send(Power::KILL);
+            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
         } catch (\Exception $exception) {
             $server->update([
                 'status' => $isSuspending ? null : Status::SUSPENDED->value,

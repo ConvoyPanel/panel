@@ -3,6 +3,7 @@
 namespace Convoy\Services\Servers\Backups;
 
 use Carbon\CarbonImmutable;
+use Convoy\Enums\Server\State;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Exceptions\Service\Backup\TooManyBackupsException;
@@ -12,15 +13,16 @@ use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\ServerDetailService;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
-class BackupService
+class BackupCreationService
 {
-    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
+    public function __construct(private ConnectionInterface $connection, private ProxmoxServerRepository $serverRepository, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
     {
     }
 
@@ -58,45 +60,6 @@ class BackupService
             MonitorBackupJob::dispatch($backup->id, $upid);
 
             return $backup;
-        });
-    }
-
-    public function restore(Server $server, Backup $backup)
-    {
-        if (!is_null($server->status)) {
-            throw new BadRequestHttpException('This server is not currently in a state that allows for a backup to be restored.');
-        }
-
-        $details = $this->detailService->getByProxmox($server);
-        if ($details->state !== 'stopped') {
-            throw new BadRequestHttpException('The server needs to be stopped before a backup can be restored.');
-        }
-
-        if (!$backup->successful && is_null($backup->completed_at)) {
-            throw new BadRequestHttpException('This backup cannot be restored at this time: not completed or failed.');
-        }
-
-        $this->connection->transaction(function () use ($server, $backup) {
-            $server->update([
-                'status' => Status::RESTORING_BACKUP->value,
-            ]);
-
-            $upid = $this->proxmoxRepository->setServer($server)->restore($backup);
-
-            MonitorBackupRestorationJob::dispatch($server->id, $upid);
-        });
-    }
-
-    public function delete(Backup $backup)
-    {
-        if (is_null($backup->completed_at)) {
-            throw new BadRequestHttpException('This backup cannot be restored at this time: not completed.');
-        }
-
-        $this->connection->transaction(function () use ($backup) {
-            $this->proxmoxRepository->setServer($backup->server)->delete($backup);
-
-            $backup->delete();
         });
     }
 }

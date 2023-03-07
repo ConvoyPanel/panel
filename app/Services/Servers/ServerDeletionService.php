@@ -2,19 +2,20 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Enums\Server\Power;
+use Convoy\Enums\Server\PowerAction;
+use Convoy\Enums\Server\State;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStateConflictException;
-use Convoy\Models\Backup;
+use Convoy\Jobs\Server\DeleteServerJob;
+use Convoy\Jobs\Server\MonitorStateJob;
+use Convoy\Jobs\Server\PurgeBackupsJob;
+use Convoy\Jobs\Server\SendPowerCommandJob;
 use Convoy\Models\Server;
-use Convoy\Repositories\Eloquent\BackupRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\Servers\Backups\BackupService;
+use Illuminate\Support\Facades\Bus;
 
 class ServerDeletionService
 {
-    public function __construct(private ProxmoxPowerRepository $powerRepository, private BackupRepository $backupRepository, private BackupService $backupService, private ProxmoxServerRepository $serverRepository)
+    public function __construct()
     {
 
     }
@@ -26,22 +27,34 @@ class ServerDeletionService
         $server->update(['status' => Status::DELETING->value]);
 
         if (!$noPurge) {
-            $this->powerRepository->setServer($server)->send(Power::KILL);
-
-            $backups = $this->backupRepository->getNonFailedBackups($server)->get();
-
-            $backups->each(function (Backup $backup) {
-                $this->backupService->delete($backup);
-            });
-
-            // TODO: add snapshot deletion
-
-            $this->serverRepository->setServer($server)->delete();
+            Bus::batch([
+                new SendPowerCommandJob($server->id, PowerAction::KILL),
+                new MonitorStateJob($server->id, State::STOPPED),
+                new PurgeBackupsJob($server->id),
+                new DeleteServerJob($server->id),
+            ])
+                ->catch(fn() => $server->update(['status' => Status::DELETION_FAILED->value]))
+                ->name('Delete server')
+                ->dispatch();
         }
 
         $server->delete();
 
-        $server->update(['status' => null]);
+//        if (!$noPurge) {
+//            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
+//
+//            $backups = $this->backupRepository->getNonFailedBackups($server)->get();
+//
+//            $backups->each(function (Backup $backup) {
+//                $this->backupDeletionService->handle($backup);
+//            });
+//
+//            // TODO: add snapshot deletion
+//
+//            $this->serverRepository->setServer($server)->delete();
+//        }
+//
+//        $server->delete();
     }
 
     public function validateStatus(Server $server, bool $verifyStatusOnly = false)

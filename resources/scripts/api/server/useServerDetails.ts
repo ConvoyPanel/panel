@@ -1,5 +1,5 @@
 import { ServerContext } from '@/state/server'
-import { ServerState } from '@/api/server/getStatus'
+import { ServerState } from '@/api/server/getState'
 import useSWR from 'swr'
 import http from '@/api/http'
 

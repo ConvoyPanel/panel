@@ -17,8 +17,8 @@ Route::group([
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('servers.show');
     Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
-    Route::get('/status', [Client\Servers\ServerController::class, 'getStatus']);
-    Route::post('/status', [Client\Servers\ServerController::class, 'sendPowerCommand']);
+    Route::get('/state', [Client\Servers\ServerController::class, 'getState']);
+    Route::patch('/state', [Client\Servers\ServerController::class, 'updateState']);
 
     Route::get('/terminal', [Client\Servers\ServerController::class, 'authorizeTerminal']);
 

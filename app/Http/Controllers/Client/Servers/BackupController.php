@@ -8,7 +8,8 @@ use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use Convoy\Services\Servers\Backups\BackupService;
+use Convoy\Services\Servers\Backups\BackupCreationService;
+use Convoy\Services\Servers\Backups\BackupDeletionService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\BackupTransformer;
 use Illuminate\Database\ConnectionInterface;
@@ -17,7 +18,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class BackupController extends ApplicationApiController
 {
-    public function __construct(private ConnectionInterface $connection, private ServerDetailService $detailService, private BackupService $backupService, private BackupRepository $backupRepository, private ProxmoxBackupRepository $proxmoxRepository)
+    public function __construct(
+        private BackupCreationService   $backupCreationService,
+        private BackupDeletionService   $backupDeletionService,
+        private BackupRepository        $backupRepository,
+    )
     {
     }
 
@@ -37,7 +42,7 @@ class BackupController extends ApplicationApiController
 
     public function store(Server $server, StoreBackupRequest $request)
     {
-        $backup = $this->backupService
+        $backup = $this->backupCreationService
             ->create($server, $request->name, $request->mode, $request->compression_type, $request->input('locked', false));
 
         return fractal($backup, new BackupTransformer)->respond();
@@ -52,7 +57,7 @@ class BackupController extends ApplicationApiController
 
     public function destroy(Server $server, Backup $backup)
     {
-        $this->backupService->delete($backup);
+        $this->backupDeletionService->handle($backup);
 
         return $this->returnNoContent();
     }

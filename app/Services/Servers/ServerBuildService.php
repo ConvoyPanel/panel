@@ -4,7 +4,8 @@ namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Enums\Server\Cloudinit\AuthenticationType;
-use Convoy\Enums\Server\Power;
+use Convoy\Enums\Server\PowerAction;
+use Convoy\Enums\Server\State;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
@@ -33,18 +34,20 @@ class ServerBuildService extends ProxmoxService
     {
         /* 1. Power off the server */
         try {
-            $this->powerRepository->setServer($server)->send(Power::KILL);
+            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
         } catch (\Exception $e) {
             // do nothing.
         }
 
         // Wait for server to turn off
-        $intermissionStatus = $this->serverRepository->setServer($server)->getStatus();
+        $intermissionStatus = $this->serverRepository->setServer($server)->getState();
 
-        if (Arr::get($intermissionStatus, 'status') !== 'stopped') {
+        if ($intermissionStatus->state !== State::STOPPED) {
             do {
-                $intermissionStatus = $this->serverRepository->getStatus();
-            } while (Arr::get($intermissionStatus, 'status') !== 'stopped');
+                $intermissionStatus = $this->serverRepository->getState();
+
+                sleep(3);
+            } while ($intermissionStatus->state !== State::STOPPED);
         }
 
         /* 3. Delete the server */
@@ -55,7 +58,7 @@ class ServerBuildService extends ProxmoxService
 
         do {
             try {
-                $this->serverRepository->getStatus(); // if it errors, this indicates the server doesn't exist
+                $this->serverRepository->getState(); // if it errors, this indicates the server doesn't exist
 
                 sleep(1);
             } catch (Exception $e) {
@@ -101,7 +104,7 @@ class ServerBuildService extends ProxmoxService
         $this->runUpdate($this->buildModificationService, $deployment);
 
         if ($deployment->start_on_completion) {
-            $this->powerRepository->send(Power::START);
+            $this->powerRepository->send(PowerAction::START);
         }
     }
 

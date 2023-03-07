@@ -2,13 +2,13 @@
 
 namespace Convoy\Enums\Server;
 
-enum Power: string
+enum PowerAction: string
 {
-    case RESTART = 'reboot';
+    case RESTART = 'restart';
     case RESET = 'reset';
     case RESUME = 'resume';
     case SHUTDOWN = 'shutdown';
     case START = 'start';
-    case KILL = 'stop';
+    case KILL = 'kill';
     case SUSPEND = 'suspend';
 }

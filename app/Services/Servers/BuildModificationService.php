@@ -3,7 +3,7 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\Power;
+use Convoy\Enums\Server\PowerAction;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
@@ -56,7 +56,7 @@ class BuildModificationService
         /* Persist configuration immediately */
 
         if ($shouldUpdateState) {
-            $this->powerRepository->setServer($server)->send(Power::KILL);
+            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
         }
     }
 }

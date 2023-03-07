@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
+use Convoy\Data\Server\Proxmox\ServerStateData;
 use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
@@ -15,7 +16,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
     /**
      * @throws ProxmoxConnectionException
      */
-    public function getStatus()
+    public function getState()
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -25,7 +26,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
             throw new ProxmoxConnectionException($e);
         }
 
-        return $this->getData($response);
+        return ServerStateData::fromRaw($this->getData($response));
     }
 
     public function create(Template $template, array $params = [])

@@ -1,5 +1,5 @@
 import { Server } from '@/api/admin/servers/getServer'
-import getStatus, { ServerStatus } from '@/api/server/getStatus'
+import getStatus, { ServerStateData } from '@/api/server/getState'
 import { action, Action, createContextStore, thunk, Thunk } from 'easy-peasy'
 import isEqual from 'react-fast-compare'
 import { getServer } from '@/api/admin/servers/getServer'

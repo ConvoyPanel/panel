@@ -2,7 +2,9 @@
 
 namespace Convoy\Http\Requests\Client\Servers;
 
+use Convoy\Enums\Server\PowerAction;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class SendPowerCommandRequest extends FormRequest
 {
@@ -24,7 +26,7 @@ class SendPowerCommandRequest extends FormRequest
     public function rules()
     {
         return [
-            'state' => 'required|in:start,shutdown,kill,restart',
+            'state' => ['required', new Enum(PowerAction::class)],
         ];
     }
 }
