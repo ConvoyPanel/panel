@@ -10,6 +10,7 @@ import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
 import updateServer from '@/api/admin/servers/updateServer'
 import { EloquentStatus } from '@/api/server/types'
+import * as yup from 'yup'
 
 const ServerInformationContainer = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
@@ -26,7 +27,19 @@ const ServerInformationContainer = () => {
             nodeId: server.nodeId.toString(),
             status: server.status ?? 'ready',
         },
-        onSubmit: async ({ status, nodeId, userId, ...values }, { setSubmitting }) => {
+        validationSchema: yup.object({
+            name: yup.string().required('A name is required').max(40),
+            hostname: yup
+                .string()
+                .required()
+                .max(191)
+                // @ts-ignore
+                .hostname(),
+            vmid: yup.number().min(100).max(999999999),
+            userId: yup.number().required(),
+            nodeId: yup.number().required(),
+        }),
+        onSubmit: async ({ status, nodeId, userId, ...values }) => {
             clearFlashes()
             try {
                 await updateServer(server.uuid, {
@@ -71,12 +84,7 @@ const ServerInformationContainer = () => {
                             <TextInputFormik name='vmid' label='VMID' />
                             <UsersSelectFormik />
                             <NodesSelectFormik />
-                            <SelectFormik
-                                name={'status'}
-                                data={statusTypes}
-                                placeholder={'Status OK'}
-                                label={'Status'}
-                            />
+                            <SelectFormik name={'status'} data={statusTypes} label={'Status'} />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>
