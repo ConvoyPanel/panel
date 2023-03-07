@@ -3,7 +3,7 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Enums\Server\PowerAction;
 use Convoy\Enums\Server\State;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
