@@ -4,7 +4,7 @@ namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
 use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStateConflictException;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -96,14 +96,14 @@ class Server extends Model
      * exception is raised. This should be called whenever something needs to make
      * sure the server is not in a weird state that should block user access.
      *
-     * @throws \Convoy\Exceptions\Http\Server\ServerStateConflictException
+     * @throws \Convoy\Exceptions\Http\Server\ServerStatusConflictException
      */
     public function validateCurrentState()
     {
         if (
             !is_null($this->status)
         ) {
-            throw new ServerStateConflictException($this);
+            throw new ServerStatusConflictException($this);
         }
     }
 

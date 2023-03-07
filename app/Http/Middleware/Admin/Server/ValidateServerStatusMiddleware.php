@@ -4,7 +4,7 @@ namespace Convoy\Http\Middleware\Admin\Server;
 
 use Closure;
 use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStateConflictException;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerDeletionService;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class ValidateServerStatusMiddleware
         }
 
         if ($server->status === Status::DELETING->value || $server->status === Status::DELETION_FAILED->value) {
-            throw new ServerStateConflictException($server);
+            throw new ServerStatusConflictException($server);
         }
 
         return $next($request);

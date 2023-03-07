@@ -5,7 +5,7 @@ namespace Convoy\Services\Servers;
 use Convoy\Enums\Server\PowerAction;
 use Convoy\Enums\Server\State;
 use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStateConflictException;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Jobs\Server\DeleteServerJob;
 use Convoy\Jobs\Server\MonitorStateJob;
 use Convoy\Jobs\Server\PurgeBackupsJob;
@@ -62,12 +62,12 @@ class ServerDeletionService
         if (
             !is_null($server->status) && $server->status !== Status::DELETING->value
         ) {
-            throw new ServerStateConflictException($server);
+            throw new ServerStatusConflictException($server);
         }
 
         if (!$verifyStatusOnly) {
             if ($server->backups()->whereNull('completed_at')->exists()) {
-                throw new ServerStateConflictException($server);
+                throw new ServerStatusConflictException($server);
             }
         }
     }
