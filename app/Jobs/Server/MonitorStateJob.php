@@ -19,7 +19,7 @@ class MonitorStateJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     public function retryUntil() {
-        return now()->addMinutes(5);
+        return now()->addMinute();
     }
 
     /**

@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.7.4-beta
+
+### Fixed
+
+- Server power commands
+
 ## v3.7.3-beta
 
 ### Fixed
