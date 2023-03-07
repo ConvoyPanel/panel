@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Services\Nodes\IsoLibrary;
+namespace Convoy\Services\Nodes\Isos;
 
 use Convoy\Data\Helpers\ChecksumData;
 use Convoy\Enums\Node\Storage\ContentType;

@@ -4,6 +4,16 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.7.5-beta
+
+### Fixed
+
+- English keyboard characters validation rule in create server modal in the administrator area.
+
+### Changed
+
+- Some minor refactoring that changed the namespacings of some files to improve code consistency.
+
 ## v3.7.4-beta
 
 ### Fixed

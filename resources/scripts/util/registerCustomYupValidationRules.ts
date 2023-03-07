@@ -26,3 +26,15 @@ yup.addMethod(yup.string, 'ipAddress', function () {
         },
     })
 })
+
+yup.addMethod(yup.string, 'hostname', function () {
+    return this.test({
+        name: 'hostname',
+        message: 'Invalid hostname',
+        test: value => {
+            const hostnameRegex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/
+
+            return hostnameRegex.test(value as string)
+        },
+    })
+})

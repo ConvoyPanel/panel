@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Services\Nodes\IsoLibrary;
+namespace Convoy\Services\Nodes\Isos;
 
 use Carbon\Carbon;
 use Convoy\Models\ISO;

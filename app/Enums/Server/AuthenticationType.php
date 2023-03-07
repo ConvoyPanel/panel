@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Server\Cloudinit;
+namespace Convoy\Enums\Server;
 
 enum AuthenticationType: string
 {

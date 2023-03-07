@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Rules\EnglishKeyboardCharacters;
 use Convoy\Rules\Password;
 use Illuminate\Foundation\Http\FormRequest;

@@ -11,7 +11,7 @@ use Convoy\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
-use Convoy\Services\Nodes\IsoLibrary\IsoService;
+use Convoy\Services\Nodes\Isos\IsoService;
 use Convoy\Transformers\Admin\FileMetadataTransformer;
 use Convoy\Transformers\Admin\IsoTransformer;
 use Illuminate\Http\Request;

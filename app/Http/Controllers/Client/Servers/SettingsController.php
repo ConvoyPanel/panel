@@ -4,7 +4,7 @@ namespace Convoy\Http\Controllers\Client\Servers;
 
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\Cloudinit\AuthenticationType;
+use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;

@@ -54,10 +54,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             hostname: yup
                 .string()
                 .max(191, 'Do not exceed 191 characters')
-                .matches(
-                    /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
-                    'Enter a valid hostname'
-                )
+                // @ts-ignore
+                .hostname()
                 .required(),
             addressIds: yup.array().of(yup.number()),
             cpu: yup.number().min(1, "Can't have zero cpus lol").required('A CPU value is required.'),
@@ -68,11 +66,10 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             bandwidthLimit: yup.number().min(0),
             accountPassword: yup
                 .string()
-                .matches(
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
-                    'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
-                )
-                .matches(/^[A-z0-9!@£$%^&*()\'~*_+\-]+$/, 'Must not contain special characters from other languages')
+                // @ts-ignore
+                .passwordRequirements()
+                // @ts-ignore
+                .englishKeyboardCharacters()
                 .required(),
             shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {

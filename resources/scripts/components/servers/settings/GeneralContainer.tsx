@@ -30,10 +30,8 @@ const GeneralContainer = () => {
                 .string()
                 .required()
                 .max(191)
-                .matches(
-                    /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
-                    'Enter a valid hostname'
-                ),
+                // @ts-ignore
+                .hostname(),
         }),
         onSubmit: ({ name, hostname }, { setSubmitting }) => {
             clearFlashes('server:settings:general:rename')
