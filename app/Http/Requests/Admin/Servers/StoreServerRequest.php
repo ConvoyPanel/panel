@@ -39,7 +39,7 @@ class StoreServerRequest extends FormRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required', 'string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(),],
+            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(),],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',

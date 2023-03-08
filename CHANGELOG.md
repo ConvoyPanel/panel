@@ -4,6 +4,13 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.8.0-beta
+
+### Changed
+
+- Made system OS password optional if create server option isn't checked when creating a new server in the administrator
+  area
+
 ## v3.7.5-beta
 
 ### Fixed

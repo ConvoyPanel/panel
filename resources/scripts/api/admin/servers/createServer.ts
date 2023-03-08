@@ -18,7 +18,7 @@ interface CreateServerParameters {
     vmid: number | null
     hostname: string
     limits: ServerLimits
-    accountPassword: string
+    accountPassword: string | null
     shouldCreateServer: boolean
     templateUuid: string | null
     startOnCompletion: boolean
@@ -44,7 +44,9 @@ const createServer = async ({
             ...limits,
             address_ids: addressIds,
         },
-        account_password: accountPassword,
+        ...((accountPassword && accountPassword.length > 0) && {
+            account_password: accountPassword
+        }),
         should_create_server: shouldCreateServer,
         ...(shouldCreateServer && {
             template_uuid: templateUuid,

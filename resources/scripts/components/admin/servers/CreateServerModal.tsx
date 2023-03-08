@@ -70,7 +70,10 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                 .passwordRequirements()
                 // @ts-ignore
                 .englishKeyboardCharacters()
-                .required(),
+                .when('shouldCreateServer', {
+                    is: true,
+                    then: yup.string().required('Must enter a password'),
+                }),
             shouldCreateServer: yup.boolean(),
             templateUuid: yup.string().when('createServer', {
                 is: true,
