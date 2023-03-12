@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Wait for database to initialize
+        run: sleep 10
+
       - name: Run database migrations
         run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
 
