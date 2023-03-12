@@ -68,7 +68,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             ->withUrlParameters([
                 'node' => $this->node->cluster,
             ])
-            ->get('/api2/json/nodes/%s/query-url-metadata', [
+            ->get('/api2/json/nodes/{node}/query-url-metadata', [
                 'url' => $link,
                 'verify-certificates' => $verifyCertificates,
             ])
