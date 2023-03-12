@@ -20,7 +20,6 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 
-
         $payload = [
             'content' => $contentType->value,
             'filename' => $fileName,
@@ -33,13 +32,13 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             $payload['algorithm'] = $checksumData->algorithm->value;
         }
 
-        try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/storage/%s/download-url', $this->node->cluster, $this->node->iso_storage), [
-                'json' => $payload,
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'storage' => $this->node->iso_storage,
+            ])
+            ->post('/api2/json/nodes/{node}/storage/{storage}/download-url', $payload)
+            ->json();
 
         return $this->getData($response);
     }
@@ -48,11 +47,14 @@ class ProxmoxStorageRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/storage/%s/content//%s:%s/%s', $this->node->cluster, $this->node->iso_storage, $this->node->iso_storage, $contentType->value, $fileName));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'storage' => $this->node->iso_storage,
+                'file' => "{$this->node->iso_storage}:$contentType->value/$fileName"
+            ])
+            ->delete('/api2/json/nodes/{node}/storage/{storage}/content//{file}')
+            ->json();
 
         return $this->getData($response);
     }
@@ -62,16 +64,15 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/query-url-metadata', $this->node->cluster), [
-                'query' => [
-                    'url' => $link,
-                    'verify-certificates' => $verifyCertificates,
-                ],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+            ])
+            ->get('/api2/json/nodes/%s/query-url-metadata', [
+                'url' => $link,
+                'verify-certificates' => $verifyCertificates,
+            ])
+            ->json();
 
         if (Arr::get($response, 'success', 1) !== 1) {
             throw new InvalidIsoLinkException;

@@ -3,19 +3,20 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Proxmox\Config\DiskData;
+use Convoy\Enums\Server\DiskInterface;
 use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
 use Convoy\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
 class AllocationService
 {
-    public function __construct(protected ProxmoxAllocationRepository $repository)
+    public function __construct(protected ProxmoxConfigRepository $repository)
     {
     }
 
@@ -28,13 +29,13 @@ class AllocationService
     {
         $isos = $server->node->isos;
 
-        $disks = array_values(array_filter($this->repository->setServer($server)->getAllocations(), function ($disk) {
-            return in_array($disk['key'], ProxmoxAllocationRepository::$validDisks);
+        $disks = array_values(array_filter($this->repository->setServer($server)->getConfig(), function ($disk) {
+            return in_array($disk['key'], ProxmoxConfigRepository::$validDisks);
         }));
 
         return DiskData::collection(Arr::map($disks, function ($rawDisk) use ($isos, $server) {
             $disk = [
-                'interface' => Arr::get($rawDisk, 'key'),
+                'interface' => DiskInterface::from(Arr::get($rawDisk, 'key')),
                 'is_primary_disk' => false,
                 'is_media' => false,
                 'media_name' => null,
@@ -75,16 +76,16 @@ class AllocationService
     {
         $disks = $this->getDisks($server);
 
-        $raw = collect($this->repository->setServer($server)->getAllocations())->where('key', 'boot')->firstOrFail();
+        $raw = collect($this->repository->setServer($server)->getConfig())->where('key', 'boot')->firstOrFail();
 
         $untaggedDisks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
-            return !ctype_space($disk) && in_array($disk, ProxmoxAllocationRepository::$validDisks); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+            return !ctype_space($disk) && in_array($disk, ProxmoxConfigRepository::$validDisks); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
         $taggedDisks = [];
 
         foreach ($untaggedDisks as $untaggedDisk) {
-            if ($disk = $disks->where('interface', '=', $untaggedDisk)->first()) {
+            if ($disk = $disks->where('interface', '=', DiskInterface::from($untaggedDisk))->first()) {
                 array_push($taggedDisks, $disk);
             }
         }
@@ -118,7 +119,7 @@ class AllocationService
             throw new IsoAlreadyMountedException();
         }
 
-        $arrayToCheckForAvailableIdeIndex = Arr::pluck($this->repository->setServer($server)->getAllocations(), 'key');
+        $arrayToCheckForAvailableIdeIndex = Arr::pluck($this->repository->setServer($server)->getConfig(), 'key');
         for ($i = 0; $i <= 4; $i++) {
             if ($i === 4) {
                 throw new NoAvailableDiskInterfaceException();
@@ -139,7 +140,7 @@ class AllocationService
     {
         $disks = $this->getDisks($server);
         if ($disk = $disks->where('media_name', '=', $iso->name)->first()) {
-            $this->repository->update(['delete' => $disk->interface]);
+            $this->repository->update(['delete' => $disk->interface->value]);
         } else {
             throw new IsoAlreadyUnmountedException();
         }

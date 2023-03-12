@@ -15,13 +15,12 @@ class ProxmoxActivityRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks', $this->node->cluster), [
-                'query' => ['vmid' => $this->server->vmid, 'start' => $startAt, 'limit' => $limitRows],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+            ])
+            ->get('/api2/json/nodes/{node}/tasks', ['vmid' => $this->server->vmid, 'start' => $startAt, 'limit' => $limitRows])
+            ->json();
 
         return $this->getData($response);
     }
@@ -30,29 +29,31 @@ class ProxmoxActivityRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/status', $this->node->cluster, rawurlencode($upid)));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'task' => rawurlencode($upid),
+            ])
+            ->get('/api2/json/nodes/{node}/tasks/{task}/status')
+            ->json();
 
         return $this->getData($response);
     }
 
-    public function getLog(string $upid, int $startAt = 0, int $limitLines = 100)
+    public function getLog(string $upid, int $startAt = 0, int $limitLinesTo = 100)
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/tasks/%s/log', $this->node->cluster, rawurlencode($upid)), [
-                'query' => [
-                    'start' => $startAt,
-                    'limit' => $limitLines,
-                ],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'task' => rawurlencode($upid),
+            ])
+            ->get('/api2/json/nodes/{node}/tasks/{task}/log', [
+                'start' => $startAt,
+                'limit' => $limitLinesTo,
+            ])
+            ->json();
 
         return $this->getData($response);
     }
@@ -61,11 +62,13 @@ class ProxmoxActivityRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/tasks/%s', $this->node->cluster, rawurlencode($upid)));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'task' => rawurlencode($upid),
+            ])
+            ->delete('/api2/json/nodes/{node}/tasks/{task}')
+            ->json();
 
         return $this->getData($response);
     }

@@ -10,7 +10,7 @@ use Convoy\Enums\Server\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
@@ -18,9 +18,9 @@ use Illuminate\Support\Arr;
 /**
  * Class SnapshotService
  */
-class CloudinitService extends ProxmoxService
+class CloudinitService
 {
-    public function __construct(private ProxmoxCloudinitRepository $repository, private ProxmoxAllocationRepository $allocationRepository)
+    public function __construct(private ProxmoxCloudinitRepository $repository, private ProxmoxConfigRepository $allocationRepository)
     {
     }
 

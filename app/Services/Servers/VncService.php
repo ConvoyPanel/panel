@@ -12,7 +12,7 @@ use Convoy\Services\ProxmoxService;
 use Exception;
 use Illuminate\Support\Arr;
 
-class VncService extends ProxmoxService
+class VncService
 {
     public function __construct(private ProxmoxServerRepository $serverRepository, private ProxmoxAccessRepository $accessRepository)
     {

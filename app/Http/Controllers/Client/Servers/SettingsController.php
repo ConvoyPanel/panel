@@ -181,7 +181,7 @@ class SettingsController extends ApplicationApiController
         if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
             $this->cloudinitService->updatePassword($server, $request->ssh_keys, AuthenticationType::from($request->type));
         } else {
-            $this->cloudinitService->setServer($server)->updatePassword($server, $request->password, AuthenticationType::from($request->type));
+            $this->cloudinitService->updatePassword($server, $request->password, AuthenticationType::from($request->type));
         }
     }
 }

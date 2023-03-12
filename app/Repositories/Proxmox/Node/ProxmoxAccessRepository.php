@@ -20,28 +20,13 @@ class ProxmoxAccessRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient()->get('/api2/json/access/users');
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->get('/api2/json/access/users')
+            ->json();
 
         $users = array_map(fn ($user) => UserData::fromRaw($user), $this->getData($response));
 
         return UserData::collection($users);
-    }
-
-    public function getUser(string $id)
-    {
-        Assert::isInstanceOf($this->node, Node::class);
-
-        try {
-            $response = $this->getHttpClient()->get('/api2/json/access/users/' . $id);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
-
-        return UserData::fromRaw($this->getData($response));
     }
 
     public function createUser(CreateUserData $data)
@@ -55,13 +40,9 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             'expire' => $data->expires_at?->timestamp ?? false,
         ];
 
-        try {
-            $this->getHttpClient()->post('/api2/json/access/users', [
-                'json' => $payload,
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->post('/api2/json/access/users', $payload)
+            ->json();
 
         return CreateUserData::from([
             'id' => explode('@', $payload['userid'])[0],
@@ -76,11 +57,14 @@ class ProxmoxAccessRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $this->getHttpClient()->delete('/api2/json/access/users/' . $id . '@' . $realmType->value);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'user' => $id . '@' . $realmType->value,
+            ])
+            ->delete('/api2/json/access/users/{user}')
+            ->json();
+
+        return $this->getData($response);
     }
 
     public function createRole(string $name, string $privileges)
@@ -92,32 +76,24 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             'privs' => $privileges,
         ];
 
-        try {
-            $this->getHttpClient()->post('/api2/json/access/roles', [
-                'json' => $payload,
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->post('/api2/json/access/roles', $payload)
+            ->json();
 
-        return $payload;
+        return $this->getData($response);
     }
 
     public function getTicket(RealmType $realmType, string $userid, string $password)
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        try {
-            $response = $this->getHttpClient(authorize: false)->post('/api2/json/access/ticket', [
-                'json' => [
-                    'username' => $userid,
-                    'password' => $password,
-                    'realm' => $realmType->value,
-                ],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient(shouldAuthorize: false)
+            ->post('/api2/json/access/ticket', [
+                'username' => $userid,
+                'password' => $password,
+                'realm' => $realmType->value,
+            ])
+            ->json();
 
         return $this->getData($response);
     }

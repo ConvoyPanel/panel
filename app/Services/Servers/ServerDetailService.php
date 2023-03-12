@@ -6,13 +6,13 @@ use Convoy\Data\Server\Eloquent\ServerEloquentData;
 use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Illuminate\Support\Arr;
 
 class ServerDetailService
 {
-    public function __construct(private NetworkService $networkService, private ProxmoxAllocationRepository $allocationRepository, private ProxmoxCloudinitRepository $cloudinitRepository, private AllocationService $allocationService, private CloudinitService $cloudinitService)
+    public function __construct(private NetworkService $networkService, private ProxmoxConfigRepository $allocationRepository, private ProxmoxCloudinitRepository $cloudinitRepository, private AllocationService $allocationService, private CloudinitService $cloudinitService)
     {
     }
 

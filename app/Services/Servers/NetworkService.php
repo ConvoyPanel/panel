@@ -9,7 +9,7 @@ use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxAllocationRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Convoy\Services\ProxmoxService;
@@ -17,30 +17,30 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
-class NetworkService extends ProxmoxService
+class NetworkService
 {
-    public function __construct(private ProxmoxFirewallRepository $firewallRepository, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $cloudinitRepository, private ProxmoxAllocationRepository $allocationRepository, private ConnectionInterface $connection)
+    public function __construct(private ProxmoxFirewallRepository $firewallRepository, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $cloudinitRepository, private ProxmoxConfigRepository $allocationRepository, private ConnectionInterface $connection)
     {
     }
 
     public function deleteIpset(Server $server, string $name)
     {
-        $this->allocationRepository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
-        $addresses = array_column($this->allocationRepository->getLockedIps($name), 'cidr');
+        $addresses = array_column($this->firewallRepository->getLockedIps($name), 'cidr');
 
         foreach ($addresses as $address) {
-            $this->allocationRepository->unlockIp($name, $address);
+            $this->firewallRepository->unlockIp($name, $address);
         }
 
-        return $this->allocationRepository->deleteIpset($name);
+        return $this->firewallRepository->deleteIpset($name);
     }
 
     public function clearIpsets(Server $server)
     {
-        $this->allocationRepository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
-        $ipSets = array_column($this->allocationRepository->getIpsets(), 'name');
+        $ipSets = array_column($this->firewallRepository->getIpsets(), 'name');
 
         foreach ($ipSets as $ipSet) {
             $this->deleteIpset($server, $ipSet);
@@ -49,12 +49,12 @@ class NetworkService extends ProxmoxService
 
     public function lockIps(Server $server, array $addresses, string $ipsetName = 'default')
     {
-        $this->allocationRepository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
-        $this->allocationRepository->createIpset($ipsetName);
+        $this->firewallRepository->createIpset($ipsetName);
 
         foreach ($addresses as $address) {
-            $this->allocationRepository->lockIp($ipsetName, $address);
+            $this->firewallRepository->lockIp($ipsetName, $address);
         }
     }
 
@@ -129,7 +129,7 @@ class NetworkService extends ProxmoxService
         $currentAddresses = $server->addresses()->get()->pluck('id')->toArray();
 
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
-        $addressesToRemove = array_filter($currentAddresses, fn ($id) => !in_array($id, $addressIds));
+        $addressesToRemove = array_filter($currentAddresses, fn($id) => !in_array($id, $addressIds));
 
         if (!empty($addressesToAdd)) {
             IPAddress::query()
