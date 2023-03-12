@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,6 +23,7 @@ class NodeFactory extends Factory
     public function definition()
     {
         return [
+            'location_id' => Location::factory(),
             'name' => $this->faker->word(),
             'cluster' => 'proxmox',
             'fqdn' => $this->faker->word(),

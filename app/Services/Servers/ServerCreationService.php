@@ -22,7 +22,7 @@ use Webmozart\Assert\Assert;
 /**
  * Class ServerCreationService
  */
-class ServerCreationService extends ProxmoxService
+class ServerCreationService
 {
     public function __construct(protected NetworkService $networkService, protected ServerRepository $repository)
     {

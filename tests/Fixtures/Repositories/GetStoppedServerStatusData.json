@@ -1,0 +1,22 @@
+{
+    "data": {
+        "maxmem": 2098200576,
+        "status": "stopped",
+        "diskwrite": 0,
+        "ha": { "managed": 0 },
+        "diskread": 0,
+        "netout": 0,
+        "serial": 1,
+        "agent": 1,
+        "mem": 0,
+        "disk": 0,
+        "netin": 0,
+        "vmid": 608782004,
+        "cpus": 2,
+        "uptime": 0,
+        "maxdisk": 4404019200,
+        "name": "windows.com",
+        "qmpstatus": "stopped",
+        "cpu": 0
+    }
+}

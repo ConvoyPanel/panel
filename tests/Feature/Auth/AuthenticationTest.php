@@ -5,11 +5,12 @@ namespace Tests\Feature\Auth;
 use Convoy\Models\User;
 use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_login_screen_can_be_rendered()
     {

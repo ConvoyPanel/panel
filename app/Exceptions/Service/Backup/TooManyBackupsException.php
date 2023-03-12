@@ -3,8 +3,9 @@
 namespace Convoy\Exceptions\Service\Backup;
 
 use Convoy\Exceptions\ConvoyException;
+use Convoy\Exceptions\DisplayException;
 
-class TooManyBackupsException extends ConvoyException
+class TooManyBackupsException extends DisplayException
 {
     /**
      * TooManyBackupsException constructor.

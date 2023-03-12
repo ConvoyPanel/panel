@@ -1,0 +1,85 @@
+{
+    "data": {
+        "proxmox-support": {
+            "pbs-dirty-bitmap-savevm": true,
+            "pbs-masterkey": true,
+            "pbs-dirty-bitmap-migration": true,
+            "backup-max-workers": true,
+            "query-bitmap-info": true,
+            "pbs-library-version": "1.3.1 (4d450bb294cac5316d2f23bf087c4b02c0543d79)",
+            "pbs-dirty-bitmap": true
+        },
+        "agent": 1,
+        "diskwrite": 13299064832,
+        "pid": 167856,
+        "running-qemu": "7.2.0",
+        "cpu": 0.0213157814979823,
+        "blockstat": {
+            "scsi1": {
+                "rd_total_time_ns": 195212549210,
+                "rd_operations": 225653,
+                "idle_time_ns": 2368081745,
+                "account_failed": true,
+                "unmap_merged": 0,
+                "invalid_wr_operations": 0,
+                "timed_stats": [],
+                "wr_bytes": 13299064832,
+                "wr_merged": 0,
+                "wr_total_time_ns": 244214638996,
+                "wr_operations": 319971,
+                "failed_rd_operations": 0,
+                "rd_bytes": 15045113856,
+                "rd_merged": 0,
+                "invalid_rd_operations": 0,
+                "account_invalid": true,
+                "invalid_unmap_operations": 0,
+                "failed_flush_operations": 0,
+                "failed_unmap_operations": 0,
+                "flush_operations": 93819,
+                "unmap_bytes": 26335698944,
+                "unmap_total_time_ns": 15513723682,
+                "wr_highest_offset": 21106470912,
+                "flush_total_time_ns": 822443477210,
+                "invalid_flush_operations": 0,
+                "failed_wr_operations": 0,
+                "unmap_operations": 22641
+            }
+        },
+        "nics": {
+            "tap196149490i0": {
+                "netin": 683478924,
+                "netout": 5255418
+            }
+        },
+        "cpus": 2,
+        "uptime": 296059,
+        "ha": {
+            "managed": 0
+        },
+        "diskread": 15045113856,
+        "running-machine": "pc-q35-6.2+pve0",
+        "netout": 5255418,
+        "freemem": 2958135296,
+        "mem": 1336176640,
+        "maxmem": 4294967296,
+        "status": "running",
+        "maxdisk": 21474836480,
+        "name": "microsoft-windows.com",
+        "qmpstatus": "running",
+        "ballooninfo": {
+            "total_mem": 4294311936,
+            "major_page_faults": 428025,
+            "free_mem": 2958135296,
+            "mem_swapped_in": 19509415936,
+            "mem_swapped_out": 464236544,
+            "minor_page_faults": 126902798,
+            "max_mem": 4294967296,
+            "actual": 4294967296,
+            "last_update": 1678636396
+        },
+        "disk": 0,
+        "netin": 683478924,
+        "balloon": 4294967296,
+        "vmid": 196149490
+    }
+}

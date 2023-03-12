@@ -3,11 +3,12 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 

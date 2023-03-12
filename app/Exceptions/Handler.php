@@ -2,6 +2,7 @@
 
 namespace Convoy\Exceptions;
 
+use Illuminate\Container\Container;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -46,5 +47,22 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Return an array of exceptions that should not be reported.
+     */
+    public static function isReportable(\Exception $exception): bool
+    {
+        return (new static(Container::getInstance()))->shouldReport($exception);
+    }
+
+    /**
+     * Helper method to allow reaching into the handler to convert an exception
+     * into the expected array response type.
+     */
+    public static function toArray(\Throwable $e): array
+    {
+        return (new self(app()))->convertExceptionToArray($e);
     }
 }

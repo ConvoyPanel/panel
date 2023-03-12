@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers\Backups;
 
+use Convoy\Exceptions\Service\Backup\BackupLockedException;
 use Convoy\Models\Backup;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
@@ -17,8 +18,8 @@ class BackupDeletionService
 
     public function handle(Backup $backup)
     {
-        if (is_null($backup->completed_at)) {
-            throw new BadRequestHttpException('This backup cannot be restored at this time: not completed.');
+        if ($backup->is_locked && ($backup->is_successful && !is_null($backup->completed_at))) {
+            throw new BackupLockedException();
         }
 
         $this->connection->transaction(function () use ($backup) {

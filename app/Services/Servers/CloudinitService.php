@@ -55,7 +55,7 @@ class CloudinitService
             'name' => $hostname,
         ]);
 
-        return $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
+        $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
     public function getNameservers(Server $server)
