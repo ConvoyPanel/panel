@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.8.1-beta
+
+### Fixed
+
+- Rate limit throttling
+
 ## v3.8.0-beta
 
 ### Changed

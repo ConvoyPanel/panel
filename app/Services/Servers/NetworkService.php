@@ -110,7 +110,7 @@ class NetworkService extends ProxmoxService
 
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
 
-        $this->allocationRepository->setServer($this->server)->update(['net0' => "virtio={$macAddress},bridge={$this->node->network}"]);
+        $this->allocationRepository->setServer($server)->update(['net0' => "virtio={$macAddress},bridge={$server->node->network}"]);
     }
 
     public function updateRateLimit(Server $server, ?int $mebibytes = null)
@@ -118,7 +118,7 @@ class NetworkService extends ProxmoxService
         $macAddresses = $this->getMacAddresses($server, true, true);
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
 
-        $payload = "virtio={$macAddress},bridge={$this->node->network}";
+        $payload = "virtio={$macAddress},bridge={$server->node->network}";
 
         if (!is_null($mebibytes))
             $payload .= ',rate=' . $mebibytes;
