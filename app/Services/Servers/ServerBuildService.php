@@ -19,7 +19,7 @@ use Webmozart\Assert\Assert;
 /**
  * Class SnapshotService
  */
-class ServerBuildService extends ProxmoxService
+class ServerBuildService
 {
     public function __construct(
         private ServerDetailService $detailService,
@@ -98,7 +98,7 @@ class ServerBuildService extends ProxmoxService
         }
 
         if(!empty($deployment->account_password)) {
-            $this->cloudinitService->setServer($deployment->server)->changePassword($deployment->account_password, AuthenticationType::PASSWORD);
+            $this->cloudinitService->setServer($deployment->server)->updatePassword($deployment->account_password, AuthenticationType::PASSWORD);
         }
 
         $this->runUpdate($this->buildModificationService, $deployment);

@@ -23,9 +23,9 @@ class NetworkService extends ProxmoxService
     {
     }
 
-    public function deleteIpset(string $name)
+    public function deleteIpset(Server $server, string $name)
     {
-        $this->allocationRepository->setServer($this->server);
+        $this->allocationRepository->setServer($server);
 
         $addresses = array_column($this->allocationRepository->getLockedIps($name), 'cidr');
 
@@ -33,23 +33,23 @@ class NetworkService extends ProxmoxService
             $this->allocationRepository->unlockIp($name, $address);
         }
 
-        return $this->allocationRepository->setServer($this->server)->deleteIpset($name);
+        return $this->allocationRepository->deleteIpset($name);
     }
 
-    public function clearIpsets()
+    public function clearIpsets(Server $server)
     {
-        $this->allocationRepository->setServer($this->server);
+        $this->allocationRepository->setServer($server);
 
         $ipSets = array_column($this->allocationRepository->getIpsets(), 'name');
 
         foreach ($ipSets as $ipSet) {
-            $this->deleteIpset($ipSet);
+            $this->deleteIpset($server, $ipSet);
         }
     }
 
-    public function lockIps(array $addresses, string $ipsetName = 'default')
+    public function lockIps(Server $server, array $addresses, string $ipsetName = 'default')
     {
-        $this->allocationRepository->setServer($this->server);
+        $this->allocationRepository->setServer($server);
 
         $this->allocationRepository->createIpset($ipsetName);
 
@@ -91,17 +91,15 @@ class NetworkService extends ProxmoxService
 
     public function syncSettings(Server $server)
     {
-        $this->setServer($server);
-
         $macAddresses = $this->getMacAddresses($server, true, true);
         $addresses = $this->getAddresses($server);
 
-        $this->clearIpsets();
+        $this->clearIpsets($server);
         $this->cloudinitService->updateIpConfig($server, CloudinitAddressConfigData::from([
             'ipv4' => $addresses->ipv4->first()?->toArray(),
             'ipv6' => $addresses->ipv6->first()?->toArray(),
         ]));
-        $this->lockIps(array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())));
+        $this->lockIps($server, array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())));
         $this->firewallRepository->setServer($server)->updateOptions([
             'ipfilter' => true,
             'policy_in' => 'ACCEPT',

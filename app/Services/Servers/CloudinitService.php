@@ -29,9 +29,9 @@ class CloudinitService extends ProxmoxService
      * @param  array  $params
      * @return mixed
      */
-    public function changePassword(?string $password, AuthenticationType $type)
+    public function updatePassword(Server $server, ?string $password, AuthenticationType $type)
     {
-        $this->repository->setServer($this->server);
+        $this->repository->setServer($server);
 
         if (AuthenticationType::KEY === $type) {
             if (!empty($password)) {

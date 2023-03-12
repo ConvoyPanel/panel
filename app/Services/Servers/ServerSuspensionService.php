@@ -10,7 +10,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Services\ProxmoxService;
 use Webmozart\Assert\Assert;
 
-class ServerSuspensionService extends ProxmoxService
+class ServerSuspensionService
 {
     public function __construct(private ProxmoxPowerRepository $powerRepository)
     {

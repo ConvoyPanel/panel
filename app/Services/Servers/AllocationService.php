@@ -13,7 +13,7 @@ use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
-class AllocationService extends ProxmoxService
+class AllocationService
 {
     public function __construct(protected ProxmoxAllocationRepository $repository)
     {
