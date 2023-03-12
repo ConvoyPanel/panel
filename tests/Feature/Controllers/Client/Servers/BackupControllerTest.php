@@ -3,10 +3,9 @@
 use Convoy\Jobs\Server\MonitorBackupJob;
 use Convoy\Jobs\Server\MonitorBackupRestorationJob;
 use Convoy\Models\Backup;
+use Convoy\Models\ISO;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
-
-use function PHPUnit\Framework\assertJson;
 
 beforeEach(fn () => Http::preventStrayRequests());
 
@@ -35,7 +34,7 @@ it('can create backups', function () {
 it('can restore backups', function () {
     Queue::fake();
     Http::fake([
-        '*/status/current' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/GetStoppedServerStatusData.json')), 200),
+        '*/status/current' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json')), 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
 
     ]);

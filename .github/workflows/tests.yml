@@ -46,8 +46,8 @@ jobs:
       - run: composer install --prefer-dist --no-interaction --no-progress
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff
         continue-on-error: true
-      - name: execute unit tests
-        run: vendor/bin/phpunit --bootstrap vendor/autoload.php tests/Unit
+      - name: execute feature tests
+        run: vendor/bin/phpunit --bootstrap vendor/autoload.php tests/Feature
         if: ${{ always() }}
         env:
           DB_HOST: UNIT_NO_DB

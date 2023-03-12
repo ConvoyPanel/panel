@@ -22,6 +22,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
 use Convoy\Transformers\Client\MediaTransformer;
+use Convoy\Transformers\Client\RenamedServerTransformer;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Transformers\Client\ServerNetworkTransformer;
 use Convoy\Transformers\Client\ServerSecurityTransformer;
@@ -46,7 +47,7 @@ class SettingsController extends ApplicationApiController
             $server->update($request->validated());
         });
 
-        return $this->returnNoContent();
+        return fractal($server, new RenamedServerTransformer)->respond();
     }
 
     public function getTemplateGroups(Request $request, Server $server)
@@ -170,7 +171,6 @@ class SettingsController extends ApplicationApiController
 
     public function getSecurity(Server $server)
     {
-
         return fractal()->item([
             'ssh_keys' => rawurldecode(Arr::get($this->repository->setServer($server)->getConfig(), 'sshkeys')) ?? ''
         ], new ServerSecurityTransformer)->respond();
@@ -183,5 +183,7 @@ class SettingsController extends ApplicationApiController
         } else {
             $this->cloudinitService->updatePassword($server, $request->password, AuthenticationType::from($request->type));
         }
+
+        return $this->returnNoContent();
     }
 }

@@ -3,8 +3,9 @@
 namespace Convoy\Exceptions\Service\Server\Allocation;
 
 use Convoy\Exceptions\ConvoyException;
+use Convoy\Exceptions\DisplayException;
 
-class IsoAlreadyMountedException extends ConvoyException
+class IsoAlreadyMountedException extends DisplayException
 {
     public function __construct()
     {
