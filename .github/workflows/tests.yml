@@ -23,7 +23,7 @@ jobs:
         run: docker compose exec workspace composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run database migrations
-        run: docker compose exec php artisan migrate
+        run: docker compose exec workspace php artisan migrate
 
       - name: Run tests
-        run: docker-compose run --rm app vendor/bin/phpunit tests
+        run: docker compose exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
