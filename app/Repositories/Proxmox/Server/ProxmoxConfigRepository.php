@@ -21,10 +21,21 @@ class ProxmoxConfigRepository extends ProxmoxRepository
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid
             ])
-            ->get('/api2/json/nodes/{node}/qemu/{server}/pending')
+            ->get('/api2/json/nodes/{node}/qemu/{server}/config')
             ->json();
 
-        return $this->getData($response);
+
+        $unparsed = $this->getData($response);
+        $parsed = [];
+
+        foreach ($unparsed as $key => $value ) {
+            $parsed[] = [
+                'key' => $key,
+                'value' => $value,
+            ];
+        }
+
+        return $parsed;
     }
 
     public function update(array $payload = [], bool $put = false)

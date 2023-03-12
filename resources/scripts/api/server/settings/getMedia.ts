@@ -14,7 +14,7 @@ export const rawDataToMedia = (data: any): Media => data
 const getMedia = async (serverUuid: string): Promise<Media[]> => {
     const {
         data: { data },
-    } = await http.get(`/api/client/servers/${serverUuid}/settings/hardware/media`)
+    } = await http.get(`/api/client/servers/${serverUuid}/settings/hardware/isos`)
 
     return data.map(rawDataToMedia)
 }

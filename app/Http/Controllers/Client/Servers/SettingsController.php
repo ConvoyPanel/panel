@@ -121,7 +121,7 @@ class SettingsController extends ApplicationApiController
         if ($request->user()->root_admin) {
             $media = $server->node->isos()->where('is_successful', '=', true)->get()->toArray();
         } else {
-            $media = $server->node->isos()->where(['hidden', '=', false], ['is_successful', '=', true])->get()->toArray();
+            $media = $server->node->isos()->where([['hidden', '=', false], ['is_successful', '=', true]])->get()->toArray();
         }
 
         $media = array_map(function ($iso) use ($disks) {
@@ -166,13 +166,16 @@ class SettingsController extends ApplicationApiController
     {
         $this->cloudinitService->updateNameservers($server, $request->nameservers);
 
-        return $this->returnNoContent();
+        return fractal()->item([
+            'nameservers' => $this->cloudinitService->getNameservers($server),
+        ], new ServerNetworkTransformer())->respond();
     }
 
     public function getSecurity(Server $server)
     {
+
         return fractal()->item([
-            'ssh_keys' => rawurldecode(Arr::get($this->repository->setServer($server)->getConfig(), 'sshkeys')) ?? ''
+            'ssh_keys' => $this->cloudinitService->getSSHKeys($server),
         ], new ServerSecurityTransformer)->respond();
     }
 

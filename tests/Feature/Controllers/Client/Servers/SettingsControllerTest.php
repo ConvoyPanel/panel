@@ -3,7 +3,7 @@
 use Convoy\Models\ISO;
 use Illuminate\Support\Facades\Http;
 
-beforeEach(fn () => Http::preventStrayRequests());
+beforeEach(fn() => Http::preventStrayRequests());
 
 it('can rename servers', function () {
     Http::fake([
@@ -22,9 +22,40 @@ it('can rename servers', function () {
         ->assertJsonPath('data.hostname', 'advinservers.com');
 });
 
+it('can change nameservers', function () {
+    Http::fake([
+        '*/config' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->putJson("/api/client/servers/{$server->uuid}/settings/network", [
+        'nameservers' => [
+            '1.1.1.1',
+            '1.0.0.1',
+        ]
+    ]);
+
+    $response->assertOk();
+});
+
+it('can fetch sshkeys', function () {
+    Http::fake([
+        '*/config' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->getJson("/api/client/servers/{$server->uuid}/settings/security");
+
+    $response->assertOk();
+});
+
 it('can change server passwords', function () {
     Http::fake([
-        '*/pending' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerPendingConfigData.json')), 200),
+        '*/config' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')), 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
 
@@ -38,9 +69,27 @@ it('can change server passwords', function () {
     $response->assertStatus(204);
 });
 
+it('can fetch available ISOs', function () {
+    Http::fake([
+        '*/config' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    ISO::factory()->count(10)->create([
+        'node_id' => $server->node_id,
+        'hidden' => false,
+    ]);
+
+    $response = $this->actingAs($user)->getJson("/api/client/servers/{$server->uuid}/settings/hardware/isos");
+
+    $response->assertOk();
+});
+
 it('can mount visible ISOs', function () {
     Http::fake([
-        '*/pending' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerPendingConfigData.json')), 200),
+        '*/config' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')), 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
 

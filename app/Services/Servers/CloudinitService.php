@@ -20,8 +20,15 @@ use Illuminate\Support\Arr;
  */
 class CloudinitService
 {
-    public function __construct(private ProxmoxCloudinitRepository $repository, private ProxmoxConfigRepository $allocationRepository)
+    public function __construct(private ProxmoxConfigRepository $configRepository)
     {
+    }
+
+    public function getSSHKeys(Server $server): string
+    {
+        $raw = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
+
+        return rawurldecode($raw);
     }
 
     /**
@@ -31,16 +38,16 @@ class CloudinitService
      */
     public function updatePassword(Server $server, ?string $password, AuthenticationType $type)
     {
-        $this->repository->setServer($server);
+        $this->configRepository->setServer($server);
 
         if (AuthenticationType::KEY === $type) {
             if (!empty($password)) {
-                return $this->repository->update([$type->value => rawurlencode($password)]);
+                return $this->configRepository->update([$type->value => rawurlencode($password)]);
             } else {
-                $this->repository->update(['delete' => $type->value]);
+                $this->configRepository->update(['delete' => $type->value]);
             }
         } else {
-            return $this->repository->update([$type->value => $password]);
+            return $this->configRepository->update([$type->value => $password]);
         }
     }
 
@@ -51,16 +58,16 @@ class CloudinitService
      */
     public function updateHostname(Server $server, string $hostname)
     {
-        $this->allocationRepository->setServer($server)->update([
+        $this->configRepository->setServer($server)->update([
             'name' => $hostname,
         ]);
 
-        $this->repository->setServer($server)->update(['searchdomain' => $hostname]);
+        $this->configRepository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
     public function getNameservers(Server $server)
     {
-        $nameservers = Arr::get($this->repository->setServer($server)->getConfig(), 'nameserver');
+        $nameservers = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'nameserver')->firstOrFail()['value'];
 
         return $nameservers ? explode(' ', $nameservers) : [];
     }
@@ -72,19 +79,17 @@ class CloudinitService
            ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : [])
         ];
 
-        return $this->repository->setServer($server)->update($payload);
+        return $this->configRepository->setServer($server)->update($payload);
     }
 
     public function getIpConfig(Server $server): AddressConfigData
     {
-        $data = $this->repository->setServer($server)->getConfig();
+        $rawConfig = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'ipconfig0')->first()['value'];
 
         $config = [
             'ipv4' => null,
             'ipv6' => null,
         ];
-
-        $rawConfig = Arr::get($data, 'ipconfig0');
 
         if ($rawConfig) {
             $configs = explode(',', $rawConfig);
@@ -136,7 +141,7 @@ class CloudinitService
             $payload[] = 'gw6=' . $ipv6->gateway;
         }
 
-        return $this->repository->setServer($server)->update([
+        return $this->configRepository->setServer($server)->update([
             'ipconfig0' => Arr::join($payload, ','),
         ]);
     }
