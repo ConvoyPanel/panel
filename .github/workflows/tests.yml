@@ -17,13 +17,13 @@ jobs:
         run: cp .env.ci .env
 
       - name: Start Docker Containers
-        run: docker compose up -d database redis workspace
+        run: docker compose -f docker-compose.ci.yml up -d
 
       - name: Install dependencies
-        run: docker compose exec workspace composer install --prefer-dist --no-interaction --no-progress
+        run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run database migrations
-        run: docker compose exec workspace php artisan migrate
+        run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
 
       - name: Run tests
-        run: docker compose exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
+        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
