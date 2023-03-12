@@ -21,7 +21,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 uses(
     Tests\TestCase::class,
     // Illuminate\Foundation\Testing\RefreshDatabase::class,
-)->in('Feature');
+)->in('Feature', 'Unit');
 
 uses(DatabaseTransactions::class)->in('Feature');
 
@@ -55,9 +55,12 @@ function createServerModel()
 {
 
     $location = Location::factory()->create();
+    /** @var User $user */
     $user = User::factory()->create();
+    /** @var Node $node */
     $node = Node::factory()->for($location)->create();
     $service = app(Convoy\Services\Servers\ServerCreationService::class);
+    /** @var Server $server */
     $server = Server::factory()->create(function() use ($user, $node, $service) {
         $uuid = $service->generateUniqueUuidCombo();
 

@@ -31,5 +31,8 @@ jobs:
       - name: Run database migrations
         run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
 
-      - name: Run tests
+      - name: Run feature tests
         run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
+
+      - name: Run unit tests
+        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Unit

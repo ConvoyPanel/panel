@@ -24,8 +24,6 @@ class VncService
         $this->serverRepository->setServer($server);
 
         $user = $this->accessRepository->createUser(CreateUserData::from([
-            'id' => null,
-            'password' => null,
             'realm_type' => 'pve',
             'enabled' => true,
             'expires_at' => now()->addDay(),

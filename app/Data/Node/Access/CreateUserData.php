@@ -13,13 +13,13 @@ use Convoy\Enums\Node\Access\RealmType;
 class CreateUserData extends Data
 {
     public function __construct(
-      #[Min(1), Max(60)]
-      public ?string $id,
       #[WithCast(EnumCast::class)]
       public RealmType $realm_type,
-      #[Min(1), Max(64)]
-      public ?string $password,
       public bool $enabled,
-      public ?Carbon $expires_at,
+      #[Min(1), Max(60)]
+      public ?string $id = null,
+      #[Min(1), Max(64)]
+      public ?string $password = null,
+      public ?Carbon $expires_at = null,
     ) {}
 }

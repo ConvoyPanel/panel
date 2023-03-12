@@ -1,0 +1,61 @@
+{
+  "data": {
+    "cap": {
+      "vms": {
+        "VM.Config.Disk": 1,
+        "VM.Snapshot.Rollback": 1,
+        "VM.PowerMgmt": 1,
+        "VM.Config.Options": 1,
+        "VM.Config.Cloudinit": 1,
+        "VM.Config.CDROM": 1,
+        "VM.Allocate": 1,
+        "VM.Config.CPU": 1,
+        "VM.Audit": 1,
+        "VM.Migrate": 1,
+        "VM.Config.HWType": 1,
+        "VM.Config.Network": 1,
+        "VM.Snapshot": 1,
+        "VM.Config.Memory": 1,
+        "Permissions.Modify": 1,
+        "VM.Monitor": 1,
+        "VM.Backup": 1,
+        "VM.Console": 1,
+        "VM.Clone": 1
+      },
+      "dc": {
+        "Sys.Audit": 1,
+        "SDN.Allocate": 1,
+        "SDN.Audit": 1
+      },
+      "sdn": {
+        "Permissions.Modify": 1,
+        "SDN.Audit": 1,
+        "SDN.Allocate": 1
+      },
+      "access": {
+        "Group.Allocate": 1,
+        "User.Modify": 1,
+        "Permissions.Modify": 1
+      },
+      "nodes": {
+        "Sys.PowerMgmt": 1,
+        "Sys.Console": 1,
+        "Sys.Incoming": 1,
+        "Sys.Modify": 1,
+        "Permissions.Modify": 1,
+        "Sys.Syslog": 1,
+        "Sys.Audit": 1
+      },
+      "storage": {
+        "Permissions.Modify": 1,
+        "Datastore.AllocateSpace": 1,
+        "Datastore.AllocateTemplate": 1,
+        "Datastore.Audit": 1,
+        "Datastore.Allocate": 1
+      }
+    },
+    "username": "advinservers@pve",
+    "ticket": "PVE:advinservers@pve:640E59CA::WEiyIzDYbuwxePvPBmFgbA5n5R6mZeTbJRmau2WoQ83ribi/wVvXEZkeD9uk31h++RuSgn22eMuAw4U7RF00XCfqX/ePgbmIxZk9USjwv5mc273esY2mck3+NibuQnq1Y4r4SBmd3z1prgg4/5d6vSdBddAcpEpQK3ajLwR9dGyoWRznyDpnJlqwd2Sg4z32/bMDI1sm1pwf8rgbRP8qHDQb64i83eQRYlBBe7QtFq3dvIiZAgAX5KakYU/eUBM4fwS9mW0WMwle62YJwcG2aUHD7SQE/TeDkw/9j8DSCiPVfs0r4mRwCH1m8KoWcooM9Zsb7vsxG7h5aqpRh8DzIw==",
+    "CSRFPreventionToken": "240E59CA:mnCMtp+D/lUWmv1EuBX/cQjBHjd7V3WrXH41NdWiIdg"
+  }
+}

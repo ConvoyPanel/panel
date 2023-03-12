@@ -2,15 +2,11 @@
 
 namespace Convoy\Repositories\Proxmox\Node;
 
-use Carbon\Carbon;
 use Convoy\Data\Node\Access\CreateUserData;
 use Convoy\Data\Node\Access\UserData;
 use Convoy\Enums\Node\Access\RealmType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
 
@@ -40,7 +36,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             'expire' => $data->expires_at?->timestamp ?? false,
         ];
 
-        $response = $this->getHttpClient()
+        $this->getHttpClient()
             ->post('/api2/json/access/users', $payload)
             ->json();
 

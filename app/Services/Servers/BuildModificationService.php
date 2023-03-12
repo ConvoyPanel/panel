@@ -41,14 +41,15 @@ class BuildModificationService
         $this->networkService->syncSettings($server);
 
         // find a disk that has a corresponding disk in the deployment
-        $disks = collect($disks->toArray())->pluck('interface')->all();
-        $bootOrder = array_filter(collect($bootOrder->filter(fn(DiskData $disk) => !$disk->is_media)->toArray())->pluck('interface')->toArray(), fn($disk) => in_array($disk, $disks));
+        $disks = collect($disks->toArray())->pluck('interface');
+        $disksArray = $disks->all();
+        $bootOrder = array_filter(collect($bootOrder->filter(fn(DiskData $disk) => !$disk->is_media)->toArray())->pluck('interface')->toArray(), fn($disk) => in_array($disk, $disksArray));
 
         if (count($bootOrder) > 0) {
             /** @var DiskData $disk */
             $disk = $disks->where('interface', '=', Arr::first($bootOrder))->first();
 
-            $diff = $eloquentDetails->limits->disk - $disk->size;
+            $diff = $server->disk - $disk->size;
 
             if ($diff > 0) {
                 $this->diskRepository->setServer($server)->resizeDisk($disk->interface, $diff);
