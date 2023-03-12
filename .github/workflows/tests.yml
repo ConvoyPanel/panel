@@ -44,6 +44,7 @@ jobs:
           coverage: none
       - run: cp .env.ci .env
       - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: php artisan migrate
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff
         continue-on-error: true
       - name: execute feature tests
