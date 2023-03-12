@@ -1,9 +1,6 @@
 services:
   workspace:
-    build:
-      context: ./dockerfiles/workspace
-      args:
-        - PHP_XDEBUG=$PHP_XDEBUG
+    image: performave/convoy-workspace:latest
     tty: true
     volumes:
       - .:/var/www/
