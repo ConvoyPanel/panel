@@ -50,7 +50,8 @@ jobs:
         run: vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
         if: ${{ always() }}
         env:
-          DB_HOST: UNIT_NO_DB
+         DB_PORT: ${{ job.services.database.ports[3306] }}
+         DB_USERNAME: root
 #      - name: execute integration tests
 #        run: vendor/bin/phpunit tests/Integration
 #        env:
