@@ -47,7 +47,7 @@ jobs:
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff
         continue-on-error: true
       - name: execute feature tests
-        run: vendor/bin/phpunit --bootstrap vendor/autoload.php tests/Feature
+        run: vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
         if: ${{ always() }}
         env:
           DB_HOST: UNIT_NO_DB
