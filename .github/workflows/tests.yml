@@ -17,7 +17,7 @@ jobs:
         run: cp .env.ci .env
 
       - name: Start Docker Containers
-        run: docker compose up -f docker-compose.ci.yml -d
+        run: docker compose -f docker-compose.ci.yml up -d
 
       - name: Install dependencies
         run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
