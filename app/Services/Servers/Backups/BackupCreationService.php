@@ -3,30 +3,25 @@
 namespace Convoy\Services\Servers\Backups;
 
 use Carbon\CarbonImmutable;
-use Convoy\Enums\Server\State;
-use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Enums\Server\BackupCompressionType;
+use Convoy\Enums\Server\BackupMode;
 use Convoy\Exceptions\Service\Backup\TooManyBackupsException;
 use Convoy\Jobs\Server\MonitorBackupJob;
-use Convoy\Jobs\Server\MonitorBackupRestorationJob;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\Servers\ServerDetailService;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class BackupCreationService
 {
-    public function __construct(private ConnectionInterface $connection, private ProxmoxServerRepository $serverRepository, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
+    public function __construct(private ConnectionInterface $connection, private ProxmoxBackupRepository $proxmoxRepository, private BackupRepository $eloquentRepository)
     {
     }
 
-    public function create(Server $server, string $name, string $mode, string $compressionType, ?bool $isLocked = false): ?Backup
+    public function create(Server $server, string $name, BackupMode $mode, BackupCompressionType $compressionType, ?bool $isLocked = false): ?Backup
     {
         $limit = config('backups.throttles.limit');
         $period = config('backups.throttles.period');

@@ -2,6 +2,8 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Enums\Server\BackupCompressionType;
+use Convoy\Enums\Server\BackupMode;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use Convoy\Models\Backup;
@@ -10,6 +12,7 @@ use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Convoy\Services\Servers\Backups\BackupCreationService;
 use Convoy\Services\Servers\Backups\BackupDeletionService;
+use Convoy\Services\Servers\Backups\RestoreFromBackupService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\BackupTransformer;
 use Illuminate\Database\ConnectionInterface;
@@ -19,9 +22,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 class BackupController extends ApplicationApiController
 {
     public function __construct(
-        private BackupCreationService   $backupCreationService,
-        private BackupDeletionService   $backupDeletionService,
-        private BackupRepository        $backupRepository,
+        private BackupCreationService    $backupCreationService,
+        private BackupDeletionService    $backupDeletionService,
+        private RestoreFromBackupService $restoreFromBackupService,
+        private BackupRepository         $backupRepository,
     )
     {
     }
@@ -43,14 +47,19 @@ class BackupController extends ApplicationApiController
     public function store(Server $server, StoreBackupRequest $request)
     {
         $backup = $this->backupCreationService
-            ->create($server, $request->name, $request->mode, $request->compression_type, $request->input('locked', false));
+            ->create(server: $server,
+                name: $request->name,
+                mode: $request->enum('mode', BackupMode::class),
+                compressionType: $request->enum('compression_type', BackupCompressionType::class),
+                isLocked: $request->input('locked', false)
+            );
 
         return fractal($backup, new BackupTransformer)->respond();
     }
 
     public function restore(Server $server, Backup $backup)
     {
-        $this->backupService->restore($server, $backup);
+        $this->restoreFromBackupService->handle($server, $backup);
 
         return $this->returnNoContent();
     }

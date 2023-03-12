@@ -40,15 +40,16 @@ class ProxmoxPowerRepository extends ProxmoxRepository
                 break;
         }
 
-        try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/status/%s', $this->node->cluster, $this->server->vmid, $parsedAction), [
-                'json' => [
-                    ...($parsedAction !== 'suspend' ? ['timeout' => 30] : ['skiplock' => 0])
-                ],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid,
+                'action' => $parsedAction,
+            ])
+            ->post('/api2/json/nodes/{node}/qemu/{server}/status/{action}', [
+                ...($parsedAction !== 'suspend' ? ['timeout' => 30] : ['skiplock' => false])
+            ])
+            ->json();
 
         return $this->getData($response);
     }

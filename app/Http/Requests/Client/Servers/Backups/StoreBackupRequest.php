@@ -2,8 +2,11 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Backups;
 
+use Convoy\Enums\Server\BackupCompressionType;
+use Convoy\Enums\Server\BackupMode;
 use Convoy\Models\Backup;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreBackupRequest extends FormRequest
 {
@@ -29,8 +32,8 @@ class StoreBackupRequest extends FormRequest
         return [
             'name' => $rules['name'],
             'is_locked' => $rules['is_locked'],
-            'mode' => 'required|in:snapshot,suspend,stop',
-            'compression_type' => 'required|in:none,lzo,gzip,zstd',
+            'mode' => ['required', new Enum(BackupMode::class)],
+            'compression_type' => ['required', new Enum(BackupCompressionType::class)],
         ];
     }
 }

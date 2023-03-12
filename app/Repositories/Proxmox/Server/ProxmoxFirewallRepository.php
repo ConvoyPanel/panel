@@ -14,16 +14,13 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->put(
-                sprintf('/api2/json/nodes/%s/qemu/%s/firewall/options', $this->node->cluster, $this->server->vmid),
-                [
-                    'json' => $payload,
-                ]
-            );
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid
+            ])
+            ->put('/api2/json/nodes/{node}/qemu/{server}/firewall/options', $payload)
+            ->json();
 
         return $this->getData($response);
     }

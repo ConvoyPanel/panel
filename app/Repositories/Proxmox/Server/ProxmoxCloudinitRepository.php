@@ -19,11 +19,13 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/config', $this->node->cluster, $this->server->vmid));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid
+            ])
+            ->get('/api2/json/nodes/{node}/qemu/{server}/config')
+            ->json();
 
         return $this->getData($response);
     }
@@ -32,13 +34,13 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->put(sprintf('/api2/json/nodes/%s/qemu/%s/config', $this->node->cluster, $this->server->vmid), [
-                'json' => $params,
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid
+            ])
+            ->put('/api2/json/nodes/{node}/qemu/{server}/config')
+            ->json();
 
         return $this->getData($response);
     }

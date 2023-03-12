@@ -2,16 +2,15 @@
 
 namespace Convoy\Repositories\Proxmox;
 
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use Illuminate\Contracts\Foundation\Application;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 use Webmozart\Assert\Assert;
-use GuzzleRetry\GuzzleRetryMiddleware;
 
 abstract class ProxmoxRepository
 {
@@ -58,47 +57,31 @@ abstract class ProxmoxRepository
      *
      * @return mixed
      */
-    public function getData(ResponseInterface $response)
+    public function getData(array|string $response)
     {
-        $json = json_decode($response->getBody(), true);
-
-        return $json['data'] ?? $json;
+        return $response['data'] ?? $response;
     }
 
     /**
      * Return an instance of the Guzzle HTTP Client to be used for requests.
      */
-    public function getHttpClient(array $headers = [], bool $authorize = true): Client
+    public function getHttpClient(array $headers = []): PendingRequest
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        return new Client([
+        return Http::withOptions([
             'verify' => $this->app->environment('production'),
             'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
-            'handler' => $this->getHandlerStack(),
             'headers' => array_merge($headers, [
-                'Authorization' => $authorize ? "PVEAPIToken={$this->node->token_id}={$this->node->secret}" : null,
+                'Authorization' => "PVEAPIToken={$this->node->token_id}={$this->node->secret}",
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
                 'User-Agent' => null,
             ]),
-        ]);
-    }
-
-    public function getHandlerStack()
-    {
-        $stack = HandlerStack::create();
-
-        $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
-            return $request->withoutHeader('User-Agent');
-        }));
-        $stack->push(GuzzleRetryMiddleware::factory([
-            'max_retry_attempts' => 3,
-            'retry_on_timeout' => true,
-        ]));
-
-        return $stack;
+        ])->throw(function (Response $response, RequestException $e) {
+            throw new ProxmoxConnectionException($e);
+        });
     }
 }

@@ -3,6 +3,7 @@
 namespace Convoy\Services\Nodes;
 
 use Carbon\Carbon;
+use Convoy\Enums\Server\MetricTimeframe;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
@@ -18,7 +19,7 @@ class ServerUsagesSyncService
         $servers = $node->servers;
 
         $servers->each(function (Server $server) {
-            $metrics = $this->repository->setServer($server)->getMetrics('hour');
+            $metrics = $this->repository->setServer($server)->getMetrics(MetricTimeframe::HOUR);
 
             $bandwidth = $server->bandwidth_usage;
             $endingDate = $server->hydrated_at ? Carbon::parse($server->hydrated_at) : Carbon::now()->firstOfMonth();

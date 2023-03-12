@@ -86,7 +86,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
     const modes = [
         { label: 'Snapshot', value: 'snapshot' },
         { label: 'Suspend', value: 'suspend' },
-        { label: 'Stop', value: 'stop' },
+        { label: 'Kill', value: 'kill' },
     ]
 
     return (

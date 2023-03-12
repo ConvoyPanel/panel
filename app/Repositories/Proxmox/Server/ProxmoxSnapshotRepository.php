@@ -2,10 +2,8 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
 
 class ProxmoxSnapshotRepository extends ProxmoxRepository
@@ -14,11 +12,13 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->get(sprintf('/api2/json/nodes/%s/qemu/%s/snapshot', $this->node->cluster, $this->server->vmid));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid
+            ])
+            ->get('/api2/json/nodes/{node}/qemu/{server}/snapshot')
+            ->json();
 
         return $this->getData($response);
     }
@@ -27,15 +27,15 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/snapshot', $this->node->cluster, $this->server->vmid), [
-                'json' => [
-                    'snapname' => $name,
-                ],
-            ]);
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid
+            ])
+            ->post('/api2/json/nodes/{node}/qemu/{server}/snapshot', [
+                'snapname' => $name
+            ])
+            ->json();
 
         return $this->getData($response);
     }
@@ -44,11 +44,14 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->post(sprintf('/api2/json/nodes/%s/qemu/%s/snapshot/%s/rollback', $this->node->cluster, $this->server->vmid, $name));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid,
+                'snapshot' => $name,
+            ])
+            ->post('/api2/json/nodes/{node}/qemu/{server}/snapshot/{snapshot}/rollback')
+            ->json();
 
         return $this->getData($response);
     }
@@ -57,11 +60,14 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        try {
-            $response = $this->getHttpClient()->delete(sprintf('/api2/json/nodes/%s/qemu/%s/snapshot/%s', $this->node->cluster, $this->server->vmid, $name));
-        } catch (GuzzleException $e) {
-            throw new ProxmoxConnectionException($e);
-        }
+        $response = $this->getHttpClient()
+            ->withUrlParameters([
+                'node' => $this->node->cluster,
+                'server' => $this->server->vmid,
+                'snapshot' => $name,
+            ])
+            ->delete('/api2/json/nodes/{node}/qemu/{server}/snapshot/{snapshot}')
+            ->json();
 
         return $this->getData($response);
     }
