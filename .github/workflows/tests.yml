@@ -19,11 +19,14 @@ jobs:
       - name: Start Docker Containers
         run: docker compose -f docker-compose.ci.yml up -d
 
-      - name: Install dependencies
+      - name: Install Composer dependencies
         run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Wait for database to initialize
-        run: sleep 10
+      - name: Install NPM dependencies
+        run: docker compose -f docker-compose.ci.yml exec workspace npm install
+
+      - name: Build frontend assets
+        run: docker compose -f docker-compose.ci.yml exec workspace npm run build
 
       - name: Run database migrations
         run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
