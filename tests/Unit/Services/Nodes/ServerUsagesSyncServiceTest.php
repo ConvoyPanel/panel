@@ -14,6 +14,6 @@ it('can sync server usages', function () {
     app(\Convoy\Services\Nodes\ServerUsagesSyncService::class)->handle($node);
 
     $server->refresh();
-    
-    $this->assertEquals($server->bandwidth_usage, 7340032);
+
+    expect($server->bandwidth_usage)->toBe(7340032);
 });

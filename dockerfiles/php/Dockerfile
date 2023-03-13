@@ -1,6 +1,7 @@
 FROM php:8.2-fpm-alpine
 
 ARG PHP_XDEBUG
+ARG PHP_XDEBUG_MODE='debug'
 ARG APP_ENV
 ENV PHP_IDE_CONFIG="serverName=convoy"
 
@@ -15,7 +16,7 @@ RUN if [ $APP_ENV = "local" ]; then \
 RUN if [ $PHP_XDEBUG = "true" ]; then \
             install-php-extensions xdebug; \
             echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
-            echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
+            echo "xdebug.mode=$PHP_XDEBUG_MODE" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
             echo "xdebug.idekey=convoy" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
             #echo "xdebug.log=/var/www/storage/logs/xdebug.log" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
             echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \

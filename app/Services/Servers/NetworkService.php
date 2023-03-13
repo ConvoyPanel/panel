@@ -5,17 +5,15 @@ namespace Convoy\Services\Servers;
 use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
 use Convoy\Data\Server\Eloquent\ServerAddressesData;
 use Convoy\Data\Server\MacAddressData;
-use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Models\IPAddress;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Convoy\Services\ProxmoxService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
 class NetworkService
 {
@@ -121,7 +119,7 @@ class NetworkService
         if (!is_null($mebibytes))
             $payload .= ',rate=' . $mebibytes;
 
-        return $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
+        $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
     }
 
     public function updateAddresses(Server $server, array $addressIds)

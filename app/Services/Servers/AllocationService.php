@@ -30,7 +30,7 @@ class AllocationService
         $isos = $server->node->isos;
 
         $disks = array_values(array_filter($this->repository->setServer($server)->getConfig(), function ($disk) {
-            return in_array($disk['key'], ProxmoxConfigRepository::$validDisks);
+            return in_array($disk['key'], array_column(DiskInterface::cases(), 'value'));
         }));
 
         return DiskData::collection(Arr::map($disks, function ($rawDisk) use ($isos, $server) {
@@ -79,7 +79,7 @@ class AllocationService
         $raw = collect($this->repository->setServer($server)->getConfig())->where('key', 'boot')->firstOrFail();
 
         $untaggedDisks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
-            return !ctype_space($disk) && in_array($disk, ProxmoxConfigRepository::$validDisks); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+            return !ctype_space($disk) && in_array($disk, array_column(DiskInterface::cases(), 'value')); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
         $taggedDisks = [];

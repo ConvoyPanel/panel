@@ -66,7 +66,7 @@ it('can change server passwords', function () {
         'password' => 'Advinservers is king!123',
     ]);
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
 });
 
 it('can fetch available ISOs', function () {
@@ -102,7 +102,7 @@ it('can mount visible ISOs', function () {
 
     $response = $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/settings/hardware/isos/{$iso->uuid}/mount");
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
 });
 
 it('can\'t mount hidden ISOs as non-admin user', function () {

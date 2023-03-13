@@ -49,7 +49,7 @@ it('can restore backups', function () {
 
     $response = $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore");
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     Queue::assertPushed(MonitorBackupRestorationJob::class);
 });
@@ -69,5 +69,5 @@ it('can delete backups', function () {
 
     $response = $this->actingAs($user)->deleteJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}");
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
 });

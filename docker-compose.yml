@@ -23,6 +23,7 @@ services:
       args:
         - APP_ENV=$APP_ENV
         - PHP_XDEBUG=$PHP_XDEBUG
+        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
     restart: unless-stopped
     volumes:
        - .:/var/www/
@@ -39,6 +40,7 @@ services:
       context: ./dockerfiles/workspace
       args:
         - PHP_XDEBUG=$PHP_XDEBUG
+        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
     tty: true
     ports:
       - 1234:1234

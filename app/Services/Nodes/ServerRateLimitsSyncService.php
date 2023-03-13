@@ -21,7 +21,7 @@ class ServerRateLimitsSyncService
             if ($server->bandwidth_usage >= $server->bandwidth_limit && isset($server->bandwidth_limit)) {
                 $this->service->updateRateLimit($server, 1);
             } else {
-                $this->service->setServer($server)->updateRateLimit($server);
+                $this->service->updateRateLimit($server);
             }
         });
     }
