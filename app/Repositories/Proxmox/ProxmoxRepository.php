@@ -65,11 +65,11 @@ abstract class ProxmoxRepository
     /**
      * Return an instance of the Guzzle HTTP Client to be used for requests.
      */
-    public function getHttpClient(array $headers = [], bool $shouldAuthorize = true): PendingRequest
+    public function getHttpClient(array $headers = [], array $options = [], bool $shouldAuthorize = true): PendingRequest
     {
         Assert::isInstanceOf($this->node, Node::class);
 
-        return Http::withOptions([
+        return Http::withOptions(array_merge([
             'verify' => $this->app->environment('production'),
             'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
@@ -80,7 +80,7 @@ abstract class ProxmoxRepository
                 'Content-Type' => 'application/json',
                 'User-Agent' => null,
             ]),
-        ])->throw(function (Response $response, RequestException $e) {
+        ], $options))->throw(function (Response $response, RequestException $e) {
             throw new ProxmoxConnectionException($e);
         });
     }

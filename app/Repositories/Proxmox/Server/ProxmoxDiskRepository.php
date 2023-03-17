@@ -20,7 +20,7 @@ class ProxmoxDiskRepository extends ProxmoxRepository
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid
             ])
-            ->put('/api2/json/nodes/%s/qemu/%s/resize', [
+            ->put('/api2/json/nodes/{node}/qemu/{server}/resize', [
                 'disk' => $disk->value,
                 'size' => "+{$gigabytes}G",
             ])

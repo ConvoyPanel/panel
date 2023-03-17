@@ -69,16 +69,6 @@ class ServerBuildService
 
     public function build(ServerDeploymentData $deployment)
     {
-        /*
-         * Procedure
-         *
-         * 1. Clone the template
-         * 2. Configure the specifications
-         * 3. Configure the IPs
-         * 4. Configure the disks
-         * 5. Kill the server to guarantee configurations are active
-         */
-
         $this->powerRepository->setServer($deployment->server);
 
         if ($deployment->should_create_server) {
@@ -98,7 +88,7 @@ class ServerBuildService
         }
 
         if(!empty($deployment->account_password)) {
-            $this->cloudinitService->setServer($deployment->server)->updatePassword($deployment->account_password, AuthenticationType::PASSWORD);
+            $this->cloudinitService->updatePassword($deployment->server, $deployment->account_password, AuthenticationType::PASSWORD);
         }
 
         $this->runUpdate($this->buildModificationService, $deployment);

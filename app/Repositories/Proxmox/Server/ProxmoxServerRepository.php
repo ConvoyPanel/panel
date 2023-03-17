@@ -53,14 +53,17 @@ class ProxmoxServerRepository extends ProxmoxRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $response = $this->getHttpClient()
+        $response = $this->getHttpClient(options: [
+            'query' => [
+                'destroy-unreferenced-disks' => true,
+                'purge' => true,
+            ]
+        ])
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid
             ])
-            ->delete('/api2/json/nodes/{node}/qemu/{server}', [
-                'destroy-unreferenced-disks' => true, 'purge' => true, 'skiplock' => true,
-            ])
+            ->delete('/api2/json/nodes/{node}/qemu/{server}')
             ->json();
 
         return $this->getData($response);
