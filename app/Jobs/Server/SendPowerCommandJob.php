@@ -28,7 +28,7 @@ class SendPowerCommandJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId, protected PowerAction $power, protected ?\Closure $callback = null)
+    public function __construct(protected int $serverId, protected PowerAction $power)
     {
         //
     }
@@ -48,9 +48,5 @@ class SendPowerCommandJob implements ShouldQueue
         $server = Server::findOrFail($this->serverId);
 
         $repository->setServer($server)->send($this->power);
-
-        if ($this->callback !== null) {
-            call_user_func($this->callback);
-        }
     }
 }

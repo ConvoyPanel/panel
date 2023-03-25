@@ -30,6 +30,9 @@ class ServerDeletionService
             Bus::chain([
                 new PurgeBackupsJob($server->id),
                 ...$this->buildDispatchService->getChainedDeleteJobs($server),
+                function () use ($server) {
+                    Server::findOrFail($server->id)->delete();
+                }
             ])
                 ->catch(fn() => $server->update(['status' => Status::DELETION_FAILED->value]))
                 ->dispatch();

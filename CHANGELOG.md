@@ -4,6 +4,19 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+
+## v3.9.0-rc.1
+
+### Added
+
+- Tests
+
+### Changed
+
+- Internal HTTP client from Guzzle to a wrapper of it from Laravel
+- VM building, deletion, and server deletion logic
+  - This should improve reliability of Convoy tremendously
+
 ## v3.8.1-beta
 
 ### Fixed

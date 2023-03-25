@@ -27,6 +27,8 @@ class ServerBuildDispatchService
         Bus::chain($jobs)
             ->catch(fn() => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
             ->dispatch();
+
+        $deployment->server->update(['status' => Status::INSTALLING->value]);
     }
 
     /* the delete virtual machine method is typically not used by itself and is accompanied by other logic like server reinstallations, server deletions */
@@ -48,6 +50,8 @@ class ServerBuildDispatchService
         Bus::chain($jobs)
             ->catch(fn() => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
             ->dispatch();
+
+        $deployment->server->update(['status' => Status::INSTALLING->value]);
     }
 
     private function getChainedBuildJobs(ServerDeploymentData $deployment): array
@@ -58,19 +62,21 @@ class ServerBuildDispatchService
                 new WaitUntilVmIsCreatedJob($deployment->server->id),
                 new UpdatePasswordJob($deployment->server->id, $deployment->account_password),
                 new SyncBuildJob($deployment->server->id),
-                function () use ($deployment) {
-                    $deployment->server->update(['status' => null]);
-                },
             ];
         } else {
             $jobs = [
                 new SyncBuildJob($deployment->server->id),
                 new UpdatePasswordJob($deployment->server->id, $deployment->account_password),
-                function () use ($deployment) {
-                    $deployment->server->update(['status' => null]);
-                },
             ];
         }
+
+        if ($deployment->start_on_completion) {
+            $jobs[] = new SendPowerCommandJob($deployment->server->id, PowerAction::START);
+        }
+
+        $jobs[] = function () use ($deployment) {
+            Server::findOrFail($deployment->server->id)->update(['status' => null]);
+        };
 
         return $jobs;
     }
