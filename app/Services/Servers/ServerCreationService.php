@@ -5,26 +5,18 @@ namespace Convoy\Services\Servers;
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
-use Convoy\Facades\Activity;
-use Convoy\Facades\LogTarget;
-use Convoy\Jobs\Server\ProcessBuildJob;
-use Convoy\Jobs\Servers\ProcessBuild;
-use Convoy\Models\Objects\Server\ServerDeploymentObject;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
-use Convoy\Services\ProxmoxService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Webmozart\Assert\Assert;
 
 /**
  * Class ServerCreationService
  */
 class ServerCreationService
 {
-    public function __construct(protected NetworkService $networkService, protected ServerRepository $repository)
+    public function __construct(private NetworkService $networkService, private ServerRepository $repository, private ServerBuildDispatchService $buildDispatchService)
     {
     }
 
@@ -72,7 +64,7 @@ class ServerCreationService
             $this->networkService->updateAddresses($server, $addressIds);
         }
 
-        ProcessBuildJob::dispatch($deployment);
+        $this->buildDispatchService->build($deployment);
 
         return $server;
     }

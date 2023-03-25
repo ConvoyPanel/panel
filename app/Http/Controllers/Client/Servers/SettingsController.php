@@ -13,14 +13,13 @@ use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
-use Convoy\Jobs\Server\ProcessRebuildJob;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\ServerBuildDispatchService;
 use Convoy\Transformers\Client\MediaTransformer;
 use Convoy\Transformers\Client\RenamedServerTransformer;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
@@ -29,13 +28,11 @@ use Convoy\Transformers\Client\ServerSecurityTransformer;
 use Convoy\Transformers\Client\TemplateGroupTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Spatie\QueryBuilder\QueryBuilder;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ProxmoxCloudinitRepository $repository, private AllocationService $allocationService)
+    public function __construct(private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ServerBuildDispatchService $buildDispatchService, private AllocationService $allocationService)
     {
     }
 
@@ -84,7 +81,7 @@ class SettingsController extends ApplicationApiController
                 'start_on_completion' => $request->boolean('start_on_completion')
             ]);
 
-            ProcessRebuildJob::dispatch($deployment);
+            $this->buildDispatchService->build($deployment);
         });
 
         return $this->returnNoContent();

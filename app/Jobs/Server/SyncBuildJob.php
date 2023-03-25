@@ -2,28 +2,24 @@
 
 namespace Convoy\Jobs\Server;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\Servers\ServerBuildService;
-use Illuminate\Bus\Batchable;
+use Convoy\Services\Servers\SyncBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Throwable;
 
-class DeleteServerJob implements ShouldQueue
+class SyncBuildJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 20;
-
-    public $tries = 3;
+    public function retryUntil() {
+        return now()->addMinutes(30);
+    }
 
     /**
      * Create a new job instance.
@@ -37,7 +33,7 @@ class DeleteServerJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.delete-{$this->serverId}")];
+        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.sync-{$this->serverId}")];
     }
 
     /**
@@ -45,10 +41,10 @@ class DeleteServerJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ServerBuildService $service)
+    public function handle(SyncBuildService $service)
     {
         $server = Server::findOrFail($this->serverId);
 
-        $service->delete($server);
+        $service->handle($server);
     }
 }

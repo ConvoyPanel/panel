@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Bus;
 
 class ServerDeletionService
 {
-    public function __construct()
+    public function __construct(private ServerBuildDispatchService $buildDispatchService)
     {
 
     }
@@ -28,10 +28,8 @@ class ServerDeletionService
 
         if (!$noPurge) {
             Bus::chain([
-                new SendPowerCommandJob($server->id, PowerAction::KILL),
-                new MonitorStateJob($server->id, State::STOPPED),
                 new PurgeBackupsJob($server->id),
-                new DeleteServerJob($server->id),
+                ...$this->buildDispatchService->getChainedDeleteJobs($server),
             ])
                 ->catch(fn() => $server->update(['status' => Status::DELETION_FAILED->value]))
                 ->dispatch();

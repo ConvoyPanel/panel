@@ -2,28 +2,29 @@
 
 namespace Convoy\Jobs\Server;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Services\Servers\ServerBuildService;
-use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Throwable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 
-class DeleteServerJob implements ShouldQueue
+class WaitUntilVmIsCreatedJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 20;
+    public function retryUntil() {
+        return now()->addMinutes(30);
+    }
 
-    public $tries = 3;
+    public function middleware(): array
+    {
+        return [new SkipIfBatchCancelled];
+    }
 
     /**
      * Create a new job instance.
@@ -35,11 +36,6 @@ class DeleteServerJob implements ShouldQueue
         //
     }
 
-    public function middleware(): array
-    {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.delete-{$this->serverId}")];
-    }
-
     /**
      * Execute the job.
      *
@@ -49,6 +45,10 @@ class DeleteServerJob implements ShouldQueue
     {
         $server = Server::findOrFail($this->serverId);
 
-        $service->delete($server);
+        $isCreated = $service->isVmCreated($server);
+
+        if (!$isCreated) {
+            $this->release(3);
+        }
     }
 }

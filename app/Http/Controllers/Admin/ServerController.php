@@ -12,7 +12,7 @@ use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
 use Convoy\Jobs\Server\ProcessDeletionJob;
 use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\BuildModificationService;
+use Convoy\Services\Servers\SyncBuildService;
 use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Services\Servers\ServerCreationService;
@@ -26,7 +26,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private BuildModificationService $buildModificationService)
+    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private SyncBuildService $buildModificationService)
     {
     }
 
@@ -80,7 +80,7 @@ class ServerController extends ApplicationApiController
         $this->networkService->updateAddresses($server, $request->address_ids ?? []);
 
         try {
-            $this->buildModificationService->handle($server, false);
+            $this->buildModificationService->handle($server);
         } catch (ProxmoxConnectionException $e) {
             // do nothing
         }

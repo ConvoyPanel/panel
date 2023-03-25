@@ -11,7 +11,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Support\Arr;
 
-class BuildModificationService
+class SyncBuildService
 {
     public function __construct(
         private AllocationService       $allocationService,
@@ -25,7 +25,7 @@ class BuildModificationService
     {
     }
 
-    public function handle(Server $server, bool $shouldUpdateState = true)
+    public function handle(Server $server)
     {
         $this->allocationRepository->setServer($server);
 
@@ -54,12 +54,6 @@ class BuildModificationService
             if ($diff > 0) {
                 $this->diskRepository->setServer($server)->resizeDisk($disk->interface, $diff);
             }
-        }
-
-        /* Persist configuration immediately */
-
-        if ($shouldUpdateState) {
-            $this->powerRepository->setServer($server)->send(PowerAction::KILL);
         }
     }
 }
