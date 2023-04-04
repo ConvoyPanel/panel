@@ -32,7 +32,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'task' => rawurlencode($upid),
+                'task' => $upid,
             ])
             ->get('/api2/json/nodes/{node}/tasks/{task}/status')
             ->json();
@@ -47,7 +47,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'task' => rawurlencode($upid),
+                'task' => $upid,
             ])
             ->get('/api2/json/nodes/{node}/tasks/{task}/log', [
                 'start' => $startAt,
@@ -65,7 +65,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'task' => rawurlencode($upid),
+                'task' => $upid,
             ])
             ->delete('/api2/json/nodes/{node}/tasks/{task}')
             ->json();

@@ -81,7 +81,7 @@ class SettingsController extends ApplicationApiController
                 'start_on_completion' => $request->boolean('start_on_completion')
             ]);
 
-            $this->buildDispatchService->build($deployment);
+            $this->buildDispatchService->rebuild($deployment);
         });
 
         return $this->returnNoContent();

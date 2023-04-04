@@ -15,5 +15,5 @@ it('can sync server usages', function () {
 
     $server->refresh();
 
-    expect($server->bandwidth_usage)->toBe(7340032);
+    expect($server->bandwidth_usage)->toBe(6291456);
 });

@@ -4,6 +4,14 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-rc.2
+
+### Fixed
+
+- Server reinstallations firing wrong job chain
+- can sync server usages test
+- ISO download progress monitor
+- Backup creation progress monitor
 
 ## v3.9.0-rc.1
 

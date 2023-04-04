@@ -20,9 +20,9 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'storage' => $this->node->backup_storage
             ])
-            ->get('/api2/json/nodes/{node}/storage/{server}/content', [
+            ->get('/api2/json/nodes/{node}/storage/{storage}/content', [
                 'content' => 'backup',
                 'vmid' => $this->server->vmid,
             ])
