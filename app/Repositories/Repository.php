@@ -50,7 +50,7 @@ abstract class Repository implements RepositoryInterface
     /**
      * Return the model being used for this repository.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     public function getModel(): Model
     {

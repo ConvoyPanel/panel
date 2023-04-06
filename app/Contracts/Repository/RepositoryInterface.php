@@ -2,6 +2,9 @@
 
 namespace Convoy\Contracts\Repository;
 
+use Closure;
+use Convoy\Exceptions\Model\DataValidationException;
+use Convoy\Exceptions\Repository\RecordNotFoundException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -10,7 +13,7 @@ interface RepositoryInterface
     /**
      * Return an identifier or Model object to be used by the repository.
      *
-     * @return string|\Closure|object
+     * @return string|Closure|object
      */
     public function model();
 
@@ -71,7 +74,7 @@ interface RepositoryInterface
      *
      * @return mixed
      *
-     * @throws \Convoy\Exceptions\Model\DataValidationException
+     * @throws DataValidationException
      */
     public function create(array $fields, bool $validate = true, bool $force = false);
 
@@ -80,7 +83,7 @@ interface RepositoryInterface
      *
      * @return mixed
      *
-     * @throws \Convoy\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function find(int $id);
 
@@ -94,7 +97,7 @@ interface RepositoryInterface
      *
      * @return mixed
      *
-     * @throws \Convoy\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function findFirstWhere(array $fields);
 
@@ -119,8 +122,8 @@ interface RepositoryInterface
      * @param  int  $id
      * @return mixed
      *
-     * @throws \Convoy\Exceptions\Model\DataValidationException
-     * @throws \Convoy\Exceptions\Repository\RecordNotFoundException
+     * @throws DataValidationException
+     * @throws RecordNotFoundException
      */
     public function update($id, array $fields, bool $validate = true, bool $force = false);
 
@@ -135,7 +138,7 @@ interface RepositoryInterface
      *
      * @return mixed
      *
-     * @throws \Convoy\Exceptions\Model\DataValidationException
+     * @throws DataValidationException
      */
     public function updateOrCreate(array $where, array $fields, bool $validate = true, bool $force = false);
 

@@ -2,6 +2,7 @@
 
 namespace Convoy\Contracts\Repository;
 
+use Convoy\Exceptions\Repository\RecordNotFoundException;
 use Convoy\Models\Server;
 
 interface ServerRepositoryInterface extends RepositoryInterface
@@ -14,7 +15,7 @@ interface ServerRepositoryInterface extends RepositoryInterface
     /**
      * Return a server by UUID.
      *
-     * @throws \Convoy\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function getByUuid(string $uuid): Server;
 }

@@ -3,8 +3,10 @@
 namespace Convoy\Models;
 
 use Convoy\Enums\Api\ApiKeyType;
+use Eloquent;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -16,7 +18,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Laravel\Sanctum\NewAccessToken;
 
 /**
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
@@ -86,7 +88,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function servers()
     {

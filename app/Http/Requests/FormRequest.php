@@ -49,7 +49,7 @@ abstract class FormRequest extends BaseFormRequest
      * Returns the named route parameter and asserts that it is a real model that
      * exists in the database.
      *
-     * @template T of \Illuminate\Database\Eloquent\Model
+     * @template T of Model
      *
      * @param  class-string<T>  $expect
      * @return T

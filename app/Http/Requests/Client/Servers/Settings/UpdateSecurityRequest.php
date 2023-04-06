@@ -5,6 +5,7 @@ namespace Convoy\Http\Requests\Client\Servers\Settings;
 use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Rules\EnglishKeyboardCharacters;
 use Convoy\Rules\Password;
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
@@ -49,7 +50,7 @@ class UpdateSecurityRequest extends FormRequest
                             PublicKeyLoader::load($key);
                         }
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $validator->errors()->add('ssh_keys', 'The SSH key(s) are invalid.');
                 }
             }

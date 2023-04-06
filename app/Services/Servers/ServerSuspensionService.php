@@ -8,6 +8,7 @@ use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Services\ProxmoxService;
+use Exception;
 use Webmozart\Assert\Assert;
 
 class ServerSuspensionService
@@ -33,7 +34,7 @@ class ServerSuspensionService
 
         try {
             $this->powerRepository->setServer($server)->send(PowerAction::KILL);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $server->update([
                 'status' => $isSuspending ? null : Status::SUSPENDED->value,
             ]);

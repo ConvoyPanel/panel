@@ -6,7 +6,7 @@ use Convoy\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Convoy\Models\Location>
+ * @extends Factory<Location>
  */
 class LocationFactory extends Factory
 {

@@ -18,7 +18,7 @@ class ServerNotInstalled
      */
     public function handle(Request $request, Closure $next)
     {
-        /** @var \Convoy\Models\Server|null $server */
+        /** @var Server|null $server */
         $server = $request->route()->parameter('server');
 
         if (!$server instanceof Server) {

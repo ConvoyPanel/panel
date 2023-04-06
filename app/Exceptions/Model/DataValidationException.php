@@ -6,6 +6,7 @@ use Convoy\Exceptions\ConvoyException;
 use Illuminate\Contracts\Support\MessageProvider;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\MessageBag;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class DataValidationException extends ConvoyException implements HttpExceptionInterface, MessageProvider
@@ -41,7 +42,7 @@ class DataValidationException extends ConvoyException implements HttpExceptionIn
     /**
      * Return the validator message bag.
      *
-     * @return \Illuminate\Support\MessageBag
+     * @return MessageBag
      */
     public function getMessageBag()
     {

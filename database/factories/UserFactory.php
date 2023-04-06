@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use Convoy\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Convoy\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {

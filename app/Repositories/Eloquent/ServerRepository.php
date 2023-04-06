@@ -29,12 +29,12 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
     /**
      * Return a server by UUID.
      *
-     * @throws \Convoy\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function getByUuid(string $uuid): Server
     {
         try {
-            /** @var \Convoy\Models\Server $model */
+            /** @var Server $model */
             $model = $this->getBuilder()
                 ->where(function (Builder $query) use ($uuid) {
                     $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);

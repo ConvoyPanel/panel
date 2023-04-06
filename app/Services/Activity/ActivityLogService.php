@@ -7,9 +7,11 @@
 
 namespace Convoy\Services\Activity;
 
+use Closure;
 use Convoy\Enums\Activity\Status;
 use Convoy\Models\ActivityLog;
 use Convoy\Models\ActivityLogSubject;
+use Exception;
 use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +19,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 class ActivityLogService
@@ -71,7 +74,7 @@ class ActivityLogService
     /**
      * Sets the subject model instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Model[]  $subjects
+     * @param Model|Model[] $subjects
      */
     public function subject(...$subjects): self
     {
@@ -143,7 +146,7 @@ class ActivityLogService
 
         try {
             return $this->save();
-        } catch (\Throwable | \Exception $exception) {
+        } catch (Throwable | Exception $exception) {
             if (config('app.env') !== 'production') {
                 /* @noinspection PhpUnhandledExceptionInspection */
                 throw $exception;
@@ -171,9 +174,9 @@ class ActivityLogService
      *
      * @return mixed
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function transaction(\Closure $callback)
+    public function transaction(Closure $callback)
     {
         return $this->connection->transaction(function () use ($callback) {
             $response = $callback($this);
@@ -228,7 +231,7 @@ class ActivityLogService
     /**
      * Saves the activity log instance and attaches all of the subject models.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function save(): ActivityLog
     {

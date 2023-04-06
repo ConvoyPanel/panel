@@ -25,7 +25,9 @@ SOFTWARE.
 
 namespace Convoy\Console\Commands\User;
 
+use Convoy\Exceptions\Model\DataValidationException;
 use Convoy\Models\User;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
@@ -38,8 +40,8 @@ class MakeUserCommand extends Command
     /**
      * Handle command request to create a new user.
      *
-     * @throws \Exception
-     * @throws \Convoy\Exceptions\Model\DataValidationException
+     * @throws Exception
+     * @throws DataValidationException
      */
     public function handle()
     {

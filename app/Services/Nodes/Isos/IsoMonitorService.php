@@ -3,6 +3,7 @@
 namespace Convoy\Services\Nodes\Isos;
 
 use Carbon\Carbon;
+use Closure;
 use Convoy\Models\ISO;
 use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use Illuminate\Support\Arr;
@@ -15,7 +16,7 @@ class IsoMonitorService
 
     }
 
-    public function checkDownloadProgress(ISO $iso, string $upid, ?\Closure $callback = null)
+    public function checkDownloadProgress(ISO $iso, string $upid, ?Closure $callback = null)
     {
         $status = $this->repository->setNode($iso->node)->getStatus($upid);
 

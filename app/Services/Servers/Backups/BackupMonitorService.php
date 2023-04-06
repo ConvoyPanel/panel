@@ -3,6 +3,7 @@
 namespace Convoy\Services\Servers\Backups;
 
 use Carbon\Carbon;
+use Closure;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
@@ -17,7 +18,7 @@ class BackupMonitorService
 
     }
 
-    public function checkCreationProgress(Backup $backup, string $upid, ?\Closure $callback = null)
+    public function checkCreationProgress(Backup $backup, string $upid, ?Closure $callback = null)
     {
         $status = $this->repository->setServer($backup->server)->getStatus($upid);
         $logs = $this->repository->setServer($backup->server)->getLog($upid);
@@ -60,7 +61,7 @@ class BackupMonitorService
         }
     }
 
-    public function checkRestorationProgress(Server $server, string $upid, ?\Closure $callback = null)
+    public function checkRestorationProgress(Server $server, string $upid, ?Closure $callback = null)
     {
         $status = $this->repository->setServer($server)->getStatus($upid);
 

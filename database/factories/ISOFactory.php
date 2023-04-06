@@ -7,7 +7,7 @@ use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Convoy\Models\ISO>
+ * @extends Factory<ISO>
  */
 class ISOFactory extends Factory
 {

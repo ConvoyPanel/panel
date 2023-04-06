@@ -2,6 +2,7 @@
 
 namespace Convoy\Jobs\Server;
 
+use Closure;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
@@ -27,7 +28,7 @@ class PurgeBackupsJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId, protected ?\Closure $callback = null)
+    public function __construct(protected int $serverId, protected ?Closure $callback = null)
     {
         //
     }

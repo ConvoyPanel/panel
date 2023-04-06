@@ -7,7 +7,7 @@ use Convoy\Models\Server;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Convoy\Models\Backup>
+ * @extends Factory<Backup>
  */
 class BackupFactory extends Factory
 {

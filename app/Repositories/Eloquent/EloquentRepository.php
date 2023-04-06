@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Eloquent;
 
+use Closure;
 use Convoy\Contracts\Repository\RepositoryInterface;
 use Convoy\Exceptions\Model\DataValidationException;
 use Convoy\Exceptions\Repository\RecordNotFoundException;
@@ -40,7 +41,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Returns the request instance.
      *
-     * @return \Illuminate\Http\Request
+     * @return Request
      */
     protected function request()
     {
@@ -50,7 +51,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Paginate the response data based on the page para.
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
     protected function paginate(Builder $instance, int $default = 50)
     {
@@ -65,7 +66,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      * Return an instance of the eloquent model bound to this
      * repository instance.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     public function getModel(): Model
     {
@@ -75,7 +76,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Return an instance of the builder to use for this repository.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function getBuilder()
     {
@@ -85,7 +86,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Create a new record in the database and return the associated model.
      *
-     * @return \Illuminate\Database\Eloquent\Model|bool
+     * @return Model|bool
      *
      * @throws \Pterodactyl\Exceptions\Model\DataValidationException
      */
@@ -108,7 +109,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Find a model that has the specific ID passed.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      *
      * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
      */
@@ -132,7 +133,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Find and return the first matching instance for the given fields.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      *
      * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
      */
@@ -175,7 +176,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      * Update a given ID with the passed array of fields.
      *
      * @param  int  $id
-     * @return \Illuminate\Database\Eloquent\Model|bool
+     * @return Model|bool
      *
      * @throws \Pterodactyl\Exceptions\Model\DataValidationException
      * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
@@ -204,7 +205,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Update a model using the attributes passed.
      *
-     * @param  array|\Closure  $attributes
+     * @param  array|Closure  $attributes
      * @return int
      */
     public function updateWhere($attributes, array $values)
@@ -226,7 +227,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Update a record if it exists in the database, otherwise create it.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      *
      * @throws \Pterodactyl\Exceptions\Model\DataValidationException
      * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException

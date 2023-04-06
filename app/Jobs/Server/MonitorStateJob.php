@@ -2,6 +2,7 @@
 
 namespace Convoy\Jobs\Server;
 
+use Closure;
 use Convoy\Enums\Server\State;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
@@ -27,7 +28,7 @@ class MonitorStateJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId, protected State $targetState, protected ?\Closure $callback = null)
+    public function __construct(protected int $serverId, protected State $targetState, protected ?Closure $callback = null)
     {
         //
     }

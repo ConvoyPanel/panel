@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class DisplayException extends ConvoyException implements HttpExceptionInterface
 {
@@ -22,7 +23,7 @@ class DisplayException extends ConvoyException implements HttpExceptionInterface
     /**
      * DisplayException constructor.
      */
-    public function __construct(string $message, ?\Throwable $previous = null, protected string $level = self::LEVEL_ERROR, int $code = 0)
+    public function __construct(string $message, ?Throwable $previous = null, protected string $level = self::LEVEL_ERROR, int $code = 0)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -60,11 +61,11 @@ class DisplayException extends ConvoyException implements HttpExceptionInterface
      * Log the exception to the logs using the defined error level only if the previous
      * exception is set.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function report()
     {
-        if (!$this->getPrevious() instanceof \Exception || !Handler::isReportable($this->getPrevious())) {
+        if (!$this->getPrevious() instanceof Exception || !Handler::isReportable($this->getPrevious())) {
             return null;
         }
 

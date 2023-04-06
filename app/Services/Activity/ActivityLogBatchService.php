@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Activity;
 
+use Closure;
 use Ramsey\Uuid\Uuid;
 
 class ActivityLogBatchService
@@ -51,7 +52,7 @@ class ActivityLogBatchService
      *
      * @return mixed
      */
-    public function transaction(\Closure $callback, ?string $uuid = null)
+    public function transaction(Closure $callback, ?string $uuid = null)
     {
         $this->start($uuid);
         $result = $callback($this->uuid());

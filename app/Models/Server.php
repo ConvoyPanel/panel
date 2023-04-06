@@ -96,7 +96,7 @@ class Server extends Model
      * exception is raised. This should be called whenever something needs to make
      * sure the server is not in a weird state that should block user access.
      *
-     * @throws \Convoy\Exceptions\Http\Server\ServerStatusConflictException
+     * @throws ServerStatusConflictException
      */
     public function validateCurrentState()
     {

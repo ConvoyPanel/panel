@@ -10,7 +10,7 @@ interface ActivityRepositoryInterface extends RepositoryInterface
     /**
      * Return the server model associated with an activity
      *
-     * @return \Convoy\Models\Server|null
+     * @return Server|null
      */
     public function getServer(ActivityLog $activity): ?Server;
 }

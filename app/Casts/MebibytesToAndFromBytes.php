@@ -3,13 +3,14 @@
 namespace Convoy\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 
 class MebibytesToAndFromBytes implements CastsAttributes
 {
     /**
      * Cast the given value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  Model  $model
      * @param  string  $key
      * @param  int|null  $value
      * @param  array  $attributes
@@ -23,7 +24,7 @@ class MebibytesToAndFromBytes implements CastsAttributes
     /**
      * Prepare the given value for storage.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  Model  $model
      * @param  string  $key
      * @param  int|null  $value
      * @param  array  $attributes

@@ -11,6 +11,7 @@ use Convoy\Models\IPAddress;
 use Convoy\Models\Node;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
+use Exception;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -42,7 +43,7 @@ class AddressController extends Controller
             if ($request->server_id) {
                 $this->networkService->syncSettings($address->server);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // do nothing
         }
 
@@ -69,7 +70,7 @@ class AddressController extends Controller
                 if ($newServer)
                     $this->networkService->syncSettings($newServer);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // do nothing
         }
 
@@ -90,7 +91,7 @@ class AddressController extends Controller
             if ($server) {
                 $this->networkService->syncSettings($server);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // do nothing
         }
 

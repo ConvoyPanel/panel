@@ -2,12 +2,16 @@
 
 namespace Convoy\Models;
 
+use Carbon\CarbonImmutable;
 use Convoy\Exceptions\Model\DataValidationException;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +36,7 @@ abstract class Model extends IlluminateModel
     protected $skipValidation = false;
 
     /**
-     * @var \Illuminate\Contracts\Validation\Factory
+     * @var Factory
      */
     protected static $validatorFactory;
 
@@ -45,7 +49,7 @@ abstract class Model extends IlluminateModel
      * Listen for the model saving event and fire off the validation
      * function before it is saved.
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected static function boot()
     {
@@ -93,7 +97,7 @@ abstract class Model extends IlluminateModel
     /**
      * Returns the validator instance used by this model.
      *
-     * @return \Illuminate\Validation\Validator|\Illuminate\Contracts\Validation\Validator
+     * @return \Illuminate\Validation\Validator|Validator
      */
     public function getValidator()
     {
@@ -130,7 +134,7 @@ abstract class Model extends IlluminateModel
      * Returns the rules associated with the model, specifically for updating the given model
      * rather than just creating it.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|int|string  $model
+     * @param IlluminateModel|int|string  $model
      * @return array
      */
     public static function getRulesForUpdate($model, string $column = 'id')
@@ -189,7 +193,7 @@ abstract class Model extends IlluminateModel
      * Return a timestamp as DateTime object.
      *
      * @param  mixed  $value
-     * @return \Illuminate\Support\Carbon|\Carbon\CarbonImmutable
+     * @return Carbon|CarbonImmutable
      */
     protected function asDateTime($value)
     {

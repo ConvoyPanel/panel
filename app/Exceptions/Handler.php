@@ -2,6 +2,7 @@
 
 namespace Convoy\Exceptions;
 
+use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
@@ -11,7 +12,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of exception types with their corresponding custom log levels.
      *
-     * @var array<class-string<\Throwable>, \Psr\Log\LogLevel::*>
+     * @var array<class-string<Throwable>, \Psr\Log\LogLevel::*>
      */
     protected $levels = [
         //
@@ -20,7 +21,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of the exception types that are not reported.
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
         //
@@ -52,7 +53,7 @@ class Handler extends ExceptionHandler
     /**
      * Return an array of exceptions that should not be reported.
      */
-    public static function isReportable(\Exception $exception): bool
+    public static function isReportable(Exception $exception): bool
     {
         return (new static(Container::getInstance()))->shouldReport($exception);
     }
@@ -61,7 +62,7 @@ class Handler extends ExceptionHandler
      * Helper method to allow reaching into the handler to convert an exception
      * into the expected array response type.
      */
-    public static function toArray(\Throwable $e): array
+    public static function toArray(Throwable $e): array
     {
         return (new self(app()))->convertExceptionToArray($e);
     }
