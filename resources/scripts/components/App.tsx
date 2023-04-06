@@ -4,7 +4,6 @@ import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } fro
 import ThemeProvider from '@/components/ThemeProvider'
 import { NavigationProgress } from '@mantine/nprogress'
 import router from '@/routers/router'
-import { LaravelReactI18nProvider } from 'laravel-react-i18n'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -44,26 +43,12 @@ const App = () => {
     }
 
     return (
-        <LaravelReactI18nProvider
-            lang={'en'}
-            fallbackLang={'en'}
-            resolve={async lang => {
-                // @ts-ignore
-                const langs = import.meta.glob('../../lang/*.json')
-                const fn = langs[`/lang/${lang}.json`]
-
-                if (typeof fn === 'function') {
-                    return await fn()
-                }
-            }}
-        >
-            <StoreProvider store={store}>
-                <ThemeProvider>
-                    <NavigationProgress />
-                    <RouterProvider router={router} />
-                </ThemeProvider>
-            </StoreProvider>
-        </LaravelReactI18nProvider>
+        <StoreProvider store={store}>
+            <ThemeProvider>
+                <NavigationProgress />
+                <RouterProvider router={router} />
+            </ThemeProvider>
+        </StoreProvider>
     )
 }
 
