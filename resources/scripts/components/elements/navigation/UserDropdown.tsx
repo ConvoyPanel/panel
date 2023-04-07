@@ -3,6 +3,7 @@ import { useStoreState } from '@/state'
 import { getInitials } from '@/util/helpers'
 import Menu from '@/components/elements/Menu'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 interface Props {
     logout: () => void
 }
@@ -10,6 +11,8 @@ interface Props {
 const UserDropdown = ({ logout }: Props) => {
     const user = useStoreState(state => state.user.data!)
     const navigate = useNavigate()
+    const { t: tAuth } = useTranslation('auth')
+    const { t: tStrings } = useTranslation('strings')
 
     return (
         <div className='hidden sm:block'>
@@ -23,12 +26,14 @@ const UserDropdown = ({ logout }: Props) => {
                     </button>
                 </Menu.Target>
                 <Menu.Dropdown>
-                    {user.rootAdmin && <>
-                      <Menu.Item onClick={() => navigate('/admin')}>Admin Center</Menu.Item>
-                      <Menu.Divider />
-                    </>}
+                    {user.rootAdmin && (
+                        <>
+                            <Menu.Item onClick={() => navigate('/admin')}>{tStrings('admin_cp')}</Menu.Item>
+                            <Menu.Divider />
+                        </>
+                    )}
                     <Menu.Item color='red' onClick={logout}>
-                        Log Out
+                        {tAuth('sign_out')}
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>

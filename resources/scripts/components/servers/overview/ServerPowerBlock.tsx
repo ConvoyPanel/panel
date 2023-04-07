@@ -2,8 +2,10 @@ import updateStatus, { PowerAction } from '@/api/server/updateState'
 import Button from '@/components/elements/Button'
 import { ServerContext } from '@/state/server'
 import useNotify from '@/util/useNotify'
+import { useTranslation } from 'react-i18next'
 
 const ServerPowerBlock = () => {
+    const { t } = useTranslation('server.overview')
     const uuid = ServerContext.useStoreState(state => state.server.data?.uuid)
     const state = ServerContext.useStoreState(state => state.status.data?.state)
     const notify = useNotify()
@@ -21,10 +23,10 @@ const ServerPowerBlock = () => {
                 disabled={!state || state === 'running'}
                 onClick={() => update('start')}
             >
-                Start
+                {t('power_actions.start')}
             </Button>
             <Button className='transition-colors' disabled={state !== 'running'} onClick={() => update('restart')}>
-                Restart
+                {t('power_actions.restart')}
             </Button>
             <Button
                 className='transition-colors'
@@ -33,7 +35,7 @@ const ServerPowerBlock = () => {
                 disabled={!state || state === 'stopped'}
                 onClick={() => update('kill')}
             >
-                Kill
+                {t('power_actions.kill')}
             </Button>
             <Button
                 className='transition-colors'
@@ -42,7 +44,7 @@ const ServerPowerBlock = () => {
                 disabled={state !== 'running'}
                 onClick={() => update('shutdown')}
             >
-                Shutdown
+                {t('power_actions.shutdown')}
             </Button>
         </div>
     )

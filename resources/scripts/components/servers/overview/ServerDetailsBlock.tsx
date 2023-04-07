@@ -8,10 +8,10 @@ import tw from 'twin.macro'
 import Card from '@/components/elements/Card'
 import { Line } from 'react-chartjs-2'
 import { useChartTickLabel } from '@/util/chart'
+import { useTranslation } from 'react-i18next'
 
 export const StatRow = styled.div`
     ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
-
     & > div {
         ${tw`border-[#eaeaea] dark:border-[#333333] p-6`}
     }
@@ -42,6 +42,8 @@ export const StatRow = styled.div`
 `
 
 const ServerDetailsBlock = () => {
+    const { t } = useTranslation('server.overview')
+    const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const server = ServerContext.useStoreState(state => state.server.data!)
     const status = ServerContext.useStoreState(state => state.status.data)
@@ -122,15 +124,15 @@ const ServerDetailsBlock = () => {
                                     }`}
                                 ></div>
                             </div>
-                            <p className='text-2xl font-semibold text-foreground'>{capitalize(status.state)}</p>
+                            <p className='text-2xl font-semibold text-foreground'>{t(`states.${status.state}`)}</p>
                         </div>
                     </div>
                     <div>
-                        <p>CPU Usage</p>
+                        <p>{tStrings('cpu')}</p>
                         <p>{Math.floor(status.cpuUsed * 100)}%</p>
                     </div>
                     <div>
-                        <p>Memory Usage</p>
+                        <p>{tStrings('memory')}</p>
                         <div className='flex space-x-2 items-end mt-1'>
                             <p className='text-2xl font-semibold text-foreground'>
                                 {memory.used.size} {memory.used.unit}
@@ -141,7 +143,7 @@ const ServerDetailsBlock = () => {
                         </div>
                     </div>
                     <div>
-                        <p>Uptime</p>
+                        <p>{t('uptime')}</p>
                         <div className='flex space-x-2 items-end mt-1'>
                             <p className='text-2xl font-semibold text-foreground'>{Math.floor(uptime.time)}</p>
                             <p className='text-sm font-semibold description mb-[0.3rem]'>{uptime.unit}</p>
@@ -151,7 +153,7 @@ const ServerDetailsBlock = () => {
             )}
 
             <Card className='flex flex-col justify-between items-center col-span-10 lg:col-span-2'>
-                <h5 className='h5'>Bandwidth Usage</h5>
+                <h5 className='h5'>{t('bandwidth_usage')}</h5>
                 <div className='grid place-items-center mt-5'>
                     <h4 className='absolute text-3xl font-semibold text-foreground'>
                         {Math.floor(bandwidth.percentage)}
@@ -170,16 +172,16 @@ const ServerDetailsBlock = () => {
                 </div>
                 <Badge className='!normal-case' size='lg' color='gray' variant='outline'>
                     {bandwidth.used.size} {bandwidth.total ? '' : bandwidth.used.unit} /{' '}
-                    {bandwidth.total ? `${bandwidth.total.size} ${bandwidth.total.unit}` : 'unlimited'}
+                    {bandwidth.total ? `${bandwidth.total.size} ${bandwidth.total.unit}` : tStrings('unlimited')}
                 </Badge>
             </Card>
 
             <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
-                <h5 className='h5'>CPU</h5>
+                <h5 className='h5'>{tStrings('cpu')}</h5>
                 <Line {...cpuGraph.props} />
             </Card>
             <Card className='flex flex-col space-y-5 col-span-10 md:col-span-5 lg:col-span-4'>
-                <h5 className='h5'>Memory</h5>
+                <h5 className='h5'>{tStrings('memory')}</h5>
                 <Line {...memoryGraph.props} />
             </Card>
         </>

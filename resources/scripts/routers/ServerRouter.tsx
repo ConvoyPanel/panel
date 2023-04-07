@@ -8,8 +8,10 @@ import { ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
+import { useTranslation } from 'react-i18next'
 
 const ServerRouter = () => {
+    const { t: tStrings } = useTranslation('strings')
     const matches = useMatches()
     const id = matches[0].params.id
     const [error, setError] = useState<string>()
@@ -20,16 +22,16 @@ const ServerRouter = () => {
     const visibleRoutes = useMemo(
         () => [
             {
-                name: 'Overview',
+                name: tStrings('overview'),
                 path: `/servers/${id}`,
                 end: true,
             },
             {
-                name: 'Backups',
+                name: tStrings('backups'),
                 path: `/servers/${id}/backups`,
             },
             {
-                name: 'Settings',
+                name: tStrings('settings'),
                 path: `/servers/${id}/settings`,
             },
         ],

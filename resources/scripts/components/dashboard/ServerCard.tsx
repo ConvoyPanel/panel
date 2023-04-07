@@ -5,6 +5,7 @@ import { Avatar, Badge } from '@mantine/core'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import tw from 'twin.macro'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     server: Server
@@ -19,6 +20,7 @@ export const Dd = styled.dt`
 `
 
 const ServerCard = ({ server }: Props) => {
+    const { t: tStrings } = useTranslation('strings')
     const memory = useMemo(() => formatBytes(server.limits.memory, 0), [server])
 
     const disk = useMemo(() => formatBytes(server.limits.disk, 0), [server])
@@ -34,12 +36,10 @@ const ServerCard = ({ server }: Props) => {
                 </Avatar>
                 <div className='overflow-hidden'>
                     <div className='flex items-center space-x-3'>
-                        <p className='font-medium text-foreground truncate'>
-                            {server.name}
-                        </p>{' '}
+                        <p className='font-medium text-foreground truncate'>{server.name}</p>{' '}
                         {server.status === 'suspended' && (
                             <Badge color='orange' radius='sm'>
-                                Suspended
+                                {tStrings('suspended')}
                             </Badge>
                         )}
                     </div>
@@ -51,17 +51,17 @@ const ServerCard = ({ server }: Props) => {
 
             <div className='grid grid-cols-3 gap-3 mt-3'>
                 <dl>
-                    <Dt>CPU</Dt>
+                    <Dt>{tStrings('cpu')}</Dt>
                     <Dd>{server.limits.cpu}</Dd>
                 </dl>
                 <dl>
-                    <Dt>Memory</Dt>
+                    <Dt>{tStrings('memory')}</Dt>
                     <Dd>
                         {memory.size} {memory.unit}
                     </Dd>
                 </dl>
                 <dl>
-                    <Dt>Disk</Dt>
+                    <Dt>{tStrings('disk')}</Dt>
                     <Dd>
                         {disk.size} {disk.unit}
                     </Dd>

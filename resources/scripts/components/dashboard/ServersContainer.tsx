@@ -10,8 +10,11 @@ import { useLocation } from 'react-router-dom'
 import useSWR from 'swr'
 import TextInput from '@/components/elements/inputs/TextInput'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useTranslation } from 'react-i18next'
 
 const ServerContainer = () => {
+    const { t } = useTranslation('dashboard.index')
+    const { t: tStrings } = useTranslation('strings')
     const { search: location } = useLocation()
     const defaultPage = Number(new URLSearchParams(location).get('page') || '1')
     const [page, setPage] = useState(!isNaN(defaultPage) && defaultPage > 0 ? defaultPage : 1)
@@ -38,7 +41,7 @@ const ServerContainer = () => {
         <>
             {rootAdmin && (
                 <div className='flex space-x-3 justify-end mb-3'>
-                    <p className='description-small'>Show all servers</p>
+                    <p className='description-small'>{t('show_all_servers')}</p>
                     <Switch checked={showOnlyAdmin} onChange={() => setShowOnlyAdmin(!showOnlyAdmin)} />
                 </div>
             )}
@@ -46,7 +49,7 @@ const ServerContainer = () => {
                 icon={<MagnifyingGlassIcon className='text-accent-400 w-4 h-4' />}
                 value={query}
                 onChange={e => setQuery(e.currentTarget.value)}
-                placeholder='Search...'
+                placeholder={`${tStrings('search')}...`}
             />
             <div className='pt-6'>
                 {!data ? (
@@ -57,7 +60,7 @@ const ServerContainer = () => {
                     </div>
                 ) : data.pagination.total === 0 ? (
                     <p className='text-sm text-center'>
-                        {showOnlyAdmin ? 'There are no servers.' : 'You have no servers.'}
+                        {showOnlyAdmin ? t('no_servers_admin_empty_state') : t('no_servers_empty_state')}
                     </p>
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
