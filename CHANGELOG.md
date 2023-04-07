@@ -4,6 +4,29 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-rc.3
+
+:warning: This release makes changes to the data in your database. Rows that have a non-null `deleted_at` field in
+your `servers` and `users` table will be purged. If your routine relies on soft deletes, please make changes now to stop
+relying on them as they are removed in this update.
+
+### Fixed
+
+- Adding both a IPv4 and IPv6 address to a server
+
+### Added
+
+- Base code for adding translations/localizations to Convoy
+
+### Removed
+
+- Soft deletes from `servers` and `users` table
+
+### Changes
+
+- Some automatic refactors done by PHPStorm
+- Renamed Media to Iso
+
 ## v3.9.0-rc.2
 
 ### Fixed
@@ -23,7 +46,7 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 - Internal HTTP client from Guzzle to a wrapper of it from Laravel
 - VM building, deletion, and server deletion logic
-  - This should improve reliability of Convoy tremendously
+    - This should improve reliability of Convoy tremendously
 
 ## v3.8.1-beta
 

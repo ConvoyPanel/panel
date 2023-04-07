@@ -5,16 +5,15 @@ namespace Convoy\Models;
 use Convoy\Enums\Api\ApiKeyType;
 use Eloquent;
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Foundation\Auth\Access\Authorizable;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Laravel\Sanctum\NewAccessToken;
 
 /**
@@ -22,7 +21,7 @@ use Laravel\Sanctum\NewAccessToken;
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
-    use HasApiTokens, HasFactory, Notifiable, Authenticatable, Authorizable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, Authenticatable, Authorizable;
 
     /**
      * The attributes that are mass assignable.

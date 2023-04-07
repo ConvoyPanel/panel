@@ -7,10 +7,12 @@ import { useEffect } from 'react'
 import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const LoginContainer = () => {
+    const { t: tAuth } = useTranslation('auth')
+    const { t: tStrings } = useTranslation('strings')
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const navigate = useNavigate()
     const location = useLocation()
 
     useEffect(() => {
@@ -46,9 +48,13 @@ const LoginContainer = () => {
 
     return (
         <form onSubmit={form.handleSubmit}>
-            <LoginFormContainer title='Convoy' description='Sign in to your account' submitting={form.isSubmitting}>
+            <LoginFormContainer
+                title='Convoy'
+                description={tAuth('sign_in_description')}
+                submitting={form.isSubmitting}
+            >
                 <TextInput
-                    label='Email'
+                    label={tStrings('email')}
                     name='email'
                     className='mt-1 block w-full'
                     value={form.values.email}
@@ -58,7 +64,7 @@ const LoginContainer = () => {
                     required
                 />
                 <TextInput
-                    label='Password'
+                    label={tStrings('password')}
                     name='password'
                     value={form.values.password}
                     onChange={form.handleChange}
@@ -69,7 +75,7 @@ const LoginContainer = () => {
                 />
                 <div className='flex items-center justify-end mt-6'>
                     <Button type='submit' variant='filled' color='accent'>
-                        Sign in
+                        {tAuth('sign_in')}
                     </Button>
                 </div>
             </LoginFormContainer>

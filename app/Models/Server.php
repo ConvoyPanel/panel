@@ -7,11 +7,10 @@ use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Server extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $casts = [
         'memory' => MebibytesToAndFromBytes::class,
@@ -105,14 +104,5 @@ class Server extends Model
         ) {
             throw new ServerStatusConflictException($this);
         }
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function ($model) {
-            IPAddress::where('server_id', $model->id)->update(['server_id' => null]);
-        });
     }
 }

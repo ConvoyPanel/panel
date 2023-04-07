@@ -1,12 +1,12 @@
 import FormCard from '@/components/elements/FormCard'
 import { ServerContext } from '@/state/server'
-import useMediaSWR from '@/api/server/settings/useMediaSWR'
+import useIsosSWR from '@/api/server/settings/useIsosSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import MediaRow from '@/components/servers/settings/partials/hardware/MediaRow'
+import IsoRow from '@/components/servers/settings/partials/hardware/IsoRow'
 
-const MediaCard = () => {
+const IsoCard = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
-    const { data } = useMediaSWR(uuid)
+    const { data } = useIsosSWR(uuid)
 
     return (
         <FormCard className='w-full'>
@@ -20,7 +20,7 @@ const MediaCard = () => {
                         data.length === 0 ? (
                             <p className='text-sm text-center'>There are no media</p>
                         ) : (
-                            data.map(iso => <MediaRow media={iso} key={iso.uuid} />)
+                            data.map(iso => <IsoRow iso={iso} key={iso.uuid} />)
                         )
                     ) : null}
                 </div>
@@ -29,4 +29,4 @@ const MediaCard = () => {
     )
 }
 
-export default MediaCard
+export default IsoCard

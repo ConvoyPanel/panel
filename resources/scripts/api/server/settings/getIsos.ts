@@ -1,6 +1,6 @@
 import http from '@/api/http'
 
-export interface Media {
+export interface Iso {
     uuid: string
     name: string
     size: number
@@ -9,9 +9,9 @@ export interface Media {
 }
 
 // it looks stupid but I wrote this for in the future
-export const rawDataToMedia = (data: any): Media => data
+export const rawDataToMedia = (data: any): Iso => data
 
-const getMedia = async (serverUuid: string): Promise<Media[]> => {
+const getIsos = async (serverUuid: string): Promise<Iso[]> => {
     const {
         data: { data },
     } = await http.get(`/api/client/servers/${serverUuid}/settings/hardware/isos`)
@@ -19,4 +19,4 @@ const getMedia = async (serverUuid: string): Promise<Media[]> => {
     return data.map(rawDataToMedia)
 }
 
-export default getMedia
+export default getIsos

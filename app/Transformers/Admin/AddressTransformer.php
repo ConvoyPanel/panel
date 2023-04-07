@@ -4,7 +4,6 @@ namespace Convoy\Transformers\Admin;
 
 use Convoy\Data\Server\Eloquent\AddressData;
 use Convoy\Models\IPAddress;
-use Convoy\Transformers\Client\ServerTransformer;
 use League\Fractal\TransformerAbstract;
 
 class AddressTransformer extends TransformerAbstract

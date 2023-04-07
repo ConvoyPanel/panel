@@ -82,8 +82,8 @@ class NetworkService
     public function getAddresses(Server $server): ServerAddressesData
     {
         return ServerAddressesData::from([
-            'ipv4' => $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
-            'ipv6' => $server->addresses->where('type', AddressType::IPV6->value)->toArray()
+            'ipv4' => array_values($server->addresses->where('type', AddressType::IPV4->value)->toArray()),
+            'ipv6' => array_values($server->addresses->where('type', AddressType::IPV6->value)->toArray())
         ]);
     }
 

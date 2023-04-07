@@ -1,5 +1,5 @@
 import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToAdminServer, Server } from '@/api/admin/servers/getServer'
+import { rawDataToAdminServer, AdminServer } from '@/api/admin/servers/getServer'
 
 export type ServerIncludes = 'user' | 'node'
 
@@ -12,7 +12,7 @@ export interface QueryParams {
     includes?: Array<ServerIncludes>
 }
 
-export type ServerResponse = PaginatedResult<Server>
+export type ServerResponse = PaginatedResult<AdminServer>
 
 const getServers = async ({
     nodeId,
