@@ -7,9 +7,9 @@ return [
       'kill' => 'Kill',
       'shutdown' => 'Shutdown',
     ],
-    'power_action_notices' => [
-        'sent_success' => 'Sent power action successfully. It may take a moment to process.',
-        'sent_fail' => 'Failed to send power action.',
+    'notices' => [
+        'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
+        'power_action_sent_fail' => 'Failed to send power action.',
     ],
 
     'state' => 'State',

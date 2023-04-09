@@ -14,10 +14,10 @@ const ServerPowerBlock = () => {
     const update = (state: PowerAction) => {
         updateStatus(uuid!, state)
             .then(() =>
-                notify({ title: tStrings('success'), message: t('power_action_notices.sent_success'), color: 'green' })
+                notify({ message: t('notices.power_action_sent_success'), color: 'green' })
             )
             .catch(() =>
-                notify({ title: tStrings('error'), message: t('power_action_notices.sent_fail'), color: 'red' })
+                notify({ message: t('notices.power_action_sent_fail'), color: 'red' })
             )
     }
 

@@ -59,4 +59,5 @@ return [
     'last_used' => 'Last Used',
     'success' => 'Success',
     'error' => 'Error',
+    'restore' => 'Restore',
 ];

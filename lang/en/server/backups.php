@@ -15,4 +15,16 @@ return [
             'kill' => 'Kill'
         ]
     ],
+    'delete_modal' => [
+        'title' => 'Delete :name',
+        'description' => 'Are you sure you want to delete this backup?',
+    ],
+    'restore_modal' => [
+        'title' => 'Restore From :name',
+        'description' => 'Are you sure you want to restore from this backup?',
+    ],
+    'notices' => [
+        'backup_deleted' => 'Deleted :name',
+        'backup_restored' => 'Began restoring server from :name',
+    ]
 ];

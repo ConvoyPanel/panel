@@ -29,7 +29,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
     const { t: tVal } = useTranslation('validation')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const [open, setOpen] = useState(false)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`server.${uuid}.backups.create`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${uuid}.backups.create`)
     const backupLimit = ServerContext.useStoreState(state => state.server.data!.limits.backups)
     const theme = useStoreState(state => state.settings.data?.theme)
 
@@ -112,7 +112,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
                         <Modal.Body>
                             <Modal.Description bottomMargin>{t('create_modal.description')}</Modal.Description>
 
-                            <FlashMessageRender byKey={`server.${uuid}.backups.create`} className='mb-5' />
+                            <FlashMessageRender byKey={`servers.${uuid}.backups.create`} className='mb-5' />
 
                             <TextInputForm name='name' placeholder='Name' label={tStrings('name')} />
 
