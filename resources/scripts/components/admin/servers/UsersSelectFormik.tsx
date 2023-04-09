@@ -1,7 +1,7 @@
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useUsersSWR from '@/api/admin/users/useUsersSWR'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
 import { useDebouncedValue } from '@mantine/hooks'
 
@@ -30,7 +30,7 @@ const UsersSelectFormik = () => {
             data={users}
             searchable
             searchValue={query}
-            onSearchChange={(val) => setQuery(val)}
+            onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
             nothingFound={'No users found'}
             name={'userId'}

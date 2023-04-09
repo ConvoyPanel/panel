@@ -1,8 +1,8 @@
 import useIsosSWR from '@/api/admin/nodes/isos/useIsosSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
@@ -37,7 +37,11 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
         validationSchema: yup.object().shape({
             name: yup.string().required('Name is required.'),
             link: yup.string().url('Invalid link').required('Link is required.'),
-            fileName: yup.string().matches(/\.iso$/, 'File extension must end in .iso').max(40, 'Limit up to 40 characters').required('File name is required.'),
+            fileName: yup
+                .string()
+                .matches(/\.iso$/, 'File extension must end in .iso')
+                .max(40, 'Limit up to 40 characters')
+                .required('File name is required.'),
             hidden: yup.boolean(),
             checksumAlgorithm: yup
                 .string()
@@ -110,9 +114,19 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
                         <FlashMessageRender className='mb-5' byKey={'admin:node:isos.create'} />
 
                         <TextInputFormik name='name' label='Display Name' />
-                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${form.touched.link && form.errors.link ? 'items-center' : 'items-end'}`}>
+                        <div
+                            className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${
+                                form.touched.link && form.errors.link ? 'items-center' : 'items-end'
+                            }`}
+                        >
                             <TextInputFormik className='col-span-2 sm:col-span-3' name='link' label='Link' />
-                            <QueryFileButton onQuery={handleQuery} onFail={handleQueryFail} link={form.values.link} disabled={Boolean(form.errors.link) || form.values.link.length === 0} className={form.touched.link && form.errors.link ? '-mt-0.5' : ''} />
+                            <QueryFileButton
+                                onQuery={handleQuery}
+                                onFail={handleQueryFail}
+                                link={form.values.link}
+                                disabled={Boolean(form.errors.link) || form.values.link.length === 0}
+                                className={form.touched.link && form.errors.link ? '-mt-0.5' : ''}
+                            />
                         </div>
                         <TextInputFormik name='fileName' label='File Name' />
                         <SelectFormik data={checksumAlgorithms} name='checksumAlgorithm' label='Checksum Algorithm' />

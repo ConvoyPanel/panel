@@ -1,7 +1,7 @@
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
-import MultiSelectFormik from '@/components/elements/forms/MultiSelectFormik'
+import MultiSelectFormik from '@/components/elements/formik/MultiSelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 
 interface Props {
@@ -16,7 +16,10 @@ const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => 
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, { query: debouncedQuery, serverId: null })
+    const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, {
+        query: debouncedQuery,
+        serverId: null,
+    })
     const { data: selectedAddresses } = useAddressesSWR(nodeId ?? -1, {
         query: ((addressIds as number[]).length > 0 ? (addressIds as number[]) : [-1]).join(','),
         id: 'selected-addresses',

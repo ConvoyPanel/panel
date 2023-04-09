@@ -1,12 +1,11 @@
 import { httpErrorToHuman } from '@/api/http'
-import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/router'
 import { ServerContext } from '@/state/server'
-import { ReactNode, useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
-import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useContext, useEffect, useMemo, useState } from 'react'
+import { Outlet, useMatches } from 'react-router-dom'
+import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
 import { useTranslation } from 'react-i18next'
 
@@ -27,11 +26,11 @@ const ServerRouter = () => {
                 end: true,
             },
             {
-                name: tStrings('backups'),
+                name: tStrings('backup', { count: 2 }),
                 path: `/servers/${id}/backups`,
             },
             {
-                name: tStrings('settings'),
+                name: tStrings('setting', { count: 2 }),
                 path: `/servers/${id}/settings`,
             },
         ],

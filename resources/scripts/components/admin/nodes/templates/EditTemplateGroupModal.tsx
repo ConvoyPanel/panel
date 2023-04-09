@@ -3,8 +3,8 @@ import { TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroup
 import updateTemplateGroup from '@/api/admin/nodes/templateGroups/updateTemplateGroup'
 import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
@@ -38,12 +38,13 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
 
             if (group) {
                 updateTemplateGroup(nodeId, group.uuid, values)
-                    .then(({name, hidden}) => {
+                    .then(({ name, hidden }) => {
                         handleClose()
 
                         // @ts-expect-error - groups should be defined. Though, it might not when there's a network error
-                        mutate(groups => groups.map(g => g.uuid === group.uuid ? { ...g, name, hidden } : g), false)
-                    }).catch(error => {
+                        mutate(groups => groups.map(g => (g.uuid === group.uuid ? { ...g, name, hidden } : g)), false)
+                    })
+                    .catch(error => {
                         clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })
                         setSubmitting(false)
                     })
@@ -53,10 +54,16 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                         handleClose()
 
                         // @ts-expect-error - groups should be defined. Though, it might not when there's a network error
-                        mutate(groups => [...groups, {
-                            ...newGroup,
-                            templates: [],
-                        }], false)
+                        mutate(
+                            groups => [
+                                ...groups,
+                                {
+                                    ...newGroup,
+                                    templates: [],
+                                },
+                            ],
+                            false
+                        )
                     })
                     .catch(error => {
                         clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })

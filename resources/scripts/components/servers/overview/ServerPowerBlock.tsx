@@ -6,14 +6,19 @@ import { useTranslation } from 'react-i18next'
 
 const ServerPowerBlock = () => {
     const { t } = useTranslation('server.overview')
+    const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data?.uuid)
     const state = ServerContext.useStoreState(state => state.status.data?.state)
     const notify = useNotify()
 
     const update = (state: PowerAction) => {
         updateStatus(uuid!, state)
-            .then(() => notify({ title: 'Success', message: 'Server state updated.', color: 'green' }))
-            .catch(() => notify({ title: 'Error', message: 'Failed to update server state.', color: 'red' }))
+            .then(() =>
+                notify({ title: tStrings('success'), message: t('power_action_notices.sent_success'), color: 'green' })
+            )
+            .catch(() =>
+                notify({ title: tStrings('error'), message: t('power_action_notices.sent_fail'), color: 'red' })
+            )
     }
 
     return (

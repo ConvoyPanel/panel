@@ -2,7 +2,7 @@ import { useField } from 'formik'
 import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import { useMemo, useState } from 'react'
 import Select from '@/components/elements/inputs/Select'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 
 interface Props {
     disabled?: boolean

@@ -8,7 +8,7 @@ import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
 import { useState } from 'react'
 import { FormikProvider, useFormik } from 'formik'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 
 const DeleteServerContainer = () => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:delete')

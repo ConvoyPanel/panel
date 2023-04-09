@@ -3,7 +3,7 @@ import { ServerContext } from '@/state/server'
 import useTemplateGroupsSWR from '@/api/server/settings/useTemplateGroupsSWR'
 import { useMemo, useState } from 'react'
 import Select from '@/components/elements/inputs/Select'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 
 interface Props {
     disabled?: boolean

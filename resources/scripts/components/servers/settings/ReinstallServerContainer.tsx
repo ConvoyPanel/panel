@@ -7,8 +7,8 @@ import * as yup from 'yup'
 import useFlash, { useFlashKey } from '@/util/useFlash'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TemplatesSelectFormik from '@/components/servers/settings/TemplatesSelectFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import reinstallServer from '@/api/server/settings/reinstallServer'
 import { ServerContext } from '@/state/server'
 
@@ -83,11 +83,7 @@ const ReinstallServerContainer = () => {
                             Start your server on a fresh slate. Select a template and confirm the reinstallation.
                         </p>
                         <TemplatesSelectFormik disabled={form.isSubmitting} />
-                        <TextInputFormik
-                            name={'accountPassword'}
-                            label={'System OS Password'}
-                            type={'password'}
-                        />
+                        <TextInputFormik name={'accountPassword'} label={'System OS Password'} type={'password'} />
                         <CheckboxFormik
                             name={'startOnCompletion'}
                             label={'Start Server After Completion'}

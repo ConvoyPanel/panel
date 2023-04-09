@@ -1,5 +1,5 @@
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'

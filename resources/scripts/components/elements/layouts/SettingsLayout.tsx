@@ -51,7 +51,9 @@ const SettingsLayout = ({ indexPattern, defaultUrl, contentBlock: ContentBlock, 
 
     useEffect(() => {
         if (width > 960 && isIndex) {
-            navigate(bindUrlParams(defaultUrl, matches[matches.length - 1].params))
+            navigate(bindUrlParams(defaultUrl, matches[matches.length - 1].params), {
+                replace: true,
+            })
         }
     }, [isIndex, width])
 

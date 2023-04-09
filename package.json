@@ -12,6 +12,7 @@
         "@emotion/styled": "^11.10.5",
         "@headlessui/react": "^1.7.5",
         "@heroicons/react": "^2.0.0",
+        "@hookform/resolvers": "^3.0.1",
         "@mantine/core": "^5.9.4",
         "@mantine/hooks": "^5.9.4",
         "@mantine/next": "^5.9.4",
@@ -38,6 +39,7 @@
         "react-chartjs-2": "^4.2.0",
         "react-dom": "^18.2.0",
         "react-fast-compare": "^3.2.0",
+        "react-hook-form": "^7.43.9",
         "react-i18next": "^12.2.0",
         "react-router-dom": "^6.4.2",
         "react-transition-group": "^4.4.5",
@@ -47,7 +49,8 @@
         "twin.macro": "^3.1.0",
         "vite": "^4.0.1",
         "vite-plugin-babel-macros": "^1.0.6",
-        "yup": "^0.32.11"
+        "yup": "^0.32.11",
+        "zod": "^3.21.4"
     },
     "devDependencies": {
         "@types/debounce": "^1.2.1",

@@ -7,6 +7,11 @@ return [
       'kill' => 'Kill',
       'shutdown' => 'Shutdown',
     ],
+    'power_action_notices' => [
+        'sent_success' => 'Sent power action successfully. It may take a moment to process.',
+        'sent_fail' => 'Failed to send power action.',
+    ],
+
     'state' => 'State',
     'states' => [
         'stopped' => 'Stopped',
@@ -16,8 +21,7 @@ return [
         'shutting_down' => 'Shutting Down',
     ],
     'uptime' => 'Uptime',
-
-    'bandwidth_usage' => 'Bandwidth Usage',
+    'poll_status_error' => 'Failed to poll server status. Retrying in 5 seconds...',
 
     'terminal' => [
         'title' => 'Terminal',

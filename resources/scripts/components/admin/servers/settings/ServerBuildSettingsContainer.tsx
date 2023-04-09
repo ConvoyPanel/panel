@@ -1,10 +1,10 @@
 import FormCard from '@/components/elements/FormCard'
 import { FormikProvider, useFormik } from 'formik'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
 import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
 import FormSection from '@/components/elements/FormSection'
 import { AdminServerContext } from '@/state/admin/server'
@@ -80,50 +80,50 @@ const ServerBuildSettingsContainer = () => {
     })
 
     return (
-            <FormCard className='w-full'>
-                <FormikProvider value={form}>
-                    <form onSubmit={form.handleSubmit}>
-                        <FormCard.Body>
-                            <FormCard.Title>Server Build</FormCard.Title>
-                            <div className='space-y-3 mt-3'>
-                                <FlashMessageRender byKey='admin:server:settings:build' />
-                                <TextInputFormik name='cpu' label='CPU' />
-                                <TextInputFormik name='memory' label='Memory (MiB)' />
-                                <TextInputFormik name='disk' label='Disk (MiB)' />
-                                <AddressesMultiSelectFormik nodeId={server.nodeId} />
-                                <TextInputFormik
-                                    name='snapshotLimit'
-                                    label='Snapshots Limit'
-                                    placeholder={'Leave blank for no limit'}
-                                />
-                                <TextInputFormik
-                                    name='backupLimit'
-                                    label='Backups Limit'
-                                    placeholder={'Leave blank for no limit'}
-                                />
-                                <TextInputFormik
-                                    name='bandwidthLimit'
-                                    label='Bandwidth Limit (MiB)'
-                                    placeholder={'Leave blank for no limit'}
-                                />
-                                <TextInputFormik name='bandwidthUsage' label='Bandwidth Usage (MiB)' />
-                            </div>
-                        </FormCard.Body>
-                        <FormCard.Footer>
-                            <Button
-                                loading={form.isSubmitting}
-                                disabled={!form.dirty}
-                                type='submit'
-                                variant='filled'
-                                color='success'
-                                size='sm'
-                            >
-                                Save
-                            </Button>
-                        </FormCard.Footer>
-                    </form>
-                </FormikProvider>
-            </FormCard>
+        <FormCard className='w-full'>
+            <FormikProvider value={form}>
+                <form onSubmit={form.handleSubmit}>
+                    <FormCard.Body>
+                        <FormCard.Title>Server Build</FormCard.Title>
+                        <div className='space-y-3 mt-3'>
+                            <FlashMessageRender byKey='admin:server:settings:build' />
+                            <TextInputFormik name='cpu' label='CPU' />
+                            <TextInputFormik name='memory' label='Memory (MiB)' />
+                            <TextInputFormik name='disk' label='Disk (MiB)' />
+                            <AddressesMultiSelectFormik nodeId={server.nodeId} />
+                            <TextInputFormik
+                                name='snapshotLimit'
+                                label='Snapshots Limit'
+                                placeholder={'Leave blank for no limit'}
+                            />
+                            <TextInputFormik
+                                name='backupLimit'
+                                label='Backups Limit'
+                                placeholder={'Leave blank for no limit'}
+                            />
+                            <TextInputFormik
+                                name='bandwidthLimit'
+                                label='Bandwidth Limit (MiB)'
+                                placeholder={'Leave blank for no limit'}
+                            />
+                            <TextInputFormik name='bandwidthUsage' label='Bandwidth Usage (MiB)' />
+                        </div>
+                    </FormCard.Body>
+                    <FormCard.Footer>
+                        <Button
+                            loading={form.isSubmitting}
+                            disabled={!form.dirty}
+                            type='submit'
+                            variant='filled'
+                            color='success'
+                            size='sm'
+                        >
+                            Save
+                        </Button>
+                    </FormCard.Footer>
+                </form>
+            </FormikProvider>
+        </FormCard>
     )
 }
 

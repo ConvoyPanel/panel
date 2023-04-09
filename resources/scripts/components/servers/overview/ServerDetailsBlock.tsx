@@ -61,8 +61,8 @@ const ServerDetailsBlock = () => {
                 await getStatus(uuid)
             } catch {
                 notify({
-                    title: 'Error',
-                    message: 'Failed to update server status. Retrying in 5 seconds.',
+                    title: tStrings('error'),
+                    message: t('poll_status_error'),
                     color: 'red',
                 })
 
@@ -153,7 +153,7 @@ const ServerDetailsBlock = () => {
             )}
 
             <Card className='flex flex-col justify-between items-center col-span-10 lg:col-span-2'>
-                <h5 className='h5'>{t('bandwidth_usage')}</h5>
+                <h5 className='h5'>{tStrings('bandwidth_usage')}</h5>
                 <div className='grid place-items-center mt-5'>
                     <h4 className='absolute text-3xl font-semibold text-foreground'>
                         {Math.floor(bandwidth.percentage)}

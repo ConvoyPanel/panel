@@ -7,7 +7,7 @@ import useFlash from '@/util/useFlash'
 import { useState } from 'react'
 import deleteAddress from '@/api/admin/nodes/addresses/deleteAddress'
 import { FormikProvider, useFormik } from 'formik'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import usePagination from '@/util/usePagination'
 
 interface Props {

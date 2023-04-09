@@ -1,85 +1,84 @@
 import login from '@/api/auth/login'
 import LoginFormContainer from '@/components/auth/LoginFormContainer'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import useFlash from '@/util/useFlash'
+import { useFlashKey } from '@/util/useFlash'
 import { useEffect } from 'react'
-import TextInput from '@/components/elements/inputs/TextInput'
 import Button from '@/components/elements/Button'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FormProvider, useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 const LoginContainer = () => {
     const { t: tAuth } = useTranslation('auth')
     const { t: tStrings } = useTranslation('strings')
-    const { clearFlashes, clearAndAddHttpError } = useFlash()
+    const { t: tVal } = useTranslation('validation')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('auth:sign_in')
     const location = useLocation()
 
     useEffect(() => {
         document.title = 'Login | Convoy'
     }, [])
 
-    const rules = yup.object({
-        email: yup.string().email('Enter a valid email').required('Email is required'),
-        password: yup.string().required('Password is required'),
+    const schema = z.object({
+        email: z.string().email(tVal('email', { attribute: tStrings('email').toLowerCase() })),
+        password: z.string().min(1, tVal('required', { attribute: tStrings('password').toLowerCase() })!),
     })
 
-    const form = useFormik({
-        initialValues: {
+    const methods = useForm({
+        resolver: zodResolver(schema),
+        mode: 'onTouched',
+        defaultValues: {
             email: '',
             password: '',
         },
-        validationSchema: rules,
-        onSubmit: values => {
-            clearFlashes()
-
-            login(values)
-                .then(() => {
-                    window.location = location.state?.from.pathname || '/'
-                })
-                .catch(error => {
-                    console.error(error)
-
-                    form.setSubmitting(false)
-                    clearAndAddHttpError({ error })
-                })
-        },
     })
 
+    const submit = async (data: z.infer<typeof schema>) => {
+        clearFlashes()
+
+        try {
+            await login(data)
+
+            window.location = location.state?.from.pathname || '/'
+        } catch (e) {
+            console.error(e)
+
+            clearAndAddHttpError(e as Error)
+        }
+    }
+
     return (
-        <form onSubmit={form.handleSubmit}>
-            <LoginFormContainer
-                title='Convoy'
-                description={tAuth('sign_in_description')}
-                submitting={form.isSubmitting}
-            >
-                <TextInput
-                    label={tStrings('email')}
-                    name='email'
-                    className='mt-1 block w-full'
-                    value={form.values.email}
-                    onChange={form.handleChange}
-                    error={form.touched.email ? form.errors.email : undefined}
-                    autoFocus
-                    required
-                />
-                <TextInput
-                    label={tStrings('password')}
-                    name='password'
-                    value={form.values.password}
-                    onChange={form.handleChange}
-                    error={form.touched.password ? form.errors.password : undefined}
-                    type='password'
-                    className='mt-1 block w-full'
-                    required
-                />
-                <div className='flex items-center justify-end mt-6'>
-                    <Button type='submit' variant='filled' color='accent'>
-                        {tAuth('sign_in')}
-                    </Button>
-                </div>
-            </LoginFormContainer>
-        </form>
+        <LoginFormContainer
+            title='Convoy'
+            description={tAuth('sign_in_description')}
+            submitting={methods.formState.isSubmitting}
+        >
+            <FormProvider {...methods}>
+                <form onSubmit={methods.handleSubmit(submit)}>
+                    <TextInputForm
+                        name={'email'}
+                        label={tStrings('email')}
+                        autoComplete={'email'}
+                        className='mt-1 block w-full'
+                        autoFocus
+                    />
+                    <TextInputForm
+                        name={'password'}
+                        label={tStrings('password')}
+                        autoComplete={'password'}
+                        type='password'
+                        className='mt-1 block w-full'
+                    />
+                    <div className='flex items-center justify-end mt-6'>
+                        <Button type='submit' variant='filled' color='accent'>
+                            {tAuth('sign_in')}
+                        </Button>
+                    </div>
+                </form>
+            </FormProvider>
+        </LoginFormContainer>
     )
 }
 

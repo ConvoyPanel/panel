@@ -6,8 +6,8 @@ import updateLocation from '@/api/admin/locations/updateLocation'
 import { KeyedMutator } from 'swr'
 import createLocation from '@/api/admin/locations/createLocation'
 import useFlash from '@/util/useFlash'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
-import TextareaFormik from '@/components/elements/forms/TextareaFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
+import TextareaFormik from '@/components/elements/formik/TextareaFormik'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 
 interface Props {

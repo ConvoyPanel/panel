@@ -3,8 +3,8 @@ import createTemplate from '@/api/admin/nodes/templateGroups/templates/createTem
 import updateTemplate from '@/api/admin/nodes/templateGroups/templates/updateTemplate'
 import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
@@ -27,7 +27,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
         enableReinitialize: true,
         initialValues: {
             name: template?.name ?? '',
-            vmid: template?.vmid ?? '' as unknown as number | undefined,
+            vmid: template?.vmid ?? ('' as unknown as number | undefined),
             hidden: template?.hidden ?? false,
         },
         validationSchema: yup.object({

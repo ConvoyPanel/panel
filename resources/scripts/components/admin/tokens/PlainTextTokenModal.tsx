@@ -1,7 +1,7 @@
 import Modal from '@/components/elements/Modal'
 import { FormikProvider } from 'formik'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import { Code } from '@mantine/core'
 import { Token } from '@/api/admin/tokens/getTokens'
 

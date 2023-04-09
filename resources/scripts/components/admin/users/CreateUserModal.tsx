@@ -1,7 +1,7 @@
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { useFlashKey } from '@/util/useFlash'
 import usePagination from '@/util/usePagination'
@@ -20,7 +20,7 @@ interface Props {
     onClose: () => void
 }
 
-const CreateUserButton = ({ open, onClose}: Props) => {
+const CreateUserButton = ({ open, onClose }: Props) => {
     const [page] = usePagination()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:users.create')
     const { mutate } = useUsersSWR({ page })

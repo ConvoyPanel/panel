@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { Select as MantineSelect } from '@mantine/core'
+import { Select as MantineSelect, SelectProps as MantineSelectProps } from '@mantine/core'
 import tw from 'twin.macro'
 import { css } from '@emotion/react'
 import LoadingDots from '@/components/elements/LoadingDots'
@@ -42,7 +42,7 @@ const StyledSelect = styled(MantineSelect)`
               `
             : null} */
 
-export interface SelectProps extends ComponentProps<typeof StyledSelect> {
+export interface SelectProps extends MantineSelectProps {
     loading?: boolean
 }
 
@@ -73,14 +73,15 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(({ label, classNa
     </StyledSelectItem>
 ))
 
-const Select = ({ loading, nothingFound, error, ...props }: SelectProps) => (
+const Select = forwardRef<HTMLInputElement, SelectProps>(({ loading, nothingFound, error, ...props }, ref) => (
     <StyledSelect
         error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
         nothingFound={loading ? 'Loading...' : nothingFound}
         rightSection={loading && <LoadingDots size={4} />}
         itemComponent={SelectItem}
+        ref={ref}
         {...props}
     />
-)
+))
 
 export default Select

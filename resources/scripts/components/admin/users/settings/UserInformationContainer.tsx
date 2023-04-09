@@ -5,12 +5,12 @@ import * as yup from 'yup'
 import updateUser from '@/api/admin/users/updateUser'
 import FormCard from '@/components/elements/FormCard'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
 import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 
 const UserInformationContainer = () => {
     const user = AdminUserContext.useStoreState(state => state.user.data!)

@@ -1,7 +1,7 @@
 import { useField } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 
 interface Props {

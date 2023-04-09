@@ -22,7 +22,7 @@ const ServerNetworkBlock = () => {
                 <dl>
                     <Dt>{tStrings('ip')}</Dt>
                     {addresses.length === 0 ? (
-                        <Dd>{t('ips_allocation.empty_state')}</Dd>
+                        <Dd>{t('ip_allocation.empty_state')}</Dd>
                     ) : (
                         <Display.Group className='mt-3'>
                             {addresses.map(ip => (

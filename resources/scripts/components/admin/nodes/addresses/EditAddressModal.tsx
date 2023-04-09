@@ -1,14 +1,14 @@
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import { Address } from '@/api/server/getServer'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/forms/CheckboxFormik'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import Radio from '@/components/elements/inputs/Radio'
-import RadioGroupFormik from '@/components/elements/forms/RadioGroupFormik'
+import RadioGroupFormik from '@/components/elements/formik/RadioGroupFormik'
 import ServersSelectFormik from '@/components/admin/nodes/addresses/ServersSelectFormik'
 import * as yup from 'yup'
 import createAddress from '@/api/admin/nodes/addresses/createAddress'
@@ -25,7 +25,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
     const [page] = usePagination()
-    const { mutate } = useAddressesSWR(nodeId, {page, includes: ['server'] })
+    const { mutate } = useAddressesSWR(nodeId, { page, includes: ['server'] })
 
     const form = useFormik({
         enableReinitialize: true,
@@ -44,7 +44,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
             macAddress: yup.string().optional(),
             type: yup.string().required('Specify a type'),
         }),
-        onSubmit: async ({cidr, serverId, ...values}, { setSubmitting }) => {
+        onSubmit: async ({ cidr, serverId, ...values }, { setSubmitting }) => {
             clearFlashes('admin:node:addresses.edit')
             setSubmitting(true)
             try {
@@ -65,7 +65,6 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
                                     return updatedAddress
                                 }
 
-
                                 return item
                             }),
                         }
@@ -82,7 +81,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
 
                         return {
                             ...data,
-                            items: [ address, ...data.items ],
+                            items: [address, ...data.items],
                         }
                     }, false)
                 }

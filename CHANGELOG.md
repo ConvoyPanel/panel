@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-rc.4
+
+### Fixed
+
+- Browser history hijacking on client server settings page
+
 ## v3.9.0-rc.3
 
 :warning: This release makes changes to the data in your database. Rows that have a non-null `deleted_at` field in

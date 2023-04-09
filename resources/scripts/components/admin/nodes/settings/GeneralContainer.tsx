@@ -4,7 +4,7 @@ import DeleteNodeContainer from '@/components/admin/nodes/settings/DeleteNodeCon
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
-import TextInputFormik from '@/components/elements/forms/TextInputFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import FormSection from '@/components/elements/FormSection'
 import { NodeContext } from '@/state/admin/node'
 import useFlash, { useFlashKey } from '@/util/useFlash'

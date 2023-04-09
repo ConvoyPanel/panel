@@ -1,6 +1,6 @@
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
-import SelectFormik from '@/components/elements/forms/SelectFormik'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { NodeContext } from '@/state/admin/node'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useField } from 'formik'
