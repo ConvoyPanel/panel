@@ -9,6 +9,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
+import { zodI18nMap } from 'zod-i18n-map'
 
 const LoginContainer = () => {
     const { t: tAuth } = useTranslation('auth')
@@ -22,8 +23,8 @@ const LoginContainer = () => {
     }, [])
 
     const schema = z.object({
-        email: z.string().email(tVal('email', { attribute: tStrings('email').toLowerCase() })),
-        password: z.string().min(1, tVal('required', { attribute: tStrings('password').toLowerCase() })!),
+        email: z.string().email().max(10),
+        password: z.string().min(1),
     })
 
     const methods = useForm({

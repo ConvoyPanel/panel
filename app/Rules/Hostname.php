@@ -25,6 +25,6 @@ class Hostname implements Rule
      */
     public function message()
     {
-        return ':attribute is invalid.';
+        return __('validation.hostname');
     }
 }

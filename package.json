@@ -50,7 +50,8 @@
         "vite": "^4.0.1",
         "vite-plugin-babel-macros": "^1.0.6",
         "yup": "^0.32.11",
-        "zod": "^3.21.4"
+        "zod": "^3.21.4",
+        "zod-i18n-map": "^2.9.0"
     },
     "devDependencies": {
         "@types/debounce": "^1.2.1",
