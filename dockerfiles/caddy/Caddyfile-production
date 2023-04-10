@@ -3,4 +3,10 @@
     php_fastcgi php:9000
     encode gzip
     file_server
+
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.webp *.avif *.jpg *.jpeg *.png *.svg *.woff *.woff2
+    }
+    header @static Cache-Control max-age=5184000
 }
