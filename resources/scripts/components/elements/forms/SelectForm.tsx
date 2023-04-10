@@ -7,13 +7,13 @@ interface Props extends Omit<SelectProps, 'error' | keyof ControllerRenderProps>
     name: string
 }
 
-const SelectForm = (props: Props) => {
+const SelectForm = ({control, ...props}: Props) => {
     const {
         field,
         fieldState: { error },
     } = useController({
         name: props.name,
-        control: props.control,
+        control: control,
     })
 
     return <Select {...field} {...props} error={error?.message} />

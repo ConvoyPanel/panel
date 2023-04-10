@@ -41,7 +41,7 @@ const ServerRouter = () => {
         setError(undefined)
 
         getServer(id as string).catch((error: any) => {
-            console.error(error)
+
             setError(httpErrorToHuman(error))
         })
 

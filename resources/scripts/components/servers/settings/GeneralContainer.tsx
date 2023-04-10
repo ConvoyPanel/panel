@@ -1,4 +1,4 @@
-import ReinstallServerContainer from '@/components/servers/settings/ReinstallServerContainer'
+import ReinstallServerCard from '@/components/servers/settings/partials/general/ReinstallServerCard'
 import ServerInfoCard from '@/components/servers/settings/partials/general/ServerInfoCard'
 
 const GeneralContainer = () => {
@@ -6,7 +6,7 @@ const GeneralContainer = () => {
     return (
         <>
             <ServerInfoCard />
-            <ReinstallServerContainer />
+            <ReinstallServerCard />
         </>
     )
 }

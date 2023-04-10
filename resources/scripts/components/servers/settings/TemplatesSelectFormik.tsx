@@ -4,14 +4,16 @@ import useTemplateGroupsSWR from '@/api/server/settings/useTemplateGroupsSWR'
 import { useMemo, useState } from 'react'
 import Select from '@/components/elements/inputs/Select'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
+import { useFormContext } from 'react-hook-form'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
 interface Props {
     disabled?: boolean
 }
 
-const TemplatesSelectFormik = ({ disabled }: Props) => {
+const TemplatesSelectForm = ({ disabled }: Props) => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
-    const [{}, {}, { setValue: setTemplateUuid }] = useField('templateUuid')
+    const { setValue } = useFormContext()
     const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(uuid)
     const templateGroups = useMemo(
         () =>
@@ -34,7 +36,7 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
     )
     const handleGroupsOnChange = (uuid: string | null) => {
         setGroupUuid(uuid ?? '')
-        setTemplateUuid('')
+        setValue('templateUuid', '')
     }
 
     return (
@@ -49,7 +51,7 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
                 nothingFound={'No groups found'}
                 disabled={disabled}
             />
-            <SelectFormik
+            <SelectForm
                 data={templates}
                 name={'templateUuid'}
                 label={'Template'}
@@ -61,4 +63,4 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
     )
 }
 
-export default TemplatesSelectFormik
+export default TemplatesSelectForm

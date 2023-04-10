@@ -28,6 +28,8 @@ return [
             'startsWith' => 'Invalid input: must start with "{{startsWith}}"',
             'endsWith' => 'Invalid input: must end with "{{endsWith}}"',
             'hostname' => 'Invalid {{validation}}',
+            'english_keyboard_characters' => 'Invalid {{validation}}',
+            'password' => 'Must contain 8 characters, one uppercase, one lowercase, one number and one special case character'
         ],
         'too_small' =>
         [

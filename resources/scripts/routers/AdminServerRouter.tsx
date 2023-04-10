@@ -38,7 +38,7 @@ const AdminServerRouter = () => {
         setError(undefined)
 
         getServer(match!.params.id as string).catch((error: any) => {
-            console.error(error)
+
             setError(httpErrorToHuman(error))
         })
 

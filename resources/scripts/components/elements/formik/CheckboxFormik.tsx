@@ -1,8 +1,6 @@
-import Checkbox, { CheckboxProps } from '@/components/elements/inputs/Checkbox'
-import Textarea, { TextareaProps } from '@/components/elements/inputs/Textarea'
-import { Field as FormikField, FieldProps } from 'formik'
+import Checkbox, { CheckboxProps } from '@/components/elements/inputs/CheckboxOld'
+import { FieldProps, Field as FormikField } from 'formik'
 import { forwardRef } from 'react'
-import { useTranslation } from 'react-i18next'
 
 const CheckboxFormik = forwardRef<HTMLInputElement, Omit<CheckboxProps, 'error'>>(({ name, ...props }, ref) => {
     return (

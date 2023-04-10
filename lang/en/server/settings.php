@@ -10,6 +10,10 @@ return [
     'reinstall' => [
         'title' => 'Reinstall Server',
         'description' => 'Start your server on a fresh slate. Select a template and confirm the reinstall.',
+        'modal' => [
+            'title' => 'Confirm Reinstallation',
+            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
+        ]
     ],
     'isos' => [
         'title' => 'Mountable ISOs',

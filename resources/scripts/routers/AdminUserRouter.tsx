@@ -38,7 +38,7 @@ const AdminUserRouter = () => {
         setError(undefined)
 
         getUser(parseInt(match!.params.id as string)).catch((error: any) => {
-            console.error(error)
+
             setError(httpErrorToHuman(error))
         })
 

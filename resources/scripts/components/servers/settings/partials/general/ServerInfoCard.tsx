@@ -5,20 +5,21 @@ import FormCard from '@/components/elements/FormCard'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import { ServerContext } from '@/state/server'
 import { useFlashKey } from '@/util/useFlash'
-import useNotify from '@/util/useNotify'
 import { hostname } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 
 const ServerInfoCard = () => {
+    const { t} = useTranslation('server.settings')
+    const { t: tStrings } = useTranslation('strings')
     const server = ServerContext.useStoreState(state => state.server.data!)
     const setServer = ServerContext.useStoreActions(actions => actions.server.setServer)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${server.uuid}.settings.general`)
-    const notify = useNotify()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${server.uuid}.settings.general.info`)
 
     const schema = z.object({
-        name: z.string().min(1).max(40),
+        name: z.string().nonempty().max(40),
         hostname: hostname().max(191),
     })
 
@@ -36,12 +37,6 @@ const ServerInfoCard = () => {
         try {
             await renameServer(server.uuid, data)
 
-            notify({
-                title: 'Updated',
-                message: 'Updated general settings',
-                color: 'green',
-            })
-
             setServer({ ...server, name: data.name })
             methods.reset(data)
         } catch (e) {
@@ -57,17 +52,17 @@ const ServerInfoCard = () => {
 
             <form onSubmit={methods.handleSubmit(submit)}>
                 <FormCard.Body>
-                    <FormCard.Title>Server Name</FormCard.Title>
+                    <FormCard.Title>{t('display_info.title')}</FormCard.Title>
                     <div className='mt-3'>
-                        <FlashMessageRender byKey='server:settings:general:rename' />
+                        <FlashMessageRender byKey={`servers.${server.uuid}.settings.general.info`} />
                         <TextInputForm
                             name='name'
-                            label='Display Name'
+                            label={tStrings('display_name')}
                         />
                         <TextInputForm
                             name='hostname'
                             className='mt-3'
-                            label='Hostname'
+                            label={tStrings('hostname')}
                         />
                     </div>
                 </FormCard.Body>
@@ -80,7 +75,7 @@ const ServerInfoCard = () => {
                         color='success'
                         size='sm'
                     >
-                        Save
+                        {tStrings('save')}
                     </Button>
                 </FormCard.Footer>
             </form>

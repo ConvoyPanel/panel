@@ -60,4 +60,6 @@ return [
     'success' => 'Success',
     'error' => 'Error',
     'restore' => 'Restore',
+    'english_chars' => 'English keyboard characters',
+    'confirm' => 'Confirm',
 ];

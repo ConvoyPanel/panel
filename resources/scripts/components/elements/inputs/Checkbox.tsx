@@ -1,83 +1,43 @@
-import ErrorMessage from '@/components/elements/ErrorMessage'
+import styled from '@emotion/styled'
+import { Checkbox as MantineCheckbox, CheckboxProps } from '@mantine/core'
 import { CheckIcon, MinusIcon } from '@heroicons/react/20/solid'
-import { ChangeEvent, ReactNode, useMemo } from 'react'
+import { classNames } from '@/util/helpers'
+import tw from 'twin.macro'
+import { forwardRef } from 'react'
 
-export interface CheckboxProps {
-    onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-    checked?: boolean
-    indeterminate?: boolean
-    name?: string
-    label?: ReactNode
-    error?: ReactNode
-    disabled?: boolean
-    className?: string
-}
-
-const getClasses = (checked?: boolean, indeterminate?: boolean, disabled?: boolean) => {
-    if (checked || indeterminate) {
-        return disabled
-            ? indeterminate
-                ? 'border-accent-300 bg-accent-100'
-                : 'border-accent-300 bg-accent-300'
-            : indeterminate
-            ? 'border-foreground'
-            : 'border-foreground bg-foreground'
+const StyledCheckbox = styled(MantineCheckbox)`
+    .mantine-Checkbox-body {
+        ${tw`items-center`}
+    }
+    .mantine-Checkbox-inner {
+        ${tw`w-4 h-4`}
     }
 
-    return disabled
-        ? 'border-accent-300 bg-accent-100'
-        : 'border-accent-500 hover:border-foreground active:bg-accent-200'
-}
+    .mantine-Checkbox-input {
+        ${tw`w-4 h-4 rounded-[3px] border-accent-500 hover:border-foreground active:bg-accent-200`}
+    }
+    .mantine-Checkbox-input:checked {
+        ${tw`border-foreground`}
+        ${({ indeterminate }) => (!indeterminate ? tw`bg-foreground` : null)}]
+    }
+`
 
-const Checkbox = ({ onChange, checked, indeterminate, name, label, error, disabled, className }: CheckboxProps) => {
-    const id = useMemo(() => Math.random().toString(36).substring(7), [])
-
-    return (
-        <div className={className}>
-            <label
-                className={`inline-flex items-center space-x-3 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                htmlFor={id}
-            >
-                <div className='grid place-items-center p-0.5 -m-0.5'>
-                    <input
-                        id={id}
-                        name={name}
-                        type='checkbox'
-                        className='sr-only'
-                        checked={checked}
-                        disabled={disabled}
-                        onChange={onChange}
-                        ref={input => {
-                            if (input) {
-                                input.indeterminate = Boolean(indeterminate)
-                            }
-                        }}
-                    />
-                    <span
-                        className={`${getClasses(
-                            checked,
-                            indeterminate,
-                            disabled
-                        )} p-0.5 rounded-[3px] border transition-border h-4 w-4`}
-                    >
-                        {indeterminate ? (
-                            <MinusIcon
-                                className={`stroke-2 ${
-                                    disabled ? 'stroke-accent-300 text-accent-300' : 'stroke-foreground text-foreground'
-                                }`}
-                            />
-                        ) : checked ? (
-                            <CheckIcon className='stroke-2 stroke-background text-background' />
-                        ) : null}
-                    </span>
-                </div>
-                {label && (
-                    <span className={`text-sm select-none ${disabled ? 'text-accent-300' : 'text-foreground'}`}>{label}</span>
-                )}
-            </label>
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-        </div>
+const Icon = ({ indeterminate, className }: { indeterminate: boolean; className: string }) => {
+    return !indeterminate ? (
+        <CheckIcon className={classNames('stroke-2 stroke-background text-background', className)} />
+    ) : (
+        <MinusIcon
+            className={classNames(
+                'stroke-2',
+                false ? 'stroke-accent-300 text-accent-300' : 'stroke-foreground text-foreground',
+                className
+            )}
+        />
     )
 }
+
+const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
+    return <StyledCheckbox ref={ref} icon={Icon} {...props} />
+})
 
 export default Checkbox

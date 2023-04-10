@@ -50,7 +50,7 @@ const AdminNodeRouter = () => {
         setError(undefined)
 
         getNode(parseInt(match!.params.id as string)).catch((error: any) => {
-            console.error(error)
+
             setError(httpErrorToHuman(error))
         })
 

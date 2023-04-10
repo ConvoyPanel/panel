@@ -73,7 +73,7 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                 color: 'green',
             })
         } catch (error) {
-            console.error(error)
+
             clearAndAddHttpError({
                 key: `servers.backups.${backup.uuid}.restore`,
                 error,
@@ -103,7 +103,7 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                 color: 'green',
             })
         } catch (error) {
-            console.error(error)
+
             clearAndAddHttpError({
                 key: `servers.backups.${backup.uuid}.delete`,
                 error,
