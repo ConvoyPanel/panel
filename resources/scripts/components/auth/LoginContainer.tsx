@@ -14,7 +14,6 @@ import { zodI18nMap } from 'zod-i18n-map'
 const LoginContainer = () => {
     const { t: tAuth } = useTranslation('auth')
     const { t: tStrings } = useTranslation('strings')
-    const { t: tVal } = useTranslation('validation')
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('auth:sign_in')
     const location = useLocation()
 
@@ -23,8 +22,8 @@ const LoginContainer = () => {
     }, [])
 
     const schema = z.object({
-        email: z.string().email().max(10),
-        password: z.string().min(1),
+        email: z.string().email().nonempty(),
+        password: z.string().nonempty(),
     })
 
     const methods = useForm({
