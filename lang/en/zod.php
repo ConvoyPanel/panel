@@ -75,7 +75,7 @@ return [
             'string' =>
             [
                 'exact' => 'String must contain exactly {{maximum}} character(s)',
-                'inclusive' => 'String must contain at most sdsd  {{maximum}} character(s)',
+                'inclusive' => 'String must contain at most {{maximum}} character(s)',
                 'not_inclusive' => 'String must contain under {{maximum}} character(s)',
             ],
             'number' =>
