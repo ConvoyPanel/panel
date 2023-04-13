@@ -61,13 +61,15 @@ class ServerBuildDispatchService
                 new BuildServerJob($deployment->server->id, $deployment->template->id),
                 new WaitUntilVmIsCreatedJob($deployment->server->id),
                 new SyncBuildJob($deployment->server->id),
-                new UpdatePasswordJob($deployment->server->id, $deployment->account_password),
             ];
         } else {
             $jobs = [
                 new SyncBuildJob($deployment->server->id),
-                new UpdatePasswordJob($deployment->server->id, $deployment->account_password),
             ];
+        }
+
+        if(!empty($deployment->account_password)) {
+            $jobs[] = new UpdatePasswordJob($deployment->server->id, $deployment->account_password);
         }
 
         if ($deployment->start_on_completion) {
