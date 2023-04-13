@@ -26,7 +26,7 @@ class UpdatePasswordJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $serverId, protected ?string $password)
+    public function __construct(protected int $serverId, protected string $password)
     {
         //
     }

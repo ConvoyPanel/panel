@@ -11,12 +11,12 @@ class ServerAuthenticationService
     {
     }
 
-    public function updatePassword(Server $server, ?string $password)
+    public function updatePassword(Server $server, string $password)
     {
-        if (!empty($password)) {
-            $this->configRepository->setServer($server)->update(['cipassword' => rawurlencode($password)]);
-        } else {
-            $this->configRepository->setServer($server)->update(['delete' => 'cipassword']);
-        }
+        // if (!empty($password)) {
+        $this->configRepository->setServer($server)->update(['cipassword' => $password]);
+        // } else {
+        //     $this->configRepository->setServer($server)->update(['delete' => 'cipassword']);
+        // }
     }
 }

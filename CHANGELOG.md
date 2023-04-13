@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-rc.5
+
+### Fixed
+
+- Password setting when rebuilding/creating a new server
+
 ## v3.9.0-rc.4
 
 ### Fixed
