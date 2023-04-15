@@ -62,7 +62,7 @@ it('can change server passwords', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->putJson("/api/client/servers/{$server->uuid}/settings/security", [
-        'type' => 'cipassword',
+        'type' => 'password',
         'password' => 'Advinservers is king!123',
     ]);
 
