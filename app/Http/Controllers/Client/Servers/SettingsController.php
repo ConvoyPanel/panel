@@ -19,6 +19,7 @@ use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
 use Convoy\Services\Servers\AllocationService;
 use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\ServerAuthService;
 use Convoy\Services\Servers\ServerBuildDispatchService;
 use Convoy\Transformers\Client\MediaTransformer;
 use Convoy\Transformers\Client\RenamedServerTransformer;
@@ -32,7 +33,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class SettingsController extends ApplicationApiController
 {
-    public function __construct(private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ServerBuildDispatchService $buildDispatchService, private AllocationService $allocationService)
+    public function __construct(private ServerAuthService $authService, private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ServerBuildDispatchService $buildDispatchService, private AllocationService $allocationService)
     {
     }
 
@@ -170,18 +171,17 @@ class SettingsController extends ApplicationApiController
 
     public function getSecurity(Server $server)
     {
-
         return fractal()->item([
-            'ssh_keys' => $this->cloudinitService->getSSHKeys($server),
+            'ssh_keys' => $this->authService->getSSHKeys($server),
         ], new ServerSecurityTransformer)->respond();
     }
 
     public function updateSecurity(UpdateSecurityRequest $request, Server $server)
     {
         if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
-            $this->cloudinitService->updatePassword($server, $request->ssh_keys, AuthenticationType::from($request->type));
+            $this->authService->updateSSHKeys($server, $request->ssh_keys);
         } else {
-            $this->cloudinitService->updatePassword($server, $request->password, AuthenticationType::from($request->type));
+            $this->authService->updatePassword($server, $request->password);
         }
 
         return $this->returnNoContent();

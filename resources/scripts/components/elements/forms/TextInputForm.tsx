@@ -7,7 +7,7 @@ interface Props extends Omit<TextInputProps, 'error' | keyof ControllerRenderPro
     name: string
 }
 
-const TextInputForm = ({control, ...props}: Props) => {
+const TextInputForm = ({ control, ...props }: Props) => {
     const {
         field,
         fieldState: { error },

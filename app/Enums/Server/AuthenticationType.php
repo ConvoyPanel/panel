@@ -4,6 +4,6 @@ namespace Convoy\Enums\Server;
 
 enum AuthenticationType: string
 {
-    case KEY = 'sshkeys';
-    case PASSWORD = 'cipassword';
+    case KEY = 'ssh_keys';
+    case PASSWORD = 'password';
 }

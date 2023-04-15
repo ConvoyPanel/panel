@@ -9,14 +9,16 @@ import mountMedia from '@/api/server/settings/mountMedia'
 import unmountMedia from '@/api/server/settings/unmountMedia'
 import { useState } from 'react'
 import useBootOrderSWR from '@/api/server/settings/useBootOrderSWR'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     iso: Iso
 }
 
 const IsoRow = ({ iso }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('server:settings:hardware:media')
+    const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${uuid}.settings.hardware.isos`)
     const { mutate: mutateMedia } = useIsosSWR(uuid)
     const { mutate: mutateBootOrder } = useBootOrderSWR(uuid)
     const [loading, setLoading] = useState(false)
@@ -77,11 +79,11 @@ const IsoRow = ({ iso }: Props) => {
 
             {iso.mounted ? (
                 <Button loading={loading} onClick={handleUnmount} variant={'outline'} color={'danger'} size={'sm'}>
-                    Unmount
+                    {tStrings('unmount')}
                 </Button>
             ) : (
                 <Button loading={loading} onClick={handleMount} variant={'filled'} color={'success'} size={'sm'}>
-                    Mount
+                    {tStrings('mount')}
                 </Button>
             )}
         </div>

@@ -1,12 +1,12 @@
 import http from '@/api/http'
 
 type UpdatePasswordPayload = {
-    type: 'cipassword'
+    type: 'password'
     password?: string
 }
 
 type UpdateKeysPayload = {
-    type: 'sshkeys'
+    type: 'ssh_keys'
     sshKeys?: string
 }
 
@@ -15,17 +15,17 @@ type Payload = UpdatePasswordPayload | UpdateKeysPayload
 export default (uuid: string, data: Payload) => {
     let payload = {}
 
-    if (data.type === 'cipassword') {
+    if (data.type === 'password') {
         payload = {
             type: data.type,
-            password: data.password
+            password: data.password,
         }
     }
 
-    if (data.type === 'sshkeys') {
+    if (data.type === 'ssh_keys') {
         payload = {
             type: data.type,
-            ssh_keys: data.sshKeys
+            ssh_keys: data.sshKeys,
         }
     }
 

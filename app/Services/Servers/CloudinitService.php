@@ -36,20 +36,6 @@ class CloudinitService
      * @param  array  $params
      * @return mixed
      */
-    public function updatePassword(Server $server, ?string $password, AuthenticationType $type)
-    {
-        $this->configRepository->setServer($server);
-
-        if (AuthenticationType::KEY === $type) {
-            if (!empty($password)) {
-                return $this->configRepository->update([$type->value => rawurlencode($password)]);
-            } else {
-                $this->configRepository->update(['delete' => $type->value]);
-            }
-        } else {
-            return $this->configRepository->update([$type->value => $password]);
-        }
-    }
 
     /**
      * @param  string  $hostname

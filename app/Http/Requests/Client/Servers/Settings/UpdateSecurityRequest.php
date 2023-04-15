@@ -32,8 +32,8 @@ class UpdateSecurityRequest extends FormRequest
     {
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
-            'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,sshkeys'],
-            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(), 'exclude_unless:type,cipassword'],
+            'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,ssh_keys'],
+            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(), 'exclude_unless:type,password'],
         ];
     }
 

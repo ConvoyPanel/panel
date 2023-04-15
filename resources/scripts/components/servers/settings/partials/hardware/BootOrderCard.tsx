@@ -22,21 +22,25 @@ import Button from '@/components/elements/Button'
 import useBootOrderSWR from '@/api/server/settings/useBootOrderSWR'
 import { updateNotification } from '@mantine/notifications'
 import { httpErrorToHuman } from '@/api/http'
+import { Trans, useTranslation } from 'react-i18next'
+import Translate from '@/components/elements/Translate'
 
 const BootOrderCard = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { data, mutate } = useBootOrderSWR(uuid)
+    const { t } = useTranslation('server.settings')
+    const { t: tStrings } = useTranslation('strings')
 
     const notify = useNotify()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('server:settings:hardware:boot-order')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${uuid}.settings.hardware.boot-order`)
 
     const updateOrder = (disks: string[]) => {
         clearFlashes()
 
         notify({
-            id: 'admin:node:template-groups.reorder',
+            id: `servers.${uuid}.settings.hardware.boot-order`,
             loading: true,
-            message: 'Saving changes...',
+            message: tStrings('saving'),
             autoClose: false,
             disallowClose: true,
         })
@@ -44,19 +48,19 @@ const BootOrderCard = () => {
         updateBootOrder(uuid, disks)
             .then(() => {
                 updateNotification({
-                    id: 'admin:node:template-groups.reorder',
-                    message: 'Saved order',
+                    id: `servers.${uuid}.settings.hardware.boot-order`,
+                    message: tStrings('saved'),
                     autoClose: 1000,
                 })
             })
             .catch(error => {
                 updateNotification({
-                    id: 'admin:node:template-groups.reorder',
+                    id: `servers.${uuid}.settings.hardware.boot-order`,
                     color: 'red',
                     message: httpErrorToHuman(error),
                     autoClose: 5000,
                 })
-                clearAndAddHttpError( error )
+                clearAndAddHttpError(error)
             })
     }
 
@@ -66,13 +70,13 @@ const BootOrderCard = () => {
                 const oldIndex = data!.bootOrder.findIndex(disk => disk.interface === (active.id as string))
                 const newIndex = data!.bootOrder.findIndex(disk => disk.interface === (over.id as string))
 
-                const bootOrder = arrayMove(data!.bootOrder, oldIndex, newIndex);
+                const bootOrder = arrayMove(data!.bootOrder, oldIndex, newIndex)
 
                 updateOrder(bootOrder.map(disk => disk.interface))
 
                 return {
                     ...data,
-                    bootOrder
+                    bootOrder,
                 } as BootOrderSettings
             }, false)
         }
@@ -81,7 +85,7 @@ const BootOrderCard = () => {
     const removeDisk = (device: Disk) => {
         mutate(data => {
             const bootOrder = data!.bootOrder.filter(disk => disk.interface !== device.interface)
-            const unusedDevices = [ ...data!.unusedDevices, device ]
+            const unusedDevices = [...data!.unusedDevices, device]
 
             updateOrder(bootOrder.map(disk => disk.interface))
 
@@ -95,7 +99,7 @@ const BootOrderCard = () => {
 
     const addDisk = (device: Disk) => {
         mutate(data => {
-            const bootOrder = [ ...data!.bootOrder, device ]
+            const bootOrder = [...data!.bootOrder, device]
             const unusedDevices = data!.unusedDevices.filter(disk => disk.interface !== device.interface)
 
             updateOrder(bootOrder.map(disk => disk.interface))
@@ -111,14 +115,14 @@ const BootOrderCard = () => {
     return (
         <FormCard className='w-full'>
             <FormCard.Body>
-                <FormCard.Title>Device Configuration</FormCard.Title>
-                <FlashMessageRender className='mt-3' byKey='server:settings:hardware:boot-order' />
+                <FormCard.Title>{t('device_config.title')}</FormCard.Title>
+                <FlashMessageRender className='mt-3' byKey={`servers.${uuid}.settings.hardware.boot-order`} />
                 <div className='mt-3'>
-                    <h5 className='text-accent-600 text-sm'>Current Boot Order (the highest will be used first)</h5>
+                    <h5 className='text-accent-600 text-sm'>{t('device_config.current')}</h5>
                     <div className='flex flex-col space-y-3 mt-3 mb-5'>
                         {data?.bootOrder.length === 0 && (
                             <MessageBox title='Warning' type='warning'>
-                                No boot device has been configured. Your VM will not start.
+                                {t('device_config.no_boot_device_warning')}
                             </MessageBox>
                         )}
                         <DndContext
@@ -143,10 +147,10 @@ const BootOrderCard = () => {
                             </SortableContext>
                         </DndContext>
                     </div>
-                    <h5 className='text-accent-600 text-sm'>Unused Devices</h5>
+                    <h5 className='text-accent-600 text-sm'>{t('device_config.unused')}</h5>
                     <div className='flex flex-col space-y-3 mt-3'>
                         {data?.unusedDevices.length === 0 && (
-                            <p className='text-sm text-center'>There are no unused devices</p>
+                            <p className='text-sm text-center'>{t('device_config.unused_empty')}</p>
                         )}
                         {data?.unusedDevices.map(device => (
                             <StaticDiskRow
@@ -217,7 +221,7 @@ const DraggableDiskRow = ({ disk, action }: DiskRowProps) => (
 
 const getName = (disk: Disk) => {
     if (disk.isPrimaryDisk) {
-        return 'Primary Disk'
+        return <Translate ns={'strings'} i18nKey={'primary_disk'} />
     }
     if (disk.isMedia) {
         return disk.mediaName
@@ -227,11 +231,19 @@ const getName = (disk: Disk) => {
 
 const getBadge = (disk: Disk) => {
     if (disk.isPrimaryDisk) {
-        return <Badge>Primary</Badge>
+        return (
+            <Badge>
+                <Translate ns={'strings'} i18nKey={'primary'} />
+            </Badge>
+        )
     }
 
     if (disk.isMedia) {
-        return <Badge>Media</Badge>
+        return (
+            <Badge>
+                <Translate ns={'strings'} i18nKey={'media'} />
+            </Badge>
+        )
     }
 
     return null

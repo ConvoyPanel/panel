@@ -73,13 +73,18 @@ const ReinstallServerCard = () => {
                 <FormCard className='w-full'>
                     <FormCard.Body>
                         <FormCard.Title>{t('reinstall.title')}</FormCard.Title>
-                        <FlashMessageRender className='mt-3' byKey={`servers.${server.uuid}.settings.general.reinstall`} />
-                        <p className='description-small mt-3'>
-                            Start your server on a fresh slate. Select a template and confirm the reinstallation.
-                        </p>
+                        <FlashMessageRender
+                            className='mt-3'
+                            byKey={`servers.${server.uuid}.settings.general.reinstall`}
+                        />
+                        <p className='description-small mt-3'>{t('reinstall.description')}</p>
                         <div className='flex flex-col space-y-3 mt-3'>
                             <TemplatesSelectForm />
-                            <TextInputForm name={'accountPassword'} label={tStrings('system_os_password')} type={'password'} />
+                            <TextInputForm
+                                name={'accountPassword'}
+                                label={tStrings('system_os_password')}
+                                type={'password'}
+                            />
                             <CheckboxForm
                                 name={'startOnCompletion'}
                                 label={tStrings('start_server_after_installing')}
