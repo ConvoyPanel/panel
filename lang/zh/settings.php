@@ -2,40 +2,40 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'There are no addresses associated with this server.'
+        'empty_state' => '此服务器没有关联的地址。'
     ],
     'display_info' => [
-        'title' => 'Server Name',
+        'title' => '服务器名称',
     ],
     'reinstall' => [
-        'title' => 'Reinstall Server',
-        'description' => 'Start your server on a fresh slate.',
+        'title' => '重装系统',
+        'description' => '为您的服务器重装系统。',
         'modal' => [
-            'title' => 'Confirm Reinstallation',
-            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
+            'title' => '确认重装系统',
+            'description' => '您确定要为此服务器重装系统吗？所有数据都将丢失。',
         ]
     ],
     'isos' => [
-        'title' => 'Mountable ISOs',
-        'empty' => 'There are no ISOs',
+        'title' => '可挂载的ISO镜像',
+        'empty' => '没有ISO镜像',
     ],
     'device_config' => [
-        'title' => 'Device Configuration',
-        'current' => 'Current Boot Order (the highest will be used first)',
-        'unused' => 'Unused Devices',
-        'unused_empty' => 'There are no unused devices.',
-        'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
+        'title' => '设备配置',
+        'current' => '当前启动顺序（优先级最高的将首先使用）',
+        'unused' => '未使用的设备',
+        'unused_empty' => '没有未使用的设备。',
+        'no_boot_device_warning' => '尚未配置启动设备。您的虚拟机将无法启动。',
     ],
     'nameservers' => [
-        'title' => 'Nameservers',
-        'nameserver' => 'Nameserver :index',
-        'add' => 'New Nameserver',
+        'title' => 'dns服务器',
+        'nameserver' => 'dns服务器 :index',
+        'add' => '新dns服务器',
     ],
     'auth' => [
-        'title' => 'Authentication',
+        'title' => '身份验证',
     ],
     'hardware' => [
-        'bandwidth_used' => 'Bandwidth Used',
-        'bandwidth_alloted' => 'Bandwidth Alloted',
+        'bandwidth_used' => '已使用流量',
+        'bandwidth_alloted' => '分配的流量',
     ]
 ];

@@ -4,20 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Authentication Language Lines
+    | 认证语言行
     |--------------------------------------------------------------------------
     |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
+    | 以下语言行在认证过程中用于显示给用户的各种消息。您可以根据您的应用程序的需求
+    | 自由修改这些语言行。
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'failed' => '这些凭据与我们的记录不符。',
+    'password' => '提供的密码不正确。',
+    'throttle' => '尝试登录次数过多。请在 :seconds 秒后重试。',
 
-    'sign_in' => 'Sign in',
-    'sign_out' => 'Sign out',
-    'sign_in_description' => 'Sign in to your account',
+    'sign_in' => '登录',
+    'sign_out' => '登出',
+    'sign_in_description' => '登录到您的帐户',
 ];

@@ -2,11 +2,11 @@
 
 return [
     'create_modal' => [
-        'title' => 'Create a Token'
+        'title' => '创建令牌'
     ],
     'created_modal' => [
-        'title' => 'Token Created',
-        'description' => 'Here is your newly created API token. Please take note of the token\'s value as this is the only and last time you will see it.',
-        'button' => 'Okay, I copied it'
+        'title' => '令牌已创建',
+        'description' => '这是您刚刚创建的API令牌。请记下令牌的值，因为这是您唯一且最后一次看到它的机会。',
+        'button' => '好的，我已复制'
     ]
 ];
