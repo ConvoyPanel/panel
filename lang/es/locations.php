@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'short_code' => 'Short Code',
-    'new_location' => 'New Location',
+    'short_code' => 'Código Corto',
+    'new_location' => 'Nueva Ubicación',
     'create_modal' => [
-        'title' => 'Create a Location',
+        'title' => 'Crear una Ubicación',
     ],
 ];
