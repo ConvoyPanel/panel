@@ -1,30 +1,30 @@
 <?php
 
 return [
-    'new_backup' => 'New Backup',
-    'empty_state' => 'There are no backups',
-    'counter_tooltip' => 'You\'ve made :count out of :max backups',
+    'new_backup' => 'Nueva Copia de Seguridad',
+    'empty_state' => 'No hay copias de seguridad',
+    'counter_tooltip' => 'Has hecho :count de :max copias de seguridad',
     'create_modal' => [
-        'title' => 'Create a Backup',
-        'description' => 'Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.',
-        'compression_type' => 'Compression Type',
-        'mode' => 'Mode',
+        'title' => 'Crear Copia de Seguridad',
+        'description' => 'La creación de una copia de seguridad tomará una copia de los archivos de su servidor. Esto puede tomar un tiempo dependiendo del tamaño de su servidor.',
+        'compression_type' => 'Tipo de Compresión',
+        'mode' => 'Modo',
         'modes' => [
-            'snapshot' => 'Snapshot',
-            'suspend' => 'Suspend',
-            'kill' => 'Kill'
+            'snapshot' => 'Instantánea',
+            'suspend' => 'Suspender',
+            'kill' => 'Matar'
         ]
     ],
     'delete_modal' => [
-        'title' => 'Delete :name',
-        'description' => 'Are you sure you want to delete this backup?',
+        'title' => 'Eliminar :name',
+        'description' => '¿Estás seguro de que quieres borrar esta copia de seguridad?',
     ],
     'restore_modal' => [
-        'title' => 'Restore From :name',
-        'description' => 'Are you sure you want to restore from this backup?',
+        'title' => 'Restaurar desde :name',
+        'description' => '¿Estás seguro de que quieres restaurar desde esta copia de seguridad?',
     ],
     'notices' => [
-        'backup_deleted' => 'Deleted :name',
-        'backup_restored' => 'Began restoring server from :name',
+        'backup_deleted' => 'Eliminado :name',
+        'backup_restored' => 'Comenzó la restauración del servidor de :name',
     ]
 ];
