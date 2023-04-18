@@ -1,30 +1,30 @@
 <?php
 
 return [
-    'new_server' => 'New Server',
-    'backup_limit' => 'Backup Limit',
-    'bandwidth_limit' => 'Bandwidth Limit',
-    'snapshots_limit' => 'Snapshots Limit',
-    'should_create_vm' => 'Should Create VM',
+    'new_server' => 'Nuevo Servidor',
+    'backup_limit' => 'Limite Copias de Seguridad',
+    'bandwidth_limit' => 'Limite Ancho de Banda',
+    'snapshots_limit' => 'Limite Instantáneas',
+    'should_create_vm' => 'Debe crear una VM',
     'create_modal' => [
-        'title' => 'Create a Server',
+        'title' => 'Crear un Servidor',
     ],
-    'manage_server' => 'Manage Server',
+    'manage_server' => 'Gestionar Servidor',
     'server_build' => [
-        'title' => 'Server Build',
+        'title' => 'Creación de Servidor',
     ],
     'server_info' => [
-        'title' => 'Server Information'
+        'title' => 'Información del Servidor'
     ],
     'suspension' => [
-        'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
-        'not_suspended' => 'This server isn\'t suspended',
-        'suspended' => 'This server is suspended',
+        'title' => 'Suspensión',
+        'description' => 'Cambia el estado de suspensión del servidor.',
+        'not_suspended' => 'Este servidor no está suspendido',
+        'suspended' => 'Este servidor está suspendido',
     ],
     'delete_server' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be destroyed. However, you can tick the checkbox below to keep the virtual machine and data on the Proxmox node.',
-        'dont_purge' => 'Do not purge VM and related files'
+        'title' => 'Eliminar Servidor',
+        'description' => 'El servidor se eliminará de Convoy. Las Copias de Seguridad y otros datos asociados serán destruidos. Sin embargo, puede marcar la casilla de abajo para mantener la máquina virtual y los datos en el nodo Proxmox.',
+        'dont_purge' => 'No purgar VM y archivos relacionados'
     ]
 ];
