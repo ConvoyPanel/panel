@@ -2,40 +2,40 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'There are no addresses associated with this server.'
+        'empty_state' => 'No hay direcciones asociadas a este servidor.'
     ],
     'display_info' => [
-        'title' => 'Server Name',
+        'title' => 'Nombre del Servidor',
     ],
     'reinstall' => [
-        'title' => 'Reinstall Server',
-        'description' => 'Start your server on a fresh slate.',
+        'title' => 'Reinstalar Servidor',
+        'description' => 'Empiece su servidor desde cero.',
         'modal' => [
-            'title' => 'Confirm Reinstallation',
-            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
+            'title' => 'Confirmar Reinstalación',
+            'description' => '¿Estás seguro de que quieres reinstalar este servidor? Se perderán todos los datos.',
         ]
     ],
     'isos' => [
-        'title' => 'Mountable ISOs',
-        'empty' => 'There are no ISOs',
+        'title' => 'ISOs Disponibles',
+        'empty' => 'No hay ISOs',
     ],
     'device_config' => [
-        'title' => 'Device Configuration',
-        'current' => 'Current Boot Order (the highest will be used first)',
-        'unused' => 'Unused Devices',
-        'unused_empty' => 'There are no unused devices.',
-        'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
+        'title' => 'Configuración del Dispositivo',
+        'current' => 'Orden de Arranque Actual (se utilizará primero el más alto)',
+        'unused' => 'Dispositivos no Utilizados',
+        'unused_empty' => 'No hay dispositivos sin utilizar.',
+        'no_boot_device_warning' => 'No se ha configurado ningún dispositivo de arranque. Su VM no se iniciará.',
     ],
     'nameservers' => [
         'title' => 'Nameservers',
         'nameserver' => 'Nameserver :index',
-        'add' => 'New Nameserver',
+        'add' => 'Nuevo Servidor de Nombres',
     ],
     'auth' => [
-        'title' => 'Authentication',
+        'title' => 'Autentificación',
     ],
     'hardware' => [
-        'bandwidth_used' => 'Bandwidth Used',
-        'bandwidth_alloted' => 'Bandwidth Alloted',
+        'bandwidth_used' => 'Ancho de Banda Usado',
+        'bandwidth_alloted' => 'Ancho de Banda Asignado',
     ]
 ];
