@@ -35,6 +35,6 @@ return [
     'delete_node' => [
         'title' => '删除节点',
         'description' => '节点将从 Convoy 中永久删除。此操作不能被复原及撤销。',
-        'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
+        'has_servers_error' => '你无法删除一个分配有服务器的节点。',
     ]
 ];
