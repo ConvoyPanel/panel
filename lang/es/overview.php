@@ -2,37 +2,37 @@
 
 return [
     'power_actions' => [
-      'start' => 'Start',
-      'restart' => 'Restart',
-      'kill' => 'Kill',
-      'shutdown' => 'Shutdown',
+      'start' => 'Iniciar',
+      'restart' => 'Reiniciar',
+      'kill' => 'Terminar',
+      'shutdown' => 'Apagar',
     ],
     'notices' => [
-        'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
-        'power_action_sent_fail' => 'Failed to send power action.',
+        'power_action_sent_success' => 'Acción enviada con éxito. Puede tardar un momento en procesarse.',
+        'power_action_sent_fail' => 'No se ha podido enviar la acción de energia al servidor.',
     ],
 
-    'state' => 'State',
+    'state' => 'Estado',
     'states' => [
-        'stopped' => 'Stopped',
-        'running' => 'Running',
-        'stopping' => 'Stopping',
-        'starting' => 'Starting',
-        'shutting_down' => 'Shutting Down',
+        'stopped' => 'Detenido',
+        'running' => 'Ejecutando',
+        'stopping' => 'Deteniendo',
+        'starting' => 'Iniciando',
+        'shutting_down' => 'Apagando',
     ],
-    'uptime' => 'Uptime',
-    'poll_status_error' => 'Failed to poll server status. Retrying in 5 seconds...',
+    'uptime' => 'Tiempo de Actividad',
+    'poll_status_error' => 'Fallo al sondear el estado del servidor. Reintentando en 5 segundos...',
 
     'terminal' => [
-        'title' => 'Terminal',
-        'description' => 'Remotely manage your server from the web.',
-        'novnc_description' => 'Best for compatibility but lacks features and performance.',
-        'xtermjs_description' => 'Best for performance but doesn\'t work for every operating system.',
+        'title' => 'Consola',
+        'description' => 'Gestiona remotamente tu servidor desde la web.',
+        'novnc_description' => 'El mejor por compatibilidad, pero carece de prestaciones y rendimiento.',
+        'xtermjs_description' => 'Lo mejor para el rendimiento, pero no funciona para todos los sistemas operativos.',
     ],
 
     'server_config' => [
-        'title' => 'Configure This Server',
-        'description' => 'You are an administrator! You can click below to visit this server\'s build configuration and make edits.',
-        'configure_server' => 'Configure Server'
+        'title' => 'Configurar este Servidor',
+        'description' => '¡Usted es un administrador! Puede hacer clic a continuación para visitar la configuración de construcción de este servidor y realizar modificaciones.',
+        'configure_server' => 'Configurar Servidor'
     ],
 ];
