@@ -115,7 +115,7 @@ const ServerDetailsBlock = () => {
             ) : (
                 <StatRow className='col-span-10'>
                     <div>
-                        <p>Server State</p>
+                        <p>{t('state')}</p>
                         <div className='flex space-x-2 items-center mt-1'>
                             <div className='grid place-items-center h-full'>
                                 <div

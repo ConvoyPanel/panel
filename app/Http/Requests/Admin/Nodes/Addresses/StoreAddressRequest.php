@@ -51,8 +51,10 @@ class StoreAddressRequest extends FormRequest
                 }
             }
 
+            $nodeId = $this->route()->originalParameter('node');
+
             // check for duplicate addresses
-            if (IPAddress::where('address', $this->address)->exists()) {
+            if (IPAddress::where([['node_id', '=', $nodeId],['address', '=', $this->address]])->exists()) {
                 $validator->errors()->add('address', 'The address has already been imported.');
             }
         });

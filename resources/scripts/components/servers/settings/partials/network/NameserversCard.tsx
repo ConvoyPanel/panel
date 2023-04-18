@@ -111,7 +111,7 @@ const NameserversCard = () => {
                                                 })
                                             }
                                         >
-                                            {tStrings('new')}
+                                            {tStrings('add')}
                                         </Button>
                                     )}
                                 </div>

@@ -4,6 +4,7 @@ namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\IPAddress;
+use Convoy\Models\Node;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
 
@@ -52,9 +53,10 @@ class UpdateAddressRequest extends FormRequest
             }
 
             $address = $this->parameter('address', IPAddress::class);
+            $nodeId = $this->route()->originalParameter('node');
 
             // check for duplicate addresses
-            if (IPAddress::where('address', $this->address)->exists() && $address->address !== $this->address) {
+            if ($address->address !== $this->address && IPAddress::where([['node_id', '=', $nodeId],['address', '=', $this->address]])->exists()) {
                 $validator->errors()->add('address', 'The address has already been imported.');
             }
         });
