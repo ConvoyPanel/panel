@@ -1,40 +1,40 @@
 <?php
 
 return [
-    'new_node' => 'New Node',
+    'new_node' => 'Nuevo Nodo',
     'create_modal' => [
-        'title' => 'Create a Node',
+        'title' => 'Crear Nodo',
     ],
 
-    'location_group' => 'Location Group',
-    'pve_name' => 'Node Name In Proxmox',
-    'override_creds' => 'Override credentials',
+    'location_group' => 'Grupo Ubicación',
+    'pve_name' => 'Nombre del Nodo en Proxmox',
+    'override_creds' => 'Anular credenciales',
     'token_id' => 'Token ID',
-    'secret' => 'Secret',
-    'port' => 'Port',
-    'memory_allocation' => 'Memory Allocation',
-    'memory_overallocation' => 'Memory Overallocation',
-    'disk_allocation' => 'Disk Allocation',
-    'disk_overallocation' => 'Disk Overallocation',
-    'vm_storage' => 'VM Storage',
-    'backup_storage' => 'Backup Storage',
-    'iso_storage' => 'ISO Storage',
+    'secret' => 'Secreto',
+    'port' => 'Puerto',
+    'memory_allocation' => 'Asignación de Memoria',
+    'memory_overallocation' => 'Sobreasignación de Memoria',
+    'disk_allocation' => 'Asignación de Disco',
+    'disk_overallocation' => 'Sobreasignación de Disco',
+    'vm_storage' => 'Almacenamiento VM',
+    'backup_storage' => 'Copias de Seguridad',
+    'iso_storage' => 'Almacenamiento ISO',
 
     'create_template_modal' => [
-        'title' => 'Create a Template',
+        'title' => 'Crear una Plantilla',
     ],
-    'new_template' => 'New Template',
+    'new_template' => 'Nueva Plantilla',
     'create_template_group_modal' => [
-        'title' => 'Create a Template Group',
+        'title' => 'Crear un Grupo de Plantilla',
     ],
-    'new_template_group' => 'New Template Group',
+    'new_template_group' => 'Nuevo Grupo de Plantilla',
 
     'node_info' => [
-        'title' => 'Node Information',
+        'title' => 'Información Nodo',
     ],
     'delete_node' => [
-        'title' => 'Delete Node',
-        'description' => 'The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.',
-        'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
+        'title' => 'Eliminar Nodo',
+        'description' => 'El nodo se eliminará permanentemente de Convoy. Esta acción es irreversible y no se puede deshacer.',
+        'has_servers_error' => 'No se puede eliminar un nodo que tenga servidores asignados.',
     ]
 ];
