@@ -1,18 +1,18 @@
 <?php
 
 return [
-    'new_user' => 'New User',
+    'new_user' => 'Nuevo Usuario',
     'create_modal' => [
-        'title' => 'Create a User',
-        'is_admin_warning' => 'You are giving this user administrative privileges.'
+        'title' => 'Crear Usuario',
+        'is_admin_warning' => 'Está dando a este usuario privilegios administrativos.'
     ],
     'user_info' => [
-        'title' => 'User Information',
-        'override_pass' => 'Override password'
+        'title' => 'Información del Usuario',
+        'override_pass' => 'Anular contraseña'
     ],
     'delete_user' => [
-        'title' => 'Delete User',
-        'description' => 'The user and its associated data will be deleted.',
-        'has_servers_error' => 'This user cannot be deleted with servers still associated with it.'
+        'title' => 'Eliminar Usuario',
+        'description' => 'El usuario y sus datos asociados serán eliminados.',
+        'has_servers_error' => 'Este usuario no puede ser eliminado con servidores aún asociados a él.'
     ]
 ];
