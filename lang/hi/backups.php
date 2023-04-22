@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'new_backup' => 'New Backup',
-    'empty_state' => 'There are no backups',
+    'new_backup' => 'नया बैकअप',
+    'empty_state' => 'कोई बैकअप उपलब्ध नहीं है',
     'counter_tooltip' => 'You\'ve made :count out of :max backups',
     'create_modal' => [
         'title' => 'Create a Backup',
