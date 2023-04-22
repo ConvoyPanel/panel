@@ -45,7 +45,7 @@ class NetworkService
         }
     }
 
-    public function lockIps(Server $server, array $addresses, string $ipsetName = 'default')
+    public function lockIps(Server $server, array $addresses, string $ipsetName = 'ipfilter-net0')
     {
         $this->firewallRepository->setServer($server);
 
