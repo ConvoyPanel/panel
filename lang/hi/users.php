@@ -11,7 +11,7 @@ return [
         'override_pass' => 'Override password'
     ],
     'delete_user' => [
-        'title' => 'Delete User',
+        'title' => 'उपभोक्ता मिटाएं',
         'description' => 'The user and its associated data will be deleted.',
         'has_servers_error' => 'This user cannot be deleted with servers still associated with it.'
     ]
