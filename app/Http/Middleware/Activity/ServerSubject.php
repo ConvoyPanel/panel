@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Middleware\Activity;
 
-use Symfony\Component\HttpFoundation\Response;
 use Closure;
 use Convoy\Facades\LogTarget;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServerSubject
 {
