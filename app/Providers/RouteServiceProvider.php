@@ -32,7 +32,9 @@ class RouteServiceProvider extends ServiceProvider
             return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
         });
 
-        $this->configureRateLimiting();
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
 
         $this->routes(function () {
             Route::middleware('web')->group(function () {
@@ -57,18 +59,6 @@ class RouteServiceProvider extends ServiceProvider
                     ->as('application.')
                     ->group(base_path('routes/api-application.php'));
             });
-        });
-    }
-
-    /**
-     * Configure the rate limiters for the application.
-     *
-     * @return void
-     */
-    protected function configureRateLimiting()
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
     }
 }
