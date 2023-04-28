@@ -22,7 +22,7 @@ class UpdateUsagesCommand extends Command
     /**
      * Handle command execution.
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Queuing usage sync.');
 

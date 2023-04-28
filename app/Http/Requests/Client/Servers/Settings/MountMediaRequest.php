@@ -7,7 +7,7 @@ use Convoy\Models\ISO;
 
 class MountMediaRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         $iso = $this->parameter('iso', ISO::class);
 

@@ -11,7 +11,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('nodes', function (Blueprint $table) {
             $table->after('last_pinged', function ($table) {
@@ -26,7 +26,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('nodes', function (Blueprint $table) {
             $table->dropColumn(['network', 'storage']);

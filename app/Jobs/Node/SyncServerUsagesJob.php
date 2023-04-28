@@ -29,7 +29,7 @@ class SyncServerUsagesJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ServerUsagesSyncService $service)
+    public function handle(ServerUsagesSyncService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
 

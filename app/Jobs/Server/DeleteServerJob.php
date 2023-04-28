@@ -41,7 +41,7 @@ class DeleteServerJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ServerBuildService $service)
+    public function handle(ServerBuildService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

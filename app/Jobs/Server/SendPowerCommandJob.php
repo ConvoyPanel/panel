@@ -42,7 +42,7 @@ class SendPowerCommandJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ProxmoxPowerRepository $repository)
+    public function handle(ProxmoxPowerRepository $repository): void
     {
         $server = Server::findOrFail($this->serverId);
 

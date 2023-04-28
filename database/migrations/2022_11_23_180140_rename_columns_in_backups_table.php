@@ -11,7 +11,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('backups', function (Blueprint $table) {
             $table->renameColumn('successful', 'is_successful');
@@ -24,7 +24,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('backups', function (Blueprint $table) {
             $table->renameColumn('is_successful', 'successful');

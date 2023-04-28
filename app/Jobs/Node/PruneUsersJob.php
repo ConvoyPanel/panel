@@ -32,7 +32,7 @@ class PruneUsersJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(UserPruneService $service)
+    public function handle(UserPruneService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
 

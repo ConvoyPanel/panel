@@ -11,7 +11,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('servers', function (Blueprint $table) {
             $table->boolean('make_template_visible')->after('is_template')->default(false);
@@ -23,7 +23,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('servers', function (Blueprint $table) {
             $table->dropColumn('make_template_visible');

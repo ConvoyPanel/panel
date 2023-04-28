@@ -40,7 +40,7 @@ class UpdatePasswordJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ServerAuthService $service)
+    public function handle(ServerAuthService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

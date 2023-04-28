@@ -41,7 +41,7 @@ class SyncBuildJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(SyncBuildService $service)
+    public function handle(SyncBuildService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

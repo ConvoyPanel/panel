@@ -28,7 +28,7 @@ class PruneUsersCommand extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Queuing user prune request.');
 

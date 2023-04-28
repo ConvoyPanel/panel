@@ -23,7 +23,7 @@ class ServerFactory extends Factory
      *
      * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         $uuid = App::make(ServerCreationService::class)->generateUniqueUuidCombo();
 

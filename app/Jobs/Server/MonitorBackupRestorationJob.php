@@ -40,7 +40,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(BackupMonitorService $service)
+    public function handle(BackupMonitorService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

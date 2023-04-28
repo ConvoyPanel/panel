@@ -29,7 +29,7 @@ class SyncServerRateLimitsJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ServerRateLimitsSyncService $service)
+    public function handle(ServerRateLimitsSyncService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
 

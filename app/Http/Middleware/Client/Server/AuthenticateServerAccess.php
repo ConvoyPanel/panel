@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Middleware\Client\Server;
 
+use Symfony\Component\HttpFoundation\Response;
 use Closure;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Models\Server;
@@ -20,7 +21,7 @@ class AuthenticateServerAccess
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
         $server = $request->route()->parameter('server');

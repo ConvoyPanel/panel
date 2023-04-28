@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Middleware\Client\Server;
 
+use Symfony\Component\HttpFoundation\Response;
 use Closure;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class SubstituteBindings extends Middleware
      * @param  Request  $request
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         // Override default behavior of the model binding to use a specific table
         // column rather than the default 'id'.

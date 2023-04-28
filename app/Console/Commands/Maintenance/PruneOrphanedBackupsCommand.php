@@ -19,7 +19,7 @@ class PruneOrphanedBackupsCommand extends Command
      */
     protected $description = 'Marks all backups that have not completed in the last "n" minutes as being failed.';
 
-    public function handle(BackupRepository $repository)
+    public function handle(BackupRepository $repository): void
     {
         $since = $this->option('prune-age') ?? config('backups.prune_age', 360);
         if (! $since || ! is_int($since)) {

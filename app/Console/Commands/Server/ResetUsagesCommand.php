@@ -20,7 +20,7 @@ class ResetUsagesCommand extends Command
     /**
      * Handle command execution.
      */
-    public function handle()
+    public function handle(): void
     {
         if (date('d') === '01') {
             Server::query()->update([

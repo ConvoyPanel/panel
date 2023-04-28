@@ -14,7 +14,7 @@ class UpdateAddressRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -24,7 +24,7 @@ class UpdateAddressRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return Arr::except(IPAddress::getRulesForUpdate($this->parameter('address', IPAddress::class)), ['node_id']);
     }

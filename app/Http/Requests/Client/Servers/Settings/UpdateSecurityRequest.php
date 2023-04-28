@@ -18,7 +18,7 @@ class UpdateSecurityRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -28,7 +28,7 @@ class UpdateSecurityRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],

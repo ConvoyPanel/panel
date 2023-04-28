@@ -11,7 +11,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
             $table->timestamp('expires_at')->nullable()->after('last_used_at');
@@ -23,7 +23,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
             $table->dropColumn('expires_at');

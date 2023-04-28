@@ -16,7 +16,7 @@ class ServerNotInstalled
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): \Symfony\Component\HttpFoundation\Response
     {
         /** @var Server|null $server */
         $server = $request->route()->parameter('server');

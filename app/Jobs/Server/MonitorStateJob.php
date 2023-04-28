@@ -43,7 +43,7 @@ class MonitorStateJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ProxmoxServerRepository $repository)
+    public function handle(ProxmoxServerRepository $repository): void
     {
         $server = Server::findOrFail($this->serverId);
 

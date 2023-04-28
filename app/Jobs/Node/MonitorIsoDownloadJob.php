@@ -29,7 +29,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
         return [new WithoutOverlapping("node:iso.download-{$this->isoId}")];
     }
 
-    public function handle(IsoMonitorService $service)
+    public function handle(IsoMonitorService $service): void
     {
         $iso = ISO::findOrFail($this->isoId);
 

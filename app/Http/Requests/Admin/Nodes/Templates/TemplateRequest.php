@@ -12,7 +12,7 @@ class TemplateRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +22,7 @@ class TemplateRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = Template::getRules();
 

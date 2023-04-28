@@ -42,7 +42,7 @@ class PurgeBackupsJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(PurgeBackupsService $service)
+    public function handle(PurgeBackupsService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

@@ -16,7 +16,7 @@ class ServerSeeder extends Seeder
      *
      * @return void
      */
-    public function run(ServerCreationService $service)
+    public function run(ServerCreationService $service): void
     {
         $location = Location::factory()->create();
         $user = User::factory()->create();
