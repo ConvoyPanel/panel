@@ -9,8 +9,6 @@ class UpdateDetailsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -38,8 +36,6 @@ class UpdateDetailsRequest extends FormRequest
 
     /**
      * Convert the allocation field into the expected format for the service handler.
-     *
-     * @return array
      */
     public function validated($key = null, $default = null): array
     {

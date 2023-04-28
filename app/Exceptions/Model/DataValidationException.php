@@ -41,8 +41,6 @@ class DataValidationException extends ConvoyException implements HttpExceptionIn
 
     /**
      * Return the validator message bag.
-     *
-     * @return MessageBag
      */
     public function getMessageBag(): MessageBag
     {

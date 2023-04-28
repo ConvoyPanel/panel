@@ -86,9 +86,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 
-    /**
-     * @return HasMany
-     */
     public function servers(): HasMany
     {
         return $this->hasMany(Server::class);

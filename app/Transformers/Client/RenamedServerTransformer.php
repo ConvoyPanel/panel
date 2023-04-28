@@ -9,8 +9,6 @@ class RenamedServerTransformer extends TransformerAbstract
 {
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
     public function transform(Server $server): array
     {

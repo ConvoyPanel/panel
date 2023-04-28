@@ -26,8 +26,6 @@ class SyncServerRateLimitsJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(ServerRateLimitsSyncService $service): void
     {

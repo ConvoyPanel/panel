@@ -37,9 +37,6 @@ class Fqdn implements Rule, DataAwareRule
 
     protected ?string $schemeField = null;
 
-    /**
-     * @param  array  $data
-     */
     public function setData(array $data): self
     {
         $this->data = $data;
@@ -51,7 +48,6 @@ class Fqdn implements Rule, DataAwareRule
      * Validates that the value provided resolves to an IP address. If a scheme is
      * specified when this rule is created additional checks will be applied.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
      */
     public function passes(string $attribute, $value): bool

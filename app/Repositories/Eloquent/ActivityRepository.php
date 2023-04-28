@@ -8,9 +8,6 @@ use Convoy\Models\Server;
 
 class ActivityRepository extends EloquentRepository implements ActivityRepositoryInterface
 {
-    /**
-     * @return string
-     */
     public function model(): string
     {
         return ActivityLog::class;

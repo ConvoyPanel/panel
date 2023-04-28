@@ -12,7 +12,6 @@ class AdminAuthenticate
     /**
      * Handle an incoming request.
      *
-     * @return mixed
      *
      * @throws AccessDeniedHttpException
      */

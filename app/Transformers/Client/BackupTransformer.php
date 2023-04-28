@@ -23,8 +23,6 @@ class BackupTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
     public function transform(Backup $backup): array
     {

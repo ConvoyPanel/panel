@@ -17,8 +17,6 @@ class TemplateGroupTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
     public function transform(TemplateGroup $group): array
     {

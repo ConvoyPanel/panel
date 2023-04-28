@@ -38,8 +38,6 @@ class SyncBuildJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(SyncBuildService $service): void
     {

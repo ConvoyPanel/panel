@@ -9,12 +9,6 @@ class MebibytesToAndFromBytes implements CastsAttributes
 {
     /**
      * Cast the given value.
-     *
-     * @param  Model  $model
-     * @param  string  $key
-     * @param  int|null  $value
-     * @param  array  $attributes
-     * @return ?int
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?int
     {
@@ -23,12 +17,6 @@ class MebibytesToAndFromBytes implements CastsAttributes
 
     /**
      * Prepare the given value for storage.
-     *
-     * @param  Model  $model
-     * @param  string  $key
-     * @param  int|null  $value
-     * @param  array  $attributes
-     * @return ?int
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): ?int
     {

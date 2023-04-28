@@ -13,8 +13,6 @@ class ServerInstalled
 {
     /**
      * Checks that the server is installed before allowing access through the route.
-     *
-     * @return mixed
      */
     public function handle(Request $request, Closure $next): \Symfony\Component\HttpFoundation\Response
     {

@@ -61,8 +61,6 @@ class Node extends Model
 
     /**
      * Gets the location associated with a node.
-     *
-     * @return BelongsTo
      */
     public function location(): BelongsTo
     {

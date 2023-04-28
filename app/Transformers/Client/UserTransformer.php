@@ -23,8 +23,6 @@ class UserTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
     public function transform(User $user): array
     {

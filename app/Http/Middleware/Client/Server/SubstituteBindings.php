@@ -10,10 +10,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings as Middleware;
 
 class SubstituteBindings extends Middleware
 {
-    /**
-     * @param  Request  $request
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next): Response
     {
         // Override default behavior of the model binding to use a specific table

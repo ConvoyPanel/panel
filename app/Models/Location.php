@@ -34,8 +34,6 @@ class Location extends Model
 
     /**
      * Gets the nodes in a specified location.
-     *
-     * @return HasMany
      */
     public function nodes(): HasMany
     {
@@ -44,8 +42,6 @@ class Location extends Model
 
     /**
      * Gets the servers within a given location.
-     *
-     * @return HasManyThrough
      */
     public function servers(): HasManyThrough
     {
