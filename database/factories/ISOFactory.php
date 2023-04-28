@@ -26,14 +26,14 @@ class ISOFactory extends Factory
     public function definition()
     {
         return [
-            'uuid' => $this->faker->uuid,
+            'uuid' => $this->faker->uuid(),
             'node_id' => Node::factory(),
-            'is_successful' => $this->faker->boolean,
-            'name' => $this->faker->name,
-            'file_name' => "{$this->faker->name}.iso",
+            'is_successful' => $this->faker->boolean(),
+            'name' => $this->faker->name(),
+            'file_name' => "{$this->faker->name()}.iso",
             'size' => $this->faker->randomNumber(),
-            'hidden' => $this->faker->boolean,
-            'completed_at' => $this->faker->dateTime,
+            'hidden' => $this->faker->boolean(),
+            'completed_at' => $this->faker->dateTime(),
         ];
     }
 }
