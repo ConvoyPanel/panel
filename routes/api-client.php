@@ -7,13 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
-Route::group([
-    'prefix' => '/servers/{server}',
-    'middleware' => [
-        ServerSubject::class,
-        AuthenticateServerAccess::class,
-    ],
-], function () {
+Route::prefix('/servers/{server}')->middleware(ServerSubject::class, AuthenticateServerAccess::class)->group(function () {
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('servers.show');
     Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
@@ -29,7 +23,7 @@ Route::group([
         Route::delete('/{backup}', [Client\Servers\BackupController::class, 'destroy']);
     });
 
-    Route::group(['prefix' => '/settings'], function () {
+    Route::prefix('/settings')->group(function () {
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
         Route::get('/template-groups', [Client\Servers\SettingsController::class, 'getTemplateGroups']);
         Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall']);

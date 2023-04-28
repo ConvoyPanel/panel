@@ -30,7 +30,7 @@ Route::prefix('/nodes/{node}')->group(function () {
 
 Route::get('/servers', [Admin\ServerController::class, 'index']);
 Route::post('/servers', [Admin\ServerController::class, 'store']);
-Route::group(['prefix' => '/servers/{server}', 'middleware' => [ValidateServerStatusMiddleware::class]], function () {
+Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
     Route::get('/', [Admin\ServerController::class, 'show'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
     Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
     Route::delete('/', [Admin\ServerController::class, 'destroy']);
