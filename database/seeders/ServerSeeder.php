@@ -22,7 +22,7 @@ class ServerSeeder extends Seeder
         $user = User::factory()->create();
         $node = Node::factory()->for($location)->create();
 
-        Server::factory()->count(10)->create(function() use ($user, $node, $service) {
+        Server::factory()->count(10)->create(function () use ($user, $node, $service) {
             $uuid = $service->generateUniqueUuidCombo();
 
             return [

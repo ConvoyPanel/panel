@@ -29,7 +29,7 @@ class ServerAuthService
 
     public function updateSSHKeys(Server $server, ?string $keys)
     {
-        if (!empty($keys)) {
+        if (! empty($keys)) {
             $this->configRepository->setServer($server)->update(['sshkeys' => rawurlencode($keys)]);
         } else {
             $this->configRepository->setServer($server)->update(['delete' => 'sshkeys']);

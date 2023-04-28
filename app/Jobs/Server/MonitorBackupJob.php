@@ -15,7 +15,8 @@ class MonitorBackupJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil() {
+    public function retryUntil()
+    {
         return now()->addDay();
     }
 

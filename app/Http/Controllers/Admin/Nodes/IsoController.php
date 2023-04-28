@@ -5,7 +5,6 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 use Convoy\Data\Helpers\ChecksumData;
 use Convoy\Enums\Helpers\ChecksumAlgorithm;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
 use Convoy\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
 use Convoy\Models\ISO;

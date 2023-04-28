@@ -2,11 +2,9 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
 
 class ProxmoxActivityRepository extends ProxmoxRepository

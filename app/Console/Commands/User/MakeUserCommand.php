@@ -54,7 +54,7 @@ class MakeUserCommand extends Command
             'name' => $name,
             'email' => $email,
             'root_admin' => (bool) $root_admin,
-            'password' => Hash::make($password)
+            'password' => Hash::make($password),
         ]);
 
         $this->table(['Field', 'Value'], [

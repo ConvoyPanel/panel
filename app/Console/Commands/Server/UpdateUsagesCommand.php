@@ -2,11 +2,8 @@
 
 namespace Convoy\Console\Commands\Server;
 
-use Carbon\Carbon;
 use Convoy\Jobs\Node\SyncServerUsagesJob;
 use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
 

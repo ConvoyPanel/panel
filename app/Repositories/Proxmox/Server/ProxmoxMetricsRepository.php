@@ -4,10 +4,8 @@ namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Enums\Server\MetricParameter;
 use Convoy\Enums\Server\MetricTimeframe;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -20,7 +18,7 @@ class ProxmoxMetricsRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->get('/api2/json/nodes/{node}/qemu/{server}/rrddata', [
                 'timeframe' => $timeframe->value,

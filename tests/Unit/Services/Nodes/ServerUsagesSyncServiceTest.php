@@ -1,10 +1,10 @@
 <?php
 
+use Carbon\Carbon;
 use Convoy\Services\Nodes\ServerUsagesSyncService;
 use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
 
-beforeEach(fn() => Http::preventStrayRequests());
+beforeEach(fn () => Http::preventStrayRequests());
 
 it('can sync server usages', function () {
     Http::fake([

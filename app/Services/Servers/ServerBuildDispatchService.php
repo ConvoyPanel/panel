@@ -15,7 +15,6 @@ use Convoy\Jobs\Server\UpdatePasswordJob;
 use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
 use Convoy\Jobs\Server\WaitUntilVmIsDeletedJob;
 use Convoy\Models\Server;
-use Convoy\Models\Template;
 use Illuminate\Support\Facades\Bus;
 
 class ServerBuildDispatchService
@@ -25,7 +24,7 @@ class ServerBuildDispatchService
         $jobs = $this->getChainedBuildJobs($deployment);
 
         Bus::chain($jobs)
-            ->catch(fn() => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
             ->dispatch();
 
         $deployment->server->update(['status' => Status::INSTALLING->value]);
@@ -48,7 +47,7 @@ class ServerBuildDispatchService
         ];
 
         Bus::chain($jobs)
-            ->catch(fn() => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
             ->dispatch();
 
         $deployment->server->update(['status' => Status::INSTALLING->value]);
@@ -68,7 +67,7 @@ class ServerBuildDispatchService
             ];
         }
 
-        if(!empty($deployment->account_password)) {
+        if (! empty($deployment->account_password)) {
             $jobs[] = new UpdatePasswordJob($deployment->server->id, $deployment->account_password);
         }
 

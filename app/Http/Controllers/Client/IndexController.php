@@ -26,7 +26,7 @@ class IndexController extends ApplicationApiController
         $type = $request->input('type');
 
         if ($type === 'all') {
-            if (!$user->root_admin) {
+            if (! $user->root_admin) {
                 $builder = $builder->whereRaw('1 = 2');
             }
         } else {

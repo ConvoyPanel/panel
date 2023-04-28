@@ -1,10 +1,10 @@
 <?php
 
 use Convoy\Services\Nodes\ServerRateLimitsSyncService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 
-beforeEach(fn() => Http::preventStrayRequests());
+beforeEach(fn () => Http::preventStrayRequests());
 
 it('can rate limit servers if over limit', function () {
     Http::fake([
@@ -23,5 +23,4 @@ it('can rate limit servers if over limit', function () {
     Http::assertSent(function (Request $request) {
         return $request->method() === 'POST';
     });
-
 });

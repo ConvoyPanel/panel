@@ -63,5 +63,4 @@ enum DiskInterface: string
     case SATA5 = 'sata5';
     case EFIDISK0 = 'efidisk0';
     case TPMSTATE0 = 'tpmstate0';
-
 }

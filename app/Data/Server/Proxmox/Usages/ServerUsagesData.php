@@ -10,5 +10,6 @@ class ServerUsagesData extends Data
       public int $bandwidth,
       public ServerNetworkData $network,
       public ServerDiskData $disk,
-    ) {}
+    ) {
+    }
 }

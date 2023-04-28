@@ -11,7 +11,6 @@ class ServerRateLimitsSyncService
 {
     public function __construct(private NetworkService $service)
     {
-
     }
 
     public function handle(Node $node)

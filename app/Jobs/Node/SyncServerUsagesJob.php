@@ -5,7 +5,6 @@ namespace Convoy\Jobs\Node;
 use Convoy\Models\Node;
 use Convoy\Services\Nodes\ServerUsagesSyncService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;

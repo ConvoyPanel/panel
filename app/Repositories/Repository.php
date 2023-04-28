@@ -10,24 +10,12 @@ use InvalidArgumentException;
 
 abstract class Repository implements RepositoryInterface
 {
-    /**
-     * @var Application
-     */
     protected Application $app;
 
-    /**
-     * @var array
-     */
     protected array $columns = ['*'];
 
-    /**
-     * @var mixed
-     */
     protected mixed $model;
 
-    /**
-     * @var bool
-     */
     protected bool $withFresh = true;
 
     /**
@@ -49,8 +37,6 @@ abstract class Repository implements RepositoryInterface
 
     /**
      * Return the model being used for this repository.
-     *
-     * @return Model
      */
     public function getModel(): Model
     {
@@ -73,8 +59,6 @@ abstract class Repository implements RepositoryInterface
 
     /**
      * Return the columns to be selected in the repository call.
-     *
-     * @return array
      */
     public function getColumns(): array
     {
@@ -120,7 +104,6 @@ abstract class Repository implements RepositoryInterface
      * Take the provided model and make it accessible to the rest of the repository.
      *
      * @param  array  $model
-     * @return mixed
      */
     protected function initializeModel(...$model): mixed
     {

@@ -10,9 +10,7 @@ use Convoy\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceExceptio
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
 class AllocationService
 {
@@ -79,7 +77,7 @@ class AllocationService
         $raw = collect($this->repository->setServer($server)->getConfig())->where('key', 'boot')->firstOrFail();
 
         $untaggedDisks = array_values(array_filter(explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))), function ($disk) {
-            return !ctype_space($disk) && in_array($disk, array_column(DiskInterface::cases(), 'value')); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
+            return ! ctype_space($disk) && in_array($disk, array_column(DiskInterface::cases(), 'value')); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
         }));
 
         $taggedDisks = [];
@@ -96,7 +94,7 @@ class AllocationService
     public function setBootOrder(Server $server, array $disks)
     {
         return $this->repository->setServer($server)->update([
-            'boot' => count($disks) > 0 ? 'order=' . Arr::join($disks, ';') : '',
+            'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }
 
@@ -104,7 +102,7 @@ class AllocationService
     {
         $payload = [
             'cores' => $cpu,
-            'memory' => $memory / 1048576
+            'memory' => $memory / 1048576,
         ];
 
         return $this->repository->setServer($server)->update($payload);
@@ -125,14 +123,14 @@ class AllocationService
                 throw new NoAvailableDiskInterfaceException();
             }
 
-            if (!in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
+            if (! in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
                 $ideIndex = $i;
                 break;
             }
         }
 
         $this->repository->update([
-            "ide$ideIndex" => "{$server->node->iso_storage}:iso/{$iso->file_name},media=cdrom"
+            "ide$ideIndex" => "{$server->node->iso_storage}:iso/{$iso->file_name},media=cdrom",
         ]);
     }
 
@@ -149,7 +147,7 @@ class AllocationService
     public function convertToBytes(string $from): ?int
     {
         $units = ['B', 'K', 'M', 'G', 'T', 'P'];
-        $number = (int)substr($from, 0, -1);
+        $number = (int) substr($from, 0, -1);
         $suffix = strtoupper(substr($from, -1));
 
         //B or no suffix

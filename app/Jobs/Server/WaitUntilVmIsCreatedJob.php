@@ -5,19 +5,18 @@ namespace Convoy\Jobs\Server;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 
 class WaitUntilVmIsCreatedJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil() {
+    public function retryUntil()
+    {
         return now()->addMinutes(30);
     }
 
@@ -47,7 +46,7 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
 
         $isCreated = $service->isVmCreated($server);
 
-        if (!$isCreated) {
+        if (! $isCreated) {
             $this->release(3);
         }
     }

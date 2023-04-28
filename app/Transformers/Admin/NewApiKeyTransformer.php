@@ -2,18 +2,17 @@
 
 namespace Convoy\Transformers\Admin;
 
-use Convoy\Models\PersonalAccessToken;
 use Laravel\Sanctum\NewAccessToken;
 use League\Fractal\TransformerAbstract;
 
 class NewApiKeyTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
-        'user'
+        'user',
     ];
 
     protected array $defaultIncludes = [
-        'user'
+        'user',
     ];
 
     public function transform(NewAccessToken $token)

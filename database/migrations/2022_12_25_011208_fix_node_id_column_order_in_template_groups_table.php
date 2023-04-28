@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('template_groups', function (Blueprint $table) {
-            DB::statement("ALTER TABLE template_groups MODIFY COLUMN node_id bigint unsigned AFTER id");
+            DB::statement('ALTER TABLE template_groups MODIFY COLUMN node_id bigint unsigned AFTER id');
         });
     }
 
@@ -27,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('template_groups', function (Blueprint $table) {
-            DB::statement("ALTER TABLE template_groups MODIFY COLUMN node_id bigint unsigned AFTER updated_at");
+            DB::statement('ALTER TABLE template_groups MODIFY COLUMN node_id bigint unsigned AFTER updated_at');
         });
     }
 };

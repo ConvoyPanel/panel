@@ -13,7 +13,7 @@ class MediaTransformer extends TransformerAbstract
             'name' => $data['name'],
             'size' => $data['size'],
             'hidden' => $data['hidden'],
-            'mounted' => $data['mounted']
+            'mounted' => $data['mounted'],
         ];
     }
 }

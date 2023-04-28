@@ -15,6 +15,7 @@ class TemplateGroupRequest extends FormRequest
     public function rules()
     {
         $rules = TemplateGroup::getRules();
+
         return [
             'name' => $rules['name'],
             'hidden' => $rules['hidden'],

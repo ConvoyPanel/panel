@@ -15,7 +15,7 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->get('/api2/json/nodes/{node}/qemu/{server}/snapshot')
             ->json();
@@ -30,10 +30,10 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/snapshot', [
-                'snapname' => $name
+                'snapname' => $name,
             ])
             ->json();
 

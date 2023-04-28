@@ -1,6 +1,6 @@
 <?php
 
-beforeEach(fn() => Http::preventStrayRequests());
+beforeEach(fn () => Http::preventStrayRequests());
 
 it('can generate noVNC authorization token', function () {
     Http::fake([

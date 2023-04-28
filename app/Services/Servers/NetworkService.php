@@ -11,7 +11,6 @@ use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
-use Convoy\Services\ProxmoxService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
 
@@ -83,7 +82,7 @@ class NetworkService
     {
         return ServerAddressesData::from([
             'ipv4' => array_values($server->addresses->where('type', AddressType::IPV4->value)->toArray()),
-            'ipv6' => array_values($server->addresses->where('type', AddressType::IPV6->value)->toArray())
+            'ipv6' => array_values($server->addresses->where('type', AddressType::IPV6->value)->toArray()),
         ]);
     }
 
@@ -116,8 +115,9 @@ class NetworkService
 
         $payload = "virtio={$macAddress},bridge={$server->node->network}";
 
-        if (!is_null($mebibytes))
-            $payload .= ',rate=' . $mebibytes;
+        if (! is_null($mebibytes)) {
+            $payload .= ',rate='.$mebibytes;
+        }
 
         $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
     }
@@ -127,9 +127,9 @@ class NetworkService
         $currentAddresses = $server->addresses()->get()->pluck('id')->toArray();
 
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
-        $addressesToRemove = array_filter($currentAddresses, fn($id) => !in_array($id, $addressIds));
+        $addressesToRemove = array_filter($currentAddresses, fn ($id) => ! in_array($id, $addressIds));
 
-        if (!empty($addressesToAdd)) {
+        if (! empty($addressesToAdd)) {
             IPAddress::query()
                 ->where('node_id', $server->node_id)
                 ->whereIn('id', $addressesToAdd)
@@ -137,7 +137,7 @@ class NetworkService
                 ->update(['server_id' => $server->id]);
         }
 
-        if (!empty($addressesToRemove)) {
+        if (! empty($addressesToRemove)) {
             IPAddress::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)

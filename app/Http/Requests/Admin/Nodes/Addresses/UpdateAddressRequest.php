@@ -4,7 +4,6 @@ namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\IPAddress;
-use Convoy\Models\Node;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
 
@@ -35,19 +34,19 @@ class UpdateAddressRequest extends FormRequest
         $validator->after(function ($validator) {
             // if the type is ipv4 make sure both the address and gateway are valid ipv4 addresses and do the same for ipv6
             if ($this->type === 'ipv4') {
-                if (!filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                if (! filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                     $validator->errors()->add('address', 'The address must be a valid IPv4 address.');
                 }
 
-                if (!filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                if (! filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                     $validator->errors()->add('gateway', 'The gateway must be a valid IPv4 address.');
                 }
             } elseif ($this->type === 'ipv6') {
-                if (!filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                if (! filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
                     $validator->errors()->add('address', 'The address must be a valid IPv6 address.');
                 }
 
-                if (!filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                if (! filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
                     $validator->errors()->add('gateway', 'The gateway must be a valid IPv6 address.');
                 }
             }
@@ -56,7 +55,7 @@ class UpdateAddressRequest extends FormRequest
             $nodeId = $this->route()->originalParameter('node');
 
             // check for duplicate addresses
-            if ($address->address !== $this->address && IPAddress::where([['node_id', '=', $nodeId],['address', '=', $this->address]])->exists()) {
+            if ($address->address !== $this->address && IPAddress::where([['node_id', '=', $nodeId], ['address', '=', $this->address]])->exists()) {
                 $validator->errors()->add('address', 'The address has already been imported.');
             }
         });

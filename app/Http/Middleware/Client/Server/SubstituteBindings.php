@@ -10,8 +10,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings as Middleware;
 class SubstituteBindings extends Middleware
 {
     /**
-     * @param Request $request
-     *
+     * @param  Request  $request
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -21,7 +20,6 @@ class SubstituteBindings extends Middleware
         $this->router->substituteBindings('server', function ($value) {
             return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
         });
-
 
         return parent::handle($request, $next);
     }

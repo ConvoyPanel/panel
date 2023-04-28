@@ -25,7 +25,7 @@ class UpdateBootOrderRequest extends FormRequest
     {
         return [
             'order' => 'array|present',
-            'order.*' => 'string'
+            'order.*' => 'string',
         ];
     }
 }

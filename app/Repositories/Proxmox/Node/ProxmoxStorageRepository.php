@@ -5,11 +5,9 @@ namespace Convoy\Repositories\Proxmox\Node;
 use Convoy\Data\Helpers\ChecksumData;
 use Convoy\Data\Node\Storage\FileMetaData;
 use Convoy\Enums\Node\Storage\ContentType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 
@@ -51,7 +49,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'storage' => $this->node->iso_storage,
-                'file' => "{$this->node->iso_storage}:$contentType->value/$fileName"
+                'file' => "{$this->node->iso_storage}:$contentType->value/$fileName",
             ])
             ->delete('/api2/json/nodes/{node}/storage/{storage}/content//{file}')
             ->json();

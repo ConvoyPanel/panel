@@ -8,7 +8,6 @@
 namespace Convoy\Services\Activity;
 
 use Closure;
-use Convoy\Enums\Activity\Status;
 use Convoy\Models\ActivityLog;
 use Convoy\Models\ActivityLogSubject;
 use Exception;
@@ -74,7 +73,7 @@ class ActivityLogService
     /**
      * Sets the subject model instance.
      *
-     * @param Model|Model[] $subjects
+     * @param  Model|Model[]  $subjects
      */
     public function subject(...$subjects): self
     {
@@ -146,7 +145,7 @@ class ActivityLogService
 
         try {
             return $this->save();
-        } catch (Throwable | Exception $exception) {
+        } catch (Throwable|Exception $exception) {
             if (config('app.env') !== 'production') {
                 /* @noinspection PhpUnhandledExceptionInspection */
                 throw $exception;

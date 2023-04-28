@@ -4,7 +4,6 @@ namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Enums\Api\ApiKeyType;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Tokens\StoreTokenRequest;
 use Convoy\Models\PersonalAccessToken;
 use Convoy\Transformers\Admin\ApiKeyTransformer;

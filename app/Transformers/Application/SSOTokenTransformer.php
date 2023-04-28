@@ -3,7 +3,6 @@
 namespace Convoy\Transformers\Application;
 
 use Convoy\Models\SSOToken;
-use Convoy\Models\User;
 use League\Fractal\TransformerAbstract;
 
 class SSOTokenTransformer extends TransformerAbstract

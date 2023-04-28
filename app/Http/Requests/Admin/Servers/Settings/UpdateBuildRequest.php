@@ -24,7 +24,7 @@ class UpdateBuildRequest extends FormRequest
             'snapshot_limit' => $rules['snapshot_limit'],
             'backup_limit' => $rules['backup_limit'],
             'bandwidth_limit' => $rules['bandwidth_limit'],
-            'bandwidth_usage' => $rules['bandwidth_usage']
+            'bandwidth_usage' => $rules['bandwidth_usage'],
         ];
     }
 

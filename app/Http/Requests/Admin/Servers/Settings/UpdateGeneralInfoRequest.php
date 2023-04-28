@@ -33,7 +33,7 @@ class UpdateGeneralInfoRequest extends FormRequest
             'node_id' => $rules['node_id'],
             'user_id' => $rules['user_id'],
             'vmid' => $rules['vmid'],
-            'status' => $rules['status']
+            'status' => $rules['status'],
         ]);
     }
 }

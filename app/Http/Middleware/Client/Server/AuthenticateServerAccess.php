@@ -10,7 +10,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthenticateServerAccess
 {
-
     /**
      * Routes that this middleware should not apply to if the user is an admin.
      */
@@ -19,8 +18,6 @@ class AuthenticateServerAccess
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -28,11 +25,11 @@ class AuthenticateServerAccess
         $user = $request->user();
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($user->id !== $server->user_id && !$user->root_admin) {
+        if ($user->id !== $server->user_id && ! $user->root_admin) {
             throw new NotFoundHttpException('Server not found');
         }
 

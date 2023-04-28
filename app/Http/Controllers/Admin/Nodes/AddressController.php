@@ -64,11 +64,13 @@ class AddressController extends Controller
 
         try {
             if ($oldServer?->id !== $newServer?->id) {
-                if ($oldServer)
+                if ($oldServer) {
                     $this->networkService->syncSettings($oldServer);
+                }
 
-                if ($newServer)
+                if ($newServer) {
                     $this->networkService->syncSettings($newServer);
+                }
             }
         } catch (Exception $e) {
             // do nothing

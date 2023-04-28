@@ -9,8 +9,6 @@ interface ActivityRepositoryInterface extends RepositoryInterface
 {
     /**
      * Return the server model associated with an activity
-     *
-     * @return Server|null
      */
     public function getServer(ActivityLog $activity): ?Server;
 }

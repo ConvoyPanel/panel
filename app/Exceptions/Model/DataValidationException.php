@@ -51,17 +51,12 @@ class DataValidationException extends ConvoyException implements HttpExceptionIn
 
     /**
      * Return the status code for this request.
-     *
-     * @return int
      */
     public function getStatusCode(): int
     {
         return 500;
     }
 
-    /**
-     * @return array
-     */
     public function getHeaders(): array
     {
         return [];

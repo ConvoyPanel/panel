@@ -36,8 +36,6 @@ class UpdateDetailsRequest extends FormRequest
         ];
     }
 
-
-
     /**
      * Convert the allocation field into the expected format for the service handler.
      *
@@ -48,7 +46,7 @@ class UpdateDetailsRequest extends FormRequest
         $data = parent::validated();
 
         // Adjust the limits field to match what is expected by the model.
-        if (!empty($data['limits'])) {
+        if (! empty($data['limits'])) {
             foreach ($data['limits'] as $key => $value) {
                 $data[$key] = $value;
             }

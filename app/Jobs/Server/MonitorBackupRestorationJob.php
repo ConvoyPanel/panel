@@ -2,11 +2,9 @@
 
 namespace Convoy\Jobs\Server;
 
-use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\Backups\BackupMonitorService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,7 +15,8 @@ class MonitorBackupRestorationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil() {
+    public function retryUntil()
+    {
         return now()->addDay();
     }
 

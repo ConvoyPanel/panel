@@ -2,22 +2,24 @@
 
 namespace Convoy\Exceptions;
 
-use Convoy\Exceptions\ConvoyException;
 use Exception;
-use Illuminate\Http\Request;
-use Psr\Log\LoggerInterface;
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Container\Container;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class DisplayException extends ConvoyException implements HttpExceptionInterface
 {
     public const LEVEL_DEBUG = 'debug';
+
     public const LEVEL_INFO = 'info';
+
     public const LEVEL_WARNING = 'warning';
+
     public const LEVEL_ERROR = 'error';
 
     /**
@@ -65,7 +67,7 @@ class DisplayException extends ConvoyException implements HttpExceptionInterface
      */
     public function report()
     {
-        if (!$this->getPrevious() instanceof Exception || !Handler::isReportable($this->getPrevious())) {
+        if (! $this->getPrevious() instanceof Exception || ! Handler::isReportable($this->getPrevious())) {
             return null;
         }
 

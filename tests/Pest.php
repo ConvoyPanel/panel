@@ -1,6 +1,5 @@
 <?php
 
-
 use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
@@ -52,7 +51,6 @@ expect()->extend('toBeOne', function () {
 
 function createServerModel()
 {
-
     $location = Location::factory()->create();
     /** @var User $user */
     $user = User::factory()->create();
@@ -60,7 +58,7 @@ function createServerModel()
     $node = Node::factory()->for($location)->create();
     $service = app(Convoy\Services\Servers\ServerCreationService::class);
     /** @var Server $server */
-    $server = Server::factory()->create(function() use ($user, $node, $service) {
+    $server = Server::factory()->create(function () use ($user, $node, $service) {
         $uuid = $service->generateUniqueUuidCombo();
 
         return [

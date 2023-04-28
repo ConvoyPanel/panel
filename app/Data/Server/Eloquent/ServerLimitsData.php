@@ -15,5 +15,6 @@ class ServerLimitsData extends Data
       public ?int $bandwidth,
       public ServerAddressesData $addresses,
       public ?string $mac_address,
-    ) {}
+    ) {
+    }
 }

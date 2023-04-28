@@ -4,10 +4,9 @@ namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Eloquent\ServerEloquentData;
 use Convoy\Data\Server\Proxmox\ServerProxmoxData;
-use Convoy\Enums\Network\AddressType;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
 
 class ServerDetailService
@@ -41,7 +40,7 @@ class ServerDetailService
                 'bandwidth' => $server->bandwidth_limit,
                 'addresses' => $addresses,
                 'mac_address' => $this->networkService->getMacAddresses($server)->eloquent,
-            ]
+            ],
         ]);
     }
 
@@ -63,7 +62,7 @@ class ServerDetailService
                 'boot_order' => $this->allocationService->getBootOrder($server),
                 'disks' => $this->allocationService->getDisks($server),
                 /* 'addresses' => $this->cloudinitService->getIpConfig($server), */
-            ]
+            ],
         ]);
     }
 }

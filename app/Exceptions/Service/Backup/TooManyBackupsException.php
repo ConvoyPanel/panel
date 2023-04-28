@@ -2,7 +2,6 @@
 
 namespace Convoy\Exceptions\Service\Backup;
 
-use Convoy\Exceptions\ConvoyException;
 use Convoy\Exceptions\DisplayException;
 
 class TooManyBackupsException extends DisplayException

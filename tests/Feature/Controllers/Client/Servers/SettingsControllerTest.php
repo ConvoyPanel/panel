@@ -3,7 +3,7 @@
 use Convoy\Models\ISO;
 use Illuminate\Support\Facades\Http;
 
-beforeEach(fn() => Http::preventStrayRequests());
+beforeEach(fn () => Http::preventStrayRequests());
 
 it('can rename servers', function () {
     Http::fake([
@@ -34,7 +34,7 @@ it('can change nameservers', function () {
         'nameservers' => [
             '1.1.1.1',
             '1.0.0.1',
-        ]
+        ],
     ]);
 
     $response->assertOk();

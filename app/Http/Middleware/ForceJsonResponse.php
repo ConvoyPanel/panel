@@ -12,7 +12,6 @@ class ForceJsonResponse
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
      * @param Closure(Request): (Response|RedirectResponse) $next
      * @return Response|RedirectResponse
      */

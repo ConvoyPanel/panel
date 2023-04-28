@@ -8,7 +8,7 @@ use League\Fractal\TransformerAbstract;
 class TemplateGroupTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
-        'templates'
+        'templates',
     ];
 
     /**

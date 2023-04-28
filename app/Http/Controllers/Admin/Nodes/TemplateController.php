@@ -3,7 +3,6 @@
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
 use Convoy\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
 use Convoy\Models\Node;

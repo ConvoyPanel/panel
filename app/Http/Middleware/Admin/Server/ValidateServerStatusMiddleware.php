@@ -6,7 +6,6 @@ use Closure;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerDeletionService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -16,7 +15,7 @@ class ValidateServerStatusMiddleware
     {
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 

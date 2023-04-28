@@ -9,25 +9,21 @@ use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Eloquent\BackupRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Convoy\Services\Servers\Backups\BackupCreationService;
 use Convoy\Services\Servers\Backups\BackupDeletionService;
 use Convoy\Services\Servers\Backups\RestoreFromBackupService;
-use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\BackupTransformer;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class BackupController extends ApplicationApiController
 {
     public function __construct(
-        private BackupCreationService    $backupCreationService,
-        private BackupDeletionService    $backupDeletionService,
+        private BackupCreationService $backupCreationService,
+        private BackupDeletionService $backupDeletionService,
         private RestoreFromBackupService $restoreFromBackupService,
-        private BackupRepository         $backupRepository,
-    )
-    {
+        private BackupRepository $backupRepository,
+    ) {
     }
 
     public function index(Server $server, Request $request)

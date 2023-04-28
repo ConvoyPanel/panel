@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            DB::statement("ALTER TABLE nodes MODIFY COLUMN network varchar(255) AFTER backup_storage");
+            DB::statement('ALTER TABLE nodes MODIFY COLUMN network varchar(255) AFTER backup_storage');
         });
     }
 
@@ -27,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('nodes', function (Blueprint $table) {
-            DB::statement("ALTER TABLE nodes MODIFY COLUMN network varchar(255) AFTER vm_storage");
+            DB::statement('ALTER TABLE nodes MODIFY COLUMN network varchar(255) AFTER vm_storage');
         });
     }
 };

@@ -4,11 +4,9 @@ namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Enums\Server\BackupCompressionType;
 use Convoy\Enums\Server\BackupMode;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
 
 class ProxmoxBackupRepository extends ProxmoxRepository
@@ -20,7 +18,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'storage' => $this->node->backup_storage
+                'storage' => $this->node->backup_storage,
             ])
             ->get('/api2/json/nodes/{node}/storage/{storage}/content', [
                 'content' => 'backup',
@@ -46,7 +44,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
 
         $response = $this->getHttpClient()
             ->withUrlParameters([
-                'node' => $this->node->cluster
+                'node' => $this->node->cluster,
             ])
             ->post('/api2/json/nodes/{node}/vzdump', [
                 'vmid' => $this->server->vmid,
@@ -65,7 +63,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
 
         $response = $this->getHttpClient()
             ->withUrlParameters([
-                'node' => $this->node->cluster
+                'node' => $this->node->cluster,
             ])
             ->post('/api2/json/nodes/{node}/qemu', [
                 'vmid' => $this->server->vmid,
@@ -85,7 +83,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'storage' => $this->node->backup_storage,
-                'backup' => "{$this->node->backup_storage}:backup/{$backup->file_name}"
+                'backup' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
             ])
             ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{backup}')
             ->json();

@@ -53,6 +53,7 @@ abstract class FormRequest extends BaseFormRequest
      *
      * @param  class-string<T>  $expect
      * @return T
+     *
      * @noinspection PhpUndefinedClassInspection
      * @noinspection PhpDocSignatureInspection
      */

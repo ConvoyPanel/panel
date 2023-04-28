@@ -4,7 +4,6 @@ namespace Convoy\Console\Commands\Maintenance;
 
 use Convoy\Jobs\Node\PruneUsersJob;
 use Convoy\Models\Node;
-use Convoy\Services\Nodes\UserPruneService;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
 

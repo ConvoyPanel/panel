@@ -54,7 +54,7 @@ class SettingsController extends ApplicationApiController
             ->defaultSort('order_column')
             ->allowedFilters(['name']);
 
-        if (!$request->user()->root_admin) {
+        if (! $request->user()->root_admin) {
             $templateGroups = $templateGroups->where([['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]])
                 ->with(['templates' => function ($query) {
                     $query->where('hidden', '=', false)->orderBy('order_column');
@@ -79,7 +79,7 @@ class SettingsController extends ApplicationApiController
                 'template' => Template::where('uuid', '=', $request->template_uuid)->firstOrFail(),
                 'account_password' => $request->account_password,
                 'should_create_server' => true,
-                'start_on_completion' => $request->boolean('start_on_completion')
+                'start_on_completion' => $request->boolean('start_on_completion'),
             ]);
 
             $this->buildDispatchService->rebuild($deployment);
@@ -131,7 +131,7 @@ class SettingsController extends ApplicationApiController
             } else {
                 return [
                     'mounted' => false,
-                    ...$iso
+                    ...$iso,
                 ];
             }
         }, $media);

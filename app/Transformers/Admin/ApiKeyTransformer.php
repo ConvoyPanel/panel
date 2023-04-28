@@ -8,11 +8,11 @@ use League\Fractal\TransformerAbstract;
 class ApiKeyTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
-        'user'
+        'user',
     ];
 
     protected array $defaultIncludes = [
-        'user'
+        'user',
     ];
 
     public function transform(PersonalAccessToken $token)

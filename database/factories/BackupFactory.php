@@ -16,7 +16,6 @@ class BackupFactory extends Factory
      *
      * @var string
      */
-
     protected $model = Backup::class;
 
     /**

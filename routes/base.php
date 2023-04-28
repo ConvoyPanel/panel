@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Convoy\Http\Controllers\Base;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [Base\IndexController::class, 'index'])->name('index')->fallback();
 

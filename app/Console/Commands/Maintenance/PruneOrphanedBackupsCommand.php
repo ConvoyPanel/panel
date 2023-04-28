@@ -3,9 +3,9 @@
 namespace Convoy\Console\Commands\Maintenance;
 
 use Carbon\CarbonImmutable;
-use InvalidArgumentException;
-use Illuminate\Console\Command;
 use Convoy\Repositories\Eloquent\BackupRepository;
+use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 class PruneOrphanedBackupsCommand extends Command
 {
@@ -22,7 +22,7 @@ class PruneOrphanedBackupsCommand extends Command
     public function handle(BackupRepository $repository)
     {
         $since = $this->option('prune-age') ?? config('backups.prune_age', 360);
-        if (!$since || !is_int($since)) {
+        if (! $since || ! is_int($since)) {
             throw new InvalidArgumentException('The "--prune-age" argument must be a value greater than 0.');
         }
 
@@ -31,7 +31,7 @@ class PruneOrphanedBackupsCommand extends Command
             ->where('created_at', '<=', CarbonImmutable::now()->subMinutes($since)->toDateTimeString());
 
         $count = $query->count();
-        if (!$count) {
+        if (! $count) {
             $this->info('There are no orphaned backups to be marked as failed.');
 
             return;

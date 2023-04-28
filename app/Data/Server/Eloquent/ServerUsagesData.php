@@ -8,5 +8,6 @@ class ServerUsagesData extends Data
 {
     public function __construct(
       public int $bandwidth
-    ) {}
+    ) {
+    }
 }

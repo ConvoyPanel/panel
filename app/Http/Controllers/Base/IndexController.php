@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Controllers\Base;
 
-use Illuminate\View\View;
-use Illuminate\View\Factory as ViewFactory;
 use Convoy\Http\Controllers\Controller;
+use Illuminate\View\Factory as ViewFactory;
+use Illuminate\View\View;
 
 class IndexController extends Controller
 {
@@ -23,8 +23,8 @@ class IndexController extends Controller
     {
         return $this->view->make('app', [
             'siteConfiguration' => [
-                'version' => config('app.version')
-            ]
+                'version' => config('app.version'),
+            ],
         ]);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Rules\Domain;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateNetworkRequest extends FormRequest

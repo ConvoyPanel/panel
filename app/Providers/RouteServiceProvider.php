@@ -3,7 +3,6 @@
 namespace Convoy\Providers;
 
 use Convoy\Http\Middleware\AdminAuthenticate;
-use Convoy\Http\Middleware\ForceJsonResponse;
 use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;

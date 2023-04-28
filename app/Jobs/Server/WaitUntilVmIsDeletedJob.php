@@ -5,7 +5,6 @@ namespace Convoy\Jobs\Server;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -16,7 +15,8 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil() {
+    public function retryUntil()
+    {
         return now()->addMinutes(30);
     }
 
@@ -46,7 +46,7 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
 
         $isDeleted = $service->isVmDeleted($server);
 
-        if (!$isDeleted) {
+        if (! $isDeleted) {
             $this->release(3);
         }
     }
