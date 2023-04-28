@@ -16,7 +16,7 @@ class TemplateGroupTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(TemplateGroup $templateGroup)
+    public function transform(TemplateGroup $templateGroup): array
     {
         return [
             'id' => $templateGroup->id,

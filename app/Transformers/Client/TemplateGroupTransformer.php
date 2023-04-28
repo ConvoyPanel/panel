@@ -20,7 +20,7 @@ class TemplateGroupTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(TemplateGroup $group)
+    public function transform(TemplateGroup $group): array
     {
         return [
             'uuid' => $group->uuid,

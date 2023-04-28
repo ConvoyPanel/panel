@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
+use Illuminate\Http\Response;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
@@ -81,7 +82,7 @@ class AddressController extends Controller
         return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
-    public function destroy(Node $node, IPAddress $address)
+    public function destroy(Node $node, IPAddress $address): Response
     {
         $address->load('server');
 

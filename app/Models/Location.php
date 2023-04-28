@@ -37,7 +37,7 @@ class Location extends Model
      *
      * @return HasMany
      */
-    public function nodes()
+    public function nodes(): HasMany
     {
         return $this->hasMany(Node::class);
     }
@@ -47,7 +47,7 @@ class Location extends Model
      *
      * @return HasManyThrough
      */
-    public function servers()
+    public function servers(): HasManyThrough
     {
         return $this->hasManyThrough(Server::class, Node::class);
     }

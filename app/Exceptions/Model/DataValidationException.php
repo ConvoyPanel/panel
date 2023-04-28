@@ -44,7 +44,7 @@ class DataValidationException extends ConvoyException implements HttpExceptionIn
      *
      * @return MessageBag
      */
-    public function getMessageBag()
+    public function getMessageBag(): MessageBag
     {
         return $this->validator->errors();
     }

@@ -64,7 +64,7 @@ class Node extends Model
      *
      * @return BelongsTo
      */
-    public function location()
+    public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }

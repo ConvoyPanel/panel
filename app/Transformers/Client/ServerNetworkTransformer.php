@@ -11,7 +11,7 @@ class ServerNetworkTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(array $data)
+    public function transform(array $data): array
     {
         return [
             'nameservers' => $data['nameservers'],

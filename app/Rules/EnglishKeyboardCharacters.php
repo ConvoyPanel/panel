@@ -23,7 +23,7 @@ class EnglishKeyboardCharacters implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         return (bool) preg_match('/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;\':",.\/<>?\\ ]*$/', $value);
     }
@@ -33,7 +33,7 @@ class EnglishKeyboardCharacters implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The :attribute must contain characters from the English keyboard.';
     }

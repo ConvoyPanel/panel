@@ -11,7 +11,7 @@ class ServerSecurityTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(array $data)
+    public function transform(array $data): array
     {
         return [
             'ssh_keys' => $data['ssh_keys'],

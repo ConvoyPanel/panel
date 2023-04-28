@@ -13,7 +13,7 @@ class Hostname implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_DOMAIN);
     }
@@ -23,7 +23,7 @@ class Hostname implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return __('validation.hostname');
     }

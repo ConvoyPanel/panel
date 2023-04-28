@@ -16,7 +16,7 @@ class MebibytesToAndFromBytes implements CastsAttributes
      * @param  array  $attributes
      * @return ?int
      */
-    public function get(Model $model, string $key, mixed $value, array $attributes)
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?int
     {
         return isset($value) ? $value * 1048576 : $value; // Convert from megabytes to bytes
     }
@@ -30,7 +30,7 @@ class MebibytesToAndFromBytes implements CastsAttributes
      * @param  array  $attributes
      * @return ?int
      */
-    public function set(Model $model, string $key, mixed $value, array $attributes)
+    public function set(Model $model, string $key, mixed $value, array $attributes): ?int
     {
         return isset($value) ? intval(floor($value / 1048576)) : $value; // Convert from bytes to megabytes to prevent overflow
     }

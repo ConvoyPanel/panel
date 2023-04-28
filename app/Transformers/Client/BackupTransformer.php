@@ -26,7 +26,7 @@ class BackupTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(Backup $backup)
+    public function transform(Backup $backup): array
     {
         return [
             'uuid' => $backup->uuid,

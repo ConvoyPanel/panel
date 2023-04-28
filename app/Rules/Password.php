@@ -13,7 +13,7 @@ class Password implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         return (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/', $value);
     }
@@ -23,7 +23,7 @@ class Password implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The :attribute must contain 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.';
     }

@@ -12,7 +12,7 @@ class ServerDetailTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(ServerProxmoxData $server)
+    public function transform(ServerProxmoxData $server): array
     {
         $data = $server->toArray();
 

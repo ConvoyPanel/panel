@@ -89,7 +89,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * @return HasMany
      */
-    public function servers()
+    public function servers(): HasMany
     {
         return $this->hasMany(Server::class);
     }

@@ -11,7 +11,7 @@ class ActivityRepository extends EloquentRepository implements ActivityRepositor
     /**
      * @return string
      */
-    public function model()
+    public function model(): string
     {
         return ActivityLog::class;
     }

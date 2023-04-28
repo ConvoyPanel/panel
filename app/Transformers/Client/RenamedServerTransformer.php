@@ -12,7 +12,7 @@ class RenamedServerTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(Server $server)
+    public function transform(Server $server): array
     {
         return [
             'name' => $server->name,

@@ -54,7 +54,7 @@ class Fqdn implements Rule, DataAwareRule
      * @param  string  $attribute
      * @param  mixed  $value
      */
-    public function passes($attribute, $value): bool
+    public function passes(string $attribute, $value): bool
     {
         if (filter_var($value, FILTER_VALIDATE_IP)) {
             // Check if the scheme is set to HTTPS.

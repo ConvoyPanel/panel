@@ -11,7 +11,7 @@ class ServerTerminalTransformer extends TransformerAbstract
      *
      * @return array
      */
-    public function transform(array $data)
+    public function transform(array $data): array
     {
         return [
             'token' => array_get($data, 'token'),

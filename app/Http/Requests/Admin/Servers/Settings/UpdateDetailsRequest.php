@@ -41,7 +41,7 @@ class UpdateDetailsRequest extends FormRequest
      *
      * @return array
      */
-    public function validated($key = null, $default = null)
+    public function validated($key = null, $default = null): array
     {
         $data = parent::validated();
 
