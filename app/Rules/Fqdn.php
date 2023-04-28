@@ -40,7 +40,7 @@ class Fqdn implements Rule, DataAwareRule
     /**
      * @param  array  $data
      */
-    public function setData($data): self
+    public function setData(array $data): self
     {
         $this->data = $data;
 
