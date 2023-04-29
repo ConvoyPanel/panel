@@ -2,7 +2,7 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'No hay direcciones asociadas a este servidor.'
+        'empty_state' => 'No hay direcciones asociadas a este servidor.',
     ],
     'display_info' => [
         'title' => 'Nombre del Servidor',
@@ -13,7 +13,7 @@ return [
         'modal' => [
             'title' => 'Confirmar Reinstalación',
             'description' => '¿Estás seguro de que quieres reinstalar este servidor? Se perderán todos los datos.',
-        ]
+        ],
     ],
     'isos' => [
         'title' => 'ISOs Disponibles',
@@ -37,5 +37,5 @@ return [
     'hardware' => [
         'bandwidth_used' => 'Ancho de Banda Usado',
         'bandwidth_alloted' => 'Ancho de Banda Asignado',
-    ]
+    ],
 ];
