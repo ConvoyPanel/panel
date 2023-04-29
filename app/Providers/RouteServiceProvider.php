@@ -3,7 +3,6 @@
 namespace Convoy\Providers;
 
 use Convoy\Http\Middleware\AdminAuthenticate;
-use Convoy\Http\Middleware\ForceJsonResponse;
 use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -24,16 +23,16 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         Route::bind('server', function ($value) {
             return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
         });
 
-        $this->configureRateLimiting();
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
 
         $this->routes(function () {
             Route::middleware('web')->group(function () {
@@ -58,18 +57,6 @@ class RouteServiceProvider extends ServiceProvider
                     ->as('application.')
                     ->group(base_path('routes/api-application.php'));
             });
-        });
-    }
-
-    /**
-     * Configure the rate limiters for the application.
-     *
-     * @return void
-     */
-    protected function configureRateLimiting()
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

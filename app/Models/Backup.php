@@ -13,11 +13,8 @@ class Backup extends Model
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected $casts = [
+        'completed_at' => 'datetime',
         'size' => MebibytesToAndFromBytes::class,
-    ];
-
-    protected $dates = [
-        'completed_at',
     ];
 
     public static $validationRules = [

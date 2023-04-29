@@ -9,8 +9,6 @@ class UserTransformer extends TransformerAbstract
 {
     /**
      * List of resources to automatically include
-     *
-     * @var array
      */
     protected array $defaultIncludes = [
         //
@@ -18,8 +16,6 @@ class UserTransformer extends TransformerAbstract
 
     /**
      * List of resources possible to include
-     *
-     * @var array
      */
     protected array $availableIncludes = [
         //
@@ -27,10 +23,8 @@ class UserTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
-    public function transform(User $user)
+    public function transform(User $user): array
     {
         return [
             'id' => $user->id,

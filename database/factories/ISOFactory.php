@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ISOFactory extends Factory
 {
-
     /**
      * The name of the factory's corresponding model.
      *
@@ -24,17 +23,17 @@ class ISOFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid,
+            'uuid' => $this->faker->uuid(),
             'node_id' => Node::factory(),
-            'is_successful' => $this->faker->boolean,
-            'name' => $this->faker->name,
-            'file_name' => "{$this->faker->name}.iso",
+            'is_successful' => $this->faker->boolean(),
+            'name' => $this->faker->name(),
+            'file_name' => "{$this->faker->name()}.iso",
             'size' => $this->faker->randomNumber(),
-            'hidden' => $this->faker->boolean,
-            'completed_at' => $this->faker->dateTime,
+            'hidden' => $this->faker->boolean(),
+            'completed_at' => $this->faker->dateTime(),
         ];
     }
 }

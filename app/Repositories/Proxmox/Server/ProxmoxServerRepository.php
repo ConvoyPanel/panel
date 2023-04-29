@@ -22,7 +22,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->get('/api2/json/nodes/{node}/qemu/{server}/status/current')
             ->json();
@@ -37,7 +37,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'template' => $template->vmid
+                'template' => $template->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{template}/clone', [
                 'target' => $this->node->cluster,
@@ -57,11 +57,11 @@ class ProxmoxServerRepository extends ProxmoxRepository
             'query' => [
                 'destroy-unreferenced-disks' => true,
                 'purge' => true,
-            ]
+            ],
         ])
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->delete('/api2/json/nodes/{node}/qemu/{server}')
             ->json();
@@ -75,8 +75,8 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         $response = $this->getHttpClient()
             ->put('/api2/json/access/acl', [
-                'path' => '/vms/' . $this->server->vmid,
-                'users' => $userId . '@' . $realmType->value,
+                'path' => '/vms/'.$this->server->vmid,
+                'users' => $userId.'@'.$realmType->value,
                 'roles' => $roleId,
             ])
             ->json();

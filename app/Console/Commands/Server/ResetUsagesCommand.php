@@ -2,7 +2,6 @@
 
 namespace Convoy\Console\Commands\Server;
 
-use Carbon\Carbon;
 use Convoy\Models\Server;
 use Illuminate\Console\Command;
 
@@ -21,12 +20,11 @@ class ResetUsagesCommand extends Command
     /**
      * Handle command execution.
      */
-    public function handle()
+    public function handle(): void
     {
-        if (date('d') === '01')
-        {
+        if (date('d') === '01') {
             Server::query()->update([
-                    'bandwidth_usage' => 0,
+                'bandwidth_usage' => 0,
             ]);
         }
     }

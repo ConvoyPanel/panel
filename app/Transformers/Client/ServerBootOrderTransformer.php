@@ -10,7 +10,7 @@ class ServerBootOrderTransformer extends TransformerAbstract
     {
         return [
             'unused_devices' => $data['unused_devices']->toArray(),
-            'boot_order' => $data['boot_order']->toArray()
+            'boot_order' => $data['boot_order']->toArray(),
         ];
     }
 }

@@ -10,10 +10,8 @@ class SendPowerCommandRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +21,7 @@ class SendPowerCommandRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'state' => ['required', new Enum(PowerAction::class)],

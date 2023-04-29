@@ -5,7 +5,6 @@ namespace Convoy\Jobs\Node;
 use Convoy\Models\ISO;
 use Convoy\Services\Nodes\Isos\IsoMonitorService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -30,7 +29,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
         return [new WithoutOverlapping("node:iso.download-{$this->isoId}")];
     }
 
-    public function handle(IsoMonitorService $service)
+    public function handle(IsoMonitorService $service): void
     {
         $iso = ISO::findOrFail($this->isoId);
 

@@ -11,10 +11,8 @@ class LocationTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
-    public function transform(Location $location)
+    public function transform(Location $location): array
     {
         return [
             'id' => $location->id,

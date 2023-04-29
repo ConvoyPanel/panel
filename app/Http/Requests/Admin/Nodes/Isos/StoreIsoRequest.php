@@ -9,12 +9,12 @@ use Illuminate\Validation\Rules\Enum;
 
 class StoreIsoRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
         $isoRules = ISO::getRules();
 

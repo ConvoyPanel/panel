@@ -9,8 +9,6 @@ class BackupTransformer extends TransformerAbstract
 {
     /**
      * List of resources to automatically include
-     *
-     * @var array
      */
     protected array $defaultIncludes = [
         //
@@ -18,8 +16,6 @@ class BackupTransformer extends TransformerAbstract
 
     /**
      * List of resources possible to include
-     *
-     * @var array
      */
     protected array $availableIncludes = [
         //
@@ -27,10 +23,8 @@ class BackupTransformer extends TransformerAbstract
 
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
-    public function transform(Backup $backup)
+    public function transform(Backup $backup): array
     {
         return [
             'uuid' => $backup->uuid,

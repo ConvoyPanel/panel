@@ -7,13 +7,12 @@ use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 
 class SendPowerCommandJob implements ShouldQueue
 {
@@ -40,10 +39,8 @@ class SendPowerCommandJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(ProxmoxPowerRepository $repository)
+    public function handle(ProxmoxPowerRepository $repository): void
     {
         $server = Server::findOrFail($this->serverId);
 

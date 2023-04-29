@@ -43,7 +43,7 @@ class MakeUserCommand extends Command
      * @throws Exception
      * @throws DataValidationException
      */
-    public function handle()
+    public function handle(): void
     {
         $root_admin = $this->option('admin') ?? $this->confirm('Is this user an administrator?');
         $email = $this->option('email') ?? $this->ask('Email Address');
@@ -54,7 +54,7 @@ class MakeUserCommand extends Command
             'name' => $name,
             'email' => $email,
             'root_admin' => (bool) $root_admin,
-            'password' => Hash::make($password)
+            'password' => Hash::make($password),
         ]);
 
         $this->table(['Field', 'Value'], [

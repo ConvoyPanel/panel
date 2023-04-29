@@ -10,10 +10,8 @@ class UpdateGeneralInfoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +21,7 @@ class UpdateGeneralInfoRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = Server::getRulesForUpdate($this->parameter('server', Server::class));
 
@@ -33,7 +31,7 @@ class UpdateGeneralInfoRequest extends FormRequest
             'node_id' => $rules['node_id'],
             'user_id' => $rules['user_id'],
             'vmid' => $rules['vmid'],
-            'status' => $rules['status']
+            'status' => $rules['status'],
         ]);
     }
 }

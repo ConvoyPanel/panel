@@ -2,9 +2,9 @@
 
 namespace Convoy\Exceptions\Http\Server;
 
-use Throwable;
 use Convoy\Models\Server;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Throwable;
 
 class ServerStatusConflictException extends ConflictHttpException
 {
@@ -17,7 +17,7 @@ class ServerStatusConflictException extends ConflictHttpException
         $message = 'This server is currently in an unsupported status, please try again later.';
         if ($server->isSuspended()) {
             $message = 'This server is currently suspended and the functionality requested is unavailable.';
-        } elseif (!$server->isInstalled()) {
+        } elseif (! $server->isInstalled()) {
             $message = 'This server has not yet completed its installation process, please try again later.';
         }
 

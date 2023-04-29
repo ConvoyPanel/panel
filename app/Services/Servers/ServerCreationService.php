@@ -57,7 +57,7 @@ class ServerCreationService
             'template' => $template,
             'account_password' => Arr::get($data, 'account_password'),
             'should_create_server' => $shouldCreateServer,
-            'start_on_completion' => Arr::get($data, 'start_on_completion')
+            'start_on_completion' => Arr::get($data, 'start_on_completion'),
         ]);
 
         if ($addressIds = Arr::get($data, 'limits.address_ids')) {
@@ -76,7 +76,7 @@ class ServerCreationService
     {
         $uuid = Str::uuid()->toString();
 
-        if (!$this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
+        if (! $this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
             return $this->generateUniqueUuidCombo();
         }
 

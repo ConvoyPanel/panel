@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'errors' =>
-    [
+    'errors' => [
         'invalid_type' => 'Expected {{expected}}, received {{received}}',
         'invalid_type_received_undefined' => 'Required',
         'invalid_literal' => 'Invalid literal value, expected {{expected}}',
@@ -17,8 +16,7 @@ return [
         'invalid_intersection_types' => 'Intersection results could not be merged',
         'not_multiple_of' => 'Number must be a multiple of {{multipleOf}}',
         'not_finite' => 'Number must be finite',
-        'invalid_string' =>
-        [
+        'invalid_string' => [
             'email' => 'Invalid {{validation}}',
             'url' => 'Invalid {{validation}}',
             'uuid' => 'Invalid {{validation}}',
@@ -32,75 +30,62 @@ return [
             'password' => 'Must contain 8 characters, one uppercase, one lowercase, one number and one special case character',
             'ip_address' => 'Invalid IP Address',
         ],
-        'too_small' =>
-        [
-            'array' =>
-            [
+        'too_small' => [
+            'array' => [
                 'exact' => 'Array must contain exactly {{minimum}} element(s)',
                 'inclusive' => 'Array must contain at least {{minimum}} element(s)',
                 'not_inclusive' => 'Array must contain more than {{minimum}} element(s)',
             ],
-            'string' =>
-            [
+            'string' => [
                 'exact' => 'String must contain exactly {{minimum}} character(s)',
                 'inclusive' => 'String must contain at least {{minimum}} character(s)',
                 'not_inclusive' => 'String must contain over {{minimum}} character(s)',
             ],
-            'number' =>
-            [
+            'number' => [
                 'exact' => 'Number must be exactly {{minimum}}',
                 'inclusive' => 'Number must be greater than or equal to {{minimum}}',
                 'not_inclusive' => 'Number must be greater than {{minimum}}',
             ],
-            'set' =>
-            [
+            'set' => [
                 'exact' => 'Invalid input',
                 'inclusive' => 'Invalid input',
                 'not_inclusive' => 'Invalid input',
             ],
-            'date' =>
-            [
+            'date' => [
                 'exact' => 'Date must be exactly {{- minimum, datetime}}',
                 'inclusive' => 'Date must be greater than or equal to {{- minimum, datetime}}',
                 'not_inclusive' => 'Date must be greater than {{- minimum, datetime}}',
             ],
         ],
-        'too_big' =>
-        [
-            'array' =>
-            [
+        'too_big' => [
+            'array' => [
                 'exact' => 'Array must contain exactly {{maximum}} element(s)',
                 'inclusive' => 'Array must contain at most {{maximum}} element(s)',
                 'not_inclusive' => 'Array must contain less than {{maximum}} element(s)',
             ],
-            'string' =>
-            [
+            'string' => [
                 'exact' => 'String must contain exactly {{maximum}} character(s)',
                 'inclusive' => 'String must contain at most {{maximum}} character(s)',
                 'not_inclusive' => 'String must contain under {{maximum}} character(s)',
             ],
-            'number' =>
-            [
+            'number' => [
                 'exact' => 'Number must be exactly {{maximum}}',
                 'inclusive' => 'Number must be less than or equal to {{maximum}}',
                 'not_inclusive' => 'Number must be less than {{maximum}}',
             ],
-            'set' =>
-            [
+            'set' => [
                 'exact' => 'Invalid input',
                 'inclusive' => 'Invalid input',
                 'not_inclusive' => 'Invalid input',
             ],
-            'date' =>
-            [
+            'date' => [
                 'exact' => 'Date must be exactly {{- maximum, datetime}}',
                 'inclusive' => 'Date must be smaller than or equal to {{- maximum, datetime}}',
                 'not_inclusive' => 'Date must be smaller than {{- maximum, datetime}}',
             ],
         ],
     ],
-    'validations' =>
-    [
+    'validations' => [
         'email' => 'email',
         'url' => 'url',
         'uuid' => 'uuid',
@@ -108,8 +93,7 @@ return [
         'regex' => 'regex',
         'datetime' => 'datetime',
     ],
-    'types' =>
-    [
+    'types' => [
         'function' => 'function',
         'number' => 'number',
         'string' => 'string',

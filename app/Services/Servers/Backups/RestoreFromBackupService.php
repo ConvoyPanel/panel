@@ -7,7 +7,6 @@ use Convoy\Enums\Server\Status;
 use Convoy\Jobs\Server\MonitorBackupRestorationJob;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
-use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Illuminate\Database\ConnectionInterface;
@@ -21,7 +20,7 @@ class RestoreFromBackupService
 
     public function handle(Server $server, Backup $backup)
     {
-        if (!is_null($server->status)) {
+        if (! is_null($server->status)) {
             throw new BadRequestHttpException('This server is not currently in a state that allows for a backup to be restored.');
         }
 
@@ -30,7 +29,7 @@ class RestoreFromBackupService
             throw new BadRequestHttpException('The server needs to be stopped before a backup can be restored.');
         }
 
-        if (!$backup->successful && is_null($backup->completed_at)) {
+        if (! $backup->successful && is_null($backup->completed_at)) {
             throw new BadRequestHttpException('This backup cannot be restored at this time: not completed or failed.');
         }
 

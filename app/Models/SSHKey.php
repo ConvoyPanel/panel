@@ -13,7 +13,7 @@ class SSHKey extends Model
 
     protected $fillabe = [
         'name',
-        'public_key'
+        'public_key',
     ];
 
     public static array $ValidationRules = [

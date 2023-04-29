@@ -23,7 +23,6 @@ abstract class ProxmoxRepository
      */
     public function __construct(private Application $app)
     {
-
     }
 
     /**

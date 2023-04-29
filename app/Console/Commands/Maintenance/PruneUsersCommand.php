@@ -4,7 +4,6 @@ namespace Convoy\Console\Commands\Maintenance;
 
 use Convoy\Jobs\Node\PruneUsersJob;
 use Convoy\Models\Node;
-use Convoy\Services\Nodes\UserPruneService;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
 
@@ -26,10 +25,8 @@ class PruneUsersCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Queuing user prune request.');
 

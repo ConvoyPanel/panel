@@ -15,7 +15,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->put('/api2/json/nodes/{node}/qemu/{server}/firewall/options', $payload)
             ->json();
@@ -30,7 +30,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->get('/api2/json/nodes/{node}/qemu/{server}/firewall/ipset')
             ->json();
@@ -45,7 +45,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/firewall/ipset', [
                 'name' => $name,
@@ -117,7 +117,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid,
                 'ipset' => $ipset,
-                'address' => $address
+                'address' => $address,
             ])
             ->delete('/api2/json/nodes/{node}/qemu/{server}/firewall/ipset/{ipset}/{address}')
             ->json();

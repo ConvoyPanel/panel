@@ -14,5 +14,6 @@ class ServerDeploymentData extends Data
         public ?string $account_password,
         public bool $should_create_server,
         public bool $start_on_completion,
-    ){}
+    ) {
+    }
 }

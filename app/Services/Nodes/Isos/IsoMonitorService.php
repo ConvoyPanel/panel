@@ -13,7 +13,6 @@ class IsoMonitorService
 {
     public function __construct(private ProxmoxActivityRepository $repository)
     {
-
     }
 
     public function checkDownloadProgress(ISO $iso, string $upid, ?Closure $callback = null)
@@ -28,8 +27,7 @@ class IsoMonitorService
             return;
         }
 
-        if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok')
-        {
+        if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok') {
             $iso->update([
                 'is_successful' => true,
                 'completed_at' => Carbon::now(),

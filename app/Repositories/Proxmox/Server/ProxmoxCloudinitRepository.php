@@ -5,7 +5,6 @@ namespace Convoy\Repositories\Proxmox\Server;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
 
 class ProxmoxCloudinitRepository extends ProxmoxRepository
@@ -22,7 +21,7 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->get('/api2/json/nodes/{node}/qemu/{server}/config')
             ->json();
@@ -37,7 +36,7 @@ class ProxmoxCloudinitRepository extends ProxmoxRepository
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'node' => $this->node->cluster,
-                'server' => $this->server->vmid
+                'server' => $this->server->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/config', $params)
             ->json();

@@ -10,10 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ServerRepository extends EloquentRepository implements ServerRepositoryInterface
 {
-    /**
-     * @return string
-     */
-    public function model()
+    public function model(): string
     {
         return Server::class;
     }

@@ -2,14 +2,9 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Enums\Server\State;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
-use Convoy\Jobs\Server\DeleteServerJob;
-use Convoy\Jobs\Server\MonitorStateJob;
 use Convoy\Jobs\Server\PurgeBackupsJob;
-use Convoy\Jobs\Server\SendPowerCommandJob;
 use Convoy\Models\Server;
 use Illuminate\Support\Facades\Bus;
 
@@ -17,7 +12,6 @@ class ServerDeletionService
 {
     public function __construct(private ServerBuildDispatchService $buildDispatchService)
     {
-
     }
 
     public function handle(Server $server, bool $noPurge = false)
@@ -26,15 +20,15 @@ class ServerDeletionService
 
         $server->update(['status' => Status::DELETING->value]);
 
-        if (!$noPurge) {
+        if (! $noPurge) {
             Bus::chain([
                 new PurgeBackupsJob($server->id),
                 ...$this->buildDispatchService->getChainedDeleteJobs($server),
                 function () use ($server) {
                     Server::findOrFail($server->id)->delete();
-                }
+                },
             ])
-                ->catch(fn() => $server->update(['status' => Status::DELETION_FAILED->value]))
+                ->catch(fn () => $server->update(['status' => Status::DELETION_FAILED->value]))
                 ->dispatch();
 
             return;
@@ -46,12 +40,12 @@ class ServerDeletionService
     public function validateStatus(Server $server, bool $verifyStatusOnly = false)
     {
         if (
-            !is_null($server->status) && $server->status !== Status::DELETING->value
+            ! is_null($server->status) && $server->status !== Status::DELETING->value
         ) {
             throw new ServerStatusConflictException($server);
         }
 
-        if (!$verifyStatusOnly) {
+        if (! $verifyStatusOnly) {
             if ($server->backups()->whereNull('completed_at')->exists()) {
                 throw new ServerStatusConflictException($server);
             }

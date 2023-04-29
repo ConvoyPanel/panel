@@ -5,7 +5,6 @@ namespace Convoy\Jobs\Server;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerAuthService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -38,10 +37,8 @@ class UpdatePasswordJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(ServerAuthService $service)
+    public function handle(ServerAuthService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

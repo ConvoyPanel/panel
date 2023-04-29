@@ -3,9 +3,8 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Controllers\Controller;
-use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
+use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
 use Convoy\Models\Filters\FiltersUser;
 use Convoy\Models\SSOToken;
 use Convoy\Models\User;
@@ -55,7 +54,7 @@ class UserController extends ApplicationApiController
             'name' => $request->name,
             'email' => $request->email,
             'root_admin' => $request->root_admin,
-            ...(is_null($request->password) ? [] : ['password' => Hash::make($request->password)])
+            ...(is_null($request->password) ? [] : ['password' => Hash::make($request->password)]),
         ]);
 
         $user->loadCount(['servers']);

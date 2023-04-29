@@ -9,10 +9,8 @@ class ServerDetailTransformer extends TransformerAbstract
 {
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
-    public function transform(ServerProxmoxData $server)
+    public function transform(ServerProxmoxData $server): array
     {
         $data = $server->toArray();
 

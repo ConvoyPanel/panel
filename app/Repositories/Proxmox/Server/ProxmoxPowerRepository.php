@@ -3,10 +3,8 @@
 namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Enums\Server\PowerAction;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Exception\GuzzleException;
 use Webmozart\Assert\Assert;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
@@ -47,7 +45,7 @@ class ProxmoxPowerRepository extends ProxmoxRepository
                 'action' => $parsedAction,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/status/{action}', [
-                ...($parsedAction !== 'suspend' ? ['timeout' => 30] : ['skiplock' => false])
+                ...($parsedAction !== 'suspend' ? ['timeout' => 30] : ['skiplock' => false]),
             ])
             ->json();
 

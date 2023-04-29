@@ -10,5 +10,6 @@ class FileMetaData extends Data
         public string $file_name,
         public string $mime_type,
         public int $size,
-    ) {}
+    ) {
+    }
 }

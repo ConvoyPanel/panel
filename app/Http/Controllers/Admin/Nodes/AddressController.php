@@ -13,6 +13,7 @@ use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -64,11 +65,13 @@ class AddressController extends Controller
 
         try {
             if ($oldServer?->id !== $newServer?->id) {
-                if ($oldServer)
+                if ($oldServer) {
                     $this->networkService->syncSettings($oldServer);
+                }
 
-                if ($newServer)
+                if ($newServer) {
                     $this->networkService->syncSettings($newServer);
+                }
             }
         } catch (Exception $e) {
             // do nothing
@@ -79,7 +82,7 @@ class AddressController extends Controller
         return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
-    public function destroy(Node $node, IPAddress $address)
+    public function destroy(Node $node, IPAddress $address): Response
     {
         $address->load('server');
 

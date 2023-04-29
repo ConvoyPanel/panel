@@ -8,25 +8,23 @@ use League\Fractal\TransformerAbstract;
 class TemplateGroupTransformer extends TransformerAbstract
 {
     protected array $defaultIncludes = [
-        'templates'
+        'templates',
     ];
 
     protected array $availableIncludes = [
-        'templates'
+        'templates',
     ];
-    
+
     /**
      * A Fractal transformer.
-     *
-     * @return array
      */
-    public function transform(TemplateGroup $group)
+    public function transform(TemplateGroup $group): array
     {
         return [
             'uuid' => $group->uuid,
             'name' => $group->name,
             'hidden' => $group->hidden,
-            'order_column' => $group->order_column
+            'order_column' => $group->order_column,
         ];
     }
 

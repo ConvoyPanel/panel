@@ -3,16 +3,10 @@
 namespace Convoy\Services\Servers;
 
 use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Data\Server\Eloquent\ServerAddressesData;
 use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Enums\Server\BiosType;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Objects\Server\Configuration\AddressConfigObject;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Services\ProxmoxService;
 use Illuminate\Support\Arr;
 
 /**
@@ -38,7 +32,6 @@ class CloudinitService
      */
 
     /**
-     * @param  string  $hostname
      * @param  array  $params
      * @return mixed
      */
@@ -61,8 +54,8 @@ class CloudinitService
     public function updateNameservers(Server $server, array $nameservers)
     {
         $payload = [
-           ...(count($nameservers) > 0 ? ['nameserver' => implode(' ', $nameservers)] : []),
-           ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : [])
+            ...(count($nameservers) > 0 ? ['nameserver' => implode(' ', $nameservers)] : []),
+            ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : []),
         ];
 
         return $this->configRepository->setServer($server)->update($payload);
@@ -118,13 +111,13 @@ class CloudinitService
         if ($addresses?->ipv4) {
             $ipv4 = $addresses->ipv4;
             $payload[] = "ip={$ipv4->address}/{$ipv4->cidr}";
-            $payload[] = 'gw=' . $ipv4->gateway;
+            $payload[] = 'gw='.$ipv4->gateway;
         }
 
         if ($addresses?->ipv6) {
             $ipv6 = $addresses->ipv6;
             $payload[] = "ip6={$ipv6->address}/{$ipv6->cidr}";
-            $payload[] = 'gw6=' . $ipv6->gateway;
+            $payload[] = 'gw6='.$ipv6->gateway;
         }
 
         return $this->configRepository->setServer($server)->update([

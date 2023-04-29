@@ -3,8 +3,8 @@
 namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Performave\EloquentSortable\Sortable;
-use Performave\EloquentSortable\SortableTrait;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Ramsey\Uuid\Uuid;
 
 class Template extends Model implements Sortable

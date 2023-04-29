@@ -11,7 +11,7 @@ class RepositoryServiceProvider extends ServiceProvider
     /**
      * Register all of the repository bindings.
      */
-    public function register()
+    public function register(): void
     {
         $this->app->bind(ActivityRepositoryInterface::class, ActivityRepository::class);
     }

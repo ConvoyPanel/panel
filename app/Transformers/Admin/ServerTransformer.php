@@ -11,7 +11,7 @@ class ServerTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
         'user',
-        'node'
+        'node',
     ];
 
     public function transform(Server $server)

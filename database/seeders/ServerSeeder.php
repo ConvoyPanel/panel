@@ -13,16 +13,14 @@ class ServerSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run(ServerCreationService $service)
+    public function run(ServerCreationService $service): void
     {
         $location = Location::factory()->create();
         $user = User::factory()->create();
         $node = Node::factory()->for($location)->create();
 
-        Server::factory()->count(10)->create(function() use ($user, $node, $service) {
+        Server::factory()->count(10)->create(function () use ($user, $node, $service) {
             $uuid = $service->generateUniqueUuidCombo();
 
             return [

@@ -15,7 +15,8 @@ class MonitorBackupJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil() {
+    public function retryUntil()
+    {
         return now()->addDay();
     }
 
@@ -35,10 +36,8 @@ class MonitorBackupJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(BackupMonitorService $service)
+    public function handle(BackupMonitorService $service): void
     {
         $backup = Backup::findOrFail($this->backupId);
 

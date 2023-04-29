@@ -41,7 +41,6 @@ class BackupCreationService
             }
         }
 
-
         return $this->connection->transaction(function () use ($server, $name, $mode, $compressionType, $isLocked) {
             $backup = $this->eloquentRepository->create([
                 'uuid' => Uuid::uuid4()->toString(),

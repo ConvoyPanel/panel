@@ -34,20 +34,16 @@ class Location extends Model
 
     /**
      * Gets the nodes in a specified location.
-     *
-     * @return HasMany
      */
-    public function nodes()
+    public function nodes(): HasMany
     {
         return $this->hasMany(Node::class);
     }
 
     /**
      * Gets the servers within a given location.
-     *
-     * @return HasManyThrough
      */
-    public function servers()
+    public function servers(): HasManyThrough
     {
         return $this->hasManyThrough(Server::class, Node::class);
     }

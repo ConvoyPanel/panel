@@ -65,8 +65,6 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Return an instance of the eloquent model bound to this
      * repository instance.
-     *
-     * @return Model
      */
     public function getModel(): Model
     {

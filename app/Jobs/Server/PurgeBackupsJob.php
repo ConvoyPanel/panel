@@ -7,13 +7,12 @@ use Convoy\Models\Server;
 use Convoy\Services\Servers\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 
 class PurgeBackupsJob implements ShouldQueue
 {
@@ -40,10 +39,8 @@ class PurgeBackupsJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(PurgeBackupsService $service)
+    public function handle(PurgeBackupsService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

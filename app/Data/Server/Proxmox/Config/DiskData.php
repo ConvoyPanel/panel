@@ -18,5 +18,6 @@ class DiskData extends Data
         public ?string $media_name,
 
         public int $size,
-    ){}
+    ) {
+    }
 }

@@ -31,7 +31,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         $payload = [
             'enable' => $data->enabled,
-            'userid' => ($data->id ?? 'convoy-' . Str::random(53)) . '@' . $data->realm_type->value,
+            'userid' => ($data->id ?? 'convoy-'.Str::random(53)).'@'.$data->realm_type->value,
             'password' => $data->password ?? Str::random(64),
             'expire' => $data->expires_at?->timestamp ?? false,
         ];
@@ -55,7 +55,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         $response = $this->getHttpClient()
             ->withUrlParameters([
-                'user' => $id . '@' . $realmType->value,
+                'user' => $id.'@'.$realmType->value,
             ])
             ->delete('/api2/json/access/users/{user}')
             ->json();

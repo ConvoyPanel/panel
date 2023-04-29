@@ -5,7 +5,6 @@ namespace Convoy\Jobs\Node;
 use Convoy\Models\Node;
 use Convoy\Services\Nodes\UserPruneService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -30,10 +29,8 @@ class PruneUsersJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(UserPruneService $service)
+    public function handle(UserPruneService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
 

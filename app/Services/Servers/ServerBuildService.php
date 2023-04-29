@@ -2,20 +2,11 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Enums\Server\State;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\ProxmoxService;
-use Exception;
-use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 
 /**
  * Class SnapshotService

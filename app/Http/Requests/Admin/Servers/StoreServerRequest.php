@@ -20,7 +20,7 @@ class StoreServerRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = Server::getRules();
 
@@ -39,7 +39,7 @@ class StoreServerRequest extends FormRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(),],
+            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters()],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',
@@ -52,7 +52,7 @@ class StoreServerRequest extends FormRequest
         $validator->after(function ($validator) {
             $addressIds = $this->input('limits.address_ids');
 
-            if (!is_null($addressIds)) {
+            if (! is_null($addressIds)) {
                 $addresses = IPAddress::whereIn('id', $addressIds)->get();
 
                 foreach ($addresses as $address) {

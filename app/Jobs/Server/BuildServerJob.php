@@ -7,7 +7,6 @@ use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -40,10 +39,8 @@ class BuildServerJob implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle(ServerBuildService $service)
+    public function handle(ServerBuildService $service): void
     {
         $server = Server::findOrFail($this->serverId);
         $template = Template::findOrFail($this->templateId);

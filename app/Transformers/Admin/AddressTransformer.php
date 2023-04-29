@@ -9,7 +9,7 @@ use League\Fractal\TransformerAbstract;
 class AddressTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
-        'server'
+        'server',
     ];
 
     public function transform(IPAddress $address)
@@ -19,6 +19,6 @@ class AddressTransformer extends TransformerAbstract
 
     public function includeServer(IPAddress $address)
     {
-        return !is_null($address->server) ? $this->item($address->server, new ServerTransformer) : null;
+        return ! is_null($address->server) ? $this->item($address->server, new ServerTransformer) : null;
     }
 }
