@@ -14,7 +14,7 @@ return [
         'title' => 'Creación de Servidor',
     ],
     'server_info' => [
-        'title' => 'Información del Servidor'
+        'title' => 'Información del Servidor',
     ],
     'suspension' => [
         'title' => 'Suspensión',
@@ -25,6 +25,6 @@ return [
     'delete_server' => [
         'title' => 'Eliminar Servidor',
         'description' => 'El servidor se eliminará de Convoy. Las Copias de Seguridad y otros datos asociados serán destruidos. Sin embargo, puede marcar la casilla de abajo para mantener la máquina virtual y los datos en el nodo Proxmox.',
-        'dont_purge' => 'No purgar VM y archivos relacionados'
-    ]
+        'dont_purge' => 'No purgar VM y archivos relacionados',
+    ],
 ];
