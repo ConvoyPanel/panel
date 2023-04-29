@@ -14,7 +14,7 @@ return [
         'title' => '服务器构建',
     ],
     'server_info' => [
-        'title' => '服务器信息'
+        'title' => '服务器信息',
     ],
     'suspension' => [
         'title' => '暂停服务器',
@@ -25,6 +25,6 @@ return [
     'delete_server' => [
         'title' => '删除服务器',
         'description' => '此操作将服务器从 Convoy 中删除。备份和其他相关数据将被销毁。通过勾选下面的复选框，你仍可以将虚拟机和数据保存在 Proxmox 节点上。',
-        'dont_purge' => '不要彻底删除虚拟机及相关文件'
-    ]
+        'dont_purge' => '不要彻底删除虚拟机及相关文件',
+    ],
 ];
