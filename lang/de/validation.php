@@ -45,12 +45,16 @@ return [
     'distinct' => 'The :attribute field has a duplicate value.',
     'doesnt_start_with' => 'The :attribute may not start with one of the following: :values.',
     'email' => 'The :attribute must be a valid email address.',
-    'hostname' => 'The :attribute must be a valid hostname.',
     'ends_with' => 'The :attribute must end with one of the following: :values.',
+    'english_keyboard_characters' => 'The :attribute must contain characters from the English keyboard.',
     'enum' => 'The selected :attribute is invalid.',
     'exists' => 'The selected :attribute is invalid.',
     'file' => 'The :attribute must be a file.',
     'filled' => 'The :attribute field must have a value.',
+    'fqdn' => [
+        'https_and_ip' => 'The :attribute must not be an IP address when HTTPS is enabled.',
+        'unresolvable' => 'The :attribute could not be resolved to a valid IP address.',
+    ],
     'gt' => [
         'array' => 'The :attribute must have more than :value items.',
         'file' => 'The :attribute must be greater than :value kilobytes.',
@@ -63,6 +67,7 @@ return [
         'numeric' => 'The :attribute must be greater than or equal to :value.',
         'string' => 'The :attribute must be greater than or equal to :value characters.',
     ],
+    'hostname' => 'The :attribute must be a valid hostname.',
     'image' => 'The :attribute must be an image.',
     'in' => 'The selected :attribute is invalid.',
     'in_array' => 'The :attribute field does not exist in :other.',
@@ -103,6 +108,7 @@ return [
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',
     'password' => [
+        'default' => 'The :attribute must contain 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.',
         'letters' => 'The :attribute must contain at least one letter.',
         'mixed' => 'The :attribute must contain at least one uppercase and one lowercase letter.',
         'numbers' => 'The :attribute must contain at least one number.',
