@@ -12,8 +12,8 @@ return [
         'modes' => [
             'snapshot' => 'Instantánea',
             'suspend' => 'Suspender',
-            'kill' => 'Matar'
-        ]
+            'kill' => 'Matar',
+        ],
     ],
     'delete_modal' => [
         'title' => 'Eliminar :name',
@@ -26,5 +26,5 @@ return [
     'notices' => [
         'backup_deleted' => 'Eliminado :name',
         'backup_restored' => 'Comenzó la restauración del servidor de :name',
-    ]
+    ],
 ];
