@@ -2,37 +2,37 @@
 
 return [
     'power_actions' => [
-        'start' => '开机',
-        'restart' => '重启',
-        'kill' => '终结',
-        'shutdown' => '关机',
+        'start' => 'Start',
+        'restart' => 'Restart',
+        'kill' => 'Kill',
+        'shutdown' => 'Shutdown',
     ],
     'notices' => [
-        'power_action_sent_success' => '已成功发送电源操作。可能需要一段时间进行处理。',
-        'power_action_sent_fail' => '发送电源操作失败。',
+        'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
+        'power_action_sent_fail' => 'Failed to send power action.',
     ],
 
-    'state' => '状态',
+    'state' => 'State',
     'states' => [
-        'stopped' => '已关机',
-        'running' => '运行中',
-        'stopping' => '关机中',
-        'starting' => '开机中',
-        'shutting_down' => '正在关机',
+        'stopped' => 'Stopped',
+        'running' => 'Running',
+        'stopping' => 'Stopping',
+        'starting' => 'Starting',
+        'shutting_down' => 'Shutting Down',
     ],
-    'uptime' => '在线时长',
-    'poll_status_error' => '获取服务器状态失败。将在 5 秒后再次尝试......',
+    'uptime' => 'Uptime',
+    'poll_status_error' => 'Failed to poll server status. Retrying in 5 seconds...',
 
     'terminal' => [
-        'title' => '终端',
-        'description' => '从网页远程管理服务器',
-        'novnc_description' => '兼容性佳，但性能不好且缺乏功能',
-        'xtermjs_description' => '性能极佳，但无法保证能在每个操作系统上运作。',
+        'title' => 'Terminal',
+        'description' => 'Remotely manage your server from the web.',
+        'novnc_description' => 'Best for compatibility but lacks features and performance.',
+        'xtermjs_description' => 'Best for performance but doesn\'t work for every operating system.',
     ],
 
     'server_config' => [
-        'title' => '配置该服务器',
-        'description' => '你拥有管理员权限，你可以访问下边的服务器构建配置并作出编辑。',
-        'configure_server' => '配置服务器',
+        'title' => 'Configure This Server',
+        'description' => 'You are an administrator! You can click below to visit this server\'s build configuration and make edits.',
+        'configure_server' => 'Configure Server',
     ],
 ];
