@@ -14,7 +14,7 @@ return [
         'title' => 'Server Build',
     ],
     'server_info' => [
-        'title' => 'Server Information'
+        'title' => 'Server Information',
     ],
     'suspension' => [
         'title' => 'Suspension',
@@ -25,6 +25,6 @@ return [
     'delete_server' => [
         'title' => 'Delete Server',
         'description' => 'The server will be deleted from Convoy. Backups and other associated data will be destroyed. However, you can tick the checkbox below to keep the virtual machine and data on the Proxmox node.',
-        'dont_purge' => 'Do not purge VM and related files'
-    ]
+        'dont_purge' => 'Do not purge VM and related files',
+    ],
 ];
