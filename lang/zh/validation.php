@@ -45,12 +45,16 @@ return [
     'distinct' => ':attribute字段具有重复值。',
     'doesnt_start_with' => ':attribute不能以以下之一开始: :values。',
     'email' => ':attribute必须是一个有效的电子邮件地址。',
-    'hostname' => ':attribute必须是一个有效的主机名。',
     'ends_with' => ':attribute必须以以下之一结尾: :values。',
+    'english_keyboard_characters' => 'The :attribute must contain characters from the English keyboard.',
     'enum' => '所选:attribute无效。',
     'exists' => '所选:attribute无效。',
     'file' => ':attribute必须是一个文件。',
     'filled' => ':attribute字段必须有一个值。',
+    'fqdn' => [
+        'https_and_ip' => 'The :attribute must not be an IP address when HTTPS is enabled.',
+        'unresolvable' => 'The :attribute could not be resolved to a valid IP address.',
+    ],
     'gt' => [
         'array' => ':attribute必须要超过:value项。',
         'file' => ':attribute必须大于:valueKib。',
@@ -63,6 +67,7 @@ return [
         'numeric' => ':attribute必须大于或等于:value。',
         'string' => ':attribute必须大于或等于:value个字符。',
     ],
+    'hostname' => ':attribute必须是一个有效的主机名。',
     'image' => ':attribute必须是一个图像。',
     'in' => '所选:attribute无效。',
     'in_array' => ':attribute字段不存在于:other中。',
@@ -103,6 +108,7 @@ return [
     'not_regex' => ':attribute格式无效。',
     'numeric' => ':attribute必须是一个数字。',
     'password' => [
+        'default' => 'The :attribute must contain 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.',
         'letters' => ':attribute必须至少包含一个字母。',
         'mixed' => ':attribute必须至少包含一个大写字母和一个小写字母。',
         'numbers' => ':attribute必须至少包含一个数字。',
