@@ -1,30 +1,30 @@
 <?php
 
 return [
-    'new_backup' => '新建备份',
-    'empty_state' => '目前还没有任何可用备份。',
-    'counter_tooltip' => '你已创建了 :count 个备份，超过了 :max 个的限制。',
+    'new_backup' => 'New Backup',
+    'empty_state' => 'There are no backups',
+    'counter_tooltip' => 'You\'ve made :count out of :max backups',
     'create_modal' => [
-        'title' => '创建备份',
-        'description' => '创建备份将拷贝你的服务器文件。这可能需要一段时间，具体取决于服务器体量。',
-        'compression_type' => '压缩类型',
-        'mode' => '备份模式',
+        'title' => 'Create a Backup',
+        'description' => 'Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.',
+        'compression_type' => 'Compression Type',
+        'mode' => 'Mode',
         'modes' => [
-            'snapshot' => '快照',
-            'suspend' => '暂停',
-            'kill' => '终结',
+            'snapshot' => 'Snapshot',
+            'suspend' => 'Suspend',
+            'kill' => 'Kill',
         ],
     ],
     'delete_modal' => [
-        'title' => '删除备份 :name',
-        'description' => '你确定要删除该备份吗？',
+        'title' => 'Delete :name',
+        'description' => 'Are you sure you want to delete this backup?',
     ],
     'restore_modal' => [
-        'title' => '从备份 :name 中复原',
-        'description' => '你确定要以该备份为样板复原吗？',
+        'title' => 'Restore From :name',
+        'description' => 'Are you sure you want to restore from this backup?',
     ],
     'notices' => [
-        'backup_deleted' => '已成功删除备份 :name',
-        'backup_restored' => '正在使用备份 :name 来复原服务器',
+        'backup_deleted' => 'Deleted :name',
+        'backup_restored' => 'Began restoring server from :name',
     ],
 ];
