@@ -2,10 +2,10 @@
 
 return [
     'power_actions' => [
-      'start' => 'Iniciar',
-      'restart' => 'Reiniciar',
-      'kill' => 'Terminar',
-      'shutdown' => 'Apagar',
+        'start' => 'Iniciar',
+        'restart' => 'Reiniciar',
+        'kill' => 'Terminar',
+        'shutdown' => 'Apagar',
     ],
     'notices' => [
         'power_action_sent_success' => 'Acción enviada con éxito. Puede tardar un momento en procesarse.',
@@ -33,6 +33,6 @@ return [
     'server_config' => [
         'title' => 'Configurar este Servidor',
         'description' => '¡Usted es un administrador! Puede hacer clic a continuación para visitar la configuración de construcción de este servidor y realizar modificaciones.',
-        'configure_server' => 'Configurar Servidor'
+        'configure_server' => 'Configurar Servidor',
     ],
 ];
