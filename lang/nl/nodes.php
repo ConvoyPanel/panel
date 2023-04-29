@@ -36,5 +36,5 @@ return [
         'title' => 'Delete Node',
         'description' => 'The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.',
         'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
-    ]
+    ],
 ];
