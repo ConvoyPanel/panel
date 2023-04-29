@@ -56,6 +56,11 @@ class RouteServiceProvider extends ServiceProvider
                     ->prefix('/api/application')
                     ->as('application.')
                     ->group(base_path('routes/api-application.php'));
+
+                Route::middleware(['auth:sanctum'])
+                    ->prefix('/api/coterm')
+                    ->as('coterm.')
+                    ->group(base_path('routes/api-coterm.php'));
             });
         });
     }
