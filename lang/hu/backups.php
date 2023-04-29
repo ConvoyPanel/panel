@@ -12,8 +12,8 @@ return [
         'modes' => [
             'snapshot' => 'Snapshot',
             'suspend' => 'Suspend',
-            'kill' => 'Kill'
-        ]
+            'kill' => 'Kill',
+        ],
     ],
     'delete_modal' => [
         'title' => 'Delete :name',
@@ -26,5 +26,5 @@ return [
     'notices' => [
         'backup_deleted' => 'Deleted :name',
         'backup_restored' => 'Began restoring server from :name',
-    ]
+    ],
 ];
