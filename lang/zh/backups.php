@@ -12,8 +12,8 @@ return [
         'modes' => [
             'snapshot' => '快照',
             'suspend' => '暂停',
-            'kill' => '终结'
-        ]
+            'kill' => '终结',
+        ],
     ],
     'delete_modal' => [
         'title' => '删除备份 :name',
@@ -26,5 +26,5 @@ return [
     'notices' => [
         'backup_deleted' => '已成功删除备份 :name',
         'backup_restored' => '正在使用备份 :name 来复原服务器',
-    ]
+    ],
 ];
