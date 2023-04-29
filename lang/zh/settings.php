@@ -2,7 +2,7 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => '目前没有 IP 地址与该服务器关联。'
+        'empty_state' => '目前没有 IP 地址与该服务器关联。',
     ],
     'display_info' => [
         'title' => '服务器名称',
@@ -13,7 +13,7 @@ return [
         'modal' => [
             'title' => '确认重装',
             'description' => '你确定要重装服务器吗？所有未备份数据将会丢失。',
-        ]
+        ],
     ],
     'isos' => [
         'title' => '可使用的 ISO 镜像',
@@ -37,5 +37,5 @@ return [
     'hardware' => [
         'bandwidth_used' => '已使用带宽',
         'bandwidth_alloted' => '所分配带宽',
-    ]
+    ],
 ];
