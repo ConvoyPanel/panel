@@ -2,10 +2,10 @@
 
 return [
     'power_actions' => [
-      'start' => '开机',
-      'restart' => '重启',
-      'kill' => '终结',
-      'shutdown' => '关机',
+        'start' => '开机',
+        'restart' => '重启',
+        'kill' => '终结',
+        'shutdown' => '关机',
     ],
     'notices' => [
         'power_action_sent_success' => '已成功发送电源操作。可能需要一段时间进行处理。',
@@ -33,6 +33,6 @@ return [
     'server_config' => [
         'title' => '配置该服务器',
         'description' => '你拥有管理员权限，你可以访问下边的服务器构建配置并作出编辑。',
-        'configure_server' => '配置服务器'
+        'configure_server' => '配置服务器',
     ],
 ];
