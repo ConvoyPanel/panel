@@ -2,7 +2,7 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'There are no addresses associated with this server.'
+        'empty_state' => 'There are no addresses associated with this server.',
     ],
     'display_info' => [
         'title' => 'Server Name',
@@ -13,7 +13,7 @@ return [
         'modal' => [
             'title' => 'Confirm Reinstallation',
             'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
-        ]
+        ],
     ],
     'isos' => [
         'title' => 'Mountable ISOs',
@@ -37,5 +37,5 @@ return [
     'hardware' => [
         'bandwidth_used' => 'Bandwidth Used',
         'bandwidth_alloted' => 'Bandwidth Alloted',
-    ]
+    ],
 ];
