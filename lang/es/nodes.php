@@ -36,5 +36,5 @@ return [
         'title' => 'Eliminar Nodo',
         'description' => 'El nodo se eliminará permanentemente de Convoy. Esta acción es irreversible y no se puede deshacer.',
         'has_servers_error' => 'No se puede eliminar un nodo que tenga servidores asignados.',
-    ]
+    ],
 ];
