@@ -25,15 +25,14 @@ SOFTWARE.
 
 namespace Convoy\Rules;
 
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class Fqdn implements Rule, DataAwareRule
+class Fqdn implements ValidationRule, DataAwareRule
 {
     protected array $data = [];
-
-    protected string $message = '';
 
     protected ?string $schemeField = null;
 
@@ -50,7 +49,7 @@ class Fqdn implements Rule, DataAwareRule
      *
      * @param  mixed  $value
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, $value, Closure $fail): void
     {
         if (filter_var($value, FILTER_VALIDATE_IP)) {
             // Check if the scheme is set to HTTPS.
@@ -59,12 +58,8 @@ class Fqdn implements Rule, DataAwareRule
             // custom SSL cert, IPs will not be able to use HTTPS.  This should prevent most
             // home users from making this mistake and wondering why their node is not working.
             if ($this->schemeField && Arr::get($this->data, $this->schemeField) === 'https') {
-                $this->message = 'The :attribute must not be an IP address when HTTPS is enabled.';
-
-                return false;
+                $fail(__('validation.fqdn.https_and_ip'));
             }
-
-            return true;
         }
 
         // Lookup A and AAAA DNS records for the FQDN. Note, this function will also resolve CNAMEs
@@ -76,17 +71,10 @@ class Fqdn implements Rule, DataAwareRule
         // resolution. This will not work for IPv6 which is why we prefer to use `dns_get_record`
         // first.
         if (! empty($records) || filter_var(gethostbyname($value), FILTER_VALIDATE_IP)) {
-            return true;
+            return;
         }
 
-        $this->message = 'The :attribute could not be resolved to a valid IP address.';
-
-        return false;
-    }
-
-    public function message(): string
-    {
-        return $this->message;
+        $fail(__('validation.fqdn.unresolvable'));
     }
 
     /**

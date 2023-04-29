@@ -2,25 +2,20 @@
 
 namespace Convoy\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class Hostname implements Rule
+class Hostname implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
+     * @param mixed $value
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, $value, Closure $fail): void
     {
-        return (bool) filter_var($value, FILTER_VALIDATE_DOMAIN);
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('validation.hostname');
+        if (!(bool)filter_var($value, FILTER_VALIDATE_DOMAIN)) {
+            $fail(__('validation.hostname'));
+        }
     }
 }
