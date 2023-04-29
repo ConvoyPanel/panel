@@ -2,10 +2,10 @@
 
 return [
     'power_actions' => [
-      'start' => 'Start',
-      'restart' => 'Restart',
-      'kill' => 'Kill',
-      'shutdown' => 'Shutdown',
+        'start' => 'Start',
+        'restart' => 'Restart',
+        'kill' => 'Kill',
+        'shutdown' => 'Shutdown',
     ],
     'notices' => [
         'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
@@ -33,6 +33,6 @@ return [
     'server_config' => [
         'title' => 'Configure This Server',
         'description' => 'You are an administrator! You can click below to visit this server\'s build configuration and make edits.',
-        'configure_server' => 'Configure Server'
+        'configure_server' => 'Configure Server',
     ],
 ];
