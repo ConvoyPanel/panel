@@ -17,11 +17,11 @@ class UserPruneService
         $users = $this->repository->setNode($node)->getUsers();
 
         $users = $users->filter(function (UserData $user) {
-            return str_starts_with($user->id, 'convoy-') && $user->expires_at?->isPast();
+            return str_starts_with($user->username, 'convoy-') && $user->expires_at?->isPast();
         });
 
         $users->each(function (UserData $user) {
-            $this->repository->deleteUser($user->id, $user->realm_type);
+            $this->repository->deleteUser($user->username, $user->realm_type);
         });
     }
 }

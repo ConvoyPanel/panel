@@ -3,6 +3,7 @@
 namespace Convoy\Repositories\Proxmox\Node;
 
 use Convoy\Data\Node\Access\CreateUserData;
+use Convoy\Data\Node\Access\UserCredentialsData;
 use Convoy\Data\Node\Access\UserData;
 use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Models\Node;
@@ -25,13 +26,13 @@ class ProxmoxAccessRepository extends ProxmoxRepository
         return UserData::collection($users);
     }
 
-    public function createUser(CreateUserData $data)
+    public function createUser(CreateUserData $data): CreateUserData
     {
         Assert::isInstanceOf($this->node, Node::class);
 
         $payload = [
             'enable' => $data->enabled,
-            'userid' => ($data->id ?? 'convoy-'.Str::random(53)).'@'.$data->realm_type->value,
+            'userid' => ($data->username ?? 'convoy-'.Str::random(53)).'@'.$data->realm_type->value,
             'password' => $data->password ?? Str::random(64),
             'expire' => $data->expires_at?->timestamp ?? false,
         ];
@@ -41,7 +42,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             ->json();
 
         return CreateUserData::from([
-            'id' => explode('@', $payload['userid'])[0],
+            'username' => explode('@', $payload['userid'])[0],
             'realm_type' => $data->realm_type,
             'password' => $payload['password'],
             'enabled' => $payload['enable'],
@@ -79,7 +80,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function getTicket(RealmType $realmType, string $userid, string $password)
+    public function createUserCredentials(RealmType $realmType, string $userid, string $password): UserCredentialsData
     {
         Assert::isInstanceOf($this->node, Node::class);
 
@@ -91,6 +92,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             ])
             ->json();
 
-        return $this->getData($response);
+        return UserCredentialsData::fromRaw($this->getData($response));
     }
 }

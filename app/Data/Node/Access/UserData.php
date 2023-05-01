@@ -12,19 +12,19 @@ use Spatie\LaravelData\Data;
 class UserData extends Data
 {
     public function __construct(
-    public string $id,
-    public ?string $email,
+    public string    $username,
+    public ?string   $email,
     #[WithCast(EnumCast::class)]
     public RealmType $realm_type,
-    public bool $enabled,
-    public ?Carbon $expires_at,
+    public bool      $enabled,
+    public ?Carbon   $expires_at,
   ) {
     }
 
-    public static function fromRaw(array $raw)
+    public static function fromRaw(array $raw): UserData
     {
         return new self(...[
-            'id' => explode('@', $raw['userid'])[0],
+            'username' => explode('@', $raw['userid'])[0],
             'email' => Arr::get($raw, 'email'),
             'realm_type' => RealmType::from($raw['realm-type']),
             'enabled' => (bool) $raw['enable'],

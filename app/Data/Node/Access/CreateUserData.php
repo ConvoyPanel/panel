@@ -15,12 +15,12 @@ class CreateUserData extends Data
     public function __construct(
       #[WithCast(EnumCast::class)]
       public RealmType $realm_type,
-      public bool $enabled,
+      public bool      $enabled,
       #[Min(1), Max(60)]
-      public ?string $id = null,
+      public ?string   $username = null,
       #[Min(1), Max(64)]
-      public ?string $password = null,
-      public ?Carbon $expires_at = null,
+      public ?string   $password = null,
+      public ?Carbon   $expires_at = null,
     ) {
     }
 }

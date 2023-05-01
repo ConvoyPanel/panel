@@ -12,7 +12,7 @@ class ServerTerminalTransformer extends TransformerAbstract
     public function transform(array $data): array
     {
         return [
-            'token' => array_get($data, 'token'),
+            'ticket' => array_get($data, 'ticket'),
             'node' => array_get($data, 'node'),
             'vmid' => array_get($data, 'vmid'),
             'fqdn' => array_get($data, 'fqdn'),
