@@ -2,7 +2,7 @@
 
 return [
     'short_code' => 'Código Corto',
-    'new_location' => 'Nueva Ubicación',
+    'create_location' => 'Create Location',
     'create_modal' => [
         'title' => 'Crear una Ubicación',
     ],
