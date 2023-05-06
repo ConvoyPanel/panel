@@ -2,7 +2,7 @@
 
 return [
     'short_code' => 'Short Code',
-    'new_location' => 'New Location',
+    'create_location' => 'Create Location',
     'create_modal' => [
         'title' => 'Create a Location',
     ],
