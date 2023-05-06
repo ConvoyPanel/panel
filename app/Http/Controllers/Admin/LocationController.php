@@ -36,7 +36,7 @@ class LocationController extends ApplicationApiController
     {
         $location->update($request->validated());
 
-        return $this->returnNoContent();
+        return fractal($location, new LocationTransformer())->respond();
     }
 
     public function destroy(Location $location)

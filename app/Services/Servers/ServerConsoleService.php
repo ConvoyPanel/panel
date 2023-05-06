@@ -14,7 +14,9 @@ use Exception;
 
 class ServerConsoleService
 {
-    public function __construct(private ProxmoxServerRepository $serverRepository, private ProxmoxAccessRepository $accessRepository, private ProxmoxConsoleRepository $consoleRepository) {}
+    public function __construct(private ProxmoxServerRepository $serverRepository, private ProxmoxAccessRepository $accessRepository, private ProxmoxConsoleRepository $consoleRepository)
+    {
+    }
 
     public function createConsoleUserCredentials(Server $server): UserCredentialsData
     {
@@ -28,14 +30,14 @@ class ServerConsoleService
         ]));
 
         try {
-            $this->accessRepository->createRole('convoy-vnc', 'VM.Audit,VM.Console');
+            $this->accessRepository->createRole('convoy-console', 'VM.Audit,VM.Console');
         } catch (Exception) {
         }
 
         $this->serverRepository->addUser(
             RealmType::PVE,
             $user->username,
-            'convoy-vnc'
+            'convoy-console'
         );
 
         return $this->accessRepository->createUserCredentials(RealmType::PVE, $user->username, $user->password);

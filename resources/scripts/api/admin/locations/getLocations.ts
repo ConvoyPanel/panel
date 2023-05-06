@@ -3,7 +3,7 @@ import http, { FractalResponseData, getPaginationSet, PaginatedResult } from '@/
 export interface Location {
     id: number
     shortCode: string
-    description?: number
+    description: string | null
     nodesCount: number
     serversCount: number
 }

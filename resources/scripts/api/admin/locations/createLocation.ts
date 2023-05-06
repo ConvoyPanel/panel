@@ -1,7 +1,7 @@
 import http from '@/api/http'
 import { rawDataToLocation, Location } from '@/api/admin/locations/getLocations'
 
-export default async (shortCode: string, description?: string): Promise<Location> => {
+export default async (shortCode: string, description: string | null): Promise<Location> => {
     const {
         data: { data },
     } = await http.post('/api/admin/locations', {

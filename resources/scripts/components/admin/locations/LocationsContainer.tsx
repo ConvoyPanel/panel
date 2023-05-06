@@ -1,64 +1,57 @@
-import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import useSWR from 'swr'
-import usePagination from '@/util/usePagination'
-import getLocations, { Location, LocationResponse } from '@/api/admin/locations/getLocations'
-import Spinner from '@/components/elements/Spinner'
-import { Column } from '@/components/elements/displays/Table'
-import Pagination from '@/components/elements/Pagination'
-import Button from '@/components/elements/Button'
-import EditLocationModal from '@/components/admin/locations/EditLocationModal'
-import { useState } from 'react'
-import Menu from '@/components/elements/Menu'
 import deleteLocation from '@/api/admin/locations/deleteLocation'
-import useFlash from '@/util/useFlash'
-import { useDebouncedValue } from '@mantine/hooks'
+import { Location, LocationResponse } from '@/api/admin/locations/getLocations'
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid'
-import TextInput from '@/components/elements/inputs/TextInput'
 import SearchBar from '@/components/admin/SearchBar'
-
-const columns: ColumnArray<Location> = [
-    {
-        header: 'Short Code',
-        accessor: 'shortCode',
-    },
-    {
-        header: 'Description',
-        accessor: 'description',
-        overflow: true,
-    },
-    {
-        header: 'Nodes',
-        accessor: 'nodesCount',
-        align: 'center',
-    },
-    {
-        header: 'Servers',
-        accessor: 'serversCount',
-        align: 'center',
-    },
-]
+import CreateLocationModal from '@/components/admin/locations/CreateLocationModal'
+import EditLocationModal from '@/components/admin/locations/EditLocationModal'
+import Menu from '@/components/elements/Menu'
+import PageContentBlock from '@/components/elements/PageContentBlock'
+import Pagination from '@/components/elements/Pagination'
+import Spinner from '@/components/elements/Spinner'
+import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import { useFlashKey } from '@/util/useFlash'
+import usePagination from '@/util/usePagination'
+import { useDebouncedValue } from '@mantine/hooks'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const LocationsContainer = () => {
+    const { t } = useTranslation('admin.locations')
+    const { t: tStrings } = useTranslation('strings')
     const [page, setPage] = usePagination()
-    const [open, setOpen] = useState(false)
-    const { clearFlashes, clearAndAddHttpError } = useFlash()
+    const [isCreating, setIsCreating] = useState(false)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.locations')
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, mutate } = useLocationsSWR({ page, query: debouncedQuery })
 
-    const [location, setLocation] = useState<Location | undefined>(undefined)
+    const columns: ColumnArray<Location> = [
+        {
+            header: t('short_code'),
+            accessor: 'shortCode',
+        },
+        {
+            header: tStrings('description'),
+            accessor: 'description',
+            overflow: true,
+        },
+        {
+            header: tStrings('node', { count: 2 }),
+            accessor: 'nodesCount',
+            align: 'center',
+        },
+        {
+            header: tStrings('server', { count: 2 }),
+            accessor: 'serversCount',
+            align: 'center',
+        },
+    ]
 
     const rowActions = ({ row: loc }: RowActionsProps<Location>) => {
-        const handleEdit = () => {
-            setLocation(loc)
-            setOpen(true)
-        }
-
+        const [isEditing, setIsEditing] = useState(false)
         const handleDelete = () => {
-            clearFlashes('admin:locations')
+            clearFlashes()
 
             deleteLocation(loc.id)
                 .then(() => {
@@ -72,31 +65,38 @@ const LocationsContainer = () => {
                     )
                 })
                 .catch(error => {
-                    clearAndAddHttpError({ key: 'admin:locations', error })
+                    clearAndAddHttpError(error)
                 })
         }
 
         return (
-            <Actions>
-                <Menu.Item onClick={handleEdit}>Edit</Menu.Item>
-                <Menu.Divider />
-                <Menu.Item color='red' disabled={loc.nodesCount > 0} onClick={handleDelete}>
-                    Delete
-                </Menu.Item>
-            </Actions>
+            <>
+                <EditLocationModal
+                    mutate={mutate}
+                    location={loc}
+                    open={isEditing}
+                    onClose={() => setIsEditing(false)}
+                />
+                <Actions>
+                    <Menu.Item onClick={() => setIsEditing(true)}>{tStrings('edit')}</Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item color='red' disabled={loc.nodesCount > 0} onClick={handleDelete}>
+                        {tStrings('delete')}
+                    </Menu.Item>
+                </Actions>
+            </>
         )
-    }
-
-    const handleClose = () => {
-        setOpen(false)
-        setLocation(undefined)
     }
 
     return (
         <div className='bg-background min-h-screen'>
-            <EditLocationModal location={location} mutate={mutate} open={open} onClose={handleClose} />
-            <PageContentBlock title='Locations' showFlashKey='admin:locations'>
-                <SearchBar value={query} onChange={e => setQuery(e.target.value)} buttonText='New Location' onClick={() => setOpen(true)} />
+            <PageContentBlock title={tStrings('location', { count: 2 }) ?? ''}>
+                <SearchBar
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    buttonText={t('create_location')}
+                    onClick={() => setIsCreating(true)}
+                />
                 {!data ? (
                     <Spinner />
                 ) : (
@@ -105,6 +105,7 @@ const LocationsContainer = () => {
                     </Pagination>
                 )}
             </PageContentBlock>
+            <CreateLocationModal open={isCreating} onClose={() => setIsCreating(false)} mutate={mutate} />
         </div>
     )
 }

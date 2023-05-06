@@ -26,7 +26,6 @@ interface Props {
 const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
     const { t } = useTranslation('server.backups')
     const { t: tStrings } = useTranslation('strings')
-    const { t: tVal } = useTranslation('validation')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const [open, setOpen] = useState(false)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${uuid}.backups.create`)
@@ -34,16 +33,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
     const theme = useStoreState(state => state.settings.data?.theme)
 
     const schema = z.object({
-        name: z
-            .string()
-            .min(1, tVal('required', { attribute: tStrings('name').toLowerCase() })!)
-            .max(
-                40,
-                tVal('max.string', {
-                    attribute: tStrings('name').toLowerCase(),
-                    max: 40,
-                })!
-            ),
+        name: z.string().nonempty().max(40),
         compressionType: z.enum(['none', 'lzo', 'gzip', 'zstd']),
         mode: z.enum(['snapshot', 'suspend', 'kill']),
     })
@@ -156,7 +146,7 @@ const CreateBackupButton = ({ swr: { mutate }, backupCount }: Props) => {
                     onClick={() => setOpen(true)}
                     variant='filled'
                 >
-                    {t('new_backup')}
+                    {t('create_backup')}
                 </Button>
             </div>
         </>

@@ -4,9 +4,13 @@ namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Data\Node\Access\UserCredentialsData;
 use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 use Webmozart\Assert\Assert;
 
 class ProxmoxConsoleRepository extends ProxmoxRepository
@@ -16,22 +20,27 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient(headers: [
-            'Cookie' => "PVEAuthCookie={$credentials->ticket}",
-            'CSRFPreventionToken' => $credentials->csrf_token,
+            'CSRFPreventionToken' => $credentials->csrf_token
+        ], options: [
+            'cookies' => CookieJar::fromArray([
+                'PVEAuthCookie' => $credentials->ticket,
+            ], $this->node->fqdn)
         ], shouldAuthorize: false)
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid,
             ])
-            ->post('/api2/json/nodes/{node}/qemu/{server}/vncproxy')
+            ->post('/api2/json/nodes/{node}/qemu/{server}/vncproxy', [
+                'websocket' => true
+            ])
             ->json();
 
         $response = $this->getData($response);
 
         return NoVncCredentialsData::from([
-            'vmid' => $response['vmid'],
             'port' => $response['port'],
-            'ticket' => $response['ticket']
+            'ticket' => $response['ticket'],
+            'pve_auth_cookie' => $credentials->ticket,
         ]);
     }
 }

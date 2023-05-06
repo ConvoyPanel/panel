@@ -73,12 +73,12 @@ abstract class ProxmoxRepository
             'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
-            'headers' => array_merge($headers, [
+            'headers' => array_merge([
                 'Authorization' => $shouldAuthorize ? "PVEAPIToken={$this->node->token_id}={$this->node->secret}" : null,
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
                 'User-Agent' => null,
-            ]),
+            ], $headers),
         ], $options))->throw(function (Response $response, RequestException $e) {
             throw new ProxmoxConnectionException($e);
         });

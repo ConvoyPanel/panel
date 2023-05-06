@@ -1,9 +1,7 @@
-import { Location, LocationResponse } from '@/api/admin/locations/getLocations'
-import updateLocation from '@/api/admin/locations/updateLocation'
+import createLocation from '@/api/admin/locations/createLocation'
+import { LocationResponse } from '@/api/admin/locations/getLocations'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import TextareaFormik from '@/components/elements/formik/TextareaFormik'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import TextareaForm from '@/components/elements/forms/TextareaForm'
 import { useFlashKey } from '@/util/useFlash'
@@ -14,14 +12,13 @@ import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 
 interface Props {
-    location: Location
+    mutate: KeyedMutator<LocationResponse>
     open: boolean
     onClose: () => void
-    mutate: KeyedMutator<LocationResponse>
 }
 
-const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.locations.${location.id}.edit`)
+const CreateLocationModal = ({ mutate, open, onClose }: Props) => {
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.locations.create')
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.locations')
 
@@ -33,8 +30,8 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
-            shortCode: location.shortCode,
-            description: location.description,
+            shortCode: '',
+            description: '',
         },
     })
 
@@ -42,21 +39,18 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
         clearFlashes()
 
         try {
-            const updatedLocation = await updateLocation(location.id, data.shortCode, data.description)
+            const location = await createLocation(data.shortCode, data.description)
 
             mutate(data => {
-                if (!data) return data
+                if (!data || data.pagination.currentPage !== 1) return data
 
                 return {
                     ...data,
-                    items: data.items.map(l => (l.id === location.id ? updatedLocation : l)),
+                    items: [location, ...data.items]
                 }
             }, false)
 
-            form.reset({
-                shortCode: updatedLocation.shortCode,
-                description: updatedLocation.description,
-            })
+            form.reset()
 
             onClose()
         } catch (e) {
@@ -74,14 +68,14 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
                 <Modal.Title>
-                    {tStrings('edit')} {location.shortCode}
+                    {t('create_location')}
                 </Modal.Title>
             </Modal.Header>
 
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.locations.${location.id}.edit`} />
+                        <FlashMessageRender className='mb-5' byKey={'admin.locations.create'} />
                         <TextInputForm name='shortCode' label={t('short_code')} />
                         <TextareaForm name='description' label={tStrings('description')} />
                     </Modal.Body>
@@ -90,7 +84,7 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
                             {tStrings('cancel')}
                         </Modal.Action>
                         <Modal.Action type='submit' loading={form.formState.isSubmitting}>
-                            {tStrings('save')}
+                            {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>
                 </form>
@@ -99,4 +93,4 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
     )
 }
 
-export default EditLocationModal
+export default CreateLocationModal;
