@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'new_backup' => 'नया बैकअप',
+    'create_backup' => 'Create Backup',
     'empty_state' => 'कोई बैकअप उपलब्ध नहीं है',
     'counter_tooltip' => 'You\'ve made :count out of :max backups',
     'create_modal' => [
