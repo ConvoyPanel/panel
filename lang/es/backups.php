@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'new_backup' => 'Nueva Copia de Seguridad',
+    'create_backup' => 'Create Backup',
     'empty_state' => 'No hay copias de seguridad',
     'counter_tooltip' => 'Has hecho :count de :max copias de seguridad',
     'create_modal' => [
