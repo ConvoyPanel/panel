@@ -23,6 +23,7 @@
         "laravel/horizon": "^5.12",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
+        "lcobucci/jwt": "^5.0",
         "phpseclib/phpseclib": "~3.0",
         "pusher/pusher-php-server": "^7.0",
         "spatie/eloquent-sortable": "^4.0",

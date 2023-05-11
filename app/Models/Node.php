@@ -10,9 +10,14 @@ class Node extends Model
 {
     use HasFactory;
 
+    public const COTERM_TOKEN_ID_LENGTH = 16;
+    public const COTERM_TOKEN_LENGTH = 64;
+
     protected $casts = [
         'memory' => MebibytesToAndFromBytes::class,
         'disk' => MebibytesToAndFromBytes::class,
+        'secret' => 'encrypted',
+        'coterm_token' => 'encrypted',
     ];
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -33,11 +38,24 @@ class Node extends Model
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        'coterm_tls_enabled' => 'required|boolean',
+        'coterm_fqdn' => 'required|string|max:191',
+        'coterm_port' => 'required|integer',
+        'coterm_token_id' => 'required_with:coterm_fqdn',
+        'coterm_token' => 'required_with:coterm_fqdn',
     ];
 
     protected $hidden = [
-        'token_id', 'secret',
+        'token_id', 'secret', 'coterm_token_id', 'coterm_token',
     ];
+
+    /**
+     * Get the connection address to use when making calls to this node.
+     */
+    public function getCotermConnectionAddress(): string
+    {
+        return sprintf('%s://%s:%s', $this->coterm_tls_enabled ? 'https' : 'http', $this->coterm_fqdn, $this->coterm_port);
+    }
 
     public function servers()
     {
