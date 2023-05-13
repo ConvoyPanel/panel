@@ -10,6 +10,7 @@ return [
     'reinstall' => [
         'title' => 'Reinstall Server',
         'description' => 'Start your server on a fresh slate.',
+        'start_server_after_installing' => 'Start Server After Completing Installation',
         'modal' => [
             'title' => 'Confirm Reinstallation',
             'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
