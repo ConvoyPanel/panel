@@ -1,5 +1,5 @@
 import updateNode from '@/api/admin/nodes/updateNode'
-import LocationsSelectFormik from '@/components/admin/nodes/LocationsSelectFormik'
+import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
 import DeleteNodeContainer from '@/components/admin/nodes/settings/DeleteNodeContainer'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
@@ -104,7 +104,7 @@ const GeneralContainer = () => {
                             <div className='space-y-3 mt-3'>
                                 <FlashMessageRender byKey='admin:node:settings:general' />
                                 <TextInputFormik name='name' label='Display Name' />
-                                <LocationsSelectFormik />
+                                <LocationsSelectForm />
                                 <TextInputFormik name='cluster' label='Node Name In Proxmox' />
                                 <TextInputFormik name='fqdn' label='FQDN' />
                                 <TextInputFormik name='port' label='Port' />

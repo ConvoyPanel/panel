@@ -3,27 +3,23 @@ import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useField } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
-const LocationsSelectFormik = () => {
-    const [{ value }] = useField('locationId')
-    const [query, setQuery] = useState(value as string)
+const LocationsSelectForm = () => {
+    const { setValue, watch } = useFormContext()
+    const locationId: number = watch('locationId')
+    const [query, setQuery] = useState(locationId.toString())
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, mutate, isValidating, isLoading } = useLocationsSWR({ query: debouncedQuery })
-    const locations = useMemo(
-        () =>
-            data?.items.map(location => ({
-                value: location.id.toString(),
-                label: location.shortCode,
-            })) ?? [],
-        [data]
-    )
-
-    useEffect(() => {
-        setQuery(value as string)
-    }, [value])
+    const locations =
+        data?.items.map(location => ({
+            value: location.id.toString(),
+            label: location.shortCode,
+        })) ?? []
 
     return (
-        <SelectFormik
+        <SelectForm
             label='Location Group'
             data={locations}
             searchable
@@ -36,4 +32,4 @@ const LocationsSelectFormik = () => {
     )
 }
 
-export default LocationsSelectFormik
+export default LocationsSelectForm

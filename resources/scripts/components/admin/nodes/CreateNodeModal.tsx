@@ -1,18 +1,16 @@
-import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
-import createNode from '@/api/admin/nodes/createNode'
-import { NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import LocationsSelectFormik from '@/components/admin/nodes/LocationsSelectFormik'
+import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import Select from '@/components/elements/inputs/Select'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
 import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
-import useFlash from '@/util/useFlash'
-import { FormikProvider, useFormik } from 'formik'
-import { useCallback, useMemo, useState } from 'react'
-import * as yup from 'yup'
+import { useFlashKey } from '@/util/useFlash'
+import { z } from 'zod'
+import { hostname } from '@/util/validation'
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
+import createNode from '@/api/admin/nodes/createNode'
 
 interface Props {
     open: boolean
@@ -20,146 +18,127 @@ interface Props {
 }
 
 const CreateNodeModal = ({ open, onClose }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const { mutate: mutateNodes } = useNodesSWR({ page: 1 })
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.create')
+    const { mutate } = useNodesSWR({ page: 1, query: '' })
+    const { t: tStrings } = useTranslation('strings')
+    const { t } = useTranslation('admin.nodes')
 
-    const form = useFormik({
-        initialValues: {
+    const schema = z.object({
+        name: z.string().max(191).nonempty(),
+        locationId: z.preprocess(Number, z.number()),
+        cluster: z.string().max(191).nonempty(),
+        tokenId: z.string().max(191).nonempty(),
+        secret: z.string().max(191).nonempty(),
+        fqdn: hostname().max(191).nonempty(),
+        port: z.preprocess(Number, z.number().int().min(1).max(65535)),
+        memory: z.preprocess(Number, z.number().int().min(0)),
+        memoryOverallocate: z.preprocess(Number, z.number().int().min(0)),
+        disk: z.preprocess(Number, z.number().int().min(0)),
+        diskOverallocate: z.preprocess(Number, z.number().int().min(0)),
+        vmStorage: z.string().max(191).nonempty(),
+        backupStorage: z.string().max(191).nonempty(),
+        isoStorage: z.string().max(191).nonempty(),
+        network: z.string().max(191).nonempty(),
+    })
+
+    const form = useForm({
+        resolver: zodResolver(schema),
+        defaultValues: {
             name: '',
-            locationId: '',
+            locationId: 0,
             cluster: '',
             tokenId: '',
             secret: '',
             fqdn: '',
             port: 8006,
-            memory: undefined as number | undefined,
+            memory: 0,
             memoryOverallocate: 0,
-            disk: undefined as number | undefined,
+            disk: 0,
             diskOverallocate: 0,
             vmStorage: '',
             backupStorage: '',
             isoStorage: '',
             network: '',
         },
-        validationSchema: yup.object({
-            name: yup.string().required('Specify a name').max(191, 'Please limit up to 191 characters'),
-            locationId: yup.number().required('Specify a location'),
-            cluster: yup.string().required('Specify a cluster').max(191, 'Please limit up to 191 characters'),
-            tokenId: yup.string().required('Specify a token ID').max(191, 'Please limit up to 191 characters'),
-            secret: yup.string().required('Specify a secret').max(191, 'Please limit up to 191 characters'),
-            fqdn: yup
-                .string()
-                .matches(
-                    /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-                    'Enter a valid FQDN'
-                )
-                .required('Specify a FQDN')
-                .max(191, 'Please limit up to 191 characters'),
-            port: yup
-                .number()
-                .integer()
-                .required('Specify a port')
-                .min(1, 'Please specify a valid port')
-                .max(65535, 'Please specify a valid port'),
-            memory: yup.number().integer().required('Specify a memory').min(0, 'Please specify a valid memory'),
-            memoryOverallocate: yup
-                .number()
-                .integer()
-                .required('Specify a memory overallocate')
-                .min(0, 'Please specify a valid memory overallocate'),
-            disk: yup.number().integer().required('Specify a disk').min(0, 'Please specify a valid disk'),
-            diskOverallocate: yup
-                .number()
-                .integer()
-                .required('Specify a disk overallocate')
-                .min(0, 'Please specify a valid disk overallocate'),
-            vmStorage: yup.string().required('Specify a VM storage').max(191, 'Please limit up to 191 characters'),
-            backupStorage: yup
-                .string()
-                .required('Specify a backup storage')
-                .max(191, 'Please limit up to 191 characters'),
-            isoStorage: yup.string().required('Specify a ISO storage').max(191, 'Please limit up to 191 characters'),
-            network: yup.string().required('Specify a network').max(191, 'Please limit up to 191 characters'),
-        }),
-        onSubmit: ({ memory, disk, locationId, ...values }, { setSubmitting }) => {
-            setSubmitting(true)
-            clearFlashes('admin:nodes.create')
-            createNode({
-                locationId: parseInt(locationId),
-                memory: memory! * 1048576,
-                disk: disk! * 1048576,
-                ...values,
-            })
-                .then(node => {
-                    mutateNodes(
-                        data =>
-                            ({
-                                ...data,
-                                items: [node].concat(data!.items),
-                            } as NodeResponse),
-                        false
-                    )
-                    handleClose()
-                })
-                .catch(error => {
-                    clearAndAddHttpError({ key: 'admin:nodes.create', error })
-                    setSubmitting(false)
-                })
-        },
     })
 
     const handleClose = () => {
-        form.resetForm()
+        clearFlashes()
+        form.reset()
         onClose()
+    }
+
+    const submit = async ({ memory, disk, ...data }: z.infer<typeof schema>) => {
+        clearFlashes()
+        try {
+            const node = await createNode({
+                memory: memory * 1048576,
+                disk: disk * 1048576,
+                ...data,
+            })
+
+            mutate(data => {
+                if (!data) return data
+
+                return {
+                    ...data,
+                    items: [node, ...data.items],
+                }
+            }, false)
+
+            handleClose()
+        } catch (error) {
+            clearAndAddHttpError(error as Error)
+        }
     }
 
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>Create a Node</Modal.Title>
+                <Modal.Title>{t('create_modal.title')}</Modal.Title>
             </Modal.Header>
 
-            <FormikProvider value={form}>
-                <form onSubmit={form.handleSubmit}>
+            <FormProvider {...form}>
+                <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:nodes.create'} />
-                        <TextInputFormik name='name' label='Display Name' />
-                        <LocationsSelectFormik />
-                        <TextInputFormik name='cluster' label='Node Name In Proxmox' />
+                        <FlashMessageRender className='mb-5' byKey={'admin.nodes.create'} />
+                        <TextInputForm name='name' label={tStrings('display_name')} />
+                        <LocationsSelectForm />
+                        <TextInputForm name='cluster' label={t('pve_name')} />
                         <MessageBox className='mt-3' title='Warning' type='warning'>
-                            Please disable privilege separation and grant root privileges
+                            {t('creds_warning')}
                         </MessageBox>
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputFormik name='tokenId' label='Token ID' />
-                            <TextInputFormik name='secret' label='Secret' />
+                            <TextInputForm name='tokenId' label={t('token_id')} />
+                            <TextInputForm name='secret' label={t('secret')} />
                         </div>
-                        <TextInputFormik name='fqdn' label='FQDN' />
-                        <TextInputFormik name='port' label='Port' />
+                        <TextInputForm name='fqdn' label={tStrings('fqdn')} />
+                        <TextInputForm name='port' label={tStrings('port')} />
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputFormik name='memory' label='Memory (MiB)' />
-                            <TextInputFormik name='memoryOverallocate' label='Memory Overallocate (%)' />
+                            <TextInputForm name='memory' label={`${t('memory_allocation')} (MiB)`} />
+                            <TextInputForm name='memoryOverallocate' label={`${t('memory_overallocation')} (%)`} />
                         </div>
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputFormik name='disk' label='Disk (MiB)' />
-                            <TextInputFormik name='diskOverallocate' label='Disk Overallocate (%)' />
+                            <TextInputForm name='disk' label={`${t('disk_allocation')} (MiB)`} />
+                            <TextInputForm name='diskOverallocate' label={`${t('disk_allocation')} (MiB)`} />
                         </div>
                         <div className='grid gap-3 grid-cols-3'>
-                            <TextInputFormik name='vmStorage' label='VM Storage' placeholder='local' />
-                            <TextInputFormik name='backupStorage' label='Backup Storage' placeholder='local' />
-                            <TextInputFormik name='isoStorage' label='ISO Storage' placeholder='local' />
+                            <TextInputForm name='vmStorage' label={t('vm_storage')} placeholder='local' />
+                            <TextInputForm name='backupStorage' label={t('backup_storage')} placeholder='local' />
+                            <TextInputForm name='isoStorage' label={t('iso_storage')} placeholder='local' />
                         </div>
-                        <TextInputFormik name='network' label='Network' placeholder='vmbr0' />
+                        <TextInputForm name='network' label={tStrings('network')} placeholder='vmbr0' />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
-                            Cancel
+                            {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.isSubmitting}>
-                            Create
+                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                            {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>
                 </form>
-            </FormikProvider>
+            </FormProvider>
         </Modal>
     )
 }

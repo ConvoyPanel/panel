@@ -5,7 +5,7 @@ import FormCard from '@/components/elements/FormCard'
 import Modal from '@/components/elements/Modal'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
-import TemplatesSelectForm from '@/components/servers/settings/TemplatesSelectFormik'
+import TemplatesSelectForm from '@/components/servers/settings/TemplatesSelectForm'
 import { ServerContext } from '@/state/server'
 import { useFlashKey } from '@/util/useFlash'
 import { englishKeyboardCharacters, password } from '@/util/validation'
@@ -87,7 +87,7 @@ const ReinstallServerCard = () => {
                             />
                             <CheckboxForm
                                 name={'startOnCompletion'}
-                                label={tStrings('start_server_after_installing')}
+                                label={t('reinstall.start_server_after_installing')}
                             />
                         </div>
                     </FormCard.Body>

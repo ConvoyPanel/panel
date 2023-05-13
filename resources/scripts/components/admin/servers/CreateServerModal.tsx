@@ -9,7 +9,7 @@ import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
 import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
 import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
-import TemplatesSelectFormik from '@/components/admin/servers/TemplatesSelectFormik'
+import TemplatesSelectForm from '@/components/admin/servers/TemplatesSelectForm'
 import createServer from '@/api/admin/servers/createServer'
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import usePagination from '@/util/usePagination'
@@ -177,9 +177,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                             label={'Create Server'}
                             className={'mt-3 relative'}
                         />
-                        <TemplatesSelectFormik
-                            disabled={!form.values.shouldCreateServer || form.values.nodeId === ''}
-                        />
+                        <TemplatesSelectForm disabled={!form.values.shouldCreateServer || form.values.nodeId === ''} />
                         <CheckboxFormik
                             name={'startOnCompletion'}
                             label={'Start Server On Completion'}

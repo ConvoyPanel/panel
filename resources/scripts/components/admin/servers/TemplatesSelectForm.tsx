@@ -3,29 +3,29 @@ import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGr
 import { useMemo, useState } from 'react'
 import Select from '@/components/elements/inputs/Select'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
+import { useFormContext } from 'react-hook-form'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
 interface Props {
     disabled?: boolean
 }
 
-const TemplatesSelectFormik = ({ disabled }: Props) => {
-    const [{ value }] = useField('nodeId')
-    const [{}, {}, { setValue: setTemplateUuid }] = useField('templateUuid')
-    const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(value)
-    const templateGroups = useMemo(
-        () =>
-            data?.map(group => {
-                return {
-                    value: group.uuid,
-                    label: group.name,
-                    templates: group.templates!.map(template => ({
-                        value: template.uuid,
-                        label: template.name,
-                    })),
-                }
-            }) ?? [],
-        [data]
-    )
+const TemplatesSelectForm = ({ disabled }: Props) => {
+    const { setValue, watch } = useFormContext()
+    const nodeId: number | null = watch('nodeId', null)
+    const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(nodeId ?? -1)
+    const templateGroups =
+        data?.map(group => {
+            return {
+                value: group.uuid,
+                label: group.name,
+                templates: group.templates!.map(template => ({
+                    value: template.uuid,
+                    label: template.name,
+                })),
+            }
+        }) ?? []
+
     const [groupUuid, setGroupUuid] = useState('')
     const templates = useMemo(
         () => templateGroups.find(group => group.value === groupUuid)?.templates ?? [],
@@ -34,7 +34,7 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
 
     const handleGroupsOnChange = (uuid: string | null) => {
         setGroupUuid(uuid ?? '')
-        setTemplateUuid('')
+        setValue('templateUuid', '')
     }
 
     return (
@@ -49,7 +49,7 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
                 nothingFound={'No groups found'}
                 disabled={disabled}
             />
-            <SelectFormik
+            <SelectForm
                 data={templates}
                 name={'templateUuid'}
                 label={'Template'}
@@ -61,4 +61,4 @@ const TemplatesSelectFormik = ({ disabled }: Props) => {
     )
 }
 
-export default TemplatesSelectFormik
+export default TemplatesSelectForm
