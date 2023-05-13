@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'new_node' => 'Nuevo Nodo',
+    'create_node' => 'Create Node',
     'create_modal' => [
         'title' => 'Crear Nodo',
     ],
@@ -9,6 +9,7 @@ return [
     'location_group' => 'Grupo Ubicación',
     'pve_name' => 'Nombre del Nodo en Proxmox',
     'override_creds' => 'Anular credenciales',
+    'creds_warning' => 'Please disable privilege separation and grant root privileges.',
     'token_id' => 'Token ID',
     'secret' => 'Secreto',
     'port' => 'Puerto',
