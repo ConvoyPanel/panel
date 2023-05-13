@@ -10,6 +10,7 @@ return [
     'reinstall' => [
         'title' => 'Reinstalar Servidor',
         'description' => 'Empiece su servidor desde cero.',
+        'start_server_after_installing' => 'Start Server After Completing Installation',
         'modal' => [
             'title' => 'Confirmar Reinstalación',
             'description' => '¿Estás seguro de que quieres reinstalar este servidor? Se perderán todos los datos.',
