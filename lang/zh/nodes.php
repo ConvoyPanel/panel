@@ -1,40 +1,41 @@
 <?php
 
 return [
-    'new_node' => 'New Node',
+    'create_node' => 'Create Node',
     'create_modal' => [
-        'title' => 'Create a Node',
+        'title' => '创建节点',
     ],
 
-    'location_group' => 'Location Group',
-    'pve_name' => 'Node Name In Proxmox',
-    'override_creds' => 'Override credentials',
-    'token_id' => 'Token ID',
-    'secret' => 'Secret',
-    'port' => 'Port',
-    'memory_allocation' => 'Memory Allocation',
-    'memory_overallocation' => 'Memory Overallocation',
-    'disk_allocation' => 'Disk Allocation',
-    'disk_overallocation' => 'Disk Overallocation',
-    'vm_storage' => 'VM Storage',
-    'backup_storage' => 'Backup Storage',
-    'iso_storage' => 'ISO Storage',
+    'location_group' => '地域分组',
+    'pve_name' => 'Proxmox 中的节点名称',
+    'override_creds' => '覆盖凭证',
+    'creds_warning' => 'Please disable privilege separation and grant root privileges.',
+    'token_id' => '令牌 ID',
+    'secret' => '令牌密钥',
+    'port' => '端口',
+    'memory_allocation' => '内存分配',
+    'memory_overallocation' => '内存超开',
+    'disk_allocation' => '硬盘分配',
+    'disk_overallocation' => '硬盘超开',
+    'vm_storage' => '虚拟机存储',
+    'backup_storage' => '备份存储',
+    'iso_storage' => 'ISO 存储',
 
     'create_template_modal' => [
-        'title' => 'Create a Template',
+        'title' => '创建模板',
     ],
-    'new_template' => 'New Template',
+    'new_template' => '新建模板',
     'create_template_group_modal' => [
-        'title' => 'Create a Template Group',
+        'title' => '创建模板分组',
     ],
-    'new_template_group' => 'New Template Group',
+    'new_template_group' => '新建模板分组',
 
     'node_info' => [
-        'title' => 'Node Information',
+        'title' => '节点信息',
     ],
     'delete_node' => [
-        'title' => 'Delete Node',
-        'description' => 'The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.',
-        'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
+        'title' => '删除节点',
+        'description' => '节点将从 Convoy 中永久删除。此操作不能被复原及撤销。',
+        'has_servers_error' => '你无法删除一个分配有服务器的节点。',
     ],
 ];
