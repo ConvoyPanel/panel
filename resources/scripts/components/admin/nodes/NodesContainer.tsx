@@ -18,10 +18,10 @@ import { useTranslation } from 'react-i18next'
 
 const NodesContainer = () => {
     const { t: tStrings } = useTranslation('strings')
-    const { t } = useTranslation('admin.nodes')
+    const { t } = useTranslation('admin.nodes.index')
     const [page, setPage] = usePagination()
     const [open, setOpen] = useState(false)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.index')
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
@@ -89,7 +89,7 @@ const NodesContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <PageContentBlock title={tStrings('node_other') ?? 'Nodes'} showFlashKey='admin.nodes'>
+            <PageContentBlock title={tStrings('node_other') ?? 'Nodes'} showFlashKey='admin.nodes.index'>
                 <CreateNodeModal open={open} onClose={() => setOpen(false)} />
                 <SearchBar
                     value={query}

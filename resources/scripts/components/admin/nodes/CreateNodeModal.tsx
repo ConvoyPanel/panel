@@ -18,10 +18,10 @@ interface Props {
 }
 
 const CreateNodeModal = ({ open, onClose }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.create')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.index.create')
     const { mutate } = useNodesSWR({ page: 1, query: '' })
     const { t: tStrings } = useTranslation('strings')
-    const { t } = useTranslation('admin.nodes')
+    const { t } = useTranslation('admin.nodes.index')
 
     const schema = z.object({
         name: z.string().max(191).nonempty(),
@@ -101,7 +101,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin.nodes.create'} />
+                        <FlashMessageRender className='mb-5' byKey={'admin.nodes.index.create'} />
                         <TextInputForm name='name' label={tStrings('display_name')} />
                         <LocationsSelectForm />
                         <TextInputForm name='cluster' label={t('pve_name')} />

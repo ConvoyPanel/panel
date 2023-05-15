@@ -2,8 +2,8 @@ import { FormikProvider, useFormik } from 'formik'
 import FormCard from '@/components/elements/FormCard'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
-import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
+import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
+import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
 import { AdminServerContext } from '@/state/admin/server'
@@ -82,8 +82,8 @@ const ServerInformationContainer = () => {
                             <TextInputFormik name='name' label='Display Name' />
                             <TextInputFormik name='hostname' label='Hostname' />
                             <TextInputFormik name='vmid' label='VMID' />
-                            <UsersSelectFormik />
-                            <NodesSelectFormik />
+                            <UsersSelectForm />
+                            <NodesSelectForm />
                             <SelectFormik name={'status'} data={statusTypes} label={'Status'} />
                         </div>
                     </FormCard.Body>

@@ -7,6 +7,7 @@ import usePagination from '@/util/usePagination'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import Button from '@/components/elements/Button'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     query?: string
@@ -15,39 +16,40 @@ interface Props {
     userId?: number
 }
 
-const columns: ColumnArray<Server> = [
-    {
-        accessor: 'name',
-        header: 'Name',
-        cell: ({ value, row }) => (
-            <Link to={`/admin/servers/${row.id}`} className='link text-foreground'>
-                {value}
-            </Link>
-        ),
-    },
-    {
-        accessor: 'hostname',
-        header: 'Hostname',
-    },
-    {
-        accessor: 'user',
-        header: 'Owner',
-        cell: ({ value }) => (
-            <Link to={`/admin/users/${value!.id}/settings`} className='link text-foreground'>
-                {value!.email}
-            </Link>
-        ),
-    },
-    {
-        accessor: 'node',
-        header: 'Node',
-        cell: ({ value }) => value!.name,
-    },
-]
-
-const ServersTable = ({query, className, nodeId, userId }: Props) => {
+const ServersTable = ({ query, className, nodeId, userId }: Props) => {
+    const { t: tStrings } = useTranslation('strings')
     const [page, setPage] = usePagination()
     const { data } = useServersSWR({ page, query, nodeId, userId, includes: ['node', 'user'] })
+
+    const columns: ColumnArray<Server> = [
+        {
+            accessor: 'name',
+            header: tStrings('name'),
+            cell: ({ value, row }) => (
+                <Link to={`/admin/servers/${row.id}`} className='link text-foreground'>
+                    {value}
+                </Link>
+            ),
+        },
+        {
+            accessor: 'hostname',
+            header: tStrings('hostname'),
+        },
+        {
+            accessor: 'user',
+            header: tStrings('owner'),
+            cell: ({ value }) => (
+                <Link to={`/admin/users/${value!.id}/settings`} className='link text-foreground'>
+                    {value!.email}
+                </Link>
+            ),
+        },
+        {
+            accessor: 'node',
+            header: tStrings('node'),
+            cell: ({ value }) => value!.name,
+        },
+    ]
 
     return (
         <div className={className}>

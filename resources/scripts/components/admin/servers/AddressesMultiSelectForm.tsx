@@ -1,18 +1,19 @@
-import { useField } from 'formik'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
-import MultiSelectFormik from '@/components/elements/formik/MultiSelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useFormContext } from 'react-hook-form'
+import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
 
 interface Props {
     disabled?: boolean
     nodeId?: number
 }
 
-const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => {
-    const [{ value: addressIds }] = useField('addressIds')
-    const [{ value: formNodeId }] = useField('nodeId')
-    const nodeId = propNodeId ?? formNodeId
+const AddressesMultiSelectForm = ({ disabled, nodeId: propNodeId }: Props) => {
+    const { watch } = useFormContext()
+    const addressIds: string[] = watch('addressIds')
+    const formNodeId: string = watch('nodeId')
+    const nodeId = propNodeId ?? parseInt(formNodeId)
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
@@ -21,7 +22,7 @@ const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => 
         serverId: null,
     })
     const { data: selectedAddresses } = useAddressesSWR(nodeId ?? -1, {
-        query: ((addressIds as number[]).length > 0 ? (addressIds as number[]) : [-1]).join(','),
+        query: (addressIds.length > 0 ? addressIds : [-1]).join(','),
         id: 'selected-addresses',
     })
 
@@ -49,7 +50,7 @@ const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => 
     }, [data, selectedAddresses])
 
     return (
-        <MultiSelectFormik
+        <MultiSelectForm
             data={addresses}
             searchable
             searchValue={query}
@@ -63,4 +64,4 @@ const AddressesMultiSelectFormik = ({ disabled, nodeId: propNodeId }: Props) => 
     )
 }
 
-export default AddressesMultiSelectFormik
+export default AddressesMultiSelectForm

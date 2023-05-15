@@ -4,10 +4,13 @@ import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useFormContext } from 'react-hook-form'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
-const UsersSelectFormik = () => {
-    const [{ value }] = useField('userId')
-    const [query, setQuery] = useState(value as string)
+const UsersSelectForm = () => {
+    const { setValue, watch } = useFormContext()
+    const userId: string = watch('userId')
+    const [query, setQuery] = useState(userId)
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, isValidating, isLoading } = useUsersSWR({ query: debouncedQuery })
     const users = useMemo(
@@ -20,12 +23,8 @@ const UsersSelectFormik = () => {
         [data]
     )
 
-    useEffect(() => {
-        setQuery(value as string)
-    }, [value])
-
     return (
-        <SelectFormik
+        <SelectForm
             label={'User'}
             data={users}
             searchable
@@ -39,4 +38,4 @@ const UsersSelectFormik = () => {
     )
 }
 
-export default UsersSelectFormik
+export default UsersSelectForm

@@ -2,8 +2,8 @@ import FormCard from '@/components/elements/FormCard'
 import { FormikProvider, useFormik } from 'formik'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import UsersSelectFormik from '@/components/admin/servers/UsersSelectFormik'
-import NodesSelectFormik from '@/components/admin/servers/NodesSelectFormik'
+import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
+import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
 import FormSection from '@/components/elements/FormSection'
@@ -14,7 +14,7 @@ import { EloquentStatus } from '@/api/server/types'
 import updateBuild from '@/api/admin/servers/updateBuild'
 import * as yup from 'yup'
 import { useMemo } from 'react'
-import AddressesMultiSelectFormik from '@/components/admin/servers/AddressesMultiSelectFormik'
+import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
 
 const ServerBuildSettingsContainer = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
@@ -90,7 +90,7 @@ const ServerBuildSettingsContainer = () => {
                             <TextInputFormik name='cpu' label='CPU' />
                             <TextInputFormik name='memory' label='Memory (MiB)' />
                             <TextInputFormik name='disk' label='Disk (MiB)' />
-                            <AddressesMultiSelectFormik nodeId={server.nodeId} />
+                            <AddressesMultiSelectForm nodeId={server.nodeId} />
                             <TextInputFormik
                                 name='snapshotLimit'
                                 label='Snapshots Limit'

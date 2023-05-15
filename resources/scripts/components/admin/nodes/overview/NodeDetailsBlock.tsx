@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 const NodeDetailsBlock = () => {
     const node = NodeContext.useStoreState(state => state.node.data!)
-    const { t } = useTranslation('admin.nodes')
+    const { t } = useTranslation('admin.nodes.index')
 
     const memory = useMemo(() => {
         const total = formatBytes(node.memory, 2)

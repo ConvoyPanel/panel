@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import { MultiSelect as MantineMultiSelect } from '@mantine/core'
 import tw from 'twin.macro'
-import { ComponentProps } from 'react'
+import { ComponentProps, forwardRef } from 'react'
 import ErrorMessage from '@/components/elements/ErrorMessage'
 import LoadingDots from '@/components/elements/LoadingDots'
 import { css } from '@emotion/react'
@@ -41,13 +41,16 @@ export interface MultiSelectProps extends ComponentProps<typeof StyledMultiSelec
     loading?: boolean
 }
 
-const MultiSelect = ({ loading, nothingFound, error, ...props }: MultiSelectProps) => (
-    <StyledMultiSelect
-        error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
-        nothingFound={loading ? 'Loading...' : nothingFound}
-        rightSection={loading && <LoadingDots size={4} />}
-        {...props}
-    />
+const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(
+    ({ loading, nothingFound, error, ...props }, ref) => (
+        <StyledMultiSelect
+            error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
+            nothingFound={loading ? 'Loading...' : nothingFound}
+            rightSection={loading && <LoadingDots size={4} />}
+            ref={ref}
+            {...props}
+        />
+    )
 )
 
 export default MultiSelect

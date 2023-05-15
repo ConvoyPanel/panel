@@ -4,7 +4,7 @@ import { useStoreState } from '@/state'
 const OverviewContainer = () => {
     const version = useStoreState(state => state.settings.data!.version)
     return (
-        <PageContentBlock title='Overview' showFlashKey='admin:overview'>
+        <PageContentBlock title='Overview'>
             <h1>
                 version <strong>{version}</strong>
             </h1>

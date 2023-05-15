@@ -3,33 +3,29 @@ import { useEffect, useMemo, useState } from 'react'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useFormContext } from 'react-hook-form'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
 interface Props {
     disabled?: boolean
 }
 
-const NodesSelectFormik = ({ disabled }: Props) => {
-    const [{ value }] = useField('nodeId')
-    const [query, setQuery] = useState(value as string)
+const NodesSelectForm = ({ disabled }: Props) => {
+    const { setValue, watch } = useFormContext()
+    const nodeId: string = watch('nodeId')
+    const [query, setQuery] = useState(nodeId)
 
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, isValidating, isLoading } = useNodesSWR({ query: debouncedQuery })
-    const nodes = useMemo(
-        () =>
-            data?.items.map(node => ({
-                value: node.id.toString(),
-                label: node.name,
-                description: node.fqdn,
-            })) ?? [],
-        [data]
-    )
-
-    useEffect(() => {
-        setQuery(value as string)
-    }, [value])
+    const nodes =
+        data?.items.map(node => ({
+            value: node.id.toString(),
+            label: node.name,
+            description: node.fqdn,
+        })) ?? []
 
     return (
-        <SelectFormik
+        <SelectForm
             label={'Node'}
             data={nodes}
             searchable
@@ -43,4 +39,4 @@ const NodesSelectFormik = ({ disabled }: Props) => {
     )
 }
 
-export default NodesSelectFormik
+export default NodesSelectForm

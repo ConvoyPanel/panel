@@ -2,6 +2,7 @@ import Button from '@/components/elements/Button'
 import TextInput from '@/components/elements/inputs/TextInput'
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid'
 import { ChangeEventHandler, MouseEventHandler } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     value?: string
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const SearchBar = ({ value, onChange, buttonText, onClick }: Props) => {
+    const { t: tStrings } = useTranslation('strings')
     return (
         <div className='flex space-x-2 items-center mb-3'>
             <TextInput
@@ -18,7 +20,7 @@ const SearchBar = ({ value, onChange, buttonText, onClick }: Props) => {
                 className='grow'
                 value={value}
                 onChange={onChange}
-                placeholder='Search...'
+                placeholder={`${tStrings('search')}...`}
             />
             <Button className='grid sm:hidden place-items-center' onClick={onClick} shape='square' variant='filled'>
                 <PlusIcon className='w-5 h-5 block sm:hidden' />
