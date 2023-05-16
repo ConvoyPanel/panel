@@ -1,11 +1,14 @@
 <?php
 
 return [
-    'new_server' => 'New Server',
+    'create_server' => 'Create Server',
     'backup_limit' => 'Backup Limit',
     'bandwidth_limit' => 'Bandwidth Limit',
     'snapshots_limit' => 'Snapshots Limit',
+    'limit_placeholder' => 'Leave blank for no limit',
     'should_create_vm' => 'Should Create VM',
+    'start_server_after_installing' => 'Start Server After Completing Installation',
+    'vmid_placeholder' => 'Leave blank for random VMID',
     'create_modal' => [
         'title' => 'Create a Server',
     ],

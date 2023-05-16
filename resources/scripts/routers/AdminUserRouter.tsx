@@ -1,15 +1,9 @@
 import { httpErrorToHuman } from '@/api/http'
-import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/router'
-import { ServerContext } from '@/state/server'
 import { useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
-import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { AdminServerContext } from '@/state/admin/server'
-import { AdminBanner } from '@/routers/AdminDashboardRouter'
-import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
+import { Outlet, useMatch } from 'react-router-dom'
 import { AdminUserContext } from '@/state/admin/user'
 
 const AdminUserRouter = () => {
@@ -38,7 +32,6 @@ const AdminUserRouter = () => {
         setError(undefined)
 
         getUser(parseInt(match!.params.id as string)).catch((error: any) => {
-
             setError(httpErrorToHuman(error))
         })
 
@@ -59,19 +52,7 @@ const AdminUserRouter = () => {
         setBreadcrumb(user?.name)
     }, [user])
 
-    return (
-        <>
-            {!user ? (
-                error ? (
-                    <ErrorMessage message={error} />
-                ) : (
-                    <Spinner />
-                )
-            ) : (
-                <Outlet />
-            )}
-        </>
-    )
+    return <>{!user ? error ? <ErrorMessage message={error} /> : <Spinner /> : <Outlet />}</>
 }
 
 export default AdminUserRouter

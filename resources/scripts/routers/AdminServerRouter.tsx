@@ -10,6 +10,7 @@ import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@
 import { AdminServerContext } from '@/state/admin/server'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
+import { useTranslation } from 'react-i18next'
 
 const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
@@ -18,27 +19,24 @@ const AdminServerRouter = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data)
     const getServer = AdminServerContext.useStoreActions(actions => actions.server.getServer)
     const clearServerState = AdminServerContext.useStoreActions(actions => actions.clearServerState)
+    const { t: tStrings } = useTranslation('strings')
 
-    const visibleRoutes = useMemo(
-        () => [
-            {
-                name: 'Overview',
-                path: `/admin/servers/${id}`,
-                end: true,
-            },
-            {
-                name: 'Settings',
-                path: `/admin/servers/${id}/settings`,
-            },
-        ],
-        [match?.params.id]
-    )
+    const visibleRoutes = [
+        {
+            name: tStrings('overview'),
+            path: `/admin/servers/:id`,
+            end: true,
+        },
+        {
+            name: tStrings('setting_other'),
+            path: `/admin/servers/:id/settings`,
+        },
+    ]
 
     useEffect(() => {
         setError(undefined)
 
         getServer(match!.params.id as string).catch((error: any) => {
-
             setError(httpErrorToHuman(error))
         })
 

@@ -2,15 +2,13 @@ import deleteServer from '@/api/admin/servers/deleteServer'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
-import FormSection from '@/components/elements/FormSection'
 import MessageBox from '@/components/elements/MessageBox'
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
-import { useState } from 'react'
 import { FormikProvider, useFormik } from 'formik'
 import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 
-const DeleteServerContainer = () => {
+const DeleteServerCard = () => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:delete')
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
@@ -75,4 +73,4 @@ const DeleteServerContainer = () => {
     )
 }
 
-export default DeleteServerContainer
+export default DeleteServerCard

@@ -1,10 +1,5 @@
-import { FormikProvider } from 'formik'
 import FormCard from '@/components/elements/FormCard'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
-import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
 import MessageBox from '@/components/elements/MessageBox'
 import { AdminServerContext } from '@/state/admin/server'
@@ -13,7 +8,7 @@ import unsuspendServer from '@/api/admin/servers/unsuspendServer'
 import suspendServer from '@/api/admin/servers/suspendServer'
 import { useState } from 'react'
 
-const SuspensionContainer = () => {
+const ServerSuspensionCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:suspension')
@@ -64,4 +59,4 @@ const SuspensionContainer = () => {
     )
 }
 
-export default SuspensionContainer
+export default ServerSuspensionCard

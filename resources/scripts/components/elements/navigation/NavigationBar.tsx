@@ -5,10 +5,11 @@ import { Burger, LoadingOverlay } from '@mantine/core'
 import UserDropdown from '@/components/elements/navigation/UserDropdown'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import NavigationDropdown from '@/components/elements/navigation/NavigationDropdown'
-import { Link, useMatch } from 'react-router-dom'
+import { Link, useMatch, useMatches } from 'react-router-dom'
 import http from '@/api/http'
 import NavLink from '@/components/elements/navigation/NavLink'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
+import { bindUrlParams } from '@/util/helpers'
 
 export interface RouteDefinition {
     name: string
@@ -31,7 +32,7 @@ export const NavigationBarContext = createContext<NavigationBarContextInterface>
 })
 
 const NavigationBar = () => {
-    const {routes, breadcrumb} = useContext(NavigationBarContext)
+    const { routes, breadcrumb } = useContext(NavigationBarContext)
     const [isVisible, setIsVisible] = useState(true)
     const [menuVisible, setMenuVisible] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -40,6 +41,7 @@ const NavigationBar = () => {
     const placeholder = useRef<HTMLDivElement>(null)
     const logo = useRef<HTMLDivElement>(null)
     const isAdminArea = useMatch('/admin/*')
+    const matches = useMatches()
 
     const visibilityObserver = useMemo(
         () => new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting)),
@@ -136,7 +138,11 @@ const NavigationBar = () => {
                     </div>
                     <div className='flex z-[2000] overflow-x-auto scrollbar-hide'>
                         {routes.map(route => (
-                            <NavLink end={route.end} key={route.path} to={route.path}>
+                            <NavLink
+                                end={route.end}
+                                key={route.path}
+                                to={bindUrlParams(route.path, matches[matches.length - 1].params)}
+                            >
                                 {route.name}
                             </NavLink>
                         ))}

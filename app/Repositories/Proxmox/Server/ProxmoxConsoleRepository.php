@@ -35,6 +35,8 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
             ])
             ->json();
 
+
+
         $response = $this->getData($response);
 
         return NoVncCredentialsData::from([

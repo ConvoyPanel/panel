@@ -15,6 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     nodeId?: number
@@ -27,6 +28,8 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
     const [page] = usePagination()
     const { mutate } = useServersSWR({ nodeId, userId, page, query: '', includes: ['node', 'user'] })
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.servers.create')
+    const { t } = useTranslation('admin.servers.index')
+    const { t: tStrings } = useTranslation('strings')
 
     const schemaWithCreateVm = z.object({
         name: z.string().max(40).nonempty(),
@@ -147,51 +150,63 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>Create a Server</Modal.Title>
+                <Modal.Title>{t('create_modal.title')}</Modal.Title>
             </Modal.Header>
 
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={'admin.servers.create'} />
-                        <TextInputForm name={'name'} label={'Display Name'} />
+                        <TextInputForm name={'name'} label={tStrings('display_name')} />
                         {nodeId ? null : <NodesSelectForm />}
                         {userId ? null : <UsersSelectForm />}
-                        <TextInputForm name={'vmid'} label={'VMID'} placeholder={'Leave blank for random VMID'} />
-                        <TextInputForm name={'hostname'} label={'Hostname'} />
+                        <TextInputForm
+                            name={'vmid'}
+                            label={'VMID'}
+                            placeholder={t('vmid_placeholder') ?? 'Leave blank for random VMID'}
+                        />
+                        <TextInputForm name={'hostname'} label={tStrings('hostname')} />
                         <AddressesMultiSelectForm disabled={watchNodeId === ''} />
                         <div className={'grid grid-cols-2 gap-3'}>
-                            <TextInputForm name={'cpu'} label={'CPUs'} />
-                            <TextInputForm name={'memory'} label={'Memory (MiB)'} />
+                            <TextInputForm name={'cpu'} label={tStrings('cpu')} />
+                            <TextInputForm name={'memory'} label={`${tStrings('memory')} (MiB)`} />
                         </div>
-                        <TextInputForm name={'disk'} label={'Disk (MiB)'} />
+                        <TextInputForm name={'disk'} label={`${tStrings('disk')} (MiB)`} />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputForm
                                 name={'backupLimit'}
-                                label={'Backup Limit'}
-                                placeholder={'Leave blank for no limit'}
+                                label={t('backup_limit')}
+                                placeholder={t('limit_placeholder') ?? 'Leave blank for no limit'}
                             />
                             <TextInputForm
                                 name={'bandwidthLimit'}
-                                label={'Bandwidth Limit (MiB)'}
-                                placeholder={'Leave blank for no limit'}
+                                label={`${t('bandwidth_limit')} (MiB)`}
+                                placeholder={t('limit_placeholder') ?? 'Leave blank for no limit'}
                             />
                         </div>
-                        <TextInputForm name={'accountPassword'} label={'System OS Password'} type={'password'} />
-                        <CheckboxForm name={'shouldCreateServer'} label={'Create Server'} className={'mt-3 relative'} />
+                        <TextInputForm
+                            name={'accountPassword'}
+                            label={tStrings('system_os_password')}
+                            type={'password'}
+                        />
+                        <CheckboxForm
+                            name={'shouldCreateServer'}
+                            label={t('should_create_vm')}
+                            className={'mt-3 relative'}
+                        />
                         <TemplatesSelectForm disabled={!watchShouldCreateServer || watchNodeId === ''} />
                         <CheckboxForm
                             name={'startOnCompletion'}
-                            label={'Start Server On Completion'}
+                            label={t('start_server_after_installing')}
                             className={'mt-3 relative'}
                         />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
-                            Cancel
+                            {tStrings('cancel')}
                         </Modal.Action>
                         <Modal.Action type='submit' loading={form.formState.isSubmitting}>
-                            Create
+                            {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>
                 </form>

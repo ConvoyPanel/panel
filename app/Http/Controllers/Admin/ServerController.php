@@ -25,7 +25,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private ServerDeletionService $deletionService, private ConnectionInterface $connection, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private SyncBuildService $buildModificationService)
+    public function __construct(private ConnectionInterface $connection, private ServerDeletionService $deletionService, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private SyncBuildService $buildModificationService)
     {
     }
 
@@ -57,15 +57,24 @@ class ServerController extends ApplicationApiController
 
     public function update(UpdateGeneralInfoRequest $request, Server $server)
     {
-        $server->update($request->validated());
-
-        if ($request->hostname) {
-            try {
-                $this->cloudinitService->updateHostname($server, $request->hostname);
-            } catch (ProxmoxConnectionException $e) {
-                // do nothing
+        $this->connection->transaction(function () use ($request, $server) {
+            if ($request->hostname !== $server->hostname && !empty($request->hostname)) {
+                try {
+                    $this->cloudinitService->updateHostname($server, $request->hostname);
+                } catch (ProxmoxConnectionException) {
+                    // do nothing
+                }
             }
-        }
+
+            if ($request->node_id !== $server->node_id && !empty($request->node_id)) {
+                // TODO: automatically drop linked IPs and validation the server has enough storage (validation will prob go in rule)
+                $server->addresses()->update([
+                    'server_id' => null
+                ]);
+            }
+
+            $server->update($request->validated());
+        });
 
         $server->load(['addresses', 'user', 'node']);
 
