@@ -1,41 +1,42 @@
 <?php
 
 return [
-    'server_info' => [
-        'title' => 'Server Information',
-        'statuses' => [
-            'ready' => 'Ready',
-            'installing' => 'Installation In Progress',
-            'install_failed' => 'Recent Installation Failed',
-            'suspended' => 'Suspended',
-            'restoring_backup' => 'Restoring From a Backup',
-            'restoring_snapshot' => 'Restoring From a Snapshot',
-        ]
+    'ip_allocation' => [
+        'empty_state' => '目前没有 IP 地址与该服务器关联。',
     ],
-    'suspension' => [
-        'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
-        'statuses' => [
-            'suspended' => 'This server is suspended.',
-            'not_suspended' => 'This server isn\'t suspended.'
+    'display_info' => [
+        'title' => '服务器名称',
+    ],
+    'reinstall' => [
+        'title' => '重装服务器',
+        'description' => '将服务器恢复到初始状态。',
+        'start_server_after_installing' => 'Start Server After Completing Installation',
+        'modal' => [
+            'title' => '确认重装',
+            'description' => '你确定要重装服务器吗？所有未备份数据将会丢失。',
         ],
-        'suspend' => 'Suspend',
-        'unsuspend' => 'Unsuspend',
     ],
-    'deletion' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be
-                                destroyed. However, you can tick the checkbox below to keep the virtual machine and data
-                                on the Proxmox node.',
-        'deleting_status' => 'This server is currently being deleted.',
-        'no_purge' => 'Do not purge VM and related files',
-        'confirmation' => [
-            'title' => 'Delete :name',
-            'description' => 'Are you sure you want to delete :name?'
-        ]
+    'isos' => [
+        'title' => '可使用的 ISO 镜像',
+        'empty' => '没有可供选择的 ISO 镜像',
     ],
-    'build' => [
-        'title' => 'Server Build',
-
-    ]
+    'device_config' => [
+        'title' => '设备配置',
+        'current' => '当前的 Boot 顺序（越排前边优先级越高）',
+        'unused' => '未使用的设备',
+        'unused_empty' => '当前没有未使用的设备。',
+        'no_boot_device_warning' => '尚未配置 Boot 策略。你的虚拟机会无法启动。',
+    ],
+    'nameservers' => [
+        'title' => '域名解析服务器',
+        'nameserver' => '域名解析服务器 :index',
+        'add' => '新建域名服务器',
+    ],
+    'auth' => [
+        'title' => '身份验证',
+    ],
+    'hardware' => [
+        'bandwidth_used' => '已使用带宽',
+        'bandwidth_alloted' => '所分配带宽',
+    ],
 ];
