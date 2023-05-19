@@ -13,11 +13,11 @@ return [
     |
     */
 
-    'failed' => '所提供凭证不符合我们的记录。',
-    'password' => '所提供密码不正确。',
-    'throttle' => '登录尝试过多。请在 :seconds 后再试。',
+    'failed' => 'These credentials do not match our records.',
+    'password' => 'The provided password is incorrect.',
+    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
 
-    'sign_in' => '登录',
-    'sign_out' => '登出',
-    'sign_in_description' => '登录你的账户',
+    'sign_in' => 'Sign in',
+    'sign_out' => 'Sign out',
+    'sign_in_description' => 'Sign in to your account',
 ];
