@@ -1,41 +1,42 @@
 <?php
 
 return [
-    'server_info' => [
-        'title' => 'Server Information',
-        'statuses' => [
-            'ready' => 'Ready',
-            'installing' => 'Installation In Progress',
-            'install_failed' => 'Recent Installation Failed',
-            'suspended' => 'Suspended',
-            'restoring_backup' => 'Restoring From a Backup',
-            'restoring_snapshot' => 'Restoring From a Snapshot',
-        ]
+    'ip_allocation' => [
+        'empty_state' => 'No hay direcciones asociadas a este servidor.',
     ],
-    'suspension' => [
-        'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
-        'statuses' => [
-            'suspended' => 'This server is suspended.',
-            'not_suspended' => 'This server isn\'t suspended.'
+    'display_info' => [
+        'title' => 'Nombre del Servidor',
+    ],
+    'reinstall' => [
+        'title' => 'Reinstalar Servidor',
+        'description' => 'Empiece su servidor desde cero.',
+        'start_server_after_installing' => 'Start Server After Completing Installation',
+        'modal' => [
+            'title' => 'Confirmar Reinstalación',
+            'description' => '¿Estás seguro de que quieres reinstalar este servidor? Se perderán todos los datos.',
         ],
-        'suspend' => 'Suspend',
-        'unsuspend' => 'Unsuspend',
     ],
-    'deletion' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be
-                                destroyed. However, you can tick the checkbox below to keep the virtual machine and data
-                                on the Proxmox node.',
-        'deleting_status' => 'This server is currently being deleted.',
-        'no_purge' => 'Do not purge VM and related files',
-        'confirmation' => [
-            'title' => 'Delete :name',
-            'description' => 'Are you sure you want to delete :name?'
-        ]
+    'isos' => [
+        'title' => 'ISOs Disponibles',
+        'empty' => 'No hay ISOs',
     ],
-    'build' => [
-        'title' => 'Server Build',
-
-    ]
+    'device_config' => [
+        'title' => 'Configuración del Dispositivo',
+        'current' => 'Orden de Arranque Actual (se utilizará primero el más alto)',
+        'unused' => 'Dispositivos no Utilizados',
+        'unused_empty' => 'No hay dispositivos sin utilizar.',
+        'no_boot_device_warning' => 'No se ha configurado ningún dispositivo de arranque. Su VM no se iniciará.',
+    ],
+    'nameservers' => [
+        'title' => 'Nameservers',
+        'nameserver' => 'Nameserver :index',
+        'add' => 'Nuevo Servidor de Nombres',
+    ],
+    'auth' => [
+        'title' => 'Autentificación',
+    ],
+    'hardware' => [
+        'bandwidth_used' => 'Ancho de Banda Usado',
+        'bandwidth_alloted' => 'Ancho de Banda Asignado',
+    ],
 ];
