@@ -248,7 +248,7 @@ const router = createBrowserRouter([
                                                     lazy(
                                                         () =>
                                                             import(
-                                                                '@/components/admin/servers/settings/ServerHardwareContainer'
+                                                                '@/components/admin/servers/settings/partials/hardware/ServerHardwareContainer'
                                                             )
                                                     )
                                                 ),

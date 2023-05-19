@@ -59,6 +59,15 @@ const ServerInformationCard = () => {
                 status: status === 'ready' ? null : (status as EloquentStatus),
                 ...data,
             })
+
+            form.reset({
+                name: data.name,
+                hostname: data.hostname,
+                vmid: data.vmid,
+                userId: data.userId.toString(),
+                nodeId: data.nodeId.toString(),
+                status: status ?? 'ready',
+            })
         } catch (error) {
             clearAndAddHttpError(error as any)
         }

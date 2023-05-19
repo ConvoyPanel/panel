@@ -7,69 +7,120 @@ import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import { z } from 'zod'
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+import { useTranslation } from 'react-i18next'
+import { FormEvent, useState } from 'react'
+import Modal from '@/components/elements/Modal'
 
 const DeleteServerCard = () => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:server:settings:delete')
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.servers.${server.uuid}.settings.general.delete`)
+    const { t: tStrings } = useTranslation('strings')
+    const { t } = useTranslation('admin.servers.settings')
+    const [showConfirmation, setShowConfirmation] = useState(false)
 
-    const form = useFormik({
-        initialValues: {
+    const schema = z.object({
+        noPurge: z.boolean(),
+    })
+
+    const form = useForm({
+        resolver: zodResolver(schema),
+        defaultValues: {
             noPurge: false,
-        },
-        onSubmit: async ({ noPurge }) => {
-            clearFlashes()
-            try {
-                await deleteServer(server.uuid, noPurge)
-
-                setServer({
-                    ...server,
-                    status: 'deleting',
-                })
-            } catch (error) {
-                clearAndAddHttpError(error as any)
-            }
         },
     })
 
+    const submit = async ({ noPurge }: z.infer<typeof schema>) => {
+        clearFlashes()
+        try {
+            await deleteServer(server.uuid, noPurge)
+
+            setServer({
+                ...server,
+                status: 'deleting',
+            })
+        } catch (error) {
+            clearAndAddHttpError(error as any)
+        }
+    }
+
+    const triggerConfirmation = (e: FormEvent) => {
+        e.preventDefault()
+        setShowConfirmation(true)
+    }
+
     return (
-        <FormCard className='w-full border-error'>
-            <FormikProvider value={form}>
-                <form onSubmit={form.handleSubmit}>
-                    <FormCard.Body>
-                        <FormCard.Title>Delete Server</FormCard.Title>
-                        <div className='space-y-3 mt-3'>
-                            <FlashMessageRender byKey='admin:server:settings:delete' />
+        <>
+            <FormCard className='w-full border-error'>
+                <FormProvider {...form}>
+                    <form onSubmit={triggerConfirmation}>
+                        <FormCard.Body>
+                            <FormCard.Title>{t('deletion.title')}</FormCard.Title>
+                            <div className='space-y-3 mt-3'>
+                                <FlashMessageRender byKey={`admin.servers.${server.uuid}.settings.general.delete`} />
 
-                            <p className='description-small !text-foreground'>
-                                The server will be deleted from Convoy. Backups and other associated data will be
-                                destroyed. However, you can tick the checkbox below to keep the virtual machine and data
-                                on the Proxmox node.
-                            </p>
-                            {server.status === 'deleting' && (
-                                <MessageBox title='Warning' type='warning'>
-                                    This server is currently being deleted.
-                                </MessageBox>
-                            )}
+                                <p className='description-small !text-foreground'>{t('deletion.description')}</p>
+                                {server.status === 'deleting' && (
+                                    <MessageBox title='Warning' type='warning'>
+                                        {t('deletion.deleting_status')}
+                                    </MessageBox>
+                                )}
 
-                            <CheckboxFormik name={'noPurge'} label={'Do not purge VM and related files'} />
-                        </div>
-                    </FormCard.Body>
-                    <FormCard.Footer>
-                        <Button
-                            loading={form.isSubmitting}
-                            disabled={server.status === 'deleting'}
-                            type='submit'
-                            variant='filled'
-                            color='danger'
-                            size='sm'
-                        >
-                            Delete
-                        </Button>
-                    </FormCard.Footer>
-                </form>
-            </FormikProvider>
-        </FormCard>
+                                <CheckboxForm
+                                    name={'noPurge'}
+                                    label={t('deletion.no_purge') ?? 'Do not purge VM and related files'}
+                                />
+                            </div>
+                        </FormCard.Body>
+                        <FormCard.Footer>
+                            <Button
+                                loading={form.formState.isSubmitting}
+                                disabled={server.status === 'deleting'}
+                                type='submit'
+                                variant='filled'
+                                color='danger'
+                                size='sm'
+                            >
+                                {tStrings('delete')}
+                            </Button>
+                        </FormCard.Footer>
+                    </form>
+                </FormProvider>
+            </FormCard>
+
+            <Modal open={showConfirmation} onClose={() => setShowConfirmation(false)}>
+                <Modal.Header>
+                    <Modal.Title>
+                        {t('deletion.confirmation.title', {
+                            name: server.name,
+                        })}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Modal.Description>
+                        {t('deletion.confirmation.description', {
+                            name: server.name,
+                        })}
+                    </Modal.Description>
+                </Modal.Body>
+                <Modal.Actions>
+                    <Modal.Action type='button' onClick={() => setShowConfirmation(false)}>
+                        {tStrings('cancel')}
+                    </Modal.Action>
+                    <Modal.Action
+                        type='button'
+                        loading={form.formState.isSubmitting}
+                        onClick={form.handleSubmit(submit)}
+                    >
+                        {tStrings('delete')}
+                    </Modal.Action>
+                </Modal.Actions>
+            </Modal>
+        </>
     )
 }
 
