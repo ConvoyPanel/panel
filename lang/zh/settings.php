@@ -2,41 +2,41 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => '目前没有 IP 地址与该服务器关联。',
+        'empty_state' => 'There are no addresses associated with this server.',
     ],
     'display_info' => [
-        'title' => '服务器名称',
+        'title' => 'Server Name',
     ],
     'reinstall' => [
-        'title' => '重装服务器',
-        'description' => '将服务器恢复到初始状态。',
+        'title' => 'Reinstall Server',
+        'description' => 'Start your server on a fresh slate.',
         'start_server_after_installing' => 'Start Server After Completing Installation',
         'modal' => [
-            'title' => '确认重装',
-            'description' => '你确定要重装服务器吗？所有未备份数据将会丢失。',
+            'title' => 'Confirm Reinstallation',
+            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
         ],
     ],
     'isos' => [
-        'title' => '可使用的 ISO 镜像',
-        'empty' => '没有可供选择的 ISO 镜像',
+        'title' => 'Mountable ISOs',
+        'empty' => 'There are no ISOs',
     ],
     'device_config' => [
-        'title' => '设备配置',
-        'current' => '当前的 Boot 顺序（越排前边优先级越高）',
-        'unused' => '未使用的设备',
-        'unused_empty' => '当前没有未使用的设备。',
-        'no_boot_device_warning' => '尚未配置 Boot 策略。你的虚拟机会无法启动。',
+        'title' => 'Device Configuration',
+        'current' => 'Current Boot Order (the highest will be used first)',
+        'unused' => 'Unused Devices',
+        'unused_empty' => 'There are no unused devices.',
+        'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
     ],
     'nameservers' => [
-        'title' => '域名解析服务器',
-        'nameserver' => '域名解析服务器 :index',
-        'add' => '新建域名服务器',
+        'title' => 'Nameservers',
+        'nameserver' => 'Nameserver :index',
+        'add' => 'New Nameserver',
     ],
     'auth' => [
-        'title' => '身份验证',
+        'title' => 'Authentication',
     ],
     'hardware' => [
-        'bandwidth_used' => '已使用带宽',
-        'bandwidth_alloted' => '所分配带宽',
+        'bandwidth_used' => 'Bandwidth Used',
+        'bandwidth_alloted' => 'Bandwidth Alloted',
     ],
 ];
