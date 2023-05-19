@@ -1,34 +1,41 @@
 <?php
 
 return [
-    'create_server' => 'Create Server',
-    'backup_limit' => 'Backup Limit',
-    'bandwidth_limit' => 'Bandwidth Limit',
-    'bandwidth_usage' => 'Bandwidth Usage',
-    'snapshot_limit' => 'Snapshots Limit',
-    'limit_placeholder' => 'Leave blank for no limit',
-    'should_create_vm' => 'Should Create VM',
-    'start_server_after_installing' => 'Start Server After Completing Installation',
-    'vmid_placeholder' => 'Leave blank for random VMID',
+    'create_node' => 'Create Node',
     'create_modal' => [
-        'title' => 'Create a Server',
+        'title' => '创建节点',
     ],
-    'manage_server' => 'Manage Server',
-    'server_build' => [
-        'title' => 'Server Build',
+
+    'location_group' => '地域分组',
+    'pve_name' => 'Proxmox 中的节点名称',
+    'override_creds' => '覆盖凭证',
+    'creds_warning' => 'Please disable privilege separation and grant root privileges.',
+    'token_id' => '令牌 ID',
+    'secret' => '令牌密钥',
+    'port' => '端口',
+    'memory_allocation' => '内存分配',
+    'memory_overallocation' => '内存超开',
+    'disk_allocation' => '硬盘分配',
+    'disk_overallocation' => '硬盘超开',
+    'vm_storage' => '虚拟机存储',
+    'backup_storage' => '备份存储',
+    'iso_storage' => 'ISO 存储',
+
+    'create_template_modal' => [
+        'title' => '创建模板',
     ],
-    'server_info' => [
-        'title' => 'Server Information',
+    'new_template' => '新建模板',
+    'create_template_group_modal' => [
+        'title' => '创建模板分组',
     ],
-    'suspension' => [
-        'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
-        'not_suspended' => 'This server isn\'t suspended',
-        'suspended' => 'This server is suspended',
+    'new_template_group' => '新建模板分组',
+
+    'node_info' => [
+        'title' => '节点信息',
     ],
-    'delete_server' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be destroyed. However, you can tick the checkbox below to keep the virtual machine and data on the Proxmox node.',
-        'dont_purge' => 'Do not purge VM and related files',
+    'delete_node' => [
+        'title' => '删除节点',
+        'description' => '节点将从 Convoy 中永久删除。此操作不能被复原及撤销。',
+        'has_servers_error' => '你无法删除一个分配有服务器的节点。',
     ],
 ];
