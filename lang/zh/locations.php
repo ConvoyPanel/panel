@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'short_code' => 'Short Code',
+    'short_code' => '代号',
     'create_location' => 'Create Location',
     'create_modal' => [
-        'title' => 'Create a Location',
+        'title' => '创建一个地域',
     ],
 ];
