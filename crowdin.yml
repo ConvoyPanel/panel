@@ -1,3 +1,4 @@
+preserve_hierarchy: true
 files:
   - source: /lang/en/**/*.php
-    translation: /lang/%two_letters_code%/%original_file_name%
+    translation: /lang/%locale%/**/%original_file_name%
