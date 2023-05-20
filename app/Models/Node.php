@@ -38,11 +38,12 @@ class Node extends Model
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        'coterm_enabled' => 'sometimes|boolean',
         'coterm_tls_enabled' => 'sometimes|boolean',
         'coterm_fqdn' => 'nullable|string|max:191',
         'coterm_port' => 'sometimes|integer',
-        'coterm_token_id' => 'required_with:coterm_fqdn',
-        'coterm_token' => 'required_with:coterm_fqdn',
+        'coterm_token_id' => 'required_if:coterm_enabled,1',
+        'coterm_token' => 'required_if:coterm_enabled,1',
     ];
 
     protected $hidden = [
