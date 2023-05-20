@@ -1,4 +1,4 @@
 preserve_hierarchy: true
 files:
-  - source: /lang/en/**/*.php
-    translation: /lang/%locale%/**/%original_file_name%
+  - source: /lang/en_US/**/*.php
+    translation: /lang/%locale_with_underscore%/**/%original_file_name%
