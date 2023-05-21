@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class NodeController extends ApplicationApiController
@@ -79,9 +80,24 @@ class NodeController extends ApplicationApiController
         ]);
     }
 
-    public function regenerateCotermToken(Node $node)
+    public function resetCotermToken(Node $node)
     {
+        if (!$node->coterm_enabled) {
+            throw new AccessDeniedHttpException('Coterm isn\'t enabled on this node.');
+        }
 
+        $creds = $this->cotermTokenCreator->handle();
+
+        $node->update([
+            'coterm_token_id' => $creds['token_id'],
+            'coterm_token' => $creds['token'],
+        ]);
+
+        return new JsonResponse([
+            'data' => [
+                'token' => "{$node->coterm_token_id}|{$node->coterm_token}",
+            ]
+        ]);
     }
 
     public function destroy(Node $node)
@@ -89,7 +105,7 @@ class NodeController extends ApplicationApiController
         $node->loadCount('servers');
 
         if ($node->servers_count > 0) {
-            throw new BadRequestHttpException('The node cannot be deleted with servers still associated.');
+            throw new AccessDeniedHttpException('This node cannot be deleted with servers still associated.');
         }
 
         $node->delete();

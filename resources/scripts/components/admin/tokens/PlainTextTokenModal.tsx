@@ -6,7 +6,7 @@ import { Code } from '@mantine/core'
 import { Token } from '@/api/admin/tokens/getTokens'
 
 interface Props {
-    value?: Token | null
+    value: Token | null
     onClose: () => void
 }
 

@@ -12,6 +12,9 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 import { hostname, port } from '@/util/validation'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import updateCoterm from '@/api/admin/nodes/settings/updateCoterm'
+import { useState } from 'react'
+import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
+import CotermResetModal from '@/components/admin/nodes/settings/partials/general/CotermResetModal'
 
 const CotermCard = () => {
     const node = NodeContext.useStoreState(state => state.node.data!)
@@ -19,6 +22,8 @@ const CotermCard = () => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.coterm`)
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.settings')
+    const [token, setToken] = useState<string | null>(null)
+    const [showResetModal, setShowResetModal] = useState<boolean>(false)
 
     const schemaIfEnabled = z.object({
         isEnabled: z.literal(true),
@@ -54,63 +59,90 @@ const CotermCard = () => {
 
         try {
             const details = await updateCoterm(node.id, data)
+
+            if (details.token) {
+                setToken(details.token)
+            }
+
+            form.reset({
+                isEnabled: details.isEnabled,
+                fqdn: details.fqdn,
+                port: details.port.toString(),
+                isTlsEnabled: details.isTlsEnabled,
+            })
+
+            setNode({ ...node, ...details })
         } catch (e) {
             clearAndAddHttpError(e as Error)
         }
     }
 
-    return (
-        <FormCard className='w-full'>
-            <FormProvider {...form}>
-                <form onSubmit={form.handleSubmit(submit)}>
-                    <FormCard.Body>
-                        <FormCard.Title>{t('coterm.title')}</FormCard.Title>
-                        <p className={'description-small my-3'}>{t('coterm.description')}</p>
+    const reset = (token: string) => {
+        setToken(token)
+        setShowResetModal(false)
+    }
 
-                        <div className={'flex flex-col gap-3'}>
-                            <SwitchForm name={'isEnabled'} label={t('coterm.enable')} />
-                            <div className={'flex flex-col lg:grid grid-cols-5 gap-3'}>
-                                <TextInputForm
-                                    name={'fqdn'}
-                                    className={'col-span-3'}
-                                    label={tStrings('fqdn')}
-                                    disabled={!isEnabled}
-                                />
-                                <TextInputForm
-                                    name={'port'}
-                                    className={'col-span-2'}
-                                    label={tStrings('port')}
-                                    disabled={!isEnabled}
-                                />
+    return (
+        <>
+            <CotermResetModal
+                nodeId={node.id}
+                open={showResetModal}
+                onReset={reset}
+                onClose={() => setShowResetModal(false)}
+            />
+            <CotermTokenModal value={token} onClose={() => setToken(null)} />
+            <FormCard className='w-full'>
+                <FormProvider {...form}>
+                    <form onSubmit={form.handleSubmit(submit)}>
+                        <FormCard.Body>
+                            <FormCard.Title>{t('coterm.title')}</FormCard.Title>
+                            <p className={'description-small my-3'}>{t('coterm.description')}</p>
+
+                            <div className={'flex flex-col gap-3'}>
+                                <SwitchForm name={'isEnabled'} label={t('coterm.enable')} />
+                                <div className={'flex flex-col lg:grid grid-cols-5 gap-3'}>
+                                    <TextInputForm
+                                        name={'fqdn'}
+                                        className={'col-span-4'}
+                                        label={tStrings('fqdn')}
+                                        disabled={!isEnabled}
+                                    />
+                                    <TextInputForm
+                                        name={'port'}
+                                        className={'col-span-1'}
+                                        label={tStrings('port')}
+                                        disabled={!isEnabled}
+                                    />
+                                </div>
+                                <div className={'flex flex-col lg:grid grid-cols-5 lg:items-center gap-3'}>
+                                    <CheckboxForm
+                                        className={'col-span-4'}
+                                        name={'isTlsEnabled'}
+                                        label={t('coterm.tls')}
+                                        disabled={!isEnabled}
+                                    />
+                                    <Button type='button' onClick={() => setShowResetModal(true)} className={'col-span-1'} disabled={!isEnabled}>
+                                        {t('coterm.reset.action')}
+                                    </Button>
+                                </div>
                             </div>
-                            <div className={'flex flex-col lg:grid grid-cols-5 lg:items-center gap-3'}>
-                                <CheckboxForm
-                                    className={'col-span-3'}
-                                    name={'isTlsEnabled'}
-                                    label={t('coterm.tls')}
-                                    disabled={!isEnabled}
-                                />
-                                <Button className={'col-span-2'} disabled={!isEnabled}>
-                                    {t('coterm.regenerate')}
-                                </Button>
-                            </div>
-                        </div>
-                    </FormCard.Body>
-                    <FormCard.Footer>
-                        <Button
-                            loading={form.formState.isSubmitting}
-                            disabled={!form.formState.isDirty}
-                            type='submit'
-                            variant='filled'
-                            color='success'
-                            size='sm'
-                        >
-                            {tStrings('save')}
-                        </Button>
-                    </FormCard.Footer>
-                </form>
-            </FormProvider>
-        </FormCard>
+                        </FormCard.Body>
+                        <FormCard.Footer>
+                            <Button
+                                loading={form.formState.isSubmitting}
+                                disabled={!form.formState.isDirty}
+                                type='submit'
+                                variant='filled'
+                                color='success'
+                                size='sm'
+                            >
+                                {tStrings('save')}
+                            </Button>
+                        </FormCard.Footer>
+                    </form>
+                </FormProvider>
+            </FormCard>
+        </>
     )
 }
 

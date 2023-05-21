@@ -21,7 +21,7 @@ const updateCoterm = async (nodeId: number, { isEnabled, fqdn, port, isTlsEnable
         isEnabled: data.is_enabled as boolean,
         fqdn: data.fqdn as string,
         port: data.port as number,
-        is_tls_enabled: data.port as boolean,
+        isTlsEnabled: data.is_tls_enabled as boolean,
         token: data.token as string | null,
     }
 }

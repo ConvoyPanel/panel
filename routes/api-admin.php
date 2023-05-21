@@ -29,7 +29,7 @@ Route::prefix('/nodes/{node}')->group(function () {
 
     Route::prefix('/settings')->group(function () {
         Route::patch('/coterm', [Admin\Nodes\NodeController::class, 'updateCoterm']);
-        Route::post('/regenerate-coterm-token', [Admin\Nodes\NodeController::class, 'regenerateCotermToken']);
+        Route::post('/reset-coterm-token', [Admin\Nodes\NodeController::class, 'resetCotermToken']);
     });
 });
 
