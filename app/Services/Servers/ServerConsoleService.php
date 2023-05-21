@@ -5,6 +5,7 @@ namespace Convoy\Services\Servers;
 use Convoy\Data\Node\Access\CreateUserData;
 use Convoy\Data\Node\Access\UserCredentialsData;
 use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
+use Convoy\Data\Server\Proxmox\Console\XTermCredentialsData;
 use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
@@ -48,5 +49,12 @@ class ServerConsoleService
         $credentials = $this->createConsoleUserCredentials($server);
 
         return $this->consoleRepository->setServer($server)->createNoVncCredentials($credentials);
+    }
+
+    public function createXTermCredentials(Server $server): XTermCredentialsData
+    {
+        $credentials = $this->createConsoleUserCredentials($server);
+
+        return $this->consoleRepository->setServer($server)->createXTermCredentials($credentials);
     }
 }

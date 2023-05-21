@@ -79,8 +79,8 @@ abstract class ProxmoxRepository
                 'Content-Type' => 'application/json',
                 'User-Agent' => null,
             ], $headers),
-        ], $options))->throw(function (Response $response, RequestException $e) {
-            throw new ProxmoxConnectionException($e);
+        ], $options))->throw(function (Response $response, RequestException $exception) {
+            throw new ProxmoxConnectionException($response, $exception);
         });
     }
 }

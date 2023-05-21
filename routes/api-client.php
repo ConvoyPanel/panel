@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
-Route::prefix('/servers/{server}')->middleware(ServerSubject::class, AuthenticateServerAccess::class)->group(function () {
+Route::prefix('/servers/{server}')->middleware([ServerSubject::class, AuthenticateServerAccess::class])->group(function () {
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('servers.show');
     Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
     Route::get('/state', [Client\Servers\ServerController::class, 'getState']);
     Route::patch('/state', [Client\Servers\ServerController::class, 'updateState']);
 
-    Route::get('/terminal', [Client\Servers\ServerController::class, 'authorizeTerminal']);
+    Route::post('/create-console-session', [Client\Servers\ServerController::class, 'createConsoleSession']);
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);

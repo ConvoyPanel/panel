@@ -13,12 +13,12 @@ const ServerTerminalBlock = () => {
     const launch = (useXterm: boolean = false, popup: boolean = false) => {
         if (popup) {
             window.open(
-                `/servers/${uuid}/terminal?type=${useXterm ? 'xterm' : 'novnc'}`,
+                `/servers/${uuid}/terminal?type=${useXterm ? 'xterm_js' : 'no_vnc'}`,
                 'Terminal',
                 'width=800,height=600'
             )
         } else {
-            window.open(`/servers/${uuid}/terminal?type=${useXterm ? 'xterm' : 'novnc'}`, '_blank')
+            window.open(`/servers/${uuid}/terminal?type=${useXterm ? 'xterm_js' : 'no_vnc'}`, '_blank')
         }
     }
 

@@ -8,10 +8,8 @@ use Illuminate\Http\Client\Response;
 
 class ProxmoxConnectionException extends RepositoryException
 {
-//    public function __construct(RequestException $previous)
-//    {
-//        /* @var Response $previous->response */
-//
-//        parent::__construct($previous->getMessage(), $previous->getCode(), $previous);
-//    }
+   public function __construct(Response $response, RequestException $exception)
+   {
+       parent::__construct($response->reason() . PHP_EOL . $exception->getMessage() . PHP_EOL . $exception->getTraceAsString(), $exception->getCode(), $exception);
+   }
 }
