@@ -12,7 +12,6 @@ return [
     'creds_warning' => 'Please disable privilege separation and grant root privileges.',
     'token_id' => 'Token ID',
     'secret' => 'Secret',
-    'port' => 'Port',
     'memory_allocation' => 'Memory Allocation',
     'memory_overallocation' => 'Memory Overallocation',
     'disk_allocation' => 'Disk Allocation',
