@@ -3,6 +3,7 @@
 namespace Convoy\Providers;
 
 use Convoy\Http\Middleware\AdminAuthenticate;
+use Convoy\Http\Middleware\Coterm\CotermAuthenticate;
 use Convoy\Models\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -57,7 +58,7 @@ class RouteServiceProvider extends ServiceProvider
                     ->as('application.')
                     ->group(base_path('routes/api-application.php'));
 
-               Route::middleware(['auth:sanctum'])
+               Route::middleware([CotermAuthenticate::class])
                    ->prefix('/api/coterm')
                    ->as('coterm.')
                    ->group(base_path('routes/api-coterm.php'));

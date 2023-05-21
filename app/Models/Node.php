@@ -17,6 +17,8 @@ class Node extends Model
         'memory' => MebibytesToAndFromBytes::class,
         'disk' => MebibytesToAndFromBytes::class,
         'secret' => 'encrypted',
+        'coterm_enabled' => 'boolean',
+        'coterm_tls_enabled' => 'boolean',
         'coterm_token' => 'encrypted',
     ];
 

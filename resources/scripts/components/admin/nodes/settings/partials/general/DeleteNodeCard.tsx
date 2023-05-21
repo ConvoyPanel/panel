@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import deleteNode from '@/api/admin/nodes/deleteNode'
 import { useState } from 'react'
 
-const DeleteNodeContainer = () => {
+const DeleteNodeCard = () => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:node:settings:delete')
     const node = NodeContext.useStoreState(state => state.node.data!)
     const navigate = useNavigate()
@@ -64,4 +64,4 @@ const DeleteNodeContainer = () => {
     )
 }
 
-export default DeleteNodeContainer
+export default DeleteNodeCard

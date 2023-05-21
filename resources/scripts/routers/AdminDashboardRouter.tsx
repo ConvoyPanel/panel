@@ -27,23 +27,23 @@ const AdminDashboardRouter = () => {
             end: true,
         },
         {
-            name: tStrings('location', { count: 2 }),
+            name: tStrings('location_other'),
             path: '/admin/locations',
         },
         {
-            name: tStrings('node', { count: 2 }),
+            name: tStrings('node_other'),
             path: '/admin/nodes',
         },
         {
-            name: tStrings('server', { count: 2 }),
+            name: tStrings('server_other'),
             path: '/admin/servers',
         },
         {
-            name: tStrings('user', { count: 2 }),
+            name: tStrings('user_other'),
             path: '/admin/users',
         },
         {
-            name: tStrings('token', { count: 2 }),
+            name: tStrings('token_other'),
             path: '/admin/tokens',
         },
     ]

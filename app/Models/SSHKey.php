@@ -11,12 +11,12 @@ class SSHKey extends Model
 
     protected $table = 'ssh_keys';
 
-    protected $fillabe = [
+    protected $fillable = [
         'name',
         'public_key',
     ];
 
-    public static array $ValidationRules = [
+    public static $validationRules = [
         'name' => 'required|string|max:40',
         'public_key' => 'required|string|max:500',
     ];
