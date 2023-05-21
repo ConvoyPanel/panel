@@ -12,7 +12,7 @@ const StyledTextInput = styled(MantineTextInput)`
     }
 
     .mantine-TextInput-input {
-        ${tw`bg-background`}
+        ${tw`bg-background disabled:bg-accent-100 disabled:text-accent-500 disabled:placeholder:text-accent-300`}
         ${({ error }) =>
             error
                 ? tw`border-error placeholder:text-error-lighter text-error`

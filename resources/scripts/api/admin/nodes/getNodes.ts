@@ -17,6 +17,10 @@ export interface Node {
     backupStorage: string
     isoStorage: string
     network: string
+    cotermEnabled: boolean
+    cotermTlsEnabled: boolean
+    cotermFqdn: string
+    cotermPort: number
     serversCount: number
 }
 
@@ -37,6 +41,10 @@ export const rawDataToNode = (data: any): Node => ({
     backupStorage: data.backup_storage,
     isoStorage: data.iso_storage,
     network: data.network,
+    cotermEnabled: data.coterm_enabled,
+    cotermTlsEnabled: data.coterm_tls_enabled,
+    cotermFqdn: data.coterm_fqdn,
+    cotermPort: data.coterm_port,
     serversCount: data.servers_count,
 })
 

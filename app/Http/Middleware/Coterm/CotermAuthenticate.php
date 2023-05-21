@@ -52,6 +52,6 @@ class CotermAuthenticate
             // Do nothing, we don't want to expose a node not existing at all.
         }
 
-        throw new HttpException(401);
+       throw new HttpException(401);
     }
 }

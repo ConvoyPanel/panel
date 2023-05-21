@@ -3,6 +3,7 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\NullableEncrypter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,7 +20,7 @@ class Node extends Model
         'secret' => 'encrypted',
         'coterm_enabled' => 'boolean',
         'coterm_tls_enabled' => 'boolean',
-        'coterm_token' => 'encrypted',
+        'coterm_token' => NullableEncrypter::class,
     ];
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -42,7 +43,7 @@ class Node extends Model
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_enabled' => 'sometimes|boolean',
         'coterm_tls_enabled' => 'sometimes|boolean',
-        'coterm_fqdn' => 'nullable|string|max:191',
+        'coterm_fqdn' => 'required_if:coterm_enabled,1|string|max:191',
         'coterm_port' => 'sometimes|integer',
         'coterm_token_id' => 'required_if:coterm_enabled,1',
         'coterm_token' => 'required_if:coterm_enabled,1',

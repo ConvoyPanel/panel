@@ -105,7 +105,7 @@ const NodeInformationCard = () => {
                             <LocationsSelectForm />
                             <TextInputForm name='cluster' label={tIndex('pve_name')} />
                             <TextInputForm name='fqdn' label={tStrings('fqdn')} />
-                            <TextInputForm name='port' label={tIndex('port')} />
+                            <TextInputForm name='port' label={tStrings('port')} />
                             <div className='grid gap-3 grid-cols-2'>
                                 <TextInputForm
                                     name='tokenId'

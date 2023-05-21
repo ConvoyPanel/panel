@@ -35,7 +35,7 @@ const DeleteNodeCard = () => {
                 <div className='space-y-3 mt-3'>
                     <FlashMessageRender byKey='admin:node:settings:delete' />
 
-                    <p className='description-small !text-foreground'>
+                    <p className='description-small my-3'>
                         The node will be permanently deleted from Convoy. This action is irreversible and can not be
                         undone.
                     </p>

@@ -148,9 +148,7 @@ const router = createBrowserRouter([
                                     {
                                         path: 'isos',
                                         element: lazyLoad(
-                                            lazy(
-                                                () => import('@/components/admin/nodes/isoLibrary/IsoLibraryContainer')
-                                            )
+                                            lazy(() => import('@/components/admin/nodes/isos/IsoLibraryContainer'))
                                         ),
                                     },
                                     {

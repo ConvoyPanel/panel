@@ -1,5 +1,5 @@
 import { t } from 'i18next'
-import { ZodString, z } from 'zod'
+import { ZodString, z, ZodNumber } from 'zod'
 
 export const hostname = (string?: ZodString) =>
     (string ?? z.string()).regex(
@@ -36,3 +36,7 @@ export const ipAddress = (string?: ZodString) =>
             })!,
         }
     )
+
+export const port = (number?: ZodNumber) => (number ?? z.number()).int().min(1).max(65535)
+
+export const vmid = (number?: ZodNumber) => (number ?? z.number()).int().min(100).max(999999999)

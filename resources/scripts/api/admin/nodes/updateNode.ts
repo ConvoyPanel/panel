@@ -1,9 +1,22 @@
 import { Node, rawDataToNode } from '@/api/admin/nodes/getNodes'
 import http from '@/api/http'
 
-interface UpdateNodeParameters extends Omit<Node, 'id' | 'serversCount' | 'memoryAllocated' | 'diskAllocated'> {
+interface UpdateNodeParameters {
+    locationId: number
+    name: string
+    cluster: string
+    fqdn: string
+    port: number
     tokenId?: string | null
     secret?: string | null
+    memory: number
+    memoryOverallocate: number
+    disk: number
+    diskOverallocate: number
+    vmStorage: string
+    backupStorage: string
+    isoStorage: string
+    network: string
 }
 
 const updateNode = async (nodeId: number, payload: UpdateNodeParameters) => {
@@ -14,9 +27,9 @@ const updateNode = async (nodeId: number, payload: UpdateNodeParameters) => {
         name: payload.name,
         cluster: payload.cluster,
         fqdn: payload.fqdn,
+        port: payload.port,
         token_id: payload.tokenId ? payload.tokenId : undefined,
         secret: payload.secret ? payload.secret : undefined,
-        port: payload.port,
         memory: payload.memory,
         memory_overallocate: payload.memoryOverallocate,
         disk: payload.disk,

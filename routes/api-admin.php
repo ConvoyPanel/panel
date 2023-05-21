@@ -26,6 +26,11 @@ Route::prefix('/nodes/{node}')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 
     Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
+
+    Route::prefix('/settings')->group(function () {
+        Route::patch('/coterm', [Admin\Nodes\NodeController::class, 'updateCoterm']);
+        Route::post('/regenerate-coterm-token', [Admin\Nodes\NodeController::class, 'regenerateCotermToken']);
+    });
 });
 
 Route::get('/servers', [Admin\ServerController::class, 'index']);

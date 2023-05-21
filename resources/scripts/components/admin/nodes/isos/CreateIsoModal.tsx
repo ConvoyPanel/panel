@@ -12,7 +12,7 @@ import * as yup from 'yup'
 import createIso, { ChecksumAlgorithm } from '@/api/admin/nodes/isos/createIso'
 import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
 import Button from '@/components/elements/Button'
-import QueryFileButton from '@/components/admin/nodes/isoLibrary/QueryFileButton'
+import QueryFileButton from '@/components/admin/nodes/isos/QueryFileButton'
 import { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
 
 interface Props {

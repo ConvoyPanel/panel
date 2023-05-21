@@ -35,7 +35,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
         name: z.string().max(40).nonempty(),
         nodeId: z.preprocess(Number, z.number()),
         userId: z.preprocess(Number, z.number()),
-        vmid: z.union([z.preprocess(Number, z.number().min(100).max(999999999)), z.literal('')]),
+        vmid: z.union([z.preprocess(Number, z.number().int().min(100).max(999999999)), z.literal('')]),
         hostname: hostname().max(191).nonempty(),
         addressIds: z.array(z.preprocess(Number, z.number())),
         cpu: z.preprocess(Number, z.number().min(1)),

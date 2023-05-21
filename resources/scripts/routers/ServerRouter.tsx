@@ -26,11 +26,11 @@ const ServerRouter = () => {
                 end: true,
             },
             {
-                name: tStrings('backup', { count: 2 }),
+                name: tStrings('backup_other'),
                 path: `/servers/${id}/backups`,
             },
             {
-                name: tStrings('setting', { count: 2 }),
+                name: tStrings('setting_other'),
                 path: `/servers/${id}/settings`,
             },
         ],
@@ -41,7 +41,6 @@ const ServerRouter = () => {
         setError(undefined)
 
         getServer(id as string).catch((error: any) => {
-
             setError(httpErrorToHuman(error))
         })
 
