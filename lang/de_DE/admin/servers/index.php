@@ -1,34 +1,34 @@
 <?php
 
 return [
-    'create_server' => 'Create Server',
-    'backup_limit' => 'Backup Limit',
-    'bandwidth_limit' => 'Bandwidth Limit',
-    'bandwidth_usage' => 'Bandwidth Usage',
-    'snapshot_limit' => 'Snapshots Limit',
-    'limit_placeholder' => 'Leave blank for no limit',
+    'create_server' => 'Server erstellen',
+    'backup_limit' => 'Backuplimit',
+    'bandwidth_limit' => 'Bandbreitenlimit',
+    'bandwidth_usage' => 'Bandbreitenverbrauch',
+    'snapshot_limit' => 'Snapshotlimit',
+    'limit_placeholder' => 'Leer lassen für kein Limit',
     'should_create_vm' => 'Should Create VM',
-    'start_server_after_installing' => 'Start Server After Completing Installation',
-    'vmid_placeholder' => 'Leave blank for random VMID',
+    'start_server_after_installing' => 'Server nach der Installation starten',
+    'vmid_placeholder' => 'Leer lassen für zufällige VMID',
     'create_modal' => [
-        'title' => 'Create a Server',
+        'title' => 'Server erstellen',
     ],
-    'manage_server' => 'Manage Server',
+    'manage_server' => 'Server verwalten',
     'server_build' => [
         'title' => 'Server Build',
     ],
     'server_info' => [
-        'title' => 'Server Information',
+        'title' => 'Serverinformation',
     ],
     'suspension' => [
-        'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
-        'not_suspended' => 'This server isn\'t suspended',
-        'suspended' => 'This server is suspended',
+        'title' => 'Sperrung',
+        'description' => 'Sperrungsstatus des Servers umschalten.',
+        'not_suspended' => 'Dieser Server ist nicht gesperrt',
+        'suspended' => 'Dieser Server ist gesperrt',
     ],
     'delete_server' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be destroyed. However, you can tick the checkbox below to keep the virtual machine and data on the Proxmox node.',
-        'dont_purge' => 'Do not purge VM and related files',
+        'title' => 'Server löschen',
+        'description' => 'Dieser Server wird aus Convoy gelöscht. Backups und andere zugewiesene Daten werden vernichtet. Du kannst jedoch den Haken unten setzen, um die virtuelle Maschine und Daten auf der Proxmox-Node zu behalten.',
+        'dont_purge' => 'VM und zugewiesene Dateien nicht löschen',
     ],
 ];
