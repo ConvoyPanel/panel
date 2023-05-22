@@ -1,29 +1,29 @@
 <?php
 
 return [
-    'create_node' => 'Create Node',
+    'create_node' => 'Node erstellen',
     'create_modal' => [
-        'title' => 'Create a Node',
+        'title' => 'Node erstellen',
     ],
 
-    'location_group' => 'Location Group',
-    'pve_name' => 'Node Name In Proxmox',
-    'override_creds' => 'Override credentials',
+    'location_group' => 'Standortgruppe',
+    'pve_name' => 'Nodename in Proxmox',
+    'override_creds' => 'Zugangsdaten überschreiben',
     'creds_warning' => 'Please disable privilege separation and grant root privileges.',
     'token_id' => 'Token ID',
-    'secret' => 'Secret',
-    'memory_allocation' => 'Memory Allocation',
+    'secret' => 'Geheimschlüssel',
+    'memory_allocation' => 'Speicherzuweisung',
     'memory_overallocation' => 'Memory Overallocation',
-    'disk_allocation' => 'Disk Allocation',
+    'disk_allocation' => 'Festplattenzuweisung',
     'disk_overallocation' => 'Disk Overallocation',
-    'vm_storage' => 'VM Storage',
-    'backup_storage' => 'Backup Storage',
-    'iso_storage' => 'ISO Storage',
+    'vm_storage' => 'VM Speicher',
+    'backup_storage' => 'Backupspeicher',
+    'iso_storage' => 'ISO Speicher',
 
     'create_template_modal' => [
-        'title' => 'Create a Template',
+        'title' => 'Vorlage erstellen',
     ],
-    'new_template' => 'New Template',
+    'new_template' => 'Neue Vorlage',
     'create_template_group_modal' => [
         'title' => 'Create a Template Group',
     ],
