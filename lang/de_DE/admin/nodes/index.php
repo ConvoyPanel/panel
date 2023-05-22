@@ -21,20 +21,20 @@ return [
     'iso_storage' => 'ISO Speicher',
 
     'create_template_modal' => [
-        'title' => 'Vorlage erstellen',
+        'title' => 'Template erstellen',
     ],
-    'new_template' => 'Neue Vorlage',
+    'new_template' => 'Neues Template',
     'create_template_group_modal' => [
-        'title' => 'Create a Template Group',
+        'title' => 'Templategruppe erstellen',
     ],
-    'new_template_group' => 'New Template Group',
+    'new_template_group' => 'Neue Templategruppe',
 
     'node_info' => [
-        'title' => 'Node Information',
+        'title' => 'Nodeinformation',
     ],
     'delete_node' => [
-        'title' => 'Delete Node',
-        'description' => 'The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.',
-        'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
+        'title' => 'Node löschen',
+        'description' => 'Diese Node wird permanent aus Convoy gelöscht. Dieser Vorgang ist irreversibel und kann nicht rückgängig gemacht werden.',
+        'has_servers_error' => 'Du kannst keine Node löschen, die Server zugewiesen hat.',
     ],
 ];
