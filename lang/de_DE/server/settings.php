@@ -2,41 +2,41 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'There are no addresses associated with this server.',
+        'empty_state' => 'Es sind keine Adressen mit diesem Server verknüpft.',
     ],
     'display_info' => [
-        'title' => 'Server Name',
+        'title' => 'Servername',
     ],
     'reinstall' => [
-        'title' => 'Reinstall Server',
-        'description' => 'Start your server on a fresh slate.',
-        'start_server_after_installing' => 'Start Server After Completing Installation',
+        'title' => 'Server neu installieren',
+        'description' => 'Setze deinen Server neu auf.',
+        'start_server_after_installing' => 'Server nach der Installation starten',
         'modal' => [
-            'title' => 'Confirm Reinstallation',
-            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
+            'title' => 'Neuinstallation bestätigen',
+            'description' => 'Bist Du sicher, dass Du diesen Server neu installieren möchtest? Alle Daten werden gelöscht.',
         ],
     ],
     'isos' => [
-        'title' => 'Mountable ISOs',
-        'empty' => 'There are no ISOs',
+        'title' => 'Mountbare ISOs',
+        'empty' => 'Es gibt keine ISOs',
     ],
     'device_config' => [
-        'title' => 'Device Configuration',
-        'current' => 'Current Boot Order (the highest will be used first)',
-        'unused' => 'Unused Devices',
-        'unused_empty' => 'There are no unused devices.',
-        'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
+        'title' => 'Gerätekonfiguration',
+        'current' => 'Aktuelle Bootreihenfolge (der oberste Eintrag wird zuerst verwendet)',
+        'unused' => 'Ungenutzte Geräte',
+        'unused_empty' => 'Es gibt keine ungenutzten Geräte.',
+        'no_boot_device_warning' => 'Es wurde kein Boot-Gerät konfiguriert. Deine VM wird nicht gestartet.',
     ],
     'nameservers' => [
-        'title' => 'Nameservers',
+        'title' => 'Nameserver',
         'nameserver' => 'Nameserver :index',
-        'add' => 'New Nameserver',
+        'add' => 'Neuer Nameserver',
     ],
     'auth' => [
-        'title' => 'Authentication',
+        'title' => 'Authentifizierung',
     ],
     'hardware' => [
-        'bandwidth_used' => 'Bandwidth Used',
-        'bandwidth_alloted' => 'Bandwidth Alloted',
+        'bandwidth_used' => 'Verwendete Bandbreite',
+        'bandwidth_alloted' => 'Zugewiesene Bandbreite',
     ],
 ];
