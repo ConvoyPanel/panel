@@ -2,12 +2,12 @@
 
 return [
     'server_info' => [
-        'title' => 'Server Information',
+        'title' => 'Serverinformation',
         'statuses' => [
             'ready' => 'Bereit',
             'installing' => 'Installation in Arbeit',
-            'install_failed' => 'Recent Installation Failed',
-            'suspended' => 'Suspended',
+            'install_failed' => 'Aktuelle Installation Fehlgeschlagen',
+            'suspended' => 'Gesperrt',
             'restoring_backup' => 'Restoring From a Backup',
             'restoring_snapshot' => 'Restoring From a Snapshot',
         ]
