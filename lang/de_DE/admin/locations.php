@@ -2,8 +2,8 @@
 
 return [
     'short_code' => 'Short Code',
-    'create_location' => 'Create Location',
+    'create_location' => 'Standort erstellen',
     'create_modal' => [
-        'title' => 'Create a Location',
+        'title' => 'Standort erstellen',
     ],
 ];
