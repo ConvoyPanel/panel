@@ -21,10 +21,10 @@ return [
     ],
     'restore_modal' => [
         'title' => 'Wiederherstellen von :name',
-        'description' => 'Are you sure you want to restore from this backup?',
+        'description' => 'Bist Du sicher, dass Du dieses Backup wiederherstellen möchtest?',
     ],
     'notices' => [
-        'backup_deleted' => 'Deleted :name',
-        'backup_restored' => 'Began restoring server from :name',
+        'backup_deleted' => ':name wurde gelöscht ',
+        'backup_restored' => 'Beginne Wiederherstellung aus :name',
     ],
 ];
