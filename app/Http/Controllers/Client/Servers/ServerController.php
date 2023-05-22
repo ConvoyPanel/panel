@@ -56,7 +56,7 @@ class ServerController extends ApplicationApiController
                     'is_tls_enabled' => $server->node->coterm_tls_enabled,
                     'fqdn' => $server->node->coterm_fqdn,
                     'port' => $server->node->coterm_port,
-                    'token' => $this->cotermJWTService->handle($server, $request->user())->toString(),
+                    'token' => $this->cotermJWTService->handle($server, $request->user(), $request->enum('type', ConsoleType::class))->toString(),
                 ]
             ]);
         } else {

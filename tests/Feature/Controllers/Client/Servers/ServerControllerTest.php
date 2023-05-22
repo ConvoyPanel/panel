@@ -12,7 +12,9 @@ it('can generate noVNC authorization token', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $response = $this->actingAs($user)->getJson("/api/client/servers/{$server->uuid}/terminal");
+    $response = $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/create-console-session", [
+        'type' => 'novnc'
+    ]);
 
     $response->assertOk();
 });

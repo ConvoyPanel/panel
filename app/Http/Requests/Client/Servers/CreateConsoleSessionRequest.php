@@ -14,10 +14,10 @@ class CreateConsoleSessionRequest extends FormRequest
      */
     public function rules(): array
     {
-        //$server = $this->parameter('server', Server::class);
+        $server = $this->parameter('server', Server::class);
 
         return [
-            //'type' => [$server->node->coterm_enabled ? 'required' : 'exclude', new Enum(ConsoleType::class)]
+            'type' => [$server->node->coterm_enabled ? 'required' : 'exclude', new Enum(ConsoleType::class)]
         ];
     }
 }

@@ -21,14 +21,14 @@ class SessionController extends Controller
     {
         $consoleType = $request->enum('type', ConsoleType::class);
 
-        if ($consoleType === ConsoleType::NO_VNC) {
+        if ($consoleType === ConsoleType::NOVNC) {
             $credentials = $this->consoleService->createNoVncCredentials($server);
 
             return fractal()->item([
                 'server' => $server,
                 'credentials' => $credentials,
             ], new NoVncCredentialsTransformer())->respond();
-        } else if ($consoleType === ConsoleType::XTERM_JS) {
+        } else if ($consoleType === ConsoleType::XTERMJS) {
             $credentials = $this->consoleService->createXTermCredentials($server);
 
             return fractal()->item([

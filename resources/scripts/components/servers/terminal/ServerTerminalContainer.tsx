@@ -1,4 +1,4 @@
-import createConsoleSession from '@/api/server/createConsoleSession'
+import createConsoleSession, { ConsoleType } from '@/api/server/createConsoleSession'
 import ServerContentBlock from '@/components/servers/ServerContentBlock'
 import { ServerContext } from '@/state/server'
 import useFlash, { useFlashKey } from '@/util/useFlash'
@@ -23,18 +23,18 @@ const ServerTerminalContainer = () => {
 
         const main = async () => {
             try {
-                const creds = await createConsoleSession(uuid)
+                const creds = await createConsoleSession(uuid, params.get('type')! as ConsoleType)
 
                 if ('ticket' in creds) {
                     window.location.href = `https://${creds.fqdn}:${
                         creds.port
                     }/novnc/novnc.html?console=qemu&virtualization=qemu&node=${encodeURIComponent(creds.node)}&vmid=${
                         creds.vmid
-                    }&token=${encodeURIComponent(creds.ticket)}${params.get('type') === 'xterm_js' ? '&xtermjs=1' : ''}`
+                    }&token=${encodeURIComponent(creds.ticket)}${params.get('type') === 'xtermjs' ? '&xtermjs=1' : ''}`
                 } else {
-                    window.location.href = `${creds.isTlsEnabled ? 'https' : 'http'}://${
-                        creds.fqdn
-                    }:${creds.port}/?type=${encodeURIComponent(params.get('type')!)}&token=${encodeURIComponent(creds.token)}`
+                    window.location.href = `${creds.isTlsEnabled ? 'https' : 'http'}://${creds.fqdn}:${
+                        creds.port
+                    }/?type=${encodeURIComponent(params.get('type')!)}&token=${encodeURIComponent(creds.token)}`
                 }
             } catch (e) {
                 clearAndAddHttpError(e as Error)
