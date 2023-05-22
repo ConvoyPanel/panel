@@ -11,13 +11,13 @@ return [
         'mode' => 'Typ',
         'modes' => [
             'snapshot' => 'Snapshot',
-            'suspend' => 'Suspend',
-            'kill' => 'Kill',
+            'suspend' => 'Sperren',
+            'kill' => 'Ausschalten',
         ],
     ],
     'delete_modal' => [
-        'title' => 'Delete :name',
-        'description' => 'Are you sure you want to delete this backup?',
+        'title' => ':name Löschen',
+        'description' => 'Bist Du sicher, dass Du dieses Backup löschen möchtest?',
     ],
     'restore_modal' => [
         'title' => 'Wiederherstellen von :name',
