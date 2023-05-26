@@ -6,6 +6,8 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ## v3.9.0-rc.9
 
+:warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the implementation of encryption of node credentials in Convoy from this point on.
+
 ### Added
 
 - Coterm support (DEV PREVIEW)
