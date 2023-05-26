@@ -4,6 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-rc.9
+
+### Added
+
+- Coterm support (DEV PREVIEW)
+- Encryption for PVE node credentials
+
+### Fixed
+
+- Potential security vulnerability allowing unauthorized users to access another user's server
+
 ## v3.9.0-rc.8
 
 ### Fixed
