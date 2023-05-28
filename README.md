@@ -26,6 +26,7 @@ Convoy wouldn't have been possible without these organizations and people
 * Pterodactyl Panel - provided the architecture and a lot of backend/boilerplate code for Convoy.
 * FastKVM.EU - for reporting bugs and testing the panel
 * Just Code Cats - created [Convoy's Blesta module](https://marketplace.blesta.com/#/extensions/179-Convoy%20Module), https://code-cats.com/
+* [HeavyNode](https://heavynode.com/) - for helping create [Coterm](https://github.com/ConvoyPanel/coterm)
 
 ## License
 Convoy is licensed under the Business Source License. Production use of Convoy without an active license from Performave is strictly disallowed.
