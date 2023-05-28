@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('address_pools', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->char('uuid', 36)->nullable(false)->unique()->change();
         });
     }
 
@@ -23,6 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('address_pools');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropUnique(['uuid']);
+            $table->char('uuid', 36)->nullable(true)->change();
+        });
     }
 };

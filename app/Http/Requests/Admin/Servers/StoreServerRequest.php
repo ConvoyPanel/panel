@@ -3,7 +3,7 @@
 namespace Convoy\Http\Requests\Admin\Servers;
 
 use Convoy\Http\Requests\FormRequest;
-use Convoy\Models\IPAddress;
+use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Rules\EnglishKeyboardCharacters;
@@ -53,7 +53,7 @@ class StoreServerRequest extends FormRequest
             $addressIds = $this->input('limits.address_ids');
 
             if (! is_null($addressIds)) {
-                $addresses = IPAddress::whereIn('id', $addressIds)->get();
+                $addresses = Address::whereIn('id', $addressIds)->get();
 
                 foreach ($addresses as $address) {
                     if ($address->server_id !== null) {

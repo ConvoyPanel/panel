@@ -3,8 +3,11 @@
 namespace Convoy\Http\Controllers\Auth;
 
 use Carbon\Carbon;
+use Convoy\Exceptions\Service\Api\InvalidJWTException;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Models\SSOToken;
+use Convoy\Models\User;
+use Convoy\Services\Api\JWTService;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -14,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class LoginController extends Controller
 {
-    public function __construct(private ViewFactory $view)
+    public function __construct(private ViewFactory $view, private JWTService $JWTService)
     {
     }
 
@@ -25,24 +28,22 @@ class LoginController extends Controller
 
     public function authorizeToken(Request $request)
     {
-        $SSOToken = SSOToken::where('token', $request->token)->first();
-
-        if (! isset($SSOToken)) {
-            return throw new NotFoundHttpException('Token doesn\'t exist');
+        try {
+            $token = $this->JWTService->decode(config('app.url'), $request->token);
+        } catch (InvalidJWTException) {
+            throw new UnauthorizedHttpException('', 'Invalid JWT token');
         }
 
-        // expire tokens if they're past a specific time
-        $diff = Carbon::parse($SSOToken->created_at)->diffInMinutes(Carbon::now());
+        /** @var User $user */
+        $user = User::where('uuid', '=', $token->claims()->get('user_uuid'))->first();
 
-        if ($diff > 2 || $SSOToken->used) {
-            return throw new UnauthorizedHttpException('', 'Token expired');
+        if (!$user) {
+            throw new UnauthorizedHttpException('', 'Invalid JWT claims');
         }
 
-        Auth::loginUsingId($SSOToken->user_id);
+        Auth::loginUsingId($user->id);
 
         $request->session()->regenerate();
-
-        $SSOToken->update(['used' => true]);
 
         return redirect()->route('index');
     }

@@ -95,4 +95,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return 'id';
     }
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            $user->uuid = Str::uuid()->toString();
+        });
+    }
 }

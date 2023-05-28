@@ -3,7 +3,7 @@
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Http\Requests\FormRequest;
-use Convoy\Models\IPAddress;
+use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Illuminate\Validation\Validator;
@@ -33,7 +33,7 @@ class UpdateBuildRequest extends FormRequest
         $validator->after(function ($validator) {
             $addressIds = $this->input('address_ids');
 
-            $addresses = IPAddress::whereIn('id', $addressIds)->get();
+            $addresses = Address::whereIn('id', $addressIds)->get();
 
             $server = $this->parameter('server', Server::class);
 

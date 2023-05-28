@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
-use Convoy\Models\IPAddress;
+use Convoy\Models\Address;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
@@ -24,7 +24,7 @@ class StoreAddressRequest extends FormRequest
      */
     public function rules(): array
     {
-        return Arr::except(IPAddress::getRules(), ['node_id']);
+        return Arr::except(Address::getRules(), ['node_id']);
     }
 
     public function withValidator(Validator $validator)
@@ -52,7 +52,7 @@ class StoreAddressRequest extends FormRequest
             $nodeId = $this->route()->originalParameter('node');
 
             // check for duplicate addresses
-            if (IPAddress::where([['node_id', '=', $nodeId], ['address', '=', $this->address]])->exists()) {
+            if (Address::where([['node_id', '=', $nodeId], ['address', '=', $this->address]])->exists()) {
                 $validator->errors()->add('address', 'The address has already been imported.');
             }
         });

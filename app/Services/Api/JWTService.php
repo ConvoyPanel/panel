@@ -3,12 +3,21 @@
 namespace Convoy\Services\Api;
 
 use Carbon\CarbonImmutable;
+use Convoy\Exceptions\Service\Api\InvalidJWTException;
+use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
 use Illuminate\Support\Str;
 use Convoy\Models\User;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Token;
+use Lcobucci\JWT\Token\InvalidTokenStructure;
+use Lcobucci\JWT\Token\UnsupportedHeaderFound;
+use Lcobucci\JWT\UnencryptedToken;
+use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Webmozart\Assert\Assert;
 
 class JWTService
 {
@@ -95,5 +104,24 @@ class JWTService
         return $builder
             ->withClaim('unique_id', Str::random())
             ->getToken($config->signer(), $config->signingKey());
+    }
+
+    public function decode(string $key, string $token): UnencryptedToken
+    {
+        $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($key));
+
+        try {
+            $parsedToken = $config->parser()->parse($token);
+        } catch (CannotDecodeContent|InvalidTokenStructure|UnsupportedHeaderFound $exception) {
+            throw new InvalidJWTException($exception);
+        }
+
+        assert($parsedToken instanceof UnencryptedToken);
+
+        if (!$config->validator()->validate($parsedToken, new StrictValidAt(new Clock))) {
+            throw new InvalidJWTException;
+        }
+
+        return $parsedToken;
     }
 }

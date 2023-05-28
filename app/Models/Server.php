@@ -54,7 +54,7 @@ class Server extends Model
 
     public function addresses()
     {
-        return $this->hasMany(IPAddress::class);
+        return $this->hasMany(Address::class);
     }
 
     public function template()

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('address_pool_to_node', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->foreignId('address_pool_id')->constrained()->onDelete('cascade');
+            $table->foreignId('node_id')->constrained()->onDelete('cascade');
         });
     }
 

@@ -7,7 +7,7 @@ use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
 use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
 use Convoy\Models\Filters\AllowedNullableFilter;
 use Convoy\Models\Filters\FiltersAddress;
-use Convoy\Models\IPAddress;
+use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
@@ -25,7 +25,7 @@ class AddressController extends Controller
 
     public function index(Request $request, Node $node)
     {
-        $addresses = QueryBuilder::for(IPAddress::query())
+        $addresses = QueryBuilder::for(Address::query())
             ->with('server')
             ->where('ip_addresses.node_id', $node->id)
             ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress), AllowedNullableFilter::exact('server_id')])
@@ -36,7 +36,7 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request, Node $node)
     {
-        $address = IPAddress::create(array_merge(['node_id' => $node->id], $request->validated()));
+        $address = Address::create(array_merge(['node_id' => $node->id], $request->validated()));
 
         $address->load('server');
 
@@ -51,7 +51,7 @@ class AddressController extends Controller
         return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
-    public function update(UpdateAddressRequest $request, Node $node, IPAddress $address)
+    public function update(UpdateAddressRequest $request, Node $node, Address $address)
     {
         $address->load('server');
 
@@ -82,7 +82,7 @@ class AddressController extends Controller
         return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
     }
 
-    public function destroy(Node $node, IPAddress $address): Response
+    public function destroy(Node $node, Address $address): Response
     {
         $address->load('server');
 

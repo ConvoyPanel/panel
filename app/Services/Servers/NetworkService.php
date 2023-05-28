@@ -6,7 +6,7 @@ use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
 use Convoy\Data\Server\Eloquent\ServerAddressesData;
 use Convoy\Data\Server\MacAddressData;
 use Convoy\Enums\Network\AddressType;
-use Convoy\Models\IPAddress;
+use Convoy\Models\Address;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
@@ -130,7 +130,7 @@ class NetworkService
         $addressesToRemove = array_filter($currentAddresses, fn ($id) => ! in_array($id, $addressIds));
 
         if (! empty($addressesToAdd)) {
-            IPAddress::query()
+            Address::query()
                 ->where('node_id', $server->node_id)
                 ->whereIn('id', $addressesToAdd)
                 ->whereNull('server_id')
@@ -138,7 +138,7 @@ class NetworkService
         }
 
         if (! empty($addressesToRemove)) {
-            IPAddress::query()
+            Address::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)
                 ->update(['server_id' => null]);

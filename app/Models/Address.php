@@ -4,7 +4,7 @@ namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class IPAddress extends Model
+class Address extends Model
 {
     use HasFactory;
 
