@@ -4,6 +4,30 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.0-beta
+
+The release candidate process for non-beta v3.9.0 was discontinued. Convoy will be keeping its beta status while more improvements to the product are made.
+
+If you are upgrading from v3.8.1-beta, keep note of these notices:
+
+- v3.9.0-rc.9: :warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the implementation of encryption of node credentials in Convoy from this point on.
+- v3.9.0-rc.3: :warning: This release makes changes to the data in your database. Rows that have a non-null `deleted_at` field in
+your `servers` and `users` table will be purged. If your routine relies on soft deletes, please make changes now to stop
+relying on them as they are removed in this update.
+
+### Fixed
+
+- Servers using IP addresses that they shouldn't have access to.
+
+### Added
+
+- Address pools (not in use yet)
+
+### Changed
+
+- IPAddress internal naming to Address
+- SSO to use JWT instead of generating+saving tokens to the database
+
 ## v3.9.0-rc.9
 
 :warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the implementation of encryption of node credentials in Convoy from this point on.

@@ -44,7 +44,7 @@ class NetworkService
         }
     }
 
-    public function lockIps(Server $server, array $addresses, string $ipsetName = 'default')
+    public function lockIps(Server $server, array $addresses, string $ipsetName)
     {
         $this->firewallRepository->setServer($server);
 
@@ -96,8 +96,9 @@ class NetworkService
             'ipv4' => $addresses->ipv4->first()?->toArray(),
             'ipv6' => $addresses->ipv6->first()?->toArray(),
         ]));
-        $this->lockIps($server, array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())));
+        $this->lockIps($server, array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())), 'ipfilter-net0');
         $this->firewallRepository->setServer($server)->updateOptions([
+            'enable' => true,
             'ipfilter' => true,
             'policy_in' => 'ACCEPT',
             'policy_out' => 'ACCEPT',
@@ -105,7 +106,7 @@ class NetworkService
 
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
 
-        $this->allocationRepository->setServer($server)->update(['net0' => "virtio={$macAddress},bridge={$server->node->network}"]);
+        $this->allocationRepository->setServer($server)->update(['net0' => "virtio={$macAddress},bridge={$server->node->network},firewall=1"]);
     }
 
     public function updateRateLimit(Server $server, ?int $mebibytes = null)
@@ -113,7 +114,7 @@ class NetworkService
         $macAddresses = $this->getMacAddresses($server, true, true);
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
 
-        $payload = "virtio={$macAddress},bridge={$server->node->network}";
+        $payload = "virtio={$macAddress},bridge={$server->node->network},firewall=1";
 
         if (! is_null($mebibytes)) {
             $payload .= ',rate='.$mebibytes;
