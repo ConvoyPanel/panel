@@ -12,9 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('nodes', function (Blueprint $table) {
-            DB::statement('ALTER TABLE nodes MODIFY COLUMN port int AFTER fqdn');
-        });
+        DB::statement('ALTER TABLE nodes MODIFY COLUMN port int AFTER fqdn');
     }
 
     /**
@@ -22,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('behind_fqdn_in_nodes', function (Blueprint $table) {
-            DB::statement('ALTER TABLE nodes MODIFY COLUMN port int AFTER secret');
-        });
+        DB::statement('ALTER TABLE nodes MODIFY COLUMN port int AFTER secret');
     }
 };
