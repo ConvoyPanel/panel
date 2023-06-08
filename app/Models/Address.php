@@ -10,22 +10,17 @@ class Address extends Model
 
     protected $table = 'ip_addresses';
 
-    protected $fillable = ['server_id', 'node_id', 'address', 'cidr', 'gateway', 'mac_address', 'type'];
+    protected $guarded = ['id', 'updated_at', 'created_at'];
 
     public static $validationRules = [
+        'address_pool_id' => ['exists:address_pools,id', 'required'],
         'server_id' => ['exists:servers,id', 'nullable'],
-        'node_id' => ['exists:nodes,id', 'required'],
         'type' => ['in:ipv4,ipv6', 'required'],
         'address' => ['ip'],
         'cidr' => ['numeric', 'required'],
         'gateway' => ['ip'],
         'mac_address' => ['mac_address', 'nullable'],
     ];
-
-    public function node()
-    {
-        return $this->belongsTo(Node::class);
-    }
 
     public function server()
     {
