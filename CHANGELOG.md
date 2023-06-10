@@ -6,9 +6,13 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ## v3.9.1-beta
 
-### Fixed
+### Fixes
 
-- Coterm fields required when trying to update node information instead of updating Coterm information.
+- Fixed coterm fields required when trying to update node information instead of updating Coterm information.
+
+### Changes
+
+- Reorganized frontend React Router routes
 
 ## v3.9.0-beta
 
