@@ -3,11 +3,57 @@ import { NavigationBarContext } from '@/components/elements/navigation/Navigatio
 import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { ServerContext } from '@/state/server'
-import { useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, useMatches } from 'react-router-dom'
+import { lazy, useContext, useEffect, useMemo, useState } from 'react'
+import { Outlet, RouteObject, useMatches } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
 import { useTranslation } from 'react-i18next'
+import { lazyLoad } from '@/routers/router'
+
+export const routes: RouteObject[] = [
+    {
+        element: <ServerContext.Provider>{lazyLoad(lazy(() => import('./ServerRouter')))}</ServerContext.Provider>,
+        path: '/servers/:id',
+        children: [
+            {
+                index: true,
+                element: lazyLoad(lazy(() => import('@/components/servers/overview/ServerOverviewContainer'))),
+            },
+            {
+                path: 'backups',
+                element: lazyLoad(lazy(() => import('@/components/servers/backups/BackupsContainer'))),
+            },
+            {
+                path: 'settings',
+                element: lazyLoad(lazy(() => import('@/components/servers/settings/ServerSettingsContainer'))),
+                children: [
+                    {
+                        path: 'general',
+                        element: lazyLoad(lazy(() => import('@/components/servers/settings/GeneralContainer'))),
+                    },
+
+                    {
+                        path: 'hardware',
+                        element: lazyLoad(lazy(() => import('@/components/servers/settings/HardwareContainer'))),
+                    },
+
+                    {
+                        path: 'network',
+                        element: lazyLoad(lazy(() => import('@/components/servers/settings/NetworkContainer'))),
+                    },
+                    {
+                        path: 'security',
+                        element: lazyLoad(lazy(() => import('@/components/servers/settings/SecurityContainer'))),
+                    },
+                ],
+            },
+            {
+                path: 'terminal',
+                element: lazyLoad(lazy(() => import('@/components/servers/terminal/ServerTerminalContainer'))),
+            },
+        ],
+    },
+]
 
 const ServerRouter = () => {
     const { t: tStrings } = useTranslation('strings')

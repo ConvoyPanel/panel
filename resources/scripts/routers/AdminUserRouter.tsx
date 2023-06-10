@@ -2,9 +2,50 @@ import { httpErrorToHuman } from '@/api/http'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import { useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import { lazy, useContext, useEffect, useMemo, useState } from 'react'
+import { Outlet, RouteObject, useMatch } from 'react-router-dom'
 import { AdminUserContext } from '@/state/admin/user'
+import { lazyLoad } from '@/routers/router'
+
+export const routes: RouteObject[] = [
+    {
+        path: 'users',
+        children: [
+            {
+                index: true,
+                element: lazyLoad(lazy(() => import('@/components/admin/users/UsersContainer'))),
+            },
+            {
+                path: ':id',
+                element: (
+                    <AdminUserContext.Provider>
+                        {lazyLoad(lazy(() => import('./AdminUserRouter')))}
+                    </AdminUserContext.Provider>
+                ),
+                children: [
+                    {
+                        path: 'settings',
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/users/settings/UserSettingsContainer'))
+                        ),
+                        children: [
+                            {
+                                path: 'general',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/admin/users/settings/GeneralContainer'))
+                                ),
+                            },
+                        ],
+                    },
+                    {
+                        path: 'servers',
+                        element: lazyLoad(lazy(() => import('@/components/admin/users/servers/UserServersContainer'))),
+                    },
+                ],
+            },
+        ],
+    },
+]
 
 const AdminUserRouter = () => {
     const match = useMatch('/admin/users/:id/*')

@@ -4,9 +4,72 @@ import { ErrorMessage, NotFound } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import { NodeContext } from '@/state/admin/node'
-import { useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
+import { lazy, useContext, useEffect, useMemo, useState } from 'react'
+import { Outlet, Route, RouteObject, Routes, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { lazyLoad } from '@/routers/router'
+
+export const routes: RouteObject[] = [
+    {
+        path: 'nodes',
+        children: [
+            {
+                index: true,
+                element: lazyLoad(lazy(() => import('@/components/admin/nodes/NodesContainer'))),
+            },
+            {
+                path: ':id',
+                element: (
+                    <NodeContext.Provider>
+                        {lazyLoad(lazy(() => import('@/routers/AdminNodeRouter')))}
+                    </NodeContext.Provider>
+                ),
+                children: [
+                    {
+                        index: true,
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/nodes/overview/NodeOverviewContainer'))
+                        ),
+                    },
+                    {
+                        path: 'servers',
+                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/servers/NodeServersContainer'))),
+                    },
+                    {
+                        path: 'isos',
+                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/isos/IsoLibraryContainer'))),
+                    },
+                    {
+                        path: 'templates',
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/nodes/templates/NodeTemplatesContainer'))
+                        ),
+                    },
+                    {
+                        path: 'addresses',
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/nodes/addresses/NodeAddressesContainer'))
+                        ),
+                    },
+                    {
+                        path: 'settings',
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/nodes/settings/NodeSettingsContainer'))
+                        ),
+                        children: [
+                            {
+                                path: 'general',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/admin/nodes/settings/GeneralContainer'))
+                                ),
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+]
 
 const AdminNodeRouter = () => {
     const { t: tStrings } = useTranslation('strings')
