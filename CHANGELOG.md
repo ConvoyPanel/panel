@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.1-beta
+
+### Fixed
+
+- Coterm fields required when trying to update node information instead of updating Coterm information.
+
 ## v3.9.0-beta
 
 The release candidate process for non-beta v3.9.0 was discontinued. Convoy will be keeping its beta status while more improvements to the product are made.
