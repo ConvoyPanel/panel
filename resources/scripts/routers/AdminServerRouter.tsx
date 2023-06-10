@@ -1,20 +1,66 @@
 import { httpErrorToHuman } from '@/api/http'
-import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import ScreenBlock, { NotFound, ErrorMessage } from '@/components/elements/ScreenBlock'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import routes from '@/routers/router'
-import { ServerContext } from '@/state/server'
-import { useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Route, Routes, useMatch } from 'react-router-dom'
-import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { lazy, useContext, useEffect, useState } from 'react'
+import { Outlet, RouteObject, useMatch } from 'react-router-dom'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { AdminServerContext } from '@/state/admin/server'
-import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 import { useTranslation } from 'react-i18next'
+import { ServerContext } from '@/state/server'
+import { lazyLoad } from '@/routers/router'
+
+export const routes: RouteObject[] = [
+    {
+        path: 'servers',
+        children: [
+            {
+                index: true,
+                element: lazyLoad(lazy(() => import('@/components/admin/servers/ServersContainer'))),
+            },
+            {
+                path: ':id',
+                element: (
+                    <AdminServerContext.Provider>
+                        {lazyLoad(lazy(() => import('@/routers/AdminServerRouter')))}
+                    </AdminServerContext.Provider>
+                ),
+                children: [
+                    {
+                        index: true,
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/servers/overview/ServerOverviewContainer'))
+                        ),
+                    },
+                    {
+                        path: 'settings',
+                        element: lazyLoad(
+                            lazy(() => import('@/components/admin/servers/settings/ServerSettingsContainer'))
+                        ),
+                        children: [
+                            {
+                                path: 'general',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/admin/servers/settings/GeneralContainer'))
+                                ),
+                            },
+                            {
+                                path: 'hardware',
+                                element: lazyLoad(
+                                    lazy(() => import('@/components/admin/servers/settings/ServerHardwareContainer'))
+                                ),
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+]
 
 const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
-    const id = match!.params.id
     const [error, setError] = useState<string>()
     const server = AdminServerContext.useStoreState(state => state.server.data)
     const getServer = AdminServerContext.useStoreActions(actions => actions.server.getServer)

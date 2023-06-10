@@ -1,8 +1,41 @@
 import ContentContainer from '@/components/elements/ContentContainer'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { useContext, useEffect } from 'react'
-import { Link, Outlet, Route, Routes, useMatch, useMatches } from 'react-router-dom'
+import { lazy, useContext, useEffect } from 'react'
+import { Link, Outlet, RouteObject, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { routes as adminNodeRoutes } from '@/routers/AdminNodeRouter'
+import { routes as adminServerRoutes } from '@/routers/AdminServerRouter'
+import { routes as adminUserRoutes } from '@/routers/AdminUserRouter'
+import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
+import { lazyLoad } from '@/routers/router'
+
+export const routes: RouteObject[] = [
+    {
+        path: '/admin',
+        element: (
+            <AuthenticatedRoutes requireRootAdmin>
+                {lazyLoad(lazy(() => import('@/routers/AdminDashboardRouter')))}
+            </AuthenticatedRoutes>
+        ),
+        children: [
+            {
+                index: true,
+                element: lazyLoad(lazy(() => import('@/components/admin/overview/OverviewContainer'))),
+            },
+            {
+                path: 'locations',
+                element: lazyLoad(lazy(() => import('@/components/admin/locations/LocationsContainer'))),
+            },
+            ...adminNodeRoutes,
+            ...adminServerRoutes,
+            ...adminUserRoutes,
+            {
+                path: 'tokens',
+                element: lazyLoad(lazy(() => import('@/components/admin/tokens/TokensContainer'))),
+            },
+        ],
+    },
+]
 
 export const AdminBanner = () => (
     <div className='bg-foreground py-1'>

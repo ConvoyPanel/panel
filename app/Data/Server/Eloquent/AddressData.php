@@ -10,7 +10,7 @@ class AddressData extends Data
 {
     public function __construct(
       public int $id,
-      public ?int $server_id,
+      public ?int $address_pool_id,
       #[In(['ipv4', 'ipv6'])]
       public string $type,
       #[IP]
