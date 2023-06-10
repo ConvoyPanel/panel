@@ -4,7 +4,7 @@ import SegmentedControl from '@/components/elements/SegmentedControl'
 import Button from '@/components/elements/Button'
 import { ServerContext } from '@/state/server'
 import { useFlashKey } from '@/util/useFlash'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import getSecurity from '@/api/server/settings/getSecurity'
 import updateSecurity from '@/api/server/settings/updateSecurity'
@@ -20,44 +20,42 @@ const AuthenticationCard = () => {
     const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${uuid}.settings.security.auth`)
+    const [type, setType] = useState<'password' | 'ssh_keys'>('password')
 
     const { data, mutate } = useSWR(['server:settings:security', uuid], () => getSecurity(uuid))
 
     const sshKeysSchema = z.object({
-        type: z.literal('ssh_keys'),
         sshKeys: z.string().optional(),
+        password: z.string().optional(),
     })
 
     const passwordSchema = z.object({
-        type: z.literal('password'),
         sshKeys: z.string().optional(),
         password: englishKeyboardCharacters(password()),
     })
-    const schema = z.discriminatedUnion('type', [sshKeysSchema, passwordSchema])
+    const schema = type === 'password' ? passwordSchema : sshKeysSchema
 
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
-            type: 'password',
-            sshKeys: data?.sshKeys,
+            sshKeys: data?.sshKeys ?? '',
             password: '',
         },
     })
-
-    const watchType = form.watch('type', 'password')
 
     const submit = async (values: z.infer<typeof schema>) => {
         clearFlashes()
 
         try {
             await updateSecurity(uuid, {
-                type: values.type,
-                password: values.type === 'password' ? values.password : undefined,
-                sshKeys: values.type === 'ssh_keys' ? values.sshKeys : undefined,
+                type,
+                password: type === 'password' ? values.password : undefined,
+                sshKeys: type === 'ssh_keys' ? values.sshKeys : undefined,
             })
 
             form.reset({
-                sshKeys: values.sshKeys,
+                sshKeys: values.sshKeys ?? '',
+                password: '',
             })
         } catch (e) {
             clearAndAddHttpError(e as Error)
@@ -66,7 +64,8 @@ const AuthenticationCard = () => {
 
     useEffect(() => {
         form.reset({
-            sshKeys: data?.sshKeys,
+            sshKeys: data?.sshKeys ?? '',
+            password: '',
         })
     }, [data])
 
@@ -82,17 +81,17 @@ const AuthenticationCard = () => {
                             <SegmentedControl
                                 className='!w-full md:!w-auto'
                                 disabled={form.formState.isSubmitting}
-                                value={watchType}
-                                onChange={val => form.setValue('type', val)}
+                                value={type}
+                                onChange={val => setType(val as typeof type)}
                                 data={[
                                     { value: 'password', label: tStrings('password') },
                                     { value: 'ssh_keys', label: tStrings('ssh_key', { count: 2 }) },
                                 ]}
                             />
-                            {watchType === 'password' && (
+                            {type === 'password' && (
                                 <TextInputForm type='password' name='password' label='Password' />
                             )}
-                            {watchType === 'ssh_keys' && <TextareaForm name='sshKeys' label='SSH Keys' />}
+                            {type === 'ssh_keys' && <TextareaForm name='sshKeys' label='SSH Keys' />}
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>
@@ -102,6 +101,7 @@ const AuthenticationCard = () => {
                             variant='filled'
                             color='success'
                             size='sm'
+                            disabled={!form.formState.isDirty}
                         >
                             {tStrings('save')}
                         </Button>

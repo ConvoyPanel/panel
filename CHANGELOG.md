@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.9.2-beta
+
+### Fixes
+
+- Fixed inability to save new password/ssh keys on Client > Server > Settings > Security > Authentication
+
 ## v3.9.1-beta
 
 ### Fixes
