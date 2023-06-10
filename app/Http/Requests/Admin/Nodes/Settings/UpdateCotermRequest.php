@@ -3,6 +3,7 @@
 namespace Convoy\Http\Requests\Admin\Nodes\Settings;
 
 use Convoy\Http\Requests\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCotermRequest extends FormRequest
 {
@@ -14,7 +15,12 @@ class UpdateCotermRequest extends FormRequest
         return [
             'is_enabled' => 'required|boolean',
             'is_tls_enabled' => 'required|boolean',
-            'fqdn' => 'required_if:is_enabled,1|string|max:191',
+            'fqdn' => [
+                'required_if:is_enabled,1',
+                Rule::when(!$this->boolean('is_enabled'), ['nullable']),
+                'string',
+                'max:191',
+            ],
             'port' => 'required|integer',
         ];
     }

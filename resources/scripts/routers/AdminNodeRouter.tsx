@@ -7,7 +7,7 @@ import { NodeContext } from '@/state/admin/node'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, Route, RouteObject, Routes, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     {

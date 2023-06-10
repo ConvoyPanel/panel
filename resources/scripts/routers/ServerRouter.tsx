@@ -8,7 +8,7 @@ import { Outlet, RouteObject, useMatches } from 'react-router-dom'
 import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon } from '@heroicons/react/24/outline'
 import { EloquentStatus } from '@/api/server/types'
 import { useTranslation } from 'react-i18next'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     {

@@ -15,6 +15,7 @@ import updateCoterm from '@/api/admin/nodes/settings/updateCoterm'
 import { useState } from 'react'
 import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
 import CotermResetModal from '@/components/admin/nodes/settings/partials/general/CotermResetModal'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 
 const CotermCard = () => {
     const node = NodeContext.useStoreState(state => state.node.data!)
@@ -45,7 +46,7 @@ const CotermCard = () => {
         resolver: zodResolver(schema),
         defaultValues: {
             isEnabled: node.cotermEnabled,
-            fqdn: node.cotermFqdn,
+            fqdn: node.cotermFqdn ?? '', // fallback to empty string because null values are not allowed
             port: node.cotermPort.toString(),
             isTlsEnabled: node.cotermTlsEnabled,
         },
@@ -54,11 +55,14 @@ const CotermCard = () => {
     const isEnabled = form.watch('isEnabled')
 
     const submit = async (_data: any) => {
-        const data = _data as z.infer<typeof schema>
+        const {fqdn, ...data} = _data as z.infer<typeof schema>
         clearFlashes()
 
         try {
-            const details = await updateCoterm(node.id, data)
+            const details = await updateCoterm(node.id, {
+                fqdn: fqdn === '' ? null : fqdn,
+                ...data,
+            })
 
             if (details.token) {
                 setToken(details.token)
@@ -66,7 +70,7 @@ const CotermCard = () => {
 
             form.reset({
                 isEnabled: details.isEnabled,
-                fqdn: details.fqdn,
+                fqdn: details.fqdn ?? '',
                 port: details.port.toString(),
                 isTlsEnabled: details.isTlsEnabled,
             })
@@ -99,6 +103,7 @@ const CotermCard = () => {
                             <p className={'description-small my-3'}>{t('coterm.description')}</p>
 
                             <div className={'flex flex-col gap-3'}>
+                                <FlashMessageRender byKey={`admin.nodes.${node.id}.settings.general.coterm`} />
                                 <SwitchForm name={'isEnabled'} label={t('coterm.enable')} />
                                 <div className={'flex flex-col lg:grid grid-cols-5 gap-3'}>
                                     <TextInputForm

@@ -2,7 +2,7 @@ import http from '@/api/http'
 
 interface UpdateCotermParameters {
     isEnabled: boolean
-    fqdn: string
+    fqdn: string | null
     port: number
     isTlsEnabled: boolean
 }

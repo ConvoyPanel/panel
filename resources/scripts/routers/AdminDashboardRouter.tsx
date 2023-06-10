@@ -7,7 +7,7 @@ import { routes as adminNodeRoutes } from '@/routers/AdminNodeRouter'
 import { routes as adminServerRoutes } from '@/routers/AdminServerRouter'
 import { routes as adminUserRoutes } from '@/routers/AdminUserRouter'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     {
