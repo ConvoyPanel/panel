@@ -19,7 +19,7 @@ export interface Node {
     network: string
     cotermEnabled: boolean
     cotermTlsEnabled: boolean
-    cotermFqdn: string
+    cotermFqdn: string | null
     cotermPort: number
     serversCount: number
 }

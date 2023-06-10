@@ -9,7 +9,7 @@ import { AdminServerContext } from '@/state/admin/server'
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 import { useTranslation } from 'react-i18next'
 import { ServerContext } from '@/state/server'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     {

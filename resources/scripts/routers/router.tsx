@@ -8,19 +8,12 @@ import NavigationBar from '@/components/elements/navigation/NavigationBar'
 import NavigationBarProvider from '@/components/NavigationBarProvider'
 import { routes as adminRoutes } from '@/routers/AdminDashboardRouter'
 import { routes as clientRoutes } from '@/routers/DashboardRouter'
+import { lazyLoad } from '@/routers/helpers'
 
 export interface Route {
     path: string
     component: FunctionComponent<{ children?: ReactNode }>
     children?: Route[]
-}
-
-export const lazyLoad = (LazyElement: LazyExoticComponent<() => JSX.Element>) => {
-    return (
-        <Spinner.Suspense>
-            <LazyElement />
-        </Spinner.Suspense>
-    )
 }
 
 const router = createBrowserRouter([

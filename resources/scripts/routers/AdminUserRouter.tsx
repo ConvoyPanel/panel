@@ -5,7 +5,7 @@ import Spinner from '@/components/elements/Spinner'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, RouteObject, useMatch } from 'react-router-dom'
 import { AdminUserContext } from '@/state/admin/user'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     {

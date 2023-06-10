@@ -43,7 +43,7 @@ class Node extends Model
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_enabled' => 'sometimes|boolean',
         'coterm_tls_enabled' => 'sometimes|boolean',
-        'coterm_fqdn' => 'required_if:coterm_enabled,1|string|max:191',
+        'coterm_fqdn' => 'sometimes|nullable|string|max:191',
         'coterm_port' => 'sometimes|integer',
         'coterm_token_id' => 'required_if:coterm_enabled,1',
         'coterm_token' => 'required_if:coterm_enabled,1',

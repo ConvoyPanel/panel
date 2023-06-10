@@ -5,7 +5,7 @@ import { lazy, useContext, useEffect } from 'react'
 import { RouteObject } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { routes as serverRoutes } from '@/routers/ServerRouter'
-import { lazyLoad } from '@/routers/router'
+import { lazyLoad } from '@/routers/helpers'
 
 export const routes: RouteObject[] = [
     { index: true, element: lazyLoad(lazy(() => import('@/routers/DashboardRouter'))) },
