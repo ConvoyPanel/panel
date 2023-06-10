@@ -72,11 +72,11 @@ const NavigationBar = () => {
         if (logo.current && bottomBar.current && placeholder.current) {
             if (!isVisible) {
                 bottomBar.current.classList.add('fixed', 'top-0', '!shadow-lg')
-                logo.current.classList.add('!w-12')
+                logo.current.classList.add('!w-8')
                 placeholder.current.classList.remove('hidden')
             } else {
                 bottomBar.current.classList.remove('fixed', 'top-0', '!shadow-lg')
-                logo.current.classList.remove('!w-12')
+                logo.current.classList.remove('!w-8')
                 placeholder.current.classList.add('hidden')
             }
         }
@@ -98,7 +98,7 @@ const NavigationBar = () => {
                 <div className='flex justify-between'>
                     <div className='flex shrink overflow-hidden space-x-5 items-center'>
                         <Link to={isAdminArea ? '/admin' : '/'} className='flex items-center space-x-3'>
-                            <img src={Logo} className='w-7 h-7 dark:invert' alt='Convoy logo' />
+                            <img src={Logo} className='w-6 h-6 dark:invert' alt='Convoy logo' />
                             <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
                         </Link>
                         {breadcrumb && (
@@ -134,7 +134,7 @@ const NavigationBar = () => {
                             transition: 'width 0.25s ease',
                         }}
                     >
-                        <img src={Logo} className='w-6 h-6 dark:invert' alt='Convoy logo' />
+                        <img src={Logo} className='w-5 h-5 dark:invert' alt='Convoy logo' />
                     </div>
                     <div className='flex z-[2000] overflow-x-auto scrollbar-hide'>
                         {routes.map(route => (

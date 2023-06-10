@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## TODO: add version
+
+### Changes
+
+- Added new logo courtesy of Yatin Manuel from [Halvex Inc.](https://halvex.net/)
+
 ## v3.9.2-beta
 
 ### Fixes
