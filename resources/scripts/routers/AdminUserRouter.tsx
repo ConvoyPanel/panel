@@ -1,11 +1,9 @@
-import { httpErrorToHuman } from '@/api/http'
+import getUser from '@/api/admin/users/getUser'
+import useUserSWR, { getKey } from '@/api/admin/users/useUserSWR'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { ErrorMessage } from '@/components/elements/ScreenBlock'
-import Spinner from '@/components/elements/Spinner'
-import { lazy, useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, RouteObject, useMatch } from 'react-router-dom'
-import { AdminUserContext } from '@/state/admin/user'
-import { lazyLoad } from '@/routers/helpers'
+import { lazyLoad, query } from '@/routers/helpers'
+import { lazy, useContext, useEffect } from 'react'
+import { Outlet, RouteObject } from 'react-router-dom'
 
 export const routes: RouteObject[] = [
     {
@@ -17,11 +15,8 @@ export const routes: RouteObject[] = [
             },
             {
                 path: ':id',
-                element: (
-                    <AdminUserContext.Provider>
-                        {lazyLoad(lazy(() => import('./AdminUserRouter')))}
-                    </AdminUserContext.Provider>
-                ),
+                element: lazyLoad(lazy(() => import('./AdminUserRouter'))),
+                loader: ({ params }) => query(getKey(parseInt(params.id!)), () => getUser(parseInt(params.id!))),
                 children: [
                     {
                         path: 'settings',
@@ -47,41 +42,20 @@ export const routes: RouteObject[] = [
     },
 ]
 
+const visibleRoutes = [
+    {
+        name: 'Settings',
+        path: '/admin/users/:id/settings',
+    },
+    {
+        name: 'Servers',
+        path: '/admin/users/:id/servers',
+    },
+]
+
 const AdminUserRouter = () => {
-    const match = useMatch('/admin/users/:id/*')
-    const id = match!.params.id
-    const [error, setError] = useState<string>()
-    const user = AdminUserContext.useStoreState(state => state.user.data)
-    const getUser = AdminUserContext.useStoreActions(actions => actions.user.getUser)
-    const clearUserState = AdminUserContext.useStoreActions(actions => actions.clearUserState)
-
-    const visibleRoutes = useMemo(
-        () => [
-            {
-                name: 'Settings',
-                path: `/admin/users/${id}/settings`,
-            },
-            {
-                name: 'Servers',
-                path: `/admin/users/${id}/servers`,
-            },
-        ],
-        [match?.params.id]
-    )
-
-    useEffect(() => {
-        setError(undefined)
-
-        getUser(parseInt(match!.params.id as string)).catch((error: any) => {
-            setError(httpErrorToHuman(error))
-        })
-
-        return () => {
-            clearUserState()
-        }
-    }, [match?.params.id])
-
     const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
+    const { data: user } = useUserSWR()
 
     useEffect(() => {
         setRoutes(visibleRoutes)
@@ -90,10 +64,10 @@ const AdminUserRouter = () => {
     }, [])
 
     useEffect(() => {
-        setBreadcrumb(user?.name)
-    }, [user])
+        setBreadcrumb(user.name)
+    }, [user.name])
 
-    return <>{!user ? error ? <ErrorMessage message={error} /> : <Spinner /> : <Outlet />}</>
+    return <Outlet />
 }
 
 export default AdminUserRouter

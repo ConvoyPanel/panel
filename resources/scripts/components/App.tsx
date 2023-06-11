@@ -4,6 +4,7 @@ import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } fro
 import ThemeProvider from '@/components/ThemeProvider'
 import { NavigationProgress } from '@mantine/nprogress'
 import router from '@/routers/router'
+import Spinner from '@/components/elements/Spinner'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -46,7 +47,9 @@ const App = () => {
         <StoreProvider store={store}>
             <ThemeProvider>
                 <NavigationProgress />
-                <RouterProvider router={router} />
+                <Spinner.Suspense>
+                    <RouterProvider router={router} />
+                </Spinner.Suspense>
             </ThemeProvider>
         </StoreProvider>
     )

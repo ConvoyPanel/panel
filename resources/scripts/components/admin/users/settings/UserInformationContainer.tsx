@@ -11,10 +11,10 @@ import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
 import Button from '@/components/elements/Button'
 import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import useUserSWR from '@/api/admin/users/useUserSWR'
 
 const UserInformationContainer = () => {
-    const user = AdminUserContext.useStoreState(state => state.user.data!)
-    const setUser = AdminUserContext.useStoreActions(actions => actions.user.setUser)
+    const { data: user, mutate } = useUserSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:user:settings:general')
 
     const form = useFormik({
@@ -45,7 +45,7 @@ const UserInformationContainer = () => {
                     password: password.length > 0 ? password : null,
                 })
 
-                setUser(updatedUser)
+                mutate(updatedUser, false)
             } catch (e) {
                 clearAndAddHttpError(e as Error)
             }

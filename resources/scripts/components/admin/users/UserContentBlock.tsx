@@ -1,14 +1,14 @@
+import useUserSWR from '@/api/admin/users/useUserSWR'
 import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
-import { AdminUserContext } from '@/state/admin/user'
 interface Props extends PageContentBlockProps {
     title: string
 }
 
 const UserContentBlock: React.FC<Props> = ({ title, children, ...props }) => {
-    const name = AdminUserContext.useStoreState(state => state.user.data!.name)
+    const { data: user } = useUserSWR()
 
     return (
-        <PageContentBlock title={`${title} | ${name}`} {...props}>
+        <PageContentBlock title={`${title} | ${user.name}`} {...props}>
             {children}
         </PageContentBlock>
     )

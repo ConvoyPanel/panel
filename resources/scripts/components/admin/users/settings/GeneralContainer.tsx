@@ -1,6 +1,5 @@
-import FormSection from '@/components/elements/FormSection'
-import UserInformationContainer from '@/components/admin/users/settings/UserInformationContainer'
 import DeleteUserContainer from '@/components/admin/users/settings/DeleteUserContainer'
+import UserInformationContainer from '@/components/admin/users/settings/UserInformationContainer'
 
 const GeneralContainer = () => {
     return (

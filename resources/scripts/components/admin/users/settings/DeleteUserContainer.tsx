@@ -9,9 +9,10 @@ import { useState } from 'react'
 import { useFlashKey } from '@/util/useFlash'
 import deleteUser from '@/api/admin/users/deleteUser'
 import { useNavigate } from 'react-router-dom'
+import useUserSWR from '@/api/admin/users/useUserSWR'
 
 const DeleteUserContainer = () => {
-    const user = AdminUserContext.useStoreState(state => state.user.data!)
+    const { data: user } = useUserSWR()
     const [loading, setLoading] = useState(false)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:user:settings:delete')
     const navigate = useNavigate()
@@ -20,7 +21,7 @@ const DeleteUserContainer = () => {
         clearFlashes()
         setLoading(true)
         try {
-            await deleteUser(user.id)
+            await deleteUser(user!.id)
 
             navigate('/admin/users')
         } catch (e) {
