@@ -1,6 +1,4 @@
 import ContentContainer from '@/components/elements/ContentContainer'
-//@ts-ignore
-import Logo from '@/assets/images/logo.svg'
 import { Burger, LoadingOverlay } from '@mantine/core'
 import UserDropdown from '@/components/elements/navigation/UserDropdown'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -10,6 +8,7 @@ import http from '@/api/http'
 import NavLink from '@/components/elements/navigation/NavLink'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import { bindUrlParams } from '@/util/helpers'
+import Logo from '@/components/elements/Logo'
 
 export interface RouteDefinition {
     name: string
@@ -98,7 +97,7 @@ const NavigationBar = () => {
                 <div className='flex justify-between'>
                     <div className='flex shrink overflow-hidden space-x-5 items-center'>
                         <Link to={isAdminArea ? '/admin' : '/'} className='flex items-center space-x-3'>
-                            <img src={Logo} className='w-6 h-6 dark:invert' alt='Convoy logo' />
+                            <Logo className='w-6 h-6 text-foreground' />
                             <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
                         </Link>
                         {breadcrumb && (
@@ -134,7 +133,7 @@ const NavigationBar = () => {
                             transition: 'width 0.25s ease',
                         }}
                     >
-                        <img src={Logo} className='w-5 h-5 dark:invert' alt='Convoy logo' />
+                        <Logo className='w-5 h-5 text-foreground' />
                     </div>
                     <div className='flex z-[2000] overflow-x-auto scrollbar-hide'>
                         {routes.map(route => (
