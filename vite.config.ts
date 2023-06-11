@@ -5,7 +5,9 @@ import macrosPlugin from 'vite-plugin-babel-macros'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
-    plugins: [react(), laravel(['resources/scripts/main.tsx']), macrosPlugin(), visualizer()],
+    plugins: [react(), laravel(['resources/scripts/main.tsx']), macrosPlugin(), visualizer({
+        filename: './public/stats.html',
+    })],
     build: {
         target: ['es2020'],
     },
