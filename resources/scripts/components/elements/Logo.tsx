@@ -1,5 +1,6 @@
 import { ComponentProps } from 'react'
 
+// the path is ~2872 long
 const Logo = (props: ComponentProps<'svg'>) => {
     return (
         <svg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 512 512' {...props}>

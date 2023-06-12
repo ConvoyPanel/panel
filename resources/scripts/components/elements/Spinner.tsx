@@ -1,5 +1,8 @@
+import LogoOutline from '@/components/elements/LogoOutline'
+import styled from '@emotion/styled'
 import { Loader } from '@mantine/core'
 import { ReactNode, Suspense } from 'react'
+import tw from 'twin.macro'
 
 interface Props {
     screen?: boolean
@@ -13,10 +16,35 @@ interface Spinner extends React.FC<Props> {
     }>
 }
 
+const SpinnerContainer = styled.div`
+    svg {
+        ${tw`w-14`}
+    }
+    svg path {
+        animation: dash 2s cubic-bezier(0.45, 0.09, 0.6, 0.89) infinite;
+    }
+    @keyframes dash {
+        0% {
+            stroke-dasharray: 100 2652;
+            stroke-dashoffset: 0;
+        }
+        50% {
+            stroke-dasharray: 2352 400;
+            stroke-dashoffset: 2752;
+        }
+        100% {
+            stroke-dasharray: 100 2652;
+            stroke-dashoffset: 5504;
+        }
+    }
+`
+
 const Spinner: Spinner = ({ screen, flat }: Props) => {
     return (
         <div className={`grid place-items-center w-full ${screen ? 'h-screen' : 'h-40'} ${flat && 'dark:bg-black'}`}>
-            <Loader size='lg' />
+            <SpinnerContainer>
+                <LogoOutline className='text-foreground' strokeWidth={'25px'} viewBox={'-13 -13 538 538'} />
+            </SpinnerContainer>
         </div>
     )
 }
