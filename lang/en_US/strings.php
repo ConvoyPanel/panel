@@ -95,4 +95,5 @@ return [
     'iso' => 'ISO',
     'iso_one' => 'ISO',
     'iso_other' => 'ISOs',
+    'ipam' => 'IPAM',
 ];

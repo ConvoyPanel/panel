@@ -3,6 +3,7 @@
 namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Address extends Model
 {
@@ -22,7 +23,7 @@ class Address extends Model
         'mac_address' => ['mac_address', 'nullable'],
     ];
 
-    public function server()
+    public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
     }

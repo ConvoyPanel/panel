@@ -26,7 +26,6 @@ class NodeController extends ApplicationApiController
     public function index(Request $request)
     {
         $nodes = QueryBuilder::for(Node::query())
-            ->with('servers')
             ->withCount(['servers'])
             ->allowedFilters(['name', 'fqdn', AllowedFilter::exact('location_id'), AllowedFilter::custom('*', new FiltersNode)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());

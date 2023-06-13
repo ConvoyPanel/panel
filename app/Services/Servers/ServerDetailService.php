@@ -5,13 +5,12 @@ namespace Convoy\Services\Servers;
 use Convoy\Data\Server\Eloquent\ServerEloquentData;
 use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
 
 class ServerDetailService
 {
-    public function __construct(private NetworkService $networkService, private ProxmoxConfigRepository $allocationRepository, private ProxmoxCloudinitRepository $cloudinitRepository, private AllocationService $allocationService, private CloudinitService $cloudinitService)
+    public function __construct(private NetworkService $networkService, private ProxmoxConfigRepository $allocationRepository, private AllocationService $allocationService,)
     {
     }
 

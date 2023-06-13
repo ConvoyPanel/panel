@@ -7,7 +7,7 @@ interface Props {
     children: ReactNode
 }
 
-const Drawer = forwardRef<HTMLDivElement, Props>(({ open, onClose, children }: Props, ref) => {
+const Drawer = forwardRef<HTMLDivElement, Props>(({ open, onClose, children }, ref) => {
     const focusTrapRef = useRef(null)
 
     return (

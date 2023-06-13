@@ -72,6 +72,10 @@ const AdminDashboardRouter = () => {
             path: '/admin/servers',
         },
         {
+            name: tStrings('ipam'),
+            path: '/admin/ipam',
+        },
+        {
             name: tStrings('user_other'),
             path: '/admin/users',
         },

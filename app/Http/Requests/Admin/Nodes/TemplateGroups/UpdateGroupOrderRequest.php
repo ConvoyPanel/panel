@@ -7,11 +7,6 @@ use Illuminate\Validation\Validator;
 
 class UpdateGroupOrderRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [
