@@ -21,7 +21,7 @@ export const englishKeyboardCharacters = (string?: ZodString) =>
     })
 
 export const password = (string?: ZodString) =>
-    (string ?? z.string()).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/, {
+    (string ?? z.string()).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s@])\S{8,50}$/, {
         message: t('errors.invalid_string.password', {
             ns: 'zod',
         })!,
