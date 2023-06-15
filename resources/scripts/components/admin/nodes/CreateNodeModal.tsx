@@ -120,7 +120,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                         </div>
                         <div className='grid gap-3 grid-cols-2'>
                             <TextInputForm name='disk' label={`${t('disk_allocation')} (MiB)`} />
-                            <TextInputForm name='diskOverallocate' label={`${t('disk_allocation')} (MiB)`} />
+                            <TextInputForm name='diskOverallocate' label={`${t('disk_overallocation')} (%)`} />
                         </div>
                         <div className='grid gap-3 grid-cols-3'>
                             <TextInputForm name='vmStorage' label={t('vm_storage')} placeholder='local' />
