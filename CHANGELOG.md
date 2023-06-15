@@ -10,6 +10,12 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 - Added new logo courtesy of Yatin Manuel from [Halvex Inc.](https://halvex.net/)
 
+## v3.9.3-beta
+
+### Fixes
+
+- Fixed inability to successfully build the `workspace` container because the PHP Docker image recently upgraded from Debian 11 to 12 while Nodesource hasn't added stable support for Debian 12.
+
 ## v3.9.2-beta
 
 ### Fixes
