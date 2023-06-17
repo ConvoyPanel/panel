@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
+use Convoy\Transformers\Admin\AddressTransformer;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\AllowedNullableFilter;
@@ -19,6 +20,8 @@ class AddressController extends ApplicationApiController
             ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress), AllowedNullableFilter::exact('server_id')])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-
+        return fractal($addresses, new AddressTransformer)->parseIncludes($request->include)->respond();
     }
+
+
 }

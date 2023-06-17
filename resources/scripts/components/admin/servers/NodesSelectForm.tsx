@@ -1,7 +1,5 @@
-import { useField } from 'formik'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useFormContext } from 'react-hook-form'
 import SelectForm from '@/components/elements/forms/SelectForm'
@@ -11,7 +9,7 @@ interface Props {
 }
 
 const NodesSelectForm = ({ disabled }: Props) => {
-    const { setValue, watch } = useFormContext()
+    const { watch } = useFormContext()
     const nodeId: string = watch('nodeId')
     const [query, setQuery] = useState(nodeId)
 
