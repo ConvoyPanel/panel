@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { forwardRef, Fragment, ReactNode, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 

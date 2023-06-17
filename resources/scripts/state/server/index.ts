@@ -1,11 +1,11 @@
-import getServer, { Server } from '@/api/server/getServer'
+import getServer, { ServerBuild } from '@/api/server/getServer'
 import getStatus, { ServerStateData } from '@/api/server/getState'
 import { action, Action, createContextStore, thunk, Thunk } from 'easy-peasy'
 import isEqual from 'react-fast-compare'
 
 export interface ServerDataStore {
-    data?: Server
-    setServer: Action<ServerDataStore, Server>
+    data?: ServerBuild
+    setServer: Action<ServerDataStore, ServerBuild>
     getServer: Thunk<ServerDataStore, string>
 }
 
