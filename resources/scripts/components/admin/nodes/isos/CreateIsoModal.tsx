@@ -1,86 +1,114 @@
-import useIsosSWR from '@/api/admin/nodes/isos/useIsosSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import SelectFormik from '@/components/elements/formik/SelectFormik'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
-import useFlash from '@/util/useFlash'
-import { FormikProvider, useFormik } from 'formik'
-import { useEffect } from 'react'
-import * as yup from 'yup'
-import createIso, { ChecksumAlgorithm } from '@/api/admin/nodes/isos/createIso'
-import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
-import Button from '@/components/elements/Button'
+import { useFlashKey } from '@/util/useFlash'
+import createIso from '@/api/admin/nodes/isos/createIso'
 import QueryFileButton from '@/components/admin/nodes/isos/QueryFileButton'
 import { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useCallback, useMemo, useState } from 'react'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+import { KeyedMutator } from 'swr'
+import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+import { data } from 'autoprefixer'
+import SelectForm from '@/components/elements/forms/SelectForm'
 
 interface Props {
     open: boolean
     onClose: () => void
+    mutate: KeyedMutator<IsoResponse>
 }
 
-const CreateIsoModal = ({ open, onClose }: Props) => {
+const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { mutate } = useIsosSWR({ nodeId })
-    const { clearFlashes, clearAndAddHttpError } = useFlash()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${nodeId}.isos.create`)
+    const { t: tStrings } = useTranslation('strings')
+    const { t } = useTranslation('admin.nodes.isos')
 
-    const form = useFormik({
-        initialValues: {
+    const schemaWithoutDownloading = z.object({
+        name: z.string().max(40).nonempty(),
+        fileName: z
+            .string()
+            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .max(191)
+            .nonempty(),
+    })
+
+    const schemaWithoutChecksum = z.object({
+        name: z.string().max(40).nonempty(),
+        link: z.string().max(191).nonempty(),
+        fileName: z
+            .string()
+            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .max(191)
+            .nonempty(),
+        checksumAlgorithm: z.literal('none'),
+        checksum: z.string(),
+        hidden: z.boolean(),
+    })
+
+    const schemaWithChecksum = z.object({
+        name: z.string().max(40).nonempty(),
+        link: z.string().max(191).nonempty(),
+        fileName: z
+            .string()
+            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .max(191)
+            .nonempty(),
+        checksumAlgorithm: z.enum(['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']),
+        checksum: z.string().max(191).nonempty(),
+        hidden: z.boolean(),
+    })
+
+    const schema = z.discriminatedUnion('checksumAlgorithm', [schemaWithoutChecksum, schemaWithChecksum])
+
+    const form = useForm({
+        resolver: zodResolver(schema),
+        defaultValues: {
             name: '',
             link: '',
             fileName: '',
             checksumAlgorithm: 'none',
-            checksum: undefined,
+            checksum: '',
             hidden: false,
-        },
-        validationSchema: yup.object().shape({
-            name: yup.string().required('Name is required.'),
-            link: yup.string().url('Invalid link').required('Link is required.'),
-            fileName: yup
-                .string()
-                .matches(/\.iso$/, 'File extension must end in .iso')
-                .max(40, 'Limit up to 40 characters')
-                .required('File name is required.'),
-            hidden: yup.boolean(),
-            checksumAlgorithm: yup
-                .string()
-                .oneOf(['none', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'])
-                .optional(),
-            checksum: yup.string().when('checksumAlgorithm', {
-                is: (value: string | undefined) => value !== 'none',
-                then: yup.string().required('Specify the checksum'),
-            }),
-        }),
-        onSubmit: ({ checksumAlgorithm, ...values }, { setSubmitting }) => {
-            setSubmitting(true)
-            clearFlashes('admin:node:isos.create')
-
-            createIso(nodeId, {
-                checksumAlgorithm: checksumAlgorithm === 'none' ? undefined : (checksumAlgorithm as ChecksumAlgorithm),
-                ...values,
-            })
-                .then(iso => {
-                    mutate(
-                        data =>
-                            ({
-                                ...data,
-                                items: [iso, ...data!.items],
-                            } as typeof data),
-                        false
-                    )
-                    setSubmitting(false)
-                    handleClose()
-                })
-                .catch(error => {
-                    clearAndAddHttpError({ key: 'admin:node:isos.create', error })
-                    setSubmitting(false)
-                })
         },
     })
 
+    const watchChecksumAlgorithm = form.watch('checksumAlgorithm')
+
+    const submit = async (_data: any) => {
+        const { checksumAlgorithm, ...data } = _data as z.infer<typeof schema>
+        clearFlashes()
+
+        try {
+            const iso = await createIso(nodeId, {
+                checksumAlgorithm: checksumAlgorithm !== 'none' ? checksumAlgorithm : undefined,
+                ...data,
+            })
+
+            mutate(isoResponse => {
+                if (!isoResponse) return isoResponse
+                if (isoResponse.pagination.totalPages > 1) return isoResponse
+
+                return {
+                    ...isoResponse,
+                    items: [...isoResponse.items, iso],
+                }
+            }, false)
+
+            handleClose()
+        } catch (e) {
+            clearAndAddHttpError(e as Error)
+        }
+    }
+
     const handleClose = () => {
-        form.resetForm()
+        form.reset()
         onClose()
     }
 
@@ -94,60 +122,46 @@ const CreateIsoModal = ({ open, onClose }: Props) => {
         { value: 'sha512', label: 'SHA512' },
     ]
 
-    const handleQuery = (meta: FileMetadata) => {
-        form.setFieldValue('fileName', meta.fileName)
-    }
-
-    const handleQueryFail = () => {
-        form.setFieldError('link', 'Invalid remote file')
-    }
-
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>Create an ISO</Modal.Title>
+                <Modal.Title>{t('create_modal.title')}</Modal.Title>
             </Modal.Header>
 
-            <FormikProvider value={form}>
-                <form onSubmit={form.handleSubmit}>
+            <FormProvider {...form}>
+                <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:node:isos.create'} />
+                        <FlashMessageRender className='mb-5' byKey={`admin.nodes.${nodeId}.isos.create`} />
 
-                        <TextInputFormik name='name' label='Display Name' />
-                        <div
-                            className={`grid grid-cols-3 sm:grid-cols-4 gap-3 ${
-                                form.touched.link && form.errors.link ? 'items-center' : 'items-end'
-                            }`}
-                        >
-                            <TextInputFormik className='col-span-2 sm:col-span-3' name='link' label='Link' />
-                            <QueryFileButton
-                                onQuery={handleQuery}
-                                onFail={handleQueryFail}
-                                link={form.values.link}
-                                disabled={Boolean(form.errors.link) || form.values.link.length === 0}
-                                className={form.touched.link && form.errors.link ? '-mt-0.5' : ''}
-                            />
+                        <TextInputForm name='name' label={tStrings('display_name')} />
+                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 items-start`}>
+                            <TextInputForm className='col-span-2 sm:col-span-3' name='link' label={tStrings('link')} />
+                            <QueryFileButton />
                         </div>
-                        <TextInputFormik name='fileName' label='File Name' />
-                        <SelectFormik data={checksumAlgorithms} name='checksumAlgorithm' label='Checksum Algorithm' />
-                        <TextInputFormik
-                            disabled={form.values.checksumAlgorithm === 'none'}
-                            name='checksum'
-                            label='Checksum'
+                        <TextInputForm name='fileName' label={tStrings('file_name')} />
+                        <SelectForm
+                            data={checksumAlgorithms}
+                            name='checksumAlgorithm'
+                            label={t('checksum_algorithm')}
                         />
-                        <CheckboxFormik className='mt-3' name='hidden' label='Hidden' />
+                        <TextInputForm
+                            disabled={watchChecksumAlgorithm === 'none'}
+                            name='checksum'
+                            label={t('checksum')}
+                        />
+                        <CheckboxForm className='mt-3' name='hidden' label={tStrings('hidden')} />
                     </Modal.Body>
 
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
-                            Cancel
+                            {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.isSubmitting}>
-                            Create
+                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                            {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>
                 </form>
-            </FormikProvider>
+            </FormProvider>
         </Modal>
     )
 }
