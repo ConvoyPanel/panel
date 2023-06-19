@@ -22,7 +22,7 @@ class ISO extends Model
         'node_id' => 'required|integer|exists:nodes,id',
         'is_successful' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',
-        'file_name' => 'required|unique:iso_library,file_name|string|ends_with:.iso',
+        'file_name' => 'required|unique:iso_library,file_name|string|ends_with:.iso|max:191',
         'size' => 'sometimes|numeric|min:0',
         'hidden' => 'sometimes|boolean',
         'completed_at' => 'nullable|date',

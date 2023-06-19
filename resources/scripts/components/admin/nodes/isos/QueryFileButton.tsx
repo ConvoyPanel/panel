@@ -1,34 +1,34 @@
-import queryRemoteFile, { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
-import Button, { ButtonProps } from '@/components/elements/Button'
+import queryRemoteFile from '@/api/admin/tools/queryRemoteFile'
+import Button from '@/components/elements/Button'
 import { NodeContext } from '@/state/admin/node'
 import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
-interface Props extends ButtonProps {
-    onQuery: (payload: FileMetadata) => void
-    onFail: () => void
-    link: string
-}
-
-const QueryFileButton = ({ link, onQuery, onFail, ...props }: Props) => {
-    const [loading, setLoading] = useState(false)
+const QueryFileButton = () => {
+    const { getValues, setError, setValue } = useFormContext()
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const [loading, setLoading] = useState(false)
+    const { t: tStrings } = useTranslation('strings')
+    const { t } = useTranslation('admin.nodes.isos')
 
-    const handleQuery = () => {
+    const query = async () => {
         setLoading(true)
-        queryRemoteFile(nodeId, link)
-            .then(metadata => {
-                onQuery(metadata)
-                setLoading(false)
-            })
-            .catch(() => {
-                onFail()
-                setLoading(false)
-            })
+
+        try {
+            const metadata = await queryRemoteFile(nodeId, getValues('link'))
+
+            setValue('fileName', metadata.fileName)
+        } catch {
+            setError('link', t('create_modal.fail_to_query_remote_file_error'))
+        }
+
+        setLoading(false)
     }
 
     return (
-        <Button variant='filled' loading={loading} onClick={handleQuery} {...props}>
-            Query
+        <Button variant='filled' loading={loading} onClick={query} className='mt-[1.625rem]'>
+            {tStrings('query')}
         </Button>
     )
 }
