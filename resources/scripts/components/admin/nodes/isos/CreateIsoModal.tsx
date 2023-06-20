@@ -172,10 +172,10 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
                         <SegmentedControl
                             className='!w-full'
                             disabled={form.formState.isSubmitting}
-                            value={watchShouldDownload ? 'new' : 'import'}
-                            onChange={val => form.setValue('shouldDownload', val === 'new')}
+                            value={watchShouldDownload ? 'download' : 'import'}
+                            onChange={val => form.setValue('shouldDownload', val === 'download')}
                             data={[
-                                { value: 'new', label: tStrings('new') },
+                                { value: 'download', label: tStrings('download') },
                                 { value: 'import', label: tStrings('import') },
                             ]}
                         />
