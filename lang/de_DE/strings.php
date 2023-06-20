@@ -99,4 +99,5 @@ return [
     'link' => 'Link',
     'file_name' => 'File Name',
     'query' => 'Query',
+    'import' => 'Import',
 ];
