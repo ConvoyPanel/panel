@@ -20,7 +20,9 @@ const QueryFileButton = () => {
 
             setValue('fileName', metadata.fileName)
         } catch {
-            setError('link', t('create_modal.fail_to_query_remote_file_error'))
+            setError('link', {
+                message: t('create_modal.fail_to_query_remote_file_error') ?? 'Failed to query remote file.',
+            })
         }
 
         setLoading(false)

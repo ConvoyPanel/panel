@@ -13,10 +13,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useMemo, useState } from 'react'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import { KeyedMutator } from 'swr'
-import { IsoResponse } from '@/api/admin/nodes/isos/getIsos'
+import { ISO, IsoResponse } from '@/api/admin/nodes/isos/getIsos'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import { data } from 'autoprefixer'
 import SelectForm from '@/components/elements/forms/SelectForm'
+import SegmentedControl from '@/components/elements/SegmentedControl'
 
 interface Props {
     open: boolean
@@ -31,20 +32,23 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
     const { t } = useTranslation('admin.nodes.isos')
 
     const schemaWithoutDownloading = z.object({
+        shouldDownload: z.literal(false),
         name: z.string().max(40).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
             .max(191)
             .nonempty(),
+        hidden: z.boolean(),
     })
 
     const schemaWithoutChecksum = z.object({
+        shouldDownload: z.literal(true),
         name: z.string().max(40).nonempty(),
-        link: z.string().max(191).nonempty(),
+        link: z.string().url().max(191).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
             .max(191)
             .nonempty(),
         checksumAlgorithm: z.literal('none'),
@@ -53,11 +57,12 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
     })
 
     const schemaWithChecksum = z.object({
+        shouldDownload: z.literal(true),
         name: z.string().max(40).nonempty(),
-        link: z.string().max(191).nonempty(),
+        link: z.string().url().max(191).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
             .max(191)
             .nonempty(),
         checksumAlgorithm: z.enum(['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']),
@@ -65,11 +70,14 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
         hidden: z.boolean(),
     })
 
-    const schema = z.discriminatedUnion('checksumAlgorithm', [schemaWithoutChecksum, schemaWithChecksum])
+    const schemaWithDownloading = z.discriminatedUnion('checksumAlgorithm', [schemaWithoutChecksum, schemaWithChecksum])
+
+    const schema = z.union([schemaWithoutDownloading, schemaWithoutChecksum, schemaWithChecksum])
 
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
+            shouldDownload: true,
             name: '',
             link: '',
             fileName: '',
@@ -80,35 +88,64 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
     })
 
     const watchChecksumAlgorithm = form.watch('checksumAlgorithm')
+    const watchShouldDownload: boolean = form.watch('shouldDownload')
 
     const submit = async (_data: any) => {
-        const { checksumAlgorithm, ...data } = _data as z.infer<typeof schema>
         clearFlashes()
 
-        try {
-            const iso = await createIso(nodeId, {
-                checksumAlgorithm: checksumAlgorithm !== 'none' ? checksumAlgorithm : undefined,
-                ...data,
-            })
+        const data = _data as z.infer<typeof schema>
 
-            mutate(isoResponse => {
-                if (!isoResponse) return isoResponse
-                if (isoResponse.pagination.totalPages > 1) return isoResponse
+        if (data.shouldDownload) {
+            const { checksumAlgorithm, ...params } = data
 
-                return {
-                    ...isoResponse,
-                    items: [...isoResponse.items, iso],
-                }
-            }, false)
+            try {
+                const iso = await createIso(nodeId, {
+                    checksumAlgorithm: checksumAlgorithm !== 'none' ? checksumAlgorithm : undefined,
+                    ...params,
+                })
 
-            handleClose()
-        } catch (e) {
-            clearAndAddHttpError(e as Error)
+                appendToSWR(iso)
+            } catch (e) {
+                clearAndAddHttpError(e as Error)
+
+                return
+            }
         }
+
+        if (!data.shouldDownload) {
+            try {
+                const iso = await createIso(nodeId, data)
+
+                appendToSWR(iso)
+            } catch (e) {
+                clearAndAddHttpError(e as Error)
+
+                return
+            }
+        }
+
+        handleClose()
+    }
+
+    const appendToSWR = (iso: ISO) => {
+        mutate(isoResponse => {
+            if (!isoResponse) return isoResponse
+            if (
+                isoResponse.pagination.totalPages > 1 &&
+                isoResponse.pagination.currentPage !== isoResponse.pagination.totalPages
+            )
+                return isoResponse
+
+            return {
+                ...isoResponse,
+                items: [...isoResponse.items, iso],
+            }
+        }, false)
     }
 
     const handleClose = () => {
         form.reset()
+        clearFlashes()
         onClose()
     }
 
@@ -132,23 +169,42 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
                         <FlashMessageRender className='mb-5' byKey={`admin.nodes.${nodeId}.isos.create`} />
-
-                        <TextInputForm name='name' label={tStrings('display_name')} />
-                        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 items-start`}>
-                            <TextInputForm className='col-span-2 sm:col-span-3' name='link' label={tStrings('link')} />
-                            <QueryFileButton />
-                        </div>
+                        <SegmentedControl
+                            className='!w-full'
+                            disabled={form.formState.isSubmitting}
+                            value={watchShouldDownload ? 'new' : 'import'}
+                            onChange={val => form.setValue('shouldDownload', val === 'new')}
+                            data={[
+                                { value: 'new', label: tStrings('new') },
+                                { value: 'import', label: tStrings('import') },
+                            ]}
+                        />
+                        <TextInputForm name='name' label={tStrings('display_name')} className={'mt-3'} />
+                        {watchShouldDownload && (
+                            <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 items-start`}>
+                                <TextInputForm
+                                    className='col-span-2 sm:col-span-3'
+                                    name='link'
+                                    label={tStrings('link')}
+                                />
+                                <QueryFileButton />
+                            </div>
+                        )}
                         <TextInputForm name='fileName' label={tStrings('file_name')} />
-                        <SelectForm
-                            data={checksumAlgorithms}
-                            name='checksumAlgorithm'
-                            label={t('checksum_algorithm')}
-                        />
-                        <TextInputForm
-                            disabled={watchChecksumAlgorithm === 'none'}
-                            name='checksum'
-                            label={t('checksum')}
-                        />
+                        {watchShouldDownload && (
+                            <>
+                                <SelectForm
+                                    data={checksumAlgorithms}
+                                    name='checksumAlgorithm'
+                                    label={t('checksum_algorithm')}
+                                />
+                                <TextInputForm
+                                    disabled={watchChecksumAlgorithm === 'none'}
+                                    name='checksum'
+                                    label={t('checksum')}
+                                />
+                            </>
+                        )}
                         <CheckboxForm className='mt-3' name='hidden' label={tStrings('hidden')} />
                     </Modal.Body>
 

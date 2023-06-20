@@ -2,14 +2,14 @@
 
 namespace Convoy\Services\Nodes\Isos;
 
-use Convoy\Data\Helpers\ChecksumData;
-use Convoy\Enums\Node\Storage\ContentType;
-use Convoy\Jobs\Node\MonitorIsoDownloadJob;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
-use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use Convoy\Data\Helpers\ChecksumData;
+use Convoy\Data\Node\Storage\IsoData;
+use Convoy\Enums\Node\Storage\ContentType;
+use Convoy\Jobs\Node\MonitorIsoDownloadJob;
 use Illuminate\Database\ConnectionInterface;
-use Ramsey\Uuid\Uuid;
+use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class IsoService
@@ -18,13 +18,12 @@ class IsoService
     {
     }
 
-    public function create(Node $node, string $name, ?string $fileName, string $link, ?ChecksumData $checksumData = null, ?bool $hidden = false)
+    public function download(Node $node, string $name, ?string $fileName, string $link, ?ChecksumData $checksumData = null, ?bool $hidden = false)
     {
         $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(function () use ($queriedFileMetadata, $node, $hidden, $fileName, $link, $name, $checksumData) {
             $iso = ISO::create([
-                'uuid' => Uuid::uuid4()->toString(),
                 'node_id' => $node->id,
                 'name' => $name,
                 'file_name' => $fileName ?? $queriedFileMetadata->file_name,
@@ -38,6 +37,13 @@ class IsoService
 
             return $iso;
         });
+    }
+
+    public function getIso(Node $node, string $fileName): ?IsoData
+    {
+        $isos = $this->repository->setNode($node)->getIsos();
+
+        return $isos->where('file_name', '=', $fileName)->first();
     }
 
     public function delete(Node $node, ISO $iso)
