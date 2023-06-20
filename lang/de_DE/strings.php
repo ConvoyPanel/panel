@@ -100,4 +100,5 @@ return [
     'file_name' => 'File Name',
     'query' => 'Query',
     'import' => 'Import',
+    'download' => 'Download',
 ];
