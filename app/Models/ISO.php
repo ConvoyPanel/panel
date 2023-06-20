@@ -2,6 +2,8 @@
 
 namespace Convoy\Models;
 
+use Illuminate\Support\Str;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ISO extends Model
@@ -14,11 +16,11 @@ class ISO extends Model
 
     protected $casts = [
         'is_successful' => 'boolean',
+        'size' => MebibytesToAndFromBytes::class,
         'hidden' => 'boolean',
     ];
 
     public static $validationRules = [
-        'uuid' => 'required|uuid',
         'node_id' => 'required|integer|exists:nodes,id',
         'is_successful' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',
@@ -31,5 +33,14 @@ class ISO extends Model
     public function node()
     {
         return $this->belongsTo(Node::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (ISO $user) {
+            $user->uuid = Str::uuid()->toString();
+        });
     }
 }

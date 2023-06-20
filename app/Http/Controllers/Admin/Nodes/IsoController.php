@@ -35,12 +35,27 @@ class IsoController extends ApplicationApiController
 
     public function store(StoreIsoRequest $request, Node $node)
     {
-        $checksumData = (bool) $request->checksum_algorithum ? ChecksumData::from([
-            'algorithm' => ChecksumAlgorithm::from($request->checksum_algorithum),
-            'checksum' => $request->checksum,
-        ]) : null;
+        $shouldDownload = $request->boolean('should_download');
 
-        $iso = $this->isoService->create($node, $request->name, $request->file_name, $request->link, $checksumData, $request->hidden);
+        if($shouldDownload) {
+            $checksumData = (bool) $request->checksum_algorithum ? ChecksumData::from([
+                'algorithm' => ChecksumAlgorithm::from($request->checksum_algorithum),
+                'checksum' => $request->checksum,
+            ]) : null;
+
+            $iso = $this->isoService->download($node, $request->name, $request->file_name, $request->link, $checksumData, $request->hidden);
+        } else {
+            $isoFromProxmox = $this->isoService->getIso($node, $request->file_name);
+
+            $iso = $node->isos()->create([
+                'is_successful' => true,
+                'name' => $request->name,
+                'file_name' => $request->file_name,
+                'size' => $isoFromProxmox->size,
+                'hidden' => $request->boolean('hidden'),
+                'completed_at' => now(),
+            ]);
+        }
 
         return fractal($iso, new IsoTransformer)->respond();
     }
