@@ -4,11 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## TODO: add version
+## v3.10.0-beta
+
+### Additions
+
+- Added ISO imports (thanks A LOTTTT Fro!!!)
+- Added new logo courtesy of Yatin Manuel from [Halvex Inc.](https://halvex.net/)
+  - This changelog was forgotten, so I will add it now
 
 ### Changes
 
-- Added new logo courtesy of Yatin Manuel from [Halvex Inc.](https://halvex.net/)
+- mind-numbing frontend refactorings
 
 ## v3.9.3-beta
 
