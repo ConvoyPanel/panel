@@ -15,6 +15,7 @@ import { ExclamationCircleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/2
 import Menu from '@/components/elements/Menu'
 import deleteIso from '@/api/admin/nodes/isos/deleteIso'
 import EditIsoModal from '@/components/admin/nodes/isos/EditIsoModal'
+import { useTranslation } from 'react-i18next'
 
 const columns: ColumnArray<ISO> = [
     {
@@ -60,11 +61,12 @@ const columns: ColumnArray<ISO> = [
     },
 ]
 
-const IsoLibraryContainer = () => {
+const IsosContainer = () => {
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
     const [page, setPage] = usePagination()
     const { data, mutate } = useIsosSWR({ nodeId })
-    const [open, setOpen] = useState(false)
+    const [showCreateModal, setShowCreateModal] = useState(false)
+    const { t } = useTranslation('admin.nodes.isos')
 
     const rowActions = ({ row: iso }: RowActionsProps<ISO>) => {
         const [open, setOpen] = useState(false)
@@ -97,11 +99,11 @@ const IsoLibraryContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <NodeContentBlock title='ISO Library' showFlashKey='admin:node:isos'>
-                <CreateIsoModal open={open} onClose={() => setOpen(false)} />
+            <NodeContentBlock title='ISO Library'>
+                <CreateIsoModal open={showCreateModal} onClose={() => setShowCreateModal(false)} mutate={mutate} />
                 <div className='flex justify-end items-center mb-3'>
-                    <Button onClick={() => setOpen(true)} variant='filled'>
-                        New ISO
+                    <Button onClick={() => setShowCreateModal(true)} variant='filled'>
+                        {t('create_iso')}
                     </Button>
                 </div>
                 {!data ? (
@@ -116,4 +118,4 @@ const IsoLibraryContainer = () => {
     )
 }
 
-export default IsoLibraryContainer
+export default IsosContainer

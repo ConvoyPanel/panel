@@ -95,4 +95,9 @@ return [
     'iso' => 'ISO',
     'iso_one' => 'ISO',
     'iso_other' => 'ISOs',
+    'ipam' => 'IPAM',
+    'link' => 'Link',
+    'file_name' => 'File Name',
+    'query' => 'Query',
+    'import' => 'Import',
 ];
