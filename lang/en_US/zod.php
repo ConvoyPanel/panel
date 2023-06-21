@@ -27,7 +27,7 @@ return [
             'endsWith' => 'Invalid input: must end with "{{endsWith}}"',
             'hostname' => 'Invalid {{validation}}',
             'english_keyboard_characters' => 'Invalid {{validation}}',
-            'password' => 'Must contain 8 - 50 characters, one uppercase, one lowercase, one digit, and one special case character. It may not contain "@" or spaces.',
+            'password' => 'Must contain 8 - 50 characters, one uppercase, one lowercase, one digit, and one special case character. It may not contain "@".',
             'ip_address' => 'Invalid IP Address',
         ],
         'too_small' => [
