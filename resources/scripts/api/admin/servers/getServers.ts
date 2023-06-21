@@ -1,7 +1,7 @@
 import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToAdminServer, AdminServer } from '@/api/admin/servers/getServer'
+import { rawDataToAdminServer, AdminServerBuild } from '@/api/admin/servers/getServer'
 
-export type ServerIncludes = 'user' | 'node'
+export type ServerInclude = 'user' | 'node'
 
 export interface QueryParams {
     nodeId?: number
@@ -9,17 +9,17 @@ export interface QueryParams {
     query?: string
     page?: number
     perPage?: number
-    includes?: Array<ServerIncludes>
+    include?: ServerInclude[]
 }
 
-export type ServerResponse = PaginatedResult<AdminServer>
+export type ServerResponse = PaginatedResult<AdminServerBuild>
 
 const getServers = async ({
     nodeId,
     userId,
     query,
     perPage = 50,
-    includes,
+    include,
     ...params
 }: QueryParams): Promise<ServerResponse> => {
     const { data } = await http.get('/api/admin/servers', {
@@ -27,7 +27,7 @@ const getServers = async ({
             'filter[node_id]': nodeId,
             'filter[user_id]': userId,
             'filter[*]': query,
-            'includes': includes?.join(','),
+            'include': include?.join(','),
             'per_page': perPage,
             ...params,
         },

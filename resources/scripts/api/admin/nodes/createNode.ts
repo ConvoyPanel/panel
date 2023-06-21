@@ -1,13 +1,28 @@
 import { Node, rawDataToNode } from '@/api/admin/nodes/getNodes'
 import http from '@/api/http'
 
-interface CreateNodeParameters extends Omit<Node, 'id' | 'serversCount' | 'memoryAllocated' | 'diskAllocated'> {
+interface CreateNodeParameters {
+    locationId: number
+    name: string
+    cluster: string
+    fqdn: string
     tokenId: string
     secret: string
+    port: number
+    memory: number
+    memoryOverallocate: number
+    disk: number
+    diskOverallocate: number
+    vmStorage: string
+    backupStorage: string
+    isoStorage: string
+    network: string
 }
 
 const createNode = async (data: CreateNodeParameters): Promise<Node> => {
-    const { data: { data: responseData } } = await http.post('/api/admin/nodes', {
+    const {
+        data: { data: responseData },
+    } = await http.post('/api/admin/nodes', {
         location_id: data.locationId,
         name: data.name,
         cluster: data.cluster,

@@ -1,5 +1,5 @@
 import useServersSWR from '@/api/admin/servers/useServersSWR'
-import { Server } from '@/api/server/getServer'
+import { ServerBuild } from '@/api/server/getServer'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
@@ -19,9 +19,9 @@ interface Props {
 const ServersTable = ({ query, className, nodeId, userId }: Props) => {
     const { t: tStrings } = useTranslation('strings')
     const [page, setPage] = usePagination()
-    const { data } = useServersSWR({ page, query, nodeId, userId, includes: ['node', 'user'] })
+    const { data } = useServersSWR({ page, query, nodeId, userId, include: ['node', 'user'] })
 
-    const columns: ColumnArray<Server> = [
+    const columns: ColumnArray<ServerBuild> = [
         {
             accessor: 'name',
             header: tStrings('name'),

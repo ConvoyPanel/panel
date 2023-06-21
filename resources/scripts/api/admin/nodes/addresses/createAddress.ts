@@ -1,6 +1,6 @@
 import http from '@/api/http'
 import { AddressType } from '@/api/server/getServer'
-import { Address, rawDataToAddressObject } from '@/api/server/getServer'
+import { Address, rawDataToAddress } from '@/api/server/getServer'
 
 export interface AddressParameters {
     serverId?: number
@@ -12,7 +12,9 @@ export interface AddressParameters {
 }
 
 const createAddress = async (nodeId: number, payload: AddressParameters): Promise<Address> => {
-    const { data: { data } } = await http.post(`/api/admin/nodes/${nodeId}/addresses`, {
+    const {
+        data: { data },
+    } = await http.post(`/api/admin/nodes/${nodeId}/addresses`, {
         server_id: payload.serverId,
         address: payload.address,
         cidr: payload.cidr,
@@ -21,7 +23,7 @@ const createAddress = async (nodeId: number, payload: AddressParameters): Promis
         type: payload.type,
     })
 
-    return rawDataToAddressObject(data)
+    return rawDataToAddress(data)
 }
 
 export default createAddress

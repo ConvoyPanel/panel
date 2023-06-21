@@ -53,17 +53,28 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                     .then(newGroup => {
                         handleClose()
 
-                        // @ts-expect-error - groups should be defined. Though, it might not when there's a network error
-                        mutate(
-                            groups => [
+                        mutate(groups => {
+                            if (!groups) return groups
+
+                            return [
                                 ...groups,
                                 {
                                     ...newGroup,
                                     templates: [],
                                 },
-                            ],
-                            false
-                        )
+                            ]
+                        }, false)
+
+                        // mutate(
+                        //     groups => [
+                        //         ...groups,
+                        //         {
+                        //             ...newGroup,
+                        //             templates: [],
+                        //         },
+                        //     ],
+                        //     false
+                        // )
                     })
                     .catch(error => {
                         clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })

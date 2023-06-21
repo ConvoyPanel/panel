@@ -66,6 +66,8 @@ class NodeController extends ApplicationApiController
             $payload['coterm_token'] = $creds['token'];
         }
 
+
+
         $node->update($payload);
 
         return new JsonResponse([

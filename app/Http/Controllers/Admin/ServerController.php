@@ -17,7 +17,7 @@ use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDeletionService;
 use Convoy\Services\Servers\ServerSuspensionService;
 use Convoy\Services\Servers\SyncBuildService;
-use Convoy\Transformers\Admin\ServerTransformer;
+use Convoy\Transformers\Admin\ServerBuildTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -36,14 +36,14 @@ class ServerController extends ApplicationApiController
             ->allowedFilters([AllowedFilter::custom('*', new FiltersServer), AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name'])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-        return fractal($servers, new ServerTransformer())->parseIncludes($request->includes)->respond();
+        return fractal($servers, new ServerBuildTransformer())->parseIncludes($request->include)->respond();
     }
 
     public function show(Request $request, Server $server)
     {
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer())->parseIncludes($request->includes)->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes($request->include)->respond();
     }
 
     public function store(StoreServerRequest $request)
@@ -52,7 +52,7 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer())->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes(['user', 'node'])->respond();
     }
 
     public function update(UpdateGeneralInfoRequest $request, Server $server)
@@ -78,7 +78,7 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])->respond();
     }
 
     public function updateBuild(UpdateBuildRequest $request, Server $server)
@@ -95,7 +95,7 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])->respond();
     }
 
     public function suspend(Server $server)

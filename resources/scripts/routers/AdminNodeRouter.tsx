@@ -37,7 +37,7 @@ export const routes: RouteObject[] = [
                     },
                     {
                         path: 'isos',
-                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/isos/IsoLibraryContainer'))),
+                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/isos/IsosContainer'))),
                     },
                     {
                         path: 'templates',

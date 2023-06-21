@@ -1,4 +1,4 @@
-import { Server } from '@/api/server/getServer'
+import { ServerBuild } from '@/api/server/getServer'
 import { formatBytes, getInitials } from '@/util/helpers'
 import styled from '@emotion/styled'
 import { Avatar, Badge } from '@mantine/core'
@@ -8,7 +8,7 @@ import tw from 'twin.macro'
 import { useTranslation } from 'react-i18next'
 
 interface Props {
-    server: Server
+    server: ServerBuild
 }
 
 export const Dt = styled.dt`

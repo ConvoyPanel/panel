@@ -1,6 +1,5 @@
 import UserContentBlock from '@/components/admin/users/UserContentBlock'
 import ServersTable from '@/components/admin/servers/ServersTable'
-import { AdminUserContext } from '@/state/admin/user'
 import Button from '@/components/elements/Button'
 import { useState } from 'react'
 import CreateServerModal from '@/components/admin/servers/CreateServerModal'

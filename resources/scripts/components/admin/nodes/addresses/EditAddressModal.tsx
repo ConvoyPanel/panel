@@ -25,7 +25,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
     const [page] = usePagination()
-    const { mutate } = useAddressesSWR(nodeId, { page, includes: ['server'] })
+    const { mutate } = useAddressesSWR(nodeId, { page, include: ['server'] })
 
     const form = useFormik({
         enableReinitialize: true,

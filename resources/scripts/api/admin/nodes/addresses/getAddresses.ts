@@ -1,7 +1,7 @@
 import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { Address, AddressType, rawDataToAddressObject } from '@/api/server/getServer'
+import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
 
-export type AddressIncludes = 'server'
+export type AddressInclude = 'server'
 
 export type AddressResponse = PaginatedResult<Address>
 
@@ -12,12 +12,12 @@ export interface QueryParams {
     query?: string
     page?: number
     perPage?: number
-    includes?: Array<AddressIncludes>
+    include?: Array<AddressInclude>
 }
 
 const getAddresses = async (
     nodeId: number,
-    { serverId, type, address, query, perPage = 50, includes, ...params }: QueryParams
+    { serverId, type, address, query, perPage = 50, include, ...params }: QueryParams
 ): Promise<AddressResponse> => {
     const { data } = await http.get(`/api/admin/nodes/${nodeId}/addresses`, {
         params: {
@@ -26,13 +26,13 @@ const getAddresses = async (
             'filter[address]': address,
             'filter[*]': query,
             'per_page': perPage,
-            'includes': includes?.join(','),
+            'include': include?.join(','),
             ...params,
         },
     })
 
     return {
-        items: data.data.map(rawDataToAddressObject),
+        items: data.data.map(rawDataToAddress),
         pagination: getPaginationSet(data.meta.pagination),
     }
 }

@@ -12,10 +12,23 @@ export interface Address {
     cidr: number
     gateway: string
     macAddress?: string
-    server?: Server
+    server?: ServerBuild
 }
 
 export interface Server {
+    id: number
+    uuid: string
+    uuidShort: string
+    userId: number
+    nodeId: number
+    vmid: number
+    hostname: string
+    name: string
+    description: string | null
+    status: EloquentStatus
+}
+
+export interface ServerBuild {
     id: string
     internalId: number
     uuid: string
@@ -23,7 +36,7 @@ export interface Server {
     name: string
     description: string | null
     status: EloquentStatus
-    node_id: number
+    nodeId: number
     usages: {
         bandwidth: number // bytes
     }
@@ -44,24 +57,37 @@ export interface Server {
     node?: Node
 }
 
-export const rawDataToAddressObject = (data: any): Address => ({
+export const rawDataToAddress = (data: any): Address => ({
     id: data.id,
     type: data.type,
     address: data.address,
     cidr: data.cidr,
     gateway: data.gateway,
     macAddress: data.mac_address,
-    server: data.server ? rawDataToServerObject(data.server.data) : undefined,
+    server: data.server ? rawDataToServerBuild(data.server.data) : undefined,
 })
 
-export const rawDataToServerObject = (data: FractalResponseData): Server => ({
+export const rawDataToServer = (data: any): Server => ({
+    id: data.id,
+    uuid: data.uuid,
+    uuidShort: data.uuid_short,
+    nodeId: data.nodeId,
+    userId: data.userId,
+    vmid: data.vmid,
+    hostname: data.hostname,
+    name: data.name,
+    description: data.description,
+    status: data.status,
+})
+
+export const rawDataToServerBuild = (data: any): ServerBuild => ({
     id: data.id,
     internalId: data.internal_id,
     uuid: data.uuid,
     hostname: data.hostname,
     name: data.name,
     status: data.status,
-    node_id: data.node_id,
+    nodeId: data.node_id,
     description: data.description ? (data.description.length > 0 ? data.description : null) : null,
     usages: {
         bandwidth: data.usages.bandwidth,
@@ -74,8 +100,8 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
         backups: data.limits.backups,
         bandwidth: data.limits.bandwidth,
         addresses: {
-            ipv4: data.limits.addresses.ipv4.map((address: any) => rawDataToAddressObject(address)),
-            ipv6: data.limits.addresses.ipv6.map((address: any) => rawDataToAddressObject(address)),
+            ipv4: data.limits.addresses.ipv4.map((address: any) => rawDataToAddress(address)),
+            ipv6: data.limits.addresses.ipv6.map((address: any) => rawDataToAddress(address)),
         },
         macAddress: data.limits.mac_address,
     },
@@ -83,10 +109,10 @@ export const rawDataToServerObject = (data: FractalResponseData): Server => ({
     node: data?.node?.data,
 })
 
-export default (uuid: string): Promise<Server> => {
+export default (uuid: string): Promise<ServerBuild> => {
     return new Promise((resolve, reject) => {
         http.get(`/api/client/servers/${uuid}`)
-            .then(({ data }) => resolve(rawDataToServerObject(data.data)))
+            .then(({ data }) => resolve(rawDataToServerBuild(data.data)))
             .catch(reject)
     })
 }

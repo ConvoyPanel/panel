@@ -1,5 +1,5 @@
 import http from '@/api/http'
-import { rawDataToServerObject } from '@/api/server/getServer'
+import { rawDataToServerBuild } from '@/api/server/getServer'
 
 interface ServerLimits {
     cpu: number
@@ -44,9 +44,10 @@ const createServer = async ({
             ...limits,
             address_ids: addressIds,
         },
-        ...((accountPassword && accountPassword.length > 0) && {
-            account_password: accountPassword
-        }),
+        ...(accountPassword &&
+            accountPassword.length > 0 && {
+                account_password: accountPassword,
+            }),
         should_create_server: shouldCreateServer,
         ...(shouldCreateServer && {
             template_uuid: templateUuid,
@@ -54,7 +55,7 @@ const createServer = async ({
         start_on_completion: startOnCompletion,
     })
 
-    return rawDataToServerObject(responseData)
+    return rawDataToServerBuild(responseData)
 }
 
 export default createServer

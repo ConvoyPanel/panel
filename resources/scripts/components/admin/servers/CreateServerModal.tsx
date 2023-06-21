@@ -26,7 +26,7 @@ interface Props {
 
 const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
     const [page] = usePagination()
-    const { mutate } = useServersSWR({ nodeId, userId, page, query: '', includes: ['node', 'user'] })
+    const { mutate } = useServersSWR({ nodeId, userId, page, query: '', include: ['node', 'user'] })
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.servers.create')
     const { t } = useTranslation('admin.servers.index')
     const { t: tStrings } = useTranslation('strings')

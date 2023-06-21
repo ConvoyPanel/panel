@@ -31,7 +31,7 @@ class AddressController extends Controller
             ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress), AllowedNullableFilter::exact('server_id')])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
-        return fractal($addresses, new AddressTransformer)->parseIncludes($request->includes)->respond();
+        return fractal($addresses, new AddressTransformer)->parseIncludes($request->include)->respond();
     }
 
     public function store(StoreAddressRequest $request, Node $node)

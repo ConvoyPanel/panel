@@ -49,7 +49,7 @@ const columns: ColumnArray<Address> = [
 const NodeAddressesContainer = () => {
     const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
     const [page, setPage] = usePagination()
-    const { mutate, data } = useAddressesSWR(nodeId, { page, includes: ['server'] })
+    const { mutate, data } = useAddressesSWR(nodeId, { page, include: ['server'] })
     const [open, setOpen] = useState(false)
 
     const rowActions = ({ row }: RowActionsProps<Address>) => {
@@ -63,7 +63,9 @@ const NodeAddressesContainer = () => {
                 <Actions>
                     <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item color='red' onClick={() => setShowDeleteModal(true)}>Delete</Menu.Item>
+                    <Menu.Item color='red' onClick={() => setShowDeleteModal(true)}>
+                        Delete
+                    </Menu.Item>
                 </Actions>
             </>
         )
