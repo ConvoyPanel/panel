@@ -3,7 +3,7 @@ import { ZodString, z, ZodNumber } from 'zod'
 
 export const hostname = (string?: ZodString) =>
     (string ?? z.string()).regex(
-        /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d@]).{8,50}$/,
         {
             message: t('errors.invalid_string.hostname', {
                 ns: 'zod',
