@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.10.1-beta
+
+### Fixes
+
+- Fixed `workspace` image failing to build because PHP Composer hash changed from a recent update.
+
 ## v3.10.0-beta
 
 ### Additions
