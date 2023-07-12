@@ -7,11 +7,6 @@ use League\Fractal\TransformerAbstract;
 
 class LocationTransformer extends TransformerAbstract
 {
-    protected array $availableIncludes = ['nodes', 'servers'];
-
-    /**
-     * A Fractal transformer.
-     */
     public function transform(Location $location): array
     {
         return [
