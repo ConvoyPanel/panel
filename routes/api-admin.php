@@ -50,6 +50,7 @@ Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::c
 
 Route::resource('address-pools', Admin\AddressPools\AddressPoolController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
+Route::get('/address-pools/{address_pool}/addresses', [Admin\AddressPools\AddressController::class, 'index']);
 Route::get('/address-pools/{address_pool}/nodes', [Admin\AddressPools\AddressPoolController::class, 'getNodesAllocatedTo']);
 
 Route::resource('users', Admin\UserController::class)

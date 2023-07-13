@@ -2,6 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
+use Convoy\Models\Address;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
 use Convoy\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
