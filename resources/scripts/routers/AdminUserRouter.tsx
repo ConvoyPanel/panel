@@ -4,8 +4,9 @@ import { NavigationBarContext } from '@/components/elements/navigation/Navigatio
 import { lazyLoad, query } from '@/routers/helpers'
 import { lazy, useContext, useEffect } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
+import { Route } from '@/routers/router'
 
-export const routes: RouteObject[] = [
+export const routes: Route[] = [
     {
         path: 'users',
         children: [

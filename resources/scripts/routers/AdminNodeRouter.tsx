@@ -5,11 +5,12 @@ import Spinner from '@/components/elements/Spinner'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import { NodeContext } from '@/state/admin/node'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Route, RouteObject, Routes, useMatch } from 'react-router-dom'
+import { Outlet, RouteObject, Routes, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { lazyLoad } from '@/routers/helpers'
+import { Route } from '@/routers/router'
 
-export const routes: RouteObject[] = [
+export const routes: Route[] = [
     {
         path: 'nodes',
         children: [

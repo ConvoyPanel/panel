@@ -1,6 +1,6 @@
 import { FunctionComponent, lazy, LazyExoticComponent, ReactNode } from 'react'
 import Spinner from '@/components/elements/Spinner'
-import { createBrowserRouter, Outlet } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { NotFound } from '@/components/elements/ScreenBlock'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
@@ -10,10 +10,16 @@ import { routes as adminRoutes } from '@/routers/AdminDashboardRouter'
 import { routes as clientRoutes } from '@/routers/DashboardRouter'
 import { lazyLoad } from '@/routers/helpers'
 
-export interface Route {
-    path: string
-    component: FunctionComponent<{ children?: ReactNode }>
+export type Route = {
+    handle?: Handle
     children?: Route[]
+} & Omit<RouteObject, 'handle' | 'children'>
+
+export interface Handle {
+    crumb: (data: any) => {
+        to: string
+        element: ReactNode
+    }
 }
 
 const router = createBrowserRouter([
@@ -41,7 +47,7 @@ const router = createBrowserRouter([
                 </NavigationBarProvider>
             </AuthenticatedRoutes>
         ),
-        children: [...clientRoutes, ...adminRoutes],
+        children: [...clientRoutes, ...adminRoutes] as RouteObject[],
     },
     {
         path: '*',

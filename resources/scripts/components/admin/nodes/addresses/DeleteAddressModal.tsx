@@ -4,10 +4,8 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
-import { useState } from 'react'
 import deleteAddress from '@/api/admin/nodes/addresses/deleteAddress'
 import { FormikProvider, useFormik } from 'formik'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import usePagination from '@/util/usePagination'
 
 interface Props {

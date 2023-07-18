@@ -1,7 +1,6 @@
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import { Address } from '@/api/server/getServer'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'

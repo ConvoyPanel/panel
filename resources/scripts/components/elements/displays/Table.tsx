@@ -2,9 +2,9 @@ import { useReactTable, getCoreRowModel, flexRender, createColumnHelper, Accesso
 import { ReactNode, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
-import Checkbox from '@/components/elements/inputs/CheckboxOld'
-import { DottedButton } from '@/components/servers/backups/BackupRow'
+import Checkbox from '@/components/elements/inputs/Checkbox'
 import Menu from '@/components/elements/Menu'
+import DottedButton from '@/components/elements/DottedButton'
 
 export type Alignment = 'left' | 'center' | 'right'
 

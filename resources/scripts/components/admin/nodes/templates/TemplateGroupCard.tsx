@@ -1,7 +1,6 @@
 import { Template, TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
 import Card from '@/components/elements/Card'
 import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
-import { DottedButton } from '@/components/servers/backups/BackupRow'
 import { classNames } from '@/util/helpers'
 import { EyeSlashIcon } from '@heroicons/react/20/solid'
 //@ts-ignore
@@ -32,6 +31,7 @@ import useNotify from '@/util/useNotify'
 import reorderTemplates from '@/api/admin/nodes/templateGroups/templates/reorderTemplates'
 import { updateNotification } from '@mantine/notifications'
 import { httpErrorToHuman } from '@/api/http'
+import { DottedButton } from '@/components/elements/DottedButton'
 
 interface Props {
     group: TemplateGroup

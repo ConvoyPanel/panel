@@ -4,12 +4,12 @@ import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGr
 import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
 import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
 import Menu from '@/components/elements/Menu'
-import { DottedButton } from '@/components/servers/backups/BackupRow'
 import { NodeContext } from '@/state/admin/node'
 import { classNames } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
 import { EyeSlashIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
+import DottedButton from '@/components/elements/DottedButton'
 
 interface Props {
     template: Template

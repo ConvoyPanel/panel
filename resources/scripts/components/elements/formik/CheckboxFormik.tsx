@@ -1,4 +1,4 @@
-import Checkbox, { CheckboxProps } from '@/components/elements/inputs/CheckboxOld'
+import Checkbox, { CheckboxProps } from '@/components/elements/inputs/Checkbox'
 import { FieldProps, Field as FormikField } from 'formik'
 import { forwardRef } from 'react'
 

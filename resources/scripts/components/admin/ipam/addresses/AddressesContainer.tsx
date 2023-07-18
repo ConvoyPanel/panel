@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { Address } from '@/api/server/getServer'
 import Spinner from '@/components/elements/Spinner'
 import Pagination from '@/components/elements/Pagination'
+import Breadcrumbs from '@/components/elements/Breadcrumbs'
 
 const AddressesContainer = () => {
     const { t: tStrings } = useTranslation('strings')
@@ -55,8 +56,9 @@ const AddressesContainer = () => {
     ]
 
     return (
-        <div className={'bg-background'}>
+        <div className={'bg-background min-h-screen'}>
             <PoolContentBlock title={tStrings('address_other') ?? 'Addresses'}>
+                <Breadcrumbs.Generate />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}

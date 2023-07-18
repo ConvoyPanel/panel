@@ -9,8 +9,9 @@ import { ArrowPathIcon, ExclamationCircleIcon, NoSymbolIcon } from '@heroicons/r
 import { EloquentStatus } from '@/api/server/types'
 import { useTranslation } from 'react-i18next'
 import { lazyLoad } from '@/routers/helpers'
+import { Route } from '@/routers/router'
 
-export const routes: RouteObject[] = [
+export const routes: Route[] = [
     {
         element: <ServerContext.Provider>{lazyLoad(lazy(() => import('./ServerRouter')))}</ServerContext.Provider>,
         path: '/servers/:id',

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { Checkbox as MantineCheckbox, CheckboxProps } from '@mantine/core'
+import { Checkbox as MantineCheckbox, CheckboxProps as MantineCheckboxProps } from '@mantine/core'
 import { CheckIcon, MinusIcon } from '@heroicons/react/20/solid'
 import { classNames } from '@/util/helpers'
 import tw from 'twin.macro'
@@ -45,6 +45,8 @@ const Icon = ({ indeterminate, className }: { indeterminate: boolean; className:
         />
     )
 }
+
+export type CheckboxProps = MantineCheckboxProps
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     return <StyledCheckbox ref={ref} icon={Icon} {...props} />

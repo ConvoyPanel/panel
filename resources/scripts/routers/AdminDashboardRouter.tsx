@@ -2,15 +2,17 @@ import ContentContainer from '@/components/elements/ContentContainer'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import { lazy, useContext, useEffect } from 'react'
 import { Link, Outlet, RouteObject, useMatch } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Translation, useTranslation } from 'react-i18next'
 import { routes as adminNodeRoutes } from '@/routers/AdminNodeRouter'
 import { routes as adminServerRoutes } from '@/routers/AdminServerRouter'
 import { routes as adminIpamRoutes } from '@/routers/AdminIpamRouter'
 import { routes as adminUserRoutes } from '@/routers/AdminUserRouter'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { lazyLoad } from '@/routers/helpers'
+import { HomeIcon } from '@heroicons/react/20/solid'
+import { Route } from '@/routers/router'
 
-export const routes: RouteObject[] = [
+export const routes: Route[] = [
     {
         path: '/admin',
         element: (
@@ -18,6 +20,12 @@ export const routes: RouteObject[] = [
                 {lazyLoad(lazy(() => import('@/routers/AdminDashboardRouter')))}
             </AuthenticatedRoutes>
         ),
+        handle: {
+            crumb: () => ({
+                to: '/admin',
+                element: <HomeIcon className={'w-4 h-4 text-accent-500 hover:text-accent-800 transition'} />,
+            }),
+        },
         children: [
             {
                 index: true,

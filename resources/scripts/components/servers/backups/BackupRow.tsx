@@ -5,10 +5,10 @@ import { Loader } from '@mantine/core'
 import { formatDistanceToNow } from 'date-fns'
 //@ts-ignore
 import Dots from '@/assets/images/icons/dots-vertical.svg'
-import { ComponentProps, forwardRef, useState } from 'react'
+import { useState } from 'react'
 import Menu from '@/components/elements/Menu'
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
-import useFlash, { useFlashKey } from '@/util/useFlash'
+import useFlash from '@/util/useFlash'
 import restoreBackup from '@/api/server/backups/restoreBackup'
 import { ServerContext } from '@/state/server'
 import useNotify from '@/util/useNotify'
@@ -17,6 +17,7 @@ import { KeyedMutator } from 'swr'
 import Modal from '@/components/elements/Modal'
 import { useTranslation } from 'react-i18next'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import DottedButton from '@/components/elements/DottedButton'
 
 interface Props {
     backup: Backup
@@ -24,20 +25,6 @@ interface Props {
         mutate: KeyedMutator<BackupResponse>
     }
 }
-
-export const DottedButton = forwardRef<HTMLButtonElement, Omit<ComponentProps<'button'>, 'children'>>(
-    ({ className, ...props }, ref) => {
-        return (
-            <button ref={ref} className={`px-2 bg-transparent ${className}`} {...props}>
-                <img
-                    src={Dots}
-                    className='w-4 h-4 min-w-[1rem] dark:invert'
-                    alt='3 vertical dots meant for activating a menu'
-                />
-            </button>
-        )
-    }
-)
 
 interface DropdownProps {
     className?: string
@@ -73,7 +60,6 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                 color: 'green',
             })
         } catch (error) {
-
             clearAndAddHttpError({
                 key: `servers.backups.${backup.uuid}.restore`,
                 error,
@@ -103,7 +89,6 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                 color: 'green',
             })
         } catch (error) {
-
             clearAndAddHttpError({
                 key: `servers.backups.${backup.uuid}.delete`,
                 error,

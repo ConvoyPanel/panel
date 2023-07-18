@@ -6,11 +6,19 @@ import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
 import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
 import getAddresses from '@/api/admin/addressPools/getAddresses'
-import { useTranslation } from 'react-i18next'
+import { Translation, useTranslation } from 'react-i18next'
+import { Route } from '@/routers/router'
+import { HomeIcon } from '@heroicons/react/20/solid'
 
-export const routes: RouteObject[] = [
+export const routes: Route[] = [
     {
         path: 'ipam',
+        handle: {
+            crumb: () => ({
+                to: '/admin/ipam',
+                element: <Translation ns={'strings'}>{t => t('ipam')}</Translation>,
+            }),
+        },
         children: [
             {
                 index: true,
@@ -21,6 +29,12 @@ export const routes: RouteObject[] = [
                 element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 loader: ({ params }) =>
                     query(getPoolKey(parseInt(params.id!)), () => getAddressPool(parseInt(params.id!))),
+                handle: {
+                    crumb: data => ({
+                        to: `/admin/ipam/${data.id}`,
+                        element: data.name,
+                    }),
+                },
                 children: [
                     {
                         index: true,
