@@ -34,8 +34,8 @@ jobs:
 
       - name: Create release archive
         run: |
-          rm -rf node_modules/ tests/ codecov.yml CONTRIBUTOR_LICENSE_AGREEMENT CODE_OF_CONDUCT.md CONTRIBUTING.md phpunit.xml phpstan.neon .env.ci docker-compose.ci.yml .styleci.yml
-          tar -czf panel.tar.gz * .env.example
+          rm -rf node_modules/ tests/ codecov.yml CONTRIBUTOR_LICENSE_AGREEMENT CODE_OF_CONDUCT.md CONTRIBUTING.md phpunit.xml phpstan.neon .env.ci docker-compose.ci.yml .styleci.yml crowdin.yml stats.html
+          tar -czf panel.tar.gz * .env.example .gitignore .prettierrc.json
 
       - name: Extract changelog
         id: extract_changelog
