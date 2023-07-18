@@ -10,7 +10,9 @@ const useAddressPoolSWR = () => {
     const match = useMatch('/admin/ipam/:id/*')
     const id = parseInt(match!.params.id!)
 
-    return useSWR<AddressPool>(getKey(id), () => getAddressPool(id)) as Optimistic<SWRResponse<AddressPool, any>>
+    return useSWR<AddressPool>(getKey(id), () => getAddressPool(id), {
+        revalidateOnMount: false,
+    }) as Optimistic<SWRResponse<AddressPool, any>>
 }
 
 export default useAddressPoolSWR
