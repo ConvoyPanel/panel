@@ -2,10 +2,10 @@ import { Navigate, Outlet, RouteObject } from 'react-router-dom'
 import { lazyLoad, query } from '@/routers/helpers'
 import { lazy, useContext, useEffect } from 'react'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { getKey as getPoolKey } from '@/api/admin/nodes/addressPools/useAddressPoolSWR'
-import getAddressPool from '@/api/admin/nodes/addressPools/getAddressPool'
-import { getKey as getAddressesKey } from '@/api/admin/nodes/addressPools/useAddressesSWR'
-import getAddresses from '@/api/admin/nodes/addressPools/getAddresses'
+import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
+import getAddressPool from '@/api/admin/addressPools/getAddressPool'
+import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
+import getAddresses from '@/api/admin/addressPools/getAddresses'
 import { useTranslation } from 'react-i18next'
 
 export const routes: RouteObject[] = [
@@ -32,7 +32,9 @@ export const routes: RouteObject[] = [
                             const id = parseInt(params.id!)
                             const page = params.page ? parseInt(params.page) : 1
 
-                            return query(getAddressesKey(id, page, ''), () => getAddresses(id, { page, query: '' }))
+                            return query(getAddressesKey(id, page, ''), () =>
+                                getAddresses(id, { page, query: '', include: ['server'] })
+                            )
                         },
                         element: lazyLoad(lazy(() => import('@/components/admin/ipam/addresses/AddressesContainer'))),
                     },

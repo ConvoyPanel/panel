@@ -1,19 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
-import { Location } from '@/api/admin/locations/getLocations'
-import { AddressPool } from '@/api/admin/nodes/addressPools/getAddressPools'
+import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
 import usePagination from '@/util/usePagination'
 import { useState } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
-import useAddressPoolsSWR from '@/api/admin/nodes/addressPools/useAddressPoolsSWR'
+import useAddressPoolsSWR from '@/api/admin/addressPools/useAddressPoolsSWR'
 import Spinner from '@/components/elements/Spinner'
 import Pagination from '@/components/elements/Pagination'
 import SearchBar from '@/components/admin/SearchBar'
+import { Link } from 'react-router-dom'
 
 const IpamContainer = () => {
     const { t: tStrings } = useTranslation('strings')
-    const { t } = useTranslation('admin.nodes.addressPools')
+    const { t } = useTranslation('admin.addressPools.index')
     const [page, setPage] = usePagination()
     const [isCreating, setIsCreating] = useState(false)
 
@@ -25,6 +25,11 @@ const IpamContainer = () => {
         {
             header: tStrings('name'),
             accessor: 'name',
+            cell: ({ value, row }) => (
+                <Link to={`/admin/ipam/${row.id}`} className='link text-foreground'>
+                    {value}
+                </Link>
+            ),
         },
         {
             header: tStrings('node', { count: 2 }),

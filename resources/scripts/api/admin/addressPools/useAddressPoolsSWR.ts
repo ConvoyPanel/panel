@@ -1,4 +1,4 @@
-import getAddressPools, { AddressPoolResponse, QueryParams } from '@/api/admin/nodes/addressPools/getAddressPools'
+import getAddressPools, { AddressPoolResponse, QueryParams } from '@/api/admin/addressPools/getAddressPools'
 import useSWR from 'swr'
 
 const useAddressPoolsSWR = ({ page, query, ...params }: QueryParams) => {

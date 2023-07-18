@@ -1,5 +1,5 @@
 import useSWR, { Key, SWRResponse } from 'swr'
-import getAddresses, { QueryParams } from '@/api/admin/nodes/addressPools/getAddresses'
+import getAddresses, { QueryParams } from '@/api/admin/addressPools/getAddresses'
 import { useMatch } from 'react-router-dom'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import { Optimistic } from '@/lib/swr'
@@ -12,7 +12,7 @@ export const getKey = (id: number, page?: number, query?: string): Key => [
 ]
 
 const useAddressesSWR = ({ page, query, ...params }: QueryParams) => {
-    const match = useMatch('/admin/address-pools/:id/*')
+    const match = useMatch('/admin/ipam/:id/*')
     const id = parseInt(match!.params.id!)
 
     return useSWR<AddressResponse>(getKey(id, page, query), () =>

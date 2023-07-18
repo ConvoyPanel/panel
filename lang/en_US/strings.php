@@ -101,4 +101,5 @@ return [
     'query' => 'Query',
     'import' => 'Import',
     'download' => 'Download',
+    'cidr' => 'CIDR',
 ];

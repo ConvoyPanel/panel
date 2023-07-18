@@ -13,7 +13,7 @@ export interface Address {
     cidr: number
     gateway: string
     macAddress?: string
-    server?: ServerBuild
+    server?: Server
 }
 
 export interface Server {
@@ -66,7 +66,7 @@ export const rawDataToAddress = (data: any): Address => ({
     cidr: data.cidr,
     gateway: data.gateway,
     macAddress: data.mac_address,
-    server: data.server ? rawDataToServerBuild(data.server.data) : undefined,
+    server: data.server ? rawDataToServer(data.server.data) : undefined,
 })
 
 export const rawDataToServer = (data: any): Server => ({
