@@ -102,4 +102,6 @@ return [
     'import' => 'Import',
     'download' => 'Download',
     'cidr' => 'CIDR',
+    'ipv4' => 'IPv4',
+    'ipv6' => 'IPv6',
 ];
