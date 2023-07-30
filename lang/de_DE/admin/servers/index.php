@@ -31,4 +31,5 @@ return [
         'description' => 'Dieser Server wird aus Convoy gelöscht. Backups und andere zugewiesene Daten werden vernichtet. Du kannst jedoch den Haken unten setzen, um die virtuelle Maschine und Daten auf der Proxmox-Node zu behalten.',
         'dont_purge' => 'VM und zugewiesene Dateien nicht löschen',
     ],
+    'no_servers_found_one' => 'No servers found',
 ];
