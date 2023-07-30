@@ -66,6 +66,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
 
             mutate(data => {
                 if (!data) return data
+                if (data.pagination.currentPage !== 1) return data
 
                 return {
                     ...data,
