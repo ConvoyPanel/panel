@@ -29,6 +29,7 @@ return [
             'english_keyboard_characters' => 'Invalid {{validation}}',
             'password' => 'Must contain 8 characters, one uppercase, one lowercase, one number and one special case character',
             'ip_address' => 'Invalid IP Address',
+            'mac_address' => 'Invalid Mac Address',
         ],
         'too_small' => [
             'array' => [
