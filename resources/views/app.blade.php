@@ -28,7 +28,7 @@
     @viteReactRefresh
     @vite('resources/scripts/main.tsx')
 
-    <!-- Google tag (gtag.js) -->
+    <!-- Analytics -->
     <script defer data-domain="hosted.convoypanel.com" src="https://beacon.performave.com/js/script.local.js"></script>
     <script>
         window.plausible = window.plausible || function() {

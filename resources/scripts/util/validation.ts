@@ -37,6 +37,16 @@ export const ipAddress = (string?: ZodString) =>
         }
     )
 
+export const macAddress = (string?: ZodString) =>
+    (string ?? z.string()).regex(
+        /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
+        {
+            message: t('errors.invalid_string.mac_address', {
+                ns: 'zod',
+            })!,
+        }
+    )
+
 export const port = (number?: ZodNumber) => (number ?? z.number()).int().min(1).max(65535)
 
 export const vmid = (number?: ZodNumber) => (number ?? z.number()).int().min(100).max(999999999)

@@ -1,15 +1,13 @@
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
-import { useField } from 'formik'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import SelectForm from '@/components/elements/forms/SelectForm'
 
 const LocationsSelectForm = () => {
-    const { setValue, watch } = useFormContext()
-    const locationId: number = watch('locationId')
-    const [query, setQuery] = useState(locationId.toString())
+    const { watch } = useFormContext()
+    const locationId: string = watch('locationId')
+    const [query, setQuery] = useState(locationId)
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, mutate, isValidating, isLoading } = useLocationsSWR({ query: debouncedQuery })
     const locations =

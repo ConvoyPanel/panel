@@ -1,5 +1,6 @@
 import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
-import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
+import useAddressPoolSWR from '@/api/admin/addressPools/addresses/useAddressPoolSWR'
+import Breadcrumbs from '@/components/elements/Breadcrumbs'
 
 interface Props extends PageContentBlockProps {
     title: string
@@ -10,6 +11,7 @@ const PoolContentBlock = ({ title, children, ...props }: Props) => {
 
     return (
         <PageContentBlock title={`${title} | ${pool.name}`} {...props}>
+            <Breadcrumbs.Generate />
             {children}
         </PageContentBlock>
     )

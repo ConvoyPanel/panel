@@ -18,7 +18,7 @@ class Address extends Model
         'server_id' => ['exists:servers,id', 'nullable'],
         'type' => ['in:ipv4,ipv6', 'required'],
         'address' => ['ip'],
-        'cidr' => ['numeric', 'required'],
+        'cidr' => ['numeric', 'min:0', 'max:128', 'required'],
         'gateway' => ['ip'],
         'mac_address' => ['mac_address', 'nullable'],
     ];

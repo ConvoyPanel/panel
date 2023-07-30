@@ -45,16 +45,16 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
         resolver: zodResolver(schema),
         defaultValues: {
             name: '',
-            locationId: 0,
+            locationId: '0',
             cluster: '',
             tokenId: '',
             secret: '',
             fqdn: '',
-            port: 8006,
-            memory: 0,
-            memoryOverallocate: 0,
-            disk: 0,
-            diskOverallocate: 0,
+            port: '8006',
+            memory: '0',
+            memoryOverallocate: '0',
+            disk: '0',
+            diskOverallocate: '0',
             vmStorage: '',
             backupStorage: '',
             isoStorage: '',
@@ -68,7 +68,8 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
         onClose()
     }
 
-    const submit = async ({ memory, disk, ...data }: z.infer<typeof schema>) => {
+    const submit = async (_data: any) => {
+        const { memory, disk, ...data } = _data as z.infer<typeof schema>
         clearFlashes()
         try {
             const node = await createNode({

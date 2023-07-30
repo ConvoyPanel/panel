@@ -1,6 +1,9 @@
 import styled from '@emotion/styled'
-import { Radio as MantineRadio, RadioGroupProps, RadioProps } from '@mantine/core'
+import { Radio as MantineRadio, RadioGroupProps as MantineRadioGroupProps, RadioProps as MantineRadioProps } from '@mantine/core'
 import tw from 'twin.macro'
+
+export type RadioProps = MantineRadioProps
+export type RadioGroupProps = MantineRadioGroupProps
 
 interface Radio extends React.FC<RadioProps> {
     Group: React.FC<RadioGroupProps>

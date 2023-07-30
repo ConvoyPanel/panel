@@ -20,7 +20,10 @@ Route::prefix('/nodes/{node}')->group(function () {
 
     Route::resource('template-groups.templates', Admin\Nodes\TemplateController::class)
         ->only(['index', 'store', 'update', 'destroy']);
-    Route::post('/template-groups/{template_group}/templates/reorder', [Admin\Nodes\TemplateController::class, 'updateOrder']);
+    Route::post(
+        '/template-groups/{template_group}/templates/reorder',
+        [Admin\Nodes\TemplateController::class, 'updateOrder'],
+    );
 
     Route::resource('addresses', Admin\Nodes\AddressController::class)
         ->only(['index', 'store', 'update', 'destroy']);
@@ -37,7 +40,9 @@ Route::get('/servers', [Admin\ServerController::class, 'index']);
 Route::post('/servers', [Admin\ServerController::class, 'store']);
 Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
     Route::get('/', [Admin\ServerController::class, 'show'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
-    Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
+    Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(
+        ValidateServerStatusMiddleware::class,
+    );
     Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
     Route::prefix('/settings')->group(function () {
@@ -50,8 +55,11 @@ Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::c
 
 Route::resource('address-pools', Admin\AddressPools\AddressPoolController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
-Route::get('/address-pools/{address_pool}/addresses', [Admin\AddressPools\AddressController::class, 'index']);
-Route::get('/address-pools/{address_pool}/nodes', [Admin\AddressPools\AddressPoolController::class, 'getNodesAllocatedTo']);
+Route::prefix('/address-pools/{address_pool}')->group(function () {
+    Route::resource('addresses', Admin\AddressPools\AddressController::class)
+        ->only(['index', 'store']);
+    Route::get('/nodes', [Admin\AddressPools\AddressPoolController::class, 'getNodesAllocatedTo']);
+});
 
 Route::resource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);

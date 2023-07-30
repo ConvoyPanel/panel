@@ -1,4 +1,4 @@
-import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
+import { AddressInclude, AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import http, { getPaginationSet } from '@/api/http'
 import { rawDataToAddress } from '@/api/server/getServer'
 
@@ -9,7 +9,10 @@ export interface QueryParams {
     include?: Array<AddressInclude>
 }
 
-const getAddresses = async (addressPoolId: number, { query, page, perPage = 50, include }: QueryParams) => {
+const getAddresses = async (
+    addressPoolId: number,
+    { query, page, perPage = 50, include }: QueryParams
+): Promise<AddressResponse> => {
     const { data } = await http.get(`/api/admin/address-pools/${addressPoolId}/addresses`, {
         params: {
             'filter[*]': query,

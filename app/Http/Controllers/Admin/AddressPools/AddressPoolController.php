@@ -22,6 +22,7 @@ class AddressPoolController extends ApplicationApiController
     {
         $addressPools = QueryBuilder::for(AddressPool::query())
             ->withCount(['addresses', 'nodes'])
+            ->defaultSort('-id')
             ->allowedFilters(['name', AllowedFilter::custom('*', new FiltersAddressPool)])
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 

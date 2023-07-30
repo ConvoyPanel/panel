@@ -11,6 +11,7 @@ import { Address } from '@/api/server/getServer'
 import Spinner from '@/components/elements/Spinner'
 import Pagination from '@/components/elements/Pagination'
 import Breadcrumbs from '@/components/elements/Breadcrumbs'
+import CreateAddressModal from '@/components/admin/ipam/addresses/CreateAddressModal'
 
 const AddressesContainer = () => {
     const { t: tStrings } = useTranslation('strings')
@@ -20,7 +21,7 @@ const AddressesContainer = () => {
     const [query, setQuery] = useState('')
     const [page, setPage] = usePagination()
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data } = useAddressesSWR({ page, query: debouncedQuery, include: ['server'] })
+    const { data, mutate } = useAddressesSWR({ page, query: debouncedQuery, include: ['server'] })
 
     const columns: ColumnArray<Address> = [
         {
@@ -58,7 +59,7 @@ const AddressesContainer = () => {
     return (
         <div className={'bg-background min-h-screen'}>
             <PoolContentBlock title={tStrings('address_other') ?? 'Addresses'}>
-                <Breadcrumbs.Generate />
+                <CreateAddressModal open={isCreating} onClose={() => setIsCreating(false)} mutate={mutate} />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}

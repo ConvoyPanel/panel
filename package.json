@@ -32,7 +32,6 @@
         "i18next-multiload-backend-adapter": "^2.2.0",
         "laravel-vite-plugin": "^0.7.2",
         "postcss": "^8.4.6",
-        "prettier": "^2.8.1",
         "react": "^18.2.0",
         "react-chartjs-2": "^4.2.0",
         "react-dom": "^18.2.0",
@@ -57,6 +56,7 @@
         "@types/react-dom": "^18.0.6",
         "@types/react-transition-group": "^4.4.5",
         "@vitejs/plugin-react-swc": "^3.0.1",
+        "prettier": "^3.0.0",
         "rollup-plugin-visualizer": "^5.8.2"
     }
 }
