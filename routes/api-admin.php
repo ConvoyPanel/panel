@@ -57,7 +57,7 @@ Route::resource('address-pools', Admin\AddressPools\AddressPoolController::class
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 Route::prefix('/address-pools/{address_pool}')->group(function () {
     Route::resource('addresses', Admin\AddressPools\AddressController::class)
-        ->only(['index', 'store']);
+        ->only(['index', 'store', 'update', 'destroy']);
     Route::get('/nodes', [Admin\AddressPools\AddressPoolController::class, 'getNodesAllocatedTo']);
 });
 

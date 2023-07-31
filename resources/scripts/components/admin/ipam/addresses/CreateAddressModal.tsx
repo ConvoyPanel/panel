@@ -61,6 +61,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
             const address = await createAddress(pool.id, {
                 macAddress: macAddress && macAddress.length > 0 ? macAddress : null,
                 serverId: serverId !== '' ? serverId : null,
+                include: ['server'],
                 ...data,
             })
 

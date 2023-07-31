@@ -18,14 +18,19 @@ const createAddress = async (
 ) => {
     const {
         data: { data },
-    } = await http.post(`/api/admin/address-pools/${poolId}/addresses`, {
-        params: {
-            include: include?.join(','),
+    } = await http.post(
+        `/api/admin/address-pools/${poolId}/addresses`,
+        {
+            mac_address: macAddress,
+            server_id: serverId,
+            ...payload,
         },
-        mac_address: macAddress,
-        server_id: serverId,
-        ...payload,
-    })
+        {
+            params: {
+                include: include?.join(','),
+            },
+        }
+    )
 
     return rawDataToAddress(data)
 }

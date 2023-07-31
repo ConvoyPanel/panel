@@ -8,6 +8,7 @@ export type AddressType = 'ipv4' | 'ipv6'
 export interface Address {
     id: number
     addressPoolId: number
+    serverId: number | null
     type: AddressType
     address: string
     cidr: number
@@ -61,6 +62,7 @@ export interface ServerBuild {
 export const rawDataToAddress = (data: any): Address => ({
     id: data.id,
     addressPoolId: data.address_pool_id,
+    serverId: data.server_id,
     type: data.type,
     address: data.address,
     cidr: data.cidr,

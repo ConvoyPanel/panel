@@ -68,6 +68,8 @@ class NodeController extends ApplicationApiController
 
 
 
+        
+
         $node->update($payload);
 
         return new JsonResponse([
