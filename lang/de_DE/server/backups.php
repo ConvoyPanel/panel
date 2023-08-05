@@ -6,8 +6,8 @@ return [
     'counter_tooltip' => 'Du hast :count von :max Backups erstellt',
     'create_modal' => [
         'title' => 'Ein Backup erstellen',
-        'description' => 'Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.',
-        'compression_type' => 'Compression Type',
+        'description' => 'Das Erstellen eines Backups wird eine Kopie deines Servers erstellen. Dies kann, je nach Servergröße, eine Weile dauern.',
+        'compression_type' => 'Kompressionstyp',
         'mode' => 'Typ',
         'modes' => [
             'snapshot' => 'Snapshot',
