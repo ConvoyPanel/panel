@@ -13,11 +13,11 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'failed' => 'Die Zugangsdaten stimmen nicht mit unserer Datenbank überein.',
+    'password' => 'Das angegebene Passwort ist falsch.',
+    'throttle' => 'Zu viele Login-Versucht. Bitte versuche es in :seconds Sekunden erneut.',
 
-    'sign_in' => 'Sign in',
-    'sign_out' => 'Sign out',
-    'sign_in_description' => 'Sign in to your account',
+    'sign_in' => 'Anmelden',
+    'sign_out' => 'Abmelden',
+    'sign_in_description' => 'Bei Deinem Konto anmelden',
 ];
