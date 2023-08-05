@@ -27,7 +27,9 @@ class NodeController extends ApplicationApiController
     {
         $nodes = QueryBuilder::for(Node::query())
             ->withCount(['servers'])
-            ->allowedFilters(['name', 'fqdn', AllowedFilter::exact('location_id'), AllowedFilter::custom('*', new FiltersNode)])
+            ->allowedFilters(
+                [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact('location_id'), AllowedFilter::custom('*', new FiltersNode)],
+            )
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($nodes, new NodeTransformer())->respond();
@@ -67,9 +69,6 @@ class NodeController extends ApplicationApiController
         }
 
 
-
-        
-
         $node->update($payload);
 
         return new JsonResponse([
@@ -79,7 +78,7 @@ class NodeController extends ApplicationApiController
                 'fqdn' => $node->coterm_fqdn,
                 'port' => $node->coterm_port,
                 'token' => isset($creds) ? "{$node->coterm_token_id}|{$node->coterm_token}" : null,
-            ]
+            ],
         ]);
     }
 
@@ -99,7 +98,7 @@ class NodeController extends ApplicationApiController
         return new JsonResponse([
             'data' => [
                 'token' => "{$node->coterm_token_id}|{$node->coterm_token}",
-            ]
+            ],
         ]);
     }
 

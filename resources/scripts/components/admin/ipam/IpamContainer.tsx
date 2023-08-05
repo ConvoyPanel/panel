@@ -10,6 +10,7 @@ import Spinner from '@/components/elements/Spinner'
 import Pagination from '@/components/elements/Pagination'
 import SearchBar from '@/components/admin/SearchBar'
 import { Link } from 'react-router-dom'
+import CreatePoolModal from '@/components/admin/ipam/CreatePoolModal'
 
 const IpamContainer = () => {
     const { t: tStrings } = useTranslation('strings')
@@ -19,7 +20,7 @@ const IpamContainer = () => {
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data } = useAddressPoolsSWR({ page, query: debouncedQuery })
+    const { data, mutate } = useAddressPoolsSWR({ page, query: debouncedQuery })
 
     const columns: ColumnArray<AddressPool> = [
         {
@@ -46,6 +47,7 @@ const IpamContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <PageContentBlock title={tStrings('ipam') ?? ''}>
+                <CreatePoolModal open={isCreating} onClose={() => setIsCreating(false)} mutate={mutate} />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}

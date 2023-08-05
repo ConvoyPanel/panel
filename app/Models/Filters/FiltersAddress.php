@@ -9,7 +9,7 @@ class FiltersAddress implements Filter
 {
     public function __invoke(Builder $query, $value, string $property)
     {
-        if (gettype($value) === 'array') {
+        if (is_array($value)) {
             $query->whereIn('id', $value)
                 ->orWhereIn('address', $value)
                 ->orWhereIn('mac_address', $value);

@@ -17,7 +17,7 @@ const AddressesMultiSelectForm = ({ disabled, nodeId: propNodeId }: Props) => {
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data, mutate, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, {
+    const { data, isValidating, isLoading } = useAddressesSWR(nodeId ?? -1, {
         query: debouncedQuery,
         serverId: null,
     })

@@ -52,15 +52,16 @@ export type NodeResponse = PaginatedResult<Node>
 
 export interface QueryParams {
     query?: string
+    id?: number | number[] | string | string[]
     page?: number
     perPage?: number
 }
 
-const getNodes = async ({ query, perPage = 50, ...params }: QueryParams): Promise<NodeResponse> => {
+const getNodes = async ({ query, id, perPage = 50, ...params }: QueryParams): Promise<NodeResponse> => {
     const { data } = await http.get('/api/admin/nodes', {
         params: {
             'filter[*]': query,
-            'per_page': perPage,
+            'filter[id]': id ? (Array.isArray(id) ? id.join(',') : id) : undefined,
             ...params,
         },
     })
