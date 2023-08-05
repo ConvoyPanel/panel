@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'create_pool' => 'Create Pool',
-    'nodes_nothing_found' => 'No nodes found',
+    'create_pool' => 'Pool erstellen',
+    'nodes_nothing_found' => 'Keine Nodes gefunden',
 ];
