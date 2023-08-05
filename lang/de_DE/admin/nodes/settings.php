@@ -2,23 +2,22 @@
 
 return [
     'node_info' => [
-        'title' => 'Node Information',
+        'title' => 'Nodeinformation',
     ],
     'coterm' => [
         'title' => 'Coterm',
-        'description' => 'Coterm lets you hide your node\'s origin from your users while they are accessing the web console.',
-        'enable' => 'Enable Coterm',
-        'tls' => 'TLS/SSL Enabled',
+        'description' => 'Mit Coterm kannst du die IP deiner Node vor Benutzern verbergen, während diese auf die Webkonsole zugreifen.',
+        'enable' => 'Coterm aktivieren',
+        'tls' => 'SSL/TLS aktiviert',
         'token_created' => [
-            'title' => 'Token Created',
-            'description' => 'Here is your newly created token. Please take note of the token\'s value as this is the only and
-            last time you will see it.',
-            'action' => 'Okay, I got it'
+            'title' => 'Token erstellt',
+            'description' => 'Hier ist dein neu erstellter Token. Bitte notiere ihn dir, da dieser nie wieder angezeigt werden kann.',
+            'action' => 'Okay, ich habe es verstanden'
         ],
         'reset' => [
-            'title' => 'Reset Token?',
-            'description' => 'Are you sure you want to reset this node\'s Coterm token? Any Coterm instances that are relying on this token will fail.',
-            'action' => 'Reset Token',
+            'title' => 'Token zurücksetzen?',
+            'description' => 'Bist du sicher, dass du den Coterm-Token dieser Node zurücksetzen möchtest? Alle Coterm-Instanzen, die diesen Token verwenden, werden nicht mehr funktionieren.',
+            'action' => 'Token zurücksetzen',
         ]
     ]
 ];
