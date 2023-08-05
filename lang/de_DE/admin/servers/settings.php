@@ -8,12 +8,12 @@ return [
             'installing' => 'Installation in Arbeit',
             'install_failed' => 'Aktuelle Installation Fehlgeschlagen',
             'suspended' => 'Gesperrt',
-            'restoring_backup' => 'Restoring From a Backup',
-            'restoring_snapshot' => 'Restoring From a Snapshot',
+            'restoring_backup' => 'Wiederherstellung aus Backup',
+            'restoring_snapshot' => 'Wiederherstellung aus Snapshot',
         ]
     ],
     'suspension' => [
-        'title' => 'Suspension',
+        'title' => 'Suspendierung',
         'description' => 'Toggle the suspension status of the server.',
         'statuses' => [
             'suspended' => 'This server is suspended.',
