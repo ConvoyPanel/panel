@@ -2,11 +2,11 @@
 
 return [
     'create_modal' => [
-        'title' => 'Create a Token',
+        'title' => 'Token erstellen',
     ],
     'created_modal' => [
-        'title' => 'Token Created',
-        'description' => 'Here is your newly created API token. Please take note of the token\'s value as this is the only and last time you will see it.',
-        'button' => 'Okay, I copied it',
+        'title' => 'Token erstellt',
+        'description' => 'Hier ist Dein neu erstellter API-Token. Bitte notiere ihn Dir, da dieser nie wieder angezeigt werden kann.',
+        'button' => 'Okay, ich habe es kopiert',
     ],
 ];
