@@ -13,25 +13,23 @@ return [
         ]
     ],
     'suspension' => [
-        'title' => 'Suspendierung',
-        'description' => 'Toggle the suspension status of the server.',
+        'title' => 'Sperrung',
+        'description' => 'Schalte den Sperrungsstatus um.',
         'statuses' => [
-            'suspended' => 'This server is suspended.',
-            'not_suspended' => 'This server isn\'t suspended.'
+            'suspended' => 'Dieser Server ist gesperrt.',
+            'not_suspended' => 'Dieser Server ist nicht gesperrt.'
         ],
-        'suspend' => 'Suspend',
-        'unsuspend' => 'Unsuspend',
+        'suspend' => 'Sperren',
+        'unsuspend' => 'Entsperren',
     ],
     'deletion' => [
-        'title' => 'Delete Server',
-        'description' => 'The server will be deleted from Convoy. Backups and other associated data will be
-                                destroyed. However, you can tick the checkbox below to keep the virtual machine and data
-                                on the Proxmox node.',
-        'deleting_status' => 'This server is currently being deleted.',
-        'no_purge' => 'Do not purge VM and related files',
+        'title' => 'Server löschen',
+        'description' => 'Dieser Server wird aus Convoy gelöscht. Backups und andere zugewiesene Daten werden vernichtet. Du kannst jedoch den Haken unten setzen, um die virtuelle Maschine und Daten auf der Proxmox-Node zu behalten.',
+        'deleting_status' => 'Dieser Server wird aktuell gelöscht.',
+        'no_purge' => 'VM und zugewiesene Dateien nicht löschen',
         'confirmation' => [
-            'title' => 'Delete :name',
-            'description' => 'Are you sure you want to delete :name?'
+            'title' => ':name Löschen',
+            'description' => 'Bist Du sicher, dass Du :name löschen möchtest?'
         ]
     ],
     'build' => [
