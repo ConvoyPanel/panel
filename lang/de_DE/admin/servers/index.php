@@ -7,7 +7,7 @@ return [
     'bandwidth_usage' => 'Bandbreitenverbrauch',
     'snapshot_limit' => 'Snapshotlimit',
     'limit_placeholder' => 'Leer lassen für kein Limit',
-    'should_create_vm' => 'Should Create VM',
+    'should_create_vm' => 'Sollte VM erstellen',
     'start_server_after_installing' => 'Server nach der Installation starten',
     'vmid_placeholder' => 'Leer lassen für zufällige VMID',
     'create_modal' => [
