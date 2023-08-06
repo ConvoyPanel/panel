@@ -9,6 +9,11 @@ class StoreAddressPoolRequest extends FormRequest
 {
     public function rules(): array
     {
-        return AddressPool::getRules();
+        $rules = AddressPool::getRules();
+        return [
+            ...$rules,
+            'node_ids' => 'sometimes|array',
+            'node_ids.*' => 'exists:nodes,id|integer'
+        ];
     }
 }

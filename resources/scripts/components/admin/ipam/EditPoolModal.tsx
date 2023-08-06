@@ -1,59 +1,60 @@
+import { AddressPool, AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
 import { KeyedMutator } from 'swr'
 import { useTranslation } from 'react-i18next'
 import { useFlashKey } from '@/util/useFlash'
+import updateAddressPool from '@/api/admin/addressPools/updateAddressPool'
 import { z } from 'zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Modal from '@/components/elements/Modal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
-import { AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
-import NodesMultiSelectForm from '@/components/admin/ipam/NodesMultiSelectForm'
-import createAddressPool from '@/api/admin/addressPools/createAddressPool'
+import { useEffect, useMemo } from 'react'
 
 interface Props {
-    open: boolean
+    pool: AddressPool | null
     onClose: () => void
     mutate: KeyedMutator<AddressPoolResponse>
 }
 
-const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
-    const { t: tStrings } = useTranslation('strings')
+const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
     const { t } = useTranslation('admin.addressPools.index')
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.addressPools.create`)
+    const { t: tStrings } = useTranslation('strings')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.addressPools.${pool?.id}.update`)
 
     const schema = z.object({
         name: z.string().nonempty().max(191),
-        nodeIds: z.array(z.coerce.number()),
     })
 
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
             name: '',
-            nodeIds: [],
         },
     })
+
+    useEffect(() => {
+        form.reset({
+            name: pool?.name ?? '',
+        })
+    }, [pool])
 
     const handleClose = () => {
         form.reset()
         onClose()
     }
 
-    const submit = async (_data: any) => {
-        const data = _data as z.infer<typeof schema>
-
+    const submit = async (data: z.infer<typeof schema>) => {
         clearFlashes()
         try {
-            const pool = await createAddressPool(data)
+            const updatedPool = await updateAddressPool(pool!.id, data)
 
             mutate(data => {
                 if (!data) return data
-                if (data.pagination.currentPage !== 1) return data
 
                 return {
                     ...data,
-                    items: [pool, ...data.items],
+                    items: data.items.map(item => (item.id === updatedPool.id ? updatedPool : item)),
                 }
             }, false)
 
@@ -64,17 +65,16 @@ const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
     }
 
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={Boolean(pool)} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>{t('create_pool')}</Modal.Title>
+                <Modal.Title>{t('edit_modal.title', { name: pool?.name })}</Modal.Title>
             </Modal.Header>
 
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.addressPools.create`} />
+                        <FlashMessageRender className='mb-5' byKey={`admin.addressPools.${pool?.id}.update`} />
                         <TextInputForm name='name' label={tStrings('name')} />
-                        <NodesMultiSelectForm />
                     </Modal.Body>
 
                     <Modal.Actions>
@@ -82,7 +82,7 @@ const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
                             {tStrings('cancel')}
                         </Modal.Action>
                         <Modal.Action type='submit' loading={form.formState.isSubmitting}>
-                            {tStrings('create')}
+                            {tStrings('save')}
                         </Modal.Action>
                     </Modal.Actions>
                 </form>
@@ -91,4 +91,4 @@ const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
     )
 }
 
-export default CreatePoolModal
+export default EditPoolModal

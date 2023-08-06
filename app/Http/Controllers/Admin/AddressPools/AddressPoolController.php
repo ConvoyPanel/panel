@@ -48,7 +48,8 @@ class AddressPoolController extends ApplicationApiController
 
     public function store(StoreAddressPoolRequest $request)
     {
-        $pool = AddressPool::create($request->validated());
+        $pool = AddressPool::create($request->safe()->except('node_ids'));
+        $pool->nodes()->attach($request->node_ids);
         $pool->loadCount(['addresses', 'nodes']);
 
         return fractal($pool, new AddressPoolTransformer)->respond();
