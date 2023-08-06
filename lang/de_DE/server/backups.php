@@ -16,11 +16,11 @@ return [
         ],
     ],
     'delete_modal' => [
-        'title' => 'Delete :name?',
+        'title' => ':name Löschen?',
         'description' => 'Bist Du sicher, dass Du dieses Backup löschen möchtest?',
     ],
     'restore_modal' => [
-        'title' => 'Restore From :name?',
+        'title' => 'Wiederherstellen von :name?',
         'description' => 'Bist Du sicher, dass Du dieses Backup wiederherstellen möchtest?',
     ],
     'notices' => [
