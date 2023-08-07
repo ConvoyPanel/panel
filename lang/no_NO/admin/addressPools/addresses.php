@@ -4,9 +4,9 @@ return [
     'create_address' => 'Create Address',
     'create_modal' => [
         'title' => 'Create Address',
-        'bulk_action_unchecked' => 'Bulk Import',
-        'bulk_action_checked_one' => 'Bulk Import (:count address)',
-        'bulk_action_checked_other' => 'Bulk Import (:count addresses)',
+        'bulkActionUnchecked' => 'Bulk Import',
+        'bulkActionChecked_one' => 'Bulk Import (:count address)',
+        'bulkActionChecked_other' => 'Bulk Import (:count addresses)',
     ],
     'assigned_server' => 'Assigned Server',
     'edit_modal' => [
