@@ -68,7 +68,7 @@ class AddressController extends ApplicationApiController
         $address = $this->connection->transaction(function () use ($request, $address) {
             $oldLinkedServer = $address->server;
 
-            $address = $address->update($request->validated());
+            $address->update($request->validated());
 
             try {
                 // Detach old server
@@ -95,6 +95,8 @@ class AddressController extends ApplicationApiController
                     );
                 }
             }
+
+            return $address;
         });
 
         return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();

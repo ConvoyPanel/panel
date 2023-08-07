@@ -54,9 +54,13 @@ const CreatePoolModal = ({ pool, onClose, mutate }: Props) => {
 
             <form onSubmit={submit}>
                 <Modal.Body>
-                    <MessageBox className={'mb-5'} type={'error'} title={tStrings('error') ?? 'Error'}>
-                        {t('delete_modal.nodes_linked_error')}
-                    </MessageBox>
+                    {pool ? (
+                        pool.nodesCount > 0 ? (
+                            <MessageBox className={'mb-5'} type={'error'} title={tStrings('error') ?? 'Error'}>
+                                {t('delete_modal.nodes_linked_error')}
+                            </MessageBox>
+                        ) : null
+                    ) : null}
                     <FlashMessageRender className='mb-5' byKey={`admin.addressPools.${pool?.id}.delete`} />
                     <Modal.Description>{t('delete_modal.description')}</Modal.Description>
                 </Modal.Body>
