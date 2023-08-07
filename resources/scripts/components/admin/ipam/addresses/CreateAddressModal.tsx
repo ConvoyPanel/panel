@@ -16,6 +16,7 @@ import { KeyedMutator, mutate } from 'swr'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import { useMemo } from 'react'
+import { Address } from '@/api/server/getServer'
 
 interface Props {
     open: boolean
@@ -23,9 +24,20 @@ interface Props {
     mutate: KeyedMutator<AddressResponse>
 }
 
-const calculateAddressBlockSize = (type: 'ipv4' | 'ipv6', cidr: number): number => {
-    if (type === 'ipv4') {
-        return Math.pow(2, 32 - cidr)
+const calculateAddressBlockSize = (address: string, cidr: number): number => {
+    const isIPv4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(address)
+    const isIPv6 = /^([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$/.test(address)
+
+    if (!isIPv4 && !isIPv6) {
+        return 0
+    }
+
+    if (isIPv4) {
+        if (address.endsWith('.0')) {
+            return Math.pow(2, 32 - cidr)
+        } else {
+            return 0
+        }
     } else {
         return 2 ** (128 - cidr)
     }
@@ -60,7 +72,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
         },
     })
 
-    const watchType = form.watch('type')
+    const watchAddress = form.watch('address')
     const watchIsBulkAction = form.watch('isBulkAction')
     const watchCidr = form.watch('cidr')
 
@@ -68,18 +80,25 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
         if (watchIsBulkAction) {
             const cidr = parseInt(watchCidr)
             if (!isNaN(cidr)) {
-                return t('create_modal.bulk_action_checked', {
-                    count: calculateAddressBlockSize(watchType as 'ipv4' | 'ipv6', cidr),
-                })
+                const addressCount = calculateAddressBlockSize(watchAddress, cidr)
+                if (addressCount === 0 || addressCount > 1) {
+                    return t('create_modal.bulkActionChecked_other', {
+                        count: addressCount,
+                    })
+                } else {
+                    return t('create_modal.bulkActionChecked_one', {
+                        count: addressCount,
+                    })
+                }
             } else {
-                return t('create_modal.bulk_action_checked', {
+                return t('create_modal.bulkActionChecked_other', {
                     count: 0,
                 })
             }
         } else {
-            return t('create_modal.bulk_action_unchecked')
+            return t('create_modal.bulkActionUnchecked')
         }
-    }, [watchType, watchIsBulkAction, watchCidr])
+    }, [watchAddress, watchIsBulkAction, watchCidr])
 
     const handleClose = () => {
         form.reset()
@@ -102,9 +121,17 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
                 if (!data) return data
                 if (data.pagination.currentPage !== 1) return data
 
+                let items = data.items
+
+                if (Array.isArray(address)) {
+                    items = [...address, ...items]
+                } else {
+                    items = [address, ...items]
+                }
+
                 return {
                     ...data,
-                    items: [address, ...data.items],
+                    items,
                 }
             }, false)
 

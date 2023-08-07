@@ -6,6 +6,7 @@ interface CreateAddressParameters {
     address: string
     type: AddressType
     cidr: number
+    isBulkAction: boolean
     gateway: string
     macAddress: string | null
     serverId: number | null
@@ -14,13 +15,14 @@ interface CreateAddressParameters {
 
 const createAddress = async (
     poolId: number,
-    { macAddress, serverId, include, ...payload }: CreateAddressParameters
+    { isBulkAction, macAddress, serverId, include, ...payload }: CreateAddressParameters
 ) => {
     const {
         data: { data },
     } = await http.post(
         `/api/admin/address-pools/${poolId}/addresses`,
         {
+            is_bulk_action: isBulkAction,
             mac_address: macAddress,
             server_id: serverId,
             ...payload,
@@ -32,7 +34,7 @@ const createAddress = async (
         }
     )
 
-    return rawDataToAddress(data)
+    return Array.isArray(data) ? data.map(rawDataToAddress) : rawDataToAddress(data)
 }
 
 export default createAddress

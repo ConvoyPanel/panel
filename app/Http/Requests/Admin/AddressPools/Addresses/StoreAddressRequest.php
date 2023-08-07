@@ -14,16 +14,26 @@ class StoreAddressRequest extends FormRequest
 {
     public function rules(): array
     {
-        return Arr::except(Address::getRules(),'address_pool_id');
+        $rules = Arr::except(Address::getRules(),'address_pool_id');
+
+        return [
+            'is_bulk_action' => 'sometimes|boolean',
+            ...$rules,
+        ];
     }
 
     public function withValidator(Validator $validator): void
     {
         $pool = $this->parameter('address_pool', AddressPool::class);
 
-        $validator->after([
-           new ValidateAddressType,
-           new ValidateAddressUniqueness($pool->id),
-        ]);
+        $rules = [
+            new ValidateAddressType,
+        ];
+
+        if ($this->boolean('is_bulk_action')) {
+            $rules[] = new ValidateAddressUniqueness($pool->id);
+        }
+
+        $validator->after($rules);
     }
 }

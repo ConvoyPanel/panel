@@ -44,6 +44,7 @@ class AddressController extends ApplicationApiController
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
     {
+        // TODO: add backend support for bulk creating addresses
         $address = $this->connection->transaction(function () use ($request, $addressPool) {
             $address = $addressPool->addresses()->create($request->validated());
 

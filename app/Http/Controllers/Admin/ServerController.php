@@ -22,6 +22,7 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class ServerController extends ApplicationApiController
 {
@@ -62,7 +63,9 @@ class ServerController extends ApplicationApiController
                 try {
                     $this->cloudinitService->updateHostname($server, $request->hostname);
                 } catch (ProxmoxConnectionException) {
-                    // do nothing
+                    throw new ServiceUnavailableHttpException(
+                        message: "Server {$server->uuid} failed to sync hostname."
+                    );
                 }
             }
 
