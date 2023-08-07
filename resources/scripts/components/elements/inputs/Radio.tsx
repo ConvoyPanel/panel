@@ -1,6 +1,11 @@
 import styled from '@emotion/styled'
-import { Radio as MantineRadio, RadioGroupProps as MantineRadioGroupProps, RadioProps as MantineRadioProps } from '@mantine/core'
+import {
+    Radio as MantineRadio,
+    RadioGroupProps as MantineRadioGroupProps,
+    RadioProps as MantineRadioProps,
+} from '@mantine/core'
 import tw from 'twin.macro'
+import { forwardRef } from 'react'
 
 export type RadioProps = MantineRadioProps
 export type RadioGroupProps = MantineRadioGroupProps
@@ -37,6 +42,8 @@ const StyledRadio = styled(MantineRadio)`
 
 const Radio: Radio = ({ ...props }) => <StyledRadio {...props} />
 
-Radio.Group = ({ ...props }) => <MantineRadio.Group {...props} />
+Radio.Group = forwardRef<HTMLInputElement, RadioGroupProps>(({ ...props }, ref) => (
+    <MantineRadio.Group ref={ref} {...props} />
+))
 
 export default Radio

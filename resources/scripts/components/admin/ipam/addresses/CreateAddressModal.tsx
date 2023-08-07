@@ -14,11 +14,21 @@ import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectFo
 import createAddress from '@/api/admin/addressPools/addresses/createAddress'
 import { KeyedMutator, mutate } from 'swr'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+import { useMemo } from 'react'
 
 interface Props {
     open: boolean
     onClose: () => void
     mutate: KeyedMutator<AddressResponse>
+}
+
+const calculateAddressBlockSize = (type: 'ipv4' | 'ipv6', cidr: number): number => {
+    if (type === 'ipv4') {
+        return Math.pow(2, 32 - cidr)
+    } else {
+        return 2 ** (128 - cidr)
+    }
 }
 
 const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
@@ -31,6 +41,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
         address: ipAddress().nonempty().max(191),
         type: z.enum(['ipv4', 'ipv6']),
         cidr: z.preprocess(Number, z.number().int().min(1).max(128)),
+        isBulkAction: z.boolean(),
         gateway: ipAddress().nonempty().max(191),
         macAddress: macAddress().max(191).optional().or(z.literal('')),
         serverId: z.literal('').or(z.preprocess(Number, z.number())),
@@ -42,11 +53,33 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
             address: '',
             type: 'ipv4',
             cidr: '',
+            isBulkAction: false,
             gateway: '',
             macAddress: '',
             serverId: '',
         },
     })
+
+    const watchType = form.watch('type')
+    const watchIsBulkAction = form.watch('isBulkAction')
+    const watchCidr = form.watch('cidr')
+
+    const isBulkActionLabel = useMemo(() => {
+        if (watchIsBulkAction) {
+            const cidr = parseInt(watchCidr)
+            if (!isNaN(cidr)) {
+                return t('create_modal.bulk_action_checked', {
+                    count: calculateAddressBlockSize(watchType as 'ipv4' | 'ipv6', cidr),
+                })
+            } else {
+                return t('create_modal.bulk_action_checked', {
+                    count: 0,
+                })
+            }
+        } else {
+            return t('create_modal.bulk_action_unchecked')
+        }
+    }, [watchType, watchIsBulkAction, watchCidr])
 
     const handleClose = () => {
         form.reset()
@@ -97,6 +130,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
                             <Radio name='type' value='ipv6' label={tStrings('ipv6')} />
                         </RadioGroupForm>
                         <TextInputForm name='cidr' label={tStrings('cidr')} placeholder='24' />
+                        <CheckboxForm className='mt-3' name={'isBulkAction'} label={isBulkActionLabel} />
                         <TextInputForm name='gateway' label={tStrings('gateway')} />
                         <TextInputForm name='macAddress' label={tStrings('mac_address')} />
                         <ServersSelectForm />
