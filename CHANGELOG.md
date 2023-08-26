@@ -4,6 +4,20 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.0.0-beta
+
+### Additions
+
+- Added IP pools and overhauled IP Address Management (IPAM)
+
+### Changes
+
+- Switched out MySQL for PostgreSQL (pending)
+
+### Fixes
+
+- Fixed inability to use special characters for Redis password
+
 ## v3.10.1-beta
 
 ### Fixes

@@ -56,10 +56,11 @@ Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::c
 Route::resource('address-pools', Admin\AddressPools\AddressPoolController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
 Route::prefix('/address-pools/{address_pool}')->group(function () {
-    Route::resource('addresses', Admin\AddressPools\AddressController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
     Route::get('/nodes', [Admin\AddressPools\AddressPoolController::class, 'getNodesAllocatedTo']);
 });
+
+Route::resource('address-pools.addresses', Admin\AddressPools\AddressController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 
 Route::resource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
