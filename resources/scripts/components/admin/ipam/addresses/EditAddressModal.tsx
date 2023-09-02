@@ -108,7 +108,7 @@ const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
                             className='mb-5'
                             byKey={`admin.addressPools.${address?.addressPoolId}.addresses.${address?.id}.edit`}
                         />
-                        <TextInputForm name='address' label={tStrings('address')} />
+                        <TextInputForm name='address' label={tStrings('address_one')} />
                         <RadioGroupForm name='type' orientation='vertical' spacing={6}>
                             <Radio name='type' value='ipv4' label={tStrings('ipv4')} />
                             <Radio name='type' value='ipv6' label={tStrings('ipv6')} />

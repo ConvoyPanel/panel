@@ -28,7 +28,7 @@ const ServerNetworkBlock = () => {
                             {addresses.map(ip => (
                                 <Display.Row key={ip.id} className='grid-cols-1 md:grid-cols-3 text-sm'>
                                     <div className='overflow-hidden'>
-                                        <p className='description-small !text-xs'>{tStrings('address')}</p>
+                                        <p className='description-small !text-xs'>{tStrings('address_one')}</p>
                                         <p className='font-semibold truncate text-foreground overflow-hidden overflow-ellipsis'>
                                             {ip.address}/{ip.cidr}
                                         </p>

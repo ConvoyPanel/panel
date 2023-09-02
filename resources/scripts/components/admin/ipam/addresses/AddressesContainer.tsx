@@ -31,7 +31,7 @@ const AddressesContainer = () => {
 
     const columns: ColumnArray<Address> = [
         {
-            header: tStrings('address'),
+            header: tStrings('address_one'),
             accessor: 'address',
         },
         {

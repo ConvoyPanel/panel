@@ -56,7 +56,7 @@ const HardwareDetailsCard = () => {
                                     {addresses.map(ip => (
                                         <Display.Row key={ip.id} className='grid-cols-1 md:grid-cols-3 text-sm'>
                                             <div>
-                                                <p className='description-small !text-xs'>{tStrings('address')}</p>
+                                                <p className='description-small !text-xs'>{tStrings('address_one')}</p>
                                                 <p className='font-semibold text-foreground'>
                                                     {ip.address}/{ip.cidr}
                                                 </p>

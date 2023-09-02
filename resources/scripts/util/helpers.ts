@@ -1,4 +1,5 @@
 import { Params } from 'react-router-dom'
+import { AddressType } from '@/api/server/getServer'
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
@@ -104,4 +105,35 @@ export const bindUrlParams = (url: string, params: Params<string>) => {
     })
 
     return url
+}
+
+export const countIPsInRange = (ipType: 'ipv4' | 'ipv6', startIP: string, endIP: string): number => {
+    if (startIP === '' || endIP === '') return 0
+
+    try {
+        const ipToNumber = (ip: string): bigint => {
+            const parts = ipType === 'ipv4' ? ip.split('.').map(Number) : ip.split(':')
+            let number = BigInt(0)
+            for (let i = 0; i < parts.length; i++) {
+                if (ipType === 'ipv4') {
+                    number = (number << BigInt(8)) + BigInt(parts[i])
+                } else {
+                    // @ts-expect-error
+                    number = (number << BigInt(16)) + BigInt(parseInt(parts[i], 16))
+                }
+            }
+            return number
+        }
+
+        const startNumber = ipToNumber(startIP)
+        const endNumber = ipToNumber(endIP)
+
+        if (startNumber > endNumber) {
+            return 0
+        }
+
+        return Number(endNumber - startNumber + BigInt(1))
+    } catch {
+        return 0
+    }
 }
