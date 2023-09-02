@@ -27,7 +27,7 @@
         "deepmerge-ts": "^4.2.1",
         "easy-peasy": "^5.1.0",
         "formik": "^2.2.9",
-        "i18next": "^22.4.14",
+        "i18next": "^23.4.6",
         "i18next-http-backend": "^2.2.0",
         "i18next-multiload-backend-adapter": "^2.2.0",
         "laravel-vite-plugin": "^0.7.2",
