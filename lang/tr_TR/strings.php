@@ -39,6 +39,8 @@ return [
     'ip' => 'IP Address',
     'address_one' => 'Address',
     'address_other' => 'Addresses',
+    'addressWithCount_one' => ':count address',
+    'addressWithCount_other' => ':count addresses',
     'gateway' => 'Gateway',
     'mac_address' => 'Mac Address',
     'none' => 'None',
