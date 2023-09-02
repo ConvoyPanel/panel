@@ -37,7 +37,6 @@ return [
     'suspended' => 'Suspended',
     'network' => 'Network',
     'ip' => 'IP Address',
-    'address' => 'Address',
     'address_one' => 'Address',
     'address_other' => 'Addresses',
     'gateway' => 'Gateway',
@@ -104,4 +103,6 @@ return [
     'cidr' => 'CIDR',
     'ipv4' => 'IPv4',
     'ipv6' => 'IPv6',
+    'single' => 'Single',
+    'multiple' => 'Multiple',
 ];
