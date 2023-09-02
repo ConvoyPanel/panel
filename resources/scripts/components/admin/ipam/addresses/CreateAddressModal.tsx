@@ -147,7 +147,9 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
                                 <TextInputForm name='startingAddress' label={t('create_modal.starting_address')} />
                                 <TextInputForm name='endingAddress' label={t('create_modal.ending_address')} />
                                 <p className={'description-small pt-2 pb-4'}>
-                                    {addressCount} <Trans t={tStrings} i18nKey={'address'} count={addressCount} />
+                                    <Trans t={tStrings} i18nKey={'addressWithCount'} count={addressCount}>
+                                        {{ addressCount }} address
+                                    </Trans>
                                 </p>
                             </>
                         ) : (

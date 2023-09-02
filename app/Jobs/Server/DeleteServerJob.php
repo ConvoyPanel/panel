@@ -33,7 +33,7 @@ class DeleteServerJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.delete-{$this->serverId}")];
+        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.delete#{$this->serverId}")];
     }
 
     /**

@@ -3,16 +3,17 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Server;
-use Convoy\Services\Servers\SyncBuildService;
 use Illuminate\Bus\Queueable;
+use Convoy\Services\Servers\NetworkService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 
-class SyncBuildJob implements ShouldQueue
+class SyncNetworkSettings implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -21,11 +22,6 @@ class SyncBuildJob implements ShouldQueue
         return now()->addMinutes(5);
     }
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(protected int $serverId)
     {
         //
@@ -33,16 +29,16 @@ class SyncBuildJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.sync#{$this->serverId}")];
+        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.sync-network-settings#{$this->serverId}")];
     }
 
     /**
      * Execute the job.
      */
-    public function handle(SyncBuildService $service): void
+    public function handle(NetworkService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 
-        $service->handle($server);
+        $service->syncSettings($server);
     }
 }

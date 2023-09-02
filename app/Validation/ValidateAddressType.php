@@ -3,28 +3,27 @@
 namespace Convoy\Validation;
 
 use Illuminate\Validation\Validator;
+use Convoy\Enums\Network\AddressType;
 
 class ValidateAddressType
 {
+    public function __construct(private AddressType $addressType, private array $fields) {}
+
     public function __invoke(Validator $validator)
     {
         $data = $validator->validated();
 
-        if ($data['type'] === 'ipv4') {
-            if (! filter_var($data['address'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                $validator->errors()->add('address', 'The address must be a valid IPv4 address.');
+        if ($this->addressType === AddressType::IPV4) {
+            foreach ($this->fields as $field) {
+                if (! filter_var($data[$field], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $validator->errors()->add('address', __('validation.ipv4', ['attribute' => $field]));
+                }
             }
-
-            if (! filter_var($data['gateway'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                $validator->errors()->add('gateway', 'The gateway must be a valid IPv4 address.');
-            }
-        } elseif ($data['type'] === 'ipv6') {
-            if (! filter_var($data['address'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                $validator->errors()->add('address', 'The address must be a valid IPv6 address.');
-            }
-
-            if (! filter_var($data['gateway'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                $validator->errors()->add('gateway', 'The gateway must be a valid IPv6 address.');
+        } elseif ($this->addressType === AddressType::IPV6) {
+            foreach ($this->fields as $field) {
+                if (! filter_var($data[$field], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                    $validator->errors()->add('address', __('validation.ipv6', ['attribute' => $field]));
+                }
             }
         }
     }

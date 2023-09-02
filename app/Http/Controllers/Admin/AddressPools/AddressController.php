@@ -4,9 +4,11 @@ namespace Convoy\Http\Controllers\Admin\AddressPools;
 
 use Convoy\Models\Address;
 use Illuminate\Support\Facades\Log;
+use Convoy\Enums\Network\AddressType;
 use Convoy\Services\Servers\NetworkService;
 use Illuminate\Database\ConnectionInterface;
 use Convoy\Transformers\Admin\AddressTransformer;
+use Convoy\Services\Nodes\Addresses\AddressHelpers;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\AllowedNullableFilter;
@@ -22,7 +24,7 @@ use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 
 class AddressController extends ApplicationApiController
 {
-    public function __construct(private NetworkService $networkService, private ConnectionInterface $connection)
+    public function __construct(private NetworkService $networkService, private AddressHelpers $addressHelpers, private ConnectionInterface $connection)
     {
     }
 
@@ -44,21 +46,41 @@ class AddressController extends ApplicationApiController
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
     {
-        // TODO: add backend support for bulk creating addresses
+        /** @var Address|Address[] $address */
         $address = $this->connection->transaction(function () use ($request, $addressPool) {
-            $address = $addressPool->addresses()->create($request->validated());
+            if ($request->boolean('is_bulk_action')) {
+                $addressesToAdd = $this->addressHelpers->expandIpRange(
+                    $request->enum('type', AddressType::class),
+                    $request->starting_address,
+                    $request->ending_address,
+                );
 
-            if ($request->server_id) {
-                try {
-                    $this->networkService->syncSettings($address->server);
-                } catch (ProxmoxConnectionException) {
-                    throw new ServiceUnavailableHttpException(
-                        message: "Server {$address->server->uuid} failed to sync network settings."
-                    );
+                foreach ($addressesToAdd as &$address) {
+                    $address = [
+                        'address' => $address,
+                        'address_pool_id' => $addressPool->id,
+                        ...$request->safe()->only(['server_id', 'type', 'cidr', 'gateway', 'mac_address'])
+                    ];
                 }
-            }
 
-            return $address;
+                
+
+
+            } else {
+                $address = $addressPool->addresses()->create($request->validated());
+
+                if ($request->server_id) {
+                    try {
+                        $this->networkService->syncSettings($address->server);
+                    } catch (ProxmoxConnectionException) {
+                        throw new ServiceUnavailableHttpException(
+                            message: "Server {$address->server->uuid} failed to sync network settings.",
+                        );
+                    }
+                }
+
+                return $address;
+            }
         });
 
         return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
@@ -84,15 +106,15 @@ class AddressController extends ApplicationApiController
             } catch (ProxmoxConnectionException) {
                 if ($oldLinkedServer && !$address->server) {
                     throw new ServiceUnavailableHttpException(
-                        message: "Server {$oldLinkedServer->uuid} failed to sync network settings."
+                        message: "Server {$oldLinkedServer->uuid} failed to sync network settings.",
                     );
                 } elseif (!$oldLinkedServer && $address->server) {
                     throw new ServiceUnavailableHttpException(
-                        message: "Server {$address->server->uuid} failed to sync network settings."
+                        message: "Server {$address->server->uuid} failed to sync network settings.",
                     );
                 } elseif ($oldLinkedServer && $address->server) {
                     throw new ServiceUnavailableHttpException(
-                        message: "Servers {$oldLinkedServer->uuid} and {$address->server->uuid} failed to sync network settings."
+                        message: "Servers {$oldLinkedServer->uuid} and {$address->server->uuid} failed to sync network settings.",
                     );
                 }
             }
@@ -113,7 +135,7 @@ class AddressController extends ApplicationApiController
                     $this->networkService->syncSettings($address->server);
                 } catch (ProxmoxConnectionException) {
                     throw new ServiceUnavailableHttpException(
-                        message: "Server {$address->server->uuid} failed to sync network settings."
+                        message: "Server {$address->server->uuid} failed to sync network settings.",
                     );
                 }
             }

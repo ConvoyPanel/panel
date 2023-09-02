@@ -32,7 +32,7 @@ class UpdatePasswordJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.update-password-{$this->serverId}")];
+        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.update-password#{$this->serverId}")];
     }
 
     /**

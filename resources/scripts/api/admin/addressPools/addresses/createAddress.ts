@@ -1,5 +1,5 @@
 import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
-import { AddressType, rawDataToAddress } from '@/api/server/getServer'
+import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
 import http from '@/api/http'
 import { z } from 'zod'
 import { ipAddress, macAddress } from '@/util/validation'
@@ -28,19 +28,23 @@ export const schema = z
     .and(baseSchema)
 
 type CreateAddressParameters = z.infer<typeof schema> & {
+    startingAddress?: string | null
+    endingAddress?: string | null
     include?: AddressInclude[]
 }
 
 const createAddress = async (
     poolId: number,
-    { isBulkAction, macAddress, serverId, include, ...payload }: CreateAddressParameters
-) => {
+    { isBulkAction, startingAddress, endingAddress, macAddress, serverId, include, ...payload }: CreateAddressParameters
+): Promise<Address | Address[]> => {
     const {
         data: { data },
     } = await http.post(
         `/api/admin/address-pools/${poolId}/addresses`,
         {
             is_bulk_action: isBulkAction,
+            starting_address: startingAddress,
+            ending_address: endingAddress,
             mac_address: macAddress,
             server_id: serverId,
             ...payload,

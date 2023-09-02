@@ -34,7 +34,7 @@ class PurgeBackupsJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server:backups.purge-{$this->serverId}")];
+        return [new SkipIfBatchCancelled, new WithoutOverlapping("server:backups.purge#{$this->serverId}")];
     }
 
     /**
