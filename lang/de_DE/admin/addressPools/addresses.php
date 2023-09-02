@@ -4,9 +4,8 @@ return [
     'create_address' => 'Adresse erstellen',
     'create_modal' => [
         'title' => 'Adresse erstellen',
-        'bulkActionUnchecked' => 'Massenimport',
-        'bulkActionChecked_one' => 'Massenimport (:count Adresse)',
-        'bulkActionChecked_other' => 'Massenimport (:count Adressen)',
+        'starting_address' => 'Starting Address',
+        'ending_address' => 'Ending Address',
     ],
     'assigned_server' => 'Zugewiesener Server',
     'edit_modal' => [
