@@ -4,8 +4,8 @@ return [
     'create_address' => 'Adresse erstellen',
     'create_modal' => [
         'title' => 'Adresse erstellen',
-        'starting_address' => 'Starting Address',
-        'ending_address' => 'Ending Address',
+        'starting_address' => 'Startadresse',
+        'ending_address' => 'Endadresse',
     ],
     'assigned_server' => 'Zugewiesener Server',
     'edit_modal' => [
