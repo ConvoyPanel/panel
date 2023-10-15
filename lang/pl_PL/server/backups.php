@@ -1,23 +1,23 @@
 <?php
 
 return [
-    'create_backup' => 'Create Backup',
-    'empty_state' => 'There are no backups',
-    'counter_tooltip' => 'You\'ve made :count out of :max backups',
+    'create_backup' => 'Stwórz kopię',
+    'empty_state' => 'Nie ma żadnych kopii',
+    'counter_tooltip' => 'Wykonałeś :count z :max kopii zapasowych',
     'create_modal' => [
-        'title' => 'Create a Backup',
-        'description' => 'Creating a backup will take a copy of your server files. This can take a while depending on the size of your server.',
-        'compression_type' => 'Compression Type',
-        'mode' => 'Mode',
+        'title' => 'Tworzenie kopii zapasowej',
+        'description' => 'Utworzenie kopii zapasowej spowoduje wykonanie kopii plików serwera. Może to trochę potrwać w zależności od wielkości serwera.',
+        'compression_type' => 'Typ kompresji',
+        'mode' => 'Tryb',
         'modes' => [
             'snapshot' => 'Snapshot',
-            'suspend' => 'Suspend',
-            'kill' => 'Kill',
+            'suspend' => 'Wyłączony',
+            'kill' => 'Wymuszony',
         ],
     ],
     'delete_modal' => [
-        'title' => 'Delete :name?',
-        'description' => 'Are you sure you want to delete this backup?',
+        'title' => 'Usunąć :name?',
+        'description' => 'Czy na pewno chcesz usunąć kopię zapasową?',
     ],
     'restore_modal' => [
         'title' => 'Restore From :name?',
