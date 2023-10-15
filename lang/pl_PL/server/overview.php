@@ -3,36 +3,36 @@
 return [
     'power_actions' => [
         'start' => 'Start',
-        'restart' => 'Restart',
-        'kill' => 'Kill',
-        'shutdown' => 'Shutdown',
+        'restart' => 'Uruchom ponownie',
+        'kill' => 'Wymuś zatrzymanie',
+        'shutdown' => 'Wyłącz',
     ],
     'notices' => [
-        'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
-        'power_action_sent_fail' => 'Failed to send power action.',
+        'power_action_sent_success' => 'Pomyślnie wysłano akcje. Przetwarzanie może chwilę potrwać.',
+        'power_action_sent_fail' => 'Nie udało się wysłać zapytania.',
     ],
 
-    'state' => 'State',
+    'state' => 'Stan',
     'states' => [
-        'stopped' => 'Stopped',
-        'running' => 'Running',
-        'stopping' => 'Stopping',
-        'starting' => 'Starting',
-        'shutting_down' => 'Shutting Down',
+        'stopped' => 'Wyłączony',
+        'running' => 'Włączony',
+        'stopping' => 'Zatrzymywanie',
+        'starting' => 'Uruchamianie',
+        'shutting_down' => 'Wyłączanie',
     ],
-    'uptime' => 'Uptime',
-    'poll_status_error' => 'Failed to poll server status. Retrying in 5 seconds...',
+    'uptime' => 'Czas działania',
+    'poll_status_error' => 'Nie udało się sprawdzić stanu serwera. Ponowna próba za 5 sekund...',
 
     'terminal' => [
-        'title' => 'Terminal',
-        'description' => 'Remotely manage your server from the web.',
-        'novnc_description' => 'Best for compatibility but lacks features and performance.',
-        'xtermjs_description' => 'Best for performance but doesn\'t work for every operating system.',
+        'title' => 'Zdalna konsola',
+        'description' => 'Zdalne zarządzanie serwerem z poziomu strony.',
+        'novnc_description' => 'Najlepsza pod względem kompatybilności, ale brakuje jej funkcji i wydajności.',
+        'xtermjs_description' => 'Najlepsza pod względem wydajności, ale nie działa z każdym systemem.',
     ],
 
     'server_config' => [
-        'title' => 'Configure This Server',
-        'description' => 'You are an administrator! You can click below to visit this server\'s build configuration and make edits.',
-        'configure_server' => 'Configure Server',
+        'title' => 'Konfiguracja tego serwera',
+        'description' => 'Jesteś administratorem! Możesz kliknąć poniżej, aby odwiedzić konfigurację tego serwera i wprowadzić zmiany.',
+        'configure_server' => 'Skonfiguruj serwer',
     ],
 ];
