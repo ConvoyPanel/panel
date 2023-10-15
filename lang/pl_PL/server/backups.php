@@ -20,11 +20,11 @@ return [
         'description' => 'Czy na pewno chcesz usunąć kopię zapasową?',
     ],
     'restore_modal' => [
-        'title' => 'Restore From :name?',
-        'description' => 'Are you sure you want to restore from this backup?',
+        'title' => 'Przywrócić z :name?',
+        'description' => 'Czy na pewno chcesz przywrócić tę kopię zapasową?',
     ],
     'notices' => [
-        'backup_deleted' => 'Deleted :name',
-        'backup_restored' => 'Began restoring server from :name',
+        'backup_deleted' => 'Usunięto :name',
+        'backup_restored' => 'Rozpoczęto przywracanie serwera z :name',
     ],
 ];
