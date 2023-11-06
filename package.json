@@ -51,6 +51,7 @@
         "zod-i18n-map": "^2.9.0"
     },
     "devDependencies": {
+        "@trivago/prettier-plugin-sort-imports": "^4.2.1",
         "@types/debounce": "^1.2.1",
         "@types/react": "^18.0.17",
         "@types/react-dom": "^18.0.6",
