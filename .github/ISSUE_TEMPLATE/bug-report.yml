@@ -1,0 +1,100 @@
+name: Bug Report
+description: Something isn't working quite right in the software.
+labels: [not confirmed]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bug reports should only be used for reporting issues with how the software works. For assistance installing this software, as well as debugging issues with dependencies, please use our [Discord server](https://discord.convoypanel.com).
+
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: Please provide a clear & concise description of the issue.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: Please describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Please be as detailed as possible when providing steps to reproduce, failure to provide steps will result in this issue being closed.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+
+  - type: input
+    attributes:
+      label: Proxmox OS Version
+      description: The version of your Proxmox node
+      placeholder: 7.4-13
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Operating System
+      description: The OS you are using on your own computer to use Convoy.
+      placeholder: Windows 11 22H2
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Browser
+      description: Your browser and its version
+      placeholder: e.g. Chrome 69, Firefox 420, Chromium 69, Edge 420
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
+
+  - type: input
+    id: panel-version
+    attributes:
+      label: Panel Version
+      description: Version number of your Panel (latest is not a version)
+      placeholder: 3.10.0-beta
+    validations:
+      required: true
+
+  - type: textarea
+    id: panel-logs
+    attributes:
+      label: Error Logs
+      description: |
+        Run the following command to collect logs of your Convoy installation. You will need to run this on the server
+        hosting your instance of Convoy.
+        
+        ```
+        wget https://github.com/ConvoyPanel/log-collector/releases/latest/download/log_collector
+        chmod +x ./log_collector
+        ./log_collector
+        ```
+      placeholder: "https://paste.frocdn.com/"
+      render: bash
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please [search here](https://github.com/pterodactyl/panel/issues) to see if an issue already exists for your problem.
+      options:
+        - label: I have searched the existing issues before opening this issue.
+          required: true
+        - label: I have checked in the Discord server and believe this is a bug with the software, and not a configuration issue with my specific system.
+          required: true
