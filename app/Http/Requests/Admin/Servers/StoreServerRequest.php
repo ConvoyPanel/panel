@@ -2,13 +2,13 @@
 
 namespace Convoy\Http\Requests\Admin\Servers;
 
-use Convoy\Http\Requests\FormRequest;
-use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Convoy\Rules\EnglishKeyboardCharacters;
+use Convoy\Models\Address;
 use Convoy\Rules\Password;
 use Illuminate\Validation\Validator;
+use Convoy\Http\Requests\FormRequest;
+use Convoy\Rules\EnglishKeyboardCharacters;
 
 /**
  * @property mixed $type
@@ -39,7 +39,8 @@ class StoreServerRequest extends FormRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters()],
+            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(
+            ), new EnglishKeyboardCharacters()],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',
@@ -52,12 +53,15 @@ class StoreServerRequest extends FormRequest
         $validator->after(function ($validator) {
             $addressIds = $this->input('limits.address_ids');
 
-            if (! is_null($addressIds)) {
+            if (!is_null($addressIds)) {
                 $addresses = Address::whereIn('id', $addressIds)->get();
 
                 foreach ($addresses as $address) {
                     if ($address->server_id !== null) {
-                        $validator->errors()->add('limits.address_ids', 'One or more of the selected addresses are already in use');
+                        $validator->errors()->add(
+                            'limits.address_ids',
+                            'One or more of the selected addresses are already in use',
+                        );
                         break;
                     }
                 }

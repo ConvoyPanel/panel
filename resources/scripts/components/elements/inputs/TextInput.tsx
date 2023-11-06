@@ -1,6 +1,5 @@
 import styled from '@emotion/styled'
-import { TextInputProps } from '@mantine/core'
-import { TextInput as MantineTextInput } from '@mantine/core'
+import { TextInput as MantineTextInput, TextInputProps } from '@mantine/core'
 import { forwardRef } from 'react'
 import tw from 'twin.macro'
 

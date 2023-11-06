@@ -1,5 +1,3 @@
-import PageContentBlock from '@/components/elements/PageContentBlock'
-
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import NodeDetailsBlock from '@/components/admin/nodes/overview/NodeDetailsBlock'
 

@@ -3,13 +3,13 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
+use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
 
 class WaitUntilVmIsCreatedJob implements ShouldQueue
 {

@@ -13,7 +13,7 @@ class StoreAddressPoolRequest extends FormRequest
         return [
             ...$rules,
             'node_ids' => 'sometimes|array',
-            'node_ids.*' => 'exists:nodes,id|integer'
+            'node_ids.*' => 'exists:nodes,id|integer',
         ];
     }
 }

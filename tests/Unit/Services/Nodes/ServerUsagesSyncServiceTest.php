@@ -1,8 +1,8 @@
 <?php
 
 use Carbon\Carbon;
-use Convoy\Services\Nodes\ServerUsagesSyncService;
 use Illuminate\Support\Facades\Http;
+use Convoy\Services\Nodes\ServerUsagesSyncService;
 
 beforeEach(fn () => Http::preventStrayRequests());
 

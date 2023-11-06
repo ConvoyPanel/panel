@@ -4,11 +4,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
 import useAddressesSWR from '@/api/admin/addressPools/useAddressesSWR'
 import { Address } from '@/api/server/getServer'
 
-import Breadcrumbs from '@/components/elements/Breadcrumbs'
 import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
@@ -23,6 +21,7 @@ import PoolContentBlock from '@/components/admin/ipam/PoolContentBlock'
 import CreateAddressModal from '@/components/admin/ipam/addresses/CreateAddressModal'
 import DeleteAddressModal from '@/components/admin/ipam/addresses/DeleteAddressModal'
 import EditAddressModal from '@/components/admin/ipam/addresses/EditAddressModal'
+
 
 const AddressesContainer = () => {
     const { t: tStrings } = useTranslation('strings')

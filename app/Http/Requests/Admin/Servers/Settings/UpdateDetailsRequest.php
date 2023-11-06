@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Server;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateDetailsRequest extends FormRequest
 {
@@ -42,7 +42,7 @@ class UpdateDetailsRequest extends FormRequest
         $data = parent::validated();
 
         // Adjust the limits field to match what is expected by the model.
-        if (! empty($data['limits'])) {
+        if (!empty($data['limits'])) {
             foreach ($data['limits'] as $key => $value) {
                 $data[$key] = $value;
             }

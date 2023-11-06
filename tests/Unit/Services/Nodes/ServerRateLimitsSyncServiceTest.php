@@ -1,8 +1,8 @@
 <?php
 
-use Convoy\Services\Nodes\ServerRateLimitsSyncService;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Convoy\Services\Nodes\ServerRateLimitsSyncService;
 
 beforeEach(fn () => Http::preventStrayRequests());
 

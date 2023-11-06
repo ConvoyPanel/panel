@@ -1,11 +1,10 @@
-import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import {
     Select as MantineSelect,
     SelectProps as MantineSelectProps,
 } from '@mantine/core'
-import { ComponentProps, ComponentPropsWithoutRef, forwardRef } from 'react'
+import { ComponentPropsWithoutRef, forwardRef } from 'react'
 import tw from 'twin.macro'
 
 import ErrorMessage from '@/components/elements/ErrorMessage'

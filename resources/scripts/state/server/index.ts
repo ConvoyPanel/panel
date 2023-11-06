@@ -4,6 +4,7 @@ import isEqual from 'react-fast-compare'
 import getServer, { ServerBuild } from '@/api/server/getServer'
 import getStatus, { ServerStateData } from '@/api/server/getState'
 
+
 export interface ServerDataStore {
     data?: ServerBuild
     setServer: Action<ServerDataStore, ServerBuild>

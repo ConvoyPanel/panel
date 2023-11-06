@@ -1,16 +1,9 @@
 import styled from '@emotion/styled'
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import {
     Textarea as MantineTextarea,
     TextareaProps as MantineTextareaProps,
 } from '@mantine/core'
-import {
-    ComponentProps,
-    FocusEvent,
-    forwardRef,
-    useEffect,
-    useState,
-} from 'react'
+import { forwardRef } from 'react'
 import tw from 'twin.macro'
 
 import ErrorMessage from '@/components/elements/ErrorMessage'

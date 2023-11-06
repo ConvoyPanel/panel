@@ -1,9 +1,9 @@
 <?php
 
-use Convoy\Models\Location;
 use Convoy\Models\Node;
-use Convoy\Models\Server;
 use Convoy\Models\User;
+use Convoy\Models\Server;
+use Convoy\Models\Location;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 /*

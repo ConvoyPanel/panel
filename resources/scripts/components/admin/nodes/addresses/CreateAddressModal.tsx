@@ -23,6 +23,7 @@ import Radio from '@/components/elements/inputs/Radio'
 
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
 
+
 interface Props {
     open: boolean
     onClose: () => void
@@ -79,7 +80,8 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
 
         clearFlashes()
         try {
-            const address = await createAddress(pool.id, {
+            // TODO: add pool id selector for create address
+            const address = await createAddress(0, {
                 macAddress:
                     macAddress && macAddress.length > 0 ? macAddress : null,
                 serverId: serverId !== '' ? serverId : null,
@@ -118,7 +120,7 @@ const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
                     <Modal.Body>
                         <FlashMessageRender
                             className='mb-5'
-                            byKey={`admin.addressPools.${pool.id}.addresses.create`}
+                            byKey={`admin.nodes.${node.id}`}
                         />
                         <SegmentedControl
                             className='!w-full'

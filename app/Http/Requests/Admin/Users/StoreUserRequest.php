@@ -3,8 +3,8 @@
 namespace Convoy\Http\Requests\Admin\Users;
 
 use Convoy\Models\User;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
 {

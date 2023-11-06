@@ -2,14 +2,14 @@
 
 namespace Convoy\Providers;
 
+use Convoy\Models\Server;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Convoy\Http\Middleware\AdminAuthenticate;
 use Convoy\Http\Middleware\Coterm\CotermAuthenticate;
-use Convoy\Models\Server;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {

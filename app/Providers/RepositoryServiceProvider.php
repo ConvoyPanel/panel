@@ -2,9 +2,9 @@
 
 namespace Convoy\Providers;
 
-use Convoy\Contracts\Repository\ActivityRepositoryInterface;
-use Convoy\Repositories\Eloquent\ActivityRepository;
 use Illuminate\Support\ServiceProvider;
+use Convoy\Repositories\Eloquent\ActivityRepository;
+use Convoy\Contracts\Repository\ActivityRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

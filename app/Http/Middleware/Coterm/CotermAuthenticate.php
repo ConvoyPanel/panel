@@ -3,10 +3,10 @@
 namespace Convoy\Http\Middleware\Coterm;
 
 use Convoy\Models\Node;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class CotermAuthenticate
 {

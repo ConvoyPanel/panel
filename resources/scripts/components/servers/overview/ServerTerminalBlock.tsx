@@ -2,7 +2,6 @@ import { ServerContext } from '@/state/server'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/20/solid'
 import { Button } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 
 import Card from '@/components/elements/Card'
 

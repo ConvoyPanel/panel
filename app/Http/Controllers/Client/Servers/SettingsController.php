@@ -2,34 +2,34 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Enums\Server\Status;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Models\TemplateGroup;
-use Convoy\Services\Servers\AllocationService;
-use Convoy\Services\Servers\CloudinitService;
-use Convoy\Services\Servers\ServerAuthService;
-use Convoy\Services\Servers\ServerBuildDispatchService;
-use Convoy\Transformers\Client\MediaTransformer;
-use Convoy\Transformers\Client\RenamedServerTransformer;
-use Convoy\Transformers\Client\ServerBootOrderTransformer;
-use Convoy\Transformers\Client\ServerNetworkTransformer;
-use Convoy\Transformers\Client\ServerSecurityTransformer;
-use Convoy\Transformers\Client\TemplateGroupTransformer;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
+use Convoy\Enums\Server\Status;
+use Convoy\Models\TemplateGroup;
 use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Enums\Server\AuthenticationType;
+use Illuminate\Database\ConnectionInterface;
+use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\AllocationService;
+use Convoy\Services\Servers\ServerAuthService;
+use Convoy\Data\Server\Proxmox\Config\DiskData;
+use Convoy\Transformers\Client\MediaTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Services\Servers\ServerBuildDispatchService;
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Transformers\Client\RenamedServerTransformer;
+use Convoy\Transformers\Client\ServerNetworkTransformer;
+use Convoy\Transformers\Client\TemplateGroupTransformer;
+use Convoy\Transformers\Client\ServerSecurityTransformer;
+use Convoy\Transformers\Client\ServerBootOrderTransformer;
+use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 
 class SettingsController extends ApplicationApiController
 {

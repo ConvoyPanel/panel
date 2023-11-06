@@ -2,12 +2,12 @@
 
 namespace Convoy\Http\Controllers\Client;
 
-use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Transformers\Client\ServerTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Transformers\Client\ServerTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
 
 class IndexController extends ApplicationApiController
 {

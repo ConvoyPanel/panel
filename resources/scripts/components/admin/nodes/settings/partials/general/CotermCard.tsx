@@ -1,4 +1,3 @@
-import { NodeContext } from '@/state/admin/node'
 import { useFlashKey } from '@/util/useFlash'
 import { hostname, port } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,10 +15,10 @@ import FormCard from '@/components/elements/FormCard'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import SwitchForm from '@/components/elements/forms/SwitchForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
-import Switch from '@/components/elements/inputs/Switch'
 
 import CotermResetModal from '@/components/admin/nodes/settings/partials/general/CotermResetModal'
 import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
+
 
 const CotermCard = () => {
     const { data: node, mutate } = useNodeSWR()

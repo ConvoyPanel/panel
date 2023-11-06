@@ -3,11 +3,11 @@
 namespace Convoy\Transformers\Client;
 
 use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Convoy\Transformers\Admin\UserTransformer;
 use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
+use Convoy\Transformers\Admin\NodeTransformer;
+use Convoy\Transformers\Admin\UserTransformer;
+use Convoy\Services\Servers\ServerDetailService;
 
 class ServerTransformer extends TransformerAbstract
 {

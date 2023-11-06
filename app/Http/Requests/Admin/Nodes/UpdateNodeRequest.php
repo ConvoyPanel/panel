@@ -2,10 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Node;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateNodeRequest extends FormRequest
 {

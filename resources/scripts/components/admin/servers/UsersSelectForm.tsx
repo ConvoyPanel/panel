@@ -1,13 +1,12 @@
 import { useDebouncedValue } from '@mantine/hooks'
-import { useField } from 'formik'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import useUsersSWR from '@/api/admin/users/useUsersSWR'
 
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import SelectForm from '@/components/elements/forms/SelectForm'
+
 
 const UsersSelectForm = () => {
     const { setValue, watch } = useFormContext()

@@ -2,7 +2,7 @@ import { Active, DraggableAttributes } from '@dnd-kit/core'
 import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 
 type BaseProps = {
     id: string | number

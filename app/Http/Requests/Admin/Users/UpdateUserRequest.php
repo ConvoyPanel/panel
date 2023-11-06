@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Users;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\User;
+use Convoy\Http\Requests\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest

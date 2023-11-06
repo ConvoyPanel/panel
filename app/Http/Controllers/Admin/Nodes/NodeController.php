@@ -2,20 +2,19 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateCotermRequest;
-use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
-use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
-use Convoy\Models\Filters\FiltersNode;
 use Convoy\Models\Node;
-use Convoy\Services\Coterm\CotermTokenCreationService;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
+use Illuminate\Http\JsonResponse;
 use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Models\Filters\FiltersNode;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Transformers\Admin\NodeTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
+use Convoy\Services\Coterm\CotermTokenCreationService;
+use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateCotermRequest;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class NodeController extends ApplicationApiController
 {

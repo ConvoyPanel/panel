@@ -1,33 +1,19 @@
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
-import {
-    englishKeyboardCharacters,
-    hostname,
-    password,
-} from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FormikProvider, useFormik } from 'formik'
-import { useMemo } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import * as yup from 'yup'
 import { z } from 'zod'
 
 import updateBuild from '@/api/admin/servers/updateBuild'
-import updateServer from '@/api/admin/servers/updateServer'
-import { EloquentStatus } from '@/api/server/types'
 
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
-import FormSection from '@/components/elements/FormSection'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
-import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
-import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
+
 
 const ServerBuildSettingsCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)

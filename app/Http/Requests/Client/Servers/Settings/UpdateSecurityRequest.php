@@ -2,14 +2,14 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Exception;
+use Convoy\Rules\Password;
+use Illuminate\Validation\Validator;
+use Illuminate\Validation\Rules\Enum;
+use phpseclib3\Crypt\PublicKeyLoader;
 use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Rules\EnglishKeyboardCharacters;
-use Convoy\Rules\Password;
-use Exception;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\Validator;
-use phpseclib3\Crypt\PublicKeyLoader;
 
 class UpdateSecurityRequest extends FormRequest
 {
@@ -29,7 +29,8 @@ class UpdateSecurityRequest extends FormRequest
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
             'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,ssh_keys'],
-            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(), 'exclude_unless:type,password'],
+            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(
+            ), 'exclude_unless:type,password'],
         ];
     }
 

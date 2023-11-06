@@ -13,6 +13,7 @@ import Modal from '@/components/elements/Modal'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import TextareaForm from '@/components/elements/forms/TextareaForm'
 
+
 interface Props {
     mutate: KeyedMutator<LocationResponse>
     open: boolean

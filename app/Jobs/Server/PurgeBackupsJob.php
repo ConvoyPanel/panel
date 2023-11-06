@@ -4,15 +4,15 @@ namespace Convoy\Jobs\Server;
 
 use Closure;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Convoy\Services\Servers\Backups\PurgeBackupsService;
 
 class PurgeBackupsJob implements ShouldQueue
 {

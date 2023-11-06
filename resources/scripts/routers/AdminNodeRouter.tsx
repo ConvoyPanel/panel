@@ -1,20 +1,18 @@
-import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { NodeContext } from '@/state/admin/node'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, RouteObject, Routes, useMatch } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
 import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
 import { httpErrorToHuman } from '@/api/http'
 
-import { ErrorMessage, NotFound } from '@/components/elements/ScreenBlock'
+import { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
-import NavigationBar, {
-    NavigationBarContext,
-} from '@/components/elements/navigation/NavigationBar'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
 
 export const routes: Route[] = [
     {

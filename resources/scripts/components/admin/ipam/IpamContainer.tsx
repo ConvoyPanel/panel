@@ -22,6 +22,7 @@ import CreatePoolModal from '@/components/admin/ipam/CreatePoolModal'
 import DeletePoolModal from '@/components/admin/ipam/DeletePoolModal'
 import EditPoolModal from '@/components/admin/ipam/EditPoolModal'
 
+
 const IpamContainer = () => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.addressPools.index')

@@ -2,11 +2,11 @@
 
 namespace Convoy\Repositories\Eloquent;
 
-use Convoy\Contracts\Repository\ServerRepositoryInterface;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
 use Convoy\Models\Server;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Convoy\Exceptions\Repository\RecordNotFoundException;
+use Convoy\Contracts\Repository\ServerRepositoryInterface;
 
 class ServerRepository extends EloquentRepository implements ServerRepositoryInterface
 {

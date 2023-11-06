@@ -2,9 +2,9 @@
 
 namespace Convoy\Exceptions\Repository\Proxmox;
 
-use Convoy\Exceptions\Repository\RepositoryException;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\Client\RequestException;
+use Convoy\Exceptions\Repository\RepositoryException;
 
 class ProxmoxConnectionException extends RepositoryException
 {

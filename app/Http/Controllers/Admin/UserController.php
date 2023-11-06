@@ -2,22 +2,20 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
+use Convoy\Models\User;
 use Carbon\CarbonImmutable;
+use Convoy\Models\SSOToken;
+use Illuminate\Http\Request;
+use Convoy\Services\Api\JWTService;
+use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Models\Filters\FiltersUser;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Transformers\Admin\UserTransformer;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
-use Convoy\Models\Filters\FiltersUser;
-use Convoy\Models\SSOToken;
-use Convoy\Models\User;
-use Convoy\Services\Api\JWTService;
-use Convoy\Transformers\Admin\UserTransformer;
-use Convoy\Transformers\Application\SSOTokenTransformer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserController extends ApplicationApiController

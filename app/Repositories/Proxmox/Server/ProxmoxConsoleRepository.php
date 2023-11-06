@@ -2,15 +2,13 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
+use Convoy\Models\Server;
+use Webmozart\Assert\Assert;
+use GuzzleHttp\Cookie\CookieJar;
 use Convoy\Data\Node\Access\UserCredentialsData;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use Convoy\Data\Server\Proxmox\Console\XTermCredentialsData;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use GuzzleHttp\Cookie\CookieJar;
-use Webmozart\Assert\Assert;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 
 class ProxmoxConsoleRepository extends ProxmoxRepository
 {

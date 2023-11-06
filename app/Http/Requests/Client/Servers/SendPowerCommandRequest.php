@@ -3,8 +3,8 @@
 namespace Convoy\Http\Requests\Client\Servers;
 
 use Convoy\Enums\Server\PowerAction;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
 
 class SendPowerCommandRequest extends FormRequest
 {

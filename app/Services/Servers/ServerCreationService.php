@@ -2,14 +2,14 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Repositories\Eloquent\ServerRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Convoy\Enums\Server\Status;
+use Convoy\Repositories\Eloquent\ServerRepository;
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 
 /**
  * Class ServerCreationService

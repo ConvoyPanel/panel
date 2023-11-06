@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
-use Convoy\Http\Controllers\Controller;
 use Convoy\Models\Server;
-use Convoy\Transformers\Client\ActivityLogTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Transformers\Client\ActivityLogTransformer;
 
 class ActivityController extends Controller
 {

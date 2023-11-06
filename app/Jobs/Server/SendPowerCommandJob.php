@@ -2,17 +2,17 @@
 
 namespace Convoy\Jobs\Server;
 
-use Convoy\Enums\Server\PowerAction;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
+use Convoy\Enums\Server\PowerAction;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 
 class SendPowerCommandJob implements ShouldQueue
 {

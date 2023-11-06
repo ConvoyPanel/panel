@@ -1,6 +1,5 @@
 import { RadioGroupProps } from '@mantine/core'
-import { FieldProps, Field as FormikField, useField } from 'formik'
-import { forwardRef } from 'react'
+import { useField } from 'formik'
 
 import Radio from '@/components/elements/inputs/Radio'
 

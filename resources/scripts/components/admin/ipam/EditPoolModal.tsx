@@ -1,6 +1,6 @@
 import { useFlashKey } from '@/util/useFlash'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { KeyedMutator } from 'swr'
@@ -15,6 +15,7 @@ import updateAddressPool from '@/api/admin/addressPools/updateAddressPool'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
+
 
 interface Props {
     pool: AddressPool | null

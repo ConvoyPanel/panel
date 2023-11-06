@@ -2,8 +2,8 @@
 
 namespace Convoy\Models\Filters;
 
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class AllowedNullableFilter extends AllowedFilter
 {

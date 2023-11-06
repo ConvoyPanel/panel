@@ -1,7 +1,6 @@
 <?php
 
 use Convoy\Providers\RouteServiceProvider;
-use Laravel\Fortify\Features;
 
 return [
 

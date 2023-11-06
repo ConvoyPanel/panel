@@ -3,8 +3,8 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Enums\Server\BiosType;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBiosTypeRequest extends FormRequest
 {

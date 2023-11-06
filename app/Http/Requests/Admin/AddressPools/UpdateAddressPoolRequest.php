@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\AddressPools;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\AddressPool;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateAddressPoolRequest extends FormRequest
 {

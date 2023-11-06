@@ -3,19 +3,19 @@
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
 use Convoy\Models\Address;
+use Illuminate\Http\Request;
+use Convoy\Models\AddressPool;
 use Convoy\Enums\Network\AddressType;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Models\Filters\FiltersAddress;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Jobs\Server\SyncNetworkSettings;
 use Illuminate\Database\ConnectionInterface;
+use Convoy\Models\Filters\AllowedNullableFilter;
 use Convoy\Transformers\Admin\AddressTransformer;
 use Convoy\Repositories\Eloquent\AddressRepository;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\AllowedNullableFilter;
-use Convoy\Models\Filters\FiltersAddress;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;

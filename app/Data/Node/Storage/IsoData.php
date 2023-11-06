@@ -2,7 +2,6 @@
 
 namespace Convoy\Data\Node\Storage;
 
-use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Spatie\LaravelData\Data;
 

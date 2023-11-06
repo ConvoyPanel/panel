@@ -3,16 +3,16 @@
 namespace Convoy\Jobs\Server;
 
 use Closure;
-use Convoy\Enums\Server\State;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
+use Convoy\Enums\Server\State;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 
 class MonitorStateJob implements ShouldQueue
 {

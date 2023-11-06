@@ -1,11 +1,10 @@
 import { lazyLoad } from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { AdminServerContext } from '@/state/admin/server'
-import { ServerContext } from '@/state/server'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, RouteObject, useMatch } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 
 import { httpErrorToHuman } from '@/api/http'
 
@@ -14,6 +13,7 @@ import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
+
 
 export const routes: Route[] = [
     {

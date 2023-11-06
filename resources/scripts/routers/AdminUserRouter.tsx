@@ -1,12 +1,13 @@
 import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { lazy, useContext, useEffect } from 'react'
-import { Outlet, RouteObject } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import getUser from '@/api/admin/users/getUser'
 import useUserSWR, { getKey } from '@/api/admin/users/useUserSWR'
 
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
 
 export const routes: Route[] = [
     {

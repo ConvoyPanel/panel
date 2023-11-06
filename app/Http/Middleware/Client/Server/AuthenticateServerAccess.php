@@ -3,10 +3,10 @@
 namespace Convoy\Http\Middleware\Client\Server;
 
 use Closure;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthenticateServerAccess

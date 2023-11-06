@@ -1,15 +1,14 @@
 import usePagination from '@/util/usePagination'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import { ServerBuild } from '@/api/server/getServer'
 
-import Button from '@/components/elements/Button'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
+
 
 interface Props {
     query?: string

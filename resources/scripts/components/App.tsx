@@ -2,17 +2,12 @@ import router from '@/routers/router'
 import { store } from '@/state'
 import { NavigationProgress } from '@mantine/nprogress'
 import { StoreProvider } from 'easy-peasy'
-import {
-    BrowserRouter,
-    Route,
-    RouterProvider,
-    Routes,
-    createBrowserRouter,
-} from 'react-router-dom'
+import { RouterProvider } from 'react-router-dom'
 
 import Spinner from '@/components/elements/Spinner'
 
 import ThemeProvider from '@/components/ThemeProvider'
+
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {

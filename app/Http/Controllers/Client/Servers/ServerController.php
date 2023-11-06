@@ -2,23 +2,23 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Models\Server;
+use Illuminate\Http\JsonResponse;
 use Convoy\Enums\Server\ConsoleType;
 use Convoy\Enums\Server\PowerAction;
+use Convoy\Services\Servers\VncService;
+use Convoy\Services\Coterm\CotermJWTService;
+use Convoy\Services\Servers\ServerDetailService;
+use Convoy\Services\Servers\ServerConsoleService;
+use Convoy\Transformers\Client\ServerTransformer;
 use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
-use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
-use Convoy\Models\Server;
+use Convoy\Transformers\Client\ServerStateTransformer;
+use Convoy\Transformers\Client\ServerDetailTransformer;
+use Convoy\Transformers\Client\ServerTerminalTransformer;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\Coterm\CotermJWTService;
-use Convoy\Services\Servers\ServerConsoleService;
-use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Services\Servers\VncService;
-use Convoy\Transformers\Client\ServerDetailTransformer;
-use Convoy\Transformers\Client\ServerStateTransformer;
-use Convoy\Transformers\Client\ServerTerminalTransformer;
-use Convoy\Transformers\Client\ServerTransformer;
-use Illuminate\Http\JsonResponse;
+use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
+use Convoy\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 
 class ServerController extends ApplicationApiController
 {

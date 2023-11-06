@@ -3,12 +3,12 @@
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Models\Address;
+use Illuminate\Support\Arr;
 use Convoy\Models\AddressPool;
+use Illuminate\Validation\Validator;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Validation\ValidateAddressType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
-use Illuminate\Validation\Validator;
 use Convoy\Validation\ValidateAddressUniqueness;
 
 class StoreAddressRequest extends FormRequest
@@ -31,7 +31,10 @@ class StoreAddressRequest extends FormRequest
         $rules = [];
 
         if ($this->boolean('is_bulk_action')) {
-            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['starting_address', 'ending_address', 'gateway']);
+            $rules[] = new ValidateAddressType(
+                $this->enum('type', AddressType::class),
+                ['starting_address', 'ending_address', 'gateway'],
+            );
         }
 
         if (!$this->boolean('is_bulk_action')) {

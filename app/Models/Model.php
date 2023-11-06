@@ -3,18 +3,18 @@
 namespace Convoy\Models;
 
 use Carbon\CarbonImmutable;
-use Convoy\Exceptions\Model\DataValidationException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
+use Convoy\Exceptions\Model\DataValidationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 abstract class Model extends IlluminateModel
 {

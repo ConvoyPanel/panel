@@ -3,8 +3,8 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Backup extends Model
 {

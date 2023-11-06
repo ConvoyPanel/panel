@@ -2,11 +2,11 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
 use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 
 class Server extends Model
 {

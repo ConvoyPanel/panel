@@ -1,4 +1,3 @@
-import { NodeContext } from '@/state/admin/node'
 import { useFlashKey } from '@/util/useFlash'
 import { hostname } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +14,7 @@ import FormCard from '@/components/elements/FormCard'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
+
 
 const NodeInformationCard = () => {
     const { data: node, mutate } = useNodeSWR()

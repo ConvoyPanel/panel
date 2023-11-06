@@ -3,10 +3,10 @@
 namespace Convoy\Repositories;
 
 use Closure;
-use Convoy\Contracts\Repository\RepositoryInterface;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Application;
 use InvalidArgumentException;
+use Illuminate\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
+use Convoy\Contracts\Repository\RepositoryInterface;
 
 abstract class Repository implements RepositoryInterface
 {

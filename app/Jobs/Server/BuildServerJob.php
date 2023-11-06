@@ -2,17 +2,17 @@
 
 namespace Convoy\Jobs\Server;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
+use Convoy\Enums\Server\Status;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 
 class BuildServerJob implements ShouldQueue
 {

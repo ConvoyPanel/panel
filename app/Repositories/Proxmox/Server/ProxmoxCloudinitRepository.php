@@ -2,10 +2,10 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Webmozart\Assert\Assert;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 class ProxmoxCloudinitRepository extends ProxmoxRepository
 {

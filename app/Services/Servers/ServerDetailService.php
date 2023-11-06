@@ -2,11 +2,11 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Eloquent\ServerEloquentData;
-use Convoy\Data\Server\Proxmox\ServerProxmoxData;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
+use Convoy\Data\Server\Proxmox\ServerProxmoxData;
+use Convoy\Data\Server\Eloquent\ServerEloquentData;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 
 class ServerDetailService
 {

@@ -2,9 +2,9 @@
 
 namespace Convoy\Repositories\Eloquent;
 
-use Convoy\Contracts\Repository\ActivityRepositoryInterface;
-use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
+use Convoy\Models\ActivityLog;
+use Convoy\Contracts\Repository\ActivityRepositoryInterface;
 
 class ActivityRepository extends EloquentRepository implements ActivityRepositoryInterface
 {

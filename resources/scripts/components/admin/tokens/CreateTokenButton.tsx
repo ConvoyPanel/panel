@@ -7,18 +7,14 @@ import * as yup from 'yup'
 import createToken from '@/api/admin/tokens/createToken'
 import { Token, TokenResponse } from '@/api/admin/tokens/getTokens'
 import useTokensSWR from '@/api/admin/tokens/useTokensSWR'
-import createUser from '@/api/admin/users/createUser'
-import { UserResponse } from '@/api/admin/users/getUsers'
-import useUsersSWR from '@/api/admin/users/useUsersSWR'
 
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
 import PlainTextTokenModal from '@/components/admin/tokens/PlainTextTokenModal'
+
 
 const CreateTokenButton = () => {
     const [open, setOpen] = useState(false)

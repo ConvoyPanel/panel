@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\FormRequest;
-use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
+use Convoy\Models\Address;
 use Illuminate\Validation\Validator;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateBuildRequest extends FormRequest
 {
@@ -39,7 +39,10 @@ class UpdateBuildRequest extends FormRequest
 
             foreach ($addresses as $address) {
                 if ($address->server_id !== null && $address->server_id !== $server->id) {
-                    $validator->errors()->add('address_ids', 'One or more of the selected addresses are already in use');
+                    $validator->errors()->add(
+                        'address_ids',
+                        'One or more of the selected addresses are already in use',
+                    );
                     break;
                 }
             }

@@ -1,9 +1,8 @@
 import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
-import { HomeIcon } from '@heroicons/react/20/solid'
 import { lazy, useContext, useEffect } from 'react'
 import { Translation, useTranslation } from 'react-i18next'
-import { Navigate, Outlet, RouteObject } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
 import getAddresses from '@/api/admin/addressPools/getAddresses'
@@ -11,6 +10,7 @@ import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR
 import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
 
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
 
 export const routes: Route[] = [
     {

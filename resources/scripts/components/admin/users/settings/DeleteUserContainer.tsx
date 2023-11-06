@@ -10,6 +10,7 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
 
+
 const DeleteUserContainer = () => {
     const { data: user } = useUserSWR()
     const [loading, setLoading] = useState(false)

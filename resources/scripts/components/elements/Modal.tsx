@@ -1,7 +1,6 @@
 import styled from '@emotion/styled'
-import { Dialog, Transition } from '@headlessui/react'
-import React, { ComponentProps, useRef } from 'react'
-import { Fragment, ReactNode } from 'react'
+import { Dialog } from '@headlessui/react'
+import React, { ComponentProps, ReactNode } from 'react'
 import tw from 'twin.macro'
 
 import Drawer from '@/components/elements/Drawer'

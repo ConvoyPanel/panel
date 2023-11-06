@@ -4,6 +4,7 @@ import isEqual from 'react-fast-compare'
 import getNode from '@/api/admin/nodes/getNode'
 import { Node } from '@/api/admin/nodes/getNodes'
 
+
 export interface NodeDataStore {
     data?: Node
     setNode: Action<NodeDataStore, Node>

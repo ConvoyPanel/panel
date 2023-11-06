@@ -1,5 +1,4 @@
 import { useFlashKey } from '@/util/useFlash'
-import { Code } from '@mantine/core'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -7,6 +6,7 @@ import resetCotermToken from '@/api/admin/nodes/settings/resetCotermToken'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
+
 
 interface Props {
     nodeId: number

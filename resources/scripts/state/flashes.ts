@@ -4,6 +4,7 @@ import { httpErrorToHuman } from '@/api/http'
 
 import { FlashMessageType } from '@/components/elements/MessageBox'
 
+
 export interface FlashStore {
     items: FlashMessage[]
     addFlash: Action<FlashStore, FlashMessage>

@@ -3,7 +3,8 @@ import { z } from 'zod'
 
 import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
 import http from '@/api/http'
-import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
+import { Address, rawDataToAddress } from '@/api/server/getServer'
+
 
 const baseSchema = z.object({
     type: z.enum(['ipv4', 'ipv6']),

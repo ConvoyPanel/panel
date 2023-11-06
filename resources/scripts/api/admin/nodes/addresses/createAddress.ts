@@ -1,6 +1,5 @@
 import http from '@/api/http'
-import { AddressType } from '@/api/server/getServer'
-import { Address, rawDataToAddress } from '@/api/server/getServer'
+import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
 
 export interface AddressParameters {
     serverId?: number

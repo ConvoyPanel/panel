@@ -1,7 +1,5 @@
 import { Params } from 'react-router-dom'
 
-import { AddressType } from '@/api/server/getServer'
-
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 export const randomInt = (low: number, high: number) =>

@@ -8,6 +8,7 @@ import CreateServerModal from '@/components/admin/servers/CreateServerModal'
 import ServersTable from '@/components/admin/servers/ServersTable'
 import UserContentBlock from '@/components/admin/users/UserContentBlock'
 
+
 const UserServersContainer = () => {
     const { data: user } = useUserSWR()
     const [open, setOpen] = useState(false)

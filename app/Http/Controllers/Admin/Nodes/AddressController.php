@@ -5,7 +5,6 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 use Convoy\Models\Node;
 use Convoy\Models\Address;
 use Illuminate\Http\Request;
-use Convoy\Models\AddressPool;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 use Convoy\Http\Controllers\Controller;

@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Settings;
 
-use Convoy\Http\Requests\FormRequest;
 use Illuminate\Validation\Rule;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateCotermRequest extends FormRequest
 {

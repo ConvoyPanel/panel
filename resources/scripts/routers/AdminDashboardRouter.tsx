@@ -7,11 +7,12 @@ import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { Route } from '@/routers/router'
 import { HomeIcon } from '@heroicons/react/20/solid'
 import { lazy, useContext, useEffect } from 'react'
-import { Translation, useTranslation } from 'react-i18next'
-import { Link, Outlet, RouteObject, useMatch } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Link, Outlet, useMatch } from 'react-router-dom'
 
 import ContentContainer from '@/components/elements/ContentContainer'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
 
 export const routes: Route[] = [
     {

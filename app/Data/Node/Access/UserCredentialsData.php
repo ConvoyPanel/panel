@@ -2,8 +2,8 @@
 
 namespace Convoy\Data\Node\Access;
 
-use Convoy\Enums\Node\Access\RealmType;
 use Spatie\LaravelData\Data;
+use Convoy\Enums\Node\Access\RealmType;
 
 class UserCredentialsData extends Data
 {

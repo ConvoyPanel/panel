@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\TemplateGroups;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateGroupOrderRequest extends FormRequest
 {

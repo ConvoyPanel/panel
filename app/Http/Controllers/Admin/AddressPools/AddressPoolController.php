@@ -2,18 +2,17 @@
 
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
-use Convoy\Models\Address;
+use Illuminate\Http\Request;
+use Convoy\Models\AddressPool;
+use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Models\Filters\FiltersNode;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Models\Filters\FiltersAddressPool;
+use Convoy\Transformers\Admin\NodeTransformer;
 use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Transformers\Admin\AddressPoolTransformer;
 use Convoy\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
 use Convoy\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
-use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\FiltersAddressPool;
-use Convoy\Models\Filters\FiltersNode;
-use Convoy\Transformers\Admin\AddressPoolTransformer;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class AddressPoolController extends ApplicationApiController

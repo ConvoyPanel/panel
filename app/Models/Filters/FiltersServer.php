@@ -2,8 +2,8 @@
 
 namespace Convoy\Models\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 
 class FiltersServer implements Filter
 {

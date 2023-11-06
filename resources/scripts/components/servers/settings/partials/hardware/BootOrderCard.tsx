@@ -2,7 +2,7 @@
 import DragVerticalIcon from '@/assets/images/icons/drag-vertical.svg'
 import { ServerContext } from '@/state/server'
 import { bytesToString } from '@/util/helpers'
-import useFlash, { useFlashKey } from '@/util/useFlash'
+import { useFlashKey } from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import {
@@ -17,19 +17,15 @@ import {
 import { PlusIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { Badge } from '@mantine/core'
 import { updateNotification } from '@mantine/notifications'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
-import useSWR from 'swr'
+import { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { httpErrorToHuman } from '@/api/http'
-import getBootOrder, {
-    BootOrderSettings,
-} from '@/api/server/settings/getBootOrder'
+import { BootOrderSettings } from '@/api/server/settings/getBootOrder'
 import updateBootOrder from '@/api/server/settings/updateBootOrder'
 import useBootOrderSWR from '@/api/server/settings/useBootOrderSWR'
 import { Disk } from '@/api/server/useServerDetails'
 
-import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'

@@ -2,7 +2,7 @@ import { ServerContext } from '@/state/server'
 import usePagination from '@/util/usePagination'
 import useSWR from 'swr'
 
-import getBackups, { BackupResponse } from '@/api/server/backups/getBackups'
+import getBackups from '@/api/server/backups/getBackups'
 
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'

@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests;
 
+use Webmozart\Assert\Assert;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest as BaseFormRequest;
-use Webmozart\Assert\Assert;
 
 abstract class FormRequest extends BaseFormRequest
 {
@@ -51,7 +51,7 @@ abstract class FormRequest extends BaseFormRequest
      *
      * @template T of Model
      *
-     * @param  class-string<T>  $expect
+     * @param class-string<T> $expect
      * @return T
      *
      * @noinspection PhpUndefinedClassInspection

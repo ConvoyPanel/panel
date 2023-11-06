@@ -6,6 +6,7 @@ import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
 
 import SelectForm from '@/components/elements/forms/SelectForm'
 
+
 const LocationsSelectForm = () => {
     const { watch } = useFormContext()
     const locationId: string = watch('locationId')

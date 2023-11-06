@@ -4,12 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { KeyedMutator, mutate } from 'swr'
+import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 
-import createAddress from '@/api/admin/addressPools/addresses/createAddress'
 import updateAddress from '@/api/admin/addressPools/addresses/updateAddress'
-import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import { Address } from '@/api/server/getServer'
 
@@ -20,6 +18,7 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 import Radio from '@/components/elements/inputs/Radio'
 
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
+
 
 interface Props {
     address: Address | null

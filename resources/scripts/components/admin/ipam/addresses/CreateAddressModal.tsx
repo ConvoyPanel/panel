@@ -1,11 +1,10 @@
 import { countIPsInRange } from '@/util/helpers'
 import { useFlashKey } from '@/util/useFlash'
-import { ipAddress, macAddress } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Trans, useTranslation } from 'react-i18next'
-import { KeyedMutator, mutate } from 'swr'
+import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 
 import createAddress, {
@@ -13,17 +12,17 @@ import createAddress, {
 } from '@/api/admin/addressPools/addresses/createAddress'
 import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
-import { Address, AddressType } from '@/api/server/getServer'
+import { AddressType } from '@/api/server/getServer'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import SegmentedControl from '@/components/elements/SegmentedControl'
-import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import RadioGroupForm from '@/components/elements/forms/RadioGroupForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import Radio from '@/components/elements/inputs/Radio'
 
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
+
 
 interface Props {
     open: boolean

@@ -2,26 +2,26 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Enums\Server\Status;
-use Convoy\Enums\Server\SuspensionAction;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
-use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
-use Convoy\Models\Filters\FiltersServer;
 use Convoy\Models\Server;
-use Convoy\Services\Servers\CloudinitService;
+use Illuminate\Http\Request;
+use Convoy\Enums\Server\Status;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Models\Filters\FiltersServer;
+use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Services\Servers\NetworkService;
+use Illuminate\Database\ConnectionInterface;
+use Convoy\Services\Servers\CloudinitService;
+use Convoy\Services\Servers\SyncBuildService;
 use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDeletionService;
 use Convoy\Services\Servers\ServerSuspensionService;
-use Convoy\Services\Servers\SyncBuildService;
+use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Transformers\Admin\ServerBuildTransformer;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class ServerController extends ApplicationApiController

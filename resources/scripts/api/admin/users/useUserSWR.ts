@@ -5,6 +5,7 @@ import useSWR, { Key, SWRResponse } from 'swr'
 import getUser from '@/api/admin/users/getUser'
 import { User } from '@/api/admin/users/getUsers'
 
+
 export const getKey = (id: number): Key => ['admin.users', id]
 
 const useUserSWR = () => {

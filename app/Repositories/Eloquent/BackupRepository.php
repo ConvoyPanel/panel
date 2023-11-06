@@ -5,8 +5,8 @@ namespace Convoy\Repositories\Eloquent;
 use Carbon\Carbon;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BackupRepository extends EloquentRepository
 {

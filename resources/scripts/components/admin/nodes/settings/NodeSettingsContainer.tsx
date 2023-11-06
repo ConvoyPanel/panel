@@ -4,6 +4,7 @@ import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
 
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 
+
 const NodeSettingsContainer = () => {
     const { t: tStrings } = useTranslation('strings')
 

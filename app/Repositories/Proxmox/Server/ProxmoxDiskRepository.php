@@ -2,10 +2,10 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
-use Convoy\Enums\Server\DiskInterface;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Webmozart\Assert\Assert;
+use Convoy\Enums\Server\DiskInterface;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxDiskRepository extends ProxmoxRepository
 {

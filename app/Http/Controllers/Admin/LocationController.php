@@ -2,14 +2,14 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\LocationFormRequest;
-use Convoy\Models\Filters\FiltersLocation;
 use Convoy\Models\Location;
-use Convoy\Transformers\Admin\LocationTransformer;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Models\Filters\FiltersLocation;
+use Convoy\Transformers\Admin\LocationTransformer;
+use Convoy\Http\Requests\Admin\LocationFormRequest;
+use Convoy\Http\Controllers\ApplicationApiController;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class LocationController extends ApplicationApiController

@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Server;
 use Convoy\Rules\Hostname;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateGeneralInfoRequest extends FormRequest
 {

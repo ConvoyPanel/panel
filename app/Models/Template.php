@@ -2,10 +2,10 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Ramsey\Uuid\Uuid;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Template extends Model implements Sortable
 {

@@ -2,11 +2,11 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 /**
  * Class SnapshotService

@@ -5,17 +5,12 @@ import { KeyedMutator } from 'swr'
 import useSWRMutation from 'swr/mutation'
 
 import deleteAddress from '@/api/admin/addressPools/addresses/deleteAddress'
-import deleteAddressPool from '@/api/admin/addressPools/deleteAddressPool'
-import {
-    AddressPool,
-    AddressPoolResponse,
-} from '@/api/admin/addressPools/getAddressPools'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import { Address } from '@/api/server/getServer'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
+
 
 interface Props {
     address: Address | null

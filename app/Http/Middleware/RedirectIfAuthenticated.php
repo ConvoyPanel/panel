@@ -3,9 +3,9 @@
 namespace Convoy\Http\Middleware;
 
 use Closure;
-use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Convoy\Providers\RouteServiceProvider;
 
 class RedirectIfAuthenticated
 {

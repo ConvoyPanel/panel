@@ -1,5 +1,5 @@
 import { ServerContext } from '@/state/server'
-import useFlash, { useFlashKey } from '@/util/useFlash'
+import { useFlashKey } from '@/util/useFlash'
 import { Loader } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'

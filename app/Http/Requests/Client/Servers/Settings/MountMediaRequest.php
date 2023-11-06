@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\ISO;
+use Convoy\Http\Requests\FormRequest;
 
 class MountMediaRequest extends FormRequest
 {
@@ -12,7 +12,7 @@ class MountMediaRequest extends FormRequest
         $iso = $this->parameter('iso', ISO::class);
 
         // check if they're authorized to mount a hidden media (iso)
-        if ($iso->hidden && ! $this->user()->root_admin) {
+        if ($iso->hidden && !$this->user()->root_admin) {
             return false;
         }
 

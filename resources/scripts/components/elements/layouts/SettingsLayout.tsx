@@ -15,8 +15,6 @@ import tw from 'twin.macro'
 import { RouteDefinition } from '@/components/elements/navigation/NavigationBar'
 import VerticalNavTab from '@/components/elements/navigation/VerticalNavTab'
 
-import ServerContentBlock from '@/components/servers/ServerContentBlock'
-
 interface Props {
     indexPattern: string
     defaultUrl: string

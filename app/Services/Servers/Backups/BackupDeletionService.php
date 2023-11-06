@@ -2,10 +2,10 @@
 
 namespace Convoy\Services\Servers\Backups;
 
-use Convoy\Exceptions\Service\Backup\BackupLockedException;
 use Convoy\Models\Backup;
-use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Illuminate\Database\ConnectionInterface;
+use Convoy\Exceptions\Service\Backup\BackupLockedException;
+use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 
 class BackupDeletionService
 {

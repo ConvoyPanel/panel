@@ -20,6 +20,7 @@ import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import DeleteAddressModal from '@/components/admin/nodes/addresses/DeleteAddressModal'
 import EditAddressModal from '@/components/admin/nodes/addresses/EditAddressModal'
 
+
 const columns: ColumnArray<Address> = [
     {
         accessor: 'address',

@@ -1,11 +1,6 @@
 import { ServerContext } from '@/state/server'
 import { useChartTickLabel } from '@/util/chart'
-import {
-    Sizes,
-    capitalize,
-    convertTimeToSmallest,
-    formatBytes,
-} from '@/util/helpers'
+import { Sizes, convertTimeToSmallest, formatBytes } from '@/util/helpers'
 import useNotify from '@/util/useNotify'
 import styled from '@emotion/styled'
 import { Badge, RingProgress, Skeleton } from '@mantine/core'

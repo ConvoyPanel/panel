@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, RouteObject, useMatches } from 'react-router-dom'
+import { Outlet, useMatches } from 'react-router-dom'
 
 import { httpErrorToHuman } from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
@@ -16,6 +16,7 @@ import { EloquentStatus } from '@/api/server/types'
 import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
 
 export const routes: Route[] = [
     {

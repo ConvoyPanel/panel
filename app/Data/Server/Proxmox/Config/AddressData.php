@@ -7,9 +7,10 @@ use Spatie\LaravelData\Data;
 class AddressData extends Data
 {
     public function __construct(
-      public string $address,
-      public int $cidr,
-      public string $gateway,
-    ) {
+        public string $address,
+        public int    $cidr,
+        public string $gateway,
+    )
+    {
     }
 }

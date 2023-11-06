@@ -1,5 +1,4 @@
 import styled from '@emotion/styled'
-import { Loader } from '@mantine/core'
 import { ReactNode, Suspense } from 'react'
 import tw from 'twin.macro'
 

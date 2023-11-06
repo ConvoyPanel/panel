@@ -5,7 +5,6 @@ namespace Convoy\Repositories\Eloquent;
 use Convoy\Models\Address;
 use Illuminate\Support\Facades\DB;
 use Convoy\Enums\Network\AddressType;
-use Convoy\Repositories\Eloquent\EloquentRepository;
 
 class AddressRepository extends EloquentRepository
 {

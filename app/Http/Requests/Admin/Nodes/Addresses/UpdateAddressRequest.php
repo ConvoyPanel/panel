@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
-use Convoy\Models\AddressPool;
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\Address;
 use Illuminate\Support\Arr;
+use Convoy\Models\AddressPool;
 use Illuminate\Validation\Validator;
+use Convoy\Http\Requests\FormRequest;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Validation\ValidateAddressType;
 use Convoy\Validation\ValidateAddressUniqueness;

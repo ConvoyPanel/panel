@@ -1,6 +1,5 @@
-import { css } from '@emotion/react'
 import styled from '@emotion/styled'
-import { NavLink, NavLinkProps } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import tw from 'twin.macro'
 
 const VerticalNavTab = styled(NavLink)`

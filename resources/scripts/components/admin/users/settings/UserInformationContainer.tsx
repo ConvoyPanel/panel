@@ -11,6 +11,7 @@ import FormCard from '@/components/elements/FormCard'
 import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
+
 const UserInformationContainer = () => {
     const { data: user, mutate } = useUserSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(

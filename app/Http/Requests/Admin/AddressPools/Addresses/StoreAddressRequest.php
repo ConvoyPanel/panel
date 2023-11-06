@@ -31,7 +31,10 @@ class StoreAddressRequest extends FormRequest
         $rules = [];
 
         if ($this->boolean('is_bulk_action')) {
-            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['starting_address', 'ending_address', 'gateway']);
+            $rules[] = new ValidateAddressType(
+                $this->enum('type', AddressType::class),
+                ['starting_address', 'ending_address', 'gateway'],
+            );
         }
 
         if (!$this->boolean('is_bulk_action')) {

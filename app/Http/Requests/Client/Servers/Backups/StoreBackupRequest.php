@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Backups;
 
-use Convoy\Enums\Server\BackupCompressionType;
-use Convoy\Enums\Server\BackupMode;
 use Convoy\Models\Backup;
-use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Enums\Server\BackupMode;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
+use Convoy\Enums\Server\BackupCompressionType;
 
 class StoreBackupRequest extends FormRequest
 {

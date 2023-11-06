@@ -2,22 +2,20 @@
 
 namespace Convoy\Services\Api;
 
-use Carbon\CarbonImmutable;
-use Convoy\Exceptions\Service\Api\InvalidJWTException;
-use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
-use Illuminate\Support\Str;
 use Convoy\Models\User;
-use Lcobucci\JWT\Encoding\CannotDecodeContent;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Str;
 use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
-use Lcobucci\JWT\UnencryptedToken;
+use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Webmozart\Assert\Assert;
+use Convoy\Exceptions\Service\Api\InvalidJWTException;
 
 class JWTService
 {

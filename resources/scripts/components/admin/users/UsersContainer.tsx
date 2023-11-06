@@ -1,5 +1,5 @@
 import usePagination from '@/util/usePagination'
-import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { CheckIcon } from '@heroicons/react/20/solid'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -11,10 +11,10 @@ import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
 import Table, { ColumnArray } from '@/components/elements/displays/Table'
-import TextInput from '@/components/elements/inputs/TextInput'
 
 import SearchBar from '@/components/admin/SearchBar'
 import CreateUserModal from '@/components/admin/users/CreateUserModal'
+
 
 const columns: ColumnArray<User> = [
     {

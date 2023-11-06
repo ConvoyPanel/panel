@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Isos;
 
-use Convoy\Http\Requests\FormRequest;
 use Convoy\Models\ISO;
+use Convoy\Http\Requests\FormRequest;
 
 class UpdateIsoRequest extends FormRequest
 {

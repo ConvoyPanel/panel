@@ -1,4 +1,3 @@
-import { NodeContext } from '@/state/admin/node'
 import { classNames } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
 import { EyeSlashIcon } from '@heroicons/react/20/solid'
@@ -19,6 +18,7 @@ import SortableItem, {
 } from '@/components/elements/dnd/SortableItem'
 
 import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
+
 
 interface Props {
     template: Template

@@ -7,7 +7,8 @@ use Spatie\LaravelData\Data;
 class MediaData extends Data
 {
     public function __construct(
-      //
-    ) {
+        //
+    )
+    {
     }
 }

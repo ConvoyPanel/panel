@@ -10,10 +10,9 @@ import updateLocation from '@/api/admin/locations/updateLocation'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import TextareaFormik from '@/components/elements/formik/TextareaFormik'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import TextareaForm from '@/components/elements/forms/TextareaForm'
+
 
 interface Props {
     location: Location

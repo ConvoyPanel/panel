@@ -1,6 +1,6 @@
 import { ServerContext } from '@/state/server'
 import { bytesToString } from '@/util/helpers'
-import useFlash, { useFlashKey } from '@/util/useFlash'
+import { useFlashKey } from '@/util/useFlash'
 import { EyeSlashIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -2,17 +2,17 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Data\Server\Eloquent\ServerAddressesData;
-use Convoy\Data\Server\MacAddressData;
-use Convoy\Enums\Network\AddressType;
-use Convoy\Models\Address;
 use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use Convoy\Models\Address;
+use Illuminate\Support\Arr;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Data\Server\MacAddressData;
+use Illuminate\Database\ConnectionInterface;
+use Convoy\Data\Server\Eloquent\ServerAddressesData;
+use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Support\Arr;
+use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 
 class NetworkService
 {

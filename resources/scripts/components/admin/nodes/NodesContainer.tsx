@@ -23,6 +23,7 @@ import Table, {
 import SearchBar from '@/components/admin/SearchBar'
 import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
 
+
 const NodesContainer = () => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.index')

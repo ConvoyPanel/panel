@@ -4,11 +4,11 @@ import { lazyLoad } from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { lazy, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RouteObject } from 'react-router-dom'
 
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 import DashboardContainer from '@/components/dashboard/DashboardContainer'
+
 
 export const routes: Route[] = [
     {

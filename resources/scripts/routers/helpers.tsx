@@ -1,10 +1,8 @@
 import { LazyExoticComponent } from 'react'
-import { MutatorOptions } from 'swr'
-import { mutate } from 'swr'
-import { BareFetcher } from 'swr'
-import { Key } from 'swr'
+import { BareFetcher, Key, MutatorOptions, mutate } from 'swr'
 
 import Spinner from '@/components/elements/Spinner'
+
 
 export const lazyLoad = (
     LazyElement: LazyExoticComponent<() => JSX.Element>

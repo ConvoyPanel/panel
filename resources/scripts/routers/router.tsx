@@ -3,14 +3,14 @@ import { routes as clientRoutes } from '@/routers/DashboardRouter'
 import { lazyLoad } from '@/routers/helpers'
 import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import GuestRoutes from '@/routers/middleware/GuestRoutes'
-import { FunctionComponent, LazyExoticComponent, ReactNode, lazy } from 'react'
+import { ReactNode, lazy } from 'react'
 import { Outlet, RouteObject, createBrowserRouter } from 'react-router-dom'
 
 import { NotFound } from '@/components/elements/ScreenBlock'
-import Spinner from '@/components/elements/Spinner'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 
 import NavigationBarProvider from '@/components/NavigationBarProvider'
+
 
 export type Route = {
     handle?: Handle

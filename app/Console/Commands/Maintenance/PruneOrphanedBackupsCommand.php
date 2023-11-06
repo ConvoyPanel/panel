@@ -3,9 +3,9 @@
 namespace Convoy\Console\Commands\Maintenance;
 
 use Carbon\CarbonImmutable;
-use Convoy\Repositories\Eloquent\BackupRepository;
-use Illuminate\Console\Command;
 use InvalidArgumentException;
+use Illuminate\Console\Command;
+use Convoy\Repositories\Eloquent\BackupRepository;
 
 class PruneOrphanedBackupsCommand extends Command
 {

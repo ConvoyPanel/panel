@@ -2,8 +2,8 @@
 
 namespace Convoy\Contracts\Repository;
 
-use Convoy\Models\ActivityLog;
 use Convoy\Models\Server;
+use Convoy\Models\ActivityLog;
 
 interface ActivityRepositoryInterface extends RepositoryInterface
 {

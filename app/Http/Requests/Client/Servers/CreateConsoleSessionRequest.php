@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Requests\Client\Servers;
 
+use Convoy\Models\Server;
 use Convoy\Enums\Server\ConsoleType;
 use Convoy\Http\Requests\FormRequest;
-use Convoy\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 
 class CreateConsoleSessionRequest extends FormRequest
@@ -17,7 +17,7 @@ class CreateConsoleSessionRequest extends FormRequest
         $server = $this->parameter('server', Server::class);
 
         return [
-            'type' => [$server->node->coterm_enabled ? 'required' : 'exclude', new Enum(ConsoleType::class)]
+            'type' => [$server->node->coterm_enabled ? 'required' : 'exclude', new Enum(ConsoleType::class)],
         ];
     }
 }

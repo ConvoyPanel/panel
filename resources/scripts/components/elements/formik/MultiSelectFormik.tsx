@@ -3,7 +3,6 @@ import { useField } from 'formik'
 import MultiSelect, {
     MultiSelectProps,
 } from '@/components/elements/inputs/MultiSelect'
-import { SelectProps } from '@/components/elements/inputs/Select'
 
 interface Props extends Omit<MultiSelectProps, 'error' | 'onChange'> {
     name: string

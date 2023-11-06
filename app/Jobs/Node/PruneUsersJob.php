@@ -3,12 +3,12 @@
 namespace Convoy\Jobs\Node;
 
 use Convoy\Models\Node;
-use Convoy\Services\Nodes\UserPruneService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Convoy\Services\Nodes\UserPruneService;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class PruneUsersJob implements ShouldQueue
 {

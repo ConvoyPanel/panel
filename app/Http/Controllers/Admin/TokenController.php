@@ -2,14 +2,14 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
+use Illuminate\Http\Request;
 use Convoy\Enums\Api\ApiKeyType;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Tokens\StoreTokenRequest;
+use Spatie\QueryBuilder\QueryBuilder;
 use Convoy\Models\PersonalAccessToken;
 use Convoy\Transformers\Admin\ApiKeyTransformer;
 use Convoy\Transformers\Admin\NewApiKeyTransformer;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Admin\Tokens\StoreTokenRequest;
 
 class TokenController extends ApplicationApiController
 {

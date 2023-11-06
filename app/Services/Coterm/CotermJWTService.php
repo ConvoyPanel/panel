@@ -2,13 +2,13 @@
 
 namespace Convoy\Services\Coterm;
 
-use Carbon\CarbonImmutable;
-use Convoy\Enums\Server\ConsoleType;
-use Convoy\Models\Server;
 use Convoy\Models\User;
-use Convoy\Services\Api\JWTService;
-use Lcobucci\JWT\Token\Plain;
+use Convoy\Models\Server;
+use Carbon\CarbonImmutable;
 use Webmozart\Assert\Assert;
+use Lcobucci\JWT\Token\Plain;
+use Convoy\Services\Api\JWTService;
+use Convoy\Enums\Server\ConsoleType;
 
 class CotermJWTService
 {

@@ -2,8 +2,8 @@
 
 namespace Convoy\Transformers\Client;
 
-use Convoy\Data\Server\Proxmox\ServerStateData;
 use League\Fractal\TransformerAbstract;
+use Convoy\Data\Server\Proxmox\ServerStateData;
 
 class ServerStateTransformer extends TransformerAbstract
 {

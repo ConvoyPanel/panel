@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
 use Convoy\Data\Helpers\ChecksumData;
 use Convoy\Data\Node\Storage\IsoData;
-use Spatie\LaravelData\DataCollection;
 use Convoy\Data\Node\Storage\FileMetaData;
 use Convoy\Enums\Node\Storage\ContentType;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;

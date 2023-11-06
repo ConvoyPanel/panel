@@ -19,6 +19,7 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
+
 const ServerInformationCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(

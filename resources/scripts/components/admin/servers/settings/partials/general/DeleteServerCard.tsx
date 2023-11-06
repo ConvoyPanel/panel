@@ -1,7 +1,6 @@
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FormikProvider, useFormik } from 'formik'
 import { FormEvent, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +13,8 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+
 
 const DeleteServerCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)

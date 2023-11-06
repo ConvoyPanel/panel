@@ -1,6 +1,6 @@
 import { Node } from '@/api/admin/nodes/getNodes'
 import { User } from '@/api/admin/users/getUsers'
-import http, { FractalResponseData } from '@/api/http'
+import http from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
 export type AddressType = 'ipv4' | 'ipv6'

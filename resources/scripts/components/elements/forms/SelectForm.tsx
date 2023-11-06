@@ -1,4 +1,3 @@
-import { TextInputProps } from '@mantine/core'
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
 
 import Select, { SelectProps } from '@/components/elements/inputs/Select'

@@ -1,9 +1,8 @@
 import { Action, Thunk, action, createContextStore, thunk } from 'easy-peasy'
 import isEqual from 'react-fast-compare'
 
-import { AdminServerBuild } from '@/api/admin/servers/getServer'
-import { getServer } from '@/api/admin/servers/getServer'
-import getStatus, { ServerStateData } from '@/api/server/getState'
+import { AdminServerBuild, getServer } from '@/api/admin/servers/getServer'
+
 
 export interface ServerDataStore {
     data?: AdminServerBuild

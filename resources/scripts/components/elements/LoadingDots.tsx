@@ -1,5 +1,4 @@
 import { keyframes } from '@emotion/react'
-import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import tw from 'twin.macro'
 

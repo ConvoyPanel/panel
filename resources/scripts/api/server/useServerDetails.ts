@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import http from '@/api/http'
 import { ServerState } from '@/api/server/getState'
 
+
 export interface BaseDisk {
     interface: string
     isPrimaryDisk: boolean

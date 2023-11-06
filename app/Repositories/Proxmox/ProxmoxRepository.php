@@ -2,15 +2,15 @@
 
 namespace Convoy\Repositories\Proxmox;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Illuminate\Contracts\Foundation\Application;
+use Webmozart\Assert\Assert;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
-use Webmozart\Assert\Assert;
+use Illuminate\Contracts\Foundation\Application;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 abstract class ProxmoxRepository
 {

@@ -1,9 +1,10 @@
-import i18n from 'i18next'
-import I18NextHttpBackend, { HttpBackendOptions } from 'i18next-http-backend'
-import I18NextMultiloadBackendAdapter from 'i18next-multiload-backend-adapter'
-import { initReactI18next } from 'react-i18next'
-import { z } from 'zod'
-import { makeZodI18nMap, zodI18nMap } from 'zod-i18n-map'
+import i18n from 'i18next';
+import I18NextHttpBackend, { HttpBackendOptions } from 'i18next-http-backend';
+import I18NextMultiloadBackendAdapter from 'i18next-multiload-backend-adapter';
+import { initReactI18next } from 'react-i18next';
+import { z } from 'zod';
+import { zodI18nMap } from 'zod-i18n-map';
+
 
 // If we're using HMR use a unique hash per page reload so that we're always
 // doing cache busting. Otherwise just use the builder provided hash value in

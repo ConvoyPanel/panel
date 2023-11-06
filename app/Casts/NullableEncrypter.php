@@ -2,9 +2,9 @@
 
 namespace Convoy\Casts;
 
-use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Encryption\Encrypter;
+use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class NullableEncrypter implements CastsAttributes
 {

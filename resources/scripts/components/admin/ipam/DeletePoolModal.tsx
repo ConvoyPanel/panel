@@ -1,5 +1,4 @@
 import { useFlashKey } from '@/util/useFlash'
-import { id } from 'date-fns/locale'
 import { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { KeyedMutator } from 'swr'
@@ -14,6 +13,7 @@ import {
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
+
 
 interface Props {
     pool: AddressPool | null

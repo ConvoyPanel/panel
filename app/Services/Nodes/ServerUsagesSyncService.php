@@ -3,11 +3,11 @@
 namespace Convoy\Services\Nodes;
 
 use Carbon\Carbon;
-use Convoy\Enums\Server\MetricTimeframe;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
+use Convoy\Enums\Server\MetricTimeframe;
 use Convoy\Repositories\Proxmox\Server\ProxmoxMetricsRepository;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 class ServerUsagesSyncService
 {

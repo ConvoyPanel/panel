@@ -5,6 +5,7 @@ import getLocations, {
     QueryParams,
 } from '@/api/admin/locations/getLocations'
 
+
 const useLocationsSWR = ({ page, query, ...params }: QueryParams) => {
     return useSWR<LocationResponse>(['admin:locations', page, query], () =>
         getLocations({ page, query, ...params })

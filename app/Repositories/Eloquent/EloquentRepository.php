@@ -3,18 +3,18 @@
 namespace Convoy\Repositories\Eloquent;
 
 use Closure;
+use Illuminate\Http\Request;
+use Webmozart\Assert\Assert;
+use Illuminate\Support\Collection;
+use Convoy\Repositories\Repository;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Convoy\Contracts\Repository\RepositoryInterface;
 use Convoy\Exceptions\Model\DataValidationException;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
-use Convoy\Repositories\Repository;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Query\Expression;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Webmozart\Assert\Assert;
+use Convoy\Exceptions\Repository\RecordNotFoundException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 abstract class EloquentRepository extends Repository implements RepositoryInterface
 {

@@ -2,12 +2,12 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
 use Convoy\Casts\NullableEncrypter;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Node extends Model

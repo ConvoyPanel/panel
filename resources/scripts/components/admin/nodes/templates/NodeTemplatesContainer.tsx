@@ -1,4 +1,3 @@
-import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
 import {
@@ -8,14 +7,13 @@ import {
     DragStartEvent,
     KeyboardSensor,
     MouseSensor,
-    TouchSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { SortableContext, arrayMove } from '@dnd-kit/sortable'
 import { updateNotification } from '@mantine/notifications'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
 import reorderTemplateGroups from '@/api/admin/nodes/templateGroups/reorderTemplateGroups'
@@ -24,11 +22,7 @@ import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 import { httpErrorToHuman } from '@/api/http'
 
 import Button from '@/components/elements/Button'
-import Card from '@/components/elements/Card'
 import Spinner from '@/components/elements/Spinner'
-import SortableItem, {
-    ChildrenPropsWithHandle,
-} from '@/components/elements/dnd/SortableItem'
 
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'

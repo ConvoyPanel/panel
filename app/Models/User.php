@@ -2,19 +2,19 @@
 
 namespace Convoy\Models;
 
-use Convoy\Enums\Api\ApiKeyType;
 use Eloquent;
+use Illuminate\Support\Str;
+use Convoy\Enums\Api\ApiKeyType;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Collection;
+use Laravel\Sanctum\NewAccessToken;
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Sanctum\NewAccessToken;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
 /**
  * @mixin Eloquent

@@ -2,14 +2,14 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
-use Convoy\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
 use Convoy\Models\Node;
 use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
-use Convoy\Transformers\Admin\TemplateTransformer;
 use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Transformers\Admin\TemplateTransformer;
+use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
+use Convoy\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
 
 class TemplateController extends ApplicationApiController
 {

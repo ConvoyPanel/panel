@@ -22,6 +22,7 @@ import SearchBar from '@/components/admin/SearchBar'
 import CreateLocationModal from '@/components/admin/locations/CreateLocationModal'
 import EditLocationModal from '@/components/admin/locations/EditLocationModal'
 
+
 const LocationsContainer = () => {
     const { t } = useTranslation('admin.locations')
     const { t: tStrings } = useTranslation('strings')
