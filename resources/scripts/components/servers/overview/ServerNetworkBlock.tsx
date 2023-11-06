@@ -1,9 +1,11 @@
-import { Dd, Dt } from '@/components/dashboard/ServerCard'
-import Card from '@/components/elements/Card'
-import Display from '@/components/elements/displays/DisplayRow'
 import { ServerContext } from '@/state/server'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import Card from '@/components/elements/Card'
+import Display from '@/components/elements/displays/DisplayRow'
+
+import { Dd, Dt } from '@/components/dashboard/ServerCard'
 
 const ServerNetworkBlock = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
@@ -11,7 +13,10 @@ const ServerNetworkBlock = () => {
     const { t: tStrings } = useTranslation('strings')
 
     const addresses = useMemo(
-        () => [...server.limits.addresses.ipv4, ...server.limits.addresses.ipv6],
+        () => [
+            ...server.limits.addresses.ipv4,
+            ...server.limits.addresses.ipv6,
+        ],
         [server.limits.addresses]
     )
 
@@ -26,19 +31,30 @@ const ServerNetworkBlock = () => {
                     ) : (
                         <Display.Group className='mt-3'>
                             {addresses.map(ip => (
-                                <Display.Row key={ip.id} className='grid-cols-1 md:grid-cols-3 text-sm'>
+                                <Display.Row
+                                    key={ip.id}
+                                    className='grid-cols-1 md:grid-cols-3 text-sm'
+                                >
                                     <div className='overflow-hidden'>
-                                        <p className='description-small !text-xs'>{tStrings('address_one')}</p>
+                                        <p className='description-small !text-xs'>
+                                            {tStrings('address_one')}
+                                        </p>
                                         <p className='font-semibold truncate text-foreground overflow-hidden overflow-ellipsis'>
                                             {ip.address}/{ip.cidr}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className='description-small !text-xs'>{tStrings('gateway')}</p>
-                                        <p className='text-foreground font-semibold'>{ip.gateway}</p>
+                                        <p className='description-small !text-xs'>
+                                            {tStrings('gateway')}
+                                        </p>
+                                        <p className='text-foreground font-semibold'>
+                                            {ip.gateway}
+                                        </p>
                                     </div>
                                     <div>
-                                        <p className='description-small !text-xs'>{tStrings('mac_address')}</p>
+                                        <p className='description-small !text-xs'>
+                                            {tStrings('mac_address')}
+                                        </p>
                                         <p className='text-foreground font-semibold'>
                                             {ip.macAddress ?? tStrings('none')}
                                         </p>

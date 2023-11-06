@@ -1,8 +1,9 @@
-import LogoOutline from '@/components/elements/LogoOutline'
 import styled from '@emotion/styled'
 import { Loader } from '@mantine/core'
 import { ReactNode, Suspense } from 'react'
 import tw from 'twin.macro'
+
+import LogoOutline from '@/components/elements/LogoOutline'
 
 interface Props {
     screen?: boolean
@@ -41,16 +42,26 @@ const SpinnerContainer = styled.div`
 
 const Spinner: Spinner = ({ screen, flat }: Props) => {
     return (
-        <div className={`grid place-items-center w-full ${screen ? 'h-screen' : 'h-40'} ${flat && 'dark:bg-black'}`}>
+        <div
+            className={`grid place-items-center w-full ${
+                screen ? 'h-screen' : 'h-40'
+            } ${flat && 'dark:bg-black'}`}
+        >
             <SpinnerContainer>
-                <LogoOutline className='text-foreground' strokeWidth={'25px'} viewBox={'-13 -13 538 538'} />
+                <LogoOutline
+                    className='text-foreground'
+                    strokeWidth={'25px'}
+                    viewBox={'-13 -13 538 538'}
+                />
             </SpinnerContainer>
         </div>
     )
 }
 
 Spinner.Suspense = ({ children, screen }) => {
-    return <Suspense fallback={<Spinner screen={screen} />}>{children}</Suspense>
+    return (
+        <Suspense fallback={<Spinner screen={screen} />}>{children}</Suspense>
+    )
 }
 
 export default Spinner

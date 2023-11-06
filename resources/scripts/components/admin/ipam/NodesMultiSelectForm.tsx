@@ -1,10 +1,12 @@
-import { useFormContext } from 'react-hook-form'
-import { useMemo, useState } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
-import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+import { useMemo, useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
+
+import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
+import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
 
 interface Props {
     disabled?: boolean
@@ -31,7 +33,12 @@ const NodesMultiSelectForm = ({ disabled }: Props) => {
         const available =
             data && selectedNodes
                 ? data.items
-                      .filter(node => !selectedNodes.items.find(selectedNode => selectedNode.id === node.id))
+                      .filter(
+                          node =>
+                              !selectedNodes.items.find(
+                                  selectedNode => selectedNode.id === node.id
+                              )
+                      )
                       .map(node => ({
                           value: node.id.toString(),
                           label: node.name,

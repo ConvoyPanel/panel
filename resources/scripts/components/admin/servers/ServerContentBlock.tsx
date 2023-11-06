@@ -1,13 +1,18 @@
-import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
-import { ServerContext } from '@/state/server'
 import { AdminServerContext } from '@/state/admin/server'
+import { ServerContext } from '@/state/server'
+
+import PageContentBlock, {
+    PageContentBlockProps,
+} from '@/components/elements/PageContentBlock'
 
 interface Props extends PageContentBlockProps {
     title: string
 }
 
 const ServerContentBlock: React.FC<Props> = ({ title, children, ...props }) => {
-    const name = AdminServerContext.useStoreState(state => state.server.data!.name)
+    const name = AdminServerContext.useStoreState(
+        state => state.server.data!.name
+    )
 
     return (
         <PageContentBlock title={`${title} | ${name}`} {...props}>

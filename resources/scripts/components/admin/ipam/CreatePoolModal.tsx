@@ -1,15 +1,18 @@
-import { KeyedMutator } from 'swr'
-import { useTranslation } from 'react-i18next'
 import { useFlashKey } from '@/util/useFlash'
-import { z } from 'zod'
-import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Modal from '@/components/elements/Modal'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
-import { AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
-import NodesMultiSelectForm from '@/components/admin/ipam/NodesMultiSelectForm'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { KeyedMutator } from 'swr'
+import { z } from 'zod'
+
 import createAddressPool from '@/api/admin/addressPools/createAddressPool'
+import { AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import NodesMultiSelectForm from '@/components/admin/ipam/NodesMultiSelectForm'
 
 interface Props {
     open: boolean
@@ -20,7 +23,9 @@ interface Props {
 const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.addressPools.index')
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.addressPools.create`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.addressPools.create`
+    )
 
     const schema = z.object({
         name: z.string().nonempty().max(191),
@@ -72,7 +77,10 @@ const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.addressPools.create`} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={`admin.addressPools.create`}
+                        />
                         <TextInputForm name='name' label={tStrings('name')} />
                         <NodesMultiSelectForm />
                     </Modal.Body>
@@ -81,7 +89,10 @@ const CreatePoolModal = ({ open, onClose, mutate }: Props) => {
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>

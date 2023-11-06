@@ -1,14 +1,16 @@
-import { Navigate, Outlet, RouteObject } from 'react-router-dom'
 import { lazyLoad, query } from '@/routers/helpers'
-import { lazy, useContext, useEffect } from 'react'
-import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
-import getAddressPool from '@/api/admin/addressPools/getAddressPool'
-import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
-import getAddresses from '@/api/admin/addressPools/getAddresses'
-import { Translation, useTranslation } from 'react-i18next'
 import { Route } from '@/routers/router'
 import { HomeIcon } from '@heroicons/react/20/solid'
+import { lazy, useContext, useEffect } from 'react'
+import { Translation, useTranslation } from 'react-i18next'
+import { Navigate, Outlet, RouteObject } from 'react-router-dom'
+
+import getAddressPool from '@/api/admin/addressPools/getAddressPool'
+import getAddresses from '@/api/admin/addressPools/getAddresses'
+import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
+import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
+
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 export const routes: Route[] = [
     {
@@ -16,18 +18,24 @@ export const routes: Route[] = [
         handle: {
             crumb: () => ({
                 to: '/admin/ipam',
-                element: <Translation ns={'strings'}>{t => t('ipam')}</Translation>,
+                element: (
+                    <Translation ns={'strings'}>{t => t('ipam')}</Translation>
+                ),
             }),
         },
         children: [
             {
                 index: true,
-                element: lazyLoad(lazy(() => import('@/components/admin/ipam/IpamContainer'))),
+                element: lazyLoad(
+                    lazy(() => import('@/components/admin/ipam/IpamContainer'))
+                ),
             },
             {
                 path: ':id',
                 loader: ({ params }) =>
-                    query(getPoolKey(parseInt(params.id!)), () => getAddressPool(parseInt(params.id!))),
+                    query(getPoolKey(parseInt(params.id!)), () =>
+                        getAddressPool(parseInt(params.id!))
+                    ),
                 element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 handle: {
                     crumb: data => ({
@@ -47,10 +55,21 @@ export const routes: Route[] = [
                             const page = params.page ? parseInt(params.page) : 1
 
                             return query(getAddressesKey(id, page, ''), () =>
-                                getAddresses(id, { page, query: '', include: ['server'] })
+                                getAddresses(id, {
+                                    page,
+                                    query: '',
+                                    include: ['server'],
+                                })
                             )
                         },
-                        element: lazyLoad(lazy(() => import('@/components/admin/ipam/addresses/AddressesContainer'))),
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/ipam/addresses/AddressesContainer'
+                                    )
+                            )
+                        ),
                     },
                 ],
             },

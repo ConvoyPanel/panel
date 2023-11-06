@@ -1,15 +1,20 @@
-import { AddressPool, AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
-import { KeyedMutator } from 'swr'
-import { useTranslation } from 'react-i18next'
 import { useFlashKey } from '@/util/useFlash'
-import updateAddressPool from '@/api/admin/addressPools/updateAddressPool'
-import { z } from 'zod'
-import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Modal from '@/components/elements/Modal'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
 import { useEffect, useMemo } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { KeyedMutator } from 'swr'
+import { z } from 'zod'
+
+import {
+    AddressPool,
+    AddressPoolResponse,
+} from '@/api/admin/addressPools/getAddressPools'
+import updateAddressPool from '@/api/admin/addressPools/updateAddressPool'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 interface Props {
     pool: AddressPool | null
@@ -20,7 +25,9 @@ interface Props {
 const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
     const { t } = useTranslation('admin.addressPools.index')
     const { t: tStrings } = useTranslation('strings')
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.addressPools.${pool?.id}.update`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.addressPools.${pool?.id}.update`
+    )
 
     const schema = z.object({
         name: z.string().nonempty().max(191),
@@ -54,7 +61,9 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
 
                 return {
                     ...data,
-                    items: data.items.map(item => (item.id === updatedPool.id ? updatedPool : item)),
+                    items: data.items.map(item =>
+                        item.id === updatedPool.id ? updatedPool : item
+                    ),
                 }
             }, false)
 
@@ -67,13 +76,18 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
     return (
         <Modal open={Boolean(pool)} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>{t('edit_modal.title', { name: pool?.name })}</Modal.Title>
+                <Modal.Title>
+                    {t('edit_modal.title', { name: pool?.name })}
+                </Modal.Title>
             </Modal.Header>
 
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.addressPools.${pool?.id}.update`} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={`admin.addressPools.${pool?.id}.update`}
+                        />
                         <TextInputForm name='name' label={tStrings('name')} />
                     </Modal.Body>
 
@@ -81,7 +95,10 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('save')}
                         </Modal.Action>
                     </Modal.Actions>

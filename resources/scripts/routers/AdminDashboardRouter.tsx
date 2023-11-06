@@ -1,16 +1,17 @@
-import ContentContainer from '@/components/elements/ContentContainer'
-import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { lazy, useContext, useEffect } from 'react'
-import { Link, Outlet, RouteObject, useMatch } from 'react-router-dom'
-import { Translation, useTranslation } from 'react-i18next'
+import { routes as adminIpamRoutes } from '@/routers/AdminIpamRouter'
 import { routes as adminNodeRoutes } from '@/routers/AdminNodeRouter'
 import { routes as adminServerRoutes } from '@/routers/AdminServerRouter'
-import { routes as adminIpamRoutes } from '@/routers/AdminIpamRouter'
 import { routes as adminUserRoutes } from '@/routers/AdminUserRouter'
-import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { lazyLoad } from '@/routers/helpers'
-import { HomeIcon } from '@heroicons/react/20/solid'
+import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
 import { Route } from '@/routers/router'
+import { HomeIcon } from '@heroicons/react/20/solid'
+import { lazy, useContext, useEffect } from 'react'
+import { Translation, useTranslation } from 'react-i18next'
+import { Link, Outlet, RouteObject, useMatch } from 'react-router-dom'
+
+import ContentContainer from '@/components/elements/ContentContainer'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 export const routes: Route[] = [
     {
@@ -23,17 +24,37 @@ export const routes: Route[] = [
         handle: {
             crumb: () => ({
                 to: '/admin',
-                element: <HomeIcon className={'w-4 h-4 text-accent-500 hover:text-accent-800 transition'} />,
+                element: (
+                    <HomeIcon
+                        className={
+                            'w-4 h-4 text-accent-500 hover:text-accent-800 transition'
+                        }
+                    />
+                ),
             }),
         },
         children: [
             {
                 index: true,
-                element: lazyLoad(lazy(() => import('@/components/admin/overview/OverviewContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import(
+                                '@/components/admin/overview/OverviewContainer'
+                            )
+                    )
+                ),
             },
             {
                 path: 'locations',
-                element: lazyLoad(lazy(() => import('@/components/admin/locations/LocationsContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import(
+                                '@/components/admin/locations/LocationsContainer'
+                            )
+                    )
+                ),
             },
             ...adminNodeRoutes,
             ...adminServerRoutes,
@@ -41,7 +62,12 @@ export const routes: Route[] = [
             ...adminUserRoutes,
             {
                 path: 'tokens',
-                element: lazyLoad(lazy(() => import('@/components/admin/tokens/TokensContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import('@/components/admin/tokens/TokensContainer')
+                    )
+                ),
             },
         ],
     },
@@ -51,7 +77,9 @@ export const AdminBanner = () => (
     <div className='bg-foreground py-1'>
         <ContentContainer>
             <Link to='/'>
-                <p className='text-background text-xs font-medium uppercase tracking-wide'>Exit Administration</p>
+                <p className='text-background text-xs font-medium uppercase tracking-wide'>
+                    Exit Administration
+                </p>
             </Link>
         </ContentContainer>
     </div>

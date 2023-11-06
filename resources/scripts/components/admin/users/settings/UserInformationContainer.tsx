@@ -1,17 +1,21 @@
 import { useFlashKey } from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
+
 import updateUser from '@/api/admin/users/updateUser'
-import FormCard from '@/components/elements/FormCard'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import Button from '@/components/elements/Button'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import useUserSWR from '@/api/admin/users/useUserSWR'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
 const UserInformationContainer = () => {
     const { data: user, mutate } = useUserSWR()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:user:settings:general')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        'admin:user:settings:general'
+    )
 
     const form = useFormik({
         enableReinitialize: true,
@@ -22,8 +26,14 @@ const UserInformationContainer = () => {
             rootAdmin: user.rootAdmin,
         },
         validationSchema: yup.object({
-            name: yup.string().max(191, 'Do not exceed 191 characters').required('A name is required.'),
-            email: yup.string().email('Enter a valid email address').required('An email address is required.'),
+            name: yup
+                .string()
+                .max(191, 'Do not exceed 191 characters')
+                .required('A name is required.'),
+            email: yup
+                .string()
+                .email('Enter a valid email address')
+                .required('An email address is required.'),
             password: yup
                 .string()
                 .matches(
@@ -58,8 +68,16 @@ const UserInformationContainer = () => {
                             <FlashMessageRender byKey='admin:user:settings:general' />
                             <TextInputFormik name='name' label='Name' />
                             <TextInputFormik name='email' label='Email' />
-                            <TextInputFormik name='password' label='Password' placeholder={'Override password'} />
-                            <CheckboxFormik name={'rootAdmin'} label={'Administrator'} className={'mt-3'} />
+                            <TextInputFormik
+                                name='password'
+                                label='Password'
+                                placeholder={'Override password'}
+                            />
+                            <CheckboxFormik
+                                name={'rootAdmin'}
+                                label={'Administrator'}
+                                className={'mt-3'}
+                            />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>

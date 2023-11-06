@@ -1,24 +1,30 @@
+import { AdminServerContext } from '@/state/admin/server'
+import { useFlashKey } from '@/util/useFlash'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormikProvider, useFormik } from 'formik'
+import { FormEvent, useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+
 import deleteServer from '@/api/admin/servers/deleteServer'
+
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
-import { AdminServerContext } from '@/state/admin/server'
-import { useFlashKey } from '@/util/useFlash'
-import { FormikProvider, useFormik } from 'formik'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
-import { z } from 'zod'
-import { FormProvider, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import CheckboxForm from '@/components/elements/forms/CheckboxForm'
-import { useTranslation } from 'react-i18next'
-import { FormEvent, useState } from 'react'
 import Modal from '@/components/elements/Modal'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 
 const DeleteServerCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
-    const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.servers.${server.uuid}.settings.general.delete`)
+    const setServer = AdminServerContext.useStoreActions(
+        actions => actions.server.setServer
+    )
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.servers.${server.uuid}.settings.general.delete`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.servers.settings')
     const [showConfirmation, setShowConfirmation] = useState(false)
@@ -59,11 +65,17 @@ const DeleteServerCard = () => {
                 <FormProvider {...form}>
                     <form onSubmit={triggerConfirmation}>
                         <FormCard.Body>
-                            <FormCard.Title>{t('deletion.title')}</FormCard.Title>
+                            <FormCard.Title>
+                                {t('deletion.title')}
+                            </FormCard.Title>
                             <div className='space-y-3 mt-3'>
-                                <FlashMessageRender byKey={`admin.servers.${server.uuid}.settings.general.delete`} />
+                                <FlashMessageRender
+                                    byKey={`admin.servers.${server.uuid}.settings.general.delete`}
+                                />
 
-                                <p className='description-small !text-foreground'>{t('deletion.description')}</p>
+                                <p className='description-small !text-foreground'>
+                                    {t('deletion.description')}
+                                </p>
                                 {server.status === 'deleting' && (
                                     <MessageBox title='Warning' type='warning'>
                                         {t('deletion.deleting_status')}
@@ -72,7 +84,10 @@ const DeleteServerCard = () => {
 
                                 <CheckboxForm
                                     name={'noPurge'}
-                                    label={t('deletion.no_purge') ?? 'Do not purge VM and related files'}
+                                    label={
+                                        t('deletion.no_purge') ??
+                                        'Do not purge VM and related files'
+                                    }
                                 />
                             </div>
                         </FormCard.Body>
@@ -92,7 +107,10 @@ const DeleteServerCard = () => {
                 </FormProvider>
             </FormCard>
 
-            <Modal open={showConfirmation} onClose={() => setShowConfirmation(false)}>
+            <Modal
+                open={showConfirmation}
+                onClose={() => setShowConfirmation(false)}
+            >
                 <Modal.Header>
                     <Modal.Title>
                         {t('deletion.confirmation.title', {
@@ -108,7 +126,10 @@ const DeleteServerCard = () => {
                     </Modal.Description>
                 </Modal.Body>
                 <Modal.Actions>
-                    <Modal.Action type='button' onClick={() => setShowConfirmation(false)}>
+                    <Modal.Action
+                        type='button'
+                        onClick={() => setShowConfirmation(false)}
+                    >
                         {tStrings('cancel')}
                     </Modal.Action>
                     <Modal.Action

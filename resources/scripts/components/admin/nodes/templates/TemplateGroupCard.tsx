@@ -1,17 +1,9 @@
-import { Template, TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
-import Card from '@/components/elements/Card'
-import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
-import { classNames } from '@/util/helpers'
-import { EyeSlashIcon } from '@heroicons/react/20/solid'
 //@ts-ignore
 import Dots from '@/assets/images/icons/dots-vertical.svg'
-import Menu from '@/components/elements/Menu'
-import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
-import { useState } from 'react'
-import deleteTemplateGroup from '@/api/admin/nodes/templateGroups/deleteTemplateGroup'
 import { NodeContext } from '@/state/admin/node'
+import { classNames } from '@/util/helpers'
 import useFlash from '@/util/useFlash'
-import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
+import useNotify from '@/util/useNotify'
 import {
     DndContext,
     DragEndEvent,
@@ -23,15 +15,34 @@ import {
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
-import { arrayMove, SortableContext } from '@dnd-kit/sortable'
-import TemplateCard from '@/components/admin/nodes/templates/TemplateCard'
-import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers'
-import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
-import useNotify from '@/util/useNotify'
-import reorderTemplates from '@/api/admin/nodes/templateGroups/templates/reorderTemplates'
+import {
+    restrictToVerticalAxis,
+    restrictToWindowEdges,
+} from '@dnd-kit/modifiers'
+import { SortableContext, arrayMove } from '@dnd-kit/sortable'
+import { EyeSlashIcon } from '@heroicons/react/20/solid'
 import { updateNotification } from '@mantine/notifications'
-import { httpErrorToHuman } from '@/api/http'
+import { useState } from 'react'
+
+import deleteTemplateGroup from '@/api/admin/nodes/templateGroups/deleteTemplateGroup'
+import {
+    Template,
+    TemplateGroup,
+} from '@/api/admin/nodes/templateGroups/getTemplateGroups'
+import reorderTemplates from '@/api/admin/nodes/templateGroups/templates/reorderTemplates'
+import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+import { httpErrorToHuman } from '@/api/http'
+
+import Card from '@/components/elements/Card'
+import Menu from '@/components/elements/Menu'
+import SortableItem, {
+    ChildrenPropsWithHandle,
+} from '@/components/elements/dnd/SortableItem'
+
+import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
+import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
+import TemplateCard from '@/components/admin/nodes/templates/TemplateCard'
 
 interface Props {
     group: TemplateGroup
@@ -92,12 +103,17 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                     message: httpErrorToHuman(error),
                     autoClose: 5000,
                 })
-                clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+                clearAndAddHttpError({
+                    key: 'admin:node:template-groups',
+                    error,
+                })
             })
     }
 
     const handleDragStart = (event: DragStartEvent) => {
-        setActiveTemplate(group.templates!.find(template => template.id === event.active.id)!)
+        setActiveTemplate(
+            group.templates!.find(template => template.id === event.active.id)!
+        )
     }
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -110,11 +126,17 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                         // use arrayMove
                         const newTemplates = arrayMove(
                             g.templates!,
-                            g.templates!.findIndex(template => template.id === active.id),
-                            g.templates!.findIndex(template => template.id === over.id)
+                            g.templates!.findIndex(
+                                template => template.id === active.id
+                            ),
+                            g.templates!.findIndex(
+                                template => template.id === over.id
+                            )
                         )
 
-                        newTemplates.forEach((group, index) => (group.orderColumn = index + 1))
+                        newTemplates.forEach(
+                            (group, index) => (group.orderColumn = index + 1)
+                        )
 
                         updateTemplateOrder(newTemplates.map(t => t.id))
 
@@ -134,13 +156,25 @@ const TemplateGroupCard = ({ group, className }: Props) => {
 
     return (
         <SortableItem overrideZIndex handle id={group.id}>
-            {({ attributes, listeners, isDragging, active }: ChildrenPropsWithHandle) => (
+            {({
+                attributes,
+                listeners,
+                isDragging,
+                active,
+            }: ChildrenPropsWithHandle) => (
                 <Card
                     overridePadding
-                    className={classNames('min-h-[9rem] relative select-none', className)}
+                    className={classNames(
+                        'min-h-[9rem] relative select-none',
+                        className
+                    )}
                     key={group.id}
                 >
-                    <EditTemplateModal group={group} open={showCreateModal} onClose={() => setShowCreateModal(false)} />
+                    <EditTemplateModal
+                        group={group}
+                        open={showCreateModal}
+                        onClose={() => setShowCreateModal(false)}
+                    />
                     <EditTemplateGroupModal
                         group={group}
                         open={showEditModal}
@@ -155,9 +189,20 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                         />
                     ) : null}
                     <div className='flex justify-between items-center pt-3 px-4'>
-                        <div className='flex items-center space-x-3 grow' {...attributes} {...listeners}>
-                            <p className='font-medium text-foreground'>{group.name}</p>
-                            {group.hidden && <EyeSlashIcon title='hidden' className='h-4 w-4 text-foreground' />}
+                        <div
+                            className='flex items-center space-x-3 grow'
+                            {...attributes}
+                            {...listeners}
+                        >
+                            <p className='font-medium text-foreground'>
+                                {group.name}
+                            </p>
+                            {group.hidden && (
+                                <EyeSlashIcon
+                                    title='hidden'
+                                    className='h-4 w-4 text-foreground'
+                                />
+                            )}
                         </div>
                         <Menu width={200}>
                             <Menu.Target>
@@ -168,7 +213,11 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                 />
                             </Menu.Target>
                             <Menu.Dropdown>
-                                <Menu.Item onClick={() => setShowEditModal(true)}>Edit</Menu.Item>
+                                <Menu.Item
+                                    onClick={() => setShowEditModal(true)}
+                                >
+                                    Edit
+                                </Menu.Item>
                                 <Menu.Divider />
                                 <Menu.Item color='red' onClick={handleDelete}>
                                     Delete
@@ -181,19 +230,29 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                             {group.templates!.length > 0 ? (
                                 <DndContext
                                     sensors={sensors}
-                                    modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+                                    modifiers={[
+                                        restrictToVerticalAxis,
+                                        restrictToWindowEdges,
+                                    ]}
                                     onDragEnd={handleDragEnd}
                                     onDragStart={handleDragStart}
                                 >
                                     <SortableContext items={group.templates!}>
                                         {group.templates!.map(template => (
-                                            <TemplateCard group={group} key={template.uuid} template={template} />
+                                            <TemplateCard
+                                                group={group}
+                                                key={template.uuid}
+                                                template={template}
+                                            />
                                         ))}
                                     </SortableContext>
 
                                     <DragOverlay>
                                         {activeTemplate ? (
-                                            <TemplateCard template={activeTemplate} className='z-20' />
+                                            <TemplateCard
+                                                template={activeTemplate}
+                                                className='z-20'
+                                            />
                                         ) : null}
                                     </DragOverlay>
                                 </DndContext>

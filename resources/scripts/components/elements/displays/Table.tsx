@@ -1,10 +1,17 @@
-import { useReactTable, getCoreRowModel, flexRender, createColumnHelper, AccessorFn } from '@tanstack/react-table'
-import { ReactNode, useMemo, useState } from 'react'
 import styled from '@emotion/styled'
+import {
+    AccessorFn,
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { ReactNode, useMemo, useState } from 'react'
 import tw from 'twin.macro'
-import Checkbox from '@/components/elements/inputs/Checkbox'
-import Menu from '@/components/elements/Menu'
+
 import DottedButton from '@/components/elements/DottedButton'
+import Menu from '@/components/elements/Menu'
+import Checkbox from '@/components/elements/inputs/Checkbox'
 
 export type Alignment = 'left' | 'center' | 'right'
 
@@ -46,7 +53,11 @@ const StyledTr = styled.tr`
 
 type ThType = 'actions' | 'select'
 
-const getThClasses = (type: ThType, align?: Alignment, hasHeaderActions?: boolean) => {
+const getThClasses = (
+    type: ThType,
+    align?: Alignment,
+    hasHeaderActions?: boolean
+) => {
     let classes =
         'font-normal whitespace-nowrap m-0 text-xs uppercase px-3 h-10 bg-accent-100 border-y border-accent-200'
 
@@ -88,22 +99,40 @@ export const Actions = ({ children }: ActionProps) => (
     </Menu>
 )
 
-const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, rowActions, minWidth }: Props<T>) => {
+const Table = <T,>({
+    columns: unparsedColumns,
+    data,
+    selectable,
+    headerActions,
+    rowActions,
+    minWidth,
+}: Props<T>) => {
     const columnHelper = createColumnHelper<T>()
 
-    const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({})
+    const [rowSelection, setRowSelection] = useState<Record<number, boolean>>(
+        {}
+    )
 
     const columns = useMemo(() => {
         let parsedColumns = unparsedColumns.map(column => {
             const { accessor, header, cell, ...rest } = column
 
-            return columnHelper.accessor(accessor as unknown as AccessorFn<T, any>, {
-                // @ts-expect-error
-                id: accessor,
-                header,
-                cell: info => (cell ? cell({ value: info.getValue(), row: info.row.original }) : info.getValue()),
-                meta: rest,
-            })
+            return columnHelper.accessor(
+                accessor as unknown as AccessorFn<T, any>,
+                {
+                    // @ts-expect-error
+                    id: accessor,
+                    header,
+                    cell: info =>
+                        cell
+                            ? cell({
+                                  value: info.getValue(),
+                                  row: info.row.original,
+                              })
+                            : info.getValue(),
+                    meta: rest,
+                }
+            )
         })
 
         if (selectable) {
@@ -145,10 +174,13 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                 <Menu.Target>
                                     <DottedButton className='relative' />
                                 </Menu.Target>
-                                <Menu.Dropdown>{headerActions({ rows: rowSelection })}</Menu.Dropdown>
+                                <Menu.Dropdown>
+                                    {headerActions({ rows: rowSelection })}
+                                </Menu.Dropdown>
                             </Menu>
                         ) : null,
-                    cell: ({ row }) => (rowActions ? rowActions({ row: row.original }) : null),
+                    cell: ({ row }) =>
+                        rowActions ? rowActions({ row: row.original }) : null,
 
                     meta: {
                         overflow: true,
@@ -193,7 +225,10 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                 >
                                     {header.isPlaceholder
                                         ? null
-                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                        : flexRender(
+                                              header.column.columnDef.header,
+                                              header.getContext()
+                                          )}
                                 </th>
                             ))}
                         </StyledTr>
@@ -209,17 +244,25 @@ const Table = <T,>({ columns: unparsedColumns, data, selectable, headerActions, 
                                             ? ''
                                             : 'overflow-hidden text-ellipsis whitespace-nowrap'
                                     } ${
-                                        cell.column.columnDef.meta?.align === 'center'
+                                        cell.column.columnDef.meta?.align ===
+                                        'center'
                                             ? 'text-center'
-                                            : cell.column.columnDef.meta?.align == 'right'
+                                            : cell.column.columnDef.meta
+                                                  ?.align == 'right'
                                             ? 'text-right'
                                             : ''
                                     } ${
-                                        cell.column.id === 'actions' && rowActions ? 'bg-background sticky right-0' : ''
+                                        cell.column.id === 'actions' &&
+                                        rowActions
+                                            ? 'bg-background sticky right-0'
+                                            : ''
                                     } text-sm text-accent-600 px-3 h-[50px] border-b border-accent-200`}
                                     key={cell.id}
                                 >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                    )}
                                 </td>
                             ))}
                         </tr>

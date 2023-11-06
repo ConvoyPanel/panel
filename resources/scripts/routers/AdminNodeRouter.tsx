@@ -1,16 +1,20 @@
-import { httpErrorToHuman } from '@/api/http'
-import NavigationBar, { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { ErrorMessage, NotFound } from '@/components/elements/ScreenBlock'
-import Spinner from '@/components/elements/Spinner'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
-import { NodeContext } from '@/state/admin/node'
-import { lazy, useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, RouteObject, Routes, useMatch } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
-import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
+import { NodeContext } from '@/state/admin/node'
+import { lazy, useContext, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Outlet, RouteObject, Routes, useMatch } from 'react-router-dom'
+
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
+import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
+import { httpErrorToHuman } from '@/api/http'
+
+import { ErrorMessage, NotFound } from '@/components/elements/ScreenBlock'
+import Spinner from '@/components/elements/Spinner'
+import NavigationBar, {
+    NavigationBarContext,
+} from '@/components/elements/navigation/NavigationBar'
 
 export const routes: Route[] = [
     {
@@ -18,54 +22,101 @@ export const routes: Route[] = [
         children: [
             {
                 index: true,
-                element: lazyLoad(lazy(() => import('@/components/admin/nodes/NodesContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () => import('@/components/admin/nodes/NodesContainer')
+                    )
+                ),
             },
             {
                 path: ':nodeId',
                 loader: ({ params }) =>
-                    query(getPoolKey(parseInt(params.id!)), () => getAddressPool(parseInt(params.id!))),
+                    query(getPoolKey(parseInt(params.id!)), () =>
+                        getAddressPool(parseInt(params.id!))
+                    ),
                 element: (
                     <NodeContext.Provider>
-                        {lazyLoad(lazy(() => import('@/routers/AdminNodeRouter')))}
+                        {lazyLoad(
+                            lazy(() => import('@/routers/AdminNodeRouter'))
+                        )}
                     </NodeContext.Provider>
                 ),
                 children: [
                     {
                         index: true,
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/nodes/overview/NodeOverviewContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/overview/NodeOverviewContainer'
+                                    )
+                            )
                         ),
                     },
                     {
                         path: 'servers',
-                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/servers/NodeServersContainer'))),
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/servers/NodeServersContainer'
+                                    )
+                            )
+                        ),
                     },
                     {
                         path: 'isos',
-                        element: lazyLoad(lazy(() => import('@/components/admin/nodes/isos/IsosContainer'))),
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/isos/IsosContainer'
+                                    )
+                            )
+                        ),
                     },
                     {
                         path: 'templates',
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/nodes/templates/NodeTemplatesContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/templates/NodeTemplatesContainer'
+                                    )
+                            )
                         ),
                     },
                     {
                         path: 'addresses',
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/nodes/addresses/NodeAddressesContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/addresses/NodeAddressesContainer'
+                                    )
+                            )
                         ),
                     },
                     {
                         path: 'settings',
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/nodes/settings/NodeSettingsContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/nodes/settings/NodeSettingsContainer'
+                                    )
+                            )
                         ),
                         children: [
                             {
                                 path: 'general',
                                 element: lazyLoad(
-                                    lazy(() => import('@/components/admin/nodes/settings/GeneralContainer'))
+                                    lazy(
+                                        () =>
+                                            import(
+                                                '@/components/admin/nodes/settings/GeneralContainer'
+                                            )
+                                    )
                                 ),
                             },
                         ],
@@ -83,7 +134,9 @@ const AdminNodeRouter = () => {
     const id = match!.params.id
     const node = NodeContext.useStoreState(state => state.node.data)
     const getNode = NodeContext.useStoreActions(actions => actions.node.getNode)
-    const clearNodeState = NodeContext.useStoreActions(actions => actions.clearNodeState)
+    const clearNodeState = NodeContext.useStoreActions(
+        actions => actions.clearNodeState
+    )
 
     const visibleRoutes = useMemo(
         () => [
@@ -140,7 +193,19 @@ const AdminNodeRouter = () => {
         setBreadcrumb(node?.name)
     }, [node])
 
-    return <>{!node ? error ? <ErrorMessage message={error} /> : <Spinner /> : <Outlet />}</>
+    return (
+        <>
+            {!node ? (
+                error ? (
+                    <ErrorMessage message={error} />
+                ) : (
+                    <Spinner />
+                )
+            ) : (
+                <Outlet />
+            )}
+        </>
+    )
 }
 
 export default AdminNodeRouter

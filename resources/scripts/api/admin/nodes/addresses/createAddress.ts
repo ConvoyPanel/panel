@@ -11,7 +11,10 @@ export interface AddressParameters {
     type: AddressType
 }
 
-const createAddress = async (nodeId: number, payload: AddressParameters): Promise<Address> => {
+const createAddress = async (
+    nodeId: number,
+    payload: AddressParameters
+): Promise<Address> => {
     const {
         data: { data },
     } = await http.post(`/api/admin/nodes/${nodeId}/addresses`, {

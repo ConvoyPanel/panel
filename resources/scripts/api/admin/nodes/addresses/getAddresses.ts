@@ -1,4 +1,4 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
 
 export type AddressInclude = 'server'
@@ -17,7 +17,15 @@ export interface QueryParams {
 
 const getAddresses = async (
     nodeId: number,
-    { serverId, type, address, query, perPage = 50, include, ...params }: QueryParams
+    {
+        serverId,
+        type,
+        address,
+        query,
+        perPage = 50,
+        include,
+        ...params
+    }: QueryParams
 ): Promise<AddressResponse> => {
     const { data } = await http.get(`/api/admin/nodes/${nodeId}/addresses`, {
         params: {

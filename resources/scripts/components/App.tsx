@@ -1,10 +1,18 @@
-import { store } from '@/state'
-import { StoreProvider } from 'easy-peasy'
-import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } from 'react-router-dom'
-import ThemeProvider from '@/components/ThemeProvider'
-import { NavigationProgress } from '@mantine/nprogress'
 import router from '@/routers/router'
+import { store } from '@/state'
+import { NavigationProgress } from '@mantine/nprogress'
+import { StoreProvider } from 'easy-peasy'
+import {
+    BrowserRouter,
+    Route,
+    RouterProvider,
+    Routes,
+    createBrowserRouter,
+} from 'react-router-dom'
+
 import Spinner from '@/components/elements/Spinner'
+
+import ThemeProvider from '@/components/ThemeProvider'
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -36,7 +44,8 @@ const App = () => {
         store.getActions().settings.setSettings({
             theme:
                 localStorage.theme === 'dark' ||
-                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                (!('theme' in localStorage) &&
+                    window.matchMedia('(prefers-color-scheme: dark)').matches)
                     ? 'dark'
                     : 'light',
             version: SiteConfiguration!.version,

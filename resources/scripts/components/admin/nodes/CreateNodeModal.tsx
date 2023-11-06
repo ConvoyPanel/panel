@@ -1,16 +1,19 @@
+import { useFlashKey } from '@/util/useFlash'
+import { hostname } from '@/util/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+
+import createNode from '@/api/admin/nodes/createNode'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
+
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
 import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
-import { useFlashKey } from '@/util/useFlash'
-import { z } from 'zod'
-import { hostname } from '@/util/validation'
-import { FormProvider, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useTranslation } from 'react-i18next'
-import createNode from '@/api/admin/nodes/createNode'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
 
 interface Props {
     open: boolean
@@ -18,7 +21,9 @@ interface Props {
 }
 
 const CreateNodeModal = ({ open, onClose }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.index.create')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        'admin.nodes.index.create'
+    )
     const { mutate } = useNodesSWR({ page: 1, query: '' })
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.index')
@@ -102,39 +107,83 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin.nodes.index.create'} />
-                        <TextInputForm name='name' label={tStrings('display_name')} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={'admin.nodes.index.create'}
+                        />
+                        <TextInputForm
+                            name='name'
+                            label={tStrings('display_name')}
+                        />
                         <LocationsSelectForm />
                         <TextInputForm name='cluster' label={t('pve_name')} />
-                        <MessageBox className='mt-3' title='Warning' type='warning'>
+                        <MessageBox
+                            className='mt-3'
+                            title='Warning'
+                            type='warning'
+                        >
                             {t('creds_warning')}
                         </MessageBox>
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputForm name='tokenId' label={t('token_id')} />
+                            <TextInputForm
+                                name='tokenId'
+                                label={t('token_id')}
+                            />
                             <TextInputForm name='secret' label={t('secret')} />
                         </div>
                         <TextInputForm name='fqdn' label={tStrings('fqdn')} />
                         <TextInputForm name='port' label={tStrings('port')} />
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputForm name='memory' label={`${t('memory_allocation')} (MiB)`} />
-                            <TextInputForm name='memoryOverallocate' label={`${t('memory_overallocation')} (%)`} />
+                            <TextInputForm
+                                name='memory'
+                                label={`${t('memory_allocation')} (MiB)`}
+                            />
+                            <TextInputForm
+                                name='memoryOverallocate'
+                                label={`${t('memory_overallocation')} (%)`}
+                            />
                         </div>
                         <div className='grid gap-3 grid-cols-2'>
-                            <TextInputForm name='disk' label={`${t('disk_allocation')} (MiB)`} />
-                            <TextInputForm name='diskOverallocate' label={`${t('disk_allocation')} (MiB)`} />
+                            <TextInputForm
+                                name='disk'
+                                label={`${t('disk_allocation')} (MiB)`}
+                            />
+                            <TextInputForm
+                                name='diskOverallocate'
+                                label={`${t('disk_allocation')} (MiB)`}
+                            />
                         </div>
                         <div className='grid gap-3 grid-cols-3'>
-                            <TextInputForm name='vmStorage' label={t('vm_storage')} placeholder='local' />
-                            <TextInputForm name='backupStorage' label={t('backup_storage')} placeholder='local' />
-                            <TextInputForm name='isoStorage' label={t('iso_storage')} placeholder='local' />
+                            <TextInputForm
+                                name='vmStorage'
+                                label={t('vm_storage')}
+                                placeholder='local'
+                            />
+                            <TextInputForm
+                                name='backupStorage'
+                                label={t('backup_storage')}
+                                placeholder='local'
+                            />
+                            <TextInputForm
+                                name='isoStorage'
+                                label={t('iso_storage')}
+                                placeholder='local'
+                            />
                         </div>
-                        <TextInputForm name='network' label={tStrings('network')} placeholder='vmbr0' />
+                        <TextInputForm
+                            name='network'
+                            label={tStrings('network')}
+                            placeholder='vmbr0'
+                        />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>

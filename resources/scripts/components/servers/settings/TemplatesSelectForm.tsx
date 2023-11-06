@@ -1,9 +1,11 @@
 import { ServerContext } from '@/state/server'
-import useTemplateGroupsSWR from '@/api/server/settings/useTemplateGroupsSWR'
 import { useMemo, useState } from 'react'
-import Select from '@/components/elements/inputs/Select'
 import { useFormContext } from 'react-hook-form'
+
+import useTemplateGroupsSWR from '@/api/server/settings/useTemplateGroupsSWR'
+
 import SelectForm from '@/components/elements/forms/SelectForm'
+import Select from '@/components/elements/inputs/Select'
 
 interface Props {
     disabled?: boolean
@@ -26,7 +28,9 @@ const TemplatesSelectForm = ({ disabled }: Props) => {
         }) ?? []
     const [groupUuid, setGroupUuid] = useState('')
     const templates = useMemo(
-        () => templateGroups.find(group => group.value === groupUuid)?.templates ?? [],
+        () =>
+            templateGroups.find(group => group.value === groupUuid)
+                ?.templates ?? [],
         [templateGroups, groupUuid]
     )
     const handleGroupsOnChange = (uuid: string | null) => {

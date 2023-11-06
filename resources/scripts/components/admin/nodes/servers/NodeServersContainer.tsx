@@ -1,11 +1,13 @@
-import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
-import ServersTable from '@/components/admin/servers/ServersTable'
 import { NodeContext } from '@/state/admin/node'
-import { useState } from 'react'
-import CreateServerModal from '@/components/admin/servers/CreateServerModal'
-import SearchBar from '@/components/admin/SearchBar'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useState } from 'react'
+
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import SearchBar from '@/components/admin/SearchBar'
+import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
+import CreateServerModal from '@/components/admin/servers/CreateServerModal'
+import ServersTable from '@/components/admin/servers/ServersTable'
 
 const NodeServersContainer = () => {
     const [query, setQuery] = useState('')
@@ -15,7 +17,11 @@ const NodeServersContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <CreateServerModal open={open} onClose={() => setOpen(false)} nodeId={node.id} />
+            <CreateServerModal
+                open={open}
+                onClose={() => setOpen(false)}
+                nodeId={node.id}
+            />
             <NodeContentBlock title='Servers' showFlashKey='admin:node:servers'>
                 <SearchBar
                     value={query}

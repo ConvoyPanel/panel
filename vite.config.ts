@@ -1,13 +1,18 @@
-import { defineConfig } from 'vite'
-import laravel from 'laravel-vite-plugin'
 import react from '@vitejs/plugin-react-swc'
-import macrosPlugin from 'vite-plugin-babel-macros'
+import laravel from 'laravel-vite-plugin'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { defineConfig } from 'vite'
+import macrosPlugin from 'vite-plugin-babel-macros'
 
 export default defineConfig({
-    plugins: [react(), laravel(['resources/scripts/main.tsx']), macrosPlugin(), visualizer({
-        filename: './public/stats.html',
-    })],
+    plugins: [
+        react(),
+        laravel(['resources/scripts/main.tsx']),
+        macrosPlugin(),
+        visualizer({
+            filename: './public/stats.html',
+        }),
+    ],
     build: {
         target: ['es2020'],
     },

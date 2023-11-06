@@ -1,15 +1,20 @@
-import DashboardContainer from '@/components/dashboard/DashboardContainer'
-import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import TransitionRouter from '@/routers/TransitionRouter'
-import { lazy, useContext, useEffect } from 'react'
-import { RouteObject } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { routes as serverRoutes } from '@/routers/ServerRouter'
+import TransitionRouter from '@/routers/TransitionRouter'
 import { lazyLoad } from '@/routers/helpers'
 import { Route } from '@/routers/router'
+import { lazy, useContext, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { RouteObject } from 'react-router-dom'
+
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
+import DashboardContainer from '@/components/dashboard/DashboardContainer'
 
 export const routes: Route[] = [
-    { index: true, element: lazyLoad(lazy(() => import('@/routers/DashboardRouter'))) },
+    {
+        index: true,
+        element: lazyLoad(lazy(() => import('@/routers/DashboardRouter'))),
+    },
     ...serverRoutes,
 ]
 

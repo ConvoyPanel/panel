@@ -1,26 +1,31 @@
 import { NodeContext } from '@/state/admin/node'
 import { useFlashKey } from '@/util/useFlash'
-import { useTranslation } from 'react-i18next'
-import FormCard from '@/components/elements/FormCard'
-import { FormProvider, useForm } from 'react-hook-form'
-import Button from '@/components/elements/Button'
-import Switch from '@/components/elements/inputs/Switch'
-import { z } from 'zod'
+import { hostname, port } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+
+import updateCoterm from '@/api/admin/nodes/settings/updateCoterm'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import SwitchForm from '@/components/elements/forms/SwitchForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
-import { hostname, port } from '@/util/validation'
-import CheckboxForm from '@/components/elements/forms/CheckboxForm'
-import updateCoterm from '@/api/admin/nodes/settings/updateCoterm'
-import { useState } from 'react'
-import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
+import Switch from '@/components/elements/inputs/Switch'
+
 import CotermResetModal from '@/components/admin/nodes/settings/partials/general/CotermResetModal'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
 
 const CotermCard = () => {
     const { data: node, mutate } = useNodeSWR()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.coterm`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.settings.general.coterm`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.settings')
     const [token, setToken] = useState<string | null>(null)
@@ -40,7 +45,10 @@ const CotermCard = () => {
         isTlsEnabled: z.boolean(),
     })
 
-    const schema = z.discriminatedUnion('isEnabled', [schemaIfEnabled, schemaIfDisabled])
+    const schema = z.discriminatedUnion('isEnabled', [
+        schemaIfEnabled,
+        schemaIfDisabled,
+    ])
 
     const form = useForm({
         resolver: zodResolver(schema),
@@ -109,12 +117,23 @@ const CotermCard = () => {
                     <form onSubmit={form.handleSubmit(submit)}>
                         <FormCard.Body>
                             <FormCard.Title>{t('coterm.title')}</FormCard.Title>
-                            <p className={'description-small my-3'}>{t('coterm.description')}</p>
+                            <p className={'description-small my-3'}>
+                                {t('coterm.description')}
+                            </p>
 
                             <div className={'flex flex-col gap-3'}>
-                                <FlashMessageRender byKey={`admin.nodes.${node.id}.settings.general.coterm`} />
-                                <SwitchForm name={'isEnabled'} label={t('coterm.enable')} />
-                                <div className={'flex flex-col lg:grid grid-cols-5 gap-3'}>
+                                <FlashMessageRender
+                                    byKey={`admin.nodes.${node.id}.settings.general.coterm`}
+                                />
+                                <SwitchForm
+                                    name={'isEnabled'}
+                                    label={t('coterm.enable')}
+                                />
+                                <div
+                                    className={
+                                        'flex flex-col lg:grid grid-cols-5 gap-3'
+                                    }
+                                >
                                     <TextInputForm
                                         name={'fqdn'}
                                         className={'col-span-4'}
@@ -128,7 +147,11 @@ const CotermCard = () => {
                                         disabled={!isEnabled}
                                     />
                                 </div>
-                                <div className={'flex flex-col lg:grid grid-cols-5 lg:items-center gap-3'}>
+                                <div
+                                    className={
+                                        'flex flex-col lg:grid grid-cols-5 lg:items-center gap-3'
+                                    }
+                                >
                                     <CheckboxForm
                                         className={'col-span-4'}
                                         name={'isTlsEnabled'}

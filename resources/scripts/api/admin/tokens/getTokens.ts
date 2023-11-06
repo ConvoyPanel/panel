@@ -1,5 +1,5 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToUser, User } from '@/api/admin/users/getUsers'
+import { User, rawDataToUser } from '@/api/admin/users/getUsers'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export type ApiTokenType = 'application' | 'account'
 
@@ -29,7 +29,11 @@ export interface QueryParams {
 
 export type TokenResponse = PaginatedResult<Token>
 
-const getTokens = async ({ query, perPage = 50, ...params }: QueryParams): Promise<TokenResponse> => {
+const getTokens = async ({
+    query,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<TokenResponse> => {
     const { data } = await http.get('/api/admin/tokens', {
         params: {
             'filter[*]': query,

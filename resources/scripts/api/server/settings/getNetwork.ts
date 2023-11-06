@@ -5,7 +5,9 @@ export interface NetworkSettings {
 }
 
 export default async (uuid: string): Promise<NetworkSettings> => {
-    const { data: { data } } = await http.get(`/api/client/servers/${uuid}/settings/network`)
+    const {
+        data: { data },
+    } = await http.get(`/api/client/servers/${uuid}/settings/network`)
 
     return data
 }

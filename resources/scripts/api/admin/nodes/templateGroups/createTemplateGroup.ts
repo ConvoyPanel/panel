@@ -1,4 +1,7 @@
-import { rawDataToTemplateGroup, TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
+import {
+    TemplateGroup,
+    rawDataToTemplateGroup,
+} from '@/api/admin/nodes/templateGroups/getTemplateGroups'
 import http from '@/api/http'
 
 export interface TemplateGroupParameters {
@@ -12,7 +15,10 @@ const createTemplateGroup = async (
 ): Promise<TemplateGroup> => {
     const {
         data: { data },
-    } = await http.post(`/api/admin/nodes/${nodeId}/template-groups`, parameters)
+    } = await http.post(
+        `/api/admin/nodes/${nodeId}/template-groups`,
+        parameters
+    )
 
     return rawDataToTemplateGroup(data)
 }

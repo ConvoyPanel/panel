@@ -1,14 +1,23 @@
-import ContentContainer from '@/components/elements/ContentContainer'
-import { Burger, LoadingOverlay } from '@mantine/core'
-import UserDropdown from '@/components/elements/navigation/UserDropdown'
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import NavigationDropdown from '@/components/elements/navigation/NavigationDropdown'
-import { Link, useMatch, useMatches } from 'react-router-dom'
-import http from '@/api/http'
-import NavLink from '@/components/elements/navigation/NavLink'
 import { AdminBanner } from '@/routers/AdminDashboardRouter'
 import { bindUrlParams } from '@/util/helpers'
+import { Burger, LoadingOverlay } from '@mantine/core'
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
+import { Link, useMatch, useMatches } from 'react-router-dom'
+
+import http from '@/api/http'
+
+import ContentContainer from '@/components/elements/ContentContainer'
 import Logo from '@/components/elements/Logo'
+import NavLink from '@/components/elements/navigation/NavLink'
+import NavigationDropdown from '@/components/elements/navigation/NavigationDropdown'
+import UserDropdown from '@/components/elements/navigation/UserDropdown'
 
 export interface RouteDefinition {
     name: string
@@ -23,12 +32,13 @@ interface NavigationBarContextInterface {
     setBreadcrumb: (breadcrumb: string | null | undefined) => void
 }
 
-export const NavigationBarContext = createContext<NavigationBarContextInterface>({
-    routes: [],
-    setRoutes: () => {},
-    breadcrumb: null,
-    setBreadcrumb: () => {},
-})
+export const NavigationBarContext =
+    createContext<NavigationBarContextInterface>({
+        routes: [],
+        setRoutes: () => {},
+        breadcrumb: null,
+        setBreadcrumb: () => {},
+    })
 
 const NavigationBar = () => {
     const { routes, breadcrumb } = useContext(NavigationBarContext)
@@ -43,13 +53,19 @@ const NavigationBar = () => {
     const matches = useMatches()
 
     const visibilityObserver = useMemo(
-        () => new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting)),
+        () =>
+            new IntersectionObserver(([entry]) =>
+                setIsVisible(entry.isIntersecting)
+            ),
         []
     )
 
     useEffect(() => {
         const resizeListener = () => {
-            let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+            let width =
+                window.innerWidth ||
+                document.documentElement.clientWidth ||
+                document.body.clientWidth
 
             if (width < 640) {
                 setMenuVisible(false)
@@ -74,7 +90,11 @@ const NavigationBar = () => {
                 logo.current.classList.add('!w-8')
                 placeholder.current.classList.remove('hidden')
             } else {
-                bottomBar.current.classList.remove('fixed', 'top-0', '!shadow-lg')
+                bottomBar.current.classList.remove(
+                    'fixed',
+                    'top-0',
+                    '!shadow-lg'
+                )
                 logo.current.classList.remove('!w-8')
                 placeholder.current.classList.add('hidden')
             }
@@ -96,9 +116,14 @@ const NavigationBar = () => {
             <ContentContainer ref={topBar} className='pt-3 pb-1.5 relative'>
                 <div className='flex justify-between'>
                     <div className='flex shrink overflow-hidden space-x-5 items-center'>
-                        <Link to={isAdminArea ? '/admin' : '/'} className='flex items-center space-x-3'>
+                        <Link
+                            to={isAdminArea ? '/admin' : '/'}
+                            className='flex items-center space-x-3'
+                        >
                             <Logo className='w-6 h-6 text-foreground' />
-                            <h1 className='font-semibold text-lg text-foreground'>Convoy</h1>
+                            <h1 className='font-semibold text-lg text-foreground'>
+                                Convoy
+                            </h1>
                         </Link>
                         {breadcrumb && (
                             <>
@@ -140,7 +165,10 @@ const NavigationBar = () => {
                             <NavLink
                                 end={route.end}
                                 key={route.path}
-                                to={bindUrlParams(route.path, matches[matches.length - 1].params)}
+                                to={bindUrlParams(
+                                    route.path,
+                                    matches[matches.length - 1].params
+                                )}
                             >
                                 {route.name}
                             </NavLink>
@@ -148,7 +176,10 @@ const NavigationBar = () => {
                     </div>
                 </ContentContainer>
             </div>
-            <div ref={placeholder} className='hidden h-[49px] w-full bg-white dark:bg-black' />
+            <div
+                ref={placeholder}
+                className='hidden h-[49px] w-full bg-white dark:bg-black'
+            />
         </div>
     )
 }

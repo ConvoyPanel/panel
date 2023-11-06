@@ -1,5 +1,8 @@
 import styled from '@emotion/styled'
-import { Switch as MantineSwitch, SwitchProps as MantineSwitchProps } from '@mantine/core'
+import {
+    Switch as MantineSwitch,
+    SwitchProps as MantineSwitchProps,
+} from '@mantine/core'
 import tw from 'twin.macro'
 
 export interface SwitchProps extends MantineSwitchProps {}

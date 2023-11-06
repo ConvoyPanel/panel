@@ -1,16 +1,19 @@
-import { httpErrorToHuman } from '@/api/http'
-import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
-import Spinner from '@/components/elements/Spinner'
-import { lazy, useContext, useEffect, useState } from 'react'
-import { Outlet, RouteObject, useMatch } from 'react-router-dom'
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { AdminServerContext } from '@/state/admin/server'
-import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
-import { useTranslation } from 'react-i18next'
-import { ServerContext } from '@/state/server'
 import { lazyLoad } from '@/routers/helpers'
 import { Route } from '@/routers/router'
+import { AdminServerContext } from '@/state/admin/server'
+import { ServerContext } from '@/state/server'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { lazy, useContext, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Outlet, RouteObject, useMatch } from 'react-router-dom'
+
+import { httpErrorToHuman } from '@/api/http'
+
+import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
+import Spinner from '@/components/elements/Spinner'
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
+import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
 
 export const routes: Route[] = [
     {
@@ -18,38 +21,67 @@ export const routes: Route[] = [
         children: [
             {
                 index: true,
-                element: lazyLoad(lazy(() => import('@/components/admin/servers/ServersContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import(
+                                '@/components/admin/servers/ServersContainer'
+                            )
+                    )
+                ),
             },
             {
                 path: ':id',
                 element: (
                     <AdminServerContext.Provider>
-                        {lazyLoad(lazy(() => import('@/routers/AdminServerRouter')))}
+                        {lazyLoad(
+                            lazy(() => import('@/routers/AdminServerRouter'))
+                        )}
                     </AdminServerContext.Provider>
                 ),
                 children: [
                     {
                         index: true,
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/servers/overview/ServerOverviewContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/servers/overview/ServerOverviewContainer'
+                                    )
+                            )
                         ),
                     },
                     {
                         path: 'settings',
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/servers/settings/ServerSettingsContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/servers/settings/ServerSettingsContainer'
+                                    )
+                            )
                         ),
                         children: [
                             {
                                 path: 'general',
                                 element: lazyLoad(
-                                    lazy(() => import('@/components/admin/servers/settings/GeneralContainer'))
+                                    lazy(
+                                        () =>
+                                            import(
+                                                '@/components/admin/servers/settings/GeneralContainer'
+                                            )
+                                    )
                                 ),
                             },
                             {
                                 path: 'hardware',
                                 element: lazyLoad(
-                                    lazy(() => import('@/components/admin/servers/settings/ServerHardwareContainer'))
+                                    lazy(
+                                        () =>
+                                            import(
+                                                '@/components/admin/servers/settings/ServerHardwareContainer'
+                                            )
+                                    )
                                 ),
                             },
                         ],
@@ -64,8 +96,12 @@ const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
     const [error, setError] = useState<string>()
     const server = AdminServerContext.useStoreState(state => state.server.data)
-    const getServer = AdminServerContext.useStoreActions(actions => actions.server.getServer)
-    const clearServerState = AdminServerContext.useStoreActions(actions => actions.clearServerState)
+    const getServer = AdminServerContext.useStoreActions(
+        actions => actions.server.getServer
+    )
+    const clearServerState = AdminServerContext.useStoreActions(
+        actions => actions.clearServerState
+    )
     const { t: tStrings } = useTranslation('strings')
 
     const visibleRoutes = [
@@ -114,7 +150,8 @@ const AdminServerRouter = () => {
                 )
             ) : (
                 <>
-                    {server.status === 'deleting' || server.status === 'deletion_failed' ? (
+                    {server.status === 'deleting' ||
+                    server.status === 'deletion_failed' ? (
                         <ScreenBlock
                             center
                             icon={ExclamationCircleIcon}
@@ -123,7 +160,11 @@ const AdminServerRouter = () => {
                                     ? "This server is being deleted. If you think this is an error, click below to make the server accessible. Clicking the button will not stop the server from being deleted if it's in progress"
                                     : 'This server failed to delete. if you think this is an error, click below to make the server accessible. The server MAY not be in a usable state.'
                             }
-                            title={server.status === 'deleting' ? 'Deleting' : 'Failed to Delete'}
+                            title={
+                                server.status === 'deleting'
+                                    ? 'Deleting'
+                                    : 'Failed to Delete'
+                            }
                         >
                             <FixServerStatusButton />
                         </ScreenBlock>

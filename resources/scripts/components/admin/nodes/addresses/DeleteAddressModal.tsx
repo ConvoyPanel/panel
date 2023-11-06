@@ -1,12 +1,14 @@
-import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
-import { Address } from '@/api/server/getServer'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
-import deleteAddress from '@/api/admin/nodes/addresses/deleteAddress'
-import { FormikProvider, useFormik } from 'formik'
 import usePagination from '@/util/usePagination'
+import { FormikProvider, useFormik } from 'formik'
+
+import deleteAddress from '@/api/admin/nodes/addresses/deleteAddress'
+import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
+import { Address } from '@/api/server/getServer'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
 
 interface Props {
     open: boolean
@@ -40,7 +42,10 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
                 }, false)
                 onClose()
             } catch (error) {
-                clearAndAddHttpError({ key: 'admin:node:addresses.delete', error })
+                clearAndAddHttpError({
+                    key: 'admin:node:addresses.delete',
+                    error,
+                })
             }
             setSubmitting(false)
         },
@@ -54,10 +59,14 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:node:addresses.delete'} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={'admin:node:addresses.delete'}
+                        />
 
                         <Modal.Description>
-                            Are you sure you want to delete this address? This action cannot be undone.
+                            Are you sure you want to delete this address? This
+                            action cannot be undone.
                         </Modal.Description>
                     </Modal.Body>
                     <Modal.Actions>

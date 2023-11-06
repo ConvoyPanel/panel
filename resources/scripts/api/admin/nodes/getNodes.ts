@@ -1,4 +1,4 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export interface Node {
     id: number
@@ -57,11 +57,20 @@ export interface QueryParams {
     perPage?: number
 }
 
-const getNodes = async ({ query, id, perPage = 50, ...params }: QueryParams): Promise<NodeResponse> => {
+const getNodes = async ({
+    query,
+    id,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<NodeResponse> => {
     const { data } = await http.get('/api/admin/nodes', {
         params: {
             'filter[*]': query,
-            'filter[id]': id ? (Array.isArray(id) ? id.join(',') : id) : undefined,
+            'filter[id]': id
+                ? Array.isArray(id)
+                    ? id.join(',')
+                    : id
+                : undefined,
             ...params,
         },
     })

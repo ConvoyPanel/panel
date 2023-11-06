@@ -1,8 +1,10 @@
-import updateStatus, { PowerAction } from '@/api/server/updateState'
-import Button from '@/components/elements/Button'
 import { ServerContext } from '@/state/server'
 import useNotify from '@/util/useNotify'
 import { useTranslation } from 'react-i18next'
+
+import updateStatus, { PowerAction } from '@/api/server/updateState'
+
+import Button from '@/components/elements/Button'
 
 const ServerPowerBlock = () => {
     const { t } = useTranslation('server.overview')
@@ -14,10 +16,16 @@ const ServerPowerBlock = () => {
     const update = (state: PowerAction) => {
         updateStatus(uuid!, state)
             .then(() =>
-                notify({ message: t('notices.power_action_sent_success'), color: 'green' })
+                notify({
+                    message: t('notices.power_action_sent_success'),
+                    color: 'green',
+                })
             )
             .catch(() =>
-                notify({ message: t('notices.power_action_sent_fail'), color: 'red' })
+                notify({
+                    message: t('notices.power_action_sent_fail'),
+                    color: 'red',
+                })
             )
     }
 
@@ -30,7 +38,11 @@ const ServerPowerBlock = () => {
             >
                 {t('power_actions.start')}
             </Button>
-            <Button className='transition-colors' disabled={state !== 'running'} onClick={() => update('restart')}>
+            <Button
+                className='transition-colors'
+                disabled={state !== 'running'}
+                onClick={() => update('restart')}
+            >
                 {t('power_actions.restart')}
             </Button>
             <Button

@@ -1,5 +1,5 @@
-import http from '@/api/http'
 import { rawDataToToken } from '@/api/admin/tokens/getTokens'
+import http from '@/api/http'
 
 interface CreateTokenParameters {
     name: string

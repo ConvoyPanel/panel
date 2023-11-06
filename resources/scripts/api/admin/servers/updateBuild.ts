@@ -1,5 +1,5 @@
-import http from '@/api/http'
 import { rawDataToAdminServer } from '@/api/admin/servers/getServer'
+import http from '@/api/http'
 
 interface UpdateServerBuildParameters {
     cpu: number
@@ -14,7 +14,14 @@ interface UpdateServerBuildParameters {
 
 const updateBuild = async (
     serverUuid: string,
-    { addressIds, snapshotLimit, backupLimit, bandwidthLimit, bandwidthUsage, ...params }: UpdateServerBuildParameters
+    {
+        addressIds,
+        snapshotLimit,
+        backupLimit,
+        bandwidthLimit,
+        bandwidthUsage,
+        ...params
+    }: UpdateServerBuildParameters
 ) => {
     const {
         data: { data },

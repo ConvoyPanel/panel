@@ -1,22 +1,25 @@
+import { useFlashKey } from '@/util/useFlash'
+import { ipAddress, macAddress } from '@/util/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { KeyedMutator, mutate } from 'swr'
+import { z } from 'zod'
+
+import createAddress from '@/api/admin/addressPools/addresses/createAddress'
+import updateAddress from '@/api/admin/addressPools/addresses/updateAddress'
 import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
+import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
+import { Address } from '@/api/server/getServer'
+
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import RadioGroupForm from '@/components/elements/forms/RadioGroupForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import Radio from '@/components/elements/inputs/Radio'
-import { useFlashKey } from '@/util/useFlash'
-import { ipAddress, macAddress } from '@/util/validation'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { FormProvider, useForm } from 'react-hook-form'
-import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
+
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
-import createAddress from '@/api/admin/addressPools/addresses/createAddress'
-import { KeyedMutator, mutate } from 'swr'
-import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
-import { Address } from '@/api/server/getServer'
-import { useEffect } from 'react'
-import updateAddress from '@/api/admin/addressPools/addresses/updateAddress'
 
 interface Props {
     address: Address | null
@@ -69,23 +72,32 @@ const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
     }
 
     const submit = async (_data: any) => {
-        const { macAddress, serverId, ...data } = _data as z.infer<typeof schema>
+        const { macAddress, serverId, ...data } = _data as z.infer<
+            typeof schema
+        >
 
         clearFlashes()
         try {
-            const updatedAddress = await updateAddress(address!.addressPoolId, address!.id, {
-                macAddress: macAddress && macAddress.length > 0 ? macAddress : null,
-                serverId: serverId !== '' ? serverId : null,
-                include: ['server'],
-                ...data,
-            })
+            const updatedAddress = await updateAddress(
+                address!.addressPoolId,
+                address!.id,
+                {
+                    macAddress:
+                        macAddress && macAddress.length > 0 ? macAddress : null,
+                    serverId: serverId !== '' ? serverId : null,
+                    include: ['server'],
+                    ...data,
+                }
+            )
 
             mutate(data => {
                 if (!data) return data
 
                 return {
                     ...data,
-                    items: data.items.map(item => (item.id === updatedAddress!.id ? updatedAddress : item)),
+                    items: data.items.map(item =>
+                        item.id === updatedAddress!.id ? updatedAddress : item
+                    ),
                 }
             }, false)
 
@@ -108,14 +120,39 @@ const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
                             className='mb-5'
                             byKey={`admin.addressPools.${address?.addressPoolId}.addresses.${address?.id}.edit`}
                         />
-                        <TextInputForm name='address' label={tStrings('address_one')} />
-                        <RadioGroupForm name='type' orientation='vertical' spacing={6}>
-                            <Radio name='type' value='ipv4' label={tStrings('ipv4')} />
-                            <Radio name='type' value='ipv6' label={tStrings('ipv6')} />
+                        <TextInputForm
+                            name='address'
+                            label={tStrings('address_one')}
+                        />
+                        <RadioGroupForm
+                            name='type'
+                            orientation='vertical'
+                            spacing={6}
+                        >
+                            <Radio
+                                name='type'
+                                value='ipv4'
+                                label={tStrings('ipv4')}
+                            />
+                            <Radio
+                                name='type'
+                                value='ipv6'
+                                label={tStrings('ipv6')}
+                            />
                         </RadioGroupForm>
-                        <TextInputForm name='cidr' label={tStrings('cidr')} placeholder='24' />
-                        <TextInputForm name='gateway' label={tStrings('gateway')} />
-                        <TextInputForm name='macAddress' label={tStrings('mac_address')} />
+                        <TextInputForm
+                            name='cidr'
+                            label={tStrings('cidr')}
+                            placeholder='24'
+                        />
+                        <TextInputForm
+                            name='gateway'
+                            label={tStrings('gateway')}
+                        />
+                        <TextInputForm
+                            name='macAddress'
+                            label={tStrings('mac_address')}
+                        />
                         <ServersSelectForm />
                     </Modal.Body>
 
@@ -123,7 +160,10 @@ const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('save')}
                         </Modal.Action>
                     </Modal.Actions>

@@ -1,16 +1,21 @@
-import { AddressPool, AddressPoolResponse } from '@/api/admin/addressPools/getAddressPools'
-import { KeyedMutator } from 'swr'
-import { useTranslation } from 'react-i18next'
 import { useFlashKey } from '@/util/useFlash'
-import useSWRMutation from 'swr/mutation'
-import deleteAddressPool from '@/api/admin/addressPools/deleteAddressPool'
-import { Address } from '@/api/server/getServer'
-import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
-import deleteAddress from '@/api/admin/addressPools/addresses/deleteAddress'
 import { FormEvent } from 'react'
-import Modal from '@/components/elements/Modal'
-import MessageBox from '@/components/elements/MessageBox'
+import { useTranslation } from 'react-i18next'
+import { KeyedMutator } from 'swr'
+import useSWRMutation from 'swr/mutation'
+
+import deleteAddress from '@/api/admin/addressPools/addresses/deleteAddress'
+import deleteAddressPool from '@/api/admin/addressPools/deleteAddressPool'
+import {
+    AddressPool,
+    AddressPoolResponse,
+} from '@/api/admin/addressPools/getAddressPools'
+import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
+import { Address } from '@/api/server/getServer'
+
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import MessageBox from '@/components/elements/MessageBox'
+import Modal from '@/components/elements/Modal'
 
 interface Props {
     address: Address | null
@@ -25,7 +30,11 @@ const DeleteAddressModal = ({ address, onClose, mutate }: Props) => {
         `admin.addressPools.${address?.addressPoolId}.addresses.${address?.id}.delete`
     )
     const { trigger, isMutating } = useSWRMutation(
-        ['admin.address-pools.addresses.delete', address?.addressPoolId, address?.id],
+        [
+            'admin.address-pools.addresses.delete',
+            address?.addressPoolId,
+            address?.id,
+        ],
         async () => {
             clearFlashes()
             try {
@@ -36,7 +45,9 @@ const DeleteAddressModal = ({ address, onClose, mutate }: Props) => {
 
                     return {
                         ...data,
-                        items: data.items.filter(item => item.id !== address!.id),
+                        items: data.items.filter(
+                            item => item.id !== address!.id
+                        ),
                     }
                 }, false)
 
@@ -66,7 +77,9 @@ const DeleteAddressModal = ({ address, onClose, mutate }: Props) => {
                         byKey={`admin.addressPools.${address?.addressPoolId}.addresses.${address?.id}.delete`}
                     />
                     <Modal.Description>
-                        {t('delete_modal.description', { address: address?.address })}
+                        {t('delete_modal.description', {
+                            address: address?.address,
+                        })}
                     </Modal.Description>
                 </Modal.Body>
 

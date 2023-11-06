@@ -1,9 +1,11 @@
-import { useFormContext } from 'react-hook-form'
-import { useState } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
-import useServersSWR from '@/api/admin/servers/useServersSWR'
-import SelectForm from '@/components/elements/forms/SelectForm'
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+
+import useServersSWR from '@/api/admin/servers/useServersSWR'
+
+import SelectForm from '@/components/elements/forms/SelectForm'
 
 const ServersSelectForm = () => {
     const { t: tSIndex } = useTranslation('admin.servers.index')
@@ -12,7 +14,10 @@ const ServersSelectForm = () => {
     const serverId: string = watch('serverId')
     const [query, setQuery] = useState(serverId)
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data, isLoading, isValidating } = useServersSWR({ query: debouncedQuery, perPage: 10 })
+    const { data, isLoading, isValidating } = useServersSWR({
+        query: debouncedQuery,
+        perPage: 10,
+    })
     const servers =
         data?.items.map(server => ({
             value: server.internalId.toString(),

@@ -1,21 +1,28 @@
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
-import { Token } from '@/api/admin/tokens/getTokens'
-import { formatDistanceToNow } from 'date-fns'
-import usePagination from '@/util/usePagination'
-import useTokensSWR from '@/api/admin/tokens/useTokensSWR'
-import Spinner from '@/components/elements/Spinner'
-import Pagination from '@/components/elements/Pagination'
-import { Link } from 'react-router-dom'
-import CreateTokenButton from '@/components/admin/tokens/CreateTokenButton'
-import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
-import deleteNode from '@/api/admin/nodes/deleteNode'
-import Menu from '@/components/elements/Menu'
 import useFlash, { useFlashKey } from '@/util/useFlash'
-import { useState } from 'react'
-import deleteToken from '@/api/admin/tokens/deleteToken'
-import Modal from '@/components/elements/Modal'
+import usePagination from '@/util/usePagination'
 import { Code } from '@mantine/core'
+import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import deleteNode from '@/api/admin/nodes/deleteNode'
+import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
+import deleteToken from '@/api/admin/tokens/deleteToken'
+import { Token } from '@/api/admin/tokens/getTokens'
+import useTokensSWR from '@/api/admin/tokens/useTokensSWR'
+
+import Menu from '@/components/elements/Menu'
+import Modal from '@/components/elements/Modal'
+import PageContentBlock from '@/components/elements/PageContentBlock'
+import Pagination from '@/components/elements/Pagination'
+import Spinner from '@/components/elements/Spinner'
+import Table, {
+    Actions,
+    ColumnArray,
+    RowActionsProps,
+} from '@/components/elements/displays/Table'
+
+import CreateTokenButton from '@/components/admin/tokens/CreateTokenButton'
 
 const columns: ColumnArray<Token> = [
     {
@@ -26,7 +33,10 @@ const columns: ColumnArray<Token> = [
         accessor: 'user',
         header: 'Owner',
         cell: ({ value }) => (
-            <Link to={`/admin/users/${value.id}/settings`} className='link text-foreground'>
+            <Link
+                to={`/admin/users/${value.id}/settings`}
+                className='link text-foreground'
+            >
                 {value.email}
             </Link>
         ),
@@ -62,7 +72,9 @@ const TokensContainer = () => {
 
                         return {
                             ...data,
-                            items: data.items.filter(tokenum => tokenum.id !== token.id),
+                            items: data.items.filter(
+                                tokenum => tokenum.id !== token.id
+                            ),
                         }
                     })
                 })
@@ -80,13 +92,18 @@ const TokensContainer = () => {
 
                     <Modal.Body>
                         <Modal.Description>
-                            Are you sure you want to delete this token? Subsequent requests to the API relying on this
-                            token will immediately fail.
+                            Are you sure you want to delete this token?
+                            Subsequent requests to the API relying on this token
+                            will immediately fail.
                         </Modal.Description>
                     </Modal.Body>
                     <Modal.Actions>
-                        <Modal.Action onClick={() => setOpen(false)}>Cancel</Modal.Action>
-                        <Modal.Action onClick={handleDelete}>Delete</Modal.Action>
+                        <Modal.Action onClick={() => setOpen(false)}>
+                            Cancel
+                        </Modal.Action>
+                        <Modal.Action onClick={handleDelete}>
+                            Delete
+                        </Modal.Action>
                     </Modal.Actions>
                 </Modal>
                 <Actions>
@@ -106,7 +123,13 @@ const TokensContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table rowActions={rowActions} columns={columns} data={items} />}
+                        {({ items }) => (
+                            <Table
+                                rowActions={rowActions}
+                                columns={columns}
+                                data={items}
+                            />
+                        )}
                     </Pagination>
                 )}
             </PageContentBlock>

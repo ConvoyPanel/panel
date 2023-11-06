@@ -1,8 +1,9 @@
-import LoadingDots from '@/components/elements/LoadingDots'
 import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { ComponentProps, ElementType } from 'react'
 import tw from 'twin.macro'
+
+import LoadingDots from '@/components/elements/LoadingDots'
 
 export type ButtonSize = 'sm'
 export type ButtonShape = 'square'
@@ -85,9 +86,11 @@ const StyledButton = styled.button<ButtonProps>`
 
     ${props => getSizes(props)}
 
-  ${({ variant = 'outline', color = 'accent' }) => getBorderStyles(variant, color)}
+  ${({ variant = 'outline', color = 'accent' }) =>
+        getBorderStyles(variant, color)}
 
-  ${({ variant = 'outline', color = 'accent' }) => getBackgroundStyles(variant, color)}
+  ${({ variant = 'outline', color = 'accent' }) =>
+        getBackgroundStyles(variant, color)}
 `
 
 const Button = ({ loading, disabled, ...props }: ButtonProps) => {
@@ -98,7 +101,9 @@ const Button = ({ loading, disabled, ...props }: ButtonProps) => {
                     <LoadingDots size={5} />
                 </div>
             ) : null}
-            <span className={loading ? 'invisible' : undefined}>{props.children}</span>
+            <span className={loading ? 'invisible' : undefined}>
+                {props.children}
+            </span>
         </StyledButton>
     )
 }

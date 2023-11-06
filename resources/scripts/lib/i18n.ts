@@ -1,7 +1,7 @@
 import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
 import I18NextHttpBackend, { HttpBackendOptions } from 'i18next-http-backend'
 import I18NextMultiloadBackendAdapter from 'i18next-multiload-backend-adapter'
+import { initReactI18next } from 'react-i18next'
 import { z } from 'zod'
 import { makeZodI18nMap, zodI18nMap } from 'zod-i18n-map'
 
@@ -20,7 +20,8 @@ i18n.use(I18NextMultiloadBackendAdapter)
         backend: {
             backend: I18NextHttpBackend,
             backendOption: {
-                loadPath: '/locales/locale.json?locale={{lng}}&namespace={{ns}}',
+                loadPath:
+                    '/locales/locale.json?locale={{lng}}&namespace={{ns}}',
                 queryStringParams: { hash },
                 allowMultiLoading: true,
             } as HttpBackendOptions,

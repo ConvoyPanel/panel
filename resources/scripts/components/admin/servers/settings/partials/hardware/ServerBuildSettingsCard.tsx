@@ -1,31 +1,42 @@
-import FormCard from '@/components/elements/FormCard'
-import { FormikProvider, useFormik } from 'formik'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
-import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
-import Button from '@/components/elements/Button'
-import FormSection from '@/components/elements/FormSection'
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
+import {
+    englishKeyboardCharacters,
+    hostname,
+    password,
+} from '@/util/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormikProvider, useFormik } from 'formik'
+import { useMemo } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import * as yup from 'yup'
+import { z } from 'zod'
+
+import updateBuild from '@/api/admin/servers/updateBuild'
 import updateServer from '@/api/admin/servers/updateServer'
 import { EloquentStatus } from '@/api/server/types'
-import updateBuild from '@/api/admin/servers/updateBuild'
-import * as yup from 'yup'
-import { useMemo } from 'react'
-import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
-import { z } from 'zod'
-import { englishKeyboardCharacters, hostname, password } from '@/util/validation'
-import { FormProvider, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useTranslation } from 'react-i18next'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
+import FormSection from '@/components/elements/FormSection'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
+import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
+import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
 const ServerBuildSettingsCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
-    const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.servers.${server.uuid}.settings.hardware.build`)
+    const setServer = AdminServerContext.useStoreActions(
+        actions => actions.server.setServer
+    )
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.servers.${server.uuid}.settings.hardware.build`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.servers.settings')
     const { t: tIndex } = useTranslation('admin.servers.index')
@@ -40,9 +51,18 @@ const ServerBuildSettingsCard = () => {
         memory: z.preprocess(Number, z.number().min(16)),
         disk: z.preprocess(Number, z.number().min(1)),
         addressIds: z.array(z.preprocess(Number, z.number())),
-        snapshotLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        backupLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        bandwidthLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
+        snapshotLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        backupLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        bandwidthLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
         bandwidthUsage: z.preprocess(Number, z.number().min(0)),
     })
 
@@ -55,15 +75,23 @@ const ServerBuildSettingsCard = () => {
             addressIds: pluckedAddressIds,
             snapshotLimit: server.limits.snapshots?.toString() ?? '',
             backupLimit: server.limits.backups?.toString() ?? '',
-            bandwidthLimit: server.limits.bandwidth ? (server.limits.bandwidth / 1048576).toString() : '',
+            bandwidthLimit: server.limits.bandwidth
+                ? (server.limits.bandwidth / 1048576).toString()
+                : '',
             bandwidthUsage: (server.usages.bandwidth / 1048576).toString(),
         },
     })
 
     const submit = async (_data: any) => {
-        const { memory, disk, snapshotLimit, backupLimit, bandwidthLimit, bandwidthUsage, ...data } = _data as z.infer<
-            typeof schema
-        >
+        const {
+            memory,
+            disk,
+            snapshotLimit,
+            backupLimit,
+            bandwidthLimit,
+            bandwidthUsage,
+            ...data
+        } = _data as z.infer<typeof schema>
         clearFlashes()
 
         try {
@@ -72,7 +100,8 @@ const ServerBuildSettingsCard = () => {
                 disk: disk * 1048576,
                 snapshotLimit: snapshotLimit !== '' ? snapshotLimit : null,
                 backupLimit: backupLimit !== '' ? backupLimit : null,
-                bandwidthLimit: bandwidthLimit !== '' ? bandwidthLimit * 1048576 : null,
+                bandwidthLimit:
+                    bandwidthLimit !== '' ? bandwidthLimit * 1048576 : null,
                 bandwidthUsage: bandwidthUsage * 1048576,
                 ...data,
             })
@@ -86,7 +115,8 @@ const ServerBuildSettingsCard = () => {
                 addressIds: data.addressIds.map(id => id.toString()),
                 snapshotLimit: snapshotLimit.toString() ?? '',
                 backupLimit: backupLimit.toString() ?? '',
-                bandwidthLimit: bandwidthLimit !== '' ? bandwidthLimit.toString() : '',
+                bandwidthLimit:
+                    bandwidthLimit !== '' ? bandwidthLimit.toString() : '',
                 bandwidthUsage: bandwidthUsage.toString(),
             })
         } catch (error) {
@@ -101,10 +131,18 @@ const ServerBuildSettingsCard = () => {
                     <FormCard.Body>
                         <FormCard.Title>{t('build.title')}</FormCard.Title>
                         <div className='space-y-3 mt-3'>
-                            <FlashMessageRender byKey={`admin.servers.${server.uuid}.settings.hardware.build`} />
+                            <FlashMessageRender
+                                byKey={`admin.servers.${server.uuid}.settings.hardware.build`}
+                            />
                             <TextInputForm name='cpu' label={tStrings('cpu')} />
-                            <TextInputForm name='memory' label={`${tStrings('memory')} (MiB)`} />
-                            <TextInputForm name='disk' label={`${tStrings('disk')} (MiB)`} />
+                            <TextInputForm
+                                name='memory'
+                                label={`${tStrings('memory')} (MiB)`}
+                            />
+                            <TextInputForm
+                                name='disk'
+                                label={`${tStrings('disk')} (MiB)`}
+                            />
                             <AddressesMultiSelectForm nodeId={server.nodeId} />
                             <TextInputForm
                                 name='snapshotLimit'
@@ -119,9 +157,15 @@ const ServerBuildSettingsCard = () => {
                             <TextInputForm
                                 name='bandwidthLimit'
                                 label={`${tIndex('bandwidth_limit')} (MiB)`}
-                                placeholder={tIndex('limit_placeholder') ?? 'Leave blank for no limit'}
+                                placeholder={
+                                    tIndex('limit_placeholder') ??
+                                    'Leave blank for no limit'
+                                }
                             />
-                            <TextInputForm name='bandwidthUsage' label={`${tIndex('bandwidth_usage')} (MiB)`} />
+                            <TextInputForm
+                                name='bandwidthUsage'
+                                label={`${tIndex('bandwidth_usage')} (MiB)`}
+                            />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>

@@ -1,9 +1,19 @@
-import ErrorMessage from '@/components/elements/ErrorMessage'
 import styled from '@emotion/styled'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { ComponentProps, FocusEvent, forwardRef, useEffect, useState } from 'react'
+import {
+    Textarea as MantineTextarea,
+    TextareaProps as MantineTextareaProps,
+} from '@mantine/core'
+import {
+    ComponentProps,
+    FocusEvent,
+    forwardRef,
+    useEffect,
+    useState,
+} from 'react'
 import tw from 'twin.macro'
-import { TextareaProps as MantineTextareaProps, Textarea as MantineTextarea } from '@mantine/core'
+
+import ErrorMessage from '@/components/elements/ErrorMessage'
 
 export interface TextareaProps extends MantineTextareaProps {}
 
@@ -21,8 +31,16 @@ const StyledTextarea = styled(MantineTextarea)`
     }
 `
 
-const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({ error, ...props }, ref) => {
-    return <StyledTextarea ref={ref} error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined} {...props} />
-})
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+    ({ error, ...props }, ref) => {
+        return (
+            <StyledTextarea
+                ref={ref}
+                error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
+                {...props}
+            />
+        )
+    }
+)
 
 export default Textarea

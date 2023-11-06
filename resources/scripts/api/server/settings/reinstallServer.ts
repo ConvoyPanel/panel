@@ -8,7 +8,11 @@ interface ReinstallServerParameters {
 
 const reinstallServer = (
     serverUuid: string,
-    { templateUuid, accountPassword, startOnCompletion }: ReinstallServerParameters
+    {
+        templateUuid,
+        accountPassword,
+        startOnCompletion,
+    }: ReinstallServerParameters
 ) => {
     return http.post(`/api/client/servers/${serverUuid}/settings/reinstall`, {
         template_uuid: templateUuid,

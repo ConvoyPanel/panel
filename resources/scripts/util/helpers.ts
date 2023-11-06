@@ -1,11 +1,17 @@
 import { Params } from 'react-router-dom'
+
 import { AddressType } from '@/api/server/getServer'
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
-export const randomInt = (low: number, high: number) => Math.floor(Math.random() * (high - low) + low)
+export const randomInt = (low: number, high: number) =>
+    Math.floor(Math.random() * (high - low) + low)
 
-export const getInitials = (str: string, splitBy: string = ' ', maxLength: number = 3) => {
+export const getInitials = (
+    str: string,
+    splitBy: string = ' ',
+    maxLength: number = 3
+) => {
     const words = str.toUpperCase().split(splitBy).slice(0, maxLength)
     const initials = words.map(word => word[0]).join('')
     return initials
@@ -29,16 +35,31 @@ export interface FormattedBytes {
     unit: Sizes
 }
 
-export type Sizes = 'B' | 'KiB' | 'MiB' | 'GiB' | 'TiB' | 'PiB' | 'EiB' | 'ZiB' | 'YiB'
+export type Sizes =
+    | 'B'
+    | 'KiB'
+    | 'MiB'
+    | 'GiB'
+    | 'TiB'
+    | 'PiB'
+    | 'EiB'
+    | 'ZiB'
+    | 'YiB'
 
-export function formatBytes(bytes: number, decimals = 2, customSize?: Sizes): FormattedBytes {
+export function formatBytes(
+    bytes: number,
+    decimals = 2,
+    customSize?: Sizes
+): FormattedBytes {
     if (bytes === 0) return { size: 0, unit: 'B' }
 
     const k = 1024
     const sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
     const dm = decimals < 0 ? 0 : decimals
 
-    const i = customSize ? sizes.indexOf(customSize) : Math.floor(Math.log(bytes) / Math.log(k))
+    const i = customSize
+        ? sizes.indexOf(customSize)
+        : Math.floor(Math.log(bytes) / Math.log(k))
     const size = parseFloat((bytes / Math.pow(k, i)).toFixed(dm))
 
     return {
@@ -107,19 +128,25 @@ export const bindUrlParams = (url: string, params: Params<string>) => {
     return url
 }
 
-export const countIPsInRange = (ipType: 'ipv4' | 'ipv6', startIP: string, endIP: string): number => {
+export const countIPsInRange = (
+    ipType: 'ipv4' | 'ipv6',
+    startIP: string,
+    endIP: string
+): number => {
     if (startIP === '' || endIP === '') return 0
 
     try {
         const ipToNumber = (ip: string): bigint => {
-            const parts = ipType === 'ipv4' ? ip.split('.').map(Number) : ip.split(':')
+            const parts =
+                ipType === 'ipv4' ? ip.split('.').map(Number) : ip.split(':')
             let number = BigInt(0)
             for (let i = 0; i < parts.length; i++) {
                 if (ipType === 'ipv4') {
                     number = (number << BigInt(8)) + BigInt(parts[i])
                 } else {
                     // @ts-expect-error
-                    number = (number << BigInt(16)) + BigInt(parseInt(parts[i], 16))
+                    number =
+                        (number << BigInt(16)) + BigInt(parseInt(parts[i], 16))
                 }
             }
             return number

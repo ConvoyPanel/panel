@@ -1,10 +1,12 @@
-import ServersTable from '@/components/admin/servers/ServersTable'
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import { useState } from 'react'
-import CreateServerModal from '@/components/admin/servers/CreateServerModal'
 import { useDebouncedValue } from '@mantine/hooks'
-import SearchBar from '@/components/admin/SearchBar'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import PageContentBlock from '@/components/elements/PageContentBlock'
+
+import SearchBar from '@/components/admin/SearchBar'
+import CreateServerModal from '@/components/admin/servers/CreateServerModal'
+import ServersTable from '@/components/admin/servers/ServersTable'
 
 const ServersContainer = () => {
     const [query, setQuery] = useState('')

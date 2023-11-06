@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+
+import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+
 import SelectForm from '@/components/elements/forms/SelectForm'
 
 interface Props {
@@ -14,7 +16,9 @@ const NodesSelectForm = ({ disabled }: Props) => {
     const [query, setQuery] = useState(nodeId)
 
     const [debouncedQuery] = useDebouncedValue(query, 200)
-    const { data, isValidating, isLoading } = useNodesSWR({ query: debouncedQuery })
+    const { data, isValidating, isLoading } = useNodesSWR({
+        query: debouncedQuery,
+    })
     const nodes =
         data?.items.map(node => ({
             value: node.id.toString(),

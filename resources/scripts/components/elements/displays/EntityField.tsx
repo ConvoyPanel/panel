@@ -11,16 +11,37 @@ interface Props {
     isLast?: boolean
 }
 
-const EntityField = ({ title, description, width, actions, isFirst, isLast }: Props) => {
+const EntityField = ({
+    title,
+    description,
+    width,
+    actions,
+    isFirst,
+    isLast,
+}: Props) => {
     const style = {
         flex: width ? `0 0 ${width}` : undefined,
     }
 
     return (
-        <div className={classNames('flex max-sm:pt-4 max-sm:border-t border-accent-200', !width ? 'flex-1' : null)} style={style}>
+        <div
+            className={classNames(
+                'flex max-sm:pt-4 max-sm:border-t border-accent-200',
+                !width ? 'flex-1' : null
+            )}
+            style={style}
+        >
             <div className='flex-grow'>
-                {title && <p className='text-sm text-foreground font-semibold truncate'>{title}</p>}
-                {description && <p className='text-sm text-foreground truncate'>{description}</p>}
+                {title && (
+                    <p className='text-sm text-foreground font-semibold truncate'>
+                        {title}
+                    </p>
+                )}
+                {description && (
+                    <p className='text-sm text-foreground truncate'>
+                        {description}
+                    </p>
+                )}
             </div>
             {isFirst || isLast ? (
                 <div

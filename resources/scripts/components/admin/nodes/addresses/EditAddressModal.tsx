@@ -1,18 +1,21 @@
-import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
-import { Address } from '@/api/server/getServer'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import Modal from '@/components/elements/Modal'
 import useFlash from '@/util/useFlash'
+import usePagination from '@/util/usePagination'
 import { FormikProvider, useFormik } from 'formik'
-import Radio from '@/components/elements/inputs/Radio'
-import RadioGroupFormik from '@/components/elements/formik/RadioGroupFormik'
-import ServersSelectFormik from '@/components/admin/nodes/addresses/ServersSelectFormik'
 import * as yup from 'yup'
+
 import createAddress from '@/api/admin/nodes/addresses/createAddress'
 import updateAddress from '@/api/admin/nodes/addresses/updateAddress'
-import usePagination from '@/util/usePagination'
+import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+import { Address } from '@/api/server/getServer'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import RadioGroupFormik from '@/components/elements/formik/RadioGroupFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
+import Radio from '@/components/elements/inputs/Radio'
+
+import ServersSelectFormik from '@/components/admin/nodes/addresses/ServersSelectFormik'
 
 interface Props {
     open: boolean
@@ -48,11 +51,15 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
             setSubmitting(true)
             try {
                 if (address) {
-                    const updatedAddress = await updateAddress(node.id, address.id, {
-                        ...values,
-                        serverId: parseInt(serverId as string),
-                        cidr: parseInt(cidr as string),
-                    })
+                    const updatedAddress = await updateAddress(
+                        node.id,
+                        address.id,
+                        {
+                            ...values,
+                            serverId: parseInt(serverId as string),
+                            cidr: parseInt(cidr as string),
+                        }
+                    )
 
                     mutate(data => {
                         if (!data) return data
@@ -87,7 +94,10 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
 
                 handleClose()
             } catch (error) {
-                clearAndAddHttpError({ key: 'admin:node:addresses.edit', error })
+                clearAndAddHttpError({
+                    key: 'admin:node:addresses.edit',
+                    error,
+                })
             }
 
             setSubmitting(false)
@@ -108,15 +118,33 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:node:addresses.edit'} />
-                        <TextInputFormik name='address' label='Address' placeholder='127.0.0.1' />
-                        <RadioGroupFormik name='type' orientation='vertical' spacing={6}>
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={'admin:node:addresses.edit'}
+                        />
+                        <TextInputFormik
+                            name='address'
+                            label='Address'
+                            placeholder='127.0.0.1'
+                        />
+                        <RadioGroupFormik
+                            name='type'
+                            orientation='vertical'
+                            spacing={6}
+                        >
                             <Radio value='ipv4' label='IPv4' />
                             <Radio value='ipv6' label='IPv6' />
                         </RadioGroupFormik>
-                        <TextInputFormik name='cidr' label='Cidr/Subnet mask' placeholder='24' />
+                        <TextInputFormik
+                            name='cidr'
+                            label='Cidr/Subnet mask'
+                            placeholder='24'
+                        />
                         <TextInputFormik name='gateway' label='Gateway' />
-                        <TextInputFormik name='macAddress' label='Mac Address (optional)' />
+                        <TextInputFormik
+                            name='macAddress'
+                            label='Mac Address (optional)'
+                        />
                         <ServersSelectFormik />
                     </Modal.Body>
                     <Modal.Actions>

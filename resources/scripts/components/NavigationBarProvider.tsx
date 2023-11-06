@@ -1,5 +1,9 @@
-import { NavigationBarContext, RouteDefinition } from '@/components/elements/navigation/NavigationBar'
 import { ReactNode, useState } from 'react'
+
+import {
+    NavigationBarContext,
+    RouteDefinition,
+} from '@/components/elements/navigation/NavigationBar'
 
 interface Props {
     children?: ReactNode
@@ -7,7 +11,7 @@ interface Props {
 
 const NavigationBarProvider = ({ children }: Props) => {
     const [routes, setRoutes] = useState<RouteDefinition[]>([])
-    const [breadcrumb, setBreadcrumb] = useState<string|null|undefined>()
+    const [breadcrumb, setBreadcrumb] = useState<string | null | undefined>()
 
     const value = {
         routes,
@@ -17,9 +21,7 @@ const NavigationBarProvider = ({ children }: Props) => {
     }
 
     return (
-        <NavigationBarContext.Provider
-            value={value}
-        >
+        <NavigationBarContext.Provider value={value}>
             {children}
         </NavigationBarContext.Provider>
     )

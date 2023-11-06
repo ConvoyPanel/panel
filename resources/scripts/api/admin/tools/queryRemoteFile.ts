@@ -12,7 +12,10 @@ const rawDataToFileMetadata = (rawData: any): FileMetadata => ({
     mimeType: rawData.mime_type,
 })
 
-const queryRemoteFile = async (nodeId: number, link: string): Promise<FileMetadata> => {
+const queryRemoteFile = async (
+    nodeId: number,
+    link: string
+): Promise<FileMetadata> => {
     const {
         data: { data },
     } = await http.get(`/api/admin/nodes/${nodeId}/tools/query-remote-file`, {

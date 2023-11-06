@@ -1,8 +1,12 @@
 import { AddressParameters } from '@/api/admin/nodes/addresses/createAddress'
-import { Address, rawDataToAddress } from '@/api/server/getServer'
 import http from '@/api/http'
+import { Address, rawDataToAddress } from '@/api/server/getServer'
 
-const updateAddress = async (nodeId: number, addressId: number, payload: AddressParameters): Promise<Address> => {
+const updateAddress = async (
+    nodeId: number,
+    addressId: number,
+    payload: AddressParameters
+): Promise<Address> => {
     const {
         data: { data },
     } = await http.put(`/api/admin/nodes/${nodeId}/addresses/${addressId}`, {

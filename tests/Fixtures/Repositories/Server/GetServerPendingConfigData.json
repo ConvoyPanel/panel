@@ -1,12 +1,18 @@
 {
     "data": [
         { "key": "serial0", "value": "socket" },
-        { "key": "ide0", "value": "local-lvm:vm-608782004-cloudinit,media=cdrom,size=4M" },
+        {
+            "key": "ide0",
+            "value": "local-lvm:vm-608782004-cloudinit,media=cdrom,size=4M"
+        },
         {
             "value": "# Owner\n\n**John Smith** (CONVOY ID: 239) \n<br>\njohn.smith@example.com\n<br>\n\n# Quick Actions\n\n<a href=\"https://google.com\">Manage Owner</a>\n<br>\n<a href=\"https://google.com\">Manage Server</a>\n\n<a href=\"https://convoypanel.com\"><img src=\"https://imgur.com/I7624db.png\" alt=\"Managed by Convoy watermark\" /></a>",
             "key": "description"
         },
-        { "value": "e01736a78043499b935d511fa9de3da4a4073e50", "key": "digest" },
+        {
+            "value": "e01736a78043499b935d511fa9de3da4a4073e50",
+            "key": "digest"
+        },
         { "value": 2001, "key": "memory" },
         { "key": "searchdomain", "value": "windows.com" },
         { "key": "bios", "value": "ovmf" },
@@ -21,7 +27,13 @@
         { "key": "net0", "value": "virtio=66:87:C3:0D:86:13,bridge=vmbr1" },
         { "value": "1.1.1.1 1.2.3.4", "key": "nameserver" },
         { "value": "creation-qemu=6.2.0,ctime=1661671707", "key": "meta" },
-        { "value": "local-lvm:vm-608782004-disk-0,discard=on,size=4200M,ssd=1", "key": "sata0" },
-        { "value": "uuid=11fe2c20-4b5e-48b5-bc59-83a7ce139fbd", "key": "smbios1" }
+        {
+            "value": "local-lvm:vm-608782004-disk-0,discard=on,size=4200M,ssd=1",
+            "key": "sata0"
+        },
+        {
+            "value": "uuid=11fe2c20-4b5e-48b5-bc59-83a7ce139fbd",
+            "key": "smbios1"
+        }
     ]
 }

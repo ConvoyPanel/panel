@@ -1,5 +1,8 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToAdminServer, AdminServerBuild } from '@/api/admin/servers/getServer'
+import {
+    AdminServerBuild,
+    rawDataToAdminServer,
+} from '@/api/admin/servers/getServer'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export type ServerInclude = 'user' | 'node'
 

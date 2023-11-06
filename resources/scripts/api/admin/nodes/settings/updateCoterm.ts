@@ -7,7 +7,10 @@ interface UpdateCotermParameters {
     isTlsEnabled: boolean
 }
 
-const updateCoterm = async (nodeId: number, { isEnabled, fqdn, port, isTlsEnabled }: UpdateCotermParameters) => {
+const updateCoterm = async (
+    nodeId: number,
+    { isEnabled, fqdn, port, isTlsEnabled }: UpdateCotermParameters
+) => {
     const {
         data: { data },
     } = await http.patch(`/api/admin/nodes/${nodeId}/settings/coterm`, {

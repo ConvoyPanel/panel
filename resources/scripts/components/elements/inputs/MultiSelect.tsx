@@ -1,10 +1,11 @@
+import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { MultiSelect as MantineMultiSelect } from '@mantine/core'
-import tw from 'twin.macro'
 import { ComponentProps, forwardRef } from 'react'
+import tw from 'twin.macro'
+
 import ErrorMessage from '@/components/elements/ErrorMessage'
 import LoadingDots from '@/components/elements/LoadingDots'
-import { css } from '@emotion/react'
 
 const StyledMultiSelect = styled(MantineMultiSelect)`
     & .mantine-MultiSelect-label {
@@ -37,7 +38,8 @@ const StyledMultiSelect = styled(MantineMultiSelect)`
             : null}
 `
 
-export interface MultiSelectProps extends ComponentProps<typeof StyledMultiSelect> {
+export interface MultiSelectProps
+    extends ComponentProps<typeof StyledMultiSelect> {
     loading?: boolean
 }
 

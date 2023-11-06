@@ -1,18 +1,25 @@
-import { useTranslation } from 'react-i18next'
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
-import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
 import usePagination from '@/util/usePagination'
-import { useState } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
-import useAddressPoolsSWR from '@/api/admin/addressPools/useAddressPoolsSWR'
-import Spinner from '@/components/elements/Spinner'
-import Pagination from '@/components/elements/Pagination'
-import SearchBar from '@/components/admin/SearchBar'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+
+import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
+import useAddressPoolsSWR from '@/api/admin/addressPools/useAddressPoolsSWR'
+
+import Menu from '@/components/elements/Menu'
+import PageContentBlock from '@/components/elements/PageContentBlock'
+import Pagination from '@/components/elements/Pagination'
+import Spinner from '@/components/elements/Spinner'
+import Table, {
+    Actions,
+    ColumnArray,
+    RowActionsProps,
+} from '@/components/elements/displays/Table'
+
+import SearchBar from '@/components/admin/SearchBar'
 import CreatePoolModal from '@/components/admin/ipam/CreatePoolModal'
 import DeletePoolModal from '@/components/admin/ipam/DeletePoolModal'
-import Menu from '@/components/elements/Menu'
 import EditPoolModal from '@/components/admin/ipam/EditPoolModal'
 
 const IpamContainer = () => {
@@ -32,7 +39,10 @@ const IpamContainer = () => {
             header: tStrings('name'),
             accessor: 'name',
             cell: ({ value, row }) => (
-                <Link to={`/admin/ipam/${row.id}`} className='link text-foreground'>
+                <Link
+                    to={`/admin/ipam/${row.id}`}
+                    className='link text-foreground'
+                >
                     {value}
                 </Link>
             ),
@@ -52,7 +62,9 @@ const IpamContainer = () => {
     const rowActions = ({ row: pool }: RowActionsProps<AddressPool>) => {
         return (
             <Actions>
-                <Menu.Item onClick={() => setPoolToEdit(pool)}>{tStrings('edit')}</Menu.Item>
+                <Menu.Item onClick={() => setPoolToEdit(pool)}>
+                    {tStrings('edit')}
+                </Menu.Item>
                 <Menu.Divider />
                 <Menu.Item color='red' onClick={() => setPoolToDelete(pool)}>
                     {tStrings('delete')}
@@ -64,9 +76,21 @@ const IpamContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <PageContentBlock title={tStrings('ipam') ?? ''}>
-                <CreatePoolModal open={isCreating} onClose={() => setIsCreating(false)} mutate={mutate} />
-                <DeletePoolModal pool={poolToDelete} onClose={() => setPoolToDelete(null)} mutate={mutate} />
-                <EditPoolModal pool={poolToEdit} onClose={() => setPoolToEdit(null)} mutate={mutate} />
+                <CreatePoolModal
+                    open={isCreating}
+                    onClose={() => setIsCreating(false)}
+                    mutate={mutate}
+                />
+                <DeletePoolModal
+                    pool={poolToDelete}
+                    onClose={() => setPoolToDelete(null)}
+                    mutate={mutate}
+                />
+                <EditPoolModal
+                    pool={poolToEdit}
+                    onClose={() => setPoolToEdit(null)}
+                    mutate={mutate}
+                />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}
@@ -77,7 +101,13 @@ const IpamContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table columns={columns} data={items} rowActions={rowActions} />}
+                        {({ items }) => (
+                            <Table
+                                columns={columns}
+                                data={items}
+                                rowActions={rowActions}
+                            />
+                        )}
                     </Pagination>
                 )}
             </PageContentBlock>

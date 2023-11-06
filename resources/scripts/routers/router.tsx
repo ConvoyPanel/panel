@@ -1,14 +1,16 @@
-import { FunctionComponent, lazy, LazyExoticComponent, ReactNode } from 'react'
-import Spinner from '@/components/elements/Spinner'
-import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
-import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
-import { NotFound } from '@/components/elements/ScreenBlock'
-import GuestRoutes from '@/routers/middleware/GuestRoutes'
-import NavigationBar from '@/components/elements/navigation/NavigationBar'
-import NavigationBarProvider from '@/components/NavigationBarProvider'
 import { routes as adminRoutes } from '@/routers/AdminDashboardRouter'
 import { routes as clientRoutes } from '@/routers/DashboardRouter'
 import { lazyLoad } from '@/routers/helpers'
+import AuthenticatedRoutes from '@/routers/middleware/AuthenticatedRoutes'
+import GuestRoutes from '@/routers/middleware/GuestRoutes'
+import { FunctionComponent, LazyExoticComponent, ReactNode, lazy } from 'react'
+import { Outlet, RouteObject, createBrowserRouter } from 'react-router-dom'
+
+import { NotFound } from '@/components/elements/ScreenBlock'
+import Spinner from '@/components/elements/Spinner'
+import NavigationBar from '@/components/elements/navigation/NavigationBar'
+
+import NavigationBarProvider from '@/components/NavigationBarProvider'
 
 export type Route = {
     handle?: Handle
@@ -33,7 +35,9 @@ const router = createBrowserRouter([
         children: [
             {
                 path: 'login',
-                element: lazyLoad(lazy(() => import('@/components/auth/LoginContainer'))),
+                element: lazyLoad(
+                    lazy(() => import('@/components/auth/LoginContainer'))
+                ),
             },
         ],
     },

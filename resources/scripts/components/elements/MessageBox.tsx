@@ -1,6 +1,6 @@
-import tw, { TwStyle } from 'twin.macro'
-import styled from '@emotion/styled'
 import { classNames } from '@/util/helpers'
+import styled from '@emotion/styled'
+import tw, { TwStyle } from 'twin.macro'
 
 export type FlashMessageType = 'success' | 'info' | 'warning' | 'error'
 
@@ -47,7 +47,11 @@ const Container = styled.div<{ $type?: FlashMessageType }>`
 `
 
 const MessageBox = ({ title, children, type, className }: Props) => (
-    <Container className={classNames('lg:inline-flex', className)} $type={type} role={'alert'}>
+    <Container
+        className={classNames('lg:inline-flex', className)}
+        $type={type}
+        role={'alert'}
+    >
         {title && (
             <span
                 className={`title flex rounded uppercase px-2 py-1 text-xs font-bold mr-3 leading-none ${getBackground(

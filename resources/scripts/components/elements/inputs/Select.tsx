@@ -1,11 +1,15 @@
-import styled from '@emotion/styled'
-import { Select as MantineSelect, SelectProps as MantineSelectProps } from '@mantine/core'
-import tw from 'twin.macro'
 import { css } from '@emotion/react'
-import LoadingDots from '@/components/elements/LoadingDots'
-import { ComponentProps, ComponentPropsWithoutRef, forwardRef } from 'react'
-import ErrorMessage from '@/components/elements/ErrorMessage'
+import styled from '@emotion/styled'
 import { CheckIcon } from '@heroicons/react/20/solid'
+import {
+    Select as MantineSelect,
+    SelectProps as MantineSelectProps,
+} from '@mantine/core'
+import { ComponentProps, ComponentPropsWithoutRef, forwardRef } from 'react'
+import tw from 'twin.macro'
+
+import ErrorMessage from '@/components/elements/ErrorMessage'
+import LoadingDots from '@/components/elements/LoadingDots'
 
 const StyledSelect = styled(MantineSelect)`
     & .mantine-Select-label {
@@ -66,22 +70,29 @@ const StyledSelectItem = styled.div`
     }
 `
 
-const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(({ label, className, ...props }, ref) => (
-    <StyledSelectItem ref={ref} {...props}>
-        <span>{label}</span>
-        <CheckIcon className='h-4 w-4 text-foreground select-item-icon' title='checked' />
-    </StyledSelectItem>
-))
+const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
+    ({ label, className, ...props }, ref) => (
+        <StyledSelectItem ref={ref} {...props}>
+            <span>{label}</span>
+            <CheckIcon
+                className='h-4 w-4 text-foreground select-item-icon'
+                title='checked'
+            />
+        </StyledSelectItem>
+    )
+)
 
-const Select = forwardRef<HTMLInputElement, SelectProps>(({ loading, nothingFound, error, ...props }, ref) => (
-    <StyledSelect
-        error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
-        nothingFound={loading ? 'Loading...' : nothingFound}
-        rightSection={loading && <LoadingDots size={4} />}
-        itemComponent={SelectItem}
-        ref={ref}
-        {...props}
-    />
-))
+const Select = forwardRef<HTMLInputElement, SelectProps>(
+    ({ loading, nothingFound, error, ...props }, ref) => (
+        <StyledSelect
+            error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
+            nothingFound={loading ? 'Loading...' : nothingFound}
+            rightSection={loading && <LoadingDots size={4} />}
+            itemComponent={SelectItem}
+            ref={ref}
+            {...props}
+        />
+    )
+)
 
 export default Select

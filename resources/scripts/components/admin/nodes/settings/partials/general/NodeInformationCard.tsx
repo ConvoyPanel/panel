@@ -1,21 +1,26 @@
-import { useFlashKey } from '@/util/useFlash'
 import { NodeContext } from '@/state/admin/node'
-import updateNode from '@/api/admin/nodes/updateNode'
-import FormCard from '@/components/elements/FormCard'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
-import Button from '@/components/elements/Button'
-import { z } from 'zod'
+import { useFlashKey } from '@/util/useFlash'
 import { hostname } from '@/util/validation'
-import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
+import { z } from 'zod'
+
+import updateNode from '@/api/admin/nodes/updateNode'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
 
 const NodeInformationCard = () => {
     const { data: node, mutate } = useNodeSWR()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.info`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.settings.general.info`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.settings')
     const { t: tIndex } = useTranslation('admin.nodes.index')
@@ -100,45 +105,90 @@ const NodeInformationCard = () => {
                     <FormCard.Body>
                         <FormCard.Title>{t('node_info.title')}</FormCard.Title>
                         <div className='space-y-3 mt-3'>
-                            <FlashMessageRender byKey={`admin.nodes.${node.id}.settings.general.info`} />
-                            <TextInputForm name='name' label={tStrings('display_name')} />
+                            <FlashMessageRender
+                                byKey={`admin.nodes.${node.id}.settings.general.info`}
+                            />
+                            <TextInputForm
+                                name='name'
+                                label={tStrings('display_name')}
+                            />
                             <LocationsSelectForm />
-                            <TextInputForm name='cluster' label={tIndex('pve_name')} />
-                            <TextInputForm name='fqdn' label={tStrings('fqdn')} />
-                            <TextInputForm name='port' label={tStrings('port')} />
+                            <TextInputForm
+                                name='cluster'
+                                label={tIndex('pve_name')}
+                            />
+                            <TextInputForm
+                                name='fqdn'
+                                label={tStrings('fqdn')}
+                            />
+                            <TextInputForm
+                                name='port'
+                                label={tStrings('port')}
+                            />
                             <div className='grid gap-3 grid-cols-2'>
                                 <TextInputForm
                                     name='tokenId'
                                     label={tIndex('token_id')}
-                                    placeholder={tIndex('override_creds') ?? 'Override credentials'}
+                                    placeholder={
+                                        tIndex('override_creds') ??
+                                        'Override credentials'
+                                    }
                                 />
                                 <TextInputForm
                                     name='secret'
                                     label={tIndex('secret')}
-                                    placeholder={tIndex('override_creds') ?? 'Override credentials'}
+                                    placeholder={
+                                        tIndex('override_creds') ??
+                                        'Override credentials'
+                                    }
                                 />
                             </div>
                             <div className='grid gap-3 grid-cols-2'>
-                                <TextInputForm name='memory' label={`${tStrings('memory')} (MiB)`} />
+                                <TextInputForm
+                                    name='memory'
+                                    label={`${tStrings('memory')} (MiB)`}
+                                />
                                 <TextInputForm
                                     name='memoryOverallocate'
-                                    label={`${tIndex('memory_overallocation')} (%)`}
+                                    label={`${tIndex(
+                                        'memory_overallocation'
+                                    )} (%)`}
                                 />
                             </div>
                             <div className='grid gap-3 grid-cols-2'>
-                                <TextInputForm name='disk' label={`${tStrings('disk')} (MiB)`} />
-                                <TextInputForm name='diskOverallocate' label={`${tIndex('disk_overallocation')} (%)`} />
+                                <TextInputForm
+                                    name='disk'
+                                    label={`${tStrings('disk')} (MiB)`}
+                                />
+                                <TextInputForm
+                                    name='diskOverallocate'
+                                    label={`${tIndex(
+                                        'disk_overallocation'
+                                    )} (%)`}
+                                />
                             </div>
                             <div className='grid gap-3 grid-cols-3'>
-                                <TextInputForm name='vmStorage' label={tIndex('vm_storage')} placeholder='local' />
+                                <TextInputForm
+                                    name='vmStorage'
+                                    label={tIndex('vm_storage')}
+                                    placeholder='local'
+                                />
                                 <TextInputForm
                                     name='backupStorage'
                                     label={tIndex('backup_storage')}
                                     placeholder='local'
                                 />
-                                <TextInputForm name='isoStorage' label={tIndex('iso_storage')} placeholder='local' />
+                                <TextInputForm
+                                    name='isoStorage'
+                                    label={tIndex('iso_storage')}
+                                    placeholder='local'
+                                />
                             </div>
-                            <TextInputForm name='network' label={tStrings('network')} placeholder='vmbr0' />
+                            <TextInputForm
+                                name='network'
+                                label={tStrings('network')}
+                                placeholder='vmbr0'
+                            />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>

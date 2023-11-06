@@ -1,27 +1,35 @@
-import deleteNode from '@/api/admin/nodes/deleteNode'
-import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
-import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
-import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
-import SearchBar from '@/components/admin/SearchBar'
-import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
-import Menu from '@/components/elements/Menu'
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import Pagination from '@/components/elements/Pagination'
-import Spinner from '@/components/elements/Spinner'
 import { bytesToString } from '@/util/helpers'
 import { useFlashKey } from '@/util/useFlash'
 import usePagination from '@/util/usePagination'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+
+import deleteNode from '@/api/admin/nodes/deleteNode'
+import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
+import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
+
+import Menu from '@/components/elements/Menu'
+import PageContentBlock from '@/components/elements/PageContentBlock'
+import Pagination from '@/components/elements/Pagination'
+import Spinner from '@/components/elements/Spinner'
+import Table, {
+    Actions,
+    ColumnArray,
+    RowActionsProps,
+} from '@/components/elements/displays/Table'
+
+import SearchBar from '@/components/admin/SearchBar'
+import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
 
 const NodesContainer = () => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.index')
     const [page, setPage] = usePagination()
     const [open, setOpen] = useState(false)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.nodes.index')
+    const { clearFlashes, clearAndAddHttpError } =
+        useFlashKey('admin.nodes.index')
 
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 200)
@@ -32,7 +40,10 @@ const NodesContainer = () => {
             accessor: 'name',
             header: tStrings('node'),
             cell: ({ value, row }) => (
-                <Link to={`/admin/nodes/${row.id}`} className='link text-foreground'>
+                <Link
+                    to={`/admin/nodes/${row.id}`}
+                    className='link text-foreground'
+                >
                     {value}
                 </Link>
             ),
@@ -69,8 +80,10 @@ const NodesContainer = () => {
                     mutateData =>
                         ({
                             ...mutateData,
-                            items: mutateData!.items.filter(n => n.id !== node.id),
-                        } as NodeResponse),
+                            items: mutateData!.items.filter(
+                                n => n.id !== node.id
+                            ),
+                        }) as NodeResponse,
                     false
                 )
             } catch (error) {
@@ -80,7 +93,11 @@ const NodesContainer = () => {
 
         return (
             <Actions>
-                <Menu.Item color='red' disabled={node.serversCount > 0} onClick={handleDelete}>
+                <Menu.Item
+                    color='red'
+                    disabled={node.serversCount > 0}
+                    onClick={handleDelete}
+                >
                     {tStrings('delete')}
                 </Menu.Item>
             </Actions>
@@ -89,7 +106,10 @@ const NodesContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <PageContentBlock title={tStrings('node_other') ?? 'Nodes'} showFlashKey='admin.nodes.index'>
+            <PageContentBlock
+                title={tStrings('node_other') ?? 'Nodes'}
+                showFlashKey='admin.nodes.index'
+            >
                 <CreateNodeModal open={open} onClose={() => setOpen(false)} />
                 <SearchBar
                     value={query}
@@ -101,7 +121,13 @@ const NodesContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table rowActions={rowActions} columns={columns} data={items} />}
+                        {({ items }) => (
+                            <Table
+                                rowActions={rowActions}
+                                columns={columns}
+                                data={items}
+                            />
+                        )}
                     </Pagination>
                 )}
             </PageContentBlock>

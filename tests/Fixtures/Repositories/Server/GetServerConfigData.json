@@ -1,24 +1,24 @@
 {
-  "data": {
-    "smbios1": "uuid=11fe2c20-4b5e-48b5-bc59-83a7ce139fbd",
-    "cores": 2,
-    "sata0": "local-lvm:vm-608782004-disk-0,discard=on,size=4712M,ssd=1",
-    "nameserver": "1.1.1.1 1.2.3.4",
-    "meta": "creation-qemu=6.2.0,ctime=1661671707",
-    "vga": "serial0",
-    "agent": "1,fstrim_cloned_disks=1",
-    "net0": "virtio=66:87:C3:0D:86:13,bridge=vmbr1",
-    "ipconfig0": "ip=1.1.1.2/24,gw=127.0.0.1",
-    "bios": "ovmf",
-    "searchdomain": "windows.com",
-    "cipassword": "**********",
-    "vmgenid": "bed22ac9-19ae-410d-bd8f-0002213d887b",
-    "name": "windows.com",
-    "boot": "order=sata0",
-    "ide0": "local-lvm:vm-608782004-cloudinit,media=cdrom,size=4M",
-    "description": "# Owner\n\n**John Smith** (CONVOY ID: 239) \n<br>\njohn.smith@example.com\n<br>\n\n# Quick Actions\n\n<a href=\"https://google.com\">Manage Owner</a>\n<br>\n<a href=\"https://google.com\">Manage Server</a>\n\n<a href=\"https://convoypanel.com\"><img src=\"https://imgur.com/I7624db.png\" alt=\"Managed by Convoy watermark\" /></a>",
-    "digest": "47fb9b586691ee1d97020370b9e7bfc8382a2db6",
-    "serial0": "socket",
-    "memory": 2000
-  }
+    "data": {
+        "smbios1": "uuid=11fe2c20-4b5e-48b5-bc59-83a7ce139fbd",
+        "cores": 2,
+        "sata0": "local-lvm:vm-608782004-disk-0,discard=on,size=4712M,ssd=1",
+        "nameserver": "1.1.1.1 1.2.3.4",
+        "meta": "creation-qemu=6.2.0,ctime=1661671707",
+        "vga": "serial0",
+        "agent": "1,fstrim_cloned_disks=1",
+        "net0": "virtio=66:87:C3:0D:86:13,bridge=vmbr1",
+        "ipconfig0": "ip=1.1.1.2/24,gw=127.0.0.1",
+        "bios": "ovmf",
+        "searchdomain": "windows.com",
+        "cipassword": "**********",
+        "vmgenid": "bed22ac9-19ae-410d-bd8f-0002213d887b",
+        "name": "windows.com",
+        "boot": "order=sata0",
+        "ide0": "local-lvm:vm-608782004-cloudinit,media=cdrom,size=4M",
+        "description": "# Owner\n\n**John Smith** (CONVOY ID: 239) \n<br>\njohn.smith@example.com\n<br>\n\n# Quick Actions\n\n<a href=\"https://google.com\">Manage Owner</a>\n<br>\n<a href=\"https://google.com\">Manage Server</a>\n\n<a href=\"https://convoypanel.com\"><img src=\"https://imgur.com/I7624db.png\" alt=\"Managed by Convoy watermark\" /></a>",
+        "digest": "47fb9b586691ee1d97020370b9e7bfc8382a2db6",
+        "serial0": "socket",
+        "memory": 2000
+    }
 }

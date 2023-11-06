@@ -1,5 +1,12 @@
 import styled from '@emotion/styled'
-import { Children, cloneElement, createContext, ReactElement, ReactNode, useMemo } from 'react'
+import {
+    Children,
+    ReactElement,
+    ReactNode,
+    cloneElement,
+    createContext,
+    useMemo,
+} from 'react'
 import tw from 'twin.macro'
 
 interface EntityContextInterface {
@@ -29,7 +36,11 @@ const Entity = ({ loading, children: _children, actions }: Props) => {
               const isFirst = idx === 0
               const isLast = idx === childrenCount - 1
 
-              return cloneElement(child, { isFirst, isLast, actions: isFirst || isLast ? actions : undefined })
+              return cloneElement(child, {
+                  isFirst,
+                  isLast,
+                  actions: isFirst || isLast ? actions : undefined,
+              })
           })
         : null
 

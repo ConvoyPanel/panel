@@ -1,8 +1,12 @@
-import { SelectProps } from '@/components/elements/inputs/Select'
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
-import MultiSelect, { MultiSelectProps } from '@/components/elements/inputs/MultiSelect'
 
-interface Props extends Omit<MultiSelectProps, 'error' | keyof ControllerRenderProps> {
+import MultiSelect, {
+    MultiSelectProps,
+} from '@/components/elements/inputs/MultiSelect'
+import { SelectProps } from '@/components/elements/inputs/Select'
+
+interface Props
+    extends Omit<MultiSelectProps, 'error' | keyof ControllerRenderProps> {
     control?: Control<any, any>
     name: string
 }

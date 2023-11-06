@@ -1,10 +1,10 @@
-import { TextInputProps } from '@mantine/core'
-
 import styled from '@emotion/styled'
+import { TextInputProps } from '@mantine/core'
 import { TextInput as MantineTextInput } from '@mantine/core'
-import tw from 'twin.macro'
-import ErrorMessage from '@/components/elements/ErrorMessage'
 import { forwardRef } from 'react'
+import tw from 'twin.macro'
+
+import ErrorMessage from '@/components/elements/ErrorMessage'
 
 const StyledTextInput = styled(MantineTextInput)`
     .mantine-TextInput-label {
@@ -20,8 +20,16 @@ const StyledTextInput = styled(MantineTextInput)`
     }
 `
 
-const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({ error, ...props }, ref) => {
-    return <StyledTextInput ref={ref} error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined} {...props} />
-})
+const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
+    ({ error, ...props }, ref) => {
+        return (
+            <StyledTextInput
+                ref={ref}
+                error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
+                {...props}
+            />
+        )
+    }
+)
 
 export default TextInput

@@ -1,4 +1,8 @@
-import http, { FractalResponseData, getPaginationSet, PaginatedResult } from '@/api/http'
+import http, {
+    FractalResponseData,
+    PaginatedResult,
+    getPaginationSet,
+} from '@/api/http'
 
 interface QueryParams {
     query?: string
@@ -28,26 +32,27 @@ export const rawDataToBackupObject = (data: FractalResponseData): Backup => ({
 
 export type BackupResponse = PaginatedResult<Backup> & { backupCount: number }
 
-export default (uuid: string, {
-    query,
-    perPage = 10,
-    ...params
-}: QueryParams): Promise<BackupResponse> => {
+export default (
+    uuid: string,
+    { query, perPage = 10, ...params }: QueryParams
+): Promise<BackupResponse> => {
     return new Promise((resolve, reject) => {
         http.get(`/api/client/servers/${uuid}/backups`, {
             params: {
-              'filter[name]': query,
-              per_page: perPage,
-              ...params,
+                'filter[name]': query,
+                'per_page': perPage,
+                ...params,
             },
         })
-        .then(({ data }) => resolve({
-            items: (data.data || []).map((datum: any) =>
-            rawDataToBackupObject(datum)
-          ),
-          pagination: getPaginationSet(data.meta.pagination),
-          backupCount: data.meta.backup_count
-        }))
-        .catch(reject)
+            .then(({ data }) =>
+                resolve({
+                    items: (data.data || []).map((datum: any) =>
+                        rawDataToBackupObject(datum)
+                    ),
+                    pagination: getPaginationSet(data.meta.pagination),
+                    backupCount: data.meta.backup_count,
+                })
+            )
+            .catch(reject)
     })
 }

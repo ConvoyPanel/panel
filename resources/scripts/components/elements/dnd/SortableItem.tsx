@@ -30,8 +30,22 @@ export type ChildrenPropsWithHandle = {
     listeners?: SyntheticListenerMap
 } & ChildrenPropsWithoutHandle
 
-const SortableItem = ({ id, handle, className, children, overrideZIndex }: PropsWithoutHandle | PropsWithHandle) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging, active } = useSortable({ id })
+const SortableItem = ({
+    id,
+    handle,
+    className,
+    children,
+    overrideZIndex,
+}: PropsWithoutHandle | PropsWithHandle) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+        active,
+    } = useSortable({ id })
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -43,7 +57,9 @@ const SortableItem = ({ id, handle, className, children, overrideZIndex }: Props
     return (
         <div
             ref={setNodeRef}
-            className={`${className} ${!handle && 'touch-none'} ${isDragging && !overrideZIndex ? 'z-[2000]' : ''}`}
+            className={`${className} ${!handle && 'touch-none'} ${
+                isDragging && !overrideZIndex ? 'z-[2000]' : ''
+            }`}
             style={style}
             {...rootAttributes}
         >

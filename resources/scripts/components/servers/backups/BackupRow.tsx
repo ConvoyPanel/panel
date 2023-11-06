@@ -1,23 +1,25 @@
-import { Backup, BackupResponse } from '@/api/server/backups/getBackups'
-import Display from '@/components/elements/displays/DisplayRow'
-import { bytesToString } from '@/util/helpers'
-import { Loader } from '@mantine/core'
-import { formatDistanceToNow } from 'date-fns'
 //@ts-ignore
 import Dots from '@/assets/images/icons/dots-vertical.svg'
-import { useState } from 'react'
-import Menu from '@/components/elements/Menu'
-import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
-import useFlash from '@/util/useFlash'
-import restoreBackup from '@/api/server/backups/restoreBackup'
 import { ServerContext } from '@/state/server'
+import { bytesToString } from '@/util/helpers'
+import useFlash from '@/util/useFlash'
 import useNotify from '@/util/useNotify'
-import deleteBackup from '@/api/server/backups/deleteBackup'
-import { KeyedMutator } from 'swr'
-import Modal from '@/components/elements/Modal'
+import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
+import { Loader } from '@mantine/core'
+import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import { KeyedMutator } from 'swr'
+
+import deleteBackup from '@/api/server/backups/deleteBackup'
+import { Backup, BackupResponse } from '@/api/server/backups/getBackups'
+import restoreBackup from '@/api/server/backups/restoreBackup'
+
 import DottedButton from '@/components/elements/DottedButton'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Menu from '@/components/elements/Menu'
+import Modal from '@/components/elements/Modal'
+import Display from '@/components/elements/displays/DisplayRow'
 
 interface Props {
     backup: Backup
@@ -39,7 +41,9 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
     const { t: tStrings } = useTranslation('strings')
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const server = ServerContext.useStoreState(state => state.server.data!)
-    const setServer = ServerContext.useStoreActions(actions => actions.server.setServer)
+    const setServer = ServerContext.useStoreActions(
+        actions => actions.server.setServer
+    )
     const notify = useNotify()
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [restoreModalOpen, setRestoreModalOpen] = useState(false)
@@ -78,7 +82,7 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                         ...data,
                         items: data!.items.filter(b => b.uuid !== backup.uuid),
                         backupCount: data!.backupCount - 1,
-                    } as BackupResponse),
+                    }) as BackupResponse,
                 false
             )
 
@@ -98,7 +102,10 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
 
     return (
         <>
-            <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(e => !e)}>
+            <Modal
+                open={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(e => !e)}
+            >
                 <Modal.Header>
                     <Modal.Title>
                         {t('delete_modal.title', {
@@ -107,16 +114,28 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Modal.Description>{t('delete_modal.description')}</Modal.Description>
+                    <Modal.Description>
+                        {t('delete_modal.description')}
+                    </Modal.Description>
 
-                    <FlashMessageRender byKey={`servers.backups.${backup.uuid}.delete`} className='py-5' />
+                    <FlashMessageRender
+                        byKey={`servers.backups.${backup.uuid}.delete`}
+                        className='py-5'
+                    />
                 </Modal.Body>
                 <Modal.Actions>
-                    <Modal.Action onClick={() => setDeleteModalOpen(e => !e)}>{tStrings('cancel')}</Modal.Action>
-                    <Modal.Action onClick={handleDelete}>{tStrings('delete')}</Modal.Action>
+                    <Modal.Action onClick={() => setDeleteModalOpen(e => !e)}>
+                        {tStrings('cancel')}
+                    </Modal.Action>
+                    <Modal.Action onClick={handleDelete}>
+                        {tStrings('delete')}
+                    </Modal.Action>
                 </Modal.Actions>
             </Modal>
-            <Modal open={restoreModalOpen} onClose={() => setRestoreModalOpen(e => !e)}>
+            <Modal
+                open={restoreModalOpen}
+                onClose={() => setRestoreModalOpen(e => !e)}
+            >
                 <Modal.Header>
                     <Modal.Title>
                         {t('restore_modal.title', {
@@ -125,13 +144,22 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Modal.Description>{t('restore_modal.description')}</Modal.Description>
+                    <Modal.Description>
+                        {t('restore_modal.description')}
+                    </Modal.Description>
 
-                    <FlashMessageRender byKey={`servers.backups.${backup.uuid}.restore`} className='py-5' />
+                    <FlashMessageRender
+                        byKey={`servers.backups.${backup.uuid}.restore`}
+                        className='py-5'
+                    />
                 </Modal.Body>
                 <Modal.Actions>
-                    <Modal.Action onClick={() => setRestoreModalOpen(e => !e)}>{tStrings('cancel')}</Modal.Action>
-                    <Modal.Action onClick={handleRestore}>{tStrings('restore')}</Modal.Action>
+                    <Modal.Action onClick={() => setRestoreModalOpen(e => !e)}>
+                        {tStrings('cancel')}
+                    </Modal.Action>
+                    <Modal.Action onClick={handleRestore}>
+                        {tStrings('restore')}
+                    </Modal.Action>
                 </Modal.Actions>
             </Modal>
             <Menu width={200}>
@@ -140,9 +168,14 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
                 </Menu.Target>
                 <Menu.Dropdown>
                     {backup.isSuccessful ? (
-                        <Menu.Item onClick={() => setRestoreModalOpen(true)}>{tStrings('restore')}</Menu.Item>
+                        <Menu.Item onClick={() => setRestoreModalOpen(true)}>
+                            {tStrings('restore')}
+                        </Menu.Item>
                     ) : null}
-                    <Menu.Item color='red' onClick={() => setDeleteModalOpen(true)}>
+                    <Menu.Item
+                        color='red'
+                        onClick={() => setDeleteModalOpen(true)}
+                    >
                         {tStrings('delete')}
                     </Menu.Item>
                 </Menu.Dropdown>
@@ -153,18 +186,31 @@ const Dropdown = ({ className, backup, swr: { mutate } }: DropdownProps) => {
 
 const BackupRow = ({ backup, swr: { mutate } }: Props) => {
     return (
-        <Display.Row key={backup.uuid} className='grid-cols-1 md:grid-cols-8 text-sm'>
+        <Display.Row
+            key={backup.uuid}
+            className='grid-cols-1 md:grid-cols-8 text-sm'
+        >
             <div className='flex justify-between items-center grow'>
                 <div className='flex items-center space-x-3'>
-                    <p className='overflow-hidden text-ellipsis font-semibold text-foreground'>{backup.name}</p>
+                    <p className='overflow-hidden text-ellipsis font-semibold text-foreground'>
+                        {backup.name}
+                    </p>
                     {!backup.completedAt ? (
                         <Loader size='xs' />
                     ) : (
-                        !backup.isSuccessful && <ExclamationCircleIcon className='h-5 w-5 text-error' />
+                        !backup.isSuccessful && (
+                            <ExclamationCircleIcon className='h-5 w-5 text-error' />
+                        )
                     )}
                 </div>
 
-                {backup.completedAt && <Dropdown swr={{ mutate }} backup={backup} className='md:hidden' />}
+                {backup.completedAt && (
+                    <Dropdown
+                        swr={{ mutate }}
+                        backup={backup}
+                        className='md:hidden'
+                    />
+                )}
             </div>
             <div>{bytesToString(backup.size)}</div>
             <div className='flex justify-between items-center md:col-span-2'>
@@ -175,7 +221,13 @@ const BackupRow = ({ backup, swr: { mutate } }: Props) => {
                     })}
                 </p>
 
-                {backup.completedAt && <Dropdown swr={{ mutate }} backup={backup} className='hidden md:block' />}
+                {backup.completedAt && (
+                    <Dropdown
+                        swr={{ mutate }}
+                        backup={backup}
+                        className='hidden md:block'
+                    />
+                )}
             </div>
         </Display.Row>
     )

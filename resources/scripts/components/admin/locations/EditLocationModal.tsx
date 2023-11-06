@@ -1,17 +1,19 @@
-import { Location, LocationResponse } from '@/api/admin/locations/getLocations'
-import updateLocation from '@/api/admin/locations/updateLocation'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import Modal from '@/components/elements/Modal'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import TextareaFormik from '@/components/elements/formik/TextareaFormik'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
-import TextareaForm from '@/components/elements/forms/TextareaForm'
 import { useFlashKey } from '@/util/useFlash'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { KeyedMutator } from 'swr'
 import { z } from 'zod'
+
+import { Location, LocationResponse } from '@/api/admin/locations/getLocations'
+import updateLocation from '@/api/admin/locations/updateLocation'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
+import TextareaFormik from '@/components/elements/formik/TextareaFormik'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+import TextareaForm from '@/components/elements/forms/TextareaForm'
 
 interface Props {
     location: Location
@@ -21,7 +23,9 @@ interface Props {
 }
 
 const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.locations.${location.id}.edit`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.locations.${location.id}.edit`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.locations')
 
@@ -42,14 +46,20 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
         clearFlashes()
 
         try {
-            const updatedLocation = await updateLocation(location.id, data.shortCode, data.description)
+            const updatedLocation = await updateLocation(
+                location.id,
+                data.shortCode,
+                data.description
+            )
 
             mutate(data => {
                 if (!data) return data
 
                 return {
                     ...data,
-                    items: data.items.map(l => (l.id === location.id ? updatedLocation : l)),
+                    items: data.items.map(l =>
+                        l.id === location.id ? updatedLocation : l
+                    ),
                 }
             }, false)
 
@@ -81,15 +91,27 @@ const EditLocationModal = ({ location, open, onClose, mutate }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.locations.${location.id}.edit`} />
-                        <TextInputForm name='shortCode' label={t('short_code')} />
-                        <TextareaForm name='description' label={tStrings('description')} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={`admin.locations.${location.id}.edit`}
+                        />
+                        <TextInputForm
+                            name='shortCode'
+                            label={t('short_code')}
+                        />
+                        <TextareaForm
+                            name='description'
+                            label={tStrings('description')}
+                        />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('save')}
                         </Modal.Action>
                     </Modal.Actions>

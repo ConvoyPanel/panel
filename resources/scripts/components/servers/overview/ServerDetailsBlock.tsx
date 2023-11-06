@@ -1,14 +1,20 @@
 import { ServerContext } from '@/state/server'
-import { capitalize, convertTimeToSmallest, formatBytes, Sizes } from '@/util/helpers'
+import { useChartTickLabel } from '@/util/chart'
+import {
+    Sizes,
+    capitalize,
+    convertTimeToSmallest,
+    formatBytes,
+} from '@/util/helpers'
 import useNotify from '@/util/useNotify'
 import styled from '@emotion/styled'
 import { Badge, RingProgress, Skeleton } from '@mantine/core'
 import { useEffect, useMemo, useRef } from 'react'
-import tw from 'twin.macro'
-import Card from '@/components/elements/Card'
 import { Line } from 'react-chartjs-2'
-import { useChartTickLabel } from '@/util/chart'
 import { useTranslation } from 'react-i18next'
+import tw from 'twin.macro'
+
+import Card from '@/components/elements/Card'
 
 export const StatRow = styled.div`
     ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
@@ -47,7 +53,9 @@ const ServerDetailsBlock = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const server = ServerContext.useStoreState(state => state.server.data!)
     const status = ServerContext.useStoreState(state => state.status.data)
-    const getStatus = ServerContext.useStoreActions(actions => actions.status.getStatus)
+    const getStatus = ServerContext.useStoreActions(
+        actions => actions.status.getStatus
+    )
     const isUpdating = useRef(true)
     const notify = useNotify()
 
@@ -89,22 +97,38 @@ const ServerDetailsBlock = () => {
     const uptime = convertTimeToSmallest(status?.uptime || 0)
 
     const bandwidth = useMemo(() => {
-        const total = server.limits.bandwidth ? formatBytes(server.limits.bandwidth) : undefined
+        const total = server.limits.bandwidth
+            ? formatBytes(server.limits.bandwidth)
+            : undefined
         const percentage = server.limits.bandwidth
-            ? Math.floor((server.usages.bandwidth / server.limits.bandwidth) * 10000) / 100
+            ? Math.floor(
+                  (server.usages.bandwidth / server.limits.bandwidth) * 10000
+              ) / 100
             : 0
-        const used = formatBytes(server.usages.bandwidth, undefined, total?.unit ? total.unit : undefined)
+        const used = formatBytes(
+            server.usages.bandwidth,
+            undefined,
+            total?.unit ? total.unit : undefined
+        )
 
         return { used, total, percentage }
     }, [server])
 
     const cpuGraph = useChartTickLabel('CPU', 100, '%', 2)
-    const memoryGraph = useChartTickLabel('Memory', memory.total.size, memory.total.unit, 2)
+    const memoryGraph = useChartTickLabel(
+        'Memory',
+        memory.total.size,
+        memory.total.unit,
+        2
+    )
 
     useEffect(() => {
         if (status) {
             cpuGraph.push(Math.floor(status.cpuUsed * 10000) / 100)
-            memoryGraph.push(formatBytes(status.memoryUsed, 2, memory.total.unit as Sizes).size)
+            memoryGraph.push(
+                formatBytes(status.memoryUsed, 2, memory.total.unit as Sizes)
+                    .size
+            )
         }
     }, [status])
 
@@ -120,11 +144,15 @@ const ServerDetailsBlock = () => {
                             <div className='grid place-items-center h-full'>
                                 <div
                                     className={`w-3 h-3 rounded-full transition-colors ${
-                                        status.state === 'running' ? 'bg-green-500' : 'bg-red-500'
+                                        status.state === 'running'
+                                            ? 'bg-green-500'
+                                            : 'bg-red-500'
                                     }`}
                                 ></div>
                             </div>
-                            <p className='text-2xl font-semibold text-foreground'>{t(`states.${status.state}`)}</p>
+                            <p className='text-2xl font-semibold text-foreground'>
+                                {t(`states.${status.state}`)}
+                            </p>
                         </div>
                     </div>
                     <div>
@@ -145,8 +173,12 @@ const ServerDetailsBlock = () => {
                     <div>
                         <p>{t('uptime')}</p>
                         <div className='flex space-x-2 items-end mt-1'>
-                            <p className='text-2xl font-semibold text-foreground'>{Math.floor(uptime.time)}</p>
-                            <p className='text-sm font-semibold description mb-[0.3rem]'>{uptime.unit}</p>
+                            <p className='text-2xl font-semibold text-foreground'>
+                                {Math.floor(uptime.time)}
+                            </p>
+                            <p className='text-sm font-semibold description mb-[0.3rem]'>
+                                {uptime.unit}
+                            </p>
                         </div>
                     </div>
                 </StatRow>
@@ -165,14 +197,25 @@ const ServerDetailsBlock = () => {
                         sections={[
                             {
                                 value: bandwidth.percentage,
-                                color: bandwidth.percentage < 100 ? 'green' : 'yellow',
+                                color:
+                                    bandwidth.percentage < 100
+                                        ? 'green'
+                                        : 'yellow',
                             },
                         ]}
                     />
                 </div>
-                <Badge className='!normal-case' size='lg' color='gray' variant='outline'>
-                    {bandwidth.used.size} {bandwidth.total ? '' : bandwidth.used.unit} /{' '}
-                    {bandwidth.total ? `${bandwidth.total.size} ${bandwidth.total.unit}` : tStrings('unlimited')}
+                <Badge
+                    className='!normal-case'
+                    size='lg'
+                    color='gray'
+                    variant='outline'
+                >
+                    {bandwidth.used.size}{' '}
+                    {bandwidth.total ? '' : bandwidth.used.unit} /{' '}
+                    {bandwidth.total
+                        ? `${bandwidth.total.size} ${bandwidth.total.unit}`
+                        : tStrings('unlimited')}
                 </Badge>
             </Card>
 

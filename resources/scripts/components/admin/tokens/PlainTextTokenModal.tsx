@@ -1,9 +1,11 @@
-import Modal from '@/components/elements/Modal'
-import { FormikProvider } from 'formik'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import { Code } from '@mantine/core'
+import { FormikProvider } from 'formik'
+
 import { Token } from '@/api/admin/tokens/getTokens'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
 interface Props {
     value: Token | null
@@ -19,8 +21,9 @@ const PlainTextTokenModal = ({ value, onClose }: Props) => {
 
             <Modal.Body>
                 <Modal.Description>
-                    Here is your newly created API token. Please take note of the token's value as this is the only and
-                    last time you will see it.
+                    Here is your newly created API token. Please take note of
+                    the token's value as this is the only and last time you will
+                    see it.
                 </Modal.Description>
 
                 <Code className={'!mt-3'} block color={'blue'}>

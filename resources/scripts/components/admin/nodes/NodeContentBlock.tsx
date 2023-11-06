@@ -1,5 +1,8 @@
-import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
 import { NodeContext } from '@/state/admin/node'
+
+import PageContentBlock, {
+    PageContentBlockProps,
+} from '@/components/elements/PageContentBlock'
 
 interface Props extends PageContentBlockProps {
     title: string

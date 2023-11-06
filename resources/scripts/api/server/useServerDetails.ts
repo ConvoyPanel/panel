@@ -1,7 +1,8 @@
 import { ServerContext } from '@/state/server'
-import { ServerState } from '@/api/server/getState'
 import useSWR from 'swr'
+
 import http from '@/api/http'
+import { ServerState } from '@/api/server/getState'
 
 export interface BaseDisk {
     interface: string

@@ -33,7 +33,9 @@ export const rawDataToTemplate = (data: any): Template => ({
 const getTemplateGroups = async (serverUuid: string) => {
     const {
         data: { data },
-    } = await http.get(`/api/client/servers/${serverUuid}/settings/template-groups`)
+    } = await http.get(
+        `/api/client/servers/${serverUuid}/settings/template-groups`
+    )
 
     return data.map(rawDataToTemplateGroup)
 }

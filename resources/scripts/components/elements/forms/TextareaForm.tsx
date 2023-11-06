@@ -1,7 +1,9 @@
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
+
 import Textarea, { TextareaProps } from '@/components/elements/inputs/Textarea'
 
-interface Props extends Omit<TextareaProps, 'error' | keyof ControllerRenderProps> {
+interface Props
+    extends Omit<TextareaProps, 'error' | keyof ControllerRenderProps> {
     control?: Control<any, any>
     name: string
 }

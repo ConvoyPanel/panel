@@ -1,31 +1,38 @@
+import { ServerContext } from '@/state/server'
+import useFlash, { useFlashKey } from '@/util/useFlash'
+import useNotify from '@/util/useNotify'
+import { ipAddress } from '@/util/validation'
+import { TrashIcon } from '@heroicons/react/20/solid'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FieldArray, FormikProvider, useFormik } from 'formik'
+import { useEffect } from 'react'
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
+import * as yup from 'yup'
+import { z } from 'zod'
+
 import getNetwork from '@/api/server/settings/getNetwork'
 import updateNetwork from '@/api/server/settings/updateNetwork'
+
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import { ServerContext } from '@/state/server'
-import useFlash, { useFlashKey } from '@/util/useFlash'
-import useNotify from '@/util/useNotify'
-import { TrashIcon } from '@heroicons/react/20/solid'
-import { FieldArray, FormikProvider, useFormik } from 'formik'
-import useSWR from 'swr'
-import * as yup from 'yup'
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { ipAddress } from '@/util/validation'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 const NameserversCard = () => {
     const { t: tStrings } = useTranslation('strings')
     const server = ServerContext.useStoreState(state => state.server.data!)
 
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`servers.${server.uuid}.settings.network.nameservers`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `servers.${server.uuid}.settings.network.nameservers`
+    )
 
-    const { data, mutate } = useSWR(['server:settings:hardware', server.uuid], () => getNetwork(server.uuid))
+    const { data, mutate } = useSWR(
+        ['server:settings:hardware', server.uuid],
+        () => getNetwork(server.uuid)
+    )
 
     const schema = z.object({
         nameservers: z
@@ -80,20 +87,30 @@ const NameserversCard = () => {
                 <FormProvider {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
                         <FormCard.Body>
-                            <FormCard.Title>{tStrings('nameserver', { count: 2 })}</FormCard.Title>
+                            <FormCard.Title>
+                                {tStrings('nameserver', { count: 2 })}
+                            </FormCard.Title>
                             <div className='space-y-3 mt-3'>
-                                <FlashMessageRender byKey={`servers.${server.uuid}.settings.network.nameservers`} />
+                                <FlashMessageRender
+                                    byKey={`servers.${server.uuid}.settings.network.nameservers`}
+                                />
                                 <div className='flex flex-col space-y-3'>
                                     {fields.map((field, index) => (
                                         <TextInputForm
                                             key={field.id}
-                                            disabled={form.formState.isSubmitting}
+                                            disabled={
+                                                form.formState.isSubmitting
+                                            }
                                             name={`nameservers.${index}.value`}
-                                            label={`${tStrings('nameserver', { count: 1 })} ${index + 1}`}
+                                            label={`${tStrings('nameserver', {
+                                                count: 1,
+                                            })} ${index + 1}`}
                                             rightSection={
                                                 <button
                                                     type='button'
-                                                    onClick={() => remove(index)}
+                                                    onClick={() =>
+                                                        remove(index)
+                                                    }
                                                     className='bg-transparent'
                                                 >
                                                     <TrashIcon className='text-accent-400 w-4 h-4' />
@@ -102,7 +119,8 @@ const NameserversCard = () => {
                                         />
                                     ))}
 
-                                    {form.getValues().nameservers.length < 2 && (
+                                    {form.getValues().nameservers.length <
+                                        2 && (
                                         <Button
                                             type='button'
                                             onClick={() =>

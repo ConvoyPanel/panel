@@ -22,9 +22,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
+import {
+    completeNavigationProgress,
+    resetNavigationProgress,
+    startNavigationProgress,
+} from '@mantine/nprogress'
 import axios, { AxiosInstance } from 'axios'
-import { startNavigationProgress, completeNavigationProgress, resetNavigationProgress } from '@mantine/nprogress'
 
 const http: AxiosInstance = axios.create({
     withCredentials: true,
@@ -140,10 +143,15 @@ export function getPaginationSet(data: any): PaginationDataSet {
 
 type QueryBuilderFilterValue = string | number | boolean | null
 
-export interface QueryBuilderParams<FilterKeys extends string = string, SortKeys extends string = string> {
+export interface QueryBuilderParams<
+    FilterKeys extends string = string,
+    SortKeys extends string = string,
+> {
     page?: number
     filters?: {
-        [K in FilterKeys]?: QueryBuilderFilterValue | Readonly<QueryBuilderFilterValue[]>
+        [K in FilterKeys]?:
+            | QueryBuilderFilterValue
+            | Readonly<QueryBuilderFilterValue[]>
     }
     sorts?: {
         [K in SortKeys]?: -1 | 0 | 1 | 'asc' | 'desc' | null
@@ -155,14 +163,21 @@ export interface QueryBuilderParams<FilterKeys extends string = string, SortKeys
  * for the Laravel Query Builder package automatically. This will apply sorts and
  * filters deterministically based on the provided values.
  */
-export const withQueryBuilderParams = (data?: QueryBuilderParams): Record<string, unknown> => {
+export const withQueryBuilderParams = (
+    data?: QueryBuilderParams
+): Record<string, unknown> => {
     if (!data) return {}
 
-    const filters = Object.keys(data.filters || {}).reduce((obj, key) => {
-        const value = data.filters?.[key]
+    const filters = Object.keys(data.filters || {}).reduce(
+        (obj, key) => {
+            const value = data.filters?.[key]
 
-        return !value || value === '' ? obj : { ...obj, [`filter[${key}]`]: value }
-    }, {} as NonNullable<QueryBuilderParams['filters']>)
+            return !value || value === ''
+                ? obj
+                : { ...obj, [`filter[${key}]`]: value }
+        },
+        {} as NonNullable<QueryBuilderParams['filters']>
+    )
 
     const sorts = Object.keys(data.sorts || {}).reduce((arr, key) => {
         const value = data.sorts?.[key]

@@ -1,16 +1,21 @@
-import { Template, TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
-import createTemplate from '@/api/admin/nodes/templateGroups/templates/createTemplate'
-import updateTemplate from '@/api/admin/nodes/templateGroups/templates/updateTemplate'
-import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import Modal from '@/components/elements/Modal'
 import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
+
+import {
+    Template,
+    TemplateGroup,
+} from '@/api/admin/nodes/templateGroups/getTemplateGroups'
+import createTemplate from '@/api/admin/nodes/templateGroups/templates/createTemplate'
+import updateTemplate from '@/api/admin/nodes/templateGroups/templates/updateTemplate'
+import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
 interface Props {
     open: boolean
@@ -32,7 +37,10 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
             hidden: template?.hidden ?? false,
         },
         validationSchema: yup.object({
-            name: yup.string().required('Specify a name').max(40, 'Please limit up to 40 characters'),
+            name: yup
+                .string()
+                .required('Specify a name')
+                .max(40, 'Please limit up to 40 characters'),
             vmid: yup
                 .number()
                 .required('Specify a VMID')
@@ -60,17 +68,19 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
                                 if (oldGroup.uuid === group.uuid) {
                                     return {
                                         ...oldGroup,
-                                        templates: oldGroup.templates!.map(t => {
-                                            if (t.uuid === template.uuid) {
-                                                return {
-                                                    ...t,
-                                                    ...values,
-                                                    vmid: vmid as number,
+                                        templates: oldGroup.templates!.map(
+                                            t => {
+                                                if (t.uuid === template.uuid) {
+                                                    return {
+                                                        ...t,
+                                                        ...values,
+                                                        vmid: vmid as number,
+                                                    }
                                                 }
-                                            }
 
-                                            return t
-                                        }),
+                                                return t
+                                            }
+                                        ),
                                     }
                                 }
 
@@ -92,7 +102,10 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
                                 if (oldGroup.uuid === group.uuid) {
                                     return {
                                         ...oldGroup,
-                                        templates: [...(oldGroup.templates ?? []), template],
+                                        templates: [
+                                            ...(oldGroup.templates ?? []),
+                                            template,
+                                        ],
                                     }
                                 }
 
@@ -102,7 +115,10 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
                     )
                 }
             } catch (error) {
-                clearAndAddHttpError({ key: 'admin:node:template-group:templates.edit', error })
+                clearAndAddHttpError({
+                    key: 'admin:node:template-group:templates.edit',
+                    error,
+                })
             }
 
             setSubmitting(false)
@@ -123,10 +139,17 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
             <FormikProvider value={form}>
                 <form onSubmit={form.handleSubmit}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin:node:template-group:templates.edit'} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={'admin:node:template-group:templates.edit'}
+                        />
                         <TextInputFormik name='name' label='Display Name' />
                         <TextInputFormik name='vmid' label='VMID' />
-                        <CheckboxFormik className='mt-3' name='hidden' label='Hidden' />
+                        <CheckboxFormik
+                            className='mt-3'
+                            name='hidden'
+                            label='Hidden'
+                        />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

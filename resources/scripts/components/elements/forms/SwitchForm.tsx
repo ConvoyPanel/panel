@@ -1,7 +1,9 @@
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
+
 import Switch, { SwitchProps } from '@/components/elements/inputs/Switch'
 
-interface Props extends Omit<SwitchProps, 'error' | keyof ControllerRenderProps> {
+interface Props
+    extends Omit<SwitchProps, 'error' | keyof ControllerRenderProps> {
     control?: Control<any, any>
     name: string
 }
@@ -15,7 +17,9 @@ const SwitchForm = ({ control, ...props }: Props) => {
         control: control,
     })
 
-    return <Switch checked={value} {...field} {...props} error={error?.message} />
+    return (
+        <Switch checked={value} {...field} {...props} error={error?.message} />
+    )
 }
 
 export default SwitchForm

@@ -1,10 +1,12 @@
-import getUser from '@/api/admin/users/getUser'
-import useUserSWR, { getKey } from '@/api/admin/users/useUserSWR'
-import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 import { lazyLoad, query } from '@/routers/helpers'
+import { Route } from '@/routers/router'
 import { lazy, useContext, useEffect } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
-import { Route } from '@/routers/router'
+
+import getUser from '@/api/admin/users/getUser'
+import useUserSWR, { getKey } from '@/api/admin/users/useUserSWR'
+
+import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 export const routes: Route[] = [
     {
@@ -12,30 +14,54 @@ export const routes: Route[] = [
         children: [
             {
                 index: true,
-                element: lazyLoad(lazy(() => import('@/components/admin/users/UsersContainer'))),
+                element: lazyLoad(
+                    lazy(
+                        () => import('@/components/admin/users/UsersContainer')
+                    )
+                ),
             },
             {
                 path: ':id',
                 element: lazyLoad(lazy(() => import('./AdminUserRouter'))),
-                loader: ({ params }) => query(getKey(parseInt(params.id!)), () => getUser(parseInt(params.id!))),
+                loader: ({ params }) =>
+                    query(getKey(parseInt(params.id!)), () =>
+                        getUser(parseInt(params.id!))
+                    ),
                 children: [
                     {
                         path: 'settings',
                         element: lazyLoad(
-                            lazy(() => import('@/components/admin/users/settings/UserSettingsContainer'))
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/users/settings/UserSettingsContainer'
+                                    )
+                            )
                         ),
                         children: [
                             {
                                 path: 'general',
                                 element: lazyLoad(
-                                    lazy(() => import('@/components/admin/users/settings/GeneralContainer'))
+                                    lazy(
+                                        () =>
+                                            import(
+                                                '@/components/admin/users/settings/GeneralContainer'
+                                            )
+                                    )
                                 ),
                             },
                         ],
                     },
                     {
                         path: 'servers',
-                        element: lazyLoad(lazy(() => import('@/components/admin/users/servers/UserServersContainer'))),
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/users/servers/UserServersContainer'
+                                    )
+                            )
+                        ),
                     },
                 ],
             },

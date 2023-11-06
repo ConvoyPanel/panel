@@ -1,7 +1,13 @@
 import { ISO, rawDataToISO } from '@/api/admin/nodes/isos/getIsos'
 import http from '@/api/http'
 
-export type ChecksumAlgorithm = 'md5' | 'sha1' | 'sha224' | 'sha256' | 'sha384' | 'sha512'
+export type ChecksumAlgorithm =
+    | 'md5'
+    | 'sha1'
+    | 'sha224'
+    | 'sha256'
+    | 'sha384'
+    | 'sha512'
 
 interface CreateIsoParameters {
     shouldDownload: boolean
@@ -15,7 +21,13 @@ interface CreateIsoParameters {
 
 const createIso = async (
     nodeId: number,
-    { shouldDownload, fileName, checksumAlgorithm, checksum, ...data }: CreateIsoParameters
+    {
+        shouldDownload,
+        fileName,
+        checksumAlgorithm,
+        checksum,
+        ...data
+    }: CreateIsoParameters
 ): Promise<ISO> => {
     const {
         data: { data: responseData },

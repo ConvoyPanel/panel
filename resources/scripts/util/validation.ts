@@ -1,5 +1,5 @@
 import { t } from 'i18next'
-import { ZodString, z, ZodNumber } from 'zod'
+import { ZodNumber, ZodString, z } from 'zod'
 
 export const hostname = (string?: ZodString) =>
     (string ?? z.string()).regex(
@@ -13,19 +13,27 @@ export const hostname = (string?: ZodString) =>
     )
 
 export const englishKeyboardCharacters = (string?: ZodString) =>
-    (string ?? z.string()).regex(/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;':",.\/<>?\\ ]*$/, {
-        message: t('errors.invalid_string.english_keyboard_characters', {
-            ns: 'zod',
-            validation: t('english_keyboard_characters', { ns: 'strings' }).toLowerCase(),
-        })!,
-    })
+    (string ?? z.string()).regex(
+        /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;':",.\/<>?\\ ]*$/,
+        {
+            message: t('errors.invalid_string.english_keyboard_characters', {
+                ns: 'zod',
+                validation: t('english_keyboard_characters', {
+                    ns: 'strings',
+                }).toLowerCase(),
+            })!,
+        }
+    )
 
 export const password = (string?: ZodString) =>
-    (string ?? z.string()).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/, {
-        message: t('errors.invalid_string.password', {
-            ns: 'zod',
-        })!,
-    })
+    (string ?? z.string()).regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+        {
+            message: t('errors.invalid_string.password', {
+                ns: 'zod',
+            })!,
+        }
+    )
 
 export const ipAddress = (string?: ZodString) =>
     (string ?? z.string()).regex(
@@ -38,15 +46,14 @@ export const ipAddress = (string?: ZodString) =>
     )
 
 export const macAddress = (string?: ZodString) =>
-    (string ?? z.string()).regex(
-        /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
-        {
-            message: t('errors.invalid_string.mac_address', {
-                ns: 'zod',
-            })!,
-        }
-    )
+    (string ?? z.string()).regex(/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, {
+        message: t('errors.invalid_string.mac_address', {
+            ns: 'zod',
+        })!,
+    })
 
-export const port = (number?: ZodNumber) => (number ?? z.number()).int().min(1).max(65535)
+export const port = (number?: ZodNumber) =>
+    (number ?? z.number()).int().min(1).max(65535)
 
-export const vmid = (number?: ZodNumber) => (number ?? z.number()).int().min(100).max(999999999)
+export const vmid = (number?: ZodNumber) =>
+    (number ?? z.number()).int().min(100).max(999999999)

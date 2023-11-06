@@ -1,4 +1,5 @@
 import { useField } from 'formik'
+
 import Select, { SelectProps } from '@/components/elements/inputs/Select'
 
 interface Props extends Omit<SelectProps, 'error' | 'onChange'> {
@@ -6,9 +7,17 @@ interface Props extends Omit<SelectProps, 'error' | 'onChange'> {
 }
 
 const SelectFormik = ({ name, ...props }: Props) => {
-    const [{onChange, ...field}, {touched, error}, {setValue}] = useField(name)
+    const [{ onChange, ...field }, { touched, error }, { setValue }] =
+        useField(name)
 
-    return <Select onChange={setValue} {...field} {...props} error={touched ? error : undefined} />
+    return (
+        <Select
+            onChange={setValue}
+            {...field}
+            {...props}
+            error={touched ? error : undefined}
+        />
+    )
 }
 
 export default SelectFormik

@@ -1,15 +1,26 @@
-import { SelectProps } from '@/components/elements/inputs/Select'
-import MultiSelect, { MultiSelectProps } from '@/components/elements/inputs/MultiSelect'
 import { useField } from 'formik'
+
+import MultiSelect, {
+    MultiSelectProps,
+} from '@/components/elements/inputs/MultiSelect'
+import { SelectProps } from '@/components/elements/inputs/Select'
 
 interface Props extends Omit<MultiSelectProps, 'error' | 'onChange'> {
     name: string
 }
 
 const MultiSelectFormik = ({ name, ...props }: Props) => {
-    const [{ onChange, ...field }, { touched, error }, { setValue }] = useField(name)
+    const [{ onChange, ...field }, { touched, error }, { setValue }] =
+        useField(name)
 
-    return <MultiSelect onChange={setValue} {...field} {...props} error={touched ? error : undefined} />
+    return (
+        <MultiSelect
+            onChange={setValue}
+            {...field}
+            {...props}
+            error={touched ? error : undefined}
+        />
+    )
 }
 
 export default MultiSelectFormik

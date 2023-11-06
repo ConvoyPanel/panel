@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 export function usePersistedState<S = undefined>(
     key: string,
@@ -6,19 +6,19 @@ export function usePersistedState<S = undefined>(
 ): [S | undefined, Dispatch<SetStateAction<S | undefined>>] {
     const [state, setState] = useState(() => {
         try {
-            const item = localStorage.getItem(key);
+            const item = localStorage.getItem(key)
 
-            return JSON.parse(item || String(defaultValue));
+            return JSON.parse(item || String(defaultValue))
         } catch (e) {
-            console.warn('Failed to retrieve persisted value from store.', e);
+            console.warn('Failed to retrieve persisted value from store.', e)
 
-            return defaultValue;
+            return defaultValue
         }
-    });
+    })
 
     useEffect(() => {
-        localStorage.setItem(key, JSON.stringify(state));
-    }, [key, state]);
+        localStorage.setItem(key, JSON.stringify(state))
+    }, [key, state])
 
-    return [state, setState];
+    return [state, setState]
 }

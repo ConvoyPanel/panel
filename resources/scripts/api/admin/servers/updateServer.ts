@@ -1,6 +1,6 @@
-import { EloquentStatus } from '@/api/server/types'
-import http from '@/api/http'
 import { rawDataToAdminServer } from '@/api/admin/servers/getServer'
+import http from '@/api/http'
+import { EloquentStatus } from '@/api/server/types'
 
 interface UpdateServerParameters {
     name?: string
@@ -11,7 +11,10 @@ interface UpdateServerParameters {
     status?: EloquentStatus
 }
 
-const updateServer = async (serverUuid: string, { userId, nodeId, ...params }: UpdateServerParameters) => {
+const updateServer = async (
+    serverUuid: string,
+    { userId, nodeId, ...params }: UpdateServerParameters
+) => {
     const {
         data: { data },
     } = await http.patch(`/api/admin/servers/${serverUuid}`, {

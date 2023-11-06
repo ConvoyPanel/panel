@@ -21,7 +21,9 @@ export const rawDataToServerStateData = (data: any) => ({
 const getState = (uuid: string): Promise<ServerStateData> => {
     return new Promise((resolve, reject) => {
         http.get(`/api/client/servers/${uuid}/state`)
-            .then(({ data: { data } }) => resolve(rawDataToServerStateData(data)))
+            .then(({ data: { data } }) =>
+                resolve(rawDataToServerStateData(data))
+            )
             .catch(reject)
     })
 }

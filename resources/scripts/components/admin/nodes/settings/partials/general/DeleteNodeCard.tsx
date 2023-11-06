@@ -1,18 +1,22 @@
+import { NodeContext } from '@/state/admin/node'
+import { useFlashKey } from '@/util/useFlash'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import deleteNode from '@/api/admin/nodes/deleteNode'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import FormSection from '@/components/elements/FormSection'
 import MessageBox from '@/components/elements/MessageBox'
-import { NodeContext } from '@/state/admin/node'
-import { useFlashKey } from '@/util/useFlash'
-import { useNavigate } from 'react-router-dom'
-import deleteNode from '@/api/admin/nodes/deleteNode'
-import { useState } from 'react'
-import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const DeleteNodeCard = () => {
     const { data: node } = useNodeSWR()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.delete`)
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.settings.general.delete`
+    )
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
 
@@ -34,16 +38,19 @@ const DeleteNodeCard = () => {
             <FormCard.Body>
                 <FormCard.Title>Delete Node</FormCard.Title>
                 <div className='space-y-3 mt-3'>
-                    <FlashMessageRender byKey={`admin.nodes.${node.id}.settings.general.delete`} />
+                    <FlashMessageRender
+                        byKey={`admin.nodes.${node.id}.settings.general.delete`}
+                    />
 
                     <p className='description-small my-3'>
-                        The node will be permanently deleted from Convoy. This action is irreversible and can not be
-                        undone.
+                        The node will be permanently deleted from Convoy. This
+                        action is irreversible and can not be undone.
                     </p>
 
                     {node.serversCount > 0 && (
                         <MessageBox title='Error' type='error'>
-                            You cannot delete a node that has servers assigned to it.
+                            You cannot delete a node that has servers assigned
+                            to it.
                         </MessageBox>
                     )}
                 </div>

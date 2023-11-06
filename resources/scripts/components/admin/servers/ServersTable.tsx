@@ -1,13 +1,15 @@
+import usePagination from '@/util/usePagination'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import { ServerBuild } from '@/api/server/getServer'
-import Table, { ColumnArray } from '@/components/elements/displays/Table'
+
+import Button from '@/components/elements/Button'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
-import usePagination from '@/util/usePagination'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import Button from '@/components/elements/Button'
-import { useTranslation } from 'react-i18next'
+import Table, { ColumnArray } from '@/components/elements/displays/Table'
 
 interface Props {
     query?: string
@@ -19,14 +21,23 @@ interface Props {
 const ServersTable = ({ query, className, nodeId, userId }: Props) => {
     const { t: tStrings } = useTranslation('strings')
     const [page, setPage] = usePagination()
-    const { data } = useServersSWR({ page, query, nodeId, userId, include: ['node', 'user'] })
+    const { data } = useServersSWR({
+        page,
+        query,
+        nodeId,
+        userId,
+        include: ['node', 'user'],
+    })
 
     const columns: ColumnArray<ServerBuild> = [
         {
             accessor: 'name',
             header: tStrings('name'),
             cell: ({ value, row }) => (
-                <Link to={`/admin/servers/${row.id}`} className='link text-foreground'>
+                <Link
+                    to={`/admin/servers/${row.id}`}
+                    className='link text-foreground'
+                >
                     {value}
                 </Link>
             ),
@@ -39,7 +50,10 @@ const ServersTable = ({ query, className, nodeId, userId }: Props) => {
             accessor: 'user',
             header: tStrings('owner'),
             cell: ({ value }) => (
-                <Link to={`/admin/users/${value!.id}/settings`} className='link text-foreground'>
+                <Link
+                    to={`/admin/users/${value!.id}/settings`}
+                    className='link text-foreground'
+                >
                     {value!.email}
                 </Link>
             ),

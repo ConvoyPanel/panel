@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react'
-import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+
+import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
+
 import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
 
 interface Props {
@@ -31,7 +33,10 @@ const AddressesMultiSelectForm = ({ disabled, nodeId: propNodeId }: Props) => {
             data && selectedAddresses
                 ? data.items
                       .filter(address => {
-                          return !selectedAddresses.items.find(selectedAddress => selectedAddress.id === address.id)
+                          return !selectedAddresses.items.find(
+                              selectedAddress =>
+                                  selectedAddress.id === address.id
+                          )
                       })
                       .map(address => ({
                           value: address.id.toString(),

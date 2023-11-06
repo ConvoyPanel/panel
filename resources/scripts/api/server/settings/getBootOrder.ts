@@ -14,7 +14,9 @@ const rawDataToBootOrderSettings = (data: any): BootOrderSettings => ({
 export default async (uuid: string): Promise<BootOrderSettings> => {
     const {
         data: { data },
-    } = await http.get(`/api/client/servers/${uuid}/settings/hardware/boot-order`)
+    } = await http.get(
+        `/api/client/servers/${uuid}/settings/hardware/boot-order`
+    )
 
     return rawDataToBootOrderSettings(data)
 }

@@ -1,21 +1,28 @@
+import { useFlashKey } from '@/util/useFlash'
+import usePagination from '@/util/usePagination'
+import {
+    englishKeyboardCharacters,
+    hostname,
+    password,
+} from '@/util/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+
+import createServer from '@/api/admin/servers/createServer'
+import { ServerResponse } from '@/api/admin/servers/getServers'
+import useServersSWR from '@/api/admin/servers/useServersSWR'
+
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
-import { useFlashKey } from '@/util/useFlash'
-import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
-import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
-import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
-import TemplatesSelectForm from '@/components/admin/servers/TemplatesSelectForm'
-import createServer from '@/api/admin/servers/createServer'
-import useServersSWR from '@/api/admin/servers/useServersSWR'
-import usePagination from '@/util/usePagination'
-import { ServerResponse } from '@/api/admin/servers/getServers'
-import { z } from 'zod'
-import { englishKeyboardCharacters, hostname, password } from '@/util/validation'
-import { FormProvider, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
 import CheckboxForm from '@/components/elements/forms/CheckboxForm'
-import { useTranslation } from 'react-i18next'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
+import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
+import TemplatesSelectForm from '@/components/admin/servers/TemplatesSelectForm'
+import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
 interface Props {
     nodeId?: number
@@ -26,8 +33,16 @@ interface Props {
 
 const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
     const [page] = usePagination()
-    const { mutate } = useServersSWR({ nodeId, userId, page, query: '', include: ['node', 'user'] })
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin.servers.create')
+    const { mutate } = useServersSWR({
+        nodeId,
+        userId,
+        page,
+        query: '',
+        include: ['node', 'user'],
+    })
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        'admin.servers.create'
+    )
     const { t } = useTranslation('admin.servers.index')
     const { t: tStrings } = useTranslation('strings')
 
@@ -35,15 +50,27 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
         name: z.string().max(40).nonempty(),
         nodeId: z.preprocess(Number, z.number()),
         userId: z.preprocess(Number, z.number()),
-        vmid: z.union([z.preprocess(Number, z.number().int().min(100).max(999999999)), z.literal('')]),
+        vmid: z.union([
+            z.preprocess(Number, z.number().int().min(100).max(999999999)),
+            z.literal(''),
+        ]),
         hostname: hostname().max(191).nonempty(),
         addressIds: z.array(z.preprocess(Number, z.number())),
         cpu: z.preprocess(Number, z.number().min(1)),
         memory: z.preprocess(Number, z.number().min(16)),
         disk: z.preprocess(Number, z.number().min(1)),
-        snapshotLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        backupLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        bandwidthLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
+        snapshotLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        backupLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        bandwidthLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
         accountPassword: password(englishKeyboardCharacters()).nonempty(),
         shouldCreateServer: z.literal(true),
         startOnCompletion: z.boolean(),
@@ -54,22 +81,37 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
         name: z.string().max(40).nonempty(),
         nodeId: z.preprocess(Number, z.number()),
         userId: z.preprocess(Number, z.number()),
-        vmid: z.union([z.preprocess(Number, z.number().min(100).max(999999999)), z.literal('')]),
+        vmid: z.union([
+            z.preprocess(Number, z.number().min(100).max(999999999)),
+            z.literal(''),
+        ]),
         hostname: hostname().max(191).nonempty(),
         addressIds: z.array(z.preprocess(Number, z.number())),
         cpu: z.preprocess(Number, z.number().min(1)),
         memory: z.preprocess(Number, z.number().min(16)),
         disk: z.preprocess(Number, z.number().min(1)),
-        snapshotLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        backupLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
-        bandwidthLimit: z.union([z.literal(''), z.preprocess(Number, z.number().min(0))]),
+        snapshotLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        backupLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
+        bandwidthLimit: z.union([
+            z.literal(''),
+            z.preprocess(Number, z.number().min(0)),
+        ]),
         accountPassword: password(englishKeyboardCharacters()).optional(),
         shouldCreateServer: z.literal(false),
         startOnCompletion: z.boolean(),
         templateUuid: z.string(),
     })
 
-    const schema = z.discriminatedUnion('shouldCreateServer', [schemaWithCreateVm, schemaWithoutCreatingVm])
+    const schema = z.discriminatedUnion('shouldCreateServer', [
+        schemaWithCreateVm,
+        schemaWithoutCreatingVm,
+    ])
 
     const form = useForm({
         resolver: zodResolver(schema),
@@ -156,32 +198,61 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={'admin.servers.create'} />
-                        <TextInputForm name={'name'} label={tStrings('display_name')} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={'admin.servers.create'}
+                        />
+                        <TextInputForm
+                            name={'name'}
+                            label={tStrings('display_name')}
+                        />
                         {nodeId ? null : <NodesSelectForm />}
                         {userId ? null : <UsersSelectForm />}
                         <TextInputForm
                             name={'vmid'}
                             label={'VMID'}
-                            placeholder={t('vmid_placeholder') ?? 'Leave blank for random VMID'}
+                            placeholder={
+                                t('vmid_placeholder') ??
+                                'Leave blank for random VMID'
+                            }
                         />
-                        <TextInputForm name={'hostname'} label={tStrings('hostname')} />
-                        <AddressesMultiSelectForm disabled={watchNodeId === ''} />
+                        <TextInputForm
+                            name={'hostname'}
+                            label={tStrings('hostname')}
+                        />
+                        <AddressesMultiSelectForm
+                            disabled={watchNodeId === ''}
+                        />
                         <div className={'grid grid-cols-2 gap-3'}>
-                            <TextInputForm name={'cpu'} label={tStrings('cpu')} />
-                            <TextInputForm name={'memory'} label={`${tStrings('memory')} (MiB)`} />
+                            <TextInputForm
+                                name={'cpu'}
+                                label={tStrings('cpu')}
+                            />
+                            <TextInputForm
+                                name={'memory'}
+                                label={`${tStrings('memory')} (MiB)`}
+                            />
                         </div>
-                        <TextInputForm name={'disk'} label={`${tStrings('disk')} (MiB)`} />
+                        <TextInputForm
+                            name={'disk'}
+                            label={`${tStrings('disk')} (MiB)`}
+                        />
                         <div className={'grid grid-cols-2 gap-3'}>
                             <TextInputForm
                                 name={'backupLimit'}
                                 label={t('backup_limit')}
-                                placeholder={t('limit_placeholder') ?? 'Leave blank for no limit'}
+                                placeholder={
+                                    t('limit_placeholder') ??
+                                    'Leave blank for no limit'
+                                }
                             />
                             <TextInputForm
                                 name={'bandwidthLimit'}
                                 label={`${t('bandwidth_limit')} (MiB)`}
-                                placeholder={t('limit_placeholder') ?? 'Leave blank for no limit'}
+                                placeholder={
+                                    t('limit_placeholder') ??
+                                    'Leave blank for no limit'
+                                }
                             />
                         </div>
                         <TextInputForm
@@ -194,7 +265,11 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                             label={t('should_create_vm')}
                             className={'mt-3 relative'}
                         />
-                        <TemplatesSelectForm disabled={!watchShouldCreateServer || watchNodeId === ''} />
+                        <TemplatesSelectForm
+                            disabled={
+                                !watchShouldCreateServer || watchNodeId === ''
+                            }
+                        />
                         <CheckboxForm
                             name={'startOnCompletion'}
                             label={t('start_server_after_installing')}
@@ -205,7 +280,10 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>

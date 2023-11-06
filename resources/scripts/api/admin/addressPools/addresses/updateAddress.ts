@@ -1,6 +1,6 @@
-import { AddressType, rawDataToAddress } from '@/api/server/getServer'
 import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
 import http from '@/api/http'
+import { AddressType, rawDataToAddress } from '@/api/server/getServer'
 
 interface UpdateAddressParameters {
     address: string

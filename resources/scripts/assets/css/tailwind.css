@@ -3,56 +3,57 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-success-lighter: #d3e5ff;
-    --color-success-light: #3291ff;
-    --color-success: #0070f3;
-    --color-success-dark: #0761d1;
-    --color-error-lighter: #f7d4d6;
-    --color-error-light: #ff1a1a;
-    --color-error: #e00;
-    --color-error-dark: #c50000;
-    --color-warning-lighter: #ffefcf;
-    --color-warning-light: #f7b955;
-    --color-warning: #f5a623;
-    --color-warning-dark: #ab570a;
-    --color-foreground: #000;
-    --color-background: #fff;
-    --color-accent-1: #fafafa;
-    --color-accent-2: #eaeaea;
-    --color-accent-3: #999999;
-    --color-accent-4: #888888;
-    --color-accent-5: #666666;
-    --color-accent-6: #444444;
-    --color-accent-7: #333333;
-    --color-accent-8: #111111;
-  }
+    :root {
+        --color-success-lighter: #d3e5ff;
+        --color-success-light: #3291ff;
+        --color-success: #0070f3;
+        --color-success-dark: #0761d1;
+        --color-error-lighter: #f7d4d6;
+        --color-error-light: #ff1a1a;
+        --color-error: #e00;
+        --color-error-dark: #c50000;
+        --color-warning-lighter: #ffefcf;
+        --color-warning-light: #f7b955;
+        --color-warning: #f5a623;
+        --color-warning-dark: #ab570a;
+        --color-foreground: #000;
+        --color-background: #fff;
+        --color-accent-1: #fafafa;
+        --color-accent-2: #eaeaea;
+        --color-accent-3: #999999;
+        --color-accent-4: #888888;
+        --color-accent-5: #666666;
+        --color-accent-6: #444444;
+        --color-accent-7: #333333;
+        --color-accent-8: #111111;
+    }
 
-  .dark {
-    --color-success-lighter: #001d7a;
-    --color-error-lighter: rgb(85, 0, 0);
-    --color-error-light: #f33;
-    --color-error: red;
-    --color-error-dark: #e60000;
-    --color-foreground: #fff;
-    --color-background: #000;
-    --color-accent-1: #111111;
-    --color-accent-2: #333333;
-    --color-accent-3: #444444;
-    --color-accent-4: #666666;
-    --color-accent-5: #888888;
-    --color-accent-6: #999999;
-    --color-accent-7: #eaeaea;
-    --color-accent-8: #fafafa;
-  }
+    .dark {
+        --color-success-lighter: #001d7a;
+        --color-error-lighter: rgb(85, 0, 0);
+        --color-error-light: #f33;
+        --color-error: red;
+        --color-error-dark: #e60000;
+        --color-foreground: #fff;
+        --color-background: #000;
+        --color-accent-1: #111111;
+        --color-accent-2: #333333;
+        --color-accent-3: #444444;
+        --color-accent-4: #666666;
+        --color-accent-5: #888888;
+        --color-accent-6: #999999;
+        --color-accent-7: #eaeaea;
+        --color-accent-8: #fafafa;
+    }
 }
 
-html, #root {
-  @apply min-h-screen
+html,
+#root {
+    @apply min-h-screen;
 }
 
 body {
-  @apply bg-accent-100 text-accent-500 overflow-x-hidden h-full;
+    @apply bg-accent-100 text-accent-500 overflow-x-hidden h-full;
 }
 
 input,
@@ -60,114 +61,114 @@ textarea,
 button,
 select,
 a {
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .description {
-  @apply text-accent-500;
+    @apply text-accent-500;
 }
 
 .description-small {
-  @apply text-accent-500 text-sm;
+    @apply text-accent-500 text-sm;
 }
 
 .dt {
-  @apply text-accent-500 text-xs font-medium uppercase tracking-wide;
+    @apply text-accent-500 text-xs font-medium uppercase tracking-wide;
 }
 
 .dd {
-  @apply text-black mt-1 font-medium;
+    @apply text-black mt-1 font-medium;
 }
 
 .h5 {
-  @apply text-base font-semibold text-foreground;
+    @apply text-base font-semibold text-foreground;
 }
 
 .h6 {
-  @apply text-base font-medium text-accent-700
+    @apply text-base font-medium text-accent-700;
 }
 
 @media screen and (min-width: 640px) {
-  .nav-link::before {
-    content: '';
-    display: block;
-    position: absolute;
-    width: 100%;
-    height: 70%;
-    @apply bg-transparent -z-[1] rounded transition-colors
-  }
+    .nav-link::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 70%;
+        @apply bg-transparent -z-[1] rounded transition-colors;
+    }
 
-  .nav-link:hover::before {
-    @apply bg-accent-200
-  }
+    .nav-link:hover::before {
+        @apply bg-accent-200;
+    }
 }
 
 .nav-link-active::after {
-  content: '';
-  display: block;
-  position: absolute;
-  left: 9px;
-  right: 9px;
-  bottom: 0;
-  height: 0;
-  border-bottom: 2px solid;
-  @apply border-foreground
+    content: '';
+    display: block;
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 0;
+    height: 0;
+    border-bottom: 2px solid;
+    @apply border-foreground;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 /* For IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
 }
 
 .fade-enter,
 .fade-exit,
 .fade-appear {
-  will-change: opacity;
+    will-change: opacity;
 }
 
 .fade-enter,
 .fade-appear {
-  @apply opacity-0;
+    @apply opacity-0;
 }
 
 .fade-enter-active,
 .fade-appear-active {
-  @apply opacity-100 transition-opacity ease-in;
-  transition-duration: 150ms;
+    @apply opacity-100 transition-opacity ease-in;
+    transition-duration: 150ms;
 }
 
 .fade-exit {
-  @apply opacity-100;
+    @apply opacity-100;
 }
 
 .fade-exit-active {
-  @apply opacity-0 transition-opacity ease-in;
-  transition-duration: 150ms;
+    @apply opacity-0 transition-opacity ease-in;
+    transition-duration: 150ms;
 }
 
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border-width: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .transition-border {
-  transition-property: border-color;
-  transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-property: border-color;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .link {
-  @apply border-b border-dashed border-accent-300
+    @apply border-b border-dashed border-accent-300;
 }

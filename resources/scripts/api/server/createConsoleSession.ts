@@ -17,7 +17,9 @@ interface ConsoleCredentialsWithCoterm {
     token: string
 }
 
-export type ConsoleCredentials = ConsoleCredentialsWithoutCoterm | ConsoleCredentialsWithCoterm
+export type ConsoleCredentials =
+    | ConsoleCredentialsWithoutCoterm
+    | ConsoleCredentialsWithCoterm
 
 export const rawDataToConsoleCredentials = (data: any): ConsoleCredentials => {
     if (data.is_tls_enabled !== undefined) {
@@ -38,12 +40,17 @@ export const rawDataToConsoleCredentials = (data: any): ConsoleCredentials => {
     }
 }
 
-export default (uuid: string, consoleType: ConsoleType): Promise<ConsoleCredentials> => {
+export default (
+    uuid: string,
+    consoleType: ConsoleType
+): Promise<ConsoleCredentials> => {
     return new Promise((resolve, reject) => {
         http.post(`/api/client/servers/${uuid}/create-console-session`, {
             type: consoleType,
         })
-            .then(({ data: { data } }) => resolve(rawDataToConsoleCredentials(data)))
+            .then(({ data: { data } }) =>
+                resolve(rawDataToConsoleCredentials(data))
+            )
             .catch(reject)
     })
 }

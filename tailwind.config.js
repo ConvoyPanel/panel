@@ -50,17 +50,17 @@ module.exports = {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
             boxShadow: {
-                'light': '0 4px 4px 0 rgba(0,0,0,.02)'
+                light: '0 4px 4px 0 rgba(0,0,0,.02)',
             },
             screens: {
-                'xs': '512px'
+                xs: '512px',
             },
             borderRadius: {
                 DEFAULT: '5px',
-            }
+            },
         },
     },
     corePlugins: {
-        preflight: false
-    }
+        preflight: false,
+    },
 }

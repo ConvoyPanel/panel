@@ -1,9 +1,11 @@
-import { Avatar } from '@mantine/core'
 import { useStoreState } from '@/state'
 import { getInitials } from '@/util/helpers'
-import Menu from '@/components/elements/Menu'
-import { useNavigate } from 'react-router-dom'
+import { Avatar } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+
+import Menu from '@/components/elements/Menu'
+
 interface Props {
     logout: () => void
 }
@@ -19,7 +21,9 @@ const UserDropdown = ({ logout }: Props) => {
             <Menu width={200} position='bottom-end'>
                 <Menu.Target>
                     <button className='flex items-center space-x-3 bg-transparent ring-transparent rounded-sm ring-4 hover:ring-stone-100 dark:hover:ring-stone-900 hover:bg-stone-100 dark:hover:bg-stone-900 transition'>
-                        <p className='text-foreground font-medium text-sm'>{user.name}</p>
+                        <p className='text-foreground font-medium text-sm'>
+                            {user.name}
+                        </p>
                         <Avatar color='blue' size='md' radius='xl'>
                             {getInitials(user.name, ' ', 2)}
                         </Avatar>
@@ -28,7 +32,9 @@ const UserDropdown = ({ logout }: Props) => {
                 <Menu.Dropdown>
                     {user.rootAdmin && (
                         <>
-                            <Menu.Item onClick={() => navigate('/admin')}>{tStrings('admin_cp')}</Menu.Item>
+                            <Menu.Item onClick={() => navigate('/admin')}>
+                                {tStrings('admin_cp')}
+                            </Menu.Item>
                             <Menu.Divider />
                         </>
                     )}

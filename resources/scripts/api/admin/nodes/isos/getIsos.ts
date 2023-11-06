@@ -1,4 +1,4 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export interface ISO {
     uuid: string
@@ -18,7 +18,9 @@ export const rawDataToISO = (rawData: any): ISO => ({
     fileName: rawData.file_name,
     size: rawData.size,
     hidden: Boolean(rawData.hidden),
-    completedAt: rawData.completed_at ? new Date(rawData.completed_at) : undefined,
+    completedAt: rawData.completed_at
+        ? new Date(rawData.completed_at)
+        : undefined,
     createdAt: new Date(rawData.created_at),
 })
 
@@ -31,13 +33,16 @@ export interface QueryParams {
 
 export type IsoResponse = PaginatedResult<ISO>
 
-const getIsos = async ({ nodeId, query, perPage = 50, ...params }: QueryParams): Promise<IsoResponse> => {
-    const {
-        data,
-    } = await http.get(`/api/admin/nodes/${nodeId}/isos`, {
+const getIsos = async ({
+    nodeId,
+    query,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<IsoResponse> => {
+    const { data } = await http.get(`/api/admin/nodes/${nodeId}/isos`, {
         params: {
             'filter[name]': query,
-            per_page: perPage,
+            'per_page': perPage,
             ...params,
         },
     })

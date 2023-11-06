@@ -1,4 +1,4 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export interface AddressPool {
     id: number
@@ -15,7 +15,11 @@ export interface QueryParams {
 
 export type AddressPoolResponse = PaginatedResult<AddressPool>
 
-const getAddressPools = async ({ query, page, perPage = 50 }: QueryParams): Promise<AddressPoolResponse> => {
+const getAddressPools = async ({
+    query,
+    page,
+    perPage = 50,
+}: QueryParams): Promise<AddressPoolResponse> => {
     const { data } = await http.get('/api/admin/address-pools', {
         params: {
             'filter[*]': query,

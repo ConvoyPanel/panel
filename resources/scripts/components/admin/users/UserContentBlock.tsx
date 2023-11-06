@@ -1,5 +1,9 @@
 import useUserSWR from '@/api/admin/users/useUserSWR'
-import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
+
+import PageContentBlock, {
+    PageContentBlockProps,
+} from '@/components/elements/PageContentBlock'
+
 interface Props extends PageContentBlockProps {
     title: string
 }

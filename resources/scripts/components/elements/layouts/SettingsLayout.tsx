@@ -1,13 +1,21 @@
-import { RouteDefinition } from '@/components/elements/navigation/NavigationBar'
-import VerticalNavTab from '@/components/elements/navigation/VerticalNavTab'
-import ServerContentBlock from '@/components/servers/ServerContentBlock'
-import { Link, Outlet, useMatch, useMatches, useNavigate } from 'react-router-dom'
+import { bindUrlParams } from '@/util/helpers'
+import styled from '@emotion/styled'
+import { ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { useViewportSize } from '@mantine/hooks'
 import { ComponentType, Fragment, ReactNode, useEffect } from 'react'
-import styled from '@emotion/styled'
+import {
+    Link,
+    Outlet,
+    useMatch,
+    useMatches,
+    useNavigate,
+} from 'react-router-dom'
 import tw from 'twin.macro'
-import { ChevronLeftIcon } from '@heroicons/react/20/solid'
-import { bindUrlParams } from '@/util/helpers'
+
+import { RouteDefinition } from '@/components/elements/navigation/NavigationBar'
+import VerticalNavTab from '@/components/elements/navigation/VerticalNavTab'
+
+import ServerContentBlock from '@/components/servers/ServerContentBlock'
 
 interface Props {
     indexPattern: string
@@ -43,7 +51,12 @@ const ReturnLink = styled(Link)`
     ${tw`flex items-center space-x-3 pb-6 text-foreground text-foreground font-semibold text-sm`}
 `
 
-const SettingsLayout = ({ indexPattern, defaultUrl, contentBlock: ContentBlock, routes }: Props) => {
+const SettingsLayout = ({
+    indexPattern,
+    defaultUrl,
+    contentBlock: ContentBlock,
+    routes,
+}: Props) => {
     const matches = useMatches()
     const { width } = useViewportSize()
     const isIndex = useMatch(indexPattern)
@@ -51,9 +64,12 @@ const SettingsLayout = ({ indexPattern, defaultUrl, contentBlock: ContentBlock, 
 
     useEffect(() => {
         if (width > 960 && isIndex) {
-            navigate(bindUrlParams(defaultUrl, matches[matches.length - 1].params), {
-                replace: true,
-            })
+            navigate(
+                bindUrlParams(defaultUrl, matches[matches.length - 1].params),
+                {
+                    replace: true,
+                }
+            )
         }
     }, [isIndex, width])
 
@@ -68,7 +84,10 @@ const SettingsLayout = ({ indexPattern, defaultUrl, contentBlock: ContentBlock, 
                             {routes.map(route => (
                                 <VerticalNavTab
                                     key={route.name}
-                                    to={bindUrlParams(route.path, matches[matches.length - 1].params)}
+                                    to={bindUrlParams(
+                                        route.path,
+                                        matches[matches.length - 1].params
+                                    )}
                                     end={route.end}
                                 >
                                     {route.name}
@@ -78,7 +97,12 @@ const SettingsLayout = ({ indexPattern, defaultUrl, contentBlock: ContentBlock, 
                     ) : null}
                     <div className=' col-span-3'>
                         {width <= 960 && !Boolean(isIndex) ? (
-                            <ReturnLink to={bindUrlParams(indexPattern, matches[matches.length - 1].params)}>
+                            <ReturnLink
+                                to={bindUrlParams(
+                                    indexPattern,
+                                    matches[matches.length - 1].params
+                                )}
+                            >
                                 <ChevronLeftIcon className='w-5 h-5' />
                                 <span>Settings</span>
                             </ReturnLink>

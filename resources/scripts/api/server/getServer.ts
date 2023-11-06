@@ -92,7 +92,11 @@ export const rawDataToServerBuild = (data: any): ServerBuild => ({
     name: data.name,
     status: data.status,
     nodeId: data.node_id,
-    description: data.description ? (data.description.length > 0 ? data.description : null) : null,
+    description: data.description
+        ? data.description.length > 0
+            ? data.description
+            : null
+        : null,
     usages: {
         bandwidth: data.usages.bandwidth,
     },
@@ -104,8 +108,12 @@ export const rawDataToServerBuild = (data: any): ServerBuild => ({
         backups: data.limits.backups,
         bandwidth: data.limits.bandwidth,
         addresses: {
-            ipv4: data.limits.addresses.ipv4.map((address: any) => rawDataToAddress(address)),
-            ipv6: data.limits.addresses.ipv6.map((address: any) => rawDataToAddress(address)),
+            ipv4: data.limits.addresses.ipv4.map((address: any) =>
+                rawDataToAddress(address)
+            ),
+            ipv6: data.limits.addresses.ipv6.map((address: any) =>
+                rawDataToAddress(address)
+            ),
         },
         macAddress: data.limits.mac_address,
     },

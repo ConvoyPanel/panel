@@ -1,8 +1,9 @@
-import useSWR, { Key, SWRResponse } from 'swr'
-import { useMatch } from 'react-router-dom'
 import { Optimistic } from '@/lib/swr'
-import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
+import { useMatch } from 'react-router-dom'
+import useSWR, { Key, SWRResponse } from 'swr'
+
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
+import { AddressPool } from '@/api/admin/addressPools/getAddressPools'
 
 export const getKey = (id: number): Key => ['admin.address-pools', id]
 

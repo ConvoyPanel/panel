@@ -1,26 +1,31 @@
-import { useState } from 'react'
-import usePagination from '@/util/usePagination'
 import { useFlashKey } from '@/util/useFlash'
-import useUsersSWR from '@/api/admin/users/useUsersSWR'
+import usePagination from '@/util/usePagination'
 import { FormikProvider, useFormik } from 'formik'
+import { useState } from 'react'
 import * as yup from 'yup'
-import createUser from '@/api/admin/users/createUser'
-import { UserResponse } from '@/api/admin/users/getUsers'
-import useTokensSWR from '@/api/admin/tokens/useTokensSWR'
+
 import createToken from '@/api/admin/tokens/createToken'
 import { Token, TokenResponse } from '@/api/admin/tokens/getTokens'
+import useTokensSWR from '@/api/admin/tokens/useTokensSWR'
+import createUser from '@/api/admin/users/createUser'
+import { UserResponse } from '@/api/admin/users/getUsers'
+import useUsersSWR from '@/api/admin/users/useUsersSWR'
+
 import Button from '@/components/elements/Button'
-import Modal from '@/components/elements/Modal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import TextInputFormik from '@/components/elements/formik/TextInputFormik'
-import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import MessageBox from '@/components/elements/MessageBox'
+import Modal from '@/components/elements/Modal'
+import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
+import TextInputFormik from '@/components/elements/formik/TextInputFormik'
+
 import PlainTextTokenModal from '@/components/admin/tokens/PlainTextTokenModal'
 
 const CreateTokenButton = () => {
     const [open, setOpen] = useState(false)
     const [page] = usePagination()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:tokens.create')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        'admin:tokens.create'
+    )
     const { mutate } = useTokensSWR({ page })
     const [token, setToken] = useState<Token | null>(null)
 
@@ -29,7 +34,10 @@ const CreateTokenButton = () => {
             name: '',
         },
         validationSchema: yup.object({
-            name: yup.string().max(191, 'Do not exceed 191 characters').required('A name is required.'),
+            name: yup
+                .string()
+                .max(191, 'Do not exceed 191 characters')
+                .required('A name is required.'),
         }),
         onSubmit: async values => {
             clearFlashes()
@@ -74,14 +82,20 @@ const CreateTokenButton = () => {
                 <FormikProvider value={form}>
                     <form onSubmit={form.handleSubmit}>
                         <Modal.Body>
-                            <FlashMessageRender className='mb-5' byKey={'admin:tokens.create'} />
+                            <FlashMessageRender
+                                className='mb-5'
+                                byKey={'admin:tokens.create'}
+                            />
                             <TextInputFormik name={'name'} label={'Name'} />
                         </Modal.Body>
                         <Modal.Actions>
                             <Modal.Action type='button' onClick={handleClose}>
                                 Cancel
                             </Modal.Action>
-                            <Modal.Action type='submit' loading={form.isSubmitting}>
+                            <Modal.Action
+                                type='submit'
+                                loading={form.isSubmitting}
+                            >
                                 Create
                             </Modal.Action>
                         </Modal.Actions>

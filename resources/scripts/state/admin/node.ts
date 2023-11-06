@@ -1,7 +1,8 @@
+import { Action, Thunk, action, createContextStore, thunk } from 'easy-peasy'
+import isEqual from 'react-fast-compare'
+
 import getNode from '@/api/admin/nodes/getNode'
 import { Node } from '@/api/admin/nodes/getNodes'
-import { action, Action, createContextStore, thunk, Thunk } from 'easy-peasy'
-import isEqual from 'react-fast-compare'
 
 export interface NodeDataStore {
     data?: Node

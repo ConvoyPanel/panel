@@ -1,4 +1,4 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
 export interface User {
     id: number
@@ -13,7 +13,9 @@ export const rawDataToUser = (data: any): User => ({
     id: data.id,
     name: data.name,
     email: data.email,
-    emailVerifiedAt: data.email_verified_at ? new Date(data.email_verified_at) : null,
+    emailVerifiedAt: data.email_verified_at
+        ? new Date(data.email_verified_at)
+        : null,
     rootAdmin: data.root_admin,
     serversCount: data.servers_count,
 })
@@ -26,7 +28,11 @@ export interface QueryParams {
 
 export type UserResponse = PaginatedResult<User>
 
-const getUsers = async ({ query, perPage = 50, ...params }: QueryParams): Promise<UserResponse> => {
+const getUsers = async ({
+    query,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<UserResponse> => {
     const { data } = await http.get('/api/admin/users', {
         params: {
             'filter[*]': query,

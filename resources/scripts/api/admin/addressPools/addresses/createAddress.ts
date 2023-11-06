@@ -1,8 +1,9 @@
-import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
-import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
-import http from '@/api/http'
-import { z } from 'zod'
 import { ipAddress, macAddress } from '@/util/validation'
+import { z } from 'zod'
+
+import { AddressInclude } from '@/api/admin/nodes/addresses/getAddresses'
+import http from '@/api/http'
+import { Address, AddressType, rawDataToAddress } from '@/api/server/getServer'
 
 const baseSchema = z.object({
     type: z.enum(['ipv4', 'ipv6']),
@@ -24,7 +25,10 @@ const multipleAddressesSchema = z.object({
 })
 
 export const schema = z
-    .discriminatedUnion('isBulkAction', [singleAddressSchema, multipleAddressesSchema])
+    .discriminatedUnion('isBulkAction', [
+        singleAddressSchema,
+        multipleAddressesSchema,
+    ])
     .and(baseSchema)
 
 type CreateAddressParameters = z.infer<typeof schema> & {
@@ -35,7 +39,15 @@ type CreateAddressParameters = z.infer<typeof schema> & {
 
 const createAddress = async (
     poolId: number,
-    { isBulkAction, startingAddress, endingAddress, macAddress, serverId, include, ...payload }: CreateAddressParameters
+    {
+        isBulkAction,
+        startingAddress,
+        endingAddress,
+        macAddress,
+        serverId,
+        include,
+        ...payload
+    }: CreateAddressParameters
 ): Promise<Address | null> => {
     const {
         data: { data },

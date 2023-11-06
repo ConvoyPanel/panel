@@ -1,7 +1,8 @@
 import { useStoreActions, useStoreState } from '@/state'
-import { LoadingOverlay, Switch } from '@mantine/core'
 import { MoonIcon, SunIcon } from '@heroicons/react/20/solid'
+import { LoadingOverlay, Switch } from '@mantine/core'
 import { ReactNode } from 'react'
+
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 
 interface Props {
@@ -11,17 +12,27 @@ interface Props {
     submitting?: boolean
 }
 
-const LoginFormContainer = ({ title, description, children, submitting }: Props) => {
+const LoginFormContainer = ({
+    title,
+    description,
+    children,
+    submitting,
+}: Props) => {
     const theme = useStoreState(state => state.settings.data!.theme)
     const setTheme = useStoreActions(actions => actions.settings.setTheme)
 
     return (
         <div className='min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-accent-100'>
             <div className='w-full sm:max-w-md'>
-                <FlashMessageRender key={'auth:sign_in'} className='px-6 sm:px-0 mb-3' />
+                <FlashMessageRender
+                    key={'auth:sign_in'}
+                    className='px-6 sm:px-0 mb-3'
+                />
                 <div className='p-6 sm:bg-background sm:shadow-md overflow-hidden sm:rounded-md relative'>
                     <LoadingOverlay visible={submitting || false} />
-                    <h1 className='text-3xl font-bold text-foreground'>{title}</h1>
+                    <h1 className='text-3xl font-bold text-foreground'>
+                        {title}
+                    </h1>
                     <p className='description'>{description}</p>
                     <div className='mt-3'>{children}</div>
                 </div>
@@ -35,7 +46,9 @@ const LoginFormContainer = ({ title, description, children, submitting }: Props)
                     <Switch
                         size='md'
                         checked={theme === 'dark'}
-                        onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                        onChange={() =>
+                            setTheme(theme === 'light' ? 'dark' : 'light')
+                        }
                         onLabel={<MoonIcon className='w-4 h-4' />}
                         offLabel={<SunIcon className='w-4 h-4 text-black' />}
                     />

@@ -1,11 +1,6 @@
-import { TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
-import useTemplatesGroupSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
-import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
-import Button from '@/components/elements/Button'
-import Card from '@/components/elements/Card'
-import Spinner from '@/components/elements/Spinner'
 import { NodeContext } from '@/state/admin/node'
-import { useEffect, useState } from 'react'
+import useFlash from '@/util/useFlash'
+import useNotify from '@/util/useNotify'
 import {
     DndContext,
     DragEndEvent,
@@ -17,17 +12,27 @@ import {
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
-import { arrayMove, SortableContext } from '@dnd-kit/sortable'
-import SortableItem, { ChildrenPropsWithHandle } from '@/components/elements/dnd/SortableItem'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
-import reorderTemplateGroups from '@/api/admin/nodes/templateGroups/reorderTemplateGroups'
-import useNotify from '@/util/useNotify'
+import { SortableContext, arrayMove } from '@dnd-kit/sortable'
 import { updateNotification } from '@mantine/notifications'
-import TemplateGroupCard from '@/components/admin/nodes/templates/TemplateGroupCard'
-import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
-import useFlash from '@/util/useFlash'
-import { httpErrorToHuman } from '@/api/http'
+import { useEffect, useState } from 'react'
+
+import { TemplateGroup } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
+import reorderTemplateGroups from '@/api/admin/nodes/templateGroups/reorderTemplateGroups'
+import useTemplatesGroupSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+import { httpErrorToHuman } from '@/api/http'
+
+import Button from '@/components/elements/Button'
+import Card from '@/components/elements/Card'
+import Spinner from '@/components/elements/Spinner'
+import SortableItem, {
+    ChildrenPropsWithHandle,
+} from '@/components/elements/dnd/SortableItem'
+
+import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
+import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
+import TemplateGroupCard from '@/components/admin/nodes/templates/TemplateGroupCard'
 
 const NodeTemplatesContainer = () => {
     const { data: node } = useNodeSWR()
@@ -71,7 +76,10 @@ const NodeTemplatesContainer = () => {
                     message: httpErrorToHuman(error),
                     autoClose: 5000,
                 })
-                clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+                clearAndAddHttpError({
+                    key: 'admin:node:template-groups',
+                    error,
+                })
             })
     }
 
@@ -85,7 +93,9 @@ const NodeTemplatesContainer = () => {
                     groups!.findIndex(group => group.id === active.id),
                     groups!.findIndex(group => group.id === over.id)
                 )
-                newGroups.forEach((group, index) => (group.orderColumn = index + 1))
+                newGroups.forEach(
+                    (group, index) => (group.orderColumn = index + 1)
+                )
 
                 updateGroupOrder(newGroups.map(group => group.id))
 
@@ -95,10 +105,20 @@ const NodeTemplatesContainer = () => {
     }
 
     return (
-        <NodeContentBlock title='Templates' showFlashKey='admin:node:template-groups'>
-            <EditTemplateGroupModal open={showCreateModal} onClose={() => setShowCreateModal(false)} />
+        <NodeContentBlock
+            title='Templates'
+            showFlashKey='admin:node:template-groups'
+        >
+            <EditTemplateGroupModal
+                open={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+            />
             <div className='flex justify-end items-center mb-3'>
-                <Button onClick={() => setShowCreateModal(true)} disabled={data!.length >= 50} variant='filled'>
+                <Button
+                    onClick={() => setShowCreateModal(true)}
+                    disabled={data!.length >= 50}
+                    variant='filled'
+                >
                     New Template Group
                 </Button>
             </div>
@@ -114,10 +134,20 @@ const NodeTemplatesContainer = () => {
                     >
                         <SortableContext items={data}>
                             {data!.map(group => (
-                                <TemplateGroupCard group={group} key={group.id} />
+                                <TemplateGroupCard
+                                    group={group}
+                                    key={group.id}
+                                />
                             ))}
                         </SortableContext>
-                        <DragOverlay>{activeId && <TemplateGroupCard group={activeId} className='z-20' />}</DragOverlay>
+                        <DragOverlay>
+                            {activeId && (
+                                <TemplateGroupCard
+                                    group={activeId}
+                                    className='z-20'
+                                />
+                            )}
+                        </DragOverlay>
                     </DndContext>
                     {data.length < 50 && (
                         <button

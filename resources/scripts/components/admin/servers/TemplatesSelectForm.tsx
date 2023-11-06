@@ -1,10 +1,12 @@
 import { useField } from 'formik'
-import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import { useMemo, useState } from 'react'
-import Select from '@/components/elements/inputs/Select'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useFormContext } from 'react-hook-form'
+
+import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
+
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 import SelectForm from '@/components/elements/forms/SelectForm'
+import Select from '@/components/elements/inputs/Select'
 
 interface Props {
     disabled?: boolean
@@ -13,7 +15,9 @@ interface Props {
 const TemplatesSelectForm = ({ disabled }: Props) => {
     const { setValue, watch } = useFormContext()
     const nodeId: number | null = watch('nodeId', null)
-    const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(nodeId ?? -1)
+    const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(
+        nodeId ?? -1
+    )
     const templateGroups =
         data?.map(group => {
             return {
@@ -28,7 +32,9 @@ const TemplatesSelectForm = ({ disabled }: Props) => {
 
     const [groupUuid, setGroupUuid] = useState('')
     const templates = useMemo(
-        () => templateGroups.find(group => group.value === groupUuid)?.templates ?? [],
+        () =>
+            templateGroups.find(group => group.value === groupUuid)
+                ?.templates ?? [],
         [templateGroups, groupUuid]
     )
 

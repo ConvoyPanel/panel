@@ -19,6 +19,11 @@
     "tabWidth": 4,
     "importOrderSeparation": true,
     "importOrderSortSpecifiers": true,
-    "importOrder": ["^@/api/(.*)$", "^@/components/elements/(.*)$", "^@/components/(.*)$", "^[./]"],
+    "importOrder": [
+        "^@/api/(.*)$",
+        "^@/components/elements/(.*)$",
+        "^@/components/(.*)$",
+        "^[./]"
+    ],
     "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

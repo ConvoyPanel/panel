@@ -1,5 +1,5 @@
-import http from '@/api/http'
 import { rawDataToUser } from '@/api/admin/users/getUsers'
+import http from '@/api/http'
 
 interface CreateUserParameters {
     name: string

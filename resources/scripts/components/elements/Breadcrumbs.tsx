@@ -1,15 +1,15 @@
+import { Handle } from '@/routers/router'
+import styled from '@emotion/styled'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import {
-    Breadcrumbs as MantineBreadcrumbs,
-    BreadcrumbsProps as MantineBreadcrumbsProps,
     Anchor as MantineAnchor,
     AnchorProps as MantineAnchorProps,
+    Breadcrumbs as MantineBreadcrumbs,
+    BreadcrumbsProps as MantineBreadcrumbsProps,
 } from '@mantine/core'
 import { ComponentProps, FC } from 'react'
-import styled from '@emotion/styled'
-import tw from 'twin.macro'
 import { Link, LinkProps, useMatches } from 'react-router-dom'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
-import { Handle } from '@/routers/router'
+import tw from 'twin.macro'
 
 export type BreadcrumbsProps = MantineBreadcrumbsProps
 
@@ -31,7 +31,10 @@ const StyledBreadcrumbs = styled(MantineBreadcrumbs)`
 `
 
 const Breadcrumbs: Breadcrumbs = props => (
-    <StyledBreadcrumbs separator={<ChevronRightIcon className={'w-4 h-4 text-accent-500'} />} {...props} />
+    <StyledBreadcrumbs
+        separator={<ChevronRightIcon className={'w-4 h-4 text-accent-500'} />}
+        {...props}
+    />
 )
 
 const Crumb = styled(Link)<CrumbProps>`

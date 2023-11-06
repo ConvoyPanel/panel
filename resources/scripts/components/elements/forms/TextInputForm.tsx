@@ -1,8 +1,10 @@
-import TextInput from '@/components/elements/inputs/TextInput'
 import { TextInputProps } from '@mantine/core'
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
 
-interface Props extends Omit<TextInputProps, 'error' | keyof ControllerRenderProps> {
+import TextInput from '@/components/elements/inputs/TextInput'
+
+interface Props
+    extends Omit<TextInputProps, 'error' | keyof ControllerRenderProps> {
     control?: Control<any, any>
     name: string
 }

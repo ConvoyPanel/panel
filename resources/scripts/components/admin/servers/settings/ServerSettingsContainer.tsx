@@ -1,6 +1,8 @@
-import ServerContentBlock from '@/components/admin/servers/ServerContentBlock'
-import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
 import { useTranslation } from 'react-i18next'
+
+import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
+
+import ServerContentBlock from '@/components/admin/servers/ServerContentBlock'
 
 const ServerSettingsContainer = () => {
     const { t: tStrings } = useTranslation('strings')
@@ -9,7 +11,12 @@ const ServerSettingsContainer = () => {
         <SettingsLayout
             indexPattern='/admin/servers/:id/settings'
             defaultUrl='/admin/servers/:id/settings/general'
-            contentBlock={props => <ServerContentBlock title={tStrings('setting_other')} {...props} />}
+            contentBlock={props => (
+                <ServerContentBlock
+                    title={tStrings('setting_other')}
+                    {...props}
+                />
+            )}
             routes={[
                 {
                     path: '/admin/servers/:id/settings/general',

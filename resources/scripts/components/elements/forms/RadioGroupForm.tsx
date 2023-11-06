@@ -1,12 +1,14 @@
-import Radio, { RadioGroupProps } from '@/components/elements/inputs/Radio'
 import { Control, ControllerRenderProps, useController } from 'react-hook-form'
 
-interface Props extends Omit<RadioGroupProps, 'error' | keyof ControllerRenderProps> {
+import Radio, { RadioGroupProps } from '@/components/elements/inputs/Radio'
+
+interface Props
+    extends Omit<RadioGroupProps, 'error' | keyof ControllerRenderProps> {
     control?: Control<any, any>
     name: string
 }
 
-const RadioGroupForm = ({control, ...props}: Props) => {
+const RadioGroupForm = ({ control, ...props }: Props) => {
     const {
         field,
         fieldState: { error },
@@ -18,4 +20,4 @@ const RadioGroupForm = ({control, ...props}: Props) => {
     return <Radio.Group {...field} {...props} error={error?.message} />
 }
 
-export default RadioGroupForm;
+export default RadioGroupForm

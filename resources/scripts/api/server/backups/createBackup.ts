@@ -8,7 +8,10 @@ export interface RequestParameters {
     compressionType: 'none' | 'lzo' | 'gzip' | 'zstd'
 }
 
-export default async (uuid: string, params: RequestParameters): Promise<Backup> => {
+export default async (
+    uuid: string,
+    params: RequestParameters
+): Promise<Backup> => {
     const {
         data: { data },
     } = await http.post(`/api/client/servers/${uuid}/backups/`, {

@@ -4,15 +4,15 @@ import user, { UserStore } from '@/state/user'
 import { createStore, createTypedHooks } from 'easy-peasy'
 
 export interface ApplicationStore {
-  user: UserStore
-  settings: SettingsStore
-  flashes: FlashStore;
+    user: UserStore
+    settings: SettingsStore
+    flashes: FlashStore
 }
 
 const state: ApplicationStore = {
-  user,
-  settings,
-  flashes
+    user,
+    settings,
+    flashes,
 }
 
 const typedHooks = createTypedHooks<ApplicationStore>()

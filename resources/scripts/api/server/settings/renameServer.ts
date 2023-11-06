@@ -7,6 +7,6 @@ interface Payload {
 
 export default (uuid: string, payload: Payload) => {
     return http.post(`/api/client/servers/${uuid}/settings/rename`, {
-        ...payload
+        ...payload,
     })
 }

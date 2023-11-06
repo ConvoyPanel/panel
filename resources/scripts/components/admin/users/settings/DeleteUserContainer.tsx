@@ -1,17 +1,21 @@
-import FormCard from '@/components/elements/FormCard'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import MessageBox from '@/components/elements/MessageBox'
-import Button from '@/components/elements/Button'
-import { useState } from 'react'
 import { useFlashKey } from '@/util/useFlash'
-import deleteUser from '@/api/admin/users/deleteUser'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import deleteUser from '@/api/admin/users/deleteUser'
 import useUserSWR from '@/api/admin/users/useUserSWR'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
+import MessageBox from '@/components/elements/MessageBox'
 
 const DeleteUserContainer = () => {
     const { data: user } = useUserSWR()
     const [loading, setLoading] = useState(false)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:user:settings:delete')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        'admin:user:settings:delete'
+    )
     const navigate = useNavigate()
 
     const handleDelete = async () => {
@@ -39,7 +43,8 @@ const DeleteUserContainer = () => {
                     </p>
                     {user.serversCount > 0 ? (
                         <MessageBox title='Error' type='error'>
-                            This user cannot be deleted with servers still associated with it.
+                            This user cannot be deleted with servers still
+                            associated with it.
                         </MessageBox>
                     ) : null}
                 </div>

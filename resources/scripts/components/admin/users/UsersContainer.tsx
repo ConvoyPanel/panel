@@ -1,24 +1,30 @@
-import { User } from '@/api/admin/users/getUsers'
-import useUsersSWR from '@/api/admin/users/useUsersSWR'
-import SearchBar from '@/components/admin/SearchBar'
-import CreateUserModal from '@/components/admin/users/CreateUserModal'
-import Table, { ColumnArray } from '@/components/elements/displays/Table'
-import TextInput from '@/components/elements/inputs/TextInput'
-import PageContentBlock from '@/components/elements/PageContentBlock'
-import Pagination from '@/components/elements/Pagination'
-import Spinner from '@/components/elements/Spinner'
 import usePagination from '@/util/usePagination'
 import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { User } from '@/api/admin/users/getUsers'
+import useUsersSWR from '@/api/admin/users/useUsersSWR'
+
+import PageContentBlock from '@/components/elements/PageContentBlock'
+import Pagination from '@/components/elements/Pagination'
+import Spinner from '@/components/elements/Spinner'
+import Table, { ColumnArray } from '@/components/elements/displays/Table'
+import TextInput from '@/components/elements/inputs/TextInput'
+
+import SearchBar from '@/components/admin/SearchBar'
+import CreateUserModal from '@/components/admin/users/CreateUserModal'
+
 const columns: ColumnArray<User> = [
     {
         accessor: 'name',
         header: 'Name',
         cell: ({ value, row }) => (
-            <Link to={`/admin/users/${row.id}/settings`} className='link text-foreground'>
+            <Link
+                to={`/admin/users/${row.id}/settings`}
+                className='link text-foreground'
+            >
                 {value}
             </Link>
         ),
@@ -33,7 +39,12 @@ const columns: ColumnArray<User> = [
         align: 'center',
         cell: ({ value }) => (
             <div className='grid place-items-center'>
-                {value ? <CheckIcon title='hidden' className='h-5 w-5 text-foreground' /> : null}
+                {value ? (
+                    <CheckIcon
+                        title='hidden'
+                        className='h-5 w-5 text-foreground'
+                    />
+                ) : null}
             </div>
         ),
     },
@@ -42,7 +53,10 @@ const columns: ColumnArray<User> = [
         header: 'Servers',
         align: 'center',
         cell: ({ value, row }) => (
-            <Link to={`/admin/users/${row.id}/servers`} className='link text-foreground'>
+            <Link
+                to={`/admin/users/${row.id}/servers`}
+                className='link text-foreground'
+            >
                 {value}
             </Link>
         ),
@@ -60,12 +74,19 @@ const UsersContainer = () => {
         <div className='bg-background min-h-screen'>
             <CreateUserModal open={open} onClose={() => setOpen(false)} />
             <PageContentBlock title='Users' showFlashKey='admin:users'>
-                <SearchBar value={query} onChange={e => setQuery(e.target.value)} buttonText='New User' onClick={() => setOpen(true)} />
+                <SearchBar
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    buttonText='New User'
+                    onClick={() => setOpen(true)}
+                />
                 {!data ? (
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table columns={columns} data={items} />}
+                        {({ items }) => (
+                            <Table columns={columns} data={items} />
+                        )}
                     </Pagination>
                 )}
             </PageContentBlock>

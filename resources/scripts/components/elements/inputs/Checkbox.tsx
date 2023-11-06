@@ -1,9 +1,12 @@
-import styled from '@emotion/styled'
-import { Checkbox as MantineCheckbox, CheckboxProps as MantineCheckboxProps } from '@mantine/core'
-import { CheckIcon, MinusIcon } from '@heroicons/react/20/solid'
 import { classNames } from '@/util/helpers'
-import tw from 'twin.macro'
+import styled from '@emotion/styled'
+import { CheckIcon, MinusIcon } from '@heroicons/react/20/solid'
+import {
+    Checkbox as MantineCheckbox,
+    CheckboxProps as MantineCheckboxProps,
+} from '@mantine/core'
 import { forwardRef } from 'react'
+import tw from 'twin.macro'
 
 const StyledCheckbox = styled(MantineCheckbox)`
     .mantine-Checkbox-body {
@@ -32,14 +35,27 @@ const StyledCheckbox = styled(MantineCheckbox)`
     }
 `
 
-const Icon = ({ indeterminate, className }: { indeterminate: boolean; className: string }) => {
+const Icon = ({
+    indeterminate,
+    className,
+}: {
+    indeterminate: boolean
+    className: string
+}) => {
     return !indeterminate ? (
-        <CheckIcon className={classNames('stroke-2 stroke-background text-background', className)} />
+        <CheckIcon
+            className={classNames(
+                'stroke-2 stroke-background text-background',
+                className
+            )}
+        />
     ) : (
         <MinusIcon
             className={classNames(
                 'stroke-2',
-                false ? 'stroke-accent-300 text-accent-300' : 'stroke-foreground text-foreground', // supposed to switch based on "disabled" state
+                false
+                    ? 'stroke-accent-300 text-accent-300'
+                    : 'stroke-foreground text-foreground', // supposed to switch based on "disabled" state
                 className
             )}
         />

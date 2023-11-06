@@ -1,9 +1,10 @@
-import { ComponentPropsWithoutRef, forwardRef } from 'react'
 import styled from '@emotion/styled'
-import tw from 'twin.macro'
 import { CheckIcon } from '@heroicons/react/20/solid'
+import { ComponentPropsWithoutRef, forwardRef } from 'react'
+import tw from 'twin.macro'
 
-interface DescriptiveItemComponentProps extends ComponentPropsWithoutRef<'div'> {
+interface DescriptiveItemComponentProps
+    extends ComponentPropsWithoutRef<'div'> {
     label: string
     description: string
 }
@@ -32,16 +33,20 @@ const StyledDescriptiveItemComponentProps = styled.div`
     }
 `
 
-const DescriptiveItemComponent = forwardRef<HTMLDivElement, DescriptiveItemComponentProps>(
-    ({ label, description, className, ...props }, ref) => (
-        <StyledDescriptiveItemComponentProps ref={ref} {...props}>
-            <div>
-                <p className='select-item-label'>{label}</p>
-                <p className='select-item-description'>{description}</p>
-            </div>
-            <CheckIcon className='h-4 w-4 text-foreground select-item-icon' title='checked' />
-        </StyledDescriptiveItemComponentProps>
-    )
-)
+const DescriptiveItemComponent = forwardRef<
+    HTMLDivElement,
+    DescriptiveItemComponentProps
+>(({ label, description, className, ...props }, ref) => (
+    <StyledDescriptiveItemComponentProps ref={ref} {...props}>
+        <div>
+            <p className='select-item-label'>{label}</p>
+            <p className='select-item-description'>{description}</p>
+        </div>
+        <CheckIcon
+            className='h-4 w-4 text-foreground select-item-icon'
+            title='checked'
+        />
+    </StyledDescriptiveItemComponentProps>
+))
 
 export default DescriptiveItemComponent

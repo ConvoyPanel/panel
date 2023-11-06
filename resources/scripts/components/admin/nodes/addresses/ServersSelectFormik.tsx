@@ -1,10 +1,12 @@
-import useServersSWR from '@/api/admin/servers/useServersSWR'
-import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useField } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
+
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+import useServersSWR from '@/api/admin/servers/useServersSWR'
+
+import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
+import SelectFormik from '@/components/elements/formik/SelectFormik'
 
 const ServersSelectFormik = () => {
     const [{ value }] = useField('serverId')
@@ -13,7 +15,10 @@ const ServersSelectFormik = () => {
     const { data: node } = useNodeSWR()
     const [debouncedQuery] = useDebouncedValue(query, 200)
 
-    const { data, isLoading, isValidating } = useServersSWR({ nodeId: node.id, query: debouncedQuery })
+    const { data, isLoading, isValidating } = useServersSWR({
+        nodeId: node.id,
+        query: debouncedQuery,
+    })
     const servers = useMemo(
         () =>
             data?.items.map(server => ({

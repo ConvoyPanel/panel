@@ -1,5 +1,5 @@
-import http, { getPaginationSet, PaginatedResult } from '@/api/http'
-import { rawDataToServerBuild, ServerBuild } from '@/api/server/getServer'
+import http, { PaginatedResult, getPaginationSet } from '@/api/http'
+import { ServerBuild, rawDataToServerBuild } from '@/api/server/getServer'
 
 interface QueryParams {
     query?: string
@@ -8,7 +8,11 @@ interface QueryParams {
     perPage?: number
 }
 
-export default ({ query, perPage = 50, ...params }: QueryParams): Promise<PaginatedResult<ServerBuild>> => {
+export default ({
+    query,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<PaginatedResult<ServerBuild>> => {
     return new Promise((resolve, reject) => {
         http.get('/api/client/servers', {
             params: {
@@ -19,7 +23,9 @@ export default ({ query, perPage = 50, ...params }: QueryParams): Promise<Pagina
         })
             .then(({ data }) =>
                 resolve({
-                    items: (data.data || []).map((datum: any) => rawDataToServerBuild(datum)),
+                    items: (data.data || []).map((datum: any) =>
+                        rawDataToServerBuild(datum)
+                    ),
                     pagination: getPaginationSet(data.meta.pagination),
                 })
             )

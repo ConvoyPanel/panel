@@ -1,25 +1,32 @@
-import FormCard from '@/components/elements/FormCard'
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
-import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
-import Button from '@/components/elements/Button'
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
-import updateServer from '@/api/admin/servers/updateServer'
-import { EloquentStatus } from '@/api/server/types'
-import { z } from 'zod'
 import { hostname } from '@/util/validation'
-import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
+import { z } from 'zod'
+
+import updateServer from '@/api/admin/servers/updateServer'
+import { EloquentStatus } from '@/api/server/types'
+
+import Button from '@/components/elements/Button'
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import FormCard from '@/components/elements/FormCard'
 import SelectForm from '@/components/elements/forms/SelectForm'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
+import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
 const ServerInformationCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
-    const setServer = AdminServerContext.useStoreActions(actions => actions.server.setServer)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.servers.${server.uuid}.settings.general.info`)
+    const setServer = AdminServerContext.useStoreActions(
+        actions => actions.server.setServer
+    )
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.servers.${server.uuid}.settings.general.info`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.servers.settings')
 
@@ -76,10 +83,19 @@ const ServerInformationCard = () => {
     const statusTypes = [
         { value: 'ready', label: t('server_info.statuses.ready') },
         { value: 'installing', label: t('server_info.statuses.installing') },
-        { value: 'install_failed', label: t('server_info.statuses.install_failed') },
+        {
+            value: 'install_failed',
+            label: t('server_info.statuses.install_failed'),
+        },
         { value: 'suspended', label: t('server_info.statuses.suspended') },
-        { value: 'restoring_backup', label: t('server_info.statuses.restoring_backup') },
-        { value: 'restoring_snapshot', label: t('server_info.statuses.restoring_snapshot') },
+        {
+            value: 'restoring_backup',
+            label: t('server_info.statuses.restoring_backup'),
+        },
+        {
+            value: 'restoring_snapshot',
+            label: t('server_info.statuses.restoring_snapshot'),
+        },
     ]
 
     return (
@@ -87,15 +103,29 @@ const ServerInformationCard = () => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <FormCard.Body>
-                        <FormCard.Title>{t('server_info.title')}</FormCard.Title>
+                        <FormCard.Title>
+                            {t('server_info.title')}
+                        </FormCard.Title>
                         <div className='space-y-3 mt-3'>
-                            <FlashMessageRender byKey={`admin.servers.${server.uuid}.settings.general.info`} />
-                            <TextInputForm name='name' label={tStrings('display_name')} />
-                            <TextInputForm name='hostname' label={tStrings('hostname')} />
+                            <FlashMessageRender
+                                byKey={`admin.servers.${server.uuid}.settings.general.info`}
+                            />
+                            <TextInputForm
+                                name='name'
+                                label={tStrings('display_name')}
+                            />
+                            <TextInputForm
+                                name='hostname'
+                                label={tStrings('hostname')}
+                            />
                             <TextInputForm name='vmid' label='VMID' />
                             <UsersSelectForm />
                             <NodesSelectForm />
-                            <SelectForm name={'status'} data={statusTypes} label={tStrings('status')} />
+                            <SelectForm
+                                name={'status'}
+                                data={statusTypes}
+                                label={tStrings('status')}
+                            />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>

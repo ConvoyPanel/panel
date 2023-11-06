@@ -1,4 +1,8 @@
-import http, { FractalResponseData, getPaginationSet, PaginatedResult } from '@/api/http'
+import http, {
+    FractalResponseData,
+    PaginatedResult,
+    getPaginationSet,
+} from '@/api/http'
 
 export interface Location {
     id: number
@@ -25,26 +29,25 @@ export interface QueryParams {
 export type LocationResponse = PaginatedResult<Location>
 
 export default ({
-                    query,
-                    perPage = 50,
-                    ...params
-                }: QueryParams): Promise<PaginatedResult<Location>> => {
+    query,
+    perPage = 50,
+    ...params
+}: QueryParams): Promise<PaginatedResult<Location>> => {
     return new Promise((resolve, reject) => {
-        http
-            .get('/api/admin/locations', {
-                params: {
-                    'filter[*]': query,
-                    per_page: perPage,
-                    ...params,
-                },
-            })
+        http.get('/api/admin/locations', {
+            params: {
+                'filter[*]': query,
+                'per_page': perPage,
+                ...params,
+            },
+        })
             .then(({ data }) =>
                 resolve({
                     items: (data.data || []).map((datum: any) =>
-                        rawDataToLocation(datum),
+                        rawDataToLocation(datum)
                     ),
                     pagination: getPaginationSet(data.meta.pagination),
-                }),
+                })
             )
             .catch(reject)
     })

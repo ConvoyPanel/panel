@@ -1,11 +1,12 @@
-import { ServerBuild } from '@/api/server/getServer'
 import { formatBytes, getInitials } from '@/util/helpers'
 import styled from '@emotion/styled'
 import { Avatar, Badge } from '@mantine/core'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import tw from 'twin.macro'
-import { useTranslation } from 'react-i18next'
+
+import { ServerBuild } from '@/api/server/getServer'
 
 interface Props {
     server: ServerBuild
@@ -36,7 +37,9 @@ const ServerCard = ({ server }: Props) => {
                 </Avatar>
                 <div className='overflow-hidden'>
                     <div className='flex items-center space-x-3'>
-                        <p className='font-medium text-foreground truncate'>{server.name}</p>{' '}
+                        <p className='font-medium text-foreground truncate'>
+                            {server.name}
+                        </p>{' '}
                         {server.status === 'suspended' && (
                             <Badge color='orange' radius='sm'>
                                 {tStrings('suspended')}

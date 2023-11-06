@@ -1,22 +1,33 @@
+import { NodeContext } from '@/state/admin/node'
+import { bytesToString } from '@/util/helpers'
+import usePagination from '@/util/usePagination'
+import {
+    ExclamationCircleIcon,
+    EyeIcon,
+    EyeSlashIcon,
+} from '@heroicons/react/20/solid'
+import { Loader } from '@mantine/core'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import deleteIso from '@/api/admin/nodes/isos/deleteIso'
+import { ISO, IsoResponse } from '@/api/admin/nodes/isos/getIsos'
 import useIsosSWR from '@/api/admin/nodes/isos/useIsosSWR'
-import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
-import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/elements/displays/Table'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import Button from '@/components/elements/Button'
+import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
-import { NodeContext } from '@/state/admin/node'
-import usePagination from '@/util/usePagination'
-import { ISO, IsoResponse } from '@/api/admin/nodes/isos/getIsos'
-import { bytesToString } from '@/util/helpers'
-import Button from '@/components/elements/Button'
-import { useState } from 'react'
+import Table, {
+    Actions,
+    ColumnArray,
+    RowActionsProps,
+} from '@/components/elements/displays/Table'
+
+import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import CreateIsoModal from '@/components/admin/nodes/isos/CreateIsoModal'
-import { Loader } from '@mantine/core'
-import { ExclamationCircleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'
-import Menu from '@/components/elements/Menu'
-import deleteIso from '@/api/admin/nodes/isos/deleteIso'
 import EditIsoModal from '@/components/admin/nodes/isos/EditIsoModal'
-import { useTranslation } from 'react-i18next'
-import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const columns: ColumnArray<ISO> = [
     {
@@ -47,9 +58,15 @@ const columns: ColumnArray<ISO> = [
         cell: ({ value }) => (
             <div className='grid place-items-center'>
                 {value ? (
-                    <EyeSlashIcon title='hidden' className='h-5 w-5 text-foreground' />
+                    <EyeSlashIcon
+                        title='hidden'
+                        className='h-5 w-5 text-foreground'
+                    />
                 ) : (
-                    <EyeIcon title='visible' className='h-5 w-5 text-foreground' />
+                    <EyeIcon
+                        title='visible'
+                        className='h-5 w-5 text-foreground'
+                    />
                 )}
             </div>
         ),
@@ -78,7 +95,9 @@ const IsosContainer = () => {
                     mutateData =>
                         ({
                             ...mutateData,
-                            items: mutateData!.items.filter(datum => datum.uuid !== iso.uuid),
+                            items: mutateData!.items.filter(
+                                datum => datum.uuid !== iso.uuid
+                            ),
                         }) as IsoResponse,
                     false
                 )
@@ -86,7 +105,11 @@ const IsosContainer = () => {
         }
         return (
             <>
-                <EditIsoModal open={open} onClose={() => setOpen(false)} iso={iso} />
+                <EditIsoModal
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    iso={iso}
+                />
                 <Actions>
                     <Menu.Item onClick={() => setOpen(true)}>Edit</Menu.Item>
                     <Menu.Divider />
@@ -101,9 +124,16 @@ const IsosContainer = () => {
     return (
         <div className='bg-background min-h-screen'>
             <NodeContentBlock title='ISO Library'>
-                <CreateIsoModal open={showCreateModal} onClose={() => setShowCreateModal(false)} mutate={mutate} />
+                <CreateIsoModal
+                    open={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    mutate={mutate}
+                />
                 <div className='flex justify-end items-center mb-3'>
-                    <Button onClick={() => setShowCreateModal(true)} variant='filled'>
+                    <Button
+                        onClick={() => setShowCreateModal(true)}
+                        variant='filled'
+                    >
                         {t('create_iso')}
                     </Button>
                 </div>
@@ -111,7 +141,13 @@ const IsosContainer = () => {
                     <Spinner />
                 ) : (
                     <Pagination data={data} onPageSelect={setPage}>
-                        {({ items }) => <Table rowActions={rowActions} columns={columns} data={items} />}
+                        {({ items }) => (
+                            <Table
+                                rowActions={rowActions}
+                                columns={columns}
+                                data={items}
+                            />
+                        )}
                     </Pagination>
                 )}
             </NodeContentBlock>

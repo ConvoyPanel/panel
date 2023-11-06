@@ -1,5 +1,10 @@
 import styled from '@emotion/styled'
-import { Menu as MantineMenu, MenuProps, MenuDropdownProps, MenuItemProps } from '@mantine/core'
+import {
+    Menu as MantineMenu,
+    MenuDropdownProps,
+    MenuItemProps,
+    MenuProps,
+} from '@mantine/core'
 import { FC, MouseEventHandler } from 'react'
 import tw from 'twin.macro'
 

@@ -1,9 +1,11 @@
-import RingCard from '@/components/elements/displays/RingCard'
 import { NodeContext } from '@/state/admin/node'
 import { formatBytes } from '@/util/helpers'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import RingCard from '@/components/elements/displays/RingCard'
 
 const NodeDetailsBlock = () => {
     const { data: node } = useNodeSWR()
