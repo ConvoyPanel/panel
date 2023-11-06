@@ -10,6 +10,7 @@ import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     open: boolean
@@ -19,8 +20,8 @@ interface Props {
 
 const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { mutate } = useTemplateGroupsSWR(nodeId)
+    const { data: node } = useNodeSWR()
+    const { mutate } = useTemplateGroupsSWR(node.id)
 
     const form = useFormik({
         enableReinitialize: true,
@@ -37,7 +38,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
             clearFlashes('admin:node:template-groups.edit')
 
             if (group) {
-                updateTemplateGroup(nodeId, group.uuid, values)
+                updateTemplateGroup(node.id, group.uuid, values)
                     .then(({ name, hidden }) => {
                         handleClose()
 
@@ -49,7 +50,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                         setSubmitting(false)
                     })
             } else {
-                createTemplateGroup(nodeId, values)
+                createTemplateGroup(node.id, values)
                     .then(newGroup => {
                         handleClose()
 
@@ -64,17 +65,6 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
                                 },
                             ]
                         }, false)
-
-                        // mutate(
-                        //     groups => [
-                        //         ...groups,
-                        //         {
-                        //             ...newGroup,
-                        //             templates: [],
-                        //         },
-                        //     ],
-                        //     false
-                        // )
                     })
                     .catch(error => {
                         clearAndAddHttpError({ key: 'admin:node:template-groups.edit', error })

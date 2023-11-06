@@ -27,10 +27,11 @@ import TemplateGroupCard from '@/components/admin/nodes/templates/TemplateGroupC
 import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTemplateGroupModal'
 import useFlash from '@/util/useFlash'
 import { httpErrorToHuman } from '@/api/http'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const NodeTemplatesContainer = () => {
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { data, mutate } = useTemplatesGroupSWR(nodeId, [])
+    const { data: node } = useNodeSWR()
+    const { data, mutate } = useTemplatesGroupSWR(node.id, [])
     const notify = useNotify()
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [activeId, setActiveId] = useState<TemplateGroup | undefined>()
@@ -55,7 +56,7 @@ const NodeTemplatesContainer = () => {
             disallowClose: true,
         })
 
-        reorderTemplateGroups(nodeId, groups)
+        reorderTemplateGroups(node.id, groups)
             .then(() => {
                 updateNotification({
                     id: 'admin:node:template-groups.reorder',

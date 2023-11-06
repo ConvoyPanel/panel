@@ -14,7 +14,7 @@ class AddressRepository extends EloquentRepository
         return Address::class;
     }
 
-    public function createIPv4AddressesInBulk(
+    public function bulkCreateIPv4Addresses(
         string  $startingAddress,
         string  $endingAddress,
         int     $addressPoolId,
@@ -65,7 +65,7 @@ class AddressRepository extends EloquentRepository
         );
     }
 
-    public function createIPv6AddressesInBulk(
+    public function bulkCreateIPv6Addresses(
         string  $startingAddress,
         string  $endingAddress,
         int     $addressPoolId,

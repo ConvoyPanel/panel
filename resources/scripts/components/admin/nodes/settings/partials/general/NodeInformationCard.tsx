@@ -11,10 +11,10 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const NodeInformationCard = () => {
-    const node = NodeContext.useStoreState(state => state.node.data!)
-    const setNode = NodeContext.useStoreActions(actions => actions.node.setNode)
+    const { data: node, mutate } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.info`)
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.settings')
@@ -69,7 +69,7 @@ const NodeInformationCard = () => {
                 disk: disk * 1048576,
             })
 
-            setNode(updatedNode)
+            mutate(() => updatedNode, false)
 
             form.reset({
                 name: data.name,

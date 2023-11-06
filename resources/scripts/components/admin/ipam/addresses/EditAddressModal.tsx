@@ -1,4 +1,4 @@
-import useAddressPoolSWR from '@/api/admin/addressPools/addresses/useAddressPoolSWR'
+import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import RadioGroupForm from '@/components/elements/forms/RadioGroupForm'
@@ -16,7 +16,7 @@ import { KeyedMutator, mutate } from 'swr'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
 import { Address } from '@/api/server/getServer'
 import { useEffect } from 'react'
-import updateAddress from '@/api/admin/addressPools/addresses/updateAddressPool'
+import updateAddress from '@/api/admin/addressPools/addresses/updateAddress'
 
 interface Props {
     address: Address | null

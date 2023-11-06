@@ -9,6 +9,7 @@ import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     open: boolean
@@ -17,9 +18,9 @@ interface Props {
 }
 
 const EditIsoModal = ({ open, onClose, iso }: Props) => {
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const { mutate } = useIsosSWR({ nodeId })
+    const { mutate } = useIsosSWR({ nodeId: node.id })
 
     const form = useFormik({
         enableReinitialize: true,
@@ -34,14 +35,14 @@ const EditIsoModal = ({ open, onClose, iso }: Props) => {
         onSubmit: ({ name, hidden }, { setSubmitting }) => {
             setSubmitting(true)
             clearFlashes('admin:node:iso.update')
-            updateIso(nodeId, iso.uuid, name, hidden)
+            updateIso(node.id, iso.uuid, name, hidden)
                 .then(newIso => {
                     mutate(
                         mutateData =>
                             ({
                                 ...mutateData,
                                 items: mutateData!.items.map(item => (item.uuid === newIso.uuid ? newIso : item)),
-                            } as IsoResponse),
+                            }) as IsoResponse,
                         false
                     )
                     setSubmitting(false)

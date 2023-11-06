@@ -6,7 +6,7 @@
     "htmlWhitespaceSensitivity": "css",
     "insertPragma": false,
     "jsxSingleQuote": true,
-    "printWidth": 120,
+    "printWidth": 80,
     "proseWrap": "preserve",
     "quoteProps": "consistent",
     "requirePragma": false,
@@ -16,5 +16,9 @@
     "trailingComma": "es5",
     "useTabs": false,
     "vueIndentScriptAndStyle": false,
-    "tabWidth": 4
+    "tabWidth": 4,
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "importOrder": ["^@/api/(.*)$", "^@/components/elements/(.*)$", "^@/components/(.*)$", "^[./]"],
+    "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

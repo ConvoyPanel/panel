@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Convoy\Models\AddressPool;
 use Illuminate\Validation\Validator;
 use Convoy\Http\Requests\FormRequest;
+use Convoy\Enums\Network\AddressType;
 use Convoy\Validation\ValidateAddressType;
 use Convoy\Validation\ValidateAddressUniqueness;
 
@@ -25,8 +26,8 @@ class UpdateAddressRequest extends FormRequest
         $address = $this->parameter('address', Address::class);
 
         $validator->after([
-           new ValidateAddressType,
-           new ValidateAddressUniqueness($pool->id, $address->address),
+            new ValidateAddressType($this->enum('type', AddressType::class), ['address']),
+            new ValidateAddressUniqueness($pool->id, $address->address),
         ]);
     }
 }

@@ -36,7 +36,7 @@ type CreateAddressParameters = z.infer<typeof schema> & {
 const createAddress = async (
     poolId: number,
     { isBulkAction, startingAddress, endingAddress, macAddress, serverId, include, ...payload }: CreateAddressParameters
-): Promise<Address | Address[]> => {
+): Promise<Address | null> => {
     const {
         data: { data },
     } = await http.post(
@@ -56,7 +56,7 @@ const createAddress = async (
         }
     )
 
-    return Array.isArray(data) ? data.map(rawDataToAddress) : rawDataToAddress(data)
+    return data ? rawDataToAddress(data) : null
 }
 
 export default createAddress

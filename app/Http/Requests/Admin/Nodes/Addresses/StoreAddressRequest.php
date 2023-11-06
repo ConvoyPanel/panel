@@ -3,58 +3,43 @@
 namespace Convoy\Http\Requests\Admin\Nodes\Addresses;
 
 use Convoy\Models\Address;
+use Convoy\Models\AddressPool;
+use Convoy\Enums\Network\AddressType;
+use Convoy\Validation\ValidateAddressType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
+use Convoy\Validation\ValidateAddressUniqueness;
 
 class StoreAddressRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
-        return Arr::except(Address::getRules(), ['node_id']);
+        $rules = Arr::except(Address::getRules(), 'address');
+
+        return [
+            'is_bulk_action' => 'sometimes|boolean',
+            'starting_address' => 'required_if:is_bulk_action,1|exclude_if:is_bulk_action,0|ip',
+            'ending_address' => 'required_if:is_bulk_action,1|exclude_if:is_bulk_action,0|ip',
+            'address' => 'required_if:is_bulk_action,0|exclude_if:is_bulk_action,1|ip',
+            ...$rules,
+        ];
     }
 
-    public function withValidator(Validator $validator)
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator) {
-            // if the type is ipv4 make sure both the address and gateway are valid ipv4 addresses and do the same for ipv6
-            if ($this->type === 'ipv4') {
-                if (! filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                    $validator->errors()->add('address', 'The address must be a valid IPv4 address.');
-                }
+        $rules = [];
 
-                if (! filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                    $validator->errors()->add('gateway', 'The gateway must be a valid IPv4 address.');
-                }
-            } elseif ($this->type === 'ipv6') {
-                if (! filter_var($this->address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                    $validator->errors()->add('address', 'The address must be a valid IPv6 address.');
-                }
+        if ($this->boolean('is_bulk_action')) {
+            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['starting_address', 'ending_address', 'gateway']);
+        }
 
-                if (! filter_var($this->gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                    $validator->errors()->add('gateway', 'The gateway must be a valid IPv6 address.');
-                }
-            }
+        if (!$this->boolean('is_bulk_action')) {
+            $pool = $this->parameter('address_pool', AddressPool::class);
+            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['address', 'gateway']);
+            $rules[] = new ValidateAddressUniqueness($pool->id);
+        }
 
-            $nodeId = $this->route()->originalParameter('node');
-
-            // check for duplicate addresses
-            if (Address::where([['node_id', '=', $nodeId], ['address', '=', $this->address]])->exists()) {
-                $validator->errors()->add('address', 'The address has already been imported.');
-            }
-        });
+        $validator->after($rules);
     }
 }

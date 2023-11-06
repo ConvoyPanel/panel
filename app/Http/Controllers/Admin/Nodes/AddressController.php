@@ -2,102 +2,99 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\Controller;
-use Convoy\Http\Requests\Admin\Nodes\Addresses\StoreAddressRequest;
-use Convoy\Http\Requests\Admin\Nodes\Addresses\UpdateAddressRequest;
-use Convoy\Models\Filters\AllowedNullableFilter;
-use Convoy\Models\Filters\FiltersAddress;
-use Convoy\Models\Address;
 use Convoy\Models\Node;
-use Convoy\Services\Servers\NetworkService;
-use Convoy\Transformers\Admin\AddressTransformer;
-use Exception;
+use Convoy\Models\Address;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Models\AddressPool;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+use Convoy\Http\Controllers\Controller;
+use Convoy\Models\Filters\FiltersAddress;
+use Convoy\Services\Servers\NetworkService;
+use Illuminate\Database\ConnectionInterface;
+use Convoy\Models\Filters\AllowedNullableFilter;
+use Convoy\Transformers\Admin\AddressTransformer;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class AddressController extends Controller
 {
-    public function __construct(private NetworkService $networkService)
+    public function __construct(private NetworkService $networkService, private ConnectionInterface $connection)
     {
     }
 
     public function index(Request $request, Node $node)
     {
-        $addresses = QueryBuilder::for(Address::query())
+        $addresses = QueryBuilder::for($node->addresses())
             ->with('server')
-            ->where('ip_addresses.node_id', $node->id)
-            ->allowedFilters(['address', AllowedFilter::exact('type'), AllowedFilter::custom('*', new FiltersAddress), AllowedNullableFilter::exact('server_id')])
+            ->defaultSort('-id')
+            ->allowedFilters(
+                ['address', AllowedFilter::exact('type'), AllowedFilter::custom(
+                    '*',
+                    new FiltersAddress,
+                ), AllowedNullableFilter::exact('server_id')],
+            )
             ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
 
         return fractal($addresses, new AddressTransformer)->parseIncludes($request->include)->respond();
     }
 
-    public function store(StoreAddressRequest $request, Node $node)
-    {
-        $address = Address::create(array_merge(['node_id' => $node->id], $request->validated()));
-
-        $address->load('server');
-
-        try {
-            if ($request->server_id) {
-                $this->networkService->syncSettings($address->server);
-            }
-        } catch (Exception $e) {
-            // do nothing
-        }
-
-        return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
-    }
-
     public function update(UpdateAddressRequest $request, Node $node, Address $address)
     {
-        $address->load('server');
+        $address = $this->connection->transaction(function () use ($request, $address) {
+            $oldLinkedServer = $address->server;
 
-        $oldServer = $address->server;
+            $address->update($request->validated());
 
-        $address->update($request->validated());
-
-        $address->refresh();
-
-        $newServer = $address->server;
-
-        try {
-            if ($oldServer?->id !== $newServer?->id) {
-                if ($oldServer) {
-                    $this->networkService->syncSettings($oldServer);
+            try {
+                // Detach old server
+                if ($oldLinkedServer) {
+                    $this->networkService->syncSettings($oldLinkedServer);
                 }
 
-                if ($newServer) {
-                    $this->networkService->syncSettings($newServer);
+                // Attach new server
+                if ($address->server) {
+                    $this->networkService->syncSettings($address->server);
+                }
+            } catch (ProxmoxConnectionException) {
+                if ($oldLinkedServer && !$address->server) {
+                    throw new ServiceUnavailableHttpException(
+                        message: "Server {$oldLinkedServer->uuid} failed to sync network settings.",
+                    );
+                } elseif (!$oldLinkedServer && $address->server) {
+                    throw new ServiceUnavailableHttpException(
+                        message: "Server {$address->server->uuid} failed to sync network settings.",
+                    );
+                } elseif ($oldLinkedServer && $address->server) {
+                    throw new ServiceUnavailableHttpException(
+                        message: "Servers {$oldLinkedServer->uuid} and {$address->server->uuid} failed to sync network settings.",
+                    );
                 }
             }
-        } catch (Exception $e) {
-            // do nothing
-        }
 
-        $address->load('server');
+            return $address;
+        });
 
-        return fractal($address, new AddressTransformer)->parseIncludes(['server'])->respond();
+        return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
     }
 
-    public function destroy(Node $node, Address $address): Response
+    public function destroy(Node $node, Address $address)
     {
-        $address->load('server');
+        $this->connection->transaction(function () use ($address) {
+            $address->delete();
 
-        $server = $address->server;
-
-        $address->delete();
-
-        try {
-            if ($server) {
-                $this->networkService->syncSettings($server);
+            if ($address->server) {
+                try {
+                    $this->networkService->syncSettings($address->server);
+                } catch (ProxmoxConnectionException) {
+                    throw new ServiceUnavailableHttpException(
+                        message: "Server {$address->server->uuid} failed to sync network settings.",
+                    );
+                }
             }
-        } catch (Exception $e) {
-            // do nothing
-        }
+        });
 
-        return response()->noContent();
+        return $this->returnNoContent();
     }
 }

@@ -3,12 +3,12 @@
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
 use Convoy\Models\Address;
-use Illuminate\Support\Facades\Log;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Services\Servers\NetworkService;
+use Convoy\Jobs\Server\SyncNetworkSettings;
 use Illuminate\Database\ConnectionInterface;
 use Convoy\Transformers\Admin\AddressTransformer;
-use Convoy\Services\Nodes\Addresses\AddressHelpers;
+use Convoy\Repositories\Eloquent\AddressRepository;
 use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\AllowedNullableFilter;
@@ -16,7 +16,6 @@ use Convoy\Models\Filters\FiltersAddress;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -24,7 +23,7 @@ use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 
 class AddressController extends ApplicationApiController
 {
-    public function __construct(private NetworkService $networkService, private AddressHelpers $addressHelpers, private ConnectionInterface $connection)
+    public function __construct(private NetworkService $networkService, private AddressRepository $repository, private ConnectionInterface $connection)
     {
     }
 
@@ -46,27 +45,9 @@ class AddressController extends ApplicationApiController
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
     {
-        /** @var Address|Address[] $address */
-        $address = $this->connection->transaction(function () use ($request, $addressPool) {
-            if ($request->boolean('is_bulk_action')) {
-                $addressesToAdd = $this->addressHelpers->expandIpRange(
-                    $request->enum('type', AddressType::class),
-                    $request->starting_address,
-                    $request->ending_address,
-                );
-
-                foreach ($addressesToAdd as &$address) {
-                    $address = [
-                        'address' => $address,
-                        'address_pool_id' => $addressPool->id,
-                        ...$request->safe()->only(['server_id', 'type', 'cidr', 'gateway', 'mac_address'])
-                    ];
-                }
-
-
-
-
-            } else {
+        if (!$request->boolean('is_bulk_action')) {
+            /** @var Address $address */
+            $address = $this->connection->transaction(function () use ($request, $addressPool) {
                 $address = $addressPool->addresses()->create($request->validated());
 
                 if ($request->server_id) {
@@ -80,10 +61,42 @@ class AddressController extends ApplicationApiController
                 }
 
                 return $address;
-            }
-        });
+            });
 
-        return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
+            return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
+        }
+
+        if ($request->boolean('is_bulk_action')) {
+            $this->connection->transaction(function () use ($request, $addressPool) {
+                if ($request->enum('type', AddressType::class) === AddressType::IPV4) {
+                    $this->repository->bulkCreateIPv4Addresses(
+                        $request->starting_address,
+                        $request->ending_address,
+                        $addressPool->id,
+                        $request->server_id,
+                        $request->cidr,
+                        $request->gateway,
+                        $request->mac_address,
+                    );
+                } else {
+                    $this->repository->bulkCreateIPv6Addresses(
+                        $request->starting_address,
+                        $request->ending_address,
+                        $addressPool->id,
+                        $request->server_id,
+                        $request->cidr,
+                        $request->gateway,
+                        $request->mac_address,
+                    );
+                }
+            });
+
+            if (!is_null($request->server_id)) {
+                SyncNetworkSettings::dispatch($request->integer('server_id'));
+            }
+
+            return $this->returnNoContent();
+        }
     }
 
     public function update(UpdateAddressRequest $request, AddressPool $addressPool, Address $address)

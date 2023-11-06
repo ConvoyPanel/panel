@@ -16,6 +16,7 @@ import Menu from '@/components/elements/Menu'
 import deleteIso from '@/api/admin/nodes/isos/deleteIso'
 import EditIsoModal from '@/components/admin/nodes/isos/EditIsoModal'
 import { useTranslation } from 'react-i18next'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const columns: ColumnArray<ISO> = [
     {
@@ -62,9 +63,9 @@ const columns: ColumnArray<ISO> = [
 ]
 
 const IsosContainer = () => {
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const [page, setPage] = usePagination()
-    const { data, mutate } = useIsosSWR({ nodeId })
+    const { data, mutate } = useIsosSWR({ nodeId: node.id })
     const [showCreateModal, setShowCreateModal] = useState(false)
     const { t } = useTranslation('admin.nodes.isos')
 
@@ -72,13 +73,13 @@ const IsosContainer = () => {
         const [open, setOpen] = useState(false)
 
         const handleDelete = () => {
-            deleteIso(nodeId, iso.uuid).then(() => {
+            deleteIso(node.id, iso.uuid).then(() => {
                 mutate(
                     mutateData =>
                         ({
                             ...mutateData,
                             items: mutateData!.items.filter(datum => datum.uuid !== iso.uuid),
-                        } as IsoResponse),
+                        }) as IsoResponse,
                     false
                 )
             })

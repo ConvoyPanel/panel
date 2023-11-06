@@ -10,6 +10,7 @@ import useFlash from '@/util/useFlash'
 import { EyeSlashIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 import DottedButton from '@/components/elements/DottedButton'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     template: Template
@@ -19,15 +20,15 @@ interface Props {
 
 const TemplateCard = ({ template, group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { mutate } = useTemplateGroupsSWR(nodeId)
+    const { data: node } = useNodeSWR()
+    const { mutate } = useTemplateGroupsSWR(node.id)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
 
     const handleDelete = async () => {
         clearFlashes('admin:node:template-groups')
 
         try {
-            await deleteTemplate(nodeId, group!.uuid, template.uuid)
+            await deleteTemplate(node.id, group!.uuid, template.uuid)
 
             mutate(
                 groups =>

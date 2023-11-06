@@ -8,10 +8,10 @@ import Table, { Actions, ColumnArray, RowActionsProps } from '@/components/eleme
 import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
-import { NodeContext } from '@/state/admin/node'
 import usePagination from '@/util/usePagination'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const columns: ColumnArray<Address> = [
     {
@@ -47,9 +47,9 @@ const columns: ColumnArray<Address> = [
 ]
 
 const NodeAddressesContainer = () => {
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const [page, setPage] = usePagination()
-    const { mutate, data } = useAddressesSWR(nodeId, { page, include: ['server'] })
+    const { mutate, data } = useAddressesSWR(node.id, { page, include: ['server'] })
     const [open, setOpen] = useState(false)
 
     const rowActions = ({ row }: RowActionsProps<Address>) => {

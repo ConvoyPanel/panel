@@ -4,10 +4,11 @@ import { NodeContext } from '@/state/admin/node'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const QueryFileButton = () => {
     const { getValues, setError, setValue } = useFormContext()
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const [loading, setLoading] = useState(false)
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.isos')
@@ -16,7 +17,7 @@ const QueryFileButton = () => {
         setLoading(true)
 
         try {
-            const metadata = await queryRemoteFile(nodeId, getValues('link'))
+            const metadata = await queryRemoteFile(node.id, getValues('link'))
 
             setValue('fileName', metadata.fileName)
         } catch {

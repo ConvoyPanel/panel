@@ -1,24 +1,22 @@
-import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import RadioGroupForm from '@/components/elements/forms/RadioGroupForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import Radio from '@/components/elements/inputs/Radio'
 import { useFlashKey } from '@/util/useFlash'
-import { ipAddress, macAddress } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Trans, useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
 import createAddress, { schema } from '@/api/admin/addressPools/addresses/createAddress'
-import { KeyedMutator, mutate } from 'swr'
+import { KeyedMutator } from 'swr'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
-import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import { useMemo } from 'react'
-import { Address, AddressType } from '@/api/server/getServer'
+import { AddressType } from '@/api/server/getServer'
 import SegmentedControl from '@/components/elements/SegmentedControl'
 import { countIPsInRange } from '@/util/helpers'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     open: boolean
@@ -29,8 +27,8 @@ interface Props {
 const CreateAddressModal = ({ open, onClose, mutate }: Props) => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.addressPools.addresses')
-    const { data: pool } = useAddressPoolSWR()
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.addressPools.${pool.id}.addresses.create`)
+    const { data: node } = useNodeSWR()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}`)
 
     const form = useForm({
         resolver: zodResolver(schema),

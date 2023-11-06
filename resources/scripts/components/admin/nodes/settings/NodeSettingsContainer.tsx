@@ -7,12 +7,12 @@ const NodeSettingsContainer = () => {
 
     return (
         <SettingsLayout
-            indexPattern='/admin/nodes/:id/settings'
-            defaultUrl='/admin/nodes/:id/settings/general'
+            indexPattern='/admin/nodes/:nodeId/settings'
+            defaultUrl='/admin/nodes/:nodeId/settings/general'
             contentBlock={props => <NodeContentBlock title={tStrings('setting_other')} {...props} />}
             routes={[
                 {
-                    path: '/admin/nodes/:id/settings/general',
+                    path: '/admin/nodes/:nodeId/settings/general',
                     name: tStrings('general'),
                 },
             ]}

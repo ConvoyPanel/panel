@@ -8,10 +8,11 @@ import { useFlashKey } from '@/util/useFlash'
 import { useNavigate } from 'react-router-dom'
 import deleteNode from '@/api/admin/nodes/deleteNode'
 import { useState } from 'react'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const DeleteNodeCard = () => {
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:node:settings:delete')
-    const node = NodeContext.useStoreState(state => state.node.data!)
+    const { data: node } = useNodeSWR()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.delete`)
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
 
@@ -33,7 +34,7 @@ const DeleteNodeCard = () => {
             <FormCard.Body>
                 <FormCard.Title>Delete Node</FormCard.Title>
                 <div className='space-y-3 mt-3'>
-                    <FlashMessageRender byKey='admin:node:settings:delete' />
+                    <FlashMessageRender byKey={`admin.nodes.${node.id}.settings.general.delete`} />
 
                     <p className='description-small my-3'>
                         The node will be permanently deleted from Convoy. This action is irreversible and can not be

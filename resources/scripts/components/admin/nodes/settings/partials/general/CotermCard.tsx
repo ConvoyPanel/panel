@@ -16,10 +16,10 @@ import { useState } from 'react'
 import CotermTokenModal from '@/components/admin/nodes/settings/partials/general/CotermTokenModal'
 import CotermResetModal from '@/components/admin/nodes/settings/partials/general/CotermResetModal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 const CotermCard = () => {
-    const node = NodeContext.useStoreState(state => state.node.data!)
-    const setNode = NodeContext.useStoreActions(actions => actions.node.setNode)
+    const { data: node, mutate } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${node.id}.settings.general.coterm`)
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.settings')
@@ -55,7 +55,7 @@ const CotermCard = () => {
     const isEnabled = form.watch('isEnabled')
 
     const submit = async (_data: any) => {
-        const {fqdn, ...data} = _data as z.infer<typeof schema>
+        const { fqdn, ...data } = _data as z.infer<typeof schema>
         clearFlashes()
 
         try {
@@ -75,7 +75,16 @@ const CotermCard = () => {
                 isTlsEnabled: details.isTlsEnabled,
             })
 
-            setNode({ ...node, ...details })
+            mutate(
+                data => ({
+                    ...data!,
+                    cotermEnabled: details.isEnabled,
+                    cotermFqdn: details.fqdn,
+                    cotermPort: details.port,
+                    cotermTlsEnabled: details.isTlsEnabled,
+                }),
+                false
+            )
         } catch (e) {
             clearAndAddHttpError(e as Error)
         }
@@ -126,7 +135,12 @@ const CotermCard = () => {
                                         label={t('coterm.tls')}
                                         disabled={!isEnabled}
                                     />
-                                    <Button type='button' onClick={() => setShowResetModal(true)} className={'col-span-1'} disabled={!isEnabled}>
+                                    <Button
+                                        type='button'
+                                        onClick={() => setShowResetModal(true)}
+                                        className={'col-span-1'}
+                                        disabled={!isEnabled}
+                                    >
                                         {t('coterm.reset.action')}
                                     </Button>
                                 </div>

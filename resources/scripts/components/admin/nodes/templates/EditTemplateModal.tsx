@@ -10,6 +10,7 @@ import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import * as yup from 'yup'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     open: boolean
@@ -20,8 +21,8 @@ interface Props {
 
 const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { mutate } = useTemplateGroupsSWR(nodeId)
+    const { data: node } = useNodeSWR()
+    const { mutate } = useTemplateGroupsSWR(node.id)
 
     const form = useFormik({
         enableReinitialize: true,
@@ -45,7 +46,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
 
             try {
                 if (template) {
-                    await updateTemplate(nodeId, group.uuid, template.uuid, {
+                    await updateTemplate(node.id, group.uuid, template.uuid, {
                         ...values,
                         vmid: vmid as number,
                     })
@@ -78,7 +79,7 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
                         false
                     )
                 } else {
-                    const template = await createTemplate(nodeId, group.uuid, {
+                    const template = await createTemplate(node.id, group.uuid, {
                         ...values,
                         vmid: vmid as number,
                     })

@@ -18,13 +18,13 @@ readonly class ValidateAddressUniqueness
         if (!$this->existingAddress) {
             if (Address::where([['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
             )->exists()) {
-                $validator->errors()->add('address', 'This address has already been imported.');
+                $validator->errors()->add('address', __('validation.unique_exists', ['attribute' => 'address']));
             }
         } else {
             if ($this->existingAddress !== $data['address'] && Address::where(
                     [['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
                 )->exists()) {
-                $validator->errors()->add('address', 'This address has already been imported.');
+                $validator->errors()->add('address', __('validation.unique_exists', ['attribute' => 'address']));
             }
         }
     }

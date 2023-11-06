@@ -1,23 +1,22 @@
-import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
-import SelectFormik from '@/components/elements/formik/SelectFormik'
-import Modal from '@/components/elements/Modal'
-import { NodeContext } from '@/state/admin/node'
 import { useFlashKey } from '@/util/useFlash'
-import createIso from '@/api/admin/nodes/isos/createIso'
-import QueryFileButton from '@/components/admin/nodes/isos/QueryFileButton'
-import { FileMetadata } from '@/api/admin/tools/queryRemoteFile'
-import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
-import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCallback, useMemo, useState } from 'react'
-import TextInputForm from '@/components/elements/forms/TextInputForm'
+import { FormProvider, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { KeyedMutator } from 'swr'
+import { z } from 'zod'
+
+import createIso from '@/api/admin/nodes/isos/createIso'
 import { ISO, IsoResponse } from '@/api/admin/nodes/isos/getIsos'
-import CheckboxForm from '@/components/elements/forms/CheckboxForm'
-import { data } from 'autoprefixer'
-import SelectForm from '@/components/elements/forms/SelectForm'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
+
+import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
+import Modal from '@/components/elements/Modal'
 import SegmentedControl from '@/components/elements/SegmentedControl'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
+import SelectForm from '@/components/elements/forms/SelectForm'
+import TextInputForm from '@/components/elements/forms/TextInputForm'
+
+import QueryFileButton from '@/components/admin/nodes/isos/QueryFileButton'
 
 interface Props {
     open: boolean
@@ -26,8 +25,10 @@ interface Props {
 }
 
 const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(`admin.nodes.${nodeId}.isos.create`)
+    const { data: node } = useNodeSWR()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.isos.create`
+    )
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.nodes.isos')
 
@@ -36,7 +37,11 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
         name: z.string().max(40).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(
+                /\.iso$/,
+                t('create_modal.non_iso_file_name_error') ??
+                    'The file extension must end in .iso'
+            )
             .max(191)
             .nonempty(),
         hidden: z.boolean(),
@@ -48,7 +53,11 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
         link: z.string().url().max(191).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(
+                /\.iso$/,
+                t('create_modal.non_iso_file_name_error') ??
+                    'The file extension must end in .iso'
+            )
             .max(191)
             .nonempty(),
         checksumAlgorithm: z.literal('none'),
@@ -62,17 +71,35 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
         link: z.string().url().max(191).nonempty(),
         fileName: z
             .string()
-            .regex(/\.iso$/, t('create_modal.non_iso_file_name_error') ?? 'The file extension must end in .iso')
+            .regex(
+                /\.iso$/,
+                t('create_modal.non_iso_file_name_error') ??
+                    'The file extension must end in .iso'
+            )
             .max(191)
             .nonempty(),
-        checksumAlgorithm: z.enum(['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']),
+        checksumAlgorithm: z.enum([
+            'md5',
+            'sha1',
+            'sha224',
+            'sha256',
+            'sha384',
+            'sha512',
+        ]),
         checksum: z.string().max(191).nonempty(),
         hidden: z.boolean(),
     })
 
-    const schemaWithDownloading = z.discriminatedUnion('checksumAlgorithm', [schemaWithoutChecksum, schemaWithChecksum])
+    const schemaWithDownloading = z.discriminatedUnion('checksumAlgorithm', [
+        schemaWithoutChecksum,
+        schemaWithChecksum,
+    ])
 
-    const schema = z.union([schemaWithoutDownloading, schemaWithoutChecksum, schemaWithChecksum])
+    const schema = z.union([
+        schemaWithoutDownloading,
+        schemaWithoutChecksum,
+        schemaWithChecksum,
+    ])
 
     const form = useForm({
         resolver: zodResolver(schema),
@@ -99,8 +126,11 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             const { checksumAlgorithm, ...params } = data
 
             try {
-                const iso = await createIso(nodeId, {
-                    checksumAlgorithm: checksumAlgorithm !== 'none' ? checksumAlgorithm : undefined,
+                const iso = await createIso(node.id, {
+                    checksumAlgorithm:
+                        checksumAlgorithm !== 'none'
+                            ? checksumAlgorithm
+                            : undefined,
                     ...params,
                 })
 
@@ -114,7 +144,7 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
 
         if (!data.shouldDownload) {
             try {
-                const iso = await createIso(nodeId, data)
+                const iso = await createIso(node.id, data)
 
                 appendToSWR(iso)
             } catch (e) {
@@ -132,7 +162,8 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             if (!isoResponse) return isoResponse
             if (
                 isoResponse.pagination.totalPages > 1 &&
-                isoResponse.pagination.currentPage !== isoResponse.pagination.totalPages
+                isoResponse.pagination.currentPage !==
+                    isoResponse.pagination.totalPages
             )
                 return isoResponse
 
@@ -168,20 +199,37 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Modal.Body>
-                        <FlashMessageRender className='mb-5' byKey={`admin.nodes.${nodeId}.isos.create`} />
+                        <FlashMessageRender
+                            className='mb-5'
+                            byKey={`admin.nodes.${node.id}.isos.create`}
+                        />
                         <SegmentedControl
                             className='!w-full'
                             disabled={form.formState.isSubmitting}
                             value={watchShouldDownload ? 'download' : 'import'}
-                            onChange={val => form.setValue('shouldDownload', val === 'download')}
+                            onChange={val =>
+                                form.setValue(
+                                    'shouldDownload',
+                                    val === 'download'
+                                )
+                            }
                             data={[
-                                { value: 'download', label: tStrings('download') },
+                                {
+                                    value: 'download',
+                                    label: tStrings('download'),
+                                },
                                 { value: 'import', label: tStrings('import') },
                             ]}
                         />
-                        <TextInputForm name='name' label={tStrings('display_name')} className={'mt-3'} />
+                        <TextInputForm
+                            name='name'
+                            label={tStrings('display_name')}
+                            className={'mt-3'}
+                        />
                         {watchShouldDownload && (
-                            <div className={`grid grid-cols-3 sm:grid-cols-4 gap-3 items-start`}>
+                            <div
+                                className={`grid grid-cols-3 sm:grid-cols-4 gap-3 items-start`}
+                            >
                                 <TextInputForm
                                     className='col-span-2 sm:col-span-3'
                                     name='link'
@@ -190,7 +238,10 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
                                 <QueryFileButton />
                             </div>
                         )}
-                        <TextInputForm name='fileName' label={tStrings('file_name')} />
+                        <TextInputForm
+                            name='fileName'
+                            label={tStrings('file_name')}
+                        />
                         {watchShouldDownload && (
                             <>
                                 <SelectForm
@@ -205,14 +256,21 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
                                 />
                             </>
                         )}
-                        <CheckboxForm className='mt-3' name='hidden' label={tStrings('hidden')} />
+                        <CheckboxForm
+                            className='mt-3'
+                            name='hidden'
+                            label={tStrings('hidden')}
+                        />
                     </Modal.Body>
 
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>
                             {tStrings('cancel')}
                         </Modal.Action>
-                        <Modal.Action type='submit' loading={form.formState.isSubmitting}>
+                        <Modal.Action
+                            type='submit'
+                            loading={form.formState.isSubmitting}
+                        >
                             {tStrings('create')}
                         </Modal.Action>
                     </Modal.Actions>

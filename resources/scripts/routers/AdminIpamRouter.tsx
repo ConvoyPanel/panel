@@ -2,7 +2,7 @@ import { Navigate, Outlet, RouteObject } from 'react-router-dom'
 import { lazyLoad, query } from '@/routers/helpers'
 import { lazy, useContext, useEffect } from 'react'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-import { getKey as getPoolKey } from '@/api/admin/addressPools/addresses/useAddressPoolSWR'
+import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
 import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
 import getAddresses from '@/api/admin/addressPools/getAddresses'
@@ -26,9 +26,9 @@ export const routes: Route[] = [
             },
             {
                 path: ':id',
-                element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 loader: ({ params }) =>
                     query(getPoolKey(parseInt(params.id!)), () => getAddressPool(parseInt(params.id!))),
+                element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 handle: {
                     crumb: data => ({
                         to: `/admin/ipam/${data.id}`,

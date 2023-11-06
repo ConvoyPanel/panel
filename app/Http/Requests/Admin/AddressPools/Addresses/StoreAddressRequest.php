@@ -28,16 +28,18 @@ class StoreAddressRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        $rules = [];
+
+        if ($this->boolean('is_bulk_action')) {
+            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['starting_address', 'ending_address', 'gateway']);
+        }
+
         if (!$this->boolean('is_bulk_action')) {
             $pool = $this->parameter('address_pool', AddressPool::class);
-
-            $rules = [
-                new ValidateAddressType($this->enum('type', AddressType::class), ['address', 'gateway']),
-            ];
-
+            $rules[] = new ValidateAddressType($this->enum('type', AddressType::class), ['address', 'gateway']);
             $rules[] = new ValidateAddressUniqueness($pool->id);
-
-            $validator->after($rules);
         }
+
+        $validator->after($rules);
     }
 }

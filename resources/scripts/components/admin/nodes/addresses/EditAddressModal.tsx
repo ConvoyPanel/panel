@@ -3,7 +3,6 @@ import { Address } from '@/api/server/getServer'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 import Modal from '@/components/elements/Modal'
-import { NodeContext } from '@/state/admin/node'
 import useFlash from '@/util/useFlash'
 import { FormikProvider, useFormik } from 'formik'
 import Radio from '@/components/elements/inputs/Radio'
@@ -13,6 +12,7 @@ import * as yup from 'yup'
 import createAddress from '@/api/admin/nodes/addresses/createAddress'
 import updateAddress from '@/api/admin/nodes/addresses/updateAddress'
 import usePagination from '@/util/usePagination'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     open: boolean
@@ -22,14 +22,14 @@ interface Props {
 
 const EditAddressModal = ({ open, onClose, address }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const [page] = usePagination()
-    const { mutate } = useAddressesSWR(nodeId, { page, include: ['server'] })
+    const { mutate } = useAddressesSWR(node.id, { page, include: ['server'] })
 
     const form = useFormik({
         enableReinitialize: true,
         initialValues: {
-            serverId: address?.server?.internalId.toString() ?? '',
+            serverId: address?.server?.id.toString() ?? '',
             address: address?.address ?? '',
             cidr: address?.cidr ?? '',
             gateway: address?.gateway ?? '',
@@ -48,7 +48,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
             setSubmitting(true)
             try {
                 if (address) {
-                    const updatedAddress = await updateAddress(nodeId, address.id, {
+                    const updatedAddress = await updateAddress(node.id, address.id, {
                         ...values,
                         serverId: parseInt(serverId as string),
                         cidr: parseInt(cidr as string),
@@ -69,7 +69,7 @@ const EditAddressModal = ({ open, onClose, address }: Props) => {
                         }
                     }, false)
                 } else {
-                    const address = await createAddress(nodeId, {
+                    const address = await createAddress(node.id, {
                         ...values,
                         serverId: parseInt(serverId as string),
                         cidr: parseInt(cidr as string),

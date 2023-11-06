@@ -1,5 +1,5 @@
 import PageContentBlock, { PageContentBlockProps } from '@/components/elements/PageContentBlock'
-import useAddressPoolSWR from '@/api/admin/addressPools/addresses/useAddressPoolSWR'
+import useAddressPoolSWR from '@/api/admin/addressPools/useAddressPoolSWR'
 import Breadcrumbs from '@/components/elements/Breadcrumbs'
 
 interface Props extends PageContentBlockProps {

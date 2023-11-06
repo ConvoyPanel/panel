@@ -7,8 +7,10 @@ import { NodeContext } from '@/state/admin/node'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, RouteObject, Routes, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { lazyLoad } from '@/routers/helpers'
+import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
+import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
+import getAddressPool from '@/api/admin/addressPools/getAddressPool'
 
 export const routes: Route[] = [
     {
@@ -19,7 +21,9 @@ export const routes: Route[] = [
                 element: lazyLoad(lazy(() => import('@/components/admin/nodes/NodesContainer'))),
             },
             {
-                path: ':id',
+                path: ':nodeId',
+                loader: ({ params }) =>
+                    query(getPoolKey(parseInt(params.id!)), () => getAddressPool(parseInt(params.id!))),
                 element: (
                     <NodeContext.Provider>
                         {lazyLoad(lazy(() => import('@/routers/AdminNodeRouter')))}

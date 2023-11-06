@@ -31,7 +31,7 @@ import useNotify from '@/util/useNotify'
 import reorderTemplates from '@/api/admin/nodes/templateGroups/templates/reorderTemplates'
 import { updateNotification } from '@mantine/notifications'
 import { httpErrorToHuman } from '@/api/http'
-import { DottedButton } from '@/components/elements/DottedButton'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 interface Props {
     group: TemplateGroup
@@ -41,9 +41,9 @@ interface Props {
 const TemplateGroupCard = ({ group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const { mutate } = useTemplateGroupsSWR(nodeId)
+    const { mutate } = useTemplateGroupsSWR(node.id)
     const [activeTemplate, setActiveTemplate] = useState<Template | undefined>()
     const notify = useNotify()
 
@@ -54,7 +54,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
     const handleDelete = () => {
         clearFlashes('admin:node:template-groups')
 
-        deleteTemplateGroup(nodeId, group.uuid)
+        deleteTemplateGroup(node.id, group.uuid)
             .then(() => {
                 mutate(groups => groups!.filter(g => g.id !== group.id), false)
             })
@@ -77,7 +77,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
             disallowClose: true,
         })
 
-        reorderTemplates(nodeId, group.uuid, templates)
+        reorderTemplates(node.id, group.uuid, templates)
             .then(() => {
                 updateNotification({
                     id: 'admin:node:template-group:templates.reorder',
