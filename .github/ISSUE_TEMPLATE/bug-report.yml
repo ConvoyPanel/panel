@@ -71,7 +71,7 @@ body:
     validations:
       required: true
 
-  - type: textarea
+  - type: input
     id: panel-logs
     attributes:
       label: Error Logs
@@ -85,9 +85,6 @@ body:
         ./log_collector
         ```
       placeholder: "https://paste.frocdn.com/"
-      render: bash
-    validations:
-      required: false
 
   - type: checkboxes
     attributes:
