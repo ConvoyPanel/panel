@@ -11,6 +11,7 @@ import tw from 'twin.macro'
 
 import Card from '@/components/elements/Card'
 
+
 export const StatRow = styled.div`
     ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
     & > div {

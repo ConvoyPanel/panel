@@ -18,6 +18,7 @@ import SegmentedControl from '@/components/elements/SegmentedControl'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 import TextareaForm from '@/components/elements/forms/TextareaForm'
 
+
 const AuthenticationCard = () => {
     const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)

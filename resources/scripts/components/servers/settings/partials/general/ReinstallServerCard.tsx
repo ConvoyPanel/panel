@@ -18,6 +18,7 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import TemplatesSelectForm from '@/components/servers/settings/TemplatesSelectForm'
 
+
 const ReinstallServerCard = () => {
     const { t } = useTranslation('server.settings')
     const { t: tStrings } = useTranslation('strings')

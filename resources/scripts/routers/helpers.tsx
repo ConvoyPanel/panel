@@ -3,7 +3,6 @@ import { BareFetcher, Key, MutatorOptions, mutate } from 'swr'
 
 import Spinner from '@/components/elements/Spinner'
 
-
 export const lazyLoad = (
     LazyElement: LazyExoticComponent<() => JSX.Element>
 ) => {

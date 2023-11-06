@@ -1,15 +1,12 @@
 import { lazyLoad, query } from '@/routers/helpers'
 import { Route } from '@/routers/router'
-import { NodeContext } from '@/state/admin/node'
-import { lazy, useContext, useEffect, useMemo, useState } from 'react'
+import { lazy, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
-import getAddressPool from '@/api/admin/addressPools/getAddressPool'
-import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
-import { httpErrorToHuman } from '@/api/http'
+import getNode from '@/api/admin/nodes/getNode'
+import useNodeSWR, { getKey as getPoolKey } from '@/api/admin/nodes/useNodeSWR'
 
-import { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
@@ -29,15 +26,11 @@ export const routes: Route[] = [
             {
                 path: ':nodeId',
                 loader: ({ params }) =>
-                    query(getPoolKey(parseInt(params.id!)), () =>
-                        getAddressPool(parseInt(params.id!))
+                    query(getPoolKey(parseInt(params.nodeId!)), () =>
+                        getNode(parseInt(params.nodeId!))
                     ),
-                element: (
-                    <NodeContext.Provider>
-                        {lazyLoad(
-                            lazy(() => import('@/routers/AdminNodeRouter'))
-                        )}
-                    </NodeContext.Provider>
+                element: lazyLoad(
+                    lazy(() => import('@/routers/AdminNodeRouter'))
                 ),
                 children: [
                     {
@@ -127,83 +120,49 @@ export const routes: Route[] = [
 
 const AdminNodeRouter = () => {
     const { t: tStrings } = useTranslation('strings')
-    const match = useMatch('/admin/nodes/:id/*')
-    const [error, setError] = useState<string>()
-    const id = match!.params.id
-    const node = NodeContext.useStoreState(state => state.node.data)
-    const getNode = NodeContext.useStoreActions(actions => actions.node.getNode)
-    const clearNodeState = NodeContext.useStoreActions(
-        actions => actions.clearNodeState
-    )
+    const { data: node } = useNodeSWR()
 
-    const visibleRoutes = useMemo(
-        () => [
-            {
-                name: tStrings('overview'),
-                path: `/admin/nodes/${id}`,
-                end: true,
-            },
-            {
-                name: tStrings('server_other'),
-                path: `/admin/nodes/${id}/servers`,
-            },
-            {
-                name: tStrings('iso_other'),
-                path: `/admin/nodes/${id}/isos`,
-            },
-            {
-                name: tStrings('template_other'),
-                path: `/admin/nodes/${id}/templates`,
-            },
-            {
-                name: tStrings('address_other'),
-                path: `/admin/nodes/${id}/addresses`,
-            },
-            {
-                name: tStrings('setting_other'),
-                path: `/admin/nodes/${id}/settings`,
-            },
-        ],
-        [match?.params.id]
-    )
-
-    useEffect(() => {
-        setError(undefined)
-
-        getNode(parseInt(match!.params.id as string)).catch((error: any) => {
-            setError(httpErrorToHuman(error))
-        })
-
-        return () => {
-            clearNodeState()
-        }
-    }, [match?.params.id])
+    const routes = [
+        {
+            name: tStrings('overview'),
+            path: `/admin/nodes/:nodeId`,
+            end: true,
+        },
+        {
+            name: tStrings('server_other'),
+            path: `/admin/nodes/:nodeId/servers`,
+        },
+        {
+            name: tStrings('iso_other'),
+            path: `/admin/nodes/:nodeId/isos`,
+        },
+        {
+            name: tStrings('template_other'),
+            path: `/admin/nodes/:nodeId/templates`,
+        },
+        {
+            name: tStrings('address_other'),
+            path: `/admin/nodes/:nodeId/addresses`,
+        },
+        {
+            name: tStrings('setting_other'),
+            path: `/admin/nodes/:nodeId/settings`,
+        },
+    ]
 
     const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
 
     useEffect(() => {
-        setRoutes(visibleRoutes)
+        setRoutes(routes)
 
         return () => setBreadcrumb(null)
     }, [])
 
     useEffect(() => {
-        setBreadcrumb(node?.name)
+        setBreadcrumb(node.name)
     }, [node])
 
-    return (
-        <>
-            {!node ? (
-                error ? (
-                    <ErrorMessage message={error} />
-                ) : (
-                    <Spinner />
-                )
-            ) : (
-                <Outlet />
-            )}
-        </>
-    )
+    return <>{!node ? <Spinner /> : <Outlet />}</>
 }
 
 export default AdminNodeRouter

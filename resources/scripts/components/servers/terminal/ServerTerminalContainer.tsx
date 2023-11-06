@@ -10,6 +10,7 @@ import createConsoleSession, {
 
 import ServerContentBlock from '@/components/servers/ServerContentBlock'
 
+
 const ServerTerminalContainer = () => {
     const [params] = useSearchParams()
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)

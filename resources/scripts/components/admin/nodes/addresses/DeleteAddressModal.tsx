@@ -1,10 +1,10 @@
-import { NodeContext } from '@/state/admin/node'
-import useFlash from '@/util/useFlash'
+import { useFlashKey } from '@/util/useFlash'
 import usePagination from '@/util/usePagination'
 import { FormikProvider, useFormik } from 'formik'
 
 import deleteAddress from '@/api/admin/nodes/addresses/deleteAddress'
 import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 import { Address } from '@/api/server/getServer'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
@@ -18,20 +18,22 @@ interface Props {
 }
 
 const DeleteAddressModal = ({ open, onClose, address }: Props) => {
-    const { clearFlashes, clearAndAddHttpError } = useFlash()
-    const nodeId = NodeContext.useStoreState(state => state.node.data!.id)
+    const { data: node } = useNodeSWR()
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.addresses.${address.id}.delete`
+    )
     const [page] = usePagination()
-    const { mutate } = useAddressesSWR(nodeId, { page, include: ['server'] })
+    const { mutate } = useAddressesSWR(node.id, { page, include: ['server'] })
 
     const form = useFormik({
         initialValues: {
             syncNetworkConfig: true,
         },
         onSubmit: async ({ syncNetworkConfig }, { setSubmitting }) => {
-            clearFlashes('admin:node:addresses.delete')
+            clearFlashes()
             setSubmitting(true)
             try {
-                await deleteAddress(nodeId, address.id, syncNetworkConfig)
+                await deleteAddress(node.id, address.id, syncNetworkConfig)
 
                 mutate(data => {
                     if (!data) return data
@@ -43,10 +45,7 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
                 }, false)
                 onClose()
             } catch (error) {
-                clearAndAddHttpError({
-                    key: 'admin:node:addresses.delete',
-                    error,
-                })
+                clearAndAddHttpError(error as Error)
             }
             setSubmitting(false)
         },
@@ -62,7 +61,7 @@ const DeleteAddressModal = ({ open, onClose, address }: Props) => {
                     <Modal.Body>
                         <FlashMessageRender
                             className='mb-5'
-                            byKey={'admin:node:addresses.delete'}
+                            byKey={`admin.nodes.${node.id}.addresses.${address.id}.delete`}
                         />
 
                         <Modal.Description>

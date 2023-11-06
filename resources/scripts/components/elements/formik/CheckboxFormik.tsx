@@ -3,6 +3,7 @@ import { forwardRef } from 'react'
 
 import Checkbox, { CheckboxProps } from '@/components/elements/inputs/Checkbox'
 
+
 const CheckboxFormik = forwardRef<
     HTMLInputElement,
     Omit<CheckboxProps, 'error'>

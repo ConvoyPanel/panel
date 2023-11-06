@@ -3,7 +3,6 @@ import isEqual from 'react-fast-compare'
 
 import { AdminServerBuild, getServer } from '@/api/admin/servers/getServer'
 
-
 export interface ServerDataStore {
     data?: AdminServerBuild
     setServer: Action<ServerDataStore, AdminServerBuild>

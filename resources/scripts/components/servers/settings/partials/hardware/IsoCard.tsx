@@ -8,6 +8,7 @@ import FormCard from '@/components/elements/FormCard'
 
 import IsoRow from '@/components/servers/settings/partials/hardware/IsoRow'
 
+
 const IsoCard = () => {
     const { t } = useTranslation('server.settings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)

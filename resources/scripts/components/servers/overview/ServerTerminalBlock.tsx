@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/elements/Card'
 
+
 const ServerTerminalBlock = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { t } = useTranslation('server.overview')

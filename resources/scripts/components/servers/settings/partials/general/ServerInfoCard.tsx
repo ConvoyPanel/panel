@@ -13,6 +13,7 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
+
 const ServerInfoCard = () => {
     const { t } = useTranslation('server.settings')
     const { t: tStrings } = useTranslation('strings')

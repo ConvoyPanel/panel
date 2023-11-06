@@ -7,6 +7,7 @@ import Display from '@/components/elements/displays/DisplayRow'
 
 import { Dd, Dt } from '@/components/dashboard/ServerCard'
 
+
 const ServerNetworkBlock = () => {
     const server = ServerContext.useStoreState(state => state.server.data!)
     const { t } = useTranslation('server.settings')

@@ -2,7 +2,6 @@ import SettingsLayout from '@/components/elements/layouts/SettingsLayout'
 
 import UserContentBlock from '@/components/admin/users/UserContentBlock'
 
-
 const UserSettingsContainer = () => {
     return (
         <SettingsLayout

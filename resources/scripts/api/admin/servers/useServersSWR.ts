@@ -5,7 +5,6 @@ import getServers, {
     ServerResponse,
 } from '@/api/admin/servers/getServers'
 
-
 const useServersSWR = ({
     page,
     nodeId,

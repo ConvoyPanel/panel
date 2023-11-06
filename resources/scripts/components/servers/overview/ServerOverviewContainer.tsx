@@ -7,6 +7,7 @@ import ServerNetworkBlock from '@/components/servers/overview/ServerNetworkBlock
 import ServerPowerBlock from '@/components/servers/overview/ServerPowerBlock'
 import ServerTerminalBlock from '@/components/servers/overview/ServerTerminalBlock'
 
+
 const ServerOverviewContainer = () => {
     const rootAdmin = useStoreState(state => state.user.data!.rootAdmin)
     return (

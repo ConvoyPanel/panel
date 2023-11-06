@@ -4,7 +4,6 @@ import { Token } from '@/api/admin/tokens/getTokens'
 
 import Modal from '@/components/elements/Modal'
 
-
 interface Props {
     value: Token | null
     onClose: () => void

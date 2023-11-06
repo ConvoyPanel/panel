@@ -6,6 +6,7 @@ import updateStatus, { PowerAction } from '@/api/server/updateState'
 
 import Button from '@/components/elements/Button'
 
+
 const ServerPowerBlock = () => {
     const { t } = useTranslation('server.overview')
     const { t: tStrings } = useTranslation('strings')

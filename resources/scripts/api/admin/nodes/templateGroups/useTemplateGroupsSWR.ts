@@ -4,7 +4,6 @@ import getTemplateGroups, {
     TemplateGroup,
 } from '@/api/admin/nodes/templateGroups/getTemplateGroups'
 
-
 const useTemplateGroupsSWR = (
     nodeId: number,
     fallbackData?: TemplateGroup[]

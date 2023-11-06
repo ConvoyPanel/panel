@@ -1,4 +1,4 @@
-import { NodeContext } from '@/state/admin/node'
+import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 import PageContentBlock, {
     PageContentBlockProps,
@@ -9,10 +9,10 @@ interface Props extends PageContentBlockProps {
 }
 
 const NodeContentBlock: React.FC<Props> = ({ title, children, ...props }) => {
-    const name = NodeContext.useStoreState(state => state.node.data!.name)
+    const { data: node } = useNodeSWR()
 
     return (
-        <PageContentBlock title={`${title} | ${name}`} {...props}>
+        <PageContentBlock title={`${title} | ${node.name}`} {...props}>
             {children}
         </PageContentBlock>
     )
