@@ -12,8 +12,7 @@ import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
-import FixServerStatusButton from '@/components/admin/servers/FixServerStatusButton'
-
+import RestoreAccessButton from '@/components/admin/servers/RestoreAccessButton'
 
 export const routes: Route[] = [
     {
@@ -166,7 +165,7 @@ const AdminServerRouter = () => {
                                     : 'Failed to Delete'
                             }
                         >
-                            <FixServerStatusButton />
+                            <RestoreAccessButton />
                         </ScreenBlock>
                     ) : (
                         <Outlet />
