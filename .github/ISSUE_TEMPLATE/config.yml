@@ -5,7 +5,7 @@ contact_links:
     about: Please visit our Discord for help with your installation.
   - name: General Question
     url: https://discord.convoypanel.com
-    about: Please visit our Discord for general questions about Pterodactyl.
+    about: Please visit our Discord for general questions about Convoy.
   - name: Documentation
     url: https://docs.convoypanel.com
     about: Our documentation may have an answer for your issue/question.
