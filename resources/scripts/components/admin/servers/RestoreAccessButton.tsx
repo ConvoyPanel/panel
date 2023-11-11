@@ -5,8 +5,7 @@ import updateServer from '@/api/admin/servers/updateServer'
 
 import Button from '@/components/elements/Button'
 
-
-const FixServerStatusButton = () => {
+const RestoreAccessButton = () => {
     const [loading, setLoading] = useState(false)
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(
@@ -31,9 +30,9 @@ const FixServerStatusButton = () => {
             variant={'filled'}
             className={'mt-6'}
         >
-            Fix Status
+            Restore Access
         </Button>
     )
 }
 
-export default FixServerStatusButton
+export default RestoreAccessButton
