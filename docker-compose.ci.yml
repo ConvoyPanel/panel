@@ -11,7 +11,7 @@ services:
         expose:
             - 6379
     database:
-        image: mysql:8.0.29
+        image: mysql:8.0
         restart: unless-stopped
         volumes:
             - ./dockerfiles/mysql/data:/var/lib/mysql/
