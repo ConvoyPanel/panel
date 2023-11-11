@@ -26,8 +26,7 @@ class StoreAddressRequest extends FormRequest
         ];
     }
 
-    public function withValidator(Validator $validator): void
-    {
+    public function after(): array {
         $rules = [];
 
         if ($this->boolean('is_bulk_action')) {
@@ -43,6 +42,6 @@ class StoreAddressRequest extends FormRequest
             $rules[] = new ValidateAddressUniqueness($pool->id);
         }
 
-        $validator->after($rules);
+        return $rules;
     }
 }

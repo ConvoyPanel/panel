@@ -20,14 +20,14 @@ class UpdateAddressRequest extends FormRequest
         return Arr::except($rules, 'address_pool_id');
     }
 
-    public function withValidator(Validator $validator): void
+    public function after(): array
     {
         $pool = $this->parameter('address_pool', AddressPool::class);
         $address = $this->parameter('address', Address::class);
 
-        $validator->after([
+        return [
             new ValidateAddressType($this->enum('type', AddressType::class), ['address']),
             new ValidateAddressUniqueness($pool->id, $address->address),
-        ]);
+        ];
     }
 }
