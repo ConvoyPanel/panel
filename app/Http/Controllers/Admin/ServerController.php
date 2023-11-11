@@ -69,13 +69,6 @@ class ServerController extends ApplicationApiController
                 }
             }
 
-            if ($request->node_id !== $server->node_id && !empty($request->node_id)) {
-                // TODO: automatically drop linked IPs and validation the server has enough storage (validation will prob go in rule)
-                $server->addresses()->update([
-                    'server_id' => null
-                ]);
-            }
-
             $server->update($request->validated());
         });
 

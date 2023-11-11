@@ -3,22 +3,20 @@ import http from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
 interface UpdateServerParameters {
-    name?: string
-    hostname?: string
-    vmid?: number
-    userId?: number
-    nodeId?: number
+    name?: string | null
+    hostname?: string | null
+    vmid?: number | null
+    userId?: number | null
     status?: EloquentStatus
 }
 
 const updateServer = async (
     serverUuid: string,
-    { userId, nodeId, ...params }: UpdateServerParameters
+    { userId, ...params }: UpdateServerParameters
 ) => {
     const {
         data: { data },
     } = await http.patch(`/api/admin/servers/${serverUuid}`, {
-        node_id: nodeId,
         user_id: userId,
         ...params,
     })

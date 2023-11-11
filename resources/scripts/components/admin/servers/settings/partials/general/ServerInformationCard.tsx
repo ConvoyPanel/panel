@@ -19,7 +19,6 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
-
 const ServerInformationCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(
@@ -32,11 +31,10 @@ const ServerInformationCard = () => {
     const { t } = useTranslation('admin.servers.settings')
 
     const schema = z.object({
-        name: z.string().max(60).nonempty(),
-        hostname: hostname().max(191).nonempty(),
+        name: z.string().max(60).min(1),
+        hostname: hostname().max(191).min(1),
         vmid: z.preprocess(Number, z.number().min(100).max(999999999)),
         userId: z.preprocess(Number, z.number()),
-        nodeId: z.preprocess(Number, z.number()),
         status: z.string(),
     })
 
@@ -47,7 +45,6 @@ const ServerInformationCard = () => {
             hostname: server.hostname,
             vmid: server.vmid,
             userId: server.userId.toString(),
-            nodeId: server.nodeId.toString(),
             status: server.status ?? 'ready',
         },
     })
@@ -73,7 +70,6 @@ const ServerInformationCard = () => {
                 hostname: data.hostname,
                 vmid: data.vmid,
                 userId: data.userId.toString(),
-                nodeId: data.nodeId.toString(),
                 status: status ?? 'ready',
             })
         } catch (error) {
@@ -121,7 +117,6 @@ const ServerInformationCard = () => {
                             />
                             <TextInputForm name='vmid' label='VMID' />
                             <UsersSelectForm />
-                            <NodesSelectForm />
                             <SelectForm
                                 name={'status'}
                                 data={statusTypes}
