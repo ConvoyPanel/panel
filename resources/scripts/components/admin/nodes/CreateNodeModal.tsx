@@ -15,7 +15,6 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
 
-
 interface Props {
     open: boolean
     onClose: () => void
@@ -151,7 +150,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                             />
                             <TextInputForm
                                 name='diskOverallocate'
-                                label={`${t('disk_allocation')} (MiB)`}
+                                label={`${t('disk_overallocation')} (%)`}
                             />
                         </div>
                         <div className='grid gap-3 grid-cols-3'>
