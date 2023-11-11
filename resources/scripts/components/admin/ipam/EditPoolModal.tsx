@@ -1,5 +1,6 @@
 import { useFlashKey } from '@/util/useFlash'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { data } from 'autoprefixer'
 import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -11,11 +12,13 @@ import {
     AddressPoolResponse,
 } from '@/api/admin/addressPools/getAddressPools'
 import updateAddressPool from '@/api/admin/addressPools/updateAddressPool'
+import useAddressPoolNodesSWR from '@/api/admin/addressPools/useAddressPoolNodesSWR'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
+import NodesMultiSelectForm from '@/components/admin/ipam/NodesMultiSelectForm'
 
 interface Props {
     pool: AddressPool | null
@@ -29,21 +32,31 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
         `admin.addressPools.${pool?.id}.update`
     )
+    const { data: nodes } = useAddressPoolNodesSWR(pool?.id ?? -1, {})
 
     const schema = z.object({
-        name: z.string().nonempty().max(191),
+        name: z.string().min(1).max(191),
+        nodeIds: z.array(z.coerce.number()),
     })
 
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
             name: '',
+            nodeIds: [] as string[],
         },
     })
 
     useEffect(() => {
         form.reset({
+            nodeIds: nodes?.items.map(node => node.id.toString()) ?? [],
+        })
+    }, [nodes])
+
+    useEffect(() => {
+        form.reset({
             name: pool?.name ?? '',
+            nodeIds: nodes?.items.map(node => node.id.toString()) ?? [],
         })
     }, [pool])
 
@@ -52,7 +65,9 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
         onClose()
     }
 
-    const submit = async (data: z.infer<typeof schema>) => {
+    const submit = async (_data: any) => {
+        const data = _data as z.infer<typeof schema>
+
         clearFlashes()
         try {
             const updatedPool = await updateAddressPool(pool!.id, data)
@@ -90,6 +105,7 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
                             byKey={`admin.addressPools.${pool?.id}.update`}
                         />
                         <TextInputForm name='name' label={tStrings('name')} />
+                        <NodesMultiSelectForm />
                     </Modal.Body>
 
                     <Modal.Actions>

@@ -11,6 +11,16 @@ class UpdateAddressPoolRequest extends FormRequest
     {
         $addressPool = $this->parameter('address_pool', AddressPool::class);
 
-        return AddressPool::getRulesForUpdate($addressPool);
+        return [
+            ...AddressPool::getRulesForUpdate($addressPool),
+            'node_ids' => 'sometimes|array',
+            'node_ids.*' => 'exists:nodes,id|integer',
+        ];
+    }
+
+    public function after(): array
+    {
+        // TODO: if nodes are removed, check whether their servers are using any of IPs from this pool before unmounting
+        return [];
     }
 }

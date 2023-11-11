@@ -56,7 +56,8 @@ class AddressPoolController extends ApplicationApiController
 
     public function update(UpdateAddressPoolRequest $request, AddressPool $addressPool)
     {
-        $addressPool->update($request->validated());
+        $addressPool->update($request->safe()->except('node_ids'));
+        $addressPool->nodes()->sync($request->node_ids);
         $addressPool->loadCount(['addresses', 'nodes']);
 
         return fractal($addressPool, new AddressPoolTransformer)->respond();

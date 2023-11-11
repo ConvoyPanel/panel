@@ -19,14 +19,13 @@ import Radio from '@/components/elements/inputs/Radio'
 
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
 
-
 interface Props {
     address: Address | null
     onClose: () => void
     mutate: KeyedMutator<AddressResponse>
 }
 
-const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
+const EditAddressModal = ({ address, onClose, mutate }: Props) => {
     const { t: tStrings } = useTranslation('strings')
     const { t } = useTranslation('admin.addressPools.addresses')
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
@@ -172,4 +171,4 @@ const CreateAddressModal = ({ address, onClose, mutate }: Props) => {
     )
 }
 
-export default CreateAddressModal
+export default EditAddressModal

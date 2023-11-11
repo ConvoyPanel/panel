@@ -8,7 +8,6 @@ import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
 import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
 
-
 interface Props {
     disabled?: boolean
 }
@@ -70,6 +69,7 @@ const NodesMultiSelectForm = ({ disabled }: Props) => {
             nothingFound={t('nodes_nothing_found')}
             name={'nodeIds'}
             disabled={disabled}
+            value={nodeIds}
         />
     )
 }

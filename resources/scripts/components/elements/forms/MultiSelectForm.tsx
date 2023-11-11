@@ -5,7 +5,10 @@ import MultiSelect, {
 } from '@/components/elements/inputs/MultiSelect'
 
 interface Props
-    extends Omit<MultiSelectProps, 'error' | keyof ControllerRenderProps> {
+    extends Omit<
+        MultiSelectProps,
+        'error' | keyof Omit<ControllerRenderProps, 'value'>
+    > {
     control?: Control<any, any>
     name: string
 }

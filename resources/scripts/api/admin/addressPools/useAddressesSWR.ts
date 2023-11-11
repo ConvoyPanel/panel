@@ -4,9 +4,8 @@ import useSWR, { Key, SWRResponse } from 'swr'
 
 import getAddresses, {
     QueryParams,
-} from '@/api/admin/addressPools/getAddresses'
+} from '@/api/admin/addressPools/addresses/getAddresses'
 import { AddressResponse } from '@/api/admin/nodes/addresses/getAddresses'
-
 
 export const getKey = (id: number, page?: number, query?: string): Key => [
     'admin.address-pools.addresses',

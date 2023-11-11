@@ -6,7 +6,6 @@ import useAddressesSWR from '@/api/admin/nodes/addresses/useAddressesSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 import { Address } from '@/api/server/getServer'
 
-import Button from '@/components/elements/Button'
 import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
@@ -19,7 +18,6 @@ import Table, {
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import DeleteAddressModal from '@/components/admin/nodes/addresses/DeleteAddressModal'
 import EditAddressModal from '@/components/admin/nodes/addresses/EditAddressModal'
-
 
 const columns: ColumnArray<Address> = [
     {
@@ -64,7 +62,6 @@ const NodeAddressesContainer = () => {
         page,
         include: ['server'],
     })
-    const [open, setOpen] = useState(false)
 
     const rowActions = ({ row }: RowActionsProps<Address>) => {
         const [showEditModal, setShowEditModal] = useState(false)
@@ -100,16 +97,7 @@ const NodeAddressesContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <NodeContentBlock
-                title='Addresses'
-                showFlashKey='admin:node:addresses'
-            >
-                <EditAddressModal open={open} onClose={() => setOpen(false)} />
-                <div className='flex justify-end items-center mb-3'>
-                    <Button onClick={() => setOpen(true)} variant='filled'>
-                        New Address
-                    </Button>
-                </div>
+            <NodeContentBlock title='Addresses'>
                 {!data ? (
                     <Spinner />
                 ) : (

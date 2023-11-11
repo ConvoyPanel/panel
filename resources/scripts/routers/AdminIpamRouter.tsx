@@ -4,13 +4,12 @@ import { lazy, useContext, useEffect } from 'react'
 import { Translation, useTranslation } from 'react-i18next'
 import { Navigate, Outlet } from 'react-router-dom'
 
+import getAddresses from '@/api/admin/addressPools/addresses/getAddresses'
 import getAddressPool from '@/api/admin/addressPools/getAddressPool'
-import getAddresses from '@/api/admin/addressPools/getAddresses'
 import { getKey as getPoolKey } from '@/api/admin/addressPools/useAddressPoolSWR'
 import { getKey as getAddressesKey } from '@/api/admin/addressPools/useAddressesSWR'
 
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
-
 
 export const routes: Route[] = [
     {
@@ -31,15 +30,15 @@ export const routes: Route[] = [
                 ),
             },
             {
-                path: ':id',
+                path: ':poolId',
                 loader: ({ params }) =>
-                    query(getPoolKey(parseInt(params.id!)), () =>
-                        getAddressPool(parseInt(params.id!))
+                    query(getPoolKey(parseInt(params.poolId!)), () =>
+                        getAddressPool(parseInt(params.poolId!))
                     ),
                 element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 handle: {
                     crumb: data => ({
-                        to: `/admin/ipam/${data.id}`,
+                        to: `/admin/ipam/${data.poolId}`,
                         element: data.name,
                     }),
                 },
@@ -51,7 +50,7 @@ export const routes: Route[] = [
                     {
                         path: 'addresses',
                         loader: ({ params }) => {
-                            const id = parseInt(params.id!)
+                            const id = parseInt(params.poolId!)
                             const page = params.page ? parseInt(params.page) : 1
 
                             return query(getAddressesKey(id, page, ''), () =>
