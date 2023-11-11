@@ -44,7 +44,9 @@ class AllocationService
 
             preg_match("/size=(\d+\w?)/s", $value, $sizeMatches);
 
-            $disk['size'] = $this->convertToBytes($sizeMatches[1]);
+            if (array_key_exists(1, $sizeMatches)) {
+                $disk['size'] =  $this->convertToBytes($sizeMatches[1]);
+            }
 
             if (str_contains($value, 'media')) {
                 $disk['is_media'] = true;
