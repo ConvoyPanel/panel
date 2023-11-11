@@ -29,11 +29,18 @@ class StoreIsoRequest extends FormRequest
         return $rules;
     }
 
-    public function withValidator(Validator $validator)
+    public function after(): array
     {
+        $rules = [
+            function (Validator $validator) {
+                if (ISO::where('file_name', $this->string('file_name'))->exists()) {
+                    $validator->errors()->add('file_name', __('validation.unique', ['attribute' => 'file name']));
+                }
+            }
+        ];
 
         if (!$this->boolean('should_download')) {
-            $validator->after(function (Validator $validator) {
+            $rules[] = function (Validator $validator) {
                 $node = $this->parameter('node', Node::class);
 
                 $iso = app(IsoService::class)->getIso($node, $this->input('file_name'));
@@ -41,7 +48,9 @@ class StoreIsoRequest extends FormRequest
                 if (is_null($iso)) {
                     $validator->errors()->add('file_name', 'This ISO doesn\'t exist.');
                 }
-            });
+            };
         }
+
+        return $rules;
     }
 }
