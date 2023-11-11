@@ -7,7 +7,6 @@ import useServersSWR from '@/api/admin/servers/useServersSWR'
 
 import SelectForm from '@/components/elements/forms/SelectForm'
 
-
 const ServersSelectForm = () => {
     const { t: tSIndex } = useTranslation('admin.servers.index')
     const { t: tAIndex } = useTranslation('admin.addressPools.addresses')
@@ -36,6 +35,7 @@ const ServersSelectForm = () => {
             onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
             nothingFound={tSIndex('no_server_found')}
+            clearable
         />
     )
 }
