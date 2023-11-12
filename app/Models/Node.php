@@ -61,7 +61,7 @@ class Node extends Model
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'coterm_id' => 'required|nullable|integer|exists:coterms,id',
+        'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
     ];
 
     /**

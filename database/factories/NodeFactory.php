@@ -36,6 +36,7 @@ class NodeFactory extends Factory
             'backup_storage' => 'local',
             'iso_storage' => 'local',
             'network' => 'vmbr0',
+            'coterm_id' => null,
         ];
     }
 }
