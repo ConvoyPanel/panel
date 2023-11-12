@@ -141,11 +141,17 @@ const NavigationBar = () => {
                     <Burger
                         className='block sm:hidden'
                         opened={menuVisible}
-                        onClick={() => setMenuVisible(!menuVisible)}
+                        onClick={() =>
+                            setMenuVisible(visibility => !visibility)
+                        }
                     />
                 </div>
             </ContentContainer>
-            <NavigationDropdown logout={logout} visible={menuVisible} />
+            <NavigationDropdown
+                onClose={() => setMenuVisible(false)}
+                logout={logout}
+                visible={menuVisible}
+            />
             <div
                 ref={bottomBar}
                 className='bg-white shadow-none transition-shadow dark:bg-black w-full border-b border-accent-200 z-[2000]'
