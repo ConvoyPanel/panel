@@ -10,9 +10,10 @@ import MultiSelectForm from '@/components/elements/forms/MultiSelectForm'
 
 interface Props {
     disabled?: boolean
+    loading?: boolean
 }
 
-const NodesMultiSelectForm = ({ disabled }: Props) => {
+const NodesMultiSelectForm = ({ disabled, loading }: Props) => {
     const { t } = useTranslation('admin.addressPools.index')
     const { t: tStrings } = useTranslation('strings')
     const { watch } = useFormContext()
@@ -64,12 +65,11 @@ const NodesMultiSelectForm = ({ disabled }: Props) => {
             searchable
             searchValue={query}
             onSearchChange={val => setQuery(val)}
-            loading={isValidating || isLoading}
+            loading={isValidating || isLoading || loading}
             label={tStrings('node_other')}
             nothingFound={t('nodes_nothing_found')}
             name={'nodeIds'}
             disabled={disabled}
-            value={nodeIds}
         />
     )
 }
