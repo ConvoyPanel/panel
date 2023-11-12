@@ -142,8 +142,8 @@ export const countIPsInRange = (
                 if (ipType === 'ipv4') {
                     number = (number << BigInt(8)) + BigInt(parts[i])
                 } else {
-                    // @ts-expect-error
                     number =
+                        // @ts-expect-error
                         (number << BigInt(16)) + BigInt(parseInt(parts[i], 16))
                 }
             }
