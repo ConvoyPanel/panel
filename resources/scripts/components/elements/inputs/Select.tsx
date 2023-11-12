@@ -10,7 +10,6 @@ import tw from 'twin.macro'
 import ErrorMessage from '@/components/elements/ErrorMessage'
 import LoadingDots from '@/components/elements/LoadingDots'
 
-
 const StyledSelect = styled(MantineSelect)`
     & .mantine-Select-label {
         ${tw`text-xs font-medium text-accent-500 mb-1`}
@@ -56,7 +55,6 @@ interface SelectItemProps extends ComponentPropsWithoutRef<'div'> {
 
 const StyledSelectItem = styled.div`
     ${tw`text-sm p-2 hover:bg-accent-200 text-accent-500 flex items-center justify-between cursor-pointer rounded`}
-
     & .select-item-icon {
         ${tw`hidden`}
     }
@@ -83,11 +81,11 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
 )
 
 const Select = forwardRef<HTMLInputElement, SelectProps>(
-    ({ loading, nothingFound, error, ...props }, ref) => (
+    ({ loading, nothingFound, rightSection, error, ...props }, ref) => (
         <StyledSelect
             error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
             nothingFound={loading ? 'Loading...' : nothingFound}
-            rightSection={loading && <LoadingDots size={4} />}
+            rightSection={loading ? <LoadingDots size={4} /> : rightSection}
             itemComponent={SelectItem}
             ref={ref}
             {...props}
