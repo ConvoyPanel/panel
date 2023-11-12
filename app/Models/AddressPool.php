@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressPool extends Model
 {
-    /**
-     * Fields that aren't mass assignable
-     */
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     public static $validationRules = [

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Node extends Model
@@ -60,12 +61,7 @@ class Node extends Model
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'coterm_enabled' => 'sometimes|boolean',
-        'coterm_tls_enabled' => 'sometimes|boolean',
-        'coterm_fqdn' => 'sometimes|nullable|string|max:191',
-        'coterm_port' => 'sometimes|integer',
-        'coterm_token_id' => 'required_if:coterm_enabled,1',
-        'coterm_token' => 'required_if:coterm_enabled,1',
+        'coterm_id' => 'required|nullable|integer|exists:coterms,id',
     ];
 
     /**
@@ -134,6 +130,14 @@ class Node extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Gets the instance of Coterm that's connected with this node.
+     */
+    public function coterm(): BelongsTo
+    {
+        return $this->belongsTo(Coterm::class);
     }
 
     /**
