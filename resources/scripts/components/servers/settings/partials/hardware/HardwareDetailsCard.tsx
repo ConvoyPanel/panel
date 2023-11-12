@@ -7,7 +7,6 @@ import Display from '@/components/elements/displays/DisplayRow'
 
 import { Dd, Dt } from '@/components/dashboard/ServerCard'
 
-
 const HardwareDetailsCard = () => {
     const { t } = useTranslation('server.settings')
     const { t: tStrings } = useTranslation('strings')
