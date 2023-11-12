@@ -32,7 +32,10 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
         `admin.addressPools.${pool?.id}.update`
     )
-    const { data: nodes } = useAddressPoolNodesSWR(pool?.id ?? -1, {})
+    const { data: nodes, isLoading: isLoadingNodes } = useAddressPoolNodesSWR(
+        pool?.id ?? -1,
+        {}
+    )
 
     const schema = z.object({
         name: z.string().min(1).max(191),
@@ -105,7 +108,7 @@ const EditPoolModal = ({ pool, onClose, mutate }: Props) => {
                             byKey={`admin.addressPools.${pool?.id}.update`}
                         />
                         <TextInputForm name='name' label={tStrings('name')} />
-                        <NodesMultiSelectForm />
+                        <NodesMultiSelectForm loading={isLoadingNodes} />
                     </Modal.Body>
 
                     <Modal.Actions>
