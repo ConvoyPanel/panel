@@ -33,12 +33,15 @@ const EditAddressModal = ({ address, onClose, mutate }: Props) => {
     )
 
     const schema = z.object({
-        address: ipAddress().nonempty().max(191),
+        address: ipAddress().max(191),
         type: z.enum(['ipv4', 'ipv6']),
         cidr: z.preprocess(Number, z.number().int().min(1).max(128)),
-        gateway: ipAddress().nonempty().max(191),
+        gateway: ipAddress().max(191),
         macAddress: macAddress().max(191).optional().or(z.literal('')),
-        serverId: z.literal('').or(z.preprocess(Number, z.number())),
+        serverId: z
+            .literal('')
+            .or(z.null())
+            .or(z.preprocess(Number, z.number())),
     })
 
     const form = useForm({
@@ -92,9 +95,9 @@ const EditAddressModal = ({ address, onClose, mutate }: Props) => {
                 if (!data) return data
 
                 return {
-                    ...data,
+                    pagination: data.pagination,
                     items: data.items.map(item =>
-                        item.id === updatedAddress!.id ? updatedAddress : item
+                        item.id === updatedAddress.id ? updatedAddress : item
                     ),
                 }
             }, false)
