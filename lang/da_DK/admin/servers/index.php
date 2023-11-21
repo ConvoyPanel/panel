@@ -27,9 +27,9 @@ return [
         'suspended' => 'This server is suspended',
     ],
     'delete_server' => [
-        'title' => 'Delete Server',
+        'title' => 'Fjern server',
         'description' => 'The server will be deleted from Convoy. Backups and other associated data will be destroyed. However, you can tick the checkbox below to keep the virtual machine and data on the Proxmox node.',
         'dont_purge' => 'Do not purge VM and related files',
     ],
-    'no_servers_found_one' => 'No servers found',
+    'no_servers_found_one' => 'Ingen servers fundet',
 ];
