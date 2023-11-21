@@ -1,14 +1,14 @@
 <?php
 
 return [
-    'create_pool' => 'Create Pool',
+    'create_pool' => 'Tạo bể',
     'delete_modal' => [
-        'title' => 'Delete :name?',
-        'description' => 'Are you sure you want to delete this pool?',
-        'nodes_linked_error' => 'This pool cannot be deleted until all nodes are unlinked.'
+        'title' => 'Xóa: name?',
+        'description' => 'Bạn có chắc muốn xóa bể địa chỉ?',
+        'nodes_linked_error' => 'Bể này không thể xóa cho đến khi các node được ngắt liên kết.'
     ],
     'edit_modal' => [
-      'title' => 'Editing :name',
+      'title' => 'Đang chỉnh sửa: name',
     ],
-    'nodes_nothing_found' => 'No nodes found',
+    'nodes_nothing_found' => 'Không tìm thấy node nào',
 ];
