@@ -13,6 +13,6 @@ return [
     ],
     'delete_modal' => [
         'title' => 'Xóa địa chỉ?',
-        'description' => 'Are you sure you want to delete :address?',
+        'description' => 'Bạn có chắc muốn xóa: địa chỉ?',
     ],
 ];
