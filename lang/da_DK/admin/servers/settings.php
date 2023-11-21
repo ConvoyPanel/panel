@@ -2,9 +2,9 @@
 
 return [
     'server_info' => [
-        'title' => 'Server Information',
+        'title' => 'Server information',
         'statuses' => [
-            'ready' => 'Ready',
+            'ready' => 'Klar',
             'installing' => 'Installation In Progress',
             'install_failed' => 'Recent Installation Failed',
             'suspended' => 'Suspended',
