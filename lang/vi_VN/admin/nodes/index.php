@@ -1,13 +1,13 @@
 <?php
 
 return [
-    'create_node' => 'Create Node',
+    'create_node' => 'Tạo Node',
     'create_modal' => [
-        'title' => 'Create a Node',
+        'title' => 'Tạo một node',
     ],
 
-    'location_group' => 'Location Group',
-    'pve_name' => 'Node Name In Proxmox',
+    'location_group' => 'Nhóm vị trí',
+    'pve_name' => 'Tên Node trong Proxmox',
     'override_creds' => 'Override credentials',
     'creds_warning' => 'Please disable privilege separation and grant root privileges.',
     'token_id' => 'Token ID',
