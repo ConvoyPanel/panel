@@ -33,7 +33,7 @@ class AddressController extends ApplicationApiController
             ->with('server')
             ->defaultSort('-id')
             ->allowedFilters(
-                ['address', AllowedFilter::exact('type'), AllowedFilter::custom(
+                [AllowedFilter::exact('address'), AllowedFilter::exact('type'), AllowedFilter::custom(
                     '*',
                     new FiltersAddress,
                 ), AllowedNullableFilter::exact('server_id')],
