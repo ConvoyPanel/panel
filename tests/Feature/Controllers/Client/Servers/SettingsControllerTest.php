@@ -48,7 +48,7 @@ it('can fetch sshkeys', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $response = $this->actingAs($user)->getJson("/api/client/servers/{$server->uuid}/settings/security");
+    $response = $this->actingAs($user)->getJson("/api/client/servers/{$server->uuid}/settings/auth");
 
     $response->assertOk();
 });
@@ -61,7 +61,7 @@ it('can change server passwords', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $response = $this->actingAs($user)->putJson("/api/client/servers/{$server->uuid}/settings/security", [
+    $response = $this->actingAs($user)->putJson("/api/client/servers/{$server->uuid}/settings/auth", [
         'type' => 'password',
         'password' => 'Advinservers is king!123',
     ]);

@@ -7,9 +7,9 @@ use Convoy\Models\User;
 
 class ServerPolicy
 {
-    public function before(User $user, string $ability): ?bool
+    public function before(User $user, string $ability, Server $server): ?bool
     {
-        if ($user->root_admin) {
+        if ($user->root_admin || $user->id === $server->user_id) {
             return true;
         }
 

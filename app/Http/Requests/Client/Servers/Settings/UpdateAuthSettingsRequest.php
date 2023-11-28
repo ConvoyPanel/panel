@@ -3,10 +3,10 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Server;
 use Exception;
 use Convoy\Rules\Password;
 use Faker\Provider\Base;
-use Grpc\Server;
 use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rules\Enum;
 use phpseclib3\Crypt\PublicKeyLoader;
