@@ -3,9 +3,9 @@
 namespace Convoy\Http\Requests\Admin\Nodes\Settings;
 
 use Illuminate\Validation\Rule;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateCotermRequest extends FormRequest
+class UpdateCotermRequest extends BaseApiRequest
 {
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>

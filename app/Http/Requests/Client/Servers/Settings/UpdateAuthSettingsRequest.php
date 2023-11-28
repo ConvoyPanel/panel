@@ -2,8 +2,11 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Http\Requests\BaseApiRequest;
 use Exception;
 use Convoy\Rules\Password;
+use Faker\Provider\Base;
+use Grpc\Server;
 use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rules\Enum;
 use phpseclib3\Crypt\PublicKeyLoader;
@@ -11,19 +14,13 @@ use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Rules\EnglishKeyboardCharacters;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateSecurityRequest extends FormRequest
+class UpdateAuthSettingsRequest extends BaseApiRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('updateAuthSettings', $this->parameter('server', Server::class));
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [

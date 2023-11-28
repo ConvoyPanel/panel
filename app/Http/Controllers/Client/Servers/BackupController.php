@@ -2,6 +2,8 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Http\Requests\Client\Servers\Backups\DeleteBackupRequest;
+use Convoy\Http\Requests\Client\Servers\Backups\RestoreBackupRequest;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
@@ -19,48 +21,50 @@ use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 class BackupController extends ApplicationApiController
 {
     public function __construct(
-        private BackupCreationService $backupCreationService,
-        private BackupDeletionService $backupDeletionService,
+        private BackupCreationService    $backupCreationService,
+        private BackupDeletionService    $backupDeletionService,
         private RestoreFromBackupService $restoreFromBackupService,
-        private BackupRepository $backupRepository,
-    ) {
+        private BackupRepository         $backupRepository,
+    )
+    {
     }
 
-    public function index(Server $server, Request $request)
+    public function index(Request $request, Server $server)
     {
         $backups = QueryBuilder::for(Backup::query())
-            ->where('backups.server_id', $server->id)
-            ->allowedFilters(['name'])
-            ->defaultSort('-created_at')
-            ->allowedSorts('created_at', 'completed_at')
-            ->paginate(min($request->query('per_page') ?? 20, 50));
+                               ->where('backups.server_id', $server->id)
+                               ->allowedFilters(['name'])
+                               ->defaultSort('-created_at')
+                               ->allowedSorts('created_at', 'completed_at')
+                               ->paginate(min($request->query('per_page') ?? 20, 50));
 
-        return fractal($backups, new BackupTransformer)->addMeta([
+        return fractal($backups, new BackupTransformer())->addMeta([
             'backup_count' => $this->backupRepository->getNonFailedBackups($server)->count(),
         ])->respond();
     }
 
-    public function store(Server $server, StoreBackupRequest $request)
+    public function store(StoreBackupRequest $request, Server $server)
     {
         $backup = $this->backupCreationService
-            ->create(server: $server,
-                name: $request->name,
-                mode: $request->enum('mode', BackupMode::class),
+            ->create(
+                server         : $server,
+                name           : $request->name,
+                mode           : $request->enum('mode', BackupMode::class),
                 compressionType: $request->enum('compression_type', BackupCompressionType::class),
-                isLocked: $request->input('locked', false)
+                isLocked       : $request->input('locked', false),
             );
 
-        return fractal($backup, new BackupTransformer)->respond();
+        return fractal($backup, new BackupTransformer())->respond();
     }
 
-    public function restore(Server $server, Backup $backup)
+    public function restore(RestoreBackupRequest $request, Server $server, Backup $backup)
     {
         $this->restoreFromBackupService->handle($server, $backup);
 
         return $this->returnNoContent();
     }
 
-    public function destroy(Server $server, Backup $backup)
+    public function destroy(DeleteBackupRequest $request, Server $server, Backup $backup)
     {
         $this->backupDeletionService->handle($backup);
 

@@ -3,9 +3,9 @@
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Models\Server;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateDetailsRequest extends FormRequest
+class UpdateDetailsRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

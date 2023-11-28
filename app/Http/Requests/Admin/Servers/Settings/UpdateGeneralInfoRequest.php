@@ -4,9 +4,9 @@ namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
 use Convoy\Models\Server;
 use Convoy\Rules\Hostname;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateGeneralInfoRequest extends FormRequest
+class UpdateGeneralInfoRequest extends BaseApiRequest
 {
     public function rules(): array
     {

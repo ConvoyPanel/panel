@@ -6,9 +6,9 @@ use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\Address;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateBuildRequest extends FormRequest
+class UpdateBuildRequest extends BaseApiRequest
 {
     public function rules(): array
     {

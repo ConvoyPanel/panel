@@ -5,10 +5,10 @@ namespace Convoy\Http\Requests\Client\Servers\Settings;
 use Convoy\Models\Server;
 use Convoy\Rules\Password;
 use Convoy\Models\Template;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Rules\EnglishKeyboardCharacters;
 
-class ReinstallServerRequest extends FormRequest
+class ReinstallServerRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

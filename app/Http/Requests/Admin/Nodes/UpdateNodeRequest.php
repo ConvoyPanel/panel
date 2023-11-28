@@ -5,9 +5,9 @@ namespace Convoy\Http\Requests\Admin\Nodes;
 use Convoy\Models\Node;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateNodeRequest extends FormRequest
+class UpdateNodeRequest extends BaseApiRequest
 {
     public function rules(): array
     {

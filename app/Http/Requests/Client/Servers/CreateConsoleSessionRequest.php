@@ -4,14 +4,16 @@ namespace Convoy\Http\Requests\Client\Servers;
 
 use Convoy\Models\Server;
 use Convoy\Enums\Server\ConsoleType;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 use Illuminate\Validation\Rules\Enum;
 
-class CreateConsoleSessionRequest extends FormRequest
+class CreateConsoleSessionRequest extends BaseApiRequest
 {
-    /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
-     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('createConsoleSession', $this->parameter('server', Server::class));
+    }
+
     public function rules(): array
     {
         $server = $this->parameter('server', Server::class);

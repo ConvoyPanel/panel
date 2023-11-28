@@ -3,9 +3,9 @@
 namespace Convoy\Http\Requests\Admin\Nodes\Isos;
 
 use Convoy\Models\ISO;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateIsoRequest extends FormRequest
+class UpdateIsoRequest extends BaseApiRequest
 {
     public function rules(): array
     {

@@ -3,10 +3,10 @@
 namespace Convoy\Http\Requests\Admin\Users;
 
 use Convoy\Models\User;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 use Illuminate\Validation\Rules\Password;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUserRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

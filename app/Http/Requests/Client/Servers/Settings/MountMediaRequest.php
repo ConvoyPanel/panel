@@ -3,9 +3,9 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Models\ISO;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class MountMediaRequest extends FormRequest
+class MountMediaRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {

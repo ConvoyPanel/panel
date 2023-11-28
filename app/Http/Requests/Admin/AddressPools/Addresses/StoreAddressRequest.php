@@ -6,12 +6,12 @@ use Convoy\Models\Address;
 use Illuminate\Support\Arr;
 use Convoy\Models\AddressPool;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Enums\Network\AddressType;
 use Convoy\Validation\ValidateAddressType;
 use Convoy\Validation\ValidateAddressUniqueness;
 
-class StoreAddressRequest extends FormRequest
+class StoreAddressRequest extends BaseApiRequest
 {
     public function rules(): array
     {

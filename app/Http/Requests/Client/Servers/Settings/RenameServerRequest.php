@@ -2,25 +2,18 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Server;
 use Convoy\Rules\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RenameServerRequest extends FormRequest
+class RenameServerRequest extends BaseApiRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('rename', $this->parameter('server', Server::class));
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

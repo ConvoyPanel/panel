@@ -7,13 +7,13 @@ use Convoy\Models\Server;
 use Convoy\Models\Address;
 use Convoy\Rules\Password;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Rules\EnglishKeyboardCharacters;
 
 /**
  * @property mixed $type
  */
-class StoreServerRequest extends FormRequest
+class StoreServerRequest extends BaseApiRequest
 {
     /**
      * Get the validation rules that apply to the request.

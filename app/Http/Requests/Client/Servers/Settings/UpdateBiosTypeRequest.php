@@ -3,17 +3,16 @@
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
 use Convoy\Enums\Server\BiosType;
+use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateBiosTypeRequest extends FormRequest
+class UpdateBiosTypeRequest extends BaseApiRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('updateBiosType', $this->parameter('server', Server::class));
     }
 
     /**

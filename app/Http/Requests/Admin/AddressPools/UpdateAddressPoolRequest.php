@@ -5,9 +5,9 @@ namespace Convoy\Http\Requests\Admin\AddressPools;
 use Convoy\Models\Node;
 use Convoy\Models\AddressPool;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\FormRequest;
+use Convoy\Http\Requests\BaseApiRequest;
 
-class UpdateAddressPoolRequest extends FormRequest
+class UpdateAddressPoolRequest extends BaseApiRequest
 {
     public function rules(): array
     {
