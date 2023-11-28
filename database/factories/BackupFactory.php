@@ -27,7 +27,6 @@ class BackupFactory extends Factory
     {
         return [
             'uuid' => $this->faker->uuid(),
-            'server_id' => Server::factory(),
             'is_successful' => $this->faker->boolean(),
             'is_locked' => $this->faker->boolean(),
             'name' => $this->faker->word(),

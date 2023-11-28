@@ -28,8 +28,6 @@ class ServerFactory extends Factory
         return [
             'uuid' => $uuid,
             'uuid_short' => substr($uuid, 0, 8),
-            'user_id' => User::factory(),
-            'node_id' => Node::factory(),
             'hostname' => $this->faker->domainName(),
             'name' => $this->faker->word(),
             'vmid' => rand(100, 5000),

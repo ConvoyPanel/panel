@@ -21,7 +21,6 @@ class NodeFactory extends Factory
     public function definition(): array
     {
         return [
-            'location_id' => Location::factory(),
             'name' => $this->faker->word(),
             'cluster' => 'proxmox',
             'fqdn' => $this->faker->word(),

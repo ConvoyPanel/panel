@@ -27,7 +27,6 @@ class ISOFactory extends Factory
     {
         return [
             'uuid' => $this->faker->uuid(),
-            'node_id' => Node::factory(),
             'is_successful' => $this->faker->boolean(),
             'name' => $this->faker->name(),
             'file_name' => "{$this->faker->name()}.iso",
