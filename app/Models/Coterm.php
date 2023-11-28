@@ -3,7 +3,6 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\NullableEncrypter;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -28,6 +27,7 @@ class Coterm extends Model
     ];
 
     public static $validationRules = [
+        'name' => 'required|string|max:191',
         'is_tls_enabled' => 'required|boolean',
         'fqdn' => 'required|string|max:191',
         'port' => 'required|integer|min:1|max:65535',

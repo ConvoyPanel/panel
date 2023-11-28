@@ -2,6 +2,10 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
+use Convoy\Http\Requests\Admin\Coterms\StoreCotermRequest;
+use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
+use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
+use Convoy\Models\Coterm;
 use Illuminate\Http\Request;
 
 class CotermController
@@ -11,20 +15,21 @@ class CotermController
         
     }
 
-    public function store(Request $request)
+    public function store(StoreCotermRequest $request)
     {
 
     }
 
-    public function show($id)
+    public function update(UpdateCotermRequest $request, Coterm $coterm)
     {
     }
 
-    public function update(Request $request, $id)
+    public function updateAttachedNodes(UpdateAttachedNodesRequest $request, Coterm $coterm)
     {
+
     }
 
-    public function destroy($id)
+    public function destroy(Coterm $coterm)
     {
     }
 }
