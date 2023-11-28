@@ -35,7 +35,7 @@ class AddressPoolController extends ApplicationApiController
         return fractal($addressPool, new AddressPoolTransformer)->respond();
     }
 
-    public function getNodesAllocatedTo(Request $request, AddressPool $addressPool)
+    public function getAttachedNodes(Request $request, AddressPool $addressPool)
     {
         $nodes = QueryBuilder::for($addressPool->nodes())
             ->withCount('servers')

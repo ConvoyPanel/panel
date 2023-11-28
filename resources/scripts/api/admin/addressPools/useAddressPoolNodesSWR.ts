@@ -1,9 +1,9 @@
 import { useParams } from 'react-router-dom'
 import useSWR from 'swr'
 
-import getNodesAllocatedTo, {
+import getAttachedNodes, {
     QueryParams,
-} from '@/api/admin/addressPools/getNodesAllocatedTo'
+} from '@/api/admin/addressPools/getAttachedNodes'
 import { NodeResponse } from '@/api/admin/nodes/getNodes'
 
 const useAddressPoolNodesSWR = (
@@ -13,7 +13,7 @@ const useAddressPoolNodesSWR = (
     return useSWR<NodeResponse>(
         ['admin.address-pools.nodes', poolId, page, query],
         () =>
-            getNodesAllocatedTo(poolId, {
+            getAttachedNodes(poolId, {
                 page,
                 query,
                 ...params,

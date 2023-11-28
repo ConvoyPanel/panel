@@ -9,7 +9,7 @@ export interface QueryParams {
     perPage?: number | null
 }
 
-const getNodesAllocatedTo = async (
+const getAttachedNodes = async (
     addressPoolId: number,
     { query, fqdn, locationId, page, perPage = 50 }: QueryParams
 ): Promise<NodeResponse> => {
@@ -32,4 +32,4 @@ const getNodesAllocatedTo = async (
     }
 }
 
-export default getNodesAllocatedTo
+export default getAttachedNodes
