@@ -12,7 +12,7 @@ type UpdateKeysPayload = {
 
 type Payload = UpdatePasswordPayload | UpdateKeysPayload
 
-export default (uuid: string, data: Payload) => {
+const updateAuthSettings = (uuid: string, data: Payload) => {
     let payload = {}
 
     if (data.type === 'password') {
@@ -29,5 +29,7 @@ export default (uuid: string, data: Payload) => {
         }
     }
 
-    return http.put(`/api/client/servers/${uuid}/settings/security`, payload)
+    return http.put(`/api/client/servers/${uuid}/settings/auth`, payload)
 }
+
+export default updateAuthSettings

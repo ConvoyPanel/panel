@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next'
 import useSWR from 'swr'
 import { z } from 'zod'
 
-import getNetwork from '@/api/server/settings/getNetwork'
-import updateNetwork from '@/api/server/settings/updateNetwork'
+import getNetwork from '@/api/server/settings/getNetworkSettings'
+import updateNetwork from '@/api/server/settings/updateNetworkSettings'
 
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'

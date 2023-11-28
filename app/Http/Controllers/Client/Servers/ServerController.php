@@ -22,28 +22,39 @@ use Convoy\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 
 class ServerController extends ApplicationApiController
 {
-    public function __construct(private CotermJWTService $cotermJWTService, private ServerConsoleService $consoleService, private ServerDetailService $detailService, private ProxmoxServerRepository $serverRepository, private ProxmoxPowerRepository $powerRepository)
+    public function __construct(
+        private CotermJWTService        $cotermJWTService,
+        private ServerConsoleService    $consoleService,
+        private ServerDetailService     $detailService,
+        private ProxmoxServerRepository $serverRepository,
+        private ProxmoxPowerRepository  $powerRepository,
+    )
     {
     }
 
     public function index(Server $server)
     {
-        return fractal($server, new ServerTransformer)->respond();
+        return fractal($server, new ServerTransformer())->respond();
     }
 
     public function details(Server $server)
     {
-        return fractal($this->detailService->getByProxmox($server), new ServerDetailTransformer)->respond();
+        return fractal(
+            $this->detailService->getByProxmox($server), new ServerDetailTransformer(),
+        )->respond();
     }
 
     public function getState(Server $server)
     {
-        return fractal()->item($this->serverRepository->setServer($server)->getState(), new ServerStateTransformer)->respond();
+        return fractal()->item(
+            $this->serverRepository->setServer($server)->getState(), new ServerStateTransformer(),
+        )->respond();
     }
 
     public function updateState(Server $server, SendPowerCommandRequest $request)
     {
-        $this->powerRepository->setServer($server)->send($request->enum('state', PowerAction::class));
+        $this->powerRepository->setServer($server)
+                              ->send($request->enum('state', PowerAction::class));
 
         return $this->returnNoContent();
     }
@@ -56,8 +67,11 @@ class ServerController extends ApplicationApiController
                     'is_tls_enabled' => $server->node->coterm_tls_enabled,
                     'fqdn' => $server->node->coterm_fqdn,
                     'port' => $server->node->coterm_port,
-                    'token' => $this->cotermJWTService->handle($server, $request->user(), $request->enum('type', ConsoleType::class))->toString(),
-                ]
+                    'token' => $this->cotermJWTService->handle(
+                        $server, $request->user(), $request->enum('type', ConsoleType::class),
+                    )
+                                                      ->toString(),
+                ],
             ]);
         } else {
             $data = $this->consoleService->createConsoleUserCredentials($server);
@@ -68,7 +82,7 @@ class ServerController extends ApplicationApiController
                 'vmid' => $server->vmid,
                 'fqdn' => $server->node->fqdn,
                 'port' => $server->node->port,
-            ], new ServerTerminalTransformer)->respond();
+            ], new ServerTerminalTransformer())->respond();
         }
     }
 }

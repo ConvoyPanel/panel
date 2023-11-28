@@ -35,10 +35,10 @@ Route::prefix('/servers/{server}')->middleware([ServerSubject::class, Authentica
         Route::post('/hardware/isos/{iso}/mount', [Client\Servers\SettingsController::class, 'mountMedia']);
         Route::post('/hardware/isos/{iso}/unmount', [Client\Servers\SettingsController::class, 'unmountMedia']);
 
-        Route::get('/network', [Client\Servers\SettingsController::class, 'getNetwork']);
-        Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetwork']);
+        Route::get('/network', [Client\Servers\SettingsController::class, 'getNetworkSettings']);
+        Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetworkSettings']);
 
-        Route::get('/security', [Client\Servers\SettingsController::class, 'getSecurity']);
-        Route::put('/security', [Client\Servers\SettingsController::class, 'updateSecurity']);
+        Route::get('/auth', [Client\Servers\SettingsController::class, 'getAuthSettings']);
+        Route::put('/auth', [Client\Servers\SettingsController::class, 'updateAuthSettings']);
     });
 });

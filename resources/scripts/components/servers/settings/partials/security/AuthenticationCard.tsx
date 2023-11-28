@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next'
 import useSWR from 'swr'
 import { z } from 'zod'
 
-import getSecurity from '@/api/server/settings/getSecurity'
-import updateSecurity from '@/api/server/settings/updateSecurity'
+import getSecurity from '@/api/server/settings/getAuthSettings'
+import updateSecurity from '@/api/server/settings/updateAuthSettings'
 
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'

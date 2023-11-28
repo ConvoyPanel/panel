@@ -27,7 +27,7 @@ use Convoy\Transformers\Client\ServerBootOrderTransformer;
 use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateSecurityRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 
@@ -153,14 +153,14 @@ class SettingsController extends ApplicationApiController
         return $this->returnNoContent();
     }
 
-    public function getNetwork(Server $server)
+    public function getNetworkSettings(Server $server)
     {
         return fractal()->item([
             'nameservers' => $this->cloudinitService->getNameservers($server),
         ], new ServerNetworkTransformer())->respond();
     }
 
-    public function updateNetwork(UpdateNetworkRequest $request, Server $server)
+    public function updateNetworkSettings(UpdateNetworkRequest $request, Server $server)
     {
         $this->cloudinitService->updateNameservers($server, $request->nameservers);
 
@@ -169,14 +169,14 @@ class SettingsController extends ApplicationApiController
         ], new ServerNetworkTransformer())->respond();
     }
 
-    public function getSecurity(Server $server)
+    public function getAuthSettings(Server $server)
     {
         return fractal()->item([
             'ssh_keys' => $this->authService->getSSHKeys($server),
         ], new ServerSecurityTransformer)->respond();
     }
 
-    public function updateSecurity(UpdateSecurityRequest $request, Server $server)
+    public function updateAuthSettings(UpdateAuthSettingsRequest $request, Server $server)
     {
         if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
             $this->authService->updateSSHKeys($server, $request->ssh_keys);
