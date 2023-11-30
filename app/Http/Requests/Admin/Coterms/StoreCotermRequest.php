@@ -12,6 +12,10 @@ class StoreCotermRequest extends BaseApiRequest
     {
         $rules = Coterm::getRules();
 
-        return Arr::only($rules, ['name', 'is_tls_enabled', 'fqdn', 'port']);
+        return [
+            ...Arr::only($rules, ['name', 'is_tls_enabled', 'fqdn', 'port']),
+            'node_ids' => ['nullable', 'array'],
+            'node_ids.*' => ['required', 'integer', 'exists:nodes,id'],
+        ];
     }
 }

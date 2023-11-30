@@ -13,6 +13,10 @@ class UpdateCotermRequest extends BaseApiRequest
         $coterm = $this->parameter('coterm', Coterm::class);
         $rules = Coterm::getRulesForUpdate($coterm);
 
-        return Arr::only($rules, ['name', 'is_tls_enabled', 'fqdn', 'port']);
+        return [
+            ...Arr::only($rules, ['name', 'is_tls_enabled', 'fqdn', 'port']),
+            'node_ids' => ['nullable', 'array'],
+            'node_ids.*' => ['required', 'integer', 'exists:nodes,id'],
+        ];
     }
 }

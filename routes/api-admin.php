@@ -4,66 +4,209 @@ use Convoy\Http\Controllers\Admin;
 use Convoy\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('locations', Admin\LocationController::class)
-    ->only(['index', 'store', 'update', 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Location Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/locations
+|
+*/
+Route::prefix('/locations')->group(function () {
+    Route::get('/', [Admin\LocationController::class, 'index']);
+    Route::post('/', [Admin\LocationController::class, 'store']);
 
-Route::resource('nodes', Admin\Nodes\NodeController::class)
-    ->only(['index', 'show', 'store', 'update', 'destroy']);
-
-Route::prefix('/nodes/{node}')->group(function () {
-    Route::resource('/isos', Admin\Nodes\IsoController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-
-    Route::resource('template-groups', Admin\Nodes\TemplateGroupController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-    Route::post('/template-groups/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateOrder']);
-
-    Route::resource('template-groups.templates', Admin\Nodes\TemplateController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-    Route::post(
-        '/template-groups/{template_group}/templates/reorder',
-        [Admin\Nodes\TemplateController::class, 'updateOrder'],
-    );
-
-    Route::resource('addresses', Admin\Nodes\AddressController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-
-    Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
-
-    Route::prefix('/settings')->group(function () {
-        Route::patch('/coterm', [Admin\Nodes\NodeController::class, 'updateCoterm']);
-        Route::post('/reset-coterm-token', [Admin\Nodes\NodeController::class, 'resetCotermToken']);
+    Route::prefix('/{location}')->group(function () {
+        Route::put('/', [Admin\LocationController::class, 'update']);
+        Route::delete('/', [Admin\LocationController::class, 'destroy']);
     });
 });
 
-Route::get('/servers', [Admin\ServerController::class, 'index']);
-Route::post('/servers', [Admin\ServerController::class, 'store']);
-Route::prefix('/servers/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
-    Route::get('/', [Admin\ServerController::class, 'show'])->withoutMiddleware(ValidateServerStatusMiddleware::class);
-    Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(
-        ValidateServerStatusMiddleware::class,
-    );
-    Route::delete('/', [Admin\ServerController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Node Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/nodes
+|
+*/
+Route::prefix('/nodes')->group(function () {
+    Route::get('/', [Admin\Nodes\NodeController::class, 'index']);
+    Route::post('/', [Admin\Nodes\NodeController::class, 'store']);
 
-    Route::prefix('/settings')->group(function () {
-        Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);
+    Route::prefix('/{node}')->group(function () {
+        Route::put('/', [Admin\Nodes\NodeController::class, 'update']);
+        Route::delete('/', [Admin\Nodes\NodeController::class, 'destroy']);
 
-        Route::post('/suspend', [Admin\ServerController::class, 'suspend']);
-        Route::post('/unsuspend', [Admin\ServerController::class, 'unsuspend']);
+        /*
+        |--------------------------------------------------------------------------
+        | Node ISOs Controller Routes
+        |--------------------------------------------------------------------------
+        |
+        | Endpoint: /api/admin/nodes/{node}/isos
+        |
+        */
+        Route::resource('/isos', Admin\Nodes\IsoController::class)
+             ->only(['index', 'store', 'update', 'destroy']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Node Templates Controller Routes
+        |--------------------------------------------------------------------------
+        |
+        | Endpoint: /api/admin/nodes/{node}/template-groups
+        |
+        */
+        Route::prefix('/template-groups')->group(function () {
+            Route::get('/', [Admin\Nodes\TemplateGroupController::class, 'index']);
+            Route::post('/', [Admin\Nodes\TemplateGroupController::class, 'store']);
+            Route::post(
+                '/reorder', [Admin\Nodes\TemplateGroupController::class, 'updateOrder'],
+            );
+
+            Route::prefix('/{template_group}')->group(function () {
+                Route::put('/', [Admin\Nodes\TemplateGroupController::class, 'update']);
+                Route::delete('/', [Admin\Nodes\TemplateGroupController::class, 'destroy']);
+                Route::prefix('/templates')->group(function () {
+                    Route::get('/', [Admin\Nodes\TemplateController::class, 'index']);
+                    Route::post('/', [Admin\Nodes\TemplateController::class, 'store']);
+                    Route::post(
+                        '/reorder',
+                        [Admin\Nodes\TemplateController::class, 'updateOrder'],
+                    );
+
+                    Route::get('/{template}', [Admin\Nodes\TemplateController::class, 'show']);
+                    Route::delete('/{template}', [Admin\Nodes\TemplateController::class, 'destroy'],
+                    );
+                });
+
+                Route::resource('templates', Admin\Nodes\TemplateController::class)
+                     ->only(['index', 'store', 'update', 'destroy']);
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Node Addresses Controller Routes
+        |--------------------------------------------------------------------------
+        |
+        | Endpoint: /api/admin/nodes/{node}/addresses
+        |
+        */
+        Route::resource('addresses', Admin\Nodes\AddressController::class)
+             ->only(['index', 'store', 'update', 'destroy']);
+
+        /*
+         |--------------------------------------------------------------------------
+         | Node Helpers Routes
+         |--------------------------------------------------------------------------
+         */
+        Route::get('/tools/query-remote-file', [Admin\Nodes\IsoController::class, 'queryLink']);
     });
 });
 
-Route::resource('address-pools', Admin\AddressPools\AddressPoolController::class)
-    ->only(['index', 'show', 'store', 'update', 'destroy']);
-Route::prefix('/address-pools/{address_pool}')->group(function () {
-    Route::get('/attached-nodes', [Admin\AddressPools\AddressPoolController::class, 'getAttachedNodes']);
+/*
+|--------------------------------------------------------------------------
+| Server Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/servers
+|
+*/
+Route::prefix('/servers')->group(function () {
+    Route::get('/', [Admin\ServerController::class, 'index']);
+    Route::post('/', [Admin\ServerController::class, 'store']);
+
+    Route::group(['prefix' => '/{server}', 'middleware' => ValidateServerStatusMiddleware::class],
+        function () {
+            Route::get('/', [Admin\ServerController::class, 'show'])->withoutMiddleware(
+                ValidateServerStatusMiddleware::class,
+            );
+            Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(
+                ValidateServerStatusMiddleware::class,
+            );
+            Route::delete('/', [Admin\ServerController::class, 'destroy']);
+
+            Route::prefix('/settings')->group(function () {
+                Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);
+
+                Route::post('/suspend', [Admin\ServerController::class, 'suspend']);
+                Route::post('/unsuspend', [Admin\ServerController::class, 'unsuspend']);
+            });
+        });
 });
 
-Route::resource('address-pools.addresses', Admin\AddressPools\AddressController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Address Pool Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/address-pools
+|
+*/
+Route::prefix('/address-pools')->group(function () {
+    Route::get('/', [Admin\AddressPools\AddressPoolController::class, 'index']);
+    Route::post('/', [Admin\AddressPools\AddressPoolController::class, 'store']);
 
+    Route::prefix('/{address_pool}')->group(function () {
+        Route::get('/', [Admin\AddressPools\AddressPoolController::class, 'show']);
+        Route::put('/', [Admin\AddressPools\AddressPoolController::class, 'update']);
+        Route::delete('/', [Admin\AddressPools\AddressPoolController::class, 'destroy']);
+        Route::get(
+            '/attached-nodes',
+            [Admin\AddressPools\AddressPoolController::class, 'getAttachedNodes'],
+        );
+
+        Route::prefix('/addresses')->group(function () {
+            Route::get('/', [Admin\AddressPools\AddressController::class, 'index']);
+            Route::post('/', [Admin\AddressPools\AddressController::class, 'store']);
+            Route::put('/{address}', [Admin\AddressPools\AddressController::class, 'update']);
+            Route::delete('/{address}', [Admin\AddressPools\AddressController::class, 'destroy']);
+        });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| User Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/users
+|
+*/
 Route::resource('users', Admin\UserController::class)
-    ->only(['index', 'show', 'store', 'update', 'destroy']);
+     ->only(['index', 'show', 'store', 'update', 'destroy']);
 
+/*
+|--------------------------------------------------------------------------
+| Coterm Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/coterms
+|
+*/
+
+Route::prefix('/coterms')->group(function () {
+    Route::get('/', [Admin\CotermController::class, 'index']);
+    Route::post('/', [Admin\CotermController::class, 'store']);
+
+    Route::prefix('/{coterm}')->group(function () {
+        Route::get('/', [Admin\CotermController::class, 'show']);
+        Route::put('/', [Admin\CotermController::class, 'update']);
+        Route::post('/reset-coterm-token', [Admin\CotermController::class, 'resetCotermToken']);
+        Route::delete('/', [Admin\CotermController::class, 'destroy']);
+        Route::get('/nodes', [Admin\CotermController::class, 'getAttachedNodes']);
+        Route::put('/nodes', [Admin\CotermController::class, 'updateAttachedNodes']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| API Token Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/tokens
+|
+*/
 Route::resource('tokens', Admin\TokenController::class)
-    ->only(['index', 'store', 'destroy']);
+     ->only(['index', 'store', 'destroy']);
