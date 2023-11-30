@@ -4,7 +4,7 @@ namespace Convoy\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 
-class ApplicationApiController extends Controller
+class ApiController extends Controller
 {
     protected function returnNoContent(): JsonResponse
     {

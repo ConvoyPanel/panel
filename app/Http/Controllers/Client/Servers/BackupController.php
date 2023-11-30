@@ -2,23 +2,23 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Enums\Server\BackupCompressionType;
+use Convoy\Enums\Server\BackupMode;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Client\Servers\Backups\DeleteBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\RestoreBackupRequest;
+use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
-use Illuminate\Http\Request;
-use Convoy\Enums\Server\BackupMode;
-use Spatie\QueryBuilder\QueryBuilder;
-use Convoy\Enums\Server\BackupCompressionType;
-use Convoy\Transformers\Client\BackupTransformer;
 use Convoy\Repositories\Eloquent\BackupRepository;
-use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Services\Servers\Backups\BackupCreationService;
 use Convoy\Services\Servers\Backups\BackupDeletionService;
 use Convoy\Services\Servers\Backups\RestoreFromBackupService;
-use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
+use Convoy\Transformers\Client\BackupTransformer;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class BackupController extends ApplicationApiController
+class BackupController extends ApiController
 {
     public function __construct(
         private BackupCreationService    $backupCreationService,

@@ -2,32 +2,40 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Models\User;
 use Carbon\CarbonImmutable;
-use Convoy\Models\SSOToken;
-use Illuminate\Http\Request;
-use Convoy\Services\Api\JWTService;
-use Illuminate\Support\Facades\Hash;
-use Spatie\QueryBuilder\QueryBuilder;
-use Convoy\Models\Filters\FiltersUser;
-use Spatie\QueryBuilder\AllowedFilter;
-use Convoy\Transformers\Admin\UserTransformer;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
+use Convoy\Models\Filters\FiltersUser;
+use Convoy\Models\SSOToken;
+use Convoy\Models\User;
+use Convoy\Services\Api\JWTService;
+use Convoy\Transformers\Admin\UserTransformer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class UserController extends ApplicationApiController
+class UserController extends ApiController
 {
-    public function __construct(private JWTService $JWTService) {}
+    public function __construct(private JWTService $JWTService)
+    {
+    }
 
     public function index(Request $request)
     {
         $users = QueryBuilder::for(User::query())
-            ->withCount(['servers'])
-            ->allowedFilters([AllowedFilter::exact('id'), 'name', AllowedFilter::exact('email'), AllowedFilter::custom('*', new FiltersUser)])
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                             ->withCount(['servers'])
+                             ->allowedFilters(
+                                 [AllowedFilter::exact('id'), 'name', AllowedFilter::exact(
+                                     'email',
+                                 ), AllowedFilter::custom('*', new FiltersUser())],
+                             )
+                             ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
         return fractal($users, new UserTransformer())->respond();
     }
@@ -70,7 +78,9 @@ class UserController extends ApplicationApiController
         $user->loadCount('servers');
 
         if ($user->servers_count > 0) {
-            throw new BadRequestHttpException('The user cannot be deleted with servers still associated.');
+            throw new BadRequestHttpException(
+                'The user cannot be deleted with servers still associated.',
+            );
         }
 
         $user->tokens()->delete();
@@ -91,7 +101,7 @@ class UserController extends ApplicationApiController
             'data' => [
                 'user_id' => $user->id,
                 'token' => $token->toString(),
-            ]
+            ],
         ]);
     }
 }

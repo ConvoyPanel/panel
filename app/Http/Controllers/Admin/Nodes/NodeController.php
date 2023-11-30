@@ -2,21 +2,21 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Models\Node;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Spatie\QueryBuilder\QueryBuilder;
-use Convoy\Models\Filters\FiltersNode;
-use Spatie\QueryBuilder\AllowedFilter;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
-use Convoy\Services\Coterm\CotermTokenCreationService;
-use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateCotermRequest;
+use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
+use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use Convoy\Models\Filters\FiltersNode;
+use Convoy\Models\Node;
+use Convoy\Services\Coterm\CotermTokenCreationService;
+use Convoy\Transformers\Admin\NodeTransformer;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class NodeController extends ApplicationApiController
+class NodeController extends ApiController
 {
     public function __construct(private CotermTokenCreationService $cotermTokenCreator)
     {
@@ -25,14 +25,18 @@ class NodeController extends ApplicationApiController
     public function index(Request $request)
     {
         $nodes = QueryBuilder::for(Node::query())
-            ->withCount(['servers'])
-            ->allowedFilters(
-                [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact('location_id'), AllowedFilter::custom(
-                    '*',
-                    new FiltersNode,
-                )],
-            )
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                             ->withCount(['servers'])
+                             ->allowedFilters(
+                                 [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact(
+                                     'location_id',
+                                 ), AllowedFilter::custom(
+                                     '*',
+                                     new FiltersNode(),
+                                 )],
+                             )
+                             ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }
@@ -50,14 +54,14 @@ class NodeController extends ApplicationApiController
     {
         $node = Node::create($request->validated());
 
-        return fractal($node, new NodeTransformer)->respond();
+        return fractal($node, new NodeTransformer())->respond();
     }
 
     public function update(UpdateNodeRequest $request, Node $node)
     {
         $node->update($request->validated());
 
-        return fractal($node, new NodeTransformer)->respond();
+        return fractal($node, new NodeTransformer())->respond();
     }
 
     public function updateCoterm(UpdateCotermRequest $request, Node $node)
@@ -109,7 +113,9 @@ class NodeController extends ApplicationApiController
         $node->loadCount('servers');
 
         if ($node->servers_count > 0) {
-            throw new AccessDeniedHttpException('This node cannot be deleted with servers still associated.');
+            throw new AccessDeniedHttpException(
+                'This node cannot be deleted with servers still associated.',
+            );
         }
 
         $node->delete();

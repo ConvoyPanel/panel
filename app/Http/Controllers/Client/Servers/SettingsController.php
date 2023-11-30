@@ -2,38 +2,43 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Data\Server\Proxmox\Config\DiskData;
+use Convoy\Enums\Server\AuthenticationType;
+use Convoy\Enums\Server\Status;
+use Convoy\Http\Controllers\ApiController;
+use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
+use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
 use Convoy\Models\ISO;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
-use Illuminate\Http\Request;
-use Convoy\Enums\Server\Status;
 use Convoy\Models\TemplateGroup;
-use Spatie\QueryBuilder\QueryBuilder;
-use Convoy\Enums\Server\AuthenticationType;
-use Illuminate\Database\ConnectionInterface;
-use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\AllocationService;
+use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\ServerAuthService;
-use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Transformers\Client\MediaTransformer;
-use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Services\Servers\ServerBuildDispatchService;
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Transformers\Client\MediaTransformer;
 use Convoy\Transformers\Client\RenamedServerTransformer;
-use Convoy\Transformers\Client\ServerNetworkTransformer;
-use Convoy\Transformers\Client\TemplateGroupTransformer;
-use Convoy\Transformers\Client\ServerSecurityTransformer;
 use Convoy\Transformers\Client\ServerBootOrderTransformer;
-use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
+use Convoy\Transformers\Client\ServerNetworkTransformer;
+use Convoy\Transformers\Client\ServerSecurityTransformer;
+use Convoy\Transformers\Client\TemplateGroupTransformer;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class SettingsController extends ApplicationApiController
+class SettingsController extends ApiController
 {
-    public function __construct(private ServerAuthService $authService, private ConnectionInterface $connection, private CloudinitService $cloudinitService, private ServerBuildDispatchService $buildDispatchService, private AllocationService $allocationService)
+    public function __construct(
+        private ServerAuthService $authService, private ConnectionInterface $connection,
+        private CloudinitService $cloudinitService,
+        private ServerBuildDispatchService $buildDispatchService,
+        private AllocationService $allocationService,
+    )
     {
     }
 
@@ -45,28 +50,34 @@ class SettingsController extends ApplicationApiController
             $server->update($request->validated());
         });
 
-        return fractal($server, new RenamedServerTransformer)->respond();
+        return fractal($server, new RenamedServerTransformer())->respond();
     }
 
     public function getTemplateGroups(Request $request, Server $server)
     {
         $templateGroups = QueryBuilder::for(TemplateGroup::query())
-            ->defaultSort('order_column')
-            ->allowedFilters(['name']);
+                                      ->defaultSort('order_column')
+                                      ->allowedFilters(['name']);
 
-        if (! $request->user()->root_admin) {
-            $templateGroups = $templateGroups->where([['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]])
-                ->with(['templates' => function ($query) {
-                    $query->where('hidden', '=', false)->orderBy('order_column');
-                }])->get();
+        if (!$request->user()->root_admin) {
+            $templateGroups = $templateGroups->where(
+                [['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]],
+            )
+                                             ->with(['templates' => function ($query) {
+                                                 $query->where('hidden', '=', false)->orderBy(
+                                                     'order_column',
+                                                 );
+                                             }])->get();
         } else {
-            $templateGroups = $templateGroups->where('template_groups.node_id', '=', $server->node->id)
-                ->with(['templates' => function ($query) {
-                    $query->orderBy('order_column');
-                }])->get();
+            $templateGroups = $templateGroups->where(
+                'template_groups.node_id', '=', $server->node->id,
+            )
+                                             ->with(['templates' => function ($query) {
+                                                 $query->orderBy('order_column');
+                                             }])->get();
         }
 
-        return fractal($templateGroups, new TemplateGroupTransformer)->respond();
+        return fractal($templateGroups, new TemplateGroupTransformer())->respond();
     }
 
     public function reinstall(ReinstallServerRequest $request, Server $server)
@@ -103,7 +114,7 @@ class SettingsController extends ApplicationApiController
         return fractal()->item([
             'unused_devices' => DiskData::collection($unconfiguredDevices),
             'boot_order' => $configuredDevices,
-        ], new ServerBootOrderTransformer)->respond();
+        ], new ServerBootOrderTransformer())->respond();
     }
 
     public function updateBootOrder(UpdateBootOrderRequest $request, Server $server)
@@ -119,7 +130,9 @@ class SettingsController extends ApplicationApiController
         if ($request->user()->root_admin) {
             $media = $server->node->isos()->where('is_successful', '=', true)->get()->toArray();
         } else {
-            $media = $server->node->isos()->where([['hidden', '=', false], ['is_successful', '=', true]])->get()->toArray();
+            $media = $server->node->isos()->where(
+                [['hidden', '=', false], ['is_successful', '=', true]],
+            )->get()->toArray();
         }
 
         $media = array_map(function ($iso) use ($disks) {
@@ -173,7 +186,7 @@ class SettingsController extends ApplicationApiController
     {
         return fractal()->item([
             'ssh_keys' => $this->authService->getSSHKeys($server),
-        ], new ServerSecurityTransformer)->respond();
+        ], new ServerSecurityTransformer())->respond();
     }
 
     public function updateAuthSettings(UpdateAuthSettingsRequest $request, Server $server)

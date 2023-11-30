@@ -2,16 +2,20 @@
 
 namespace Convoy\Http\Controllers\Client\Servers;
 
+use Convoy\Http\Controllers\ApiController;
+use Convoy\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 use Convoy\Models\Server;
-use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
 use Convoy\Services\Servers\Snapshots\SnapshotCreationService;
 use Convoy\Services\Servers\Snapshots\SnapshotDeletionService;
-use Convoy\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
-use Convoy\Http\Requests\Client\Servers\Snapshots\SnapshotRequest;
 
-class SnapshotController extends ApplicationApiController
+class SnapshotController extends ApiController
 {
-    public function __construct(protected ProxmoxSnapshotRepository $repository, protected SnapshotCreationService $creationService, protected SnapshotDeletionService $deletionService)
+    public function __construct(
+        protected ProxmoxSnapshotRepository $repository,
+        protected SnapshotCreationService   $creationService,
+        protected SnapshotDeletionService   $deletionService,
+    )
     {
     }
 
@@ -22,7 +26,9 @@ class SnapshotController extends ApplicationApiController
         return inertia('servers/snapshots/Index', [
             'server' => $server,
             'snapshots' => $snapshots,
-            'can_create' => isset($server->snapshot_limit) ? (count($snapshots) - 1) < $server->snapshot_limit : true,
+            'can_create' => isset($server->snapshot_limit) ? (count(
+                        $snapshots,
+                    ) - 1) < $server->snapshot_limit : true,
         ]);
     }
 

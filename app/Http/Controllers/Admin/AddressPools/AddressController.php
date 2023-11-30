@@ -2,45 +2,53 @@
 
 namespace Convoy\Http\Controllers\Admin\AddressPools;
 
-use Convoy\Models\Address;
-use Illuminate\Http\Request;
-use Convoy\Models\AddressPool;
 use Convoy\Enums\Network\AddressType;
-use Spatie\QueryBuilder\QueryBuilder;
-use Spatie\QueryBuilder\AllowedFilter;
-use Convoy\Models\Filters\FiltersAddress;
-use Convoy\Services\Servers\NetworkService;
-use Convoy\Jobs\Server\SyncNetworkSettings;
-use Illuminate\Database\ConnectionInterface;
-use Convoy\Models\Filters\AllowedNullableFilter;
-use Convoy\Transformers\Admin\AddressTransformer;
-use Convoy\Repositories\Eloquent\AddressRepository;
-use Convoy\Http\Controllers\ApplicationApiController;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
+use Convoy\Jobs\Server\SyncNetworkSettings;
+use Convoy\Models\Address;
+use Convoy\Models\AddressPool;
+use Convoy\Models\Filters\AllowedNullableFilter;
+use Convoy\Models\Filters\FiltersAddress;
+use Convoy\Repositories\Eloquent\AddressRepository;
+use Convoy\Services\Servers\NetworkService;
+use Convoy\Transformers\Admin\AddressTransformer;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
-class AddressController extends ApplicationApiController
+class AddressController extends ApiController
 {
-    public function __construct(private NetworkService $networkService, private AddressRepository $repository, private ConnectionInterface $connection)
+    public function __construct(
+        private NetworkService $networkService, private AddressRepository $repository,
+        private ConnectionInterface $connection,
+    )
     {
     }
 
     public function index(Request $request, AddressPool $addressPool)
     {
         $addresses = QueryBuilder::for($addressPool->addresses())
-            ->with('server')
-            ->defaultSort('-id')
-            ->allowedFilters(
-                [AllowedFilter::exact('address'), AllowedFilter::exact('type'), AllowedFilter::custom(
-                    '*',
-                    new FiltersAddress,
-                ), AllowedNullableFilter::exact('server_id')],
-            )
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                                 ->with('server')
+                                 ->defaultSort('-id')
+                                 ->allowedFilters(
+                                     [AllowedFilter::exact('address'), AllowedFilter::exact(
+                                         'type',
+                                     ), AllowedFilter::custom(
+                                         '*',
+                                         new FiltersAddress(),
+                                     ), AllowedNullableFilter::exact('server_id')],
+                                 )
+                                 ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
-        return fractal($addresses, new AddressTransformer)->parseIncludes($request->include)->respond();
+        return fractal($addresses, new AddressTransformer())->parseIncludes($request->include)
+                                                            ->respond();
     }
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
@@ -63,7 +71,8 @@ class AddressController extends ApplicationApiController
                 return $address;
             });
 
-            return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
+            return fractal($address, new AddressTransformer())->parseIncludes($request->include)
+                                                              ->respond();
         }
 
         if ($request->boolean('is_bulk_action')) {
@@ -99,7 +108,8 @@ class AddressController extends ApplicationApiController
         }
     }
 
-    public function update(UpdateAddressRequest $request, AddressPool $addressPool, Address $address)
+    public function update(UpdateAddressRequest $request, AddressPool $addressPool, Address $address,
+    )
     {
         $address = $this->connection->transaction(function () use ($request, $address) {
             $oldLinkedServer = $address->server;
@@ -135,7 +145,8 @@ class AddressController extends ApplicationApiController
             return $address;
         });
 
-        return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
+        return fractal($address, new AddressTransformer())->parseIncludes($request->include)
+                                                          ->respond();
     }
 
     public function destroy(AddressPool $addressPool, Address $address)

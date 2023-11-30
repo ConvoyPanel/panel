@@ -2,48 +2,55 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Models\ISO;
-use Convoy\Models\Node;
-use Illuminate\Http\Request;
 use Convoy\Data\Helpers\ChecksumData;
-use Spatie\QueryBuilder\QueryBuilder;
-use Illuminate\Support\Facades\Validator;
-use Convoy\Services\Nodes\Isos\IsoService;
 use Convoy\Enums\Helpers\ChecksumAlgorithm;
-use Convoy\Transformers\Admin\IsoTransformer;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Transformers\Admin\FileMetadataTransformer;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
 use Convoy\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
+use Convoy\Models\ISO;
+use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use Convoy\Services\Nodes\Isos\IsoService;
+use Convoy\Transformers\Admin\FileMetadataTransformer;
+use Convoy\Transformers\Admin\IsoTransformer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class IsoController extends ApplicationApiController
+class IsoController extends ApiController
 {
-    public function __construct(private IsoService $isoService, private ProxmoxStorageRepository $repository)
+    public function __construct(
+        private IsoService $isoService, private ProxmoxStorageRepository $repository,
+    )
     {
     }
 
     public function index(Node $node, Request $request)
     {
         $isos = QueryBuilder::for(ISO::query())
-            ->where('iso_library.node_id', $node->id)
-            ->allowedFilters(['name'])
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                            ->where('iso_library.node_id', $node->id)
+                            ->allowedFilters(['name'])
+                            ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
-        return fractal($isos, new IsoTransformer)->respond();
+        return fractal($isos, new IsoTransformer())->respond();
     }
 
     public function store(StoreIsoRequest $request, Node $node)
     {
         $shouldDownload = $request->boolean('should_download');
 
-        if($shouldDownload) {
-            $checksumData = (bool) $request->checksum_algorithum ? ChecksumData::from([
+        if ($shouldDownload) {
+            $checksumData = (bool)$request->checksum_algorithum ? ChecksumData::from([
                 'algorithm' => ChecksumAlgorithm::from($request->checksum_algorithum),
                 'checksum' => $request->checksum,
             ]) : null;
 
-            $iso = $this->isoService->download($node, $request->name, $request->file_name, $request->link, $checksumData, $request->hidden);
+            $iso = $this->isoService->download(
+                $node, $request->name, $request->file_name, $request->link, $checksumData,
+                $request->hidden,
+            );
         } else {
             $isoFromProxmox = $this->isoService->getIso($node, $request->file_name);
 
@@ -57,14 +64,14 @@ class IsoController extends ApplicationApiController
             ]);
         }
 
-        return fractal($iso, new IsoTransformer)->respond();
+        return fractal($iso, new IsoTransformer())->respond();
     }
 
     public function update(UpdateIsoRequest $request, Node $node, ISO $iso)
     {
         $iso->update($request->validated());
 
-        return fractal($iso, new IsoTransformer)->respond();
+        return fractal($iso, new IsoTransformer())->respond();
     }
 
     public function destroy(Node $node, ISO $iso)
@@ -84,6 +91,6 @@ class IsoController extends ApplicationApiController
 
         $metadata = $this->repository->setNode($node)->getFileMetadata($request->link);
 
-        return fractal($metadata, new FileMetadataTransformer)->respond();
+        return fractal($metadata, new FileMetadataTransformer())->respond();
     }
 }

@@ -2,49 +2,64 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Models\Server;
-use Illuminate\Http\Request;
 use Convoy\Enums\Server\Status;
-use Spatie\QueryBuilder\QueryBuilder;
-use Spatie\QueryBuilder\AllowedFilter;
-use Convoy\Models\Filters\FiltersServer;
 use Convoy\Enums\Server\SuspensionAction;
-use Convoy\Services\Servers\NetworkService;
-use Illuminate\Database\ConnectionInterface;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Controllers\ApiController;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
+use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
+use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Models\Filters\FiltersServer;
+use Convoy\Models\Server;
 use Convoy\Services\Servers\CloudinitService;
-use Convoy\Services\Servers\SyncBuildService;
+use Convoy\Services\Servers\NetworkService;
 use Convoy\Services\Servers\ServerCreationService;
 use Convoy\Services\Servers\ServerDeletionService;
 use Convoy\Services\Servers\ServerSuspensionService;
-use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Services\Servers\SyncBuildService;
 use Convoy\Transformers\Admin\ServerBuildTransformer;
-use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
-class ServerController extends ApplicationApiController
+class ServerController extends ApiController
 {
-    public function __construct(private ConnectionInterface $connection, private ServerDeletionService $deletionService, private NetworkService $networkService, private ServerSuspensionService $suspensionService, private ServerCreationService $creationService, private CloudinitService $cloudinitService, private SyncBuildService $buildModificationService)
+    public function __construct(
+        private ConnectionInterface $connection, private ServerDeletionService $deletionService,
+        private NetworkService $networkService, private ServerSuspensionService $suspensionService,
+        private ServerCreationService $creationService, private CloudinitService $cloudinitService,
+        private SyncBuildService $buildModificationService,
+    )
     {
     }
 
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::query())
-            ->with(['addresses', 'user', 'node'])
-            ->allowedFilters([AllowedFilter::custom('*', new FiltersServer), AllowedFilter::exact('node_id'), AllowedFilter::exact('user_id'), 'name'])
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                               ->with(['addresses', 'user', 'node'])
+                               ->allowedFilters(
+                                   [AllowedFilter::custom(
+                                       '*', new FiltersServer(),
+                                   ), AllowedFilter::exact('node_id'), AllowedFilter::exact(
+                                       'user_id',
+                                   ), 'name'],
+                               )
+                               ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
-        return fractal($servers, new ServerBuildTransformer())->parseIncludes($request->include)->respond();
+        return fractal($servers, new ServerBuildTransformer())->parseIncludes($request->include)
+                                                              ->respond();
     }
 
     public function show(Request $request, Server $server)
     {
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer())->parseIncludes($request->include)->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes($request->include)
+                                                             ->respond();
     }
 
     public function store(StoreServerRequest $request)
@@ -53,7 +68,8 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer())->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes(['user', 'node'])
+                                                             ->respond();
     }
 
     public function update(UpdateGeneralInfoRequest $request, Server $server)
@@ -64,7 +80,7 @@ class ServerController extends ApplicationApiController
                     $this->cloudinitService->updateHostname($server, $request->hostname);
                 } catch (ProxmoxConnectionException) {
                     throw new ServiceUnavailableHttpException(
-                        message: "Server {$server->uuid} failed to sync hostname."
+                        message: "Server {$server->uuid} failed to sync hostname.",
                     );
                 }
             }
@@ -74,7 +90,8 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes(['user', 'node'])
+                                                             ->respond();
     }
 
     public function updateBuild(UpdateBuildRequest $request, Server $server)
@@ -91,7 +108,8 @@ class ServerController extends ApplicationApiController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])->respond();
+        return fractal($server, new ServerBuildTransformer())->parseIncludes(['user', 'node'])
+                                                             ->respond();
     }
 
     public function suspend(Server $server)

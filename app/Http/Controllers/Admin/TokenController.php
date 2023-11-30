@@ -2,23 +2,25 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use Convoy\Enums\Api\ApiKeyType;
-use Spatie\QueryBuilder\QueryBuilder;
+use Convoy\Http\Controllers\ApiController;
+use Convoy\Http\Requests\Admin\Tokens\StoreTokenRequest;
 use Convoy\Models\PersonalAccessToken;
 use Convoy\Transformers\Admin\ApiKeyTransformer;
 use Convoy\Transformers\Admin\NewApiKeyTransformer;
-use Convoy\Http\Controllers\ApplicationApiController;
-use Convoy\Http\Requests\Admin\Tokens\StoreTokenRequest;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class TokenController extends ApplicationApiController
+class TokenController extends ApiController
 {
     public function index(Request $request)
     {
         $tokens = QueryBuilder::for(PersonalAccessToken::query())
-            ->with('tokenable')
-            ->where('personal_access_tokens.type', ApiKeyType::APPLICATION->value)
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                              ->with('tokenable')
+                              ->where('personal_access_tokens.type', ApiKeyType::APPLICATION->value)
+                              ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
         return fractal($tokens, new ApiKeyTransformer())->respond();
     }

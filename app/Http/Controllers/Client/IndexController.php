@@ -2,14 +2,14 @@
 
 namespace Convoy\Http\Controllers\Client;
 
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Models\Server;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Transformers\Client\ServerTransformer;
-use Convoy\Http\Controllers\ApplicationApiController;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class IndexController extends ApplicationApiController
+class IndexController extends ApiController
 {
     public function __construct(private ServerDetailService $service)
     {
@@ -20,21 +20,23 @@ class IndexController extends ApplicationApiController
         $user = $request->user();
 
         $builder = QueryBuilder::for(Server::query())
-            ->with(['addresses'])
-            ->allowedFilters(['name']);
+                               ->with(['addresses'])
+                               ->allowedFilters(['name']);
 
         $type = $request->input('type');
 
         if ($type === 'all') {
-            if (! $user->root_admin) {
+            if (!$user->root_admin) {
                 $builder = $builder->whereRaw('1 = 2');
             }
         } else {
             $builder = $builder->where('servers.user_id', $user->id);
         }
 
-        $servers = $builder->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+        $servers = $builder->paginate(min($request->query('per_page', 50), 100))->appends(
+            $request->query(),
+        );
 
-        return fractal($servers, new ServerTransformer)->respond();
+        return fractal($servers, new ServerTransformer())->respond();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Http\Controllers\ApplicationApiController;
+use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Coterms\StoreCotermRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class CotermController extends ApplicationApiController
+class CotermController extends ApiController
 {
     public function __construct(private CotermTokenCreationService $cotermTokenCreator)
     {
