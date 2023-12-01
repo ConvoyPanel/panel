@@ -61,12 +61,14 @@ class ServerController extends ApiController
 
     public function createConsoleSession(CreateConsoleSessionRequest $request, Server $server)
     {
-        if ($server->node->coterm_enabled) {
+        $server->node->loadMissing('coterm');
+
+        if ($coterm = $server->node->coterm) {
             return new JsonResponse([
                 'data' => [
-                    'is_tls_enabled' => $server->node->coterm_tls_enabled,
-                    'fqdn' => $server->node->coterm_fqdn,
-                    'port' => $server->node->coterm_port,
+                    'is_tls_enabled' => $coterm->is_tls_enabled,
+                    'fqdn' => $coterm->fqdn,
+                    'port' => $coterm->port,
                     'token' => $this->cotermJWTService->handle(
                         $server, $request->user(), $request->enum('type', ConsoleType::class),
                     )

@@ -35,6 +35,7 @@ Route::prefix('/nodes')->group(function () {
     Route::post('/', [Admin\Nodes\NodeController::class, 'store']);
 
     Route::prefix('/{node}')->group(function () {
+        Route::get('/', [Admin\Nodes\NodeController::class, 'show']);
         Route::put('/', [Admin\Nodes\NodeController::class, 'update']);
         Route::delete('/', [Admin\Nodes\NodeController::class, 'destroy']);
 

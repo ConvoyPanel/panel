@@ -4,7 +4,6 @@ namespace Convoy\Models;
 
 use Convoy\Casts\NullableEncrypter;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Coterm extends Model
 {
@@ -38,5 +37,10 @@ class Coterm extends Model
     public function nodes(): HasMany
     {
         return $this->hasMany(Node::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
     }
 }

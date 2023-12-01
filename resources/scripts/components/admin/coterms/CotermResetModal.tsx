@@ -2,24 +2,24 @@ import { useFlashKey } from '@/util/useFlash'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import resetCotermToken from '@/api/admin/nodes/settings/resetCotermToken'
+import { Coterm } from '@/api/admin/coterms/getCoterms'
+import resetCotermToken from '@/api/admin/coterms/resetCotermToken'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import Modal from '@/components/elements/Modal'
 
 
 interface Props {
-    nodeId: number
-    open: boolean
+    coterm: Coterm | null
     onReset: (token: string) => void
     onClose: () => void
 }
 
-const CotermResetModal = ({ nodeId, open, onReset, onClose }: Props) => {
+const CotermResetModal = ({ coterm, onReset, onClose }: Props) => {
     const { t } = useTranslation('admin.nodes.settings')
     const [loading, setLoading] = useState(false)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
-        `admin.nodes.${nodeId}.settings.general.reset-coterm`
+        `admin.coterms.${coterm?.id}.reset`
     )
 
     const reset = async () => {
@@ -27,9 +27,9 @@ const CotermResetModal = ({ nodeId, open, onReset, onClose }: Props) => {
 
         try {
             setLoading(true)
-            const token = await resetCotermToken(nodeId)
+            const updatedCoterm = await resetCotermToken(coterm.id)
 
-            onReset(token)
+            onReset(`${updatedCoterm!.tokenId}|${updatedCoterm!.token}`)
         } catch (e) {
             clearAndAddHttpError(e as Error)
         } finally {
@@ -38,7 +38,7 @@ const CotermResetModal = ({ nodeId, open, onReset, onClose }: Props) => {
     }
 
     return (
-        <Modal open={open} onClose={onClose}>
+        <Modal open={Boolean(coterm)} onClose={onClose}>
             <Modal.Header>
                 <Modal.Title>{t('coterm.reset.title')}</Modal.Title>
             </Modal.Header>
@@ -46,7 +46,7 @@ const CotermResetModal = ({ nodeId, open, onReset, onClose }: Props) => {
             <Modal.Body>
                 <FlashMessageRender
                     className='mb-3'
-                    byKey={`admin.nodes.${nodeId}.settings.general.reset-coterm`}
+                    byKey={`admin.coterms.${coterm?.id}.reset`}
                 />
                 <Modal.Description>
                     {t('coterm.reset.description')}

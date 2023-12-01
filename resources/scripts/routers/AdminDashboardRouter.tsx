@@ -1,3 +1,4 @@
+import { routes as adminCotermRoutes } from '@/routers/AdminCotermRouter'
 import { routes as adminIpamRoutes } from '@/routers/AdminIpamRouter'
 import { routes as adminNodeRoutes } from '@/routers/AdminNodeRouter'
 import { routes as adminServerRoutes } from '@/routers/AdminServerRouter'
@@ -61,6 +62,7 @@ export const routes: Route[] = [
             ...adminServerRoutes,
             ...adminIpamRoutes,
             ...adminUserRoutes,
+            ...adminCotermRoutes,
             {
                 path: 'tokens',
                 element: lazyLoad(
@@ -117,6 +119,10 @@ const AdminDashboardRouter = () => {
         {
             name: tStrings('user_other'),
             path: '/admin/users',
+        },
+        {
+            name: 'Coterms',
+            path: '/admin/coterms',
         },
         {
             name: tStrings('token_other'),

@@ -3,12 +3,14 @@
 namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\ApiController;
+use Convoy\Http\Requests\Admin\Coterms\DeleteCotermRequest;
 use Convoy\Http\Requests\Admin\Coterms\StoreCotermRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
 use Convoy\Models\Coterm;
 use Convoy\Models\Filters\FiltersCoterm;
 use Convoy\Models\Filters\FiltersNode;
+use Convoy\Models\Node;
 use Convoy\Services\Coterm\CotermTokenCreationService;
 use Convoy\Transformers\Admin\CotermTransformer;
 use Convoy\Transformers\Admin\NodeTransformer;
@@ -48,20 +50,31 @@ class CotermController extends ApiController
 
     public function store(StoreCotermRequest $request)
     {
-        $coterm = Coterm::create($request->safe()->except('node_ids'));
+        $creds = $this->cotermTokenCreator->handle();
+        $coterm = Coterm::create([
+            ...$request->safe()->except('node_ids'),
+            ...$creds,
+        ]);
         if ($request->node_ids !== null) {
-            $coterm->nodes()->attach($request->node_ids);
+            Node::whereIn('id', $request->node_ids)->whereNull('coterm_id')->update(
+                ['coterm_id' => $coterm->id],
+            );
         }
         $coterm->loadCount(['nodes']);
 
-        return fractal($coterm, new CotermTransformer())->respond();
+        return fractal($coterm, new CotermTransformer(includeToken: true))->respond();
     }
 
     public function update(UpdateCotermRequest $request, Coterm $coterm)
     {
         $coterm->update($request->validated());
         if ($request->node_ids !== null) {
-            $coterm->nodes()->sync($request->node_ids);
+            Node::whereIn('id', $request->node_ids)->whereNull('coterm_id')->update(
+                ['coterm_id' => $coterm->id],
+            );
+            Node::where('coterm_id', $coterm->id)->whereNotIn('id', $request->node_ids)->update(
+                ['coterm_id' => null],
+            );
         }
         $coterm->loadCount(['nodes']);
 
@@ -86,7 +99,12 @@ class CotermController extends ApiController
 
     public function updateAttachedNodes(UpdateAttachedNodesRequest $request, Coterm $coterm)
     {
-        $coterm->nodes()->sync($request->node_ids);
+        Node::whereIn('id', $request->node_ids)->whereNull('coterm_id')->update(
+            ['coterm_id' => $coterm->id],
+        );
+        Node::where('coterm_id', $coterm->id)->whereNotIn('id', $request->node_ids)->update(
+            ['coterm_id' => null],
+        );
         $coterm->loadCount(['nodes']);
 
         return fractal($coterm, new CotermTransformer())->respond();
@@ -100,11 +118,14 @@ class CotermController extends ApiController
             'token' => $creds['token'],
         ]);
 
-        return fractal($coterm, new CotermTransformer())->parseIncludes('token')->respond();
+        return fractal($coterm, new CotermTransformer(includeToken: true))->parseIncludes('token')
+                                                                          ->respond();
     }
 
-    public function destroy(Coterm $coterm)
+    public function destroy(DeleteCotermRequest $request, Coterm $coterm)
     {
+        $coterm->delete();
+
         return $this->returnNoContent();
     }
 }

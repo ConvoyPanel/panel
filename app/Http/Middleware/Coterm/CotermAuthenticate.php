@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Middleware\Coterm;
 
-use Convoy\Models\Node;
-use Illuminate\Http\Request;
+use Convoy\Models\Coterm;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CotermAuthenticate
 {
@@ -27,31 +27,30 @@ class CotermAuthenticate
         }
 
         if (is_null($bearer = $request->bearerToken())) {
-            throw new HttpException(401, 'Access to this endpoint must include an Authorization header.', null, ['WWW-Authenticate' => 'Bearer']);
+            throw new HttpException(
+                401, 'Access to this endpoint must include an Authorization header.', null,
+                ['WWW-Authenticate' => 'Bearer'],
+            );
         }
 
         $parts = explode('|', $bearer);
         // Ensure that all the correct parts are provided in the header.
         if (count($parts) !== 2 || empty($parts[0]) || empty($parts[1])) {
-            throw new BadRequestHttpException('The Authorization header provided was not in a valid format.');
+            throw new BadRequestHttpException(
+                'The Authorization header provided was not in a valid format.',
+            );
         }
 
         try {
-            $node = Node::where('coterm_token_id', $parts[0])->firstOrFail();
+            $coterm = Coterm::where('token_id', $parts[0])->firstOrFail();
 
-            if (!$node->coterm_enabled) {
-                throw new HttpException(401);
-            }
-
-            if (hash_equals($node->coterm_token, $parts[1])) {
-                $request->attributes->set('node', $node);
-
+            if (hash_equals($coterm->token, $parts[1])) {
                 return $next($request);
             }
         } catch (ModelNotFoundException) {
             // Do nothing, we don't want to expose a node not existing at all.
         }
 
-       throw new HttpException(401);
+        throw new HttpException(401);
     }
 }

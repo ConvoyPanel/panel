@@ -15,7 +15,7 @@ const updateCoterm = async (
 ) => {
     const {
         data: { data },
-    } = await http.put(`/admin/coterms/${id}`, {
+    } = await http.put(`/api/admin/coterms/${id}`, {
         name,
         is_tls_enabled: isTlsEnabled,
         fqdn,

@@ -7,11 +7,13 @@ use League\Fractal\TransformerAbstract;
 
 class CotermTransformer extends TransformerAbstract
 {
-    protected array $availableIncludes = ['token'];
+    public function __construct(private bool $includeToken = false)
+    {
+    }
 
     public function transform(Coterm $coterm): array
     {
-        return [
+        $transformed = [
             'id' => (int)$coterm->id,
             'name' => $coterm->name,
             'is_tls_enabled' => (boolean)$coterm->is_tls_enabled,
@@ -19,13 +21,12 @@ class CotermTransformer extends TransformerAbstract
             'port' => (int)$coterm->port,
             'nodes_count' => (int)$coterm->nodes_count,
         ];
-    }
 
-    public function includeToken(Coterm $coterm): array
-    {
-        return [
-            'token_id' => $coterm->token_id,
-            'token' => $coterm->token,
-        ];
+        if ($this->includeToken) {
+            $transformed['token_id'] = $coterm->token_id;
+            $transformed['token'] = $coterm->token;
+        }
+
+        return $transformed;
     }
 }

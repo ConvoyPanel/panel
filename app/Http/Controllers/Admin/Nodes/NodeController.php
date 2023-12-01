@@ -29,7 +29,9 @@ class NodeController extends ApiController
                              ->allowedFilters(
                                  [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact(
                                      'location_id',
-                                 ), AllowedFilter::custom(
+                                 ), AllowedFilter::exact(
+                                     'coterm_id',
+                                 )->nullable(), AllowedFilter::custom(
                                      '*',
                                      new FiltersNode(),
                                  )],
