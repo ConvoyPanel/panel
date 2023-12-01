@@ -2,41 +2,47 @@
 
 namespace Convoy\Http\Controllers\Admin\Nodes;
 
-use Convoy\Models\Node;
-use Convoy\Models\Address;
-use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
-use Spatie\QueryBuilder\AllowedFilter;
-use Convoy\Http\Controllers\Controller;
-use Convoy\Models\Filters\FiltersAddress;
-use Convoy\Services\Servers\NetworkService;
-use Illuminate\Database\ConnectionInterface;
-use Convoy\Models\Filters\AllowedNullableFilter;
-use Convoy\Transformers\Admin\AddressTransformer;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
+use Convoy\Models\Address;
+use Convoy\Models\Filters\FiltersAddress;
+use Convoy\Models\Node;
+use Convoy\Services\Servers\NetworkService;
+use Convoy\Transformers\Admin\AddressTransformer;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class AddressController extends Controller
 {
-    public function __construct(private NetworkService $networkService, private ConnectionInterface $connection)
+    public function __construct(
+        private NetworkService $networkService, private ConnectionInterface $connection,
+    )
     {
     }
 
     public function index(Request $request, Node $node)
     {
         $addresses = QueryBuilder::for($node->addresses())
-            ->with('server')
-            ->defaultSort('-id')
-            ->allowedFilters(
-                ['address', AllowedFilter::exact('type'), AllowedFilter::custom(
-                    '*',
-                    new FiltersAddress,
-                ), AllowedNullableFilter::exact('server_id')],
-            )
-            ->paginate(min($request->query('per_page', 50), 100))->appends($request->query());
+                                 ->with('server')
+                                 ->defaultSort('-id')
+                                 ->allowedFilters(
+                                     ['address', AllowedFilter::exact(
+                                         'type',
+                                     ), AllowedFilter::custom(
+                                         '*',
+                                         new FiltersAddress(),
+                                     ), AllowedFilter::exact('server_id')->nullable()],
+                                 )
+                                 ->paginate(min($request->query('per_page', 50), 100))->appends(
+                $request->query(),
+            );
 
-        return fractal($addresses, new AddressTransformer)->parseIncludes($request->include)->respond();
+        return fractal($addresses, new AddressTransformer())->parseIncludes($request->include)
+                                                            ->respond();
     }
 
     public function update(UpdateAddressRequest $request, Node $node, Address $address)
@@ -75,7 +81,8 @@ class AddressController extends Controller
             return $address;
         });
 
-        return fractal($address, new AddressTransformer)->parseIncludes($request->include)->respond();
+        return fractal($address, new AddressTransformer())->parseIncludes($request->include)
+                                                          ->respond();
     }
 
     public function destroy(Node $node, Address $address)

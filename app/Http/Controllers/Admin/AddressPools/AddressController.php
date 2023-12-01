@@ -10,7 +10,6 @@ use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 use Convoy\Jobs\Server\SyncNetworkSettings;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\AllowedNullableFilter;
 use Convoy\Models\Filters\FiltersAddress;
 use Convoy\Repositories\Eloquent\AddressRepository;
 use Convoy\Services\Servers\NetworkService;
@@ -41,7 +40,7 @@ class AddressController extends ApiController
                                      ), AllowedFilter::custom(
                                          '*',
                                          new FiltersAddress(),
-                                     ), AllowedNullableFilter::exact('server_id')],
+                                     ), AllowedFilter::exact('server_id')->nullable()],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
@@ -108,7 +107,8 @@ class AddressController extends ApiController
         }
     }
 
-    public function update(UpdateAddressRequest $request, AddressPool $addressPool, Address $address,
+    public function update(
+        UpdateAddressRequest $request, AddressPool $addressPool, Address $address,
     )
     {
         $address = $this->connection->transaction(function () use ($request, $address) {
