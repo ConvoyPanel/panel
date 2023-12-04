@@ -51,10 +51,10 @@ class ServerConsoleService
         return $this->consoleRepository->setServer($server)->createNoVncCredentials($credentials);
     }
 
-    public function createXTermCredentials(Server $server): XTermCredentialsData
+    public function createXTermjsCredentials(Server $server): XTermCredentialsData
     {
         $credentials = $this->createConsoleUserCredentials($server);
 
-        return $this->consoleRepository->setServer($server)->createXTermCredentials($credentials);
+        return $this->consoleRepository->setServer($server)->createXTermjsCredentials($credentials);
     }
 }

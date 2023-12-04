@@ -28,7 +28,7 @@ class SessionController extends Controller
                 'credentials' => $credentials,
             ], new NoVncCredentialsTransformer())->respond();
         } else if ($consoleType === ConsoleType::XTERMJS) {
-            $credentials = $this->consoleService->createXTermCredentials($server);
+            $credentials = $this->consoleService->createXTermjsCredentials($server);
 
             return fractal()->item([
                 'server' => $server,

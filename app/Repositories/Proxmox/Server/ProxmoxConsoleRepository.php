@@ -41,7 +41,7 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
         ]);
     }
 
-    public function createXTermCredentials(UserCredentialsData $credentials): XTermCredentialsData
+    public function createXTermjsCredentials(UserCredentialsData $credentials): XTermCredentialsData
     {
         Assert::isInstanceOf($this->server, Server::class);
 
