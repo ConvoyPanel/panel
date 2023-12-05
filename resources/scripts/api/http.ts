@@ -22,14 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-import { completeNavigationProgress, resetNavigationProgress, startNavigationProgress } from '@mantine/nprogress';
-import axios, { AxiosInstance } from 'axios';
+import {completeNavigationProgress, resetNavigationProgress, startNavigationProgress} from '@mantine/nprogress';
+import axios, {AxiosInstance} from 'axios';
 
 
 const http: AxiosInstance = axios.create({
     withCredentials: true,
     headers: {
-        'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
@@ -67,7 +66,7 @@ export default http
  */
 export function httpErrorToHuman(error: any): string {
     if (error.response && error.response.data) {
-        let { data } = error.response
+        let {data} = error.response
 
         // Some non-JSON requests can still return the error as a JSON block. In those cases, attempt
         // to parse it into JSON so we can display an actual error.
@@ -146,8 +145,8 @@ export interface QueryBuilderParams<
     page?: number
     filters?: {
         [K in FilterKeys]?:
-            | QueryBuilderFilterValue
-            | Readonly<QueryBuilderFilterValue[]>
+        | QueryBuilderFilterValue
+        | Readonly<QueryBuilderFilterValue[]>
     }
     sorts?: {
         [K in SortKeys]?: -1 | 0 | 1 | 'asc' | 'desc' | null
@@ -170,7 +169,7 @@ export const withQueryBuilderParams = (
 
             return !value || value === ''
                 ? obj
-                : { ...obj, [`filter[${key}]`]: value }
+                : {...obj, [`filter[${key}]`]: value}
         },
         {} as NonNullable<QueryBuilderParams['filters']>
     )
