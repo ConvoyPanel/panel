@@ -108,6 +108,13 @@ const TemplateCard = ({ template, group, className }: Props) => {
                             <DottedButton />
                         </Menu.Target>
                         <Menu.Dropdown>
+                            <Menu.Item
+                                onClick={() =>
+                                    navigator.clipboard.writeText(template.uuid)
+                                }
+                            >
+                                Copy ID
+                            </Menu.Item>
                             <Menu.Item onClick={() => setShowEditModal(true)}>
                                 Edit
                             </Menu.Item>

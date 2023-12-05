@@ -95,6 +95,12 @@ const NodesContainer = () => {
         return (
             <Actions>
                 <Menu.Item
+                    onClick={() => navigator.clipboard.writeText(node.id)}
+                >
+                    Copy ID
+                </Menu.Item>
+                <Menu.Divider />
+                <Menu.Item
                     color='red'
                     disabled={node.serversCount > 0}
                     onClick={handleDelete}

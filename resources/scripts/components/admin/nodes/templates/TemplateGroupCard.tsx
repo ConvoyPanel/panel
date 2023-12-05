@@ -42,6 +42,7 @@ import EditTemplateGroupModal from '@/components/admin/nodes/templates/EditTempl
 import EditTemplateModal from '@/components/admin/nodes/templates/EditTemplateModal'
 import TemplateCard from '@/components/admin/nodes/templates/TemplateCard'
 
+
 interface Props {
     group: TemplateGroup
     className?: string
@@ -211,6 +212,15 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                 />
                             </Menu.Target>
                             <Menu.Dropdown>
+                                <Menu.Item
+                                    onClick={() =>
+                                        navigator.clipboard.writeText(
+                                            group.uuid
+                                        )
+                                    }
+                                >
+                                    Copy ID
+                                </Menu.Item>
                                 <Menu.Item
                                     onClick={() => setShowEditModal(true)}
                                 >
