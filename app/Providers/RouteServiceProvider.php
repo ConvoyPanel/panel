@@ -2,14 +2,11 @@
 
 namespace Convoy\Providers;
 
-use Convoy\Models\Server;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
 use Convoy\Http\Middleware\AdminAuthenticate;
 use Convoy\Http\Middleware\Coterm\CotermAuthenticate;
+use Convoy\Models\Server;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -28,11 +25,8 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::bind('server', function ($value) {
-            return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)->firstOrFail();
-        });
-
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
+                         ->firstOrFail();
         });
 
         $this->routes(function () {
@@ -40,28 +34,28 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware('guest')->group(base_path('routes/auth.php'));
 
                 Route::middleware(['auth.session'])
-                    ->group(base_path('routes/base.php'));
+                     ->group(base_path('routes/base.php'));
 
                 Route::middleware(['auth'])->prefix('/api/client')
-                    ->as('client.')
-                    ->group(base_path('routes/api-client.php'));
+                     ->as('client.')
+                     ->group(base_path('routes/api-client.php'));
 
                 Route::middleware(['auth', AdminAuthenticate::class])
-                    ->prefix('/api/admin')
-                    ->as('admin.')
-                    ->group(base_path('routes/api-admin.php'));
+                     ->prefix('/api/admin')
+                     ->as('admin.')
+                     ->group(base_path('routes/api-admin.php'));
             });
 
             Route::middleware(['api'])->group(function () {
                 Route::middleware(['auth:sanctum'])
-                    ->prefix('/api/application')
-                    ->as('application.')
-                    ->group(base_path('routes/api-application.php'));
+                     ->prefix('/api/application')
+                     ->as('application.')
+                     ->group(base_path('routes/api-application.php'));
 
-               Route::middleware([CotermAuthenticate::class])
-                   ->prefix('/api/coterm')
-                   ->as('coterm.')
-                   ->group(base_path('routes/api-coterm.php'));
+                Route::middleware([CotermAuthenticate::class])
+                     ->prefix('/api/coterm')
+                     ->as('coterm.')
+                     ->group(base_path('routes/api-coterm.php'));
             });
         });
     }
