@@ -4,6 +4,13 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.0.0
+
+### Changes
+
+- Removed API request throttling
+- Increased Coterm session token lifetime from 30 seconds to a minute.
+
 ## v4.0.0-rc.1
 
 If you use Convoy for a production or commercial environment/purpose, please subscribe to a

@@ -25,7 +25,7 @@ class CotermJWTService
         );
 
         $token = $this->JWTService
-            ->setExpiresAt(CarbonImmutable::now()->addSeconds(30))
+            ->setExpiresAt(CarbonImmutable::now()->addMinute())
             ->setUser($user)
             ->setClaims([
                 'server_uuid' => $server->uuid,
