@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.10.2-beta
+
+### Changes
+
+- Fixed cloning of VM's to the wrong storage location #64
+
 ## v4.0.0
 
 ### Changes
