@@ -10,12 +10,13 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 - Fixed cloning of VM's to the wrong storage location #64
 
-## v4.0.0
+## v4.0.0-rc.2
 
 ### Changes
 
 - Removed API request throttling
 - Increased Coterm session token lifetime from 30 seconds to a minute.
+- Fixed cloning of VM's to the wrong storage location #64
 
 ## v4.0.0-rc.1
 
