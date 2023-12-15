@@ -4,6 +4,36 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v3.10.2-beta
+
+### Changes
+
+- Fixed cloning of VM's to the wrong storage location #64
+
+## v4.0.0
+
+### Changes
+
+- Removed API request throttling
+- Increased Coterm session token lifetime from 30 seconds to a minute.
+
+## v4.0.0-rc.1
+
+If you use Convoy for a production or commercial environment/purpose, please subscribe to a
+license [here](https://console.convoypanel.com). It supports my work, and you are also violating the license agreement
+if you don't. Your deployment of Convoy may be disabled without warning if you don't adhere to the terms of the license
+agreement.
+
+### Changes
+
+- **BREAKING**: Overhauled the IP address management system to add IP pools that can be shared among nodes. #51
+- **BREAKING**: Fixed Coterm where it doesn't support multiple nodes #50
+- Fixed inability to use special characters for Redis password.
+- Fixed error when trying to parse a vm's disk that has no `size` attribute #48
+- Fixed typo in the input labels on the node creation modal #42
+- Fixed the mobile navigation menu where it won't automatically close when you click on a link #41
+- Added ability to copy node and template IDs #40
+
 ## v3.10.1-beta
 
 ### Fixes
@@ -16,7 +46,7 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 - Added ISO imports (thanks A LOTTTT Fro!!!)
 - Added new logo courtesy of Yatin Manuel from [Halvex Inc.](https://halvex.net/)
-  - This changelog was forgotten, so I will add it now
+    - This changelog was forgotten, so I will add it now
 
 ### Changes
 
@@ -26,7 +56,8 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ### Fixes
 
-- Fixed inability to successfully build the `workspace` container because the PHP Docker image recently upgraded from Debian 11 to 12 while Nodesource hasn't added stable support for Debian 12.
+- Fixed inability to successfully build the `workspace` container because the PHP Docker image recently upgraded from
+  Debian 11 to 12 while Nodesource hasn't added stable support for Debian 12.
 
 ## v3.9.2-beta
 
@@ -46,14 +77,18 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 
 ## v3.9.0-beta
 
-The release candidate process for non-beta v3.9.0 was discontinued. Convoy will be keeping its beta status while more improvements to the product are made.
+The release candidate process for non-beta v3.9.0 was discontinued. Convoy will be keeping its beta status while more
+improvements to the product are made.
 
 If you are upgrading from v3.8.1-beta, keep note of these notices:
 
-- v3.9.0-rc.9: :warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the implementation of encryption of node credentials in Convoy from this point on.
-- v3.9.0-rc.3: :warning: This release makes changes to the data in your database. Rows that have a non-null `deleted_at` field in
-your `servers` and `users` table will be purged. If your routine relies on soft deletes, please make changes now to stop
-relying on them as they are removed in this update.
+- v3.9.0-rc.9: :warning: This release may require you to regenerate your Proxmox API token credentials for each of your
+  nodes with the implementation of encryption of node credentials in Convoy from this point on.
+- v3.9.0-rc.3: :warning: This release makes changes to the data in your database. Rows that have a non-null `deleted_at`
+  field in
+  your `servers` and `users` table will be purged. If your routine relies on soft deletes, please make changes now to
+  stop
+  relying on them as they are removed in this update.
 
 ### Fixed
 
@@ -70,7 +105,8 @@ relying on them as they are removed in this update.
 
 ## v3.9.0-rc.9
 
-:warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the implementation of encryption of node credentials in Convoy from this point on.
+:warning: This release may require you to regenerate your Proxmox API token credentials for each of your nodes with the
+implementation of encryption of node credentials in Convoy from this point on.
 
 ### Added
 
