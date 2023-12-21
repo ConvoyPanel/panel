@@ -3,28 +3,23 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Server;
+use Convoy\Services\Servers\ServerAuthService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Convoy\Services\Servers\ServerAuthService;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
 class UpdatePasswordJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 10;
+    public int $tries = 3;
 
-    public $tries = 3;
+    public int $timeout = 10;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(protected int $serverId, protected string $password)
     {
         //
@@ -32,12 +27,11 @@ class UpdatePasswordJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server.update-password#{$this->serverId}")];
+        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
+            "server.update-password#{$this->serverId}",
+        )];
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(ServerAuthService $service): void
     {
         $server = Server::findOrFail($this->serverId);

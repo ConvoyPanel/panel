@@ -2,52 +2,41 @@
 
 namespace Convoy\Jobs\Server;
 
-use Closure;
 use Convoy\Models\Server;
+use Convoy\Services\Servers\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Convoy\Services\Servers\Backups\PurgeBackupsService;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
 class PurgeBackupsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
-    public $timeout = 300;
+    public int $tries = 3;
 
-    public $tries = 10;
+    public int $timeout = 300;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct(protected int $serverId, protected ?Closure $callback = null)
+    public function __construct(protected int $serverId)
     {
         //
     }
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping("server:backups.purge#{$this->serverId}")];
+        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
+            "server:backups.purge#{$this->serverId}",
+        )];
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(PurgeBackupsService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 
         $service->handle($server);
-
-        if ($this->callback !== null) {
-            call_user_func($this->callback);
-        }
     }
 }
