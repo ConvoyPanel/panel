@@ -6,8 +6,8 @@ use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
 use Convoy\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
 use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\FiltersAddressPool;
-use Convoy\Models\Filters\FiltersNode;
+use Convoy\Models\Filters\FiltersAddressPoolWildcard;
+use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Transformers\Admin\AddressPoolTransformer;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ class AddressPoolController extends ApiController
                                     ->defaultSort('-id')
                                     ->allowedFilters(
                                         ['name', AllowedFilter::custom(
-                                            '*', new FiltersAddressPool(),
+                                            '*', new FiltersAddressPoolWildcard(),
                                         )],
                                     )
                                     ->paginate(min($request->query('per_page', 50), 100))->appends(
@@ -48,7 +48,7 @@ class AddressPoolController extends ApiController
                              ->allowedFilters(
                                  ['name', 'fqdn', AllowedFilter::exact(
                                      'location_id',
-                                 ), AllowedFilter::custom('*', new FiltersNode())],
+                                 ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

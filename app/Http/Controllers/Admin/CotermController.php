@@ -8,8 +8,8 @@ use Convoy\Http\Requests\Admin\Coterms\StoreCotermRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
 use Convoy\Models\Coterm;
-use Convoy\Models\Filters\FiltersCoterm;
-use Convoy\Models\Filters\FiltersNode;
+use Convoy\Models\Filters\FiltersCotermWildcard;
+use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Models\Node;
 use Convoy\Services\Coterm\CotermTokenCreationService;
 use Convoy\Transformers\Admin\CotermTransformer;
@@ -31,7 +31,7 @@ class CotermController extends ApiController
                                     ->defaultSort('-id')
                                     ->allowedFilters(
                                         ['name', AllowedFilter::custom(
-                                            '*', new FiltersCoterm(),
+                                            '*', new FiltersCotermWildcard(),
                                         )],
                                     )
                                     ->paginate(min($request->query('per_page', 50), 100))->appends(
@@ -88,7 +88,7 @@ class CotermController extends ApiController
                              ->allowedFilters(
                                  ['name', 'fqdn', AllowedFilter::exact(
                                      'location_id',
-                                 ), AllowedFilter::custom('*', new FiltersNode())],
+                                 ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

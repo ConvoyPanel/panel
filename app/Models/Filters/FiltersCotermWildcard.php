@@ -2,14 +2,14 @@
 
 namespace Convoy\Models\Filters;
 
-use Spatie\QueryBuilder\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\QueryBuilder\Filters\Filter;
 
-class FiltersLocation implements Filter
+class FiltersCotermWildcard implements Filter
 {
     public function __invoke(Builder $query, $value, string $property)
     {
         $query->where('id', $value)
-            ->orWhereRaw('LOWER(short_code) LIKE ?', ["%$value%"]);
+              ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
     }
 }

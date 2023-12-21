@@ -6,7 +6,7 @@ use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Nodes\Settings\UpdateCotermRequest;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
-use Convoy\Models\Filters\FiltersNode;
+use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Models\Node;
 use Convoy\Services\Coterm\CotermTokenCreationService;
 use Convoy\Transformers\Admin\NodeTransformer;
@@ -33,7 +33,7 @@ class NodeController extends ApiController
                                      'coterm_id',
                                  )->nullable(), AllowedFilter::custom(
                                      '*',
-                                     new FiltersNode(),
+                                     new FiltersNodeWildcard(),
                                  )],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(

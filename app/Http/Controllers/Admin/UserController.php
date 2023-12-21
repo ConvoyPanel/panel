@@ -6,7 +6,7 @@ use Carbon\CarbonImmutable;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
-use Convoy\Models\Filters\FiltersUser;
+use Convoy\Models\Filters\FiltersUserWildcard;
 use Convoy\Models\SSOToken;
 use Convoy\Models\User;
 use Convoy\Services\Api\JWTService;
@@ -31,7 +31,7 @@ class UserController extends ApiController
                              ->allowedFilters(
                                  [AllowedFilter::exact('id'), 'name', AllowedFilter::exact(
                                      'email',
-                                 ), AllowedFilter::custom('*', new FiltersUser())],
+                                 ), AllowedFilter::custom('*', new FiltersUserWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

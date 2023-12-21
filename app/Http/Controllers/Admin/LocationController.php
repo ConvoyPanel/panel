@@ -4,7 +4,7 @@ namespace Convoy\Http\Controllers\Admin;
 
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\LocationFormRequest;
-use Convoy\Models\Filters\FiltersLocation;
+use Convoy\Models\Filters\FiltersLocationWildcard;
 use Convoy\Models\Location;
 use Convoy\Transformers\Admin\LocationTransformer;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ class LocationController extends ApiController
                                  ->withCount(['nodes', 'servers'])
             // @phpstan-ignore-next-line
                                  ->allowedFilters(
-                ['short_code', AllowedFilter::custom('*', new FiltersLocation())],
+                ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard())],
             )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

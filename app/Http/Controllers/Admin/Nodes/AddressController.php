@@ -6,7 +6,7 @@ use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Controllers\Controller;
 use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 use Convoy\Models\Address;
-use Convoy\Models\Filters\FiltersAddress;
+use Convoy\Models\Filters\FiltersAddressWildcard;
 use Convoy\Models\Node;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
@@ -34,7 +34,7 @@ class AddressController extends Controller
                                          'type',
                                      ), AllowedFilter::custom(
                                          '*',
-                                         new FiltersAddress(),
+                                         new FiltersAddressWildcard(),
                                      ), AllowedFilter::exact('server_id')->nullable()],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(

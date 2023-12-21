@@ -10,7 +10,7 @@ use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 use Convoy\Jobs\Server\SyncNetworkSettings;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\FiltersAddress;
+use Convoy\Models\Filters\FiltersAddressWildcard;
 use Convoy\Repositories\Eloquent\AddressRepository;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class AddressController extends ApiController
 {
     public function __construct(
-        private NetworkService $networkService, private AddressRepository $repository,
+        private NetworkService      $networkService, private AddressRepository $repository,
         private ConnectionInterface $connection,
     )
     {
@@ -39,7 +39,7 @@ class AddressController extends ApiController
                                          'type',
                                      ), AllowedFilter::custom(
                                          '*',
-                                         new FiltersAddress(),
+                                         new FiltersAddressWildcard(),
                                      ), AllowedFilter::exact('server_id')->nullable()],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(

@@ -2,14 +2,15 @@
 
 namespace Convoy\Models\Filters;
 
-use Spatie\QueryBuilder\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\QueryBuilder\Filters\Filter;
 
-class FiltersAddressPool implements Filter
+class FiltersUserWildcard implements Filter
 {
     public function __invoke(Builder $query, $value, string $property)
     {
         $query->where('id', $value)
-            ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
+              ->orWhere('email', $value)
+              ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
     }
 }

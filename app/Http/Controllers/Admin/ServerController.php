@@ -9,7 +9,7 @@ use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
-use Convoy\Models\Filters\FiltersServer;
+use Convoy\Models\Filters\FiltersServerWildcard;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\CloudinitService;
 use Convoy\Services\Servers\NetworkService;
@@ -27,10 +27,13 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class ServerController extends ApiController
 {
     public function __construct(
-        private ConnectionInterface $connection, private ServerDeletionService $deletionService,
-        private NetworkService $networkService, private ServerSuspensionService $suspensionService,
-        private ServerCreationService $creationService, private CloudinitService $cloudinitService,
-        private SyncBuildService $buildModificationService,
+        private ConnectionInterface     $connection,
+        private ServerDeletionService   $deletionService,
+        private NetworkService          $networkService,
+        private ServerSuspensionService $suspensionService,
+        private ServerCreationService   $creationService,
+        private CloudinitService        $cloudinitService,
+        private SyncBuildService        $buildModificationService,
     )
     {
     }
@@ -41,7 +44,7 @@ class ServerController extends ApiController
                                ->with(['addresses', 'user', 'node'])
                                ->allowedFilters(
                                    [AllowedFilter::custom(
-                                       '*', new FiltersServer(),
+                                       '*', new FiltersServerWildcard(),
                                    ), AllowedFilter::exact('node_id'), AllowedFilter::exact(
                                        'user_id',
                                    ), 'name'],
