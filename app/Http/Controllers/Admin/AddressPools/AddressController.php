@@ -116,6 +116,8 @@ class AddressController extends ApiController
 
             $address->update($request->validated());
 
+            $address->load('server'); // update the server relationship
+
             try {
                 // Detach old server
                 if ($oldLinkedServer) {
