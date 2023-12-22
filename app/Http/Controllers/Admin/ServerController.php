@@ -9,6 +9,7 @@ use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Models\Filters\FiltersServerByAddressPoolId;
 use Convoy\Models\Filters\FiltersServerWildcard;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\CloudinitService;
@@ -42,12 +43,20 @@ class ServerController extends ApiController
     {
         $servers = QueryBuilder::for(Server::query())
                                ->with(['addresses', 'user', 'node'])
+                               ->defaultSort('-id')
                                ->allowedFilters(
-                                   [AllowedFilter::custom(
-                                       '*', new FiltersServerWildcard(),
-                                   ), AllowedFilter::exact('node_id'), AllowedFilter::exact(
-                                       'user_id',
-                                   ), 'name'],
+                                   [
+                                       AllowedFilter::custom(
+                                           '*', new FiltersServerWildcard(),
+                                       ),
+                                       AllowedFilter::custom(
+                                           'address_pool_id',
+                                           new FiltersServerByAddressPoolId(),
+                                       ),
+                                       AllowedFilter::exact('node_id'),
+                                       AllowedFilter::exact('user_id'),
+                                       'name',
+                                   ],
                                )
                                ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

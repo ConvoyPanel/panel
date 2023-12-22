@@ -5,16 +5,26 @@ import getServers, {
     ServerResponse,
 } from '@/api/admin/servers/getServers'
 
+
 const useServersSWR = ({
     page,
     nodeId,
     userId,
+    addressPoolId,
     query,
     ...params
 }: QueryParams) => {
     return useSWR<ServerResponse>(
-        ['admin:servers', page, query, nodeId, userId],
-        () => getServers({ page, query, nodeId, userId, ...params })
+        ['admin:servers', page, query, nodeId, userId, addressPoolId],
+        () =>
+            getServers({
+                page,
+                query,
+                nodeId,
+                userId,
+                addressPoolId,
+                ...params,
+            })
     )
 }
 

@@ -15,9 +15,10 @@ import Table, {
     RowActionsProps,
 } from '@/components/elements/displays/Table'
 
+import EditAddressModal from '@/components/admin/ipam/addresses/EditAddressModal'
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import DeleteAddressModal from '@/components/admin/nodes/addresses/DeleteAddressModal'
-import EditAddressModal from '@/components/admin/nodes/addresses/EditAddressModal'
+
 
 const columns: ColumnArray<Address> = [
     {
@@ -63,6 +64,8 @@ const NodeAddressesContainer = () => {
         include: ['server'],
     })
 
+    console.log(data)
+
     const rowActions = ({ row }: RowActionsProps<Address>) => {
         const [showEditModal, setShowEditModal] = useState(false)
         const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -70,9 +73,9 @@ const NodeAddressesContainer = () => {
         return (
             <>
                 <EditAddressModal
-                    address={row}
-                    open={showEditModal}
+                    address={showEditModal ? row : null}
                     onClose={() => setShowEditModal(false)}
+                    mutate={mutate}
                 />
                 <DeleteAddressModal
                     address={row}

@@ -7,7 +7,12 @@ import useServersSWR from '@/api/admin/servers/useServersSWR'
 
 import SelectForm from '@/components/elements/forms/SelectForm'
 
-const ServersSelectForm = () => {
+
+interface Props {
+    addressPoolId?: number | null
+}
+
+const ServersSelectForm = ({ addressPoolId }: Props) => {
     const { t: tSIndex } = useTranslation('admin.servers.index')
     const { t: tAIndex } = useTranslation('admin.addressPools.addresses')
     const { watch } = useFormContext()
@@ -15,6 +20,7 @@ const ServersSelectForm = () => {
     const [query, setQuery] = useState(serverId)
     const [debouncedQuery] = useDebouncedValue(query, 200)
     const { data, isLoading, isValidating } = useServersSWR({
+        addressPoolId,
         query: debouncedQuery,
         perPage: 10,
     })

@@ -19,6 +19,7 @@ import Radio from '@/components/elements/inputs/Radio'
 
 import ServersSelectForm from '@/components/admin/ipam/addresses/ServersSelectForm'
 
+
 interface Props {
     address: Address | null
     onClose: () => void
@@ -154,7 +155,9 @@ const EditAddressModal = ({ address, onClose, mutate }: Props) => {
                             name='macAddress'
                             label={tStrings('mac_address')}
                         />
-                        <ServersSelectForm />
+                        <ServersSelectForm
+                            addressPoolId={address?.addressPoolId}
+                        />
                     </Modal.Body>
 
                     <Modal.Actions>

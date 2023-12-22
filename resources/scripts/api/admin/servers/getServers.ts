@@ -4,20 +4,23 @@ import {
 } from '@/api/admin/servers/getServer'
 import http, { PaginatedResult, getPaginationSet } from '@/api/http'
 
+
 export type ServerInclude = 'user' | 'node'
 
 export interface QueryParams {
-    nodeId?: number
-    userId?: number
-    query?: string
-    page?: number
-    perPage?: number
-    include?: ServerInclude[]
+    addressPoolId?: number | null
+    nodeId?: number | null
+    userId?: number | null
+    query?: string | null
+    page?: number | null
+    perPage?: number | null
+    include?: ServerInclude[] | null
 }
 
 export type ServerResponse = PaginatedResult<AdminServerBuild>
 
 const getServers = async ({
+    addressPoolId,
     nodeId,
     userId,
     query,
@@ -27,6 +30,7 @@ const getServers = async ({
 }: QueryParams): Promise<ServerResponse> => {
     const { data } = await http.get('/api/admin/servers', {
         params: {
+            'filter[address_pool_id]': addressPoolId,
             'filter[node_id]': nodeId,
             'filter[user_id]': userId,
             'filter[*]': query,

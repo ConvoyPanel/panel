@@ -1,6 +1,7 @@
 import { NodeResponse, rawDataToNode } from '@/api/admin/nodes/getNodes'
 import http, { getPaginationSet } from '@/api/http'
 
+
 export interface QueryParams {
     query?: string | null
     fqdn?: string | null
@@ -14,7 +15,7 @@ const getAttachedNodes = async (
     { query, fqdn, locationId, page, perPage = 50 }: QueryParams
 ): Promise<NodeResponse> => {
     const { data } = await http.get(
-        `/api/admin/address-pools/${addressPoolId}/nodes`,
+        `/api/admin/address-pools/${addressPoolId}/attached-nodes`,
         {
             params: {
                 query,
