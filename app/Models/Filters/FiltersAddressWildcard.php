@@ -7,7 +7,7 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class FiltersAddressWildcard implements Filter
 {
-    public function __invoke(Builder $query, $value, string $property)
+    public function __invoke(Builder $query, $value, string $property): void
     {
         if (is_array($value)) {
             $query->whereIn('id', $value)

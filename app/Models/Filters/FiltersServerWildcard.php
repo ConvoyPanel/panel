@@ -7,7 +7,7 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class FiltersServerWildcard implements Filter
 {
-    public function __invoke(Builder $query, $value, string $property)
+    public function __invoke(Builder $query, $value, string $property): void
     {
         $query->where('id', $value)
               ->orWhere('uuid', $value)
