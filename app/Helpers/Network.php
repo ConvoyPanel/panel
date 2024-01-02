@@ -29,16 +29,12 @@ function getAddressesFromRange(AddressType $type, string $from, string $to): arr
         $from = ip2long($from);
         $to = ip2long($to);
 
-        $addresses[] = $from;
-
         for ($i = $from; $i <= $to; $i++) {
             $addresses[] = long2ip($i);
         }
     } else {
         $from = ipv6ToInteger($from);
         $to = ipv6ToInteger($to);
-
-        $addresses[] = $from;
 
         for ($i = $from; $i <= $to; $i++) {
             $addresses[] = ipv6FromInteger($i);

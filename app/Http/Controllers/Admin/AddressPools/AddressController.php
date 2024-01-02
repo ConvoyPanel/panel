@@ -11,7 +11,7 @@ use Convoy\Jobs\Server\SyncNetworkSettings;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\FiltersAddressWildcard;
-use Convoy\Repositories\Eloquent\AddressRepository;
+use Convoy\Services\Activity\BulkAddressCreationService;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
 use Illuminate\Database\ConnectionInterface;
@@ -23,8 +23,9 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class AddressController extends ApiController
 {
     public function __construct(
-        private NetworkService      $networkService, private AddressRepository $repository,
-        private ConnectionInterface $connection,
+        private NetworkService             $networkService,
+        private ConnectionInterface        $connection,
+        private BulkAddressCreationService $bulkAddressCreationService,
     )
     {
     }
@@ -57,52 +58,19 @@ class AddressController extends ApiController
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
     {
-        if (!$request->boolean('is_bulk_action')) {
-            /** @var Address $address */
-            $address = $this->connection->transaction(function () use ($request, $addressPool) {
-                $address = $addressPool->addresses()->create($request->validated());
+        $data = $request->validated();
 
-                if ($request->server_id) {
-                    try {
-                        $this->networkService->syncSettings($address->server);
-                    } catch (ProxmoxConnectionException) {
-                        throw new ServiceUnavailableHttpException(
-                            message: "Server {$address->server->uuid} failed to sync network settings.",
-                        );
-                    }
-                }
-
-                return $address;
-            });
-
-            return fractal($address, new AddressTransformer())->parseIncludes($request->include)
-                                                              ->respond();
-        }
-
-        if ($request->boolean('is_bulk_action')) {
-            $this->connection->transaction(function () use ($request, $addressPool) {
-                if ($request->enum('type', AddressType::class) === AddressType::IPV4) {
-                    $this->repository->bulkCreateIPv4Addresses(
-                        $request->starting_address,
-                        $request->ending_address,
-                        $addressPool->id,
-                        $request->server_id,
-                        $request->cidr,
-                        $request->gateway,
-                        $request->mac_address,
-                    );
-                } else {
-                    $this->repository->bulkCreateIPv6Addresses(
-                        $request->starting_address,
-                        $request->ending_address,
-                        $addressPool->id,
-                        $request->server_id,
-                        $request->cidr,
-                        $request->gateway,
-                        $request->mac_address,
-                    );
-                }
-            });
+        if ($data['is_bulk_action']) {
+            $this->bulkAddressCreationService->handle(
+                type      : AddressType::from($data['type']),
+                from      : $data['starting_address'],
+                to        : $data['ending_address'],
+                poolId    : $addressPool->id,
+                serverId  : $data['server_id'],
+                cidr      : $data['cidr'],
+                gateway   : $data['gateway'],
+                macAddress: $data['mac_address'],
+            );
 
             if (!is_null($request->server_id)) {
                 SyncNetworkSettings::dispatch($request->integer('server_id'));
@@ -110,6 +78,29 @@ class AddressController extends ApiController
 
             return $this->returnNoContent();
         }
+
+        /** @var Address $address */
+        $address = $this->connection->transaction(function () use ($data, $addressPool) {
+            $address = $addressPool->addresses()->create([
+                ...$data,
+                'address_pool_id' => $addressPool->id,
+            ]);
+
+            if ($data['server_id']) {
+                try {
+                    $this->networkService->syncSettings($address->server);
+                } catch (ProxmoxConnectionException) {
+                    throw new ServiceUnavailableHttpException(
+                        message: "Server {$address->server->uuid} failed to sync network settings.",
+                    );
+                }
+            }
+
+            return $address;
+        });
+
+        return fractal($address, new AddressTransformer())->parseIncludes($request->include)
+                                                          ->respond();
     }
 
     public function update(
