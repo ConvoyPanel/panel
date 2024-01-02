@@ -2,13 +2,12 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\NullableEncrypter;
 use Convoy\Casts\MebibytesToAndFromBytes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Convoy\Casts\NullableEncrypter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Node extends Model
@@ -45,7 +44,7 @@ class Node extends Model
      */
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'location_id' => 'required|integer|exists:locations,id',
         'name' => 'required|string|max:191',
         'cluster' => 'required|string|max:191',
@@ -69,7 +68,10 @@ class Node extends Model
      */
     public function getCotermConnectionAddress(): string
     {
-        return sprintf('%s://%s:%s', $this->coterm_tls_enabled ? 'https' : 'http', $this->coterm_fqdn, $this->coterm_port);
+        return sprintf(
+            '%s://%s:%s', $this->coterm_tls_enabled ? 'https' : 'http', $this->coterm_fqdn,
+            $this->coterm_port,
+        );
     }
 
     /**
@@ -89,7 +91,7 @@ class Node extends Model
             AddressPool::class,
             'address_pool_to_node',
             'node_id',
-            'address_pool_id'
+            'address_pool_id',
         );
     }
 
@@ -104,7 +106,7 @@ class Node extends Model
             'node_id',
             'address_pool_id',
             'id',
-            'address_pool_id'
+            'address_pool_id',
         );
     }
 

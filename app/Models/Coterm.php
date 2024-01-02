@@ -25,7 +25,7 @@ class Coterm extends Model
         'coterm_token' => NullableEncrypter::class,
     ];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'name' => 'required|string|max:191',
         'is_tls_enabled' => 'required|boolean',
         'fqdn' => 'required|string|max:191',

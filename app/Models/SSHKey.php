@@ -2,8 +2,8 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SSHKey extends Model
 {
@@ -16,7 +16,7 @@ class SSHKey extends Model
         'public_key',
     ];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'name' => 'required|string|max:40',
         'public_key' => 'required|string|max:500',
     ];

@@ -3,18 +3,18 @@
 namespace Convoy\Models;
 
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Validation\Factory;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 use Convoy\Exceptions\Model\DataValidationException;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
-use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator;
 
 abstract class Model extends IlluminateModel
 {
@@ -22,28 +22,18 @@ abstract class Model extends IlluminateModel
 
     /**
      * Set to true to return immutable Carbon date instances from the model.
-     *
-     * @var bool
      */
-    protected $immutableDates = false;
+    protected bool $immutableDates = false;
 
     /**
      * Determines if the model should undergo data validation before it is saved
      * to the database.
-     *
-     * @var bool
      */
-    protected $skipValidation = false;
+    protected bool $skipValidation = false;
 
-    /**
-     * @var Factory
-     */
-    protected static $validatorFactory;
+    protected static Factory $validatorFactory;
 
-    /**
-     * @var array
-     */
-    public static $validationRules = [];
+    public static array $validationRules = [];
 
     /**
      * Listen for the model saving event and fire off the validation
@@ -51,7 +41,7 @@ abstract class Model extends IlluminateModel
      *
      * @throws BindingResolutionException
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -69,7 +59,7 @@ abstract class Model extends IlluminateModel
     }
 
     /**
-     * Returns the model key to use for route model binding. By default we'll
+     * Returns the model key to use for route model binding. By default, we'll
      * assume every model uses a UUID field for this. If the model does not have
      * a UUID and is using a different key it should be specified on the model
      * itself.
@@ -84,10 +74,8 @@ abstract class Model extends IlluminateModel
 
     /**
      * Set the model to skip validation when saving.
-     *
-     * @return $this
      */
-    public function skipValidation()
+    public function skipValidation(): static
     {
         $this->skipValidation = true;
 
@@ -96,25 +84,21 @@ abstract class Model extends IlluminateModel
 
     /**
      * Returns the validator instance used by this model.
-     *
-     * @return \Illuminate\Validation\Validator|Validator
      */
-    public function getValidator()
+    public function getValidator(): Validator
     {
         $rules = $this->exists ? static::getRulesForUpdate($this) : static::getRules();
 
-        return static::$validatorFactory->make([], $rules, [], []);
+        return static::$validatorFactory->make([], $rules);
     }
 
     /**
      * Returns the rules associated with this model.
-     *
-     * @return array
      */
-    public static function getRules()
+    public static function getRules(): array
     {
         $rules = static::$validationRules;
-        foreach ($rules as $key => &$rule) {
+        foreach ($rules as &$rule) {
             $rule = is_array($rule) ? $rule : explode('|', $rule);
         }
 
@@ -133,11 +117,10 @@ abstract class Model extends IlluminateModel
     /**
      * Returns the rules associated with the model, specifically for updating the given model
      * rather than just creating it.
-     *
-     * @param  IlluminateModel|int|string  $model
-     * @return array
      */
-    public static function getRulesForUpdate($model, string $column = 'id')
+    public static function getRulesForUpdate(
+        IlluminateModel|int|string $model, string $column = 'id',
+    ): array
     {
         if ($model instanceof Model) {
             [$id, $column] = [$model->getKey(), $model->getKeyName()];
@@ -147,10 +130,10 @@ abstract class Model extends IlluminateModel
         foreach ($rules as $key => &$data) {
             // For each rule in a given field, iterate over it and confirm if the rule
             // is one for a unique field. If that is the case, append the ID of the current
-            // working model so we don't run into errors due to the way that field validation
+            // working model, so we don't run into errors due to the way that field validation
             // works.
             foreach ($data as &$datum) {
-                if (! is_string($datum) || ! Str::startsWith($datum, 'unique')) {
+                if (!is_string($datum) || !Str::startsWith($datum, 'unique')) {
                     continue;
                 }
 
@@ -175,29 +158,26 @@ abstract class Model extends IlluminateModel
 
         $validator = $this->getValidator();
         $validator->setData(
-            // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
-            // for that model. Doing this will return all of the attributes in a format that can
-            // properly be validated.
+        // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
+        // for that model. Doing this will return all the attributes in a format that can
+        // properly be validated.
             $this->addCastAttributesToArray(
                 $this->getAttributes(),
-                $this->getMutatedAttributes()
-            )
+                $this->getMutatedAttributes(),
+            ),
         );
 
-        if (! $validator->passes()) {
+        if (!$validator->passes()) {
             throw new ValidationException($validator);
         }
     }
 
     /**
      * Return a timestamp as DateTime object.
-     *
-     * @param  mixed  $value
-     * @return Carbon|CarbonImmutable
      */
-    protected function asDateTime($value)
+    protected function asDateTime(mixed $value): Carbon|CarbonImmutable
     {
-        if (! $this->immutableDates) {
+        if (!$this->immutableDates) {
             return parent::asDateTime($value);
         }
 

@@ -2,8 +2,8 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Location extends Model
@@ -22,7 +22,7 @@ class Location extends Model
      *
      * @var array
      */
-    public static $validationRules = [
+    public static array $validationRules = [
         'short_code' => 'required|string|between:1,60|unique:locations,short_code',
         'description' => 'string|nullable|between:1,191',
     ];

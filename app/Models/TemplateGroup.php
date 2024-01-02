@@ -2,16 +2,16 @@
 
 namespace Convoy\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Ramsey\Uuid\Uuid;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TemplateGroup extends Model implements Sortable
 {
     use HasFactory, SortableTrait;
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
         'name' => 'required|string|max:40',
         'hidden' => 'sometimes|boolean',

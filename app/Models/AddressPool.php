@@ -2,14 +2,14 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AddressPool extends Model
 {
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'name' => 'required|string|max:191',
     ];
 
@@ -18,7 +18,9 @@ class AddressPool extends Model
      */
     public function nodes(): BelongsToMany
     {
-        return $this->belongsToMany(Node::class, 'address_pool_to_node', 'address_pool_id', 'node_id');
+        return $this->belongsToMany(
+            Node::class, 'address_pool_to_node', 'address_pool_id', 'node_id',
+        );
     }
 
     /**

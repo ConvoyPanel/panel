@@ -2,11 +2,11 @@
 
 namespace Convoy\Models;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Enums\Server\Status;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 
 class Server extends Model
 {
@@ -25,7 +25,7 @@ class Server extends Model
         'created_at',
     ];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|integer|exists:nodes,id',
         'user_id' => 'required|integer|exists:users,id',
@@ -100,7 +100,7 @@ class Server extends Model
     public function validateCurrentState()
     {
         if (
-            ! is_null($this->status)
+            !is_null($this->status)
         ) {
             throw new ServerStatusConflictException($this);
         }

@@ -2,9 +2,9 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Support\Str;
 use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class ISO extends Model
 {
@@ -20,7 +20,7 @@ class ISO extends Model
         'hidden' => 'boolean',
     ];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
         'is_successful' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',

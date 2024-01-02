@@ -3,8 +3,8 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
 {
@@ -17,7 +17,7 @@ class Backup extends Model
         'size' => MebibytesToAndFromBytes::class,
     ];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'uuid' => 'required|uuid',
         'server_id' => 'required|exists:servers,id',
         'is_successful' => 'sometimes|boolean',
