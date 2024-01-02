@@ -6,6 +6,9 @@ use Convoy\Casts\MebibytesToAndFromBytes;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Server extends Model
@@ -42,33 +45,33 @@ class Server extends Model
         'hydrated_at' => 'nullable|date',
     ];
 
-    public function node()
+    public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function addresses()
+    public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
     }
 
-    public function template()
+    public function template(): HasOne
     {
         return $this->hasOne(Template::class);
     }
 
-    public function backups()
+    public function backups(): HasMany
     {
         return $this->hasMany(Backup::class);
     }
 
     /**
-     * Returns all of the activity log entries where the server is the subject.
+     * Returns all the activity log entries where the server is the subject.
      */
     public function activity(): MorphToMany
     {
@@ -97,7 +100,7 @@ class Server extends Model
      *
      * @throws ServerStatusConflictException
      */
-    public function validateCurrentState()
+    public function validateCurrentState(): void
     {
         if (
             !is_null($this->status)

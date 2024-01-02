@@ -2,14 +2,15 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Ramsey\Uuid\Uuid;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
 class TemplateGroup extends Model implements Sortable
 {
-    use HasFactory, SortableTrait;
+    use SortableTrait;
 
     public static array $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
@@ -24,17 +25,17 @@ class TemplateGroup extends Model implements Sortable
         'updated_at',
     ];
 
-    public function templates()
+    public function templates(): HasMany
     {
         return $this->hasMany(Template::class);
     }
 
-    public function buildSortQuery()
+    public function buildSortQuery(): Builder
     {
         return static::query()->where('node_id', $this->node_id);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

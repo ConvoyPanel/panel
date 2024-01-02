@@ -4,6 +4,7 @@ namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class ISO extends Model
@@ -30,12 +31,12 @@ class ISO extends Model
         'completed_at' => 'nullable|date',
     ];
 
-    public function node()
+    public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

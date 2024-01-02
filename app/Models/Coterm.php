@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coterm extends Model
 {
-    public const COTERM_TOKEN_ID_LENGTH = 16;
-    public const COTERM_TOKEN_LENGTH = 64;
-
     protected $guarded = [
         'id',
         'created_at',

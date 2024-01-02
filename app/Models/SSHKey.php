@@ -2,13 +2,10 @@
 
 namespace Convoy\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SSHKey extends Model
 {
-    use HasFactory;
-
     protected $table = 'ssh_keys';
 
     protected $fillable = [

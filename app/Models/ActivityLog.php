@@ -3,16 +3,14 @@
 namespace Convoy\Models;
 
 use Carbon\Carbon;
-use LogicException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use LogicException;
 
 class ActivityLog extends Model
 {
-    use HasFactory;
-
     public $timestamps = false;
 
     protected $guarded = [
@@ -27,7 +25,7 @@ class ActivityLog extends Model
 
     protected $with = ['subjects'];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'event' => ['required', 'string'],
         'batch' => ['nullable', 'uuid'],
         'ip' => ['required', 'string'],
@@ -45,7 +43,7 @@ class ActivityLog extends Model
         return $morph;
     }
 
-    public function subjects()
+    public function subjects(): HasMany
     {
         return $this->hasMany(ActivityLogSubject::class);
     }
@@ -68,12 +66,16 @@ class ActivityLog extends Model
      *
      * @see https://laravel.com/docs/9.x/eloquent#pruning-models
      */
-    public function prunable()
+    public function prunable(): ActivityLog
     {
         if (is_null(config('activity.prune_days'))) {
-            throw new LogicException('Cannot prune activity logs: no "prune_days" configuration value is set.');
+            throw new LogicException(
+                'Cannot prune activity logs: no "prune_days" configuration value is set.',
+            );
         }
 
-        return static::where('created_at', '<=', Carbon::now()->subDays(config('activity.prune_days')));
+        return static::where(
+            'created_at', '<=', Carbon::now()->subDays(config('activity.prune_days')),
+        );
     }
 }

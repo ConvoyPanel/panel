@@ -4,6 +4,7 @@ namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
@@ -28,7 +29,7 @@ class Backup extends Model
         'completed_at' => 'nullable|date',
     ];
 
-    public function server()
+    public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
     }

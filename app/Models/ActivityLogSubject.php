@@ -3,18 +3,17 @@
 namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ActivityLogSubject extends Model
 {
-    use HasFactory;
-
-    public function activityLog()
+    public function activityLog(): BelongsTo
     {
         return $this->belongsTo(ActivityLog::class);
     }
 
-    public function subject()
+    public function subject(): MorphTo
     {
         $morph = $this->morphTo();
         if (method_exists($morph, 'withTrashed')) {
