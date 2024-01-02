@@ -2,13 +2,13 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Isos;
 
+use Convoy\Enums\Helpers\ChecksumAlgorithm;
+use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
-use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Services\Isos\IsoService;
 use Illuminate\Validation\Rules\Enum;
-use Convoy\Services\Nodes\Isos\IsoService;
-use Convoy\Enums\Helpers\ChecksumAlgorithm;
+use Illuminate\Validation\Validator;
 
 class StoreIsoRequest extends BaseApiRequest
 {
@@ -22,7 +22,9 @@ class StoreIsoRequest extends BaseApiRequest
             'file_name' => $isoRules['file_name'],
             'hidden' => $isoRules['hidden'],
             'link' => 'required_if:should_download,1|url|max:191|exclude_if:should_download,0',
-            'checksum_algorithm' => ['sometimes', new Enum(ChecksumAlgorithm::class), 'exclude_if:should_download,0'],
+            'checksum_algorithm' => ['sometimes', new Enum(
+                ChecksumAlgorithm::class,
+            ), 'exclude_if:should_download,0'],
             'checksum' => 'required_with:checksum_algorithm|string|max:191|exclude_if:should_download,0',
         ];
 
@@ -34,9 +36,11 @@ class StoreIsoRequest extends BaseApiRequest
         $rules = [
             function (Validator $validator) {
                 if (ISO::where('file_name', $this->string('file_name'))->exists()) {
-                    $validator->errors()->add('file_name', __('validation.unique', ['attribute' => 'file name']));
+                    $validator->errors()->add(
+                        'file_name', __('validation.unique', ['attribute' => 'file name']),
+                    );
                 }
-            }
+            },
         ];
 
         if (!$this->boolean('should_download')) {

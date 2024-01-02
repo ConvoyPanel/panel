@@ -3,7 +3,7 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Server;
-use Convoy\Services\Servers\Backups\PurgeBackupsService;
+use Convoy\Services\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

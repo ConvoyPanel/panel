@@ -3,7 +3,7 @@
 namespace Convoy\Jobs\Node;
 
 use Convoy\Models\ISO;
-use Convoy\Services\Nodes\Isos\IsoMonitorService;
+use Convoy\Services\Isos\IsoMonitorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

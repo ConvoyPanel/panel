@@ -3,7 +3,7 @@
 namespace Convoy\Jobs\Server;
 
 use Convoy\Models\Server;
-use Convoy\Services\Servers\Backups\BackupMonitorService;
+use Convoy\Services\Backups\BackupMonitorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
