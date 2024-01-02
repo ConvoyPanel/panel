@@ -35,12 +35,17 @@ class AddressController extends ApiController
                                  ->with('server')
                                  ->defaultSort('-id')
                                  ->allowedFilters(
-                                     [AllowedFilter::exact('address'), AllowedFilter::exact(
-                                         'type',
-                                     ), AllowedFilter::custom(
-                                         '*',
-                                         new FiltersAddressWildcard(),
-                                     ), AllowedFilter::exact('server_id')->nullable()],
+                                     [
+                                         AllowedFilter::exact('address'),
+                                         AllowedFilter::exact(
+                                             'type',
+                                         ),
+                                         AllowedFilter::custom(
+                                             '*',
+                                             new FiltersAddressWildcard(),
+                                         ),
+                                         AllowedFilter::exact('server_id')->nullable(),
+                                     ],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
