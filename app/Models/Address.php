@@ -3,17 +3,14 @@
 namespace Convoy\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Address extends Model
 {
-    use HasFactory;
-
     protected $table = 'ip_addresses';
 
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
-    public static $validationRules = [
+    public static array $validationRules = [
         'address_pool_id' => ['exists:address_pools,id', 'required'],
         'server_id' => ['exists:servers,id', 'nullable'],
         'type' => ['in:ipv4,ipv6', 'required'],
