@@ -178,6 +178,7 @@ Route::prefix('/address-pools')->group(function () {
 Route::apiResource('users', Admin\UserController::class)
      ->only(['index', 'show', 'store', 'update', 'destroy']);
 
+Route::post('/users/{user}/generate-sso-token', [Admin\UserController::class, 'getSSOToken']);
 /*
 |--------------------------------------------------------------------------
 | Coterm Controller Routes
