@@ -175,8 +175,10 @@ Route::prefix('/address-pools')->group(function () {
 | Endpoint: /api/application/users
 |
 */
+
 Route::apiResource('users', Admin\UserController::class)
      ->only(['index', 'show', 'store', 'update', 'destroy']);
+Route::post('/users/{user}/generate-sso-token', [Admin\UserController::class, 'getSSOToken']);
 
 /*
 |--------------------------------------------------------------------------
