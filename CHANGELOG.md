@@ -4,6 +4,13 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.0.0-rc.6
+
+### Changes
+
+- Fixed incorrect conversion from mebibytes to bytes of a server's bandwidth limit during manual server creation through
+  the admin area UI #70
+
 ## v4.0.0-rc.5
 
 ### Changes

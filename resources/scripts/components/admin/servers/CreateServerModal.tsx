@@ -32,20 +32,20 @@ interface Props {
     onClose: () => void
 }
 
-const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
+const CreateServerModal = ({nodeId, userId, open, onClose}: Props) => {
     const [page] = usePagination()
-    const { mutate } = useServersSWR({
+    const {mutate} = useServersSWR({
         nodeId,
         userId,
         page,
         query: '',
         include: ['node', 'user'],
     })
-    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
-        'admin.servers.create'
+    const {clearFlashes, clearAndAddHttpError} = useFlashKey(
+            'admin.servers.create'
     )
-    const { t } = useTranslation('admin.servers.index')
-    const { t: tStrings } = useTranslation('strings')
+    const {t} = useTranslation('admin.servers.index')
+    const {t: tStrings} = useTranslation('strings')
 
     const schemaWithCreateVm = z.object({
         name: z.string().max(40).nonempty(),
@@ -163,7 +163,7 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
                     disk: disk * 1048576,
                     snapshots: snapshotLimit !== '' ? snapshotLimit : null,
                     backups: backupLimit !== '' ? backupLimit : null,
-                    bandwidth: bandwidthLimit !== '' ? bandwidthLimit : null,
+                    bandwidth: bandwidthLimit !== '' ? bandwidthLimit * 1048576 : null,
                     addressIds,
                 },
                 accountPassword: accountPassword ? accountPassword : null,
@@ -191,106 +191,106 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
     }
 
     return (
-        <Modal open={open} onClose={handleClose}>
-            <Modal.Header>
-                <Modal.Title>{t('create_modal.title')}</Modal.Title>
-            </Modal.Header>
+            <Modal open={open} onClose={handleClose}>
+                <Modal.Header>
+                    <Modal.Title>{t('create_modal.title')}</Modal.Title>
+                </Modal.Header>
 
-            <FormProvider {...form}>
-                <form onSubmit={form.handleSubmit(submit)}>
-                    <Modal.Body>
-                        <FlashMessageRender
-                            className='mb-5'
-                            byKey={'admin.servers.create'}
-                        />
-                        <TextInputForm
-                            name={'name'}
-                            label={tStrings('display_name')}
-                        />
-                        {nodeId ? null : <NodesSelectForm />}
-                        {userId ? null : <UsersSelectForm />}
-                        <TextInputForm
-                            name={'vmid'}
-                            label={'VMID'}
-                            placeholder={
-                                t('vmid_placeholder') ??
-                                'Leave blank for random VMID'
-                            }
-                        />
-                        <TextInputForm
-                            name={'hostname'}
-                            label={tStrings('hostname')}
-                        />
-                        <AddressesMultiSelectForm
-                            disabled={watchNodeId === ''}
-                        />
-                        <div className={'grid grid-cols-2 gap-3'}>
-                            <TextInputForm
-                                name={'cpu'}
-                                label={tStrings('cpu')}
+                <FormProvider {...form}>
+                    <form onSubmit={form.handleSubmit(submit)}>
+                        <Modal.Body>
+                            <FlashMessageRender
+                                    className='mb-5'
+                                    byKey={'admin.servers.create'}
                             />
                             <TextInputForm
-                                name={'memory'}
-                                label={`${tStrings('memory')} (MiB)`}
+                                    name={'name'}
+                                    label={tStrings('display_name')}
                             />
-                        </div>
-                        <TextInputForm
-                            name={'disk'}
-                            label={`${tStrings('disk')} (MiB)`}
-                        />
-                        <div className={'grid grid-cols-2 gap-3'}>
+                            {nodeId ? null : <NodesSelectForm/>}
+                            {userId ? null : <UsersSelectForm/>}
                             <TextInputForm
-                                name={'backupLimit'}
-                                label={t('backup_limit')}
-                                placeholder={
-                                    t('limit_placeholder') ??
-                                    'Leave blank for no limit'
-                                }
+                                    name={'vmid'}
+                                    label={'VMID'}
+                                    placeholder={
+                                            t('vmid_placeholder') ??
+                                            'Leave blank for random VMID'
+                                    }
                             />
                             <TextInputForm
-                                name={'bandwidthLimit'}
-                                label={`${t('bandwidth_limit')} (MiB)`}
-                                placeholder={
-                                    t('limit_placeholder') ??
-                                    'Leave blank for no limit'
-                                }
+                                    name={'hostname'}
+                                    label={tStrings('hostname')}
                             />
-                        </div>
-                        <TextInputForm
-                            name={'accountPassword'}
-                            label={tStrings('system_os_password')}
-                            type={'password'}
-                        />
-                        <CheckboxForm
-                            name={'shouldCreateServer'}
-                            label={t('should_create_vm')}
-                            className={'mt-3 relative'}
-                        />
-                        <TemplatesSelectForm
-                            disabled={
-                                !watchShouldCreateServer || watchNodeId === ''
-                            }
-                        />
-                        <CheckboxForm
-                            name={'startOnCompletion'}
-                            label={t('start_server_after_installing')}
-                            className={'mt-3 relative'}
-                        />
-                    </Modal.Body>
-                    <Modal.Actions>
-                        <Modal.Action type='button' onClick={handleClose}>
-                            {tStrings('cancel')}
-                        </Modal.Action>
-                        <Modal.Action
-                            type='submit'
-                            loading={form.formState.isSubmitting}
-                        >
-                            {tStrings('create')}
-                        </Modal.Action>
-                    </Modal.Actions>
-                </form>
-            </FormProvider>
-        </Modal>
+                            <AddressesMultiSelectForm
+                                    disabled={watchNodeId === ''}
+                            />
+                            <div className={'grid grid-cols-2 gap-3'}>
+                                <TextInputForm
+                                        name={'cpu'}
+                                        label={tStrings('cpu')}
+                                />
+                                <TextInputForm
+                                        name={'memory'}
+                                        label={`${tStrings('memory')} (MiB)`}
+                                />
+                            </div>
+                            <TextInputForm
+                                    name={'disk'}
+                                    label={`${tStrings('disk')} (MiB)`}
+                            />
+                            <div className={'grid grid-cols-2 gap-3'}>
+                                <TextInputForm
+                                        name={'backupLimit'}
+                                        label={t('backup_limit')}
+                                        placeholder={
+                                                t('limit_placeholder') ??
+                                                'Leave blank for no limit'
+                                        }
+                                />
+                                <TextInputForm
+                                        name={'bandwidthLimit'}
+                                        label={`${t('bandwidth_limit')} (MiB)`}
+                                        placeholder={
+                                                t('limit_placeholder') ??
+                                                'Leave blank for no limit'
+                                        }
+                                />
+                            </div>
+                            <TextInputForm
+                                    name={'accountPassword'}
+                                    label={tStrings('system_os_password')}
+                                    type={'password'}
+                            />
+                            <CheckboxForm
+                                    name={'shouldCreateServer'}
+                                    label={t('should_create_vm')}
+                                    className={'mt-3 relative'}
+                            />
+                            <TemplatesSelectForm
+                                    disabled={
+                                            !watchShouldCreateServer || watchNodeId === ''
+                                    }
+                            />
+                            <CheckboxForm
+                                    name={'startOnCompletion'}
+                                    label={t('start_server_after_installing')}
+                                    className={'mt-3 relative'}
+                            />
+                        </Modal.Body>
+                        <Modal.Actions>
+                            <Modal.Action type='button' onClick={handleClose}>
+                                {tStrings('cancel')}
+                            </Modal.Action>
+                            <Modal.Action
+                                    type='submit'
+                                    loading={form.formState.isSubmitting}
+                            >
+                                {tStrings('create')}
+                            </Modal.Action>
+                        </Modal.Actions>
+                    </form>
+                </FormProvider>
+            </Modal>
     )
 }
 
