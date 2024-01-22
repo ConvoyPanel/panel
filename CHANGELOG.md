@@ -4,12 +4,32 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## v4.0.0-rc.6
+## v4.0.0-beta
+
+If you use Convoy for a production or commercial environment/purpose, please subscribe to a
+license [here](https://console.convoypanel.com). It supports my work, and you are also violating the license agreement
+if you don't. Your deployment of Convoy may be disabled without warning if you don't adhere to the terms of the license
+agreement.
 
 ### Changes
 
+- **BREAKING**: Overhauled the IP address management system to add IP pools that can be shared among nodes. #51
+- **BREAKING**: Fixed Coterm where it doesn't support multiple nodes #50
+- Fixed inability to use special characters for Redis password.
+- Fixed error when trying to parse a vm's disk that has no `size` attribute #48
+- Fixed typo in the input labels on the node creation modal #42
+- Fixed the mobile navigation menu where it won't automatically close when you click on a link #41
+- Added ability to copy node and template IDs #40
 - Fixed incorrect conversion from mebibytes to bytes of a server's bandwidth limit during manual server creation through
   the admin area UI #70
+- Fixed missing SSO token creation endpoint
+- Fixed bulk importing of IPv6 addresses #66
+- Fixed inability to create servers with IP addresses.
+- Fixed minor UI bug where addresses in IPAM won't optimistically update after making a change.
+- Made the IPAM address table sort by descending.
+- Removed API request throttling
+- Increased Coterm session token lifetime from 30 seconds to a minute.
+- Fixed cloning of VM's to the wrong storage location #64
 
 ## v4.0.0-rc.5
 
