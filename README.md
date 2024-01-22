@@ -21,14 +21,7 @@ Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a
 
 ## Acknowledgements
 
-Convoy wouldn't have been possible without these organizations and people
-
--   Advin Servers - provided several development servers (at least $200 of hardware) to help me develop this SaaS
--   Kjartann - donated $250 to support Convoy development and encouraged me to keep on working on this panel!
--   Pterodactyl Panel - provided the architecture and a lot of backend/boilerplate code for Convoy.
--   FastKVM.EU - for reporting bugs and testing the panel
--   Just Code Cats - created [Convoy's Blesta module](https://marketplace.blesta.com/#/extensions/179-Convoy%20Module), https://code-cats.com/
--   [HeavyNode](https://heavynode.com/) - for helping create [Coterm](https://github.com/ConvoyPanel/coterm)
+Please [visit this page](https://convoypanel.com/docs/project/about.html#acknowledgements) on our website to view acknowledgements.
 
 ## License
 
