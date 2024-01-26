@@ -1,24 +1,39 @@
 services:
-    workspace:
-        image: performave/convoy-workspace:latest
-        tty: true
-        volumes:
-            - .:/var/www/
-    redis:
-        image: redis:7.0-alpine
-        restart: unless-stopped
-        command: redis-server --save 20 1 --loglevel notice --requirepass ${REDIS_PASSWORD}
-        expose:
-            - 6379
-    database:
-        image: mysql:8.0
-        restart: unless-stopped
-        volumes:
-            - ./dockerfiles/mysql/data:/var/lib/mysql/
-        expose:
-            - 3306
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_USER: ${DB_USERNAME}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
+  workspace:
+    image: performave/convoy-workspace:latest
+    tty: true
+    volumes:
+      - .:/var/www/
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  redis:
+    image: redis:7.0-alpine
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel notice --requirepass ${REDIS_PASSWORD}
+    expose:
+      - 6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  database:
+    image: mysql:8.0
+    restart: unless-stopped
+    volumes:
+      - ./dockerfiles/mysql/data:/var/lib/mysql/
+    expose:
+      - 3306
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-u${DB_USERNAME}", "-p${DB_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20

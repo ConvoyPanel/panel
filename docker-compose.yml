@@ -1,78 +1,92 @@
 services:
-    caddy:
-        build:
-            context: ./dockerfiles/caddy
-            args:
-                - APP_ENV=$APP_ENV
-                - APP_URL=$APP_URL
-        restart: unless-stopped
-        volumes:
-            - .:/var/www/
-            - ./dockerfiles/caddy/data/config:/config
-            - ./dockerfiles/caddy/data/data:/data
-        ports:
-            - 80:80
-            - 443:443
-        depends_on:
-            - php
-        env_file: .env
-    php:
-        build:
-            context: ./dockerfiles/php
-            args:
-                - APP_ENV=$APP_ENV
-                - PHP_XDEBUG=$PHP_XDEBUG
-                - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
-        restart: unless-stopped
-        volumes:
-            - .:/var/www/
-        expose:
-            - 9000
-        depends_on:
-            - database
-            - redis
-        env_file: .env
-        extra_hosts:
-            host.docker.internal: host-gateway
-    workspace:
-        build:
-            context: ./dockerfiles/workspace
-            args:
-                - PHP_XDEBUG=$PHP_XDEBUG
-                - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
-        tty: true
-        ports:
-            - 1234:1234
-        volumes:
-            - .:/var/www/
-        extra_hosts:
-            host.docker.internal: host-gateway
-    redis:
-        image: redis:7.0-alpine
-        restart: unless-stopped
-        command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
-        ports:
-            - 6379:6379
-    workers:
-        build:
-            context: ./dockerfiles/workers
-            args:
-                - APP_ENV=$APP_ENV
-        restart: unless-stopped
-        volumes:
-            - .:/var/www/
-        depends_on:
-            - database
-            - redis
-    database:
-        image: mysql:8.0
-        restart: unless-stopped
-        volumes:
-            - ./dockerfiles/mysql/data:/var/lib/mysql/
-        ports:
-            - 3306:3306
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_USER: ${DB_USERNAME}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
+  caddy:
+    build:
+      context: ./dockerfiles/caddy
+      args:
+        - APP_ENV=$APP_ENV
+        - APP_URL=$APP_URL
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/
+      - ./dockerfiles/caddy/data/config:/config
+      - ./dockerfiles/caddy/data/data:/data
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - php
+    env_file: .env
+  php:
+    build:
+      context: ./dockerfiles/php
+      args:
+        - APP_ENV=$APP_ENV
+        - PHP_XDEBUG=$PHP_XDEBUG
+        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/
+    expose:
+      - 9000
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env
+    extra_hosts:
+      host.docker.internal: host-gateway
+  workspace:
+    build:
+      context: ./dockerfiles/workspace
+      args:
+        - PHP_XDEBUG=$PHP_XDEBUG
+        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
+    tty: true
+    ports:
+      - 1234:1234
+    volumes:
+      - .:/var/www/
+    extra_hosts:
+      host.docker.internal: host-gateway
+  workers:
+    build:
+      context: ./dockerfiles/workers
+      args:
+        - APP_ENV=$APP_ENV
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  redis:
+    image: redis:7.0-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  database:
+    image: mysql:8.0
+    restart: unless-stopped
+    volumes:
+      - ./dockerfiles/mysql/data:/var/lib/mysql/
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-u${DB_USERNAME}", "-p${DB_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
