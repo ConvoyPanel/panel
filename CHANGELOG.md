@@ -4,6 +4,15 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.1.0-beta
+
+### Changes
+
+- Removed the `DB_ROOT_PASSWORD` variable from the environment file. It is now automatically generated, but we still
+  aren't planning on using it.
+- Added health checks to the Docker compose configuration to prevent the containers from exploding when its dependencies
+  don't start up in time.
+
 ## v4.0.0-beta
 
 If you use Convoy for a production or commercial environment/purpose, please subscribe to a
