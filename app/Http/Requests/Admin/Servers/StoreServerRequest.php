@@ -2,24 +2,19 @@
 
 namespace Convoy\Http\Requests\Admin\Servers;
 
+use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Convoy\Models\Address;
+use Convoy\Rules\EnglishKeyboardCharacters;
 use Convoy\Rules\Password;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Rules\EnglishKeyboardCharacters;
 
 /**
  * @property mixed $type
  */
 class StoreServerRequest extends BaseApiRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $rules = Server::getRules();
@@ -47,8 +42,7 @@ class StoreServerRequest extends BaseApiRequest
         ];
     }
 
-    // check that all of the address_ids server_id is null
-    public function withValidator(Validator $validator)
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $addressIds = $this->input('limits.address_ids');
@@ -77,11 +71,15 @@ class StoreServerRequest extends BaseApiRequest
             $disk = intval($this->input('limits.disk'));
 
             if ($memory > $nodeMemoryLimit || $memory < 0) {
-                $validator->errors()->add('limits.memory', 'The memory value exceeds the node\'s limit.');
+                $validator->errors()->add(
+                    'limits.memory', 'The memory value exceeds the node\'s limit.',
+                );
             }
 
             if ($disk > $nodeDiskLimit || $disk < 0) {
-                $validator->errors()->add('limits.disk', 'The disk value exceeds the node\'s limit.');
+                $validator->errors()->add(
+                    'limits.disk', 'The disk value exceeds the node\'s limit.',
+                );
             }
         });
     }
