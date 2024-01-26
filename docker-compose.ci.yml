@@ -16,7 +16,7 @@ services:
     expose:
       - 6379
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--raw", "incr", "ping" ]
+      test: redis-cli -a ${REDIS_PASSWORD} ping | grep PONG
       interval: 5s
       timeout: 5s
       retries: 20
@@ -33,7 +33,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-u${DB_USERNAME}", "-p${DB_PASSWORD}" ]
+      test: mysqladmin ping -u${DB_USERNAME} -p${DB_PASSWORD}
       interval: 5s
       timeout: 5s
       retries: 20
