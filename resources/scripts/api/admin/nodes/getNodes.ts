@@ -5,6 +5,7 @@ export interface Node {
     locationId: number
     name: string
     cluster: string
+    verifyTls: boolean
     fqdn: string
     port: number
     memory: number
@@ -29,6 +30,7 @@ export const rawDataToNode = (data: any): Node => ({
     locationId: data.location_id,
     name: data.name,
     cluster: data.cluster,
+    verifyTls: data.verify_tls,
     fqdn: data.fqdn,
     port: data.port,
     memory: data.memory,

@@ -14,6 +14,7 @@ class NodeTransformer extends TransformerAbstract
             'location_id' => $node->location_id,
             'name' => $node->name,
             'cluster' => $node->cluster,
+            'verify_tls' => $node->verify_tls,
             'fqdn' => $node->fqdn,
             'port' => $node->port,
             'memory' => $node->memory,
@@ -30,7 +31,7 @@ class NodeTransformer extends TransformerAbstract
             'coterm_tls_enabled' => $node->coterm_tls_enabled,
             'coterm_fqdn' => $node->coterm_fqdn,
             'coterm_port' => $node->coterm_port,
-            'servers_count' => (int) $node->servers_count,
+            'servers_count' => (int)$node->servers_count,
         ];
     }
 }
