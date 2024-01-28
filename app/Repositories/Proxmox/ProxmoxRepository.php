@@ -2,15 +2,15 @@
 
 namespace Convoy\Repositories\Proxmox;
 
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Webmozart\Assert\Assert;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\Response;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Contracts\Foundation\Application;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
+use Webmozart\Assert\Assert;
 
 abstract class ProxmoxRepository
 {
@@ -56,7 +56,7 @@ abstract class ProxmoxRepository
      *
      * @return mixed
      */
-    public function getData(array|string $response)
+    public function getData(array|string $response): mixed
     {
         return $response['data'] ?? $response;
     }
@@ -64,12 +64,14 @@ abstract class ProxmoxRepository
     /**
      * Return an instance of the Guzzle HTTP Client to be used for requests.
      */
-    public function getHttpClient(array $headers = [], array $options = [], bool $shouldAuthorize = true): PendingRequest
+    public function getHttpClient(
+        array $headers = [], array $options = [], bool $shouldAuthorize = true,
+    ): PendingRequest
     {
         Assert::isInstanceOf($this->node, Node::class);
 
         return Http::withOptions(array_merge([
-            'verify' => $this->app->environment('production'),
+            'verify' => $this->node->verify_tls,
             'base_uri' => "https://{$this->node->fqdn}:{$this->node->port}/",
             'timeout' => config('convoy.guzzle.timeout'),
             'connect_timeout' => config('convoy.guzzle.connect_timeout'),
