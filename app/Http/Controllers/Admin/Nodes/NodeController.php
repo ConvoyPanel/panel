@@ -7,7 +7,6 @@ use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
 use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Models\Node;
-use Convoy\Services\Coterm\CotermTokenCreationService;
 use Convoy\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -16,10 +15,6 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class NodeController extends ApiController
 {
-    public function __construct(private CotermTokenCreationService $cotermTokenCreator)
-    {
-    }
-
     public function index(Request $request)
     {
         $nodes = QueryBuilder::for(Node::query())
