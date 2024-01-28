@@ -9,6 +9,7 @@ This project follows [Semantic Versioning](http://semver.org) guidelines.
 ### Changes
 
 - Added server UUID copy to clipboard button in the admin area server table.
+- Added ability to toggle TLS verification per node basis.
 
 ## v4.1.0-beta
 
