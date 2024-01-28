@@ -5,9 +5,13 @@ import { Link } from 'react-router-dom'
 import useServersSWR from '@/api/admin/servers/useServersSWR'
 import { ServerBuild } from '@/api/server/getServer'
 
+import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
-import Table, { ColumnArray } from '@/components/elements/displays/Table'
+import Table, {
+    Actions,
+    ColumnArray,
+} from '@/components/elements/displays/Table'
 
 
 interface Props {
@@ -64,13 +68,31 @@ const ServersTable = ({ query, className, nodeId, userId }: Props) => {
         },
     ]
 
+    const rowActions = ({ row: server }: RowActionsProps<ServerBuild>) => {
+        return (
+            <Actions>
+                <Menu.Item
+                    onClick={() => navigator.clipboard.writeText(server.uuid)}
+                >
+                    Copy ID
+                </Menu.Item>
+            </Actions>
+        )
+    }
+
     return (
         <div className={className}>
             {!data ? (
                 <Spinner />
             ) : (
                 <Pagination data={data} onPageSelect={setPage}>
-                    {({ items }) => <Table columns={columns} data={items} />}
+                    {({ items }) => (
+                        <Table
+                            columns={columns}
+                            data={items}
+                            rowActions={rowActions}
+                        />
+                    )}
                 </Pagination>
             )}
         </div>

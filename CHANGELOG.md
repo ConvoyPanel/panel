@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.0-beta
+
+### Changes
+
+- Added server UUID copy to clipboard button in the admin area server table.
+
 ## v4.1.0-beta
 
 ### Changes
