@@ -11,6 +11,7 @@ import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 import Button from '@/components/elements/Button'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
@@ -26,21 +27,22 @@ const NodeInformationCard = () => {
     const { t: tIndex } = useTranslation('admin.nodes.index')
 
     const schema = z.object({
-        name: z.string().max(191).nonempty(),
+        name: z.string().min(1).max(191),
         locationId: z.preprocess(Number, z.number()),
-        cluster: z.string().max(191).nonempty(),
+        cluster: z.string().min(1).max(191),
+        verifyTls: z.boolean(),
         tokenId: z.string().max(191),
         secret: z.string().max(191),
-        fqdn: hostname().max(191).nonempty(),
+        fqdn: hostname().min(1).max(191),
         port: z.preprocess(Number, z.number().int().min(1).max(65535)),
         memory: z.preprocess(Number, z.number().int().min(0)),
         memoryOverallocate: z.preprocess(Number, z.number().int().min(0)),
         disk: z.preprocess(Number, z.number().int().min(0)),
         diskOverallocate: z.preprocess(Number, z.number().int().min(0)),
-        vmStorage: z.string().max(191).nonempty(),
-        backupStorage: z.string().max(191).nonempty(),
-        isoStorage: z.string().max(191).nonempty(),
-        network: z.string().max(191).nonempty(),
+        vmStorage: z.string().min(1).max(191),
+        backupStorage: z.string().min(1).max(191),
+        isoStorage: z.string().min(1).max(191),
+        network: z.string().min(1).max(191),
     })
 
     const form = useForm({
@@ -49,6 +51,7 @@ const NodeInformationCard = () => {
             name: node.name,
             locationId: node.locationId.toString(),
             cluster: node.cluster,
+            verifyTls: node.verifyTls,
             tokenId: '',
             secret: '',
             fqdn: node.fqdn,
@@ -80,6 +83,7 @@ const NodeInformationCard = () => {
                 name: data.name,
                 locationId: data.locationId.toString(),
                 cluster: data.cluster,
+                verifyTls: data.verifyTls,
                 tokenId: '',
                 secret: '',
                 fqdn: data.fqdn,
@@ -120,6 +124,11 @@ const NodeInformationCard = () => {
                             <TextInputForm
                                 name='fqdn'
                                 label={tStrings('fqdn')}
+                            />
+                            <CheckboxForm
+                                name={'verifyTls'}
+                                label='Verify TLS Certificate'
+                                className={'relative'}
                             />
                             <TextInputForm
                                 name='port'

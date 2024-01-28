@@ -11,9 +11,11 @@ import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import MessageBox from '@/components/elements/MessageBox'
 import Modal from '@/components/elements/Modal'
+import CheckboxForm from '@/components/elements/forms/CheckboxForm'
 import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import LocationsSelectForm from '@/components/admin/nodes/LocationsSelectForm'
+
 
 interface Props {
     open: boolean
@@ -29,21 +31,22 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
     const { t } = useTranslation('admin.nodes.index')
 
     const schema = z.object({
-        name: z.string().max(191).nonempty(),
+        name: z.string().min(1).max(191),
         locationId: z.preprocess(Number, z.number()),
-        cluster: z.string().max(191).nonempty(),
-        tokenId: z.string().max(191).nonempty(),
-        secret: z.string().max(191).nonempty(),
-        fqdn: hostname().max(191).nonempty(),
+        cluster: z.string().min(1).max(191),
+        verifyTls: z.boolean(),
+        tokenId: z.string().min(1).max(191),
+        secret: z.string().min(1).max(191),
+        fqdn: hostname().min(1).max(191),
         port: z.preprocess(Number, z.number().int().min(1).max(65535)),
         memory: z.preprocess(Number, z.number().int().min(0)),
         memoryOverallocate: z.preprocess(Number, z.number().int().min(0)),
         disk: z.preprocess(Number, z.number().int().min(0)),
         diskOverallocate: z.preprocess(Number, z.number().int().min(0)),
-        vmStorage: z.string().max(191).nonempty(),
-        backupStorage: z.string().max(191).nonempty(),
-        isoStorage: z.string().max(191).nonempty(),
-        network: z.string().max(191).nonempty(),
+        vmStorage: z.string().min(1).max(191),
+        backupStorage: z.string().min(1).max(191),
+        isoStorage: z.string().min(1).max(191),
+        network: z.string().min(1).max(191),
     })
 
     const form = useForm({
@@ -52,6 +55,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             name: '',
             locationId: '0',
             cluster: '',
+            verifyTls: true,
             tokenId: '',
             secret: '',
             fqdn: '',
@@ -132,6 +136,11 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                             <TextInputForm name='secret' label={t('secret')} />
                         </div>
                         <TextInputForm name='fqdn' label={tStrings('fqdn')} />
+                        <CheckboxForm
+                            name={'verifyTls'}
+                            label='Verify TLS Certificate'
+                            className={'mt-3 relative'}
+                        />
                         <TextInputForm name='port' label={tStrings('port')} />
                         <div className='grid gap-3 grid-cols-2'>
                             <TextInputForm
