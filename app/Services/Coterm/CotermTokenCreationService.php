@@ -2,7 +2,7 @@
 
 namespace Convoy\Services\Coterm;
 
-use Convoy\Models\Node;
+use Convoy\Models\Coterm;
 use Illuminate\Support\Str;
 
 /**
@@ -19,8 +19,8 @@ class CotermTokenCreationService
     public function handle(): array
     {
         return [
-            'token' => Str::random(Node::COTERM_TOKEN_LENGTH),
-            'token_id' => Str::random(Node::COTERM_TOKEN_ID_LENGTH),
+            'token' => Str::random(Coterm::COTERM_TOKEN_LENGTH),
+            'token_id' => Str::random(Coterm::COTERM_TOKEN_ID_LENGTH),
         ];
     }
 }

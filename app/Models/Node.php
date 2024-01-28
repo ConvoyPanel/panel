@@ -3,7 +3,6 @@
 namespace Convoy\Models;
 
 use Convoy\Casts\MebibytesToAndFromBytes;
-use Convoy\Casts\NullableEncrypter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,28 +14,21 @@ class Node extends Model
     use HasFactory;
 
     /**
-     * The constants for generating temporary Coterm (a noVNC reverse proxy) session tokens
-     */
-    public const COTERM_TOKEN_ID_LENGTH = 16;
-    public const COTERM_TOKEN_LENGTH = 64;
-
-    /**
      * The attributes excluded from the model's JSON form.
      */
     protected $hidden = [
-        'token_id', 'secret', 'coterm_token_id', 'coterm_token',
+        'token_id',
+        'secret',
     ];
 
     /**
      * Cast values to correct type.
      */
     protected $casts = [
+        'verify_tls' => 'boolean',
         'memory' => MebibytesToAndFromBytes::class,
         'disk' => MebibytesToAndFromBytes::class,
         'secret' => 'encrypted',
-        'coterm_enabled' => 'boolean',
-        'coterm_tls_enabled' => 'boolean',
-        'coterm_token' => NullableEncrypter::class,
     ];
 
     /**
@@ -48,6 +40,7 @@ class Node extends Model
         'location_id' => 'required|integer|exists:locations,id',
         'name' => 'required|string|max:191',
         'cluster' => 'required|string|max:191',
+        'verify_tls' => 'sometimes|boolean',
         'fqdn' => 'required|string|max:191',
         'token_id' => 'required|string|max:191',
         'secret' => 'required|string|max:191',
