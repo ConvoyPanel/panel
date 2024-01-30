@@ -26,13 +26,14 @@ jobs:
       - name: Create Release Archive
         run: |
           rm -rf node_modules/ \ 
-                 tests/ \
-                 CODE_OF_CONDUCT.md \
-                 CONTRIBUTOR_LICENSE_AGREEMENT \
-                 crowdin.yml \
-                 docker-compose.ci.yml \
-                 phpstan.neon \
-                 phpunit.xml
+          tests/ \
+          CODE_OF_CONDUCT.md \
+          CONTRIBUTOR_LICENSE_AGREEMENT \
+          crowdin.yml \
+          docker-compose.ci.yml \
+          phpstan.neon \
+          phpunit.xml
+          
           tar -czf panel.tar.gz *
 
       - name: Extract Changelog
