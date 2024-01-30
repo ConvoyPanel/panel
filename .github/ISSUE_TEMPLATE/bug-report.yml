@@ -76,14 +76,8 @@ body:
     attributes:
       label: Error Logs
       description: |
-        Run the following command to collect logs of your Convoy installation. You will need to run this on the server
+        Check out [this page on our documentation](https://convoypanel.com/docs/project/support.html#collecting-panel-logs) for the log collector utility. You will need to run this on the server
         hosting your instance of Convoy.
-        
-        ```
-        wget https://github.com/ConvoyPanel/log-collector/releases/latest/download/log_collector
-        chmod +x ./log_collector
-        ./log_collector
-        ```
       placeholder: "https://paste.frocdn.com/"
 
   - type: checkboxes
