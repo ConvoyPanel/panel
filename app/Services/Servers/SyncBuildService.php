@@ -9,7 +9,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Illuminate\Support\Arr;
 
-class SyncBuildService
+readonly class SyncBuildService
 {
     public function __construct(
         private AllocationService       $allocationService,
@@ -22,7 +22,7 @@ class SyncBuildService
     {
     }
 
-    public function handle(Server $server)
+    public function handle(Server $server): void
     {
         $this->allocationRepository->setServer($server);
 

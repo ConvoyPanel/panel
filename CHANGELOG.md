@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.1-rc.1
+
+### Changes
+
+- Potential fix for disk resize timeout?
+
 ## v4.2.0-beta
 
 ### Changes
