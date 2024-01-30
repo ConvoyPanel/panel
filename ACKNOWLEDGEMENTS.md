@@ -1,4 +1,8 @@
-Package: tslib
+# Acknowledgements
+
+## tslib
+
+```
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -13,10 +17,13 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+```
 
-Package: fakerphp/faker
+## fakerphp/faker
+
 Translations are under the CC-BY-SA-3.0 license.
 https://github.com/FakerPHP/Faker
 
-Package: caniuse-lite
+## caniuse-lite
+
 https://github.com/browserslist/caniuse-lite
