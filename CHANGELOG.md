@@ -4,12 +4,6 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## v4.3.0-beta
-
-### Changes
-
-- Test
-
 ## v4.2.0-beta
 
 ### Changes
