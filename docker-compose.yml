@@ -68,8 +68,10 @@ services:
     command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
     ports:
       - 6379:6379
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
-      test: redis-cli -a ${REDIS_PASSWORD} ping | grep PONG
+      test: redis-cli -a $$REDIS_PASSWORD ping | grep PONG
       interval: 5s
       timeout: 5s
       retries: 20
@@ -86,7 +88,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     healthcheck:
-      test: mysqladmin ping -u${DB_USERNAME} -p${DB_PASSWORD}
+      test: mysqladmin ping -u$$MYSQL_USER -p$$MYSQL_PASSWORD
       interval: 5s
       timeout: 5s
       retries: 20
