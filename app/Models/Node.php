@@ -49,6 +49,7 @@ class Node extends Model
         'memory_overallocate' => 'required|integer',
         'disk' => 'required|integer',
         'disk_overallocate' => 'required|integer',
+        'template_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'vm_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],

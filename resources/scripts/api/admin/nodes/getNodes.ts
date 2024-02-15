@@ -14,14 +14,12 @@ export interface Node {
     disk: number
     diskOverallocate: number
     diskAllocated: number
+    templateStorage: string
     vmStorage: string
     backupStorage: string
     isoStorage: string
     network: string
-    cotermEnabled: boolean
-    cotermTlsEnabled: boolean
-    cotermFqdn: string | null
-    cotermPort: number
+    cotermId: number
     serversCount: number
 }
 
@@ -39,14 +37,12 @@ export const rawDataToNode = (data: any): Node => ({
     disk: data.disk,
     diskOverallocate: data.disk_overallocate,
     diskAllocated: data.disk_allocated,
+    templateStorage: data.template_storage,
     vmStorage: data.vm_storage,
     backupStorage: data.backup_storage,
     isoStorage: data.iso_storage,
     network: data.network,
-    cotermEnabled: data.coterm_enabled,
-    cotermTlsEnabled: data.coterm_tls_enabled,
-    cotermFqdn: data.coterm_fqdn,
-    cotermPort: data.coterm_port,
+    cotermId: data.coterm_id,
     serversCount: data.servers_count,
 })
 

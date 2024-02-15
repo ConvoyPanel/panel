@@ -43,6 +43,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
         memoryOverallocate: z.preprocess(Number, z.number().int().min(0)),
         disk: z.preprocess(Number, z.number().int().min(0)),
         diskOverallocate: z.preprocess(Number, z.number().int().min(0)),
+        templateStorage: z.string().min(1).max(191),
         vmStorage: z.string().min(1).max(191),
         backupStorage: z.string().min(1).max(191),
         isoStorage: z.string().min(1).max(191),
@@ -64,6 +65,7 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
             memoryOverallocate: '0',
             disk: '0',
             diskOverallocate: '0',
+            templateStorage: '',
             vmStorage: '',
             backupStorage: '',
             isoStorage: '',
@@ -164,6 +166,11 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                         </div>
                         <div className='grid gap-3 grid-cols-3'>
                             <TextInputForm
+                                name='templateStorage'
+                                label={'Template Storage'}
+                                placeholder='local'
+                            />
+                            <TextInputForm
                                 name='vmStorage'
                                 label={t('vm_storage')}
                                 placeholder='local'
@@ -173,17 +180,19 @@ const CreateNodeModal = ({ open, onClose }: Props) => {
                                 label={t('backup_storage')}
                                 placeholder='local'
                             />
+                        </div>
+                        <div className={'grid gap-3 grid-cols-2'}>
                             <TextInputForm
                                 name='isoStorage'
                                 label={t('iso_storage')}
                                 placeholder='local'
                             />
+                            <TextInputForm
+                                name='network'
+                                label={tStrings('network')}
+                                placeholder='vmbr0'
+                            />
                         </div>
-                        <TextInputForm
-                            name='network'
-                            label={tStrings('network')}
-                            placeholder='vmbr0'
-                        />
                     </Modal.Body>
                     <Modal.Actions>
                         <Modal.Action type='button' onClick={handleClose}>

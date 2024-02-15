@@ -23,14 +23,12 @@ class NodeTransformer extends TransformerAbstract
             'disk' => $node->disk,
             'disk_overallocate' => $node->disk_overallocate,
             'disk_allocated' => $node->disk_allocated,
+            'template_storage' => $node->template_storage,
             'vm_storage' => $node->vm_storage,
             'backup_storage' => $node->backup_storage,
             'iso_storage' => $node->iso_storage,
             'network' => $node->network,
-            'coterm_enabled' => $node->coterm_enabled,
-            'coterm_tls_enabled' => $node->coterm_tls_enabled,
-            'coterm_fqdn' => $node->coterm_fqdn,
-            'coterm_port' => $node->coterm_port,
+            'coterm_id' => $node->coterm_id,
             'servers_count' => (int)$node->servers_count,
         ];
     }

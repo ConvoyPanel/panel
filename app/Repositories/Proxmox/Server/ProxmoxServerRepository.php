@@ -15,7 +15,7 @@ class ProxmoxServerRepository extends ProxmoxRepository
     /**
      * @throws ProxmoxConnectionException
      */
-    public function getState()
+    public function getState(): ServerStateData
     {
         Assert::isInstanceOf($this->server, Server::class);
 

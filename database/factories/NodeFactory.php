@@ -23,6 +23,7 @@ class NodeFactory extends Factory
             'memory_overallocate' => 0,
             'disk' => 137438953472, // 128 gb
             'disk_overallocate' => 0,
+            'template_storage' => 'local',
             'vm_storage' => 'local',
             'backup_storage' => 'local',
             'iso_storage' => 'local',

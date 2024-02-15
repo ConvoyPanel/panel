@@ -14,6 +14,7 @@ interface UpdateNodeParameters {
     memoryOverallocate: number
     disk: number
     diskOverallocate: number
+    templateStorage: string
     vmStorage: string
     backupStorage: string
     isoStorage: string
@@ -36,6 +37,7 @@ const updateNode = async (nodeId: number, payload: UpdateNodeParameters) => {
         memory_overallocate: payload.memoryOverallocate,
         disk: payload.disk,
         disk_overallocate: payload.diskOverallocate,
+        template_storage: payload.templateStorage,
         vm_storage: payload.vmStorage,
         backup_storage: payload.backupStorage,
         iso_storage: payload.isoStorage,

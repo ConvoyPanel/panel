@@ -39,6 +39,7 @@ const NodeInformationCard = () => {
         memoryOverallocate: z.preprocess(Number, z.number().int().min(0)),
         disk: z.preprocess(Number, z.number().int().min(0)),
         diskOverallocate: z.preprocess(Number, z.number().int().min(0)),
+        templateStorage: z.string().min(1).max(191),
         vmStorage: z.string().min(1).max(191),
         backupStorage: z.string().min(1).max(191),
         isoStorage: z.string().min(1).max(191),
@@ -60,6 +61,7 @@ const NodeInformationCard = () => {
             memoryOverallocate: node.memoryOverallocate,
             disk: node.disk / 1048576,
             diskOverallocate: node.diskOverallocate,
+            templateStorage: node.templateStorage,
             vmStorage: node.vmStorage,
             backupStorage: node.backupStorage,
             isoStorage: node.isoStorage,
@@ -178,6 +180,11 @@ const NodeInformationCard = () => {
                             </div>
                             <div className='grid gap-3 grid-cols-3'>
                                 <TextInputForm
+                                    name='templateStorage'
+                                    label={'Template Storage'}
+                                    placeholder='local'
+                                />
+                                <TextInputForm
                                     name='vmStorage'
                                     label={tIndex('vm_storage')}
                                     placeholder='local'
@@ -187,17 +194,19 @@ const NodeInformationCard = () => {
                                     label={tIndex('backup_storage')}
                                     placeholder='local'
                                 />
+                            </div>
+                            <div className='grid gap-3 grid-cols-2'>
                                 <TextInputForm
                                     name='isoStorage'
                                     label={tIndex('iso_storage')}
                                     placeholder='local'
                                 />
+                                <TextInputForm
+                                    name='network'
+                                    label={tIndex('network')}
+                                    placeholder='local'
+                                />
                             </div>
-                            <TextInputForm
-                                name='network'
-                                label={tStrings('network')}
-                                placeholder='vmbr0'
-                            />
                         </div>
                     </FormCard.Body>
                     <FormCard.Footer>

@@ -14,6 +14,7 @@ interface CreateNodeParameters {
     memoryOverallocate: number
     disk: number
     diskOverallocate: number
+    templateStorage: string
     vmStorage: string
     backupStorage: string
     isoStorage: string
@@ -36,6 +37,7 @@ const createNode = async (data: CreateNodeParameters): Promise<Node> => {
         memory_overallocate: data.memoryOverallocate,
         disk: data.disk,
         disk_overallocate: data.diskOverallocate,
+        template_storage: data.templateStorage,
         vm_storage: data.vmStorage,
         backup_storage: data.backupStorage,
         iso_storage: data.isoStorage,
