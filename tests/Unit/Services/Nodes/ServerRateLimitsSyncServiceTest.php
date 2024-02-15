@@ -1,12 +1,10 @@
 <?php
 
+use Convoy\Services\Nodes\ServerRateLimitsSyncService;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Convoy\Services\Nodes\ServerRateLimitsSyncService;
 
-beforeEach(fn () => Http::preventStrayRequests());
-
-it('can rate limit servers if over limit', function () {
+rit('can rate limit servers if over limit', function () {
     Http::fake([
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);

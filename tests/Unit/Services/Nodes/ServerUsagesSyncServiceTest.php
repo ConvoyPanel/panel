@@ -1,14 +1,18 @@
 <?php
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Http;
 use Convoy\Services\Nodes\ServerUsagesSyncService;
-
-beforeEach(fn () => Http::preventStrayRequests());
+use Illuminate\Support\Facades\Http;
 
 it('can sync server usages', function () {
     Http::fake([
-        '*/rrddata*' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerMetricsData.hourly.average.json')), 200),
+        '*/rrddata*' => Http::response(
+            file_get_contents(
+                base_path(
+                    'tests/Fixtures/Repositories/Server/GetServerMetricsData.hourly.average.json',
+                ),
+            ), 200,
+        ),
     ]);
 
     [$_, $_, $node, $server] = createServerModel();
