@@ -1,10 +1,12 @@
 <?php
 
-use Convoy\Models\Node;
-use Convoy\Models\User;
-use Convoy\Models\Server;
 use Convoy\Models\Location;
+use Convoy\Models\Node;
+use Convoy\Models\Server;
+use Convoy\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +22,11 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 uses(
     Tests\TestCase::class,
     DatabaseTransactions::class,
-    // Illuminate\Foundation\Testing\RefreshDatabase::class,
-)->in('Feature', 'Unit');
+// Illuminate\Foundation\Testing\RefreshDatabase::class,
+)->beforeEach(function () {
+    Http::preventStrayRequests();
+    Queue::fake();
+})->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -34,9 +39,9 @@ uses(
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+//expect()->extend('toBeOne', function () {
+//    return $this->toBe(1);
+//});
 
 /*
 |--------------------------------------------------------------------------

@@ -1,16 +1,13 @@
 <?php
 
-use Convoy\Models\User;
-use Convoy\Models\Backup;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Queue;
 use Convoy\Jobs\Server\MonitorBackupJob;
 use Convoy\Jobs\Server\MonitorBackupRestorationJob;
-
-beforeEach(fn () => Http::preventStrayRequests());
+use Convoy\Models\Backup;
+use Convoy\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 it('can create backups', function () {
-    Queue::fake();
     Http::fake([
         '*' => Http::response(['data' => 'upid'], 200),
     ]);
@@ -25,16 +22,19 @@ it('can create backups', function () {
     ]);
 
     $response->assertOk()
-        ->assertJsonPath('data.name', 'Test Backup')
-        ->assertJsonPath('data.is_locked', 0);
+             ->assertJsonPath('data.name', 'Test Backup')
+             ->assertJsonPath('data.is_locked', 0);
 
     Queue::assertPushed(MonitorBackupJob::class);
 });
 
 it('can restore backups', function () {
-    Queue::fake();
     Http::fake([
-        '*/status/current' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json')), 200),
+        '*/status/current' => Http::response(
+            file_get_contents(
+                base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json'),
+            ), 200,
+        ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
 
     ]);
@@ -47,7 +47,9 @@ it('can restore backups', function () {
         'server_id' => $server->id,
     ]);
 
-    $response = $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore");
+    $response = $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore",
+    );
 
     $response->assertNoContent();
 
@@ -67,14 +69,15 @@ it('can delete backups', function () {
         'server_id' => $server->id,
     ]);
 
-    $response = $this->actingAs($user)->deleteJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}");
+    $response = $this->actingAs($user)->deleteJson(
+        "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}",
+    );
 
     $response->assertNoContent();
 });
 
 describe('admin', function () {
     it('can create backups', function () {
-        Queue::fake();
         Http::fake([
             '*' => Http::response(['data' => 'upid'], 200),
         ]);
@@ -85,12 +88,14 @@ describe('admin', function () {
             'root_admin' => true,
         ]);
 
-        $response = $this->actingAs($admin)->postJson("/api/client/servers/{$server->uuid}/backups", [
+        $response = $this->actingAs($admin)->postJson(
+            "/api/client/servers/{$server->uuid}/backups", [
             'name' => 'Test Backup',
             'mode' => 'snapshot',
             'compression_type' => 'none',
             'is_locked' => false,
-        ]);
+        ],
+        );
 
         $response->assertOk()
                  ->assertJsonPath('data.name', 'Test Backup')
@@ -100,9 +105,12 @@ describe('admin', function () {
     });
 
     it('can restore backups', function () {
-        Queue::fake();
         Http::fake([
-            '*/status/current' => Http::response(file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json')), 200),
+            '*/status/current' => Http::response(
+                file_get_contents(
+                    base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json'),
+                ), 200,
+            ),
             '*' => Http::response(['data' => 'dummy-upid'], 200),
 
         ]);
@@ -119,7 +127,9 @@ describe('admin', function () {
             'server_id' => $server->id,
         ]);
 
-        $response = $this->actingAs($admin)->postJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore");
+        $response = $this->actingAs($admin)->postJson(
+            "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore",
+        );
 
         $response->assertNoContent();
 
@@ -143,7 +153,9 @@ describe('admin', function () {
             'server_id' => $server->id,
         ]);
 
-        $response = $this->actingAs($admin)->deleteJson("/api/client/servers/{$server->uuid}/backups/{$backup->uuid}");
+        $response = $this->actingAs($admin)->deleteJson(
+            "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}",
+        );
 
         $response->assertNoContent();
     });
