@@ -2,11 +2,14 @@
 
 namespace Convoy\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AddressPool extends Model
 {
+    use HasFactory;
+    
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     public static array $validationRules = [
