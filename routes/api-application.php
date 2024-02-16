@@ -94,8 +94,7 @@ Route::prefix('/nodes')->group(function () {
         | Endpoint: /api/application/nodes/{node}/addresses
         |
         */
-        Route::apiResource('addresses', Admin\Nodes\AddressController::class)
-             ->only(['index', 'store', 'update', 'destroy']);
+        Route::get('/addresses', [Admin\Nodes\AddressController::class, 'index']);
 
         /*
          |--------------------------------------------------------------------------
