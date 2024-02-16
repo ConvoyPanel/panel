@@ -64,8 +64,6 @@ const NodeAddressesContainer = () => {
         include: ['server'],
     })
 
-    console.log(data)
-
     const rowActions = ({ row }: RowActionsProps<Address>) => {
         const [showEditModal, setShowEditModal] = useState(false)
         const [showDeleteModal, setShowDeleteModal] = useState(false)
