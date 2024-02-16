@@ -13,10 +13,14 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  */
 class AddressPoolToNode extends Model
 {
-    /**
-     * The actual name of the table Laravel ORM should query.
-     */
     protected $table = 'address_pool_to_node';
+
+    public $fillable = [
+        'address_pool_id',
+        'node_id',
+    ];
+
+    public $timestamps = false;
 
     public function addressPool(): BelongsTo
     {
