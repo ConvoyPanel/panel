@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Convoy\Models\ISO;
-use Convoy\Models\Node;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -11,11 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ISOFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = ISO::class;
 
     /**
