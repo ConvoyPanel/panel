@@ -18,6 +18,7 @@ class LocationController extends ApiController
     {
         $locations = QueryBuilder::for(Location::query())
                                  ->withCount(['nodes', 'servers'])
+                                 ->defaultSort('-id')
             // @phpstan-ignore-next-line
                                  ->allowedFilters(
                 ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard())],

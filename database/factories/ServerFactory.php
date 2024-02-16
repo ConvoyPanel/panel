@@ -2,9 +2,7 @@
 
 namespace Database\Factories;
 
-use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Convoy\Models\User;
 use Convoy\Services\Servers\ServerCreationService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\App;
@@ -32,8 +30,11 @@ class ServerFactory extends Factory
             'name' => $this->faker->word(),
             'vmid' => rand(100, 5000),
             'cpu' => 2,
-            'memory' => 17179869184,
-            'disk' => 17179869184,
+            'memory' => 2048 * 1024 * 1024,
+            'disk' => 20 * 1024 * 1024 * 1024,
+            'backup_limit' => 16,
+            'snapshot_limit' => 16,
+            'bandwidth_limit' => 100 * 1024 * 1024 * 1024,
         ];
     }
 }

@@ -17,6 +17,7 @@ class TokenController extends ApiController
     {
         $tokens = QueryBuilder::for(PersonalAccessToken::query())
                               ->with('tokenable')
+                              ->defaultSort('-id')
                               ->where('personal_access_tokens.type', ApiKeyType::APPLICATION->value)
                               ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
