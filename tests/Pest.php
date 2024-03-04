@@ -54,7 +54,7 @@ uses(
 |
 */
 
-function createServerModel()
+function createServerModel(): array
 {
     $location = Location::factory()->create();
     /** @var User $user */
