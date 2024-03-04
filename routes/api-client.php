@@ -7,14 +7,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
-Route::prefix('/servers/{server}')->middleware([ServerSubject::class, AuthenticateServerAccess::class])->group(function () {
+Route::prefix('/servers/{server}')->middleware(
+    [ServerSubject::class, AuthenticateServerAccess::class],
+)->group(function () {
     Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('servers.show');
     Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
     Route::get('/state', [Client\Servers\ServerController::class, 'getState']);
     Route::patch('/state', [Client\Servers\ServerController::class, 'updateState']);
 
-    Route::post('/create-console-session', [Client\Servers\ServerController::class, 'createConsoleSession']);
+    Route::post(
+        '/create-console-session', [Client\Servers\ServerController::class, 'createConsoleSession'],
+    );
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
@@ -25,15 +29,26 @@ Route::prefix('/servers/{server}')->middleware([ServerSubject::class, Authentica
 
     Route::prefix('/settings')->group(function () {
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
-        Route::get('/template-groups', [Client\Servers\SettingsController::class, 'getTemplateGroups']);
+        Route::get(
+            '/template-groups', [Client\Servers\SettingsController::class, 'getTemplateGroups'],
+        );
         Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall']);
 
-        Route::get('/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder']);
-        Route::put('/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder']);
+        Route::get(
+            '/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder'],
+        );
+        Route::put(
+            '/hardware/boot-order', [Client\Servers\SettingsController::class, 'updateBootOrder'],
+        );
 
         Route::get('/hardware/isos', [Client\Servers\SettingsController::class, 'getMedia']);
-        Route::post('/hardware/isos/{iso}/mount', [Client\Servers\SettingsController::class, 'mountMedia']);
-        Route::post('/hardware/isos/{iso}/unmount', [Client\Servers\SettingsController::class, 'unmountMedia']);
+        Route::post(
+            '/hardware/isos/{iso}/mount', [Client\Servers\SettingsController::class, 'mountMedia'],
+        )->withoutScopedBindings();
+        Route::post(
+            '/hardware/isos/{iso}/unmount',
+            [Client\Servers\SettingsController::class, 'unmountMedia'],
+        )->withoutScopedBindings();
 
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetworkSettings']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetworkSettings']);

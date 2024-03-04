@@ -38,11 +38,13 @@ class RouteServiceProvider extends ServiceProvider
 
                 Route::middleware(['auth'])->prefix('/api/client')
                      ->as('client.')
+                     ->scopeBindings()
                      ->group(base_path('routes/api-client.php'));
 
                 Route::middleware(['auth', AdminAuthenticate::class])
                      ->prefix('/api/admin')
                      ->as('admin.')
+                     ->scopeBindings()
                      ->group(base_path('routes/api-admin.php'));
             });
 
@@ -50,11 +52,13 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['auth:sanctum'])
                      ->prefix('/api/application')
                      ->as('application.')
+                     ->scopeBindings()
                      ->group(base_path('routes/api-application.php'));
 
                 Route::middleware([CotermAuthenticate::class])
                      ->prefix('/api/coterm')
                      ->as('coterm.')
+                     ->scopeBindings()
                      ->group(base_path('routes/api-coterm.php'));
             });
         });
