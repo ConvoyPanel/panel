@@ -4,6 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.2-rc.1
+
+### Changes
+
+- Fix special character support in environment file.
+- Added checks in server creation to use unique VMID. #78
+- Add error messages instead of generic server error messages. #49
+- Scope route model binding by default to prevent unauthorized access of related resources.
+- Removed a lot of dead code.
+- Added more tests (getting closer to full release! 😁😩).
+
 ## v4.2.1-rc.1
 
 ### Changes
