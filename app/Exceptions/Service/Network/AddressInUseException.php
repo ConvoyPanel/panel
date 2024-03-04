@@ -2,9 +2,9 @@
 
 namespace Convoy\Exceptions\Service\Network;
 
-use Convoy\Exceptions\ConvoyException;
+use Convoy\Exceptions\DisplayException;
 
-class AddressInUseException extends ConvoyException
+class AddressInUseException extends DisplayException
 {
     /**
      * TooManyBackupsException constructor.
@@ -12,7 +12,7 @@ class AddressInUseException extends ConvoyException
     public function __construct(int $addressId)
     {
         parent::__construct(
-            sprintf('Address %d is currently in use by another server.', $addressId)
+            sprintf('Address %d is currently in use by another server.', $addressId),
         );
     }
 }

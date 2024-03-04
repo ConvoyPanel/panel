@@ -2,8 +2,8 @@
 
 namespace Convoy\Exceptions\Service\Deployment;
 
-use Convoy\Exceptions\ConvoyException;
+use Convoy\Exceptions\DisplayException;
 
-class InvalidTemplateException extends ConvoyException
+class InvalidTemplateException extends DisplayException
 {
 }

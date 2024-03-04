@@ -2,9 +2,9 @@
 
 namespace Convoy\Exceptions\Service\Server\Allocation;
 
-use Convoy\Exceptions\ConvoyException;
+use Convoy\Exceptions\DisplayException;
 
-class IsoAlreadyUnmountedException extends ConvoyException
+class IsoAlreadyUnmountedException extends DisplayException
 {
     public function __construct()
     {
