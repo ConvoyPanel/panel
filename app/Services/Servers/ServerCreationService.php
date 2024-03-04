@@ -42,14 +42,16 @@ class ServerCreationService
             }
         }
 
+        $nodeId = Arr::get($data, 'node_id');
+
         $server = Server::create([
             'uuid' => $uuid,
             'uuid_short' => substr($uuid, 0, 8),
             'status' => $shouldCreateServer ? Status::INSTALLING->value : null,
             'name' => Arr::get($data, 'name'),
             'user_id' => Arr::get($data, 'user_id'),
-            'node_id' => Arr::get($data, 'node_id'),
-            'vmid' => Arr::get($data, 'vmid') ?? $this->generateUniqueVmId(),
+            'node_id' => $nodeId,
+            'vmid' => Arr::get($data, 'vmid') ?? $this->generateUniqueVmId($nodeId),
             'hostname' => Arr::get($data, 'hostname'),
             'cpu' => Arr::get($data, 'limits.cpu'),
             'memory' => Arr::get($data, 'limits.memory'),
@@ -78,12 +80,12 @@ class ServerCreationService
         return $server;
     }
 
-    public function generateUniqueVmId(): int
+    public function generateUniqueVmId(int $nodeId): int
     {
         $vmid = random_int(100, 999999999);
         $attempts = 0;
 
-        while ($this->repository->getBuilder()->where('vmid', '=', $vmid)->exists()) {
+        while (!$this->repository->isUniqueVmId($nodeId, $vmid)) {
             $vmid = random_int(100, 999999999);
 
             if ($attempts++ > 10) {

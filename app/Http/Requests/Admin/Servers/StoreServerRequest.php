@@ -23,6 +23,7 @@ class StoreServerRequest extends BaseApiRequest
             'name' => $rules['name'],
             'user_id' => $rules['user_id'],
             'node_id' => $rules['node_id'],
+            // TODO: validation should be added for manually setting the vmid
             'vmid' => 'present|nullable|numeric|min:100|max:999999999',
             'hostname' => $rules['hostname'],
             'limits' => 'required|array',

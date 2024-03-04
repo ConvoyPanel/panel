@@ -2,11 +2,11 @@
 
 namespace Convoy\Repositories\Eloquent;
 
+use Convoy\Contracts\Repository\ServerRepositoryInterface;
+use Convoy\Exceptions\Repository\RecordNotFoundException;
 use Convoy\Models\Server;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
-use Convoy\Contracts\Repository\ServerRepositoryInterface;
 
 class ServerRepository extends EloquentRepository implements ServerRepositoryInterface
 {
@@ -15,12 +15,21 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
         return Server::class;
     }
 
+    public function isUniqueVmId(int $nodeId, int $vmid): bool
+    {
+        return !$this->getBuilder()
+                     ->where('vmid', '=', $vmid)
+                     ->where('node_id', '=', $nodeId)
+                     ->exists();
+    }
+
     /**
      * Check if a given UUID and UUID-Short string are unique to a server.
      */
     public function isUniqueUuidCombo(string $uuid, string $short): bool
     {
-        return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)->exists();
+        return !$this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)
+                     ->exists();
     }
 
     /**
@@ -33,10 +42,10 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
         try {
             /** @var Server $model */
             $model = $this->getBuilder()
-                ->where(function (Builder $query) use ($uuid) {
-                    $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);
-                })
-                ->firstOrFail($this->getColumns());
+                          ->where(function (Builder $query) use ($uuid) {
+                              $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);
+                          })
+                          ->firstOrFail($this->getColumns());
 
             return $model;
         } catch (ModelNotFoundException $exception) {
