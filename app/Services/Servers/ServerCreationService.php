@@ -2,21 +2,26 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Enums\Server\Status;
+use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
+use Convoy\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
+use Convoy\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
+use Convoy\Repositories\Eloquent\ServerRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Convoy\Enums\Server\Status;
-use Convoy\Repositories\Eloquent\ServerRepository;
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
 
 /**
  * Class ServerCreationService
  */
 class ServerCreationService
 {
-    public function __construct(private NetworkService $networkService, private ServerRepository $repository, private ServerBuildDispatchService $buildDispatchService)
+    public function __construct(
+        private NetworkService             $networkService, private ServerRepository $repository,
+        private ServerBuildDispatchService $buildDispatchService,
+    )
     {
     }
 
@@ -25,11 +30,15 @@ class ServerCreationService
         $uuid = $this->generateUniqueUuidCombo();
 
         $shouldCreateServer = Arr::get($data, 'should_create_server');
-        $template = $shouldCreateServer ? Template::where('uuid', '=', Arr::get($data, 'template_uuid'))->firstOrFail() : null;
+        $template = $shouldCreateServer ? Template::where(
+            'uuid', '=', Arr::get($data, 'template_uuid'),
+        )->firstOrFail() : null;
 
         if ($template) {
             if ($template->group->node_id !== intval(Arr::get($data, 'node_id'))) {
-                throw new InvalidTemplateException('This template is inaccessible to the specified node');
+                throw new InvalidTemplateException(
+                    'This template is inaccessible to the specified node',
+                );
             }
         }
 
@@ -40,7 +49,7 @@ class ServerCreationService
             'name' => Arr::get($data, 'name'),
             'user_id' => Arr::get($data, 'user_id'),
             'node_id' => Arr::get($data, 'node_id'),
-            'vmid' => Arr::get($data, 'vmid') ?? random_int(100, 999999999),
+            'vmid' => Arr::get($data, 'vmid') ?? $this->generateUniqueVmId(),
             'hostname' => Arr::get($data, 'hostname'),
             'cpu' => Arr::get($data, 'limits.cpu'),
             'memory' => Arr::get($data, 'limits.memory'),
@@ -69,15 +78,35 @@ class ServerCreationService
         return $server;
     }
 
-    /**
-     * Create a unique UUID and UUID-Short combo for a server.
-     */
+    public function generateUniqueVmId(): int
+    {
+        $vmid = random_int(100, 999999999);
+        $attempts = 0;
+
+        while ($this->repository->getBuilder()->where('vmid', '=', $vmid)->exists()) {
+            $vmid = random_int(100, 999999999);
+
+            if ($attempts++ > 10) {
+                throw new NoUniqueVmidException();
+            }
+        }
+
+        return $vmid;
+    }
+
     public function generateUniqueUuidCombo(): string
     {
         $uuid = Str::uuid()->toString();
+        $short = substr($uuid, 0, 8);
+        $attempts = 0;
 
-        if (! $this->repository->isUniqueUuidCombo($uuid, substr($uuid, 0, 8))) {
-            return $this->generateUniqueUuidCombo();
+        while (!$this->repository->isUniqueUuidCombo($uuid, $short)) {
+            $uuid = Str::uuid()->toString();
+            $short = substr($uuid, 0, 8);
+
+            if ($attempts++ > 10) {
+                throw new NoUniqueUuidComboException();
+            }
         }
 
         return $uuid;
