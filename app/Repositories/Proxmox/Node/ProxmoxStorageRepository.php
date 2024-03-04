@@ -2,20 +2,25 @@
 
 namespace Convoy\Repositories\Proxmox\Node;
 
-use Convoy\Models\Node;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 use Convoy\Data\Helpers\ChecksumData;
-use Convoy\Data\Node\Storage\IsoData;
 use Convoy\Data\Node\Storage\FileMetaData;
+use Convoy\Data\Node\Storage\IsoData;
 use Convoy\Enums\Node\Storage\ContentType;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Convoy\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
+use Convoy\Models\Node;
+use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use Illuminate\Support\Arr;
+use Spatie\LaravelData\DataCollection;
+use Webmozart\Assert\Assert;
 
 class ProxmoxStorageRepository extends ProxmoxRepository
 {
-    public function download(ContentType $contentType, string $fileName, string $link, ?bool $verifyCertificates = true, ?ChecksumData $checksumData = null)
+    public function download(
+        ContentType   $contentType, string $fileName, string $link,
+        ?bool         $verifyCertificates = true,
+        ?ChecksumData $checksumData = null,
+    )
     {
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
@@ -33,12 +38,12 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         }
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-                'storage' => $this->node->iso_storage,
-            ])
-            ->post('/api2/json/nodes/{node}/storage/{storage}/download-url', $payload)
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $this->node->iso_storage,
+                         ])
+                         ->post('/api2/json/nodes/{node}/storage/{storage}/download-url', $payload)
+                         ->json();
 
         return $this->getData($response);
     }
@@ -48,28 +53,28 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-                'storage' => $this->node->iso_storage,
-                'file' => "{$this->node->iso_storage}:$contentType->value/$fileName",
-            ])
-            ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{file}')
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $this->node->iso_storage,
+                             'file' => "{$this->node->iso_storage}:$contentType->value/$fileName",
+                         ])
+                         ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{file}')
+                         ->json();
 
         return $this->getData($response);
     }
 
-    public function getIsos()
+    public function getIsos(): DataCollection
     {
         Assert::isInstanceOf($this->node, Node::class);
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-                'storage' => $this->node->iso_storage,
-            ])
-            ->get('/api2/json/nodes/{node}/storage/{storage}/content?content=iso')
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $this->node->iso_storage,
+                         ])
+                         ->get('/api2/json/nodes/{node}/storage/{storage}/content?content=iso')
+                         ->json();
 
         $response = $this->getData($response);
 
@@ -86,23 +91,23 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         return IsoData::collection($isos);
     }
 
-    public function getFileMetadata(string $link, ?bool $verifyCertificates = true): FileMetaData
+    public function getFileMetadata(string $link, bool $verifyCertificates = true): FileMetaData
     {
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-            ])
-            ->get('/api2/json/nodes/{node}/query-url-metadata', [
-                'url' => $link,
-                'verify-certificates' => $verifyCertificates,
-            ])
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                         ])
+                         ->get('/api2/json/nodes/{node}/query-url-metadata', [
+                             'url' => $link,
+                             'verify-certificates' => $verifyCertificates,
+                         ])
+                         ->json();
 
         if (Arr::get($response, 'success', 1) !== 1) {
-            throw new InvalidIsoLinkException;
+            throw new InvalidIsoLinkException();
         }
 
         $data = $this->getData($response);

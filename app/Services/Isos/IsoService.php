@@ -21,7 +21,7 @@ class IsoService
     }
 
     public function download(
-        Node $node, string $name, ?string $fileName, string $link,
+        Node          $node, string $name, ?string $fileName, string $link,
         ?ChecksumData $checksumData = null, ?bool $hidden = false,
     )
     {
@@ -57,11 +57,11 @@ class IsoService
         return $isos->where('file_name', '=', $fileName)->first();
     }
 
-    public function delete(Node $node, ISO $iso)
+    public function delete(Node $node, ISO $iso): void
     {
         if (is_null($iso->completed_at)) {
             throw new BadRequestHttpException(
-                'This ISO cannot be restored at this time: not completed.',
+                'This ISO cannot be deleted at this time: not completed.',
             );
         }
 

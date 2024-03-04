@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Isos;
 
-use Convoy\Models\ISO;
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\ISO;
 
 class UpdateIsoRequest extends BaseApiRequest
 {
@@ -16,4 +16,5 @@ class UpdateIsoRequest extends BaseApiRequest
             'hidden' => $rules['hidden'],
         ];
     }
+
 }
