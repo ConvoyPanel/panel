@@ -8,6 +8,6 @@ class NoUniqueUuidComboException extends DisplayException
 {
     public function __construct()
     {
-        parent::__construct('There is no available VMID to use for the server creation process.');
+        parent::__construct('There is no available VMID to use.');
     }
 }
