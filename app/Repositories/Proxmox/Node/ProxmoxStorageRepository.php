@@ -7,6 +7,7 @@ use Convoy\Data\Helpers\ChecksumData;
 use Convoy\Data\Node\Storage\FileMetaData;
 use Convoy\Data\Node\Storage\IsoData;
 use Convoy\Enums\Node\Storage\ContentType;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
@@ -96,15 +97,21 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 
-        $response = $this->getHttpClient()
-                         ->withUrlParameters([
-                             'node' => $this->node->cluster,
-                         ])
-                         ->get('/api2/json/nodes/{node}/query-url-metadata', [
-                             'url' => $link,
-                             'verify-certificates' => $verifyCertificates,
-                         ])
-                         ->json();
+        try {
+            $response = $this->getHttpClient()
+                             ->withUrlParameters([
+                                 'node' => $this->node->cluster,
+                             ])
+                             ->get('/api2/json/nodes/{node}/query-url-metadata', [
+                                 'url' => $link,
+                                 'verify-certificates' => $verifyCertificates,
+                             ])
+                             ->json();
+        } catch (ProxmoxConnectionException $e) {
+            if (str_contains($e->getMessage(), "Can't connect to")) {
+                throw new InvalidIsoLinkException();
+            }
+        }
 
         if (Arr::get($response, 'success', 1) !== 1) {
             throw new InvalidIsoLinkException();
