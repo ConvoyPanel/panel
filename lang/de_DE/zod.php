@@ -25,11 +25,11 @@ return [
             'datetime' => '{{validation}} ungültig',
             'startsWith' => 'Ungültige Eingabe: Muss beginnen mit: "{{startsWith}}"',
             'endsWith' => 'Ungültige Eingabe: Muss enden mit: "{{endsWith}}"',
-            'hostname' => '{{validation}} ungültig',
-            'english_keyboard_characters' => '{{validation}} ungültig',
+            'hostname' => 'Invalid hostname',
+            'us_keyboard_characters' => 'Invalid US keyboard characters',
             'password' => 'Muss 8 Zeichen erhalten. Ein Groß-, ein Kleinbuchstaben, eine Nummer und ein Sonderzeichen',
-            'ip_address' => 'Ungültige IP-Adresse',
-            'mac_address' => 'Ungültige MAC-Adresse',
+            'ip_address' => 'Invalid IP address',
+            'mac_address' => 'Invalid MAC address',
         ],
         'too_small' => [
             'array' => [
