@@ -2,17 +2,15 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
+use Convoy\Enums\Server\AuthenticationType;
 use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Server;
-use Exception;
 use Convoy\Rules\Password;
-use Faker\Provider\Base;
-use Illuminate\Validation\Validator;
+use Convoy\Rules\USKeyboardCharacters;
+use Exception;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Validator;
 use phpseclib3\Crypt\PublicKeyLoader;
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Rules\EnglishKeyboardCharacters;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAuthSettingsRequest extends BaseApiRequest
 {
@@ -26,7 +24,7 @@ class UpdateAuthSettingsRequest extends BaseApiRequest
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
             'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,ssh_keys'],
-            'password' => ['string', 'min:8', 'max:191', new Password(), new EnglishKeyboardCharacters(
+            'password' => ['string', 'min:8', 'max:191', new Password(), new USKeyboardCharacters(
             ), 'exclude_unless:type,password'],
         ];
     }

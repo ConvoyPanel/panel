@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Models\Server;
-use Convoy\Rules\Password;
-use Convoy\Models\Template;
 use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Rules\EnglishKeyboardCharacters;
+use Convoy\Models\Server;
+use Convoy\Models\Template;
+use Convoy\Rules\Password;
+use Convoy\Rules\USKeyboardCharacters;
 
 class ReinstallServerRequest extends BaseApiRequest
 {
@@ -28,7 +28,7 @@ class ReinstallServerRequest extends BaseApiRequest
         return [
             'template_uuid' => 'required|string|exists:templates,uuid',
             'account_password' => ['required', 'string', 'min:8', 'max:191', new Password(
-            ), new EnglishKeyboardCharacters()],
+            ), new USKeyboardCharacters()],
             'start_on_completion' => 'present|boolean',
         ];
     }

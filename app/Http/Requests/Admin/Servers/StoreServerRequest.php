@@ -6,8 +6,8 @@ use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Convoy\Rules\EnglishKeyboardCharacters;
 use Convoy\Rules\Password;
+use Convoy\Rules\USKeyboardCharacters;
 use Illuminate\Validation\Validator;
 
 /**
@@ -36,7 +36,7 @@ class StoreServerRequest extends BaseApiRequest
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
             'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(
-            ), new EnglishKeyboardCharacters()],
+            ), new USKeyboardCharacters()],
             'should_create_server' => 'present|boolean',
             'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',
