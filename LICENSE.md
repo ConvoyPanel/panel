@@ -68,11 +68,7 @@ may also apply as outlined elsewhere in this EULA or as otherwise determined by 
 
 ### 4.1 Additional Licensing Terms for Modifications and Contributions
 
-Any modifications, enhancements, or derivative works of the Software made by you or any third party are to be considered
-part of the Software and are subject to the terms and conditions of this EULA. Such modifications or derivative works
-must be offered under the same terms and conditions as those set forth in this EULA, including any provisions regarding
-distribution and sublicensing. You may not alter the terms of this EULA or sublicense any modifications or derivative
-works of the Software under terms that differ from those specified in this EULA.
+Any modifications, enhancements, derivative works of the Software, or any code from the Software that is incorporated into other works by you or any third party are considered part of the Software and subject to the terms and conditions of this EULA. Such modifications, derivative works, or incorporated code must be offered under the same terms and conditions as those set forth in this EULA, including any provisions regarding distribution and sublicensing. You may not alter the terms of this EULA or sublicense any modifications, derivative works, or incorporated code under terms that differ from those specified in this EULA.
 
 ## 5. Intellectual Property Rights
 
