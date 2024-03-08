@@ -1,6 +1,6 @@
 import { ServerContext } from '@/state/server'
 import { useFlashKey } from '@/util/useFlash'
-import { englishKeyboardCharacters, password } from '@/util/validation'
+import { password, usKeyboardCharacters } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -33,7 +33,7 @@ const ReinstallServerCard = () => {
 
     const schema = z.object({
         templateUuid: z.string().nonempty(),
-        accountPassword: password(englishKeyboardCharacters()).nonempty(),
+        accountPassword: password(usKeyboardCharacters()).nonempty(),
         startOnCompletion: z.boolean(),
     })
 

@@ -1,6 +1,6 @@
 import { ServerContext } from '@/state/server'
 import { useFlashKey } from '@/util/useFlash'
-import { englishKeyboardCharacters, password } from '@/util/validation'
+import { password, usKeyboardCharacters } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -38,7 +38,7 @@ const AuthenticationCard = () => {
 
     const passwordSchema = z.object({
         sshKeys: z.string().optional(),
-        password: englishKeyboardCharacters(password()),
+        password: usKeyboardCharacters(password()),
     })
     const schema = type === 'password' ? passwordSchema : sshKeysSchema
 
