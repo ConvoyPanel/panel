@@ -25,11 +25,11 @@ return [
             'datetime' => 'Invalid {{validation}}',
             'startsWith' => 'Invalid input: must start with "{{startsWith}}"',
             'endsWith' => 'Invalid input: must end with "{{endsWith}}"',
-            'hostname' => 'Invalid {{validation}}',
-            'english_keyboard_characters' => 'Invalid {{validation}}',
+            'hostname' => 'Invalid hostname',
+            'us_keyboard_characters' => 'Invalid US keyboard characters',
             'password' => 'Must contain 8 characters, one uppercase, one lowercase, one number and one special case character',
-            'ip_address' => 'Invalid IP Address',
-            'mac_address' => 'Invalid Mac Address',
+            'ip_address' => 'Invalid IP address',
+            'mac_address' => 'Invalid MAC address',
         ],
         'too_small' => [
             'array' => [
