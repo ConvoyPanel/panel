@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.3-rc.1
+
+### Changes
+
+- Fix US keyboard characters validation #80
+
 ## v4.2.2-rc.1
 
 ### Changes
