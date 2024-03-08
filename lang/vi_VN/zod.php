@@ -25,11 +25,11 @@ return [
             'datetime' => '{{validation}} không hợp lệ',
             'startsWith' => 'Dữ liệu đầu vào không hợp lệ, phải bắt đầu với "{{startsWith}}"',
             'endsWith' => 'Dữ liệu đầu vào không hợp lệ, phải kết thúc bằng "{{endsWith}}"',
-            'hostname' => '{{validation}} không hợp lệ',
-            'english_keyboard_characters' => '{{validation}} không hợp lệ',
+            'hostname' => 'Invalid hostname',
+            'us_keyboard_characters' => 'Invalid US keyboard characters',
             'password' => 'Phải gồm 8 chữ cái, một chữ cái in hoa, một chữ cái viết thường, một số và một ký tự đặc biệt',
-            'ip_address' => 'Địa chỉ IP không hợp lệ',
-            'mac_address' => 'Địa chỉ Mac không hợp lệ',
+            'ip_address' => 'Invalid IP address',
+            'mac_address' => 'Invalid MAC address',
         ],
         'too_small' => [
             'array' => [
