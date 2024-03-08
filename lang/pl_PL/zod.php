@@ -25,11 +25,11 @@ return [
             'datetime' => 'Nieprawidłowe {{validation}}',
             'startsWith' => 'Nieprawidłowe dane: muszą się zacząć z "{{startsWith}}"',
             'endsWith' => 'Nieprawidłowe dane: muszą się kończyć z "{{endsWith}}"',
-            'hostname' => 'Nieprawidłowe {{validation}}',
-            'english_keyboard_characters' => 'Nieprawidłowe {{validation}}',
+            'hostname' => 'Invalid hostname',
+            'us_keyboard_characters' => 'Invalid US keyboard characters',
             'password' => 'Musi zawierać 8 znaków, jedną wielką literę, jedną małą literę, jedną cyfrę i jeden znak specjalny',
-            'ip_address' => 'Nieprawidłowy adres IP',
-            'mac_address' => 'Nieprawidłowy adres MAC',
+            'ip_address' => 'Invalid IP address',
+            'mac_address' => 'Invalid MAC address',
         ],
         'too_small' => [
             'array' => [
