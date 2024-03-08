@@ -15,7 +15,7 @@ export const hostname = (string?: ZodString) =>
 
 export const usKeyboardCharacters = (string?: ZodString) =>
     (string ?? z.string()).regex(/^[\x20-\x7F]*$/, {
-        message: t('errors.invalid_string.english_keyboard_characters', {
+        message: t('errors.invalid_string.us_keyboard_characters', {
             ns: 'zod',
             validation: t('us_keyboard_characters', {
                 ns: 'strings',
