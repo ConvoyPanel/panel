@@ -46,7 +46,7 @@ return [
     'doesnt_start_with' => 'The :attribute may not start with one of the following: :values.',
     'email' => 'The :attribute must be a valid email address.',
     'ends_with' => 'The :attribute must end with one of the following: :values.',
-    'english_keyboard_characters' => 'The :attribute must contain characters from the English keyboard.',
+    'us_keyboard_characters' => 'The :attribute must contain characters from the US keyboard.',
     'enum' => 'The selected :attribute is invalid.',
     'exists' => 'The selected :attribute is invalid.',
     'file' => 'The :attribute must be a file.',
