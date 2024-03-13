@@ -1,6 +1,8 @@
 # Convoy Software End User License Agreement (EULA)
 
-**Effective Date:** March 4th, 2024
+**Effective Date:** March 3th, 2024
+
+**Last Updated:** March 13th, 2024
 
 **License Grantor:** Performave
 
@@ -70,44 +72,52 @@ may also apply as outlined elsewhere in this EULA or as otherwise determined by 
 
 Any modifications, enhancements, derivative works of the Software, or any code from the Software that is incorporated into other works by you or any third party are considered part of the Software and subject to the terms and conditions of this EULA. Such modifications, derivative works, or incorporated code must be offered under the same terms and conditions as those set forth in this EULA, including any provisions regarding distribution and sublicensing. You may not alter the terms of this EULA or sublicense any modifications, derivative works, or incorporated code under terms that differ from those specified in this EULA.
 
-## 5. Intellectual Property Rights
+## 5. License Enforcement and Digital Rights Management
+
+Performave employs various measures, including Digital Rights Management (DRM), to enforce the terms of this EULA and prevent unauthorized use of the Software. These measures may include, but are not limited to, remotely disabling access to the Software or specific features of the Software for users who are found to be in violation of this EULA. By using the Software, you acknowledge and agree that Performave may, at its sole discretion, implement such measures.
+
+You further agree that Performave shall not be responsible or liable for any loss, damage, or inconvenience you may suffer as a result of such actions taken to enforce this EULA. Your rights under this EULA may be subject to termination and denial of access to the Software without notice if any form of tampering with or circumvention of the DRM or other license enforcement mechanisms is detected.
+
+This section is designed to inform users of the license enforcement practices and to legally protect Performave from liability for actions taken in good faith to protect its intellectual property rights.
+
+## 6. Intellectual Property Rights
 
 The Software is protected by intellectual property laws and treaties. Performave or its suppliers own all title,
 copyright, and interest in and to the Software, including any intellectual property rights therein. This EULA grants you
 no rights to use such content. All rights not expressly granted are reserved by Performave.
 
-## 6. Termination
+## 7. Termination
 
 This EULA is effective until terminated. Your rights under this EULA will terminate automatically without notice from
 Performave if you fail to comply with any term(s) of this EULA. Upon termination, you shall cease all use of the
 Software and destroy all copies, full or partial, of the Software.
 
-## 7. Disclaimer of Warranty
+## 8. Disclaimer of Warranty
 
 The Software is provided "AS IS," with all faults, without warranty of any kind, and Performave hereby disclaims all
 warranties and conditions with respect to the Software, either express, implied, or statutory, including, but not
 limited to, the implied warranties and/or conditions of merchantability, of satisfactory quality, of fitness for a
 particular purpose, of accuracy, of quiet enjoyment, and non-infringement of third-party rights.
 
-## 8. Limitation of Liability
+## 9. Limitation of Liability
 
 In no event shall Performave be liable for any indirect, incidental, special, consequential, or punitive damages
 whatsoever (including, without limitation, damages for loss of business profits, business interruption, loss of business
 information, or any other pecuniary loss) arising out of the use of or inability to use the Software, even if Performave
 has been advised of the possibility of such damages.
 
-## 9. Governing Law
+## 10. Governing Law
 
 This EULA shall be governed by the laws of the jurisdiction in which Performave is located, without reference to
 conflict of laws principles.
 
-## 10. Entire Agreement
+## 11. Entire Agreement
 
 This EULA constitutes the entire agreement between you and Performave relating to the Software and supersedes all prior
 or contemporaneous oral or written communications, proposals, and representations with respect to the Software or any
 other subject matter covered by this EULA.
 
-## 11. Amendment
+## 12. Amendment
 
 Performave reserves the right to amend this EULA at any time, at its sole discretion, by posting an updated version to
 its website or through the Software. Your continued use of the Software following the posting of an updated EULA will
