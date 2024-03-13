@@ -1,66 +1,86 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
+import animate from 'tailwindcss-animate'
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-    darkMode: 'class',
-
+const config = {
+    darkMode: ['class'],
     content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-        './resources/scripts/**/*.jsx',
-        './resources/scripts/**/*.tsx',
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './app/**/*.{ts,tsx}',
+        './src/**/*.{ts,tsx}',
     ],
-
+    prefix: '',
     theme: {
-        extend: {
-            colors: {
-                error: {
-                    lighter: 'var(--color-error-lighter)',
-                    light: 'var(--color-error-light)',
-                    DEFAULT: 'var(--color-error)',
-                    dark: 'var(--color-error-dark)',
-                },
-                success: {
-                    lighter: 'var(--color-success-lighter)',
-                    light: 'var(--color-success-light)',
-                    DEFAULT: 'var(--color-success)',
-                    dark: 'var(--color-success-dark)',
-                },
-                warning: {
-                    lighter: 'var(--color-warning-lighter)',
-                    light: 'var(--color-warning-light)',
-                    DEFAULT: 'var(--color-warning)',
-                    dark: 'var(--color-warning-dark)',
-                },
-                foreground: 'var(--color-foreground)',
-                background: 'var(--color-background)',
-                accent: {
-                    100: 'var(--color-accent-1)',
-                    200: 'var(--color-accent-2)',
-                    300: 'var(--color-accent-3)',
-                    400: 'var(--color-accent-4)',
-                    500: 'var(--color-accent-5)',
-                    600: 'var(--color-accent-6)',
-                    700: 'var(--color-accent-7)',
-                    800: 'var(--color-accent-8)',
-                },
-            },
-            fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
-            },
-            boxShadow: {
-                light: '0 4px 4px 0 rgba(0,0,0,.02)',
-            },
+        container: {
+            center: true,
+            padding: '2rem',
             screens: {
-                xs: '512px',
-            },
-            borderRadius: {
-                DEFAULT: '5px',
+                '2xl': '1400px',
             },
         },
+        extend: {
+            colors: {
+                border: 'hsl(var(--border))',
+                input: 'hsl(var(--input))',
+                ring: 'hsl(var(--ring))',
+                background: 'hsl(var(--background))',
+                foreground: 'hsl(var(--foreground))',
+                primary: {
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
+                },
+                secondary: {
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
+                },
+                destructive: {
+                    DEFAULT: 'hsl(var(--destructive))',
+                    foreground: 'hsl(var(--destructive-foreground))',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
+                },
+                popover: {
+                    DEFAULT: 'hsl(var(--popover))',
+                    foreground: 'hsl(var(--popover-foreground))',
+                },
+                card: {
+                    DEFAULT: 'hsl(var(--card))',
+                    foreground: 'hsl(var(--card-foreground))',
+                },
+            },
+            borderRadius: {
+                lg: 'var(--radius)',
+                md: 'calc(var(--radius) - 2px)',
+                sm: 'calc(var(--radius) - 4px)',
+            },
+            keyframes: {
+                'accordion-down': {
+                    from: { height: '0' },
+                    to: { height: 'var(--radix-accordion-content-height)' },
+                },
+                'accordion-up': {
+                    from: { height: 'var(--radix-accordion-content-height)' },
+                    to: { height: '0' },
+                },
+            },
+            animation: {
+                'accordion-down': 'accordion-down 0.2s ease-out',
+                'accordion-up': 'accordion-up 0.2s ease-out',
+            },
+        },
+        fontFamily: {
+            sans: ['Geist Sans', ...defaultTheme.fontFamily.sans],
+        },
     },
-    corePlugins: {
-        preflight: false,
-    },
+    plugins: [animate],
 }
+
+export default config
