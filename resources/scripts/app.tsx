@@ -1,3 +1,4 @@
+import '@/app.css'
 import '@fontsource/geist-sans'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import React from 'react'

@@ -1,17 +1,15 @@
-import animate from 'tailwindcss-animate'
-import defaultTheme from 'tailwindcss/defaultTheme'
-
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 /** @type {import('tailwindcss').Config} */
 const config = {
     darkMode: ['class'],
     content: [
-        './pages/**/*.{ts,tsx}',
-        './components/**/*.{ts,tsx}',
-        './app/**/*.{ts,tsx}',
-        './src/**/*.{ts,tsx}',
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
+        './resources/scripts/**/*.jsx',
+        './resources/scripts/**/*.tsx',
     ],
-    prefix: '',
     theme: {
         container: {
             center: true,
@@ -63,24 +61,24 @@ const config = {
             },
             keyframes: {
                 'accordion-down': {
-                    from: { height: '0' },
-                    to: { height: 'var(--radix-accordion-content-height)' },
+                    from: {height: '0'},
+                    to: {height: 'var(--radix-accordion-content-height)'},
                 },
                 'accordion-up': {
-                    from: { height: 'var(--radix-accordion-content-height)' },
-                    to: { height: '0' },
+                    from: {height: 'var(--radix-accordion-content-height)'},
+                    to: {height: '0'},
                 },
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
             },
-        },
-        fontFamily: {
-            sans: ['Geist Sans', ...defaultTheme.fontFamily.sans],
+            fontFamily: {
+                sans: ['Geist Sans', ...defaultTheme.fontFamily.sans],
+            },
         },
     },
-    plugins: [animate],
+    plugins: [require('tailwindcss-animate')],
 }
 
-export default config
+module.exports = config
