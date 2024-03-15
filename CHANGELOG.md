@@ -4,6 +4,10 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.3-rc.2
+
+- Fixed a visual bug on the bandwidth usage card where the text wasn't centered.
+
 ## v4.2.3-rc.1
 
 ### Changes
