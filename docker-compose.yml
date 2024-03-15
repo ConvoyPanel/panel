@@ -44,7 +44,7 @@ services:
         - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
     tty: true
     ports:
-      - 1234:1234
+      - 3000:3000
     volumes:
       - .:/var/www/
     extra_hosts:

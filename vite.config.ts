@@ -17,7 +17,7 @@ export default defineConfig({
         // }),
     ],
     server: {
-        port: 1234,
+        port: 3000,
         hmr: {
             host: 'localhost',
         },

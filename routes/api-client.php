@@ -5,6 +5,8 @@ use Convoy\Http\Middleware\Activity\ServerSubject;
 use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/user', Client\SessionController::class);
+
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
 Route::prefix('/servers/{server}')->middleware(
