@@ -1,13 +1,13 @@
 import { useTheme } from '@/providers/theme-provider'
 import { IconMoon, IconSun } from '@tabler/icons-react'
 
-import { Button, ButtonProps } from '@/components/ui/button'
+import { Button, ButtonProps } from '@/components/ui/Button'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/DropdownMenu'
 
 interface Props {
     variant?: ButtonProps['variant']

@@ -8,8 +8,6 @@ export const getKey = () => 'user'
 export const cacheUser = async () => {
     const user = await getUser()
 
-    console.log('cache')
-
     await mutate(getKey(), user, false)
 }
 

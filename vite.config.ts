@@ -12,9 +12,6 @@ export default defineConfig({
             generatedRouteTree: 'resources/scripts/routeTree.gen.ts',
         }),
         laravel(['resources/scripts/app.tsx']),
-        // visualizer({
-        //     filename: './public/stats.html',
-        // }),
     ],
     server: {
         port: 3000,

@@ -8,8 +8,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from '@/components/ui/form.tsx'
-import { Input, InputProps } from '@/components/ui/input.tsx'
+} from '@/components/ui/Form'
+import { Input, InputProps } from '@/components/ui/Input'
 
 interface Props extends InputProps {
     name: string

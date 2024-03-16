@@ -9,6 +9,8 @@ const config = {
         './resources/views/**/*.blade.php',
         './resources/scripts/**/*.jsx',
         './resources/scripts/**/*.tsx',
+        './resources/scripts/**/*.js',
+        './resources/scripts/**/*.ts',
     ],
     theme: {
         container: {

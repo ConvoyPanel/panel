@@ -4,9 +4,9 @@ import { Cache, cache as SWRCache } from 'swr/_internal'
 
 import { cacheUser, getKey } from '@/api/transformers/use-user-swr.ts'
 
+import { Card } from '@/components/ui/Card'
 import Logo from '@/components/ui/Logo.tsx'
 import ThemeToggle from '@/components/ui/ThemeToggle.tsx'
-import { Card } from '@/components/ui/card.tsx'
 
 
 export const Route = createFileRoute('/auth')({

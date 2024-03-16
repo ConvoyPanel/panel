@@ -6,16 +6,16 @@ import { z } from 'zod'
 
 import login from '@/api/auth/login.ts'
 
-import { Button } from '@/components/ui/button.tsx'
+import { Button } from '@/components/ui/Button'
 import {
     CardContent,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card'
-import { Form, FormButton } from '@/components/ui/form.tsx'
-import InputForm from '@/components/ui/forms/InputForm.tsx'
+} from '@/components/ui/Card'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 
 
 export const Route = createLazyFileRoute('/auth/login')({
