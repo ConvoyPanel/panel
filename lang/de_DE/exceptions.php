@@ -2,6 +2,6 @@
 
 return [
     'api' => [
-        'resource_not_found' => 'The requested resource was not found on this server.',
+        'resource_not_found' => 'Die angeforderte Ressource wurde auf diesem Server nicht gefunden.',
     ],
 ];
