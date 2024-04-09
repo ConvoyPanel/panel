@@ -25,6 +25,6 @@ Please [visit this page](https://convoypanel.com/docs/project/about.html#acknowl
 
 ## License
 
-Convoy is licensed under the Business Source License. Production use of Convoy without an active license from Performave is strictly disallowed.
+Convoy is licensed under our own proprietary license.
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel?ref=badge_large)
