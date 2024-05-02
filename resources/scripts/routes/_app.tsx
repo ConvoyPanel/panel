@@ -4,7 +4,7 @@ import { Cache, cache as SWRCache } from 'swr/_internal'
 
 import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
 
-import LargeSidebar from '@/components/ui/Navigation/LargeSidebar.tsx'
+import Sidebar from '@/components/ui/Navigation/Sidebar.tsx'
 
 
 export const Route = createFileRoute('/_app')({
@@ -27,17 +27,10 @@ export const Route = createFileRoute('/_app')({
 
 function AppLayout() {
     return (
-        <div className={'flex h-full'}>
-            <LargeSidebar heading={'Dashboard'} />
-            <div className={'flex flex-1 flex-col'}>
-                <div
-                    className={
-                        'border-default flex h-12 max-h-12 items-center justify-between border-b py-2 px-5'
-                    }
-                >
-                    <p>hi</p>
-                </div>
-                <main className={'flex-1 flex-grow overflow-y-auto'}>
+        <div className='flex min-h-screen w-full flex-col bg-muted/40'>
+            <Sidebar />
+            <div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
+                <main className={'p-4 sm:px-6 sm:py-0'}>
                     <Outlet />
                 </main>
             </div>
