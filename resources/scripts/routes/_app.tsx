@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_app')({
             throw redirect({
                 to: '/auth/login',
                 search: {
-                    redirect: location.href,
+                    redirect: location.href !== '/' ? location.href : undefined,
                 },
             })
         }
@@ -28,11 +28,11 @@ export const Route = createFileRoute('/_app')({
 function AppLayout() {
     return (
         <div className={'flex h-full'}>
-            <LargeSidebar />
+            <LargeSidebar heading={'Dashboard'} />
             <div className={'flex flex-1 flex-col'}>
                 <div
                     className={
-                        'flex h-12 max-h-12 items-center justify-between py-2 px-5 border-b border-default'
+                        'border-default flex h-12 max-h-12 items-center justify-between border-b py-2 px-5'
                     }
                 >
                     <p>hi</p>

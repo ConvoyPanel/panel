@@ -27,9 +27,9 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@tabler/icons-react": "^3.0.2",
     "@tailwindcss/forms": "^0.5.2",
-    "@tanstack/react-router": "^1.19.12",
+    "@tanstack/react-router": "^1.24.0",
     "@tanstack/react-table": "^8.7.0",
-    "@tanstack/router-vite-plugin": "^1.19.6",
+    "@tanstack/router-vite-plugin": "^1.24.1",
     "autoprefixer": "^10.4.2",
     "axios": "^1.6.7",
     "chart.js": "^3.8.0",
@@ -71,6 +71,7 @@
     "@types/react-transition-group": "^4.4.5",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.12",
     "rollup-plugin-visualizer": "^5.8.2",
     "typescript": "^5.4.2"
   }
