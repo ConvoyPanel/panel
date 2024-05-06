@@ -1,5 +1,7 @@
 import { useTheme } from '@/providers/theme-provider.tsx'
+import { useRouter } from '@tanstack/react-router'
 
+import logout from '@/api/auth/logout.ts'
 import useUserSWR from '@/api/auth/use-user-swr.ts'
 
 import { Button } from '@/components/ui/Button'
@@ -23,7 +25,15 @@ import {
 
 const Avatar = () => {
     const { theme, setTheme } = useTheme()
-    const { data: user } = useUserSWR()
+    const { data: user, mutate } = useUserSWR()
+
+    const { navigate } = useRouter()
+
+    const signout = async () => {
+        await logout()
+        await mutate(undefined, false)
+        await navigate({ to: '/auth/login' })
+    }
 
     return (
         <DropdownMenu>
@@ -63,7 +73,7 @@ const Avatar = () => {
                     </Select>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={signout}>Sign out</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )
