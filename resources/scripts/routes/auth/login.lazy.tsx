@@ -45,6 +45,7 @@ function Login() {
             console.log({ redirect })
 
             await navigate({
+                // @ts-expect-error
                 to: redirect ? `/${redirect.slice(1)}` : '/',
             })
         } catch {}

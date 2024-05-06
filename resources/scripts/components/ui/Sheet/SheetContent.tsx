@@ -5,7 +5,8 @@ import type { VariantProps } from 'class-variance-authority'
 import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
 
 import sheetVariants from '@/components/ui/Sheet/Sheet.variants.ts'
-import { SheetOverlay, SheetPortal } from '@/components/ui/sheet.tsx'
+import SheetOverlay from '@/components/ui/Sheet/SheetOverlay.tsx'
+import { SheetPortal } from '@/components/ui/Sheet/index.ts'
 
 
 export interface SheetContentProps
