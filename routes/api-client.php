@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/user', Client\SessionController::class);
 
-Route::get('/servers', [Client\IndexController::class, 'index']);
+Route::get('/servers', [Client\Servers\ServerController::class, 'index']);
 
 Route::prefix('/servers/{server}')->middleware(
     [ServerSubject::class, AuthenticateServerAccess::class],
 )->group(function () {
-    Route::get('/', [Client\Servers\ServerController::class, 'index'])->name('servers.show');
+    Route::get('/', [Client\Servers\ServerController::class, 'show'])->name('servers.show');
     Route::get('/details', [Client\Servers\ServerController::class, 'details']);
 
     Route::get('/state', [Client\Servers\ServerController::class, 'getState']);

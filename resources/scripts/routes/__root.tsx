@@ -1,32 +1,27 @@
-import {
-    Outlet,
-    createRootRouteWithContext,
-    useRouter,
-} from '@tanstack/react-router'
+import { Outlet, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
 import { TooltipProvider } from '@/components/ui/Tooltip.tsx'
 
-interface RouterContext {
-    getTitle: () => string
-}
 
-export const Route = createRootRouteWithContext<RouterContext>()({
+export const Route = createRootRoute({
     component: RootComponent,
 })
 
 function RootComponent() {
-    const router = useRouter()
-
-    const matchWithTitle = [...router.state.matches]
-        .reverse()
-        .find(d => d.context.getTitle)
-
-    const title = matchWithTitle?.context.getTitle() || 'Convoy'
+    const routeMeta = useRouterState({
+        select: state => {
+            return state.matches.map(match => match.meta!).filter(Boolean)
+        },
+    })
 
     useEffect(() => {
-        document.title = title
-    }, [title])
+        const title = routeMeta[routeMeta.length - 1].find(
+            tag => tag.title
+        )?.title
+
+        document.title = title ? `${title} | Convoy` : 'Convoy'
+    }, [routeMeta])
 
     return (
         <TooltipProvider>

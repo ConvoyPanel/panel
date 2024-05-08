@@ -10,9 +10,6 @@ import { routeTree } from './routeTree.gen'
 
 const router = createRouter({
     routeTree,
-    context: {
-        getTitle: () => 'Convoy',
-    },
 })
 
 declare module '@tanstack/react-router' {

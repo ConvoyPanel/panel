@@ -1,19 +1,14 @@
-import { IconLayoutSidebar, IconPackage, IconSearch } from '@tabler/icons-react'
+import { IconLayoutSidebar, IconSearch } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/Breadcrumb'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import Avatar from '@/components/ui/Navigation/Avatar.tsx'
+import Logo from '@/components/ui/Logo.tsx'
+import AvatarWithDropdown from '@/components/ui/Navigation/AvatarWithDropdown.tsx'
+import Breadcrumbs from '@/components/ui/Navigation/Breadcrumbs.tsx'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet'
+
 
 interface Props {
     routes: Route[]
@@ -32,11 +27,11 @@ const Header = ({ routes }: Props) => {
                 <SheetContent side='left' className='sm:max-w-xs'>
                     <nav className='grid gap-6 text-lg font-medium'>
                         <Link
-                            href='#'
+                            href='/'
                             className='group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base'
                         >
-                            <IconPackage className='h-5 w-5 transition-all group-hover:scale-110' />
-                            <span className='sr-only'>Acme Inc</span>
+                            <Logo className='h-5 w-5 transition-all group-hover:scale-110' />
+                            <span className='sr-only'>Convoy Panel</span>
                         </Link>
                         {routes.map(route => (
                             <Link
@@ -57,25 +52,7 @@ const Header = ({ routes }: Props) => {
                     </nav>
                 </SheetContent>
             </Sheet>
-            <Breadcrumb className='hidden md:flex'>
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link href='#'>Dashboard</Link>
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link href='#'>Orders</Link>
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>Recent Orders</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-            </Breadcrumb>
+            <Breadcrumbs />
             <div className='relative ml-auto flex-1 md:grow-0'>
                 <IconSearch className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
@@ -84,7 +61,7 @@ const Header = ({ routes }: Props) => {
                     className='w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]'
                 />
             </div>
-            <Avatar />
+            <AvatarWithDropdown />
         </header>
     )
 }

@@ -2,10 +2,11 @@
 
 namespace Convoy\Transformers\Admin;
 
+use Convoy\Data\Server\Eloquent\AddressData;
 use Convoy\Models\Address;
+use Convoy\Transformers\Client\ServerTransformer;
 use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
-use Convoy\Data\Server\Eloquent\AddressData;
 
 class AddressTransformer extends TransformerAbstract
 {
@@ -20,6 +21,8 @@ class AddressTransformer extends TransformerAbstract
 
     public function includeServer(Address $address): ?Item
     {
-        return !is_null($address->server) ? $this->item($address->server, new ServerTransformer()) : null;
+        return !is_null($address->server) ? $this->item(
+            $address->server, new ServerTransformer(),
+        ) : null;
     }
 }

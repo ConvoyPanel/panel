@@ -3,39 +3,28 @@
 namespace Convoy\Transformers\Client;
 
 use Convoy\Models\Server;
-use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Convoy\Transformers\Admin\UserTransformer;
-use Convoy\Services\Servers\ServerDetailService;
 
 class ServerTransformer extends TransformerAbstract
 {
-    protected array $availableIncludes = [
-        'user',
-        'node',
-    ];
-
-    public function transform(Server $server)
+    public function transform(Server $server): array
     {
-        $serverEloquentData = App::make(ServerDetailService::class)->getByEloquent($server);
-
-        $data = $serverEloquentData->toArray();
-
-        $data['internal_id'] = $data['id'];
-        $data['id'] = $data['uuid_short'];
-        unset($data['uuid_short']);
-
-        return $data;
-    }
-
-    public function includeUser(Server $server)
-    {
-        return $this->item($server->user, new UserTransformer);
-    }
-
-    public function includeNode(Server $server)
-    {
-        return $this->item($server->node, new NodeTransformer);
+        return [
+            'id' => $server->id,
+            'uuid' => $server->uuid,
+            'uuid_short' => $server->uuid_short,
+            'user_id' => $server->user_id,
+            'node_id' => $server->node_id,
+            'vmid' => $server->vmid,
+            'hostname' => $server->hostname,
+            'name' => $server->name,
+            'description' => $server->description,
+            'status' => $server->status,
+            'cpu' => $server->cpu,
+            'memory' => $server->memory,
+            'disk' => $server->disk,
+            'bandwidth_usage' => $server->bandwidth_usage,
+            'bandwidth_limit' => $server->bandwidth_limit,
+        ];
     }
 }

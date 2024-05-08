@@ -1,4 +1,4 @@
-import { IconHome } from '@tabler/icons-react'
+import { IconHome, IconLock } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -12,17 +12,18 @@ export const Route = createFileRoute('/_app/_dashboard')({
             <Outlet />
         </AppLayout>
     ),
+    meta: () => [{ title: 'Dashboard' }],
 })
 
 const routes: RouteDef[] = [
     {
         icon: IconHome,
         label: 'Dashboard',
-        path: Route.path,
+        path: '/',
     },
     {
-        icon: IconHome,
-        label: 'Test',
-        path: '/test',
+        icon: IconLock,
+        label: 'Security',
+        path: '/security',
     },
 ]

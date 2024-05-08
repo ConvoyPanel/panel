@@ -5,7 +5,7 @@ namespace Convoy\Http\Controllers\Client;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Transformers\Client\ServerTransformer;
+use Convoy\Transformers\Client\OldServerTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -37,6 +37,6 @@ class IndexController extends ApiController
             $request->query(),
         );
 
-        return fractal($servers, new ServerTransformer())->respond();
+        return fractal($servers, new OldServerTransformer())->respond();
     }
 }

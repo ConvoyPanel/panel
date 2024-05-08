@@ -15,7 +15,13 @@ const AppLayout = ({ routes, children }: Props) => {
             <Sidebar routes={routes} />
             <div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
                 <Header routes={routes} />
-                <main className={'p-4 sm:px-6 sm:py-0'}>{children}</main>
+                <main
+                    className={
+                        'flex flex-col gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'
+                    }
+                >
+                    {children}
+                </main>
             </div>
         </div>
     )

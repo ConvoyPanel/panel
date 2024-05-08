@@ -14,11 +14,16 @@ use Convoy\Services\Coterm\CotermJWTService;
 use Convoy\Services\Servers\ServerConsoleService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\VncService;
+use Convoy\Transformers\Client\OldServerTransformer;
 use Convoy\Transformers\Client\ServerDetailTransformer;
 use Convoy\Transformers\Client\ServerStateTransformer;
 use Convoy\Transformers\Client\ServerTerminalTransformer;
 use Convoy\Transformers\Client\ServerTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
+use function fractal;
+use function min;
 
 class ServerController extends ApiController
 {
@@ -32,9 +37,19 @@ class ServerController extends ApiController
     {
     }
 
-    public function index(Server $server)
+    public function index(Request $request)
     {
-        return fractal($server, new ServerTransformer())->respond();
+        $servers = QueryBuilder::for(Server::query())
+                               ->allowedFilters(['name'])
+                               ->paginate(min($request->query('per_page', 50), 100))
+                               ->appends($request->query());
+
+        return fractal($servers, new ServerTransformer())->respond();
+    }
+
+    public function show(Server $server)
+    {
+        return fractal($server, new OldServerTransformer())->respond();
     }
 
     public function details(Server $server)

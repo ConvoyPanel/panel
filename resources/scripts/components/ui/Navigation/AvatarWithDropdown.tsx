@@ -23,7 +23,7 @@ import {
     SelectValue,
 } from '@/components/ui/Select'
 
-const Avatar = () => {
+const AvatarWithDropdown = () => {
     const { theme, setTheme } = useTheme()
     const { data: user, mutate } = useUserSWR()
 
@@ -52,7 +52,7 @@ const Avatar = () => {
                 </DropdownMenuLabel>
                 <p
                     className={
-                        'mb-2 truncate px-2 text-xs text-muted-foreground'
+                        'mb-3 -mt-1 truncate px-2 text-xs text-muted-foreground'
                     }
                 >
                     {user?.email}
@@ -79,4 +79,4 @@ const Avatar = () => {
     )
 }
 
-export default Avatar
+export default AvatarWithDropdown
