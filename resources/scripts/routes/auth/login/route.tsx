@@ -7,7 +7,5 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute('/auth/login')({
     validateSearch: searchSchema,
-    beforeLoad: ({ context }) => {
-        context.getTitle = () => 'Sign in | Convoy'
-    },
+    meta: () => [{ title: 'Sign in' }],
 })
