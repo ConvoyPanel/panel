@@ -2,15 +2,15 @@
 
 namespace Convoy\Console;
 
+use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
+use Convoy\Console\Commands\Maintenance\PruneProxmoxUsersCommand;
+use Convoy\Console\Commands\Server\ResetUsagesCommand;
+use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
+use Convoy\Console\Commands\Server\UpdateUsagesCommand;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
-use Convoy\Console\Commands\Server\ResetUsagesCommand;
-use Convoy\Console\Commands\Server\UpdateUsagesCommand;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Convoy\Console\Commands\Maintenance\PruneUsersCommand;
-use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
-use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command(ResetUsagesCommand::class)->daily();
-        $schedule->command(PruneUsersCommand::class)->daily();
+        $schedule->command(PruneProxmoxUsersCommand::class)->daily();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
     }
@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         //require base_path('routes/console.php');
     }

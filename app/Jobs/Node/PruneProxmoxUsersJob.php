@@ -3,14 +3,14 @@
 namespace Convoy\Jobs\Node;
 
 use Convoy\Models\Node;
-use Convoy\Services\Nodes\UserPruneService;
+use Convoy\Services\Nodes\ProxmoxUserPruneService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class PruneUsersJob implements ShouldQueue
+class PruneProxmoxUsersJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -22,7 +22,7 @@ class PruneUsersJob implements ShouldQueue
     {
     }
 
-    public function handle(UserPruneService $service): void
+    public function handle(ProxmoxUserPruneService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
 

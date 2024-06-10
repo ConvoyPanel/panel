@@ -2,17 +2,17 @@
 
 namespace Convoy\Services\Nodes;
 
-use Convoy\Models\Node;
 use Convoy\Data\Node\Access\UserData;
+use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
 
-class UserPruneService
+class ProxmoxUserPruneService
 {
     public function __construct(private ProxmoxAccessRepository $repository)
     {
     }
 
-    public function handle(Node $node)
+    public function handle(Node $node): void
     {
         $users = $this->repository->setNode($node)->getUsers();
 
