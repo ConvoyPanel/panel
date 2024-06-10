@@ -12,7 +12,7 @@
     "@dnd-kit/sortable": "^7.0.1",
     "@emotion/styled": "^11.10.5",
     "@fontsource/geist-sans": "^5.0.2",
-    "@headlessui/react": "^1.7.5",
+    "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.0.0",
     "@hookform/resolvers": "^3.3.4",
     "@mantine/core": "^5.9.4",
