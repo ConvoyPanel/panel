@@ -34,10 +34,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 class SettingsController extends ApiController
 {
     public function __construct(
-        private ServerAuthService $authService, private ConnectionInterface $connection,
-        private CloudinitService $cloudinitService,
+        private ServerAuthService          $authService,
+        private ConnectionInterface        $connection,
+        private CloudinitService           $cloudinitService,
         private ServerBuildDispatchService $buildDispatchService,
-        private AllocationService $allocationService,
+        private AllocationService          $allocationService,
     )
     {
     }

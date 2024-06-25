@@ -2,11 +2,11 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 /**
  * Class SnapshotService
@@ -16,15 +16,16 @@ class ServerBuildService
     public function __construct(
         private ProxmoxConfigRepository $configRepository,
         private ProxmoxServerRepository $serverRepository,
-    ) {
+    )
+    {
     }
 
-    public function delete(Server $server)
+    public function delete(Server $server): void
     {
         $this->serverRepository->setServer($server)->delete();
     }
 
-    public function build(Server $server, Template $template)
+    public function build(Server $server, Template $template): void
     {
         $this->serverRepository->setServer($server)->create($template);
     }
