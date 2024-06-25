@@ -70,6 +70,11 @@ class Server extends Model
         return $this->hasMany(Backup::class);
     }
 
+    public function deployments(): HasMany
+    {
+        return $this->hasMany(Deployment::class);
+    }
+
     /**
      * Returns all the activity log entries where the server is the subject.
      */
