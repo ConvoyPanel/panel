@@ -2,7 +2,7 @@ import { cn } from '@/utils'
 import { ChevronLeftIcon } from '@radix-ui/react-icons'
 import { ComponentProps } from 'react'
 
-import { PaginationLink } from '@/components/ui/pagination.tsx'
+import { PaginationLink } from '@/components/ui/Pagination/index.ts'
 
 
 const PaginationPrevious = ({

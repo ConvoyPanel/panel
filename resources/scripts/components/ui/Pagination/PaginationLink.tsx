@@ -1,30 +1,20 @@
-import { cn } from '@/utils'
-import { Link } from '@tanstack/react-router'
 import { ComponentProps } from 'react'
 
-import { ButtonProps, buttonVariants } from '@/components/ui/Button'
-
+import { Button, ButtonProps } from '@/components/ui/Button'
 
 export type PaginationLinkProps = {
     isActive?: boolean
 } & Pick<ButtonProps, 'size'> &
-    Pick<ComponentProps<'a'>, 'className'>
+    ComponentProps<'button'>
 
 const PaginationLink = ({
-    className,
     isActive,
     size = 'icon',
     ...props
 }: PaginationLinkProps) => (
-    <Link
+    <Button
         aria-current={isActive ? 'page' : undefined}
-        className={cn(
-            buttonVariants({
-                variant: isActive ? 'outline' : 'ghost',
-                size,
-            }),
-            className
-        )}
+        variant={isActive ? 'outline' : 'ghost'}
         {...props}
     />
 )
