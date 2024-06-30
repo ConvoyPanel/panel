@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Models\Server;
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Server;
 
 class UpdateDetailsRequest extends BaseApiRequest
 {

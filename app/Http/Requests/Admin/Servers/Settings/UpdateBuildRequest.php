@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Requests\Admin\Servers\Settings;
 
+use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Address;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
-use Convoy\Models\Address;
 use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\BaseApiRequest;
 
 class UpdateBuildRequest extends BaseApiRequest
 {

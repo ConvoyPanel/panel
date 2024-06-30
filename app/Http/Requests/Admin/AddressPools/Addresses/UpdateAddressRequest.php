@@ -2,14 +2,13 @@
 
 namespace Convoy\Http\Requests\Admin\AddressPools\Addresses;
 
-use Convoy\Models\Address;
-use Illuminate\Support\Arr;
-use Convoy\Models\AddressPool;
-use Illuminate\Validation\Validator;
-use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Enums\Network\AddressType;
+use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Address;
+use Convoy\Models\AddressPool;
 use Convoy\Validation\ValidateAddressType;
 use Convoy\Validation\ValidateAddressUniqueness;
+use Illuminate\Support\Arr;
 
 class UpdateAddressRequest extends BaseApiRequest
 {

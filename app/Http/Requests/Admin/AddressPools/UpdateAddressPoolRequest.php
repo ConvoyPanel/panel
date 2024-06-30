@@ -2,10 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\AddressPools;
 
-use Convoy\Models\Node;
-use Convoy\Models\AddressPool;
-use Illuminate\Validation\Validator;
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\AddressPool;
+use Convoy\Models\Node;
+use Illuminate\Validation\Validator;
 
 class UpdateAddressPoolRequest extends BaseApiRequest
 {
@@ -40,16 +40,22 @@ class UpdateAddressPoolRequest extends BaseApiRequest
                         '=',
                         'servers.node_id',
                     )
-                        ->join('ip_addresses', 'servers.id', '=', 'ip_addresses.server_id')
-                        ->where(
-                            'ip_addresses.address_pool_id',
-                            '=',
-                            $addressPool->id,
-                        )
-                        ->exists();
+                                                ->join(
+                                                    'ip_addresses', 'servers.id', '=',
+                                                    'ip_addresses.server_id',
+                                                )
+                                                ->where(
+                                                    'ip_addresses.address_pool_id',
+                                                    '=',
+                                                    $addressPool->id,
+                                                )
+                                                ->exists();
 
                     if ($isAddressesAllocated) {
-                        $validator->errors()->add('node_ids', 'Cannot detach nodes with servers using addresses from this pool.');
+                        $validator->errors()->add(
+                            'node_ids',
+                            'Cannot detach nodes with servers using addresses from this pool.',
+                        );
                     }
                 }
             },

@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Nodes\Templates;
 
-use Illuminate\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class UpdateTemplateOrderRequest extends FormRequest
 {

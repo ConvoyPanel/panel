@@ -6,7 +6,6 @@ use Convoy\Enums\Server\BiosType;
 use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Server;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBiosTypeRequest extends BaseApiRequest
 {

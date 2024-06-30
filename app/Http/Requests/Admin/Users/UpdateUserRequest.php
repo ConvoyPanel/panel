@@ -2,8 +2,8 @@
 
 namespace Convoy\Http\Requests\Admin\Users;
 
-use Convoy\Models\User;
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\User;
 use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends BaseApiRequest
