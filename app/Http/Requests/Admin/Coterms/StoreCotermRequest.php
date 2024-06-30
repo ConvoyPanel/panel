@@ -2,10 +2,10 @@
 
 namespace Convoy\Http\Requests\Admin\Coterms;
 
-use Convoy\Rules\Fqdn;
-use Convoy\Models\Coterm;
-use Illuminate\Support\Arr;
 use Convoy\Http\Requests\BaseApiRequest;
+use Convoy\Models\Coterm;
+use Convoy\Rules\Fqdn;
+use Illuminate\Support\Arr;
 
 class StoreCotermRequest extends BaseApiRequest
 {

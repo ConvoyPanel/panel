@@ -3,8 +3,8 @@
 namespace Convoy\Http\Requests\Coterm;
 
 use Convoy\Enums\Server\ConsoleType;
-use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreSessionRequest extends FormRequest
 {
