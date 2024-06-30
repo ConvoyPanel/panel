@@ -23,7 +23,8 @@ class TemplateGroupController extends ApiController
                                       ->allowedFilters(['name'])
                                       ->get();
 
-        return fractal($templateGroups, new TemplateGroupTransformer())->parseIncludes(['templates'],
+        return fractal($templateGroups, new TemplateGroupTransformer())->parseIncludes(
+            ['templates'],
         )->respond();
     }
 

@@ -3,11 +3,11 @@
 namespace Convoy\Http\Middleware\Admin\Server;
 
 use Closure;
+use Convoy\Enums\Server\Status;
+use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
-use Convoy\Enums\Server\Status;
 use Symfony\Component\HttpFoundation\Response;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ValidateServerStatusMiddleware
@@ -16,7 +16,7 @@ class ValidateServerStatusMiddleware
     {
         $server = $request->route()->parameter('server');
 
-        if (! $server instanceof Server) {
+        if (!$server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
