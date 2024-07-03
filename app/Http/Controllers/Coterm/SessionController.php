@@ -2,11 +2,11 @@
 
 namespace Convoy\Http\Controllers\Coterm;
 
-use Convoy\Models\Server;
 use Convoy\Enums\Server\ConsoleType;
 use Convoy\Http\Controllers\Controller;
-use Convoy\Services\Servers\ServerConsoleService;
 use Convoy\Http\Requests\Coterm\StoreSessionRequest;
+use Convoy\Models\Server;
+use Convoy\Services\Servers\ServerConsoleService;
 use Convoy\Transformers\Coterm\NoVncCredentialsTransformer;
 use Convoy\Transformers\Coterm\XTermCredentialsTransformer;
 
@@ -27,7 +27,7 @@ class SessionController extends Controller
                 'server' => $server,
                 'credentials' => $credentials,
             ], new NoVncCredentialsTransformer())->respond();
-        } else if ($consoleType === ConsoleType::XTERMJS) {
+        } elseif ($consoleType === ConsoleType::XTERMJS) {
             $credentials = $this->consoleService->createXTermjsCredentials($server);
 
             return fractal()->item([

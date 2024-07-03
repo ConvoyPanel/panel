@@ -2,11 +2,11 @@ import { ReactNode } from 'react'
 
 import Header from '@/components/ui/Navigation/Header.tsx'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
-import Sidebar from '@/components/ui/Navigation/Sidebar.tsx'
+import Sidebar from '@/components/ui/Navigation/Sidebar/Sidebar.tsx'
 
 interface Props {
     routes: Route[]
-    children: ReactNode
+    children?: ReactNode
 }
 
 const AppLayout = ({ routes, children }: Props) => {

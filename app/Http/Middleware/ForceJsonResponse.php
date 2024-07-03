@@ -10,9 +10,10 @@ class ForceJsonResponse
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse) $next
      */
-    public function handle(Request $request, Closure $next): \Symfony\Component\HttpFoundation\Response
+    public function handle(Request $request, Closure $next,
+    ): \Symfony\Component\HttpFoundation\Response
     {
         $request->headers->set('Accept', 'application/json');
 

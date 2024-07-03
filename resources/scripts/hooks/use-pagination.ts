@@ -5,7 +5,7 @@ const usePagination = () => {
     const navigate = useNavigate()
 
     // @ts-expect-error
-    const page = search.page
+    const page = search.page ?? 1
     return { page, setPage: (page: number) => navigate({ search: { page } }) }
 }
 

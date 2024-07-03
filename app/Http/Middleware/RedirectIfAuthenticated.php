@@ -3,18 +3,19 @@
 namespace Convoy\Http\Middleware;
 
 use Closure;
+use Convoy\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Convoy\Providers\RouteServiceProvider;
 
 class RedirectIfAuthenticated
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse) $next
      */
-    public function handle(Request $request, Closure $next, string ...$guards): \Symfony\Component\HttpFoundation\Response
+    public function handle(Request $request, Closure $next, string ...$guards
+    ): \Symfony\Component\HttpFoundation\Response
     {
         $guards = empty($guards) ? [null] : $guards;
 

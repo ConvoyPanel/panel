@@ -25,11 +25,11 @@ SOFTWARE.
 
 namespace Convoy\Http\Controllers\Base;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Translation\Translator;
 use Convoy\Http\Controllers\Controller;
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Translation\Translator;
 
 class LocaleController extends Controller
 {
@@ -53,7 +53,7 @@ class LocaleController extends Controller
             $response[$locale] = [];
             foreach ($namespaces as $namespace) {
                 $response[$locale][$namespace] = $this->i18n(
-                    $this->loader->load($locale, str_replace('.', '/', $namespace))
+                    $this->loader->load($locale, str_replace('.', '/', $namespace)),
                 );
             }
         }

@@ -16,9 +16,10 @@ function RootComponent() {
     })
 
     useEffect(() => {
-        const title = routeMeta[routeMeta.length - 1].find(
-            tag => tag.title
-        )?.title
+        const title =
+            routeMeta.length > 0
+                ? routeMeta[routeMeta.length - 1].find(tag => tag.title)?.title
+                : null
 
         document.title = title ? `${title} | Convoy` : 'Convoy'
     }, [routeMeta])

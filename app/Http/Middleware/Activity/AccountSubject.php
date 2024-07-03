@@ -3,8 +3,8 @@
 namespace Convoy\Http\Middleware\Activity;
 
 use Closure;
-use Illuminate\Http\Request;
 use Convoy\Facades\LogTarget;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AccountSubject

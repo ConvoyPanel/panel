@@ -1,8 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Convoy\Http\Controllers\Coterm;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/servers/{server}')->group(function () {
-    Route::post('/create-console-session', [Coterm\SessionController::class, 'store']);
+    Route::post(
+        '/create-console-session',
+        [Coterm\SessionController::class, 'store'],
+    );
 });

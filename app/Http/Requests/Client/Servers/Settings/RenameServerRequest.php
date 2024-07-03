@@ -5,7 +5,6 @@ namespace Convoy\Http\Requests\Client\Servers\Settings;
 use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Server;
 use Convoy\Rules\Hostname;
-use Illuminate\Foundation\Http\FormRequest;
 
 class RenameServerRequest extends BaseApiRequest
 {
@@ -18,7 +17,7 @@ class RenameServerRequest extends BaseApiRequest
     {
         return [
             'name' => Server::getRules()['name'],
-            'hostname' => [...Server::getRules()['hostname'], ...[new Hostname]],
+            'hostname' => [...Server::getRules()['hostname'], ...[new Hostname()]],
         ];
     }
 }

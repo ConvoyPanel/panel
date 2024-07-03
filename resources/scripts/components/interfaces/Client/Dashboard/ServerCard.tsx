@@ -5,6 +5,7 @@ import {
     IconDatabase,
     IconDots,
 } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import byteSize from 'byte-size'
 
 import { Button } from '@/components/ui/Button'
@@ -33,9 +34,13 @@ const ServerCard = ({ server }: Props) => {
                     'w-0 flex-auto text-ellipsis md:w-1/3 md:flex-initial md:shrink-0'
                 }
             >
-                <a href={'#'} className={'font-semibold'}>
+                <Link
+                    // @ts-expect-error
+                    to={`/servers/${server.uuidShort}`}
+                    className={'font-semibold'}
+                >
                     {server.name}
-                </a>
+                </Link>
                 <p className={'text-sm text-muted-foreground'}>
                     {server.hostname}
                 </p>
@@ -95,7 +100,7 @@ const ServerCard = ({ server }: Props) => {
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Reinstall system</DropdownMenuItem>
+                        <DropdownMenuItem>Rebuild server</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

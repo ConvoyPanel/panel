@@ -3,9 +3,9 @@
 namespace Convoy\Http\Middleware\Activity;
 
 use Closure;
+use Convoy\Facades\LogTarget;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
-use Convoy\Facades\LogTarget;
 use Symfony\Component\HttpFoundation\Response;
 
 class ServerSubject

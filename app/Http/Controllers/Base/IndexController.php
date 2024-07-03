@@ -2,9 +2,9 @@
 
 namespace Convoy\Http\Controllers\Base;
 
-use Illuminate\View\View;
 use Convoy\Http\Controllers\Controller;
 use Illuminate\View\Factory as ViewFactory;
+use Illuminate\View\View;
 
 class IndexController extends Controller
 {
@@ -12,8 +12,9 @@ class IndexController extends Controller
      * IndexController constructor.
      */
     public function __construct(
-        protected ViewFactory $view
-    ) {
+        protected ViewFactory $view,
+    )
+    {
     }
 
     /**

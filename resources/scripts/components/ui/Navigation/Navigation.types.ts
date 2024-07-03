@@ -1,5 +1,7 @@
+import { TablerIcon } from '@/lib/tabler.ts'
+
 export interface Route {
-    icon: any
+    icon: TablerIcon
     label: string
     path: string
 }

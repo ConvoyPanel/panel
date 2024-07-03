@@ -7,7 +7,7 @@ import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
 
 
 const searchSchema = z.object({
-    page: z.number().catch(1),
+    page: z.number().optional(),
 })
 
 export const Route = createFileRoute('/_app')({

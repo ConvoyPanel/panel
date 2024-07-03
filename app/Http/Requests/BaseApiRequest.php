@@ -3,10 +3,10 @@
 namespace Convoy\Http\Requests;
 
 use Illuminate\Auth\Access\AuthorizationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Webmozart\Assert\Assert;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Webmozart\Assert\Assert;
 
 abstract class BaseApiRequest extends FormRequest
 {
@@ -91,7 +91,7 @@ abstract class BaseApiRequest extends FormRequest
      * @template T of Model
      *
      * @param class-string<T> $expect
-     * @return T
+     * @return Model
      *
      * @noinspection PhpDocSignatureInspection
      */
@@ -103,7 +103,7 @@ abstract class BaseApiRequest extends FormRequest
         Assert::isInstanceOf($value, Model::class);
         Assert::true($value->exists);
 
-        /* @var T $value */
+        /* @var Model $value */
         return $value;
     }
 }
