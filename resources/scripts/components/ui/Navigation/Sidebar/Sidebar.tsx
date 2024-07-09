@@ -1,10 +1,17 @@
-import { IconSettings } from '@tabler/icons-react'
+import { cn } from '@/utils'
+import {
+    IconChevronLeft,
+    IconChevronRight,
+    IconSettings,
+} from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
+import { Button } from '@/components/ui/Button'
 import Logo from '@/components/ui/Logo.tsx'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
 import SidebarLink from '@/components/ui/Navigation/Sidebar/SidebarLink.tsx'
+import { useSidebarStore } from '@/components/ui/Navigation/Sidebar/use-sidebar-store.ts'
 
 
 interface Props {
@@ -12,34 +19,44 @@ interface Props {
 }
 
 const Sidebar = ({ routes }: Props) => {
-    const [expanded, setExpanded] = useState(false)
+    const { expanded, setExpanded, keepExpanded, setKeepExpanded } =
+        useSidebarStore(
+            useShallow(state => ({
+                expanded: state.expanded,
+                setExpanded: state.setExpanded,
+                keepExpanded: state.keepExpanded,
+                setKeepExpanded: state.setKeepExpanded,
+            }))
+        )
 
     return (
-        <div className={'w-14'}>
-            <aside
-                data-state={expanded ? 'expanded' : 'collapsed'}
-                className='transition-width group fixed inset-y-0 left-0 z-50 hidden w-14 flex-col overflow-y-auto border-r bg-background duration-200 data-[state=expanded]:w-[13rem] data-[state=expanded]:shadow-xl sm:flex'
+        <aside
+            data-state={expanded ? 'expanded' : 'collapsed'}
+            data-keep-expanded={keepExpanded}
+            className={
+                'group hidden h-full w-14 data-[keep-expanded=true]:w-[13rem] sm:block'
+            }
+        >
+            <div
+                className={cn(
+                    'transition-width fixed inset-y-0 left-0 z-50 flex w-14 flex-col overflow-y-auto border-r bg-background duration-200',
+                    'group-data-[state=expanded]:w-[13rem] group-data-[state=expanded]:shadow-xl',
+                    'group-data-[keep-expanded=true]:w-[13rem] group-data-[keep-expanded=true]:shadow-none'
+                )}
                 onMouseEnter={() => setExpanded(true)}
                 onMouseLeave={() => setExpanded(false)}
             >
                 <nav className='flex flex-col justify-start gap-2 px-2 sm:py-5'>
-                    <div className={'w-full px-0.5'}>
-                        <Link
-                            to='/'
-                            className='relative flex h-9 w-full shrink-0 items-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground group-data-[state=expanded]:justify-center md:text-base'
+                    <Link to={'/'} className='mx-1'>
+                        <span
+                            className={
+                                'grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground'
+                            }
                         >
-                            <span
-                                className={
-                                    'absolute left-0 grid h-9 w-9 place-items-center'
-                                }
-                            >
-                                <Logo className='h-4 w-4 transition-all' />
-                            </span>
-                            <span className='absolute min-w-[11rem] text-center opacity-0 transition-all group-data-[state=expanded]:opacity-100'>
-                                Convoy Panel
-                            </span>
-                        </Link>
-                    </div>
+                            <Logo className='h-4 w-4' />
+                        </span>
+                        <span className='sr-only'>Convoy Panel</span>
+                    </Link>
 
                     {routes.map(route => (
                         <SidebarLink
@@ -49,15 +66,30 @@ const Sidebar = ({ routes }: Props) => {
                         />
                     ))}
                 </nav>
-                <nav className='mt-auto flex flex-col items-center gap-4 px-2 sm:py-5'>
+                <nav className='mt-auto flex items-center gap-0.5 px-2 sm:py-5'>
                     <SidebarLink
                         to={'/settings'}
                         icon={IconSettings}
                         label={'Settings'}
+                        className={'rounded-r-none'}
                     />
+                    <Button
+                        className={
+                            'h-10 rounded-l-none text-muted-foreground opacity-0 transition-all hover:text-foreground group-data-[keep-expanded=true]:opacity-100 group-data-[state=expanded]:opacity-100'
+                        }
+                        variant={'ghost'}
+                        size={'icon'}
+                        onClick={() => setKeepExpanded(!keepExpanded)}
+                    >
+                        {keepExpanded ? (
+                            <IconChevronLeft className={'h-4 w-4'} />
+                        ) : (
+                            <IconChevronRight className={'h-4 w-4'} />
+                        )}
+                    </Button>
                 </nav>
-            </aside>
-        </div>
+            </div>
+        </aside>
     )
 }
 
