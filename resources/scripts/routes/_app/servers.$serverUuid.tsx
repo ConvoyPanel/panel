@@ -1,3 +1,4 @@
+import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
 import {
     IconBinaryTree,
@@ -12,19 +13,19 @@ import {
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-import { preloadServer } from '@/api/servers/use-server-swr.ts'
+import useServerSWR, { preloadServer } from '@/api/servers/use-server-swr.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
 import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
-import NotFound from '@/components/ui/Navigation/NotFound.tsx'
 
 export const Route = createFileRoute('/_app/servers/$serverUuid')({
     loader: ({ params: { serverUuid } }) =>
         preloadServer(serverUuid).catch(processAxiosError),
-    notFoundComponent: NotFound,
     component: () => {
         const { serverUuid } = Route.useParams()
+        const { data: server } = useServerSWR(serverUuid)
+        useTitle(server?.name)
 
         const routes: RouteDef[] = [
             {

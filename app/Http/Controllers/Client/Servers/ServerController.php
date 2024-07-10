@@ -14,7 +14,6 @@ use Convoy\Services\Coterm\CotermJWTService;
 use Convoy\Services\Servers\ServerConsoleService;
 use Convoy\Services\Servers\ServerDetailService;
 use Convoy\Services\Servers\VncService;
-use Convoy\Transformers\Client\OldServerTransformer;
 use Convoy\Transformers\Client\ServerDetailTransformer;
 use Convoy\Transformers\Client\ServerStateTransformer;
 use Convoy\Transformers\Client\ServerTerminalTransformer;
@@ -49,7 +48,7 @@ class ServerController extends ApiController
 
     public function show(Server $server)
     {
-        return fractal($server, new OldServerTransformer())->respond();
+        return fractal($server, new ServerTransformer())->respond();
     }
 
     public function details(Server $server)

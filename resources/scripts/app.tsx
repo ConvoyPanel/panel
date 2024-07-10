@@ -5,11 +5,14 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
+import NotFound from '@/components/ui/Navigation/NotFound.tsx'
+
 import { routeTree } from './routeTree.gen'
 
 
 const router = createRouter({
     routeTree,
+    defaultNotFoundComponent: NotFound,
 })
 
 declare module '@tanstack/react-router' {

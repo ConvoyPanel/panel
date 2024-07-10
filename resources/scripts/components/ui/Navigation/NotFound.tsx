@@ -16,7 +16,7 @@ const NotFound = () => {
         >
             <Lighthouse
                 className={
-                    'fixed bottom-4 -right-2 z-0 w-[20rem] text-muted-foreground/10 md:w-[40rem]'
+                    'fixed bottom-4 right-0 -z-10 w-[20rem] text-muted-foreground/10 sm:w-[30rem] md:w-[40rem]'
                 }
             />
             <h1 className={'text-sm font-semibold'}>404</h1>

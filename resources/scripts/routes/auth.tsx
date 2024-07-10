@@ -1,3 +1,4 @@
+import useTitle from '@/hooks/use-title.ts'
 import { AuthenticatedUser } from '@/types/user.ts'
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { Cache, cache as SWRCache } from 'swr/_internal'
@@ -27,6 +28,8 @@ export const Route = createFileRoute('/auth')({
 })
 
 function AuthLayout() {
+    useTitle()
+
     return (
         <div className={'flex h-full justify-center px-4'}>
             <div className={'w-full pt-6 sm:w-96 md:pt-14 lg:w-[30rem]'}>

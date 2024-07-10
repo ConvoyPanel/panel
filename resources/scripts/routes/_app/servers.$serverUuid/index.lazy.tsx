@@ -1,8 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useServerSWR from '@/api/servers/use-server-swr.ts'
-
-import { Heading } from '@/components/ui/Typography'
+import Header from '@/components/interfaces/Server/Overview/Header.tsx'
+import Statistics from '@/components/interfaces/Server/Overview/Statistics.tsx'
 
 
 export const Route = createLazyFileRoute('/_app/servers/$serverUuid/')({
@@ -12,13 +11,10 @@ export const Route = createLazyFileRoute('/_app/servers/$serverUuid/')({
 })
 
 function ServerOverview() {
-    const { serverUuid } = Route.useParams()
-    const { data: server } = useServerSWR(serverUuid)
-
     return (
         <>
-            <Heading className={'max-w-md truncate'}>{server?.name}</Heading>
-            <p className={''}></p>
+            <Header />
+            <Statistics />
         </>
     )
 }
