@@ -55,7 +55,7 @@ const Statistics = () => {
                     <span className={'text-xl font-bold'}>
                         {bandwidthUsage.value} {bandwidthUsage.unit}
                     </span>
-                    <span className={'ml-2 mt-0.5 text-xs'}>
+                    <span className={'ml-1.5 mt-0.5 text-xs'}>
                         / {bandwidthLimit.value} {bandwidthLimit.unit}
                     </span>
                 </p>
