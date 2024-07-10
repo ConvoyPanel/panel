@@ -52,7 +52,7 @@ const Statistics = () => {
                 icon={IconWifi}
             >
                 <p className={'flex'}>
-                    <span className={'text-2xl font-bold'}>
+                    <span className={'text-xl font-bold'}>
                         {bandwidthUsage.value} {bandwidthUsage.unit}
                     </span>
                     <span className={'ml-2 mt-0.5 text-xs'}>
