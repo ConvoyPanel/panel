@@ -2,8 +2,8 @@ import { IconLayoutSidebar } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
+import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
-import Logo from '@/components/ui/Logo.tsx'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet'
 

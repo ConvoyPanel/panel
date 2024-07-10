@@ -13,6 +13,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/_app')({
     validateSearch: searchSchema,
     beforeLoad: async ({ location }) => {
+        // I don't like how I'm accessing internal functions here. Rewrite this if this portion ever needs to be edited
         const cache: Cache<AuthenticatedUser> = SWRCache
 
         await cacheUser().catch(_ => {})

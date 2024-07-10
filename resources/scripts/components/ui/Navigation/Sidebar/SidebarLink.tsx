@@ -1,5 +1,5 @@
 import { cn } from '@/utils'
-import { Link } from '@tanstack/react-router'
+import { Link, LinkOptions } from '@tanstack/react-router'
 
 import { TablerIcon } from '@/lib/tabler.ts'
 
@@ -7,13 +7,21 @@ interface Props {
     to: string
     icon: TablerIcon
     label: string
+    activeOptions?: LinkOptions['activeOptions']
     className?: string
 }
 
-const SidebarLink = ({ to, icon: Icon, label, className }: Props) => {
+const SidebarLink = ({
+    to,
+    icon: Icon,
+    label,
+    activeOptions,
+    className,
+}: Props) => {
     return (
         <Link
             to={to}
+            activeOptions={activeOptions}
             className={cn(
                 'relative flex h-10 w-full items-center rounded-lg transition-colors hover:bg-accent hover:text-foreground',
                 className

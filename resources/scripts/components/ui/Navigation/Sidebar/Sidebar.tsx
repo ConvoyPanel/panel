@@ -7,8 +7,8 @@ import {
 import { Link } from '@tanstack/react-router'
 import { useShallow } from 'zustand/react/shallow'
 
+import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
-import Logo from '@/components/ui/Logo.tsx'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
 import SidebarLink from '@/components/ui/Navigation/Sidebar/SidebarLink.tsx'
 import { useSidebarStore } from '@/components/ui/Navigation/Sidebar/use-sidebar-store.ts'
@@ -29,6 +29,12 @@ const Sidebar = ({ routes }: Props) => {
             }))
         )
 
+    const setExpandedIfNotKeepExpanded = (value: boolean) => {
+        if (!keepExpanded) {
+            setExpanded(value)
+        }
+    }
+
     return (
         <aside
             data-state={expanded ? 'expanded' : 'collapsed'}
@@ -43,8 +49,8 @@ const Sidebar = ({ routes }: Props) => {
                     'group-data-[state=expanded]:w-[13rem] group-data-[state=expanded]:shadow-xl',
                     'group-data-[keep-expanded=true]:w-[13rem] group-data-[keep-expanded=true]:shadow-none'
                 )}
-                onMouseEnter={() => setExpanded(true)}
-                onMouseLeave={() => setExpanded(false)}
+                onMouseEnter={() => setExpandedIfNotKeepExpanded(true)}
+                onMouseLeave={() => setExpandedIfNotKeepExpanded(false)}
             >
                 <nav className='flex flex-col justify-start gap-2 px-2 sm:py-5'>
                     <Link to={'/'} className='mx-1'>
@@ -60,9 +66,11 @@ const Sidebar = ({ routes }: Props) => {
 
                     {routes.map(route => (
                         <SidebarLink
+                            key={route.path}
                             to={route.path}
                             icon={route.icon}
                             label={route.label}
+                            activeOptions={route.activeOptions}
                         />
                     ))}
                 </nav>

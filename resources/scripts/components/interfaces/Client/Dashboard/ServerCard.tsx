@@ -1,3 +1,4 @@
+import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
 import { Server } from '@/types/server.ts'
 import {
     IconAirConditioningDisabled,
@@ -35,8 +36,10 @@ const ServerCard = ({ server }: Props) => {
                 }
             >
                 <Link
-                    // @ts-expect-error
-                    to={`/servers/${server.uuidShort}`}
+                    to={ServerIndexRoute.to}
+                    params={{
+                        serverUuid: server.uuidShort,
+                    }}
                     className={'font-semibold'}
                 >
                     {server.name}

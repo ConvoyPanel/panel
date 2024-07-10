@@ -4,6 +4,7 @@ import { useRouter } from '@tanstack/react-router'
 import logout from '@/api/auth/logout.ts'
 import useUserSWR from '@/api/auth/use-user-swr.ts'
 
+import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
 import {
     DropdownMenu,
@@ -13,7 +14,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import Logo from '@/components/ui/Logo.tsx'
 import {
     Select,
     SelectContent,

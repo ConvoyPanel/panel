@@ -1,11 +1,13 @@
 import { Outlet, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import NotFound from '@/components/ui/Navigation/NotFound.tsx'
 import { TooltipProvider } from '@/components/ui/Tooltip.tsx'
 
 
 export const Route = createRootRoute({
     component: RootComponent,
+    notFoundComponent: NotFound,
 })
 
 function RootComponent() {

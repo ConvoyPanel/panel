@@ -17,7 +17,7 @@ const AppLayout = ({ routes, children }: Props) => {
                 <Header routes={routes} />
                 <main
                     className={
-                        'flex flex-col gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'
+                        'flex h-full flex-col gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'
                     }
                 >
                     {children}

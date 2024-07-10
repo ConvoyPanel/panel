@@ -1,3 +1,7 @@
+import { notFound } from '@tanstack/react-router'
+import { AxiosError } from 'axios'
+
+
 export interface FractalResponseData {
     [k: string]: any
 }
@@ -94,5 +98,11 @@ export const withQueryBuilderParams = (
         ...filters,
         sort: !sorts.length ? undefined : sorts.join(','),
         page: data.page,
+    }
+}
+
+export const processAxiosError = (error: AxiosError) => {
+    if (error.response?.status === 404) {
+        throw notFound()
     }
 }

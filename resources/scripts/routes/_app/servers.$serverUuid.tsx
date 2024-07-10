@@ -1,3 +1,4 @@
+import { processAxiosError } from '@/utils/http.ts'
 import {
     IconBinaryTree,
     IconChartBar,
@@ -16,9 +17,12 @@ import { preloadServer } from '@/api/servers/use-server-swr.ts'
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
 import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
+import NotFound from '@/components/ui/Navigation/NotFound.tsx'
 
 export const Route = createFileRoute('/_app/servers/$serverUuid')({
-    loader: ({ params: { serverUuid } }) => preloadServer(serverUuid),
+    loader: ({ params: { serverUuid } }) =>
+        preloadServer(serverUuid).catch(processAxiosError),
+    notFoundComponent: NotFound,
     component: () => {
         const { serverUuid } = Route.useParams()
 
@@ -26,7 +30,10 @@ export const Route = createFileRoute('/_app/servers/$serverUuid')({
             {
                 icon: IconLayoutGrid,
                 label: 'Overview',
-                path: `/servers/${serverUuid}/`,
+                path: `/servers/${serverUuid}`,
+                activeOptions: {
+                    exact: true,
+                },
             },
             {
                 icon: IconChartBar,
