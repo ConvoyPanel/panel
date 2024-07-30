@@ -2,9 +2,9 @@
 
 namespace Convoy\Providers;
 
-use Laravel\Sanctum\Sanctum;
 use Convoy\Models\PersonalAccessToken;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {

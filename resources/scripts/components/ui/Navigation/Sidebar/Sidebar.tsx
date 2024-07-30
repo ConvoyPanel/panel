@@ -40,7 +40,7 @@ const Sidebar = ({ routes }: Props) => {
             data-state={expanded ? 'expanded' : 'collapsed'}
             data-keep-expanded={keepExpanded}
             className={
-                'group hidden h-full w-14 data-[keep-expanded=true]:w-[13rem] sm:block'
+                'group hidden h-full w-14 shrink-0 data-[keep-expanded=true]:w-[13rem] sm:block'
             }
         >
             <div

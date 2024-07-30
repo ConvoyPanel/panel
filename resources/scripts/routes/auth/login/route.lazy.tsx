@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconBrandOauth } from '@tabler/icons-react'
+import { IconKey } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -86,8 +86,8 @@ function Login() {
                             </div>
                         </div>
                         <Button className={'w-full'} variant='outline'>
-                            <IconBrandOauth className='mr-2 h-4 w-4' />
-                            OIDC Provider
+                            <IconKey className='mr-2 h-4 w-4' />
+                            Passkeys
                         </Button>
                     </CardFooter>
                 </form>

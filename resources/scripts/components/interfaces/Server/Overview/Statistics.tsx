@@ -51,11 +51,11 @@ const Statistics = () => {
                 title={'Bandwidth Allowance'}
                 icon={IconWifi}
             >
-                <p className={'flex'}>
-                    <span className={'text-xl font-bold'}>
+                <p className={'flex truncate'}>
+                    <span className={'text-lg font-bold'}>
                         {bandwidthUsage.value} {bandwidthUsage.unit}
                     </span>
-                    <span className={'ml-1.5 mt-0.5 text-xs'}>
+                    <span className={'ml-1.5 mt-1 text-xs'}>
                         / {bandwidthLimit.value} {bandwidthLimit.unit}
                     </span>
                 </p>

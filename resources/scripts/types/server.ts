@@ -1,4 +1,4 @@
-import {PaginatedResult} from "@/utils/http.ts";
+import { PaginatedResult } from '@/utils/http.ts'
 
 export type ServerLifecycleStatus =
     | 'installing'
@@ -31,3 +31,13 @@ export interface Server {
 }
 
 export type PaginatedServers = PaginatedResult<Server>
+
+export type ServerState = 'running' | 'stopped'
+
+export interface ServerStateData {
+    state: ServerState
+    cpuUsed: number
+    memoryTotal: number
+    memoryUsed: number
+    uptime: number
+}
