@@ -65,6 +65,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-essentials": "^9.1.2",
     "twin.macro": "^3.1.0",
+    "vaul": "^0.9.1",
     "vite": "^5.1.6",
     "yup": "^0.32.11",
     "zod": "^3.22.4",
