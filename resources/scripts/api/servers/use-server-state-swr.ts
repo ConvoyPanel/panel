@@ -11,7 +11,7 @@ const useServerStateSWR = (uuid?: string) => {
     const serverUuid = uuid ?? params.serverUuid
 
     return useSWR(getKey(serverUuid), () => getState(serverUuid), {
-        refreshInterval: 500,
+        refreshInterval: 50,
     })
 }
 

@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/Button'
 const Toolbar = () => {
     const { data } = useServerStateSWR()
 
-    console.log(data)
-
     return (
         <div
             className={
