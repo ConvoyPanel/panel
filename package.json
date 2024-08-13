@@ -31,7 +31,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@tabler/icons-react": "^3.0.2",
+    "@tabler/icons-react": "^3.12.0",
     "@tailwindcss/forms": "^0.5.2",
     "@tanstack/react-router": "^1.24.0",
     "@tanstack/react-table": "^8.7.0",
@@ -73,6 +73,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
     "@trivago/prettier-plugin-sort-imports": "^4.2.1",
     "@types/byte-size": "^8.1.2",
     "@types/debounce": "^1.2.1",

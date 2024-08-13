@@ -7,15 +7,7 @@ import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
 import { Button } from '@/components/ui/Button'
-import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+
 
 const actions = {
     start: {
@@ -113,33 +105,6 @@ const Toolbar = () => {
                     Shutdown
                 </Button>
             </div>
-
-            <Credenza
-                open={Boolean(selectedAction)}
-                onOpenChange={() => setSelectedAction(null)}
-            >
-                <CredenzaContent>
-                    <CredenzaHeader>
-                        <CredenzaTitle>
-                            {selectedActionData?.title}
-                        </CredenzaTitle>
-                        <CredenzaDescription>
-                            {selectedActionData?.description}
-                        </CredenzaDescription>
-                    </CredenzaHeader>
-                    <CredenzaFooter>
-                        <CredenzaClose asChild>
-                            <Button
-                                loading={isMutating}
-                                variant={'destructive'}
-                                onClick={() => trigger(selectedAction!)}
-                            >
-                                {selectedActionData?.buttonText}
-                            </Button>
-                        </CredenzaClose>
-                    </CredenzaFooter>
-                </CredenzaContent>
-            </Credenza>
         </>
     )
 }

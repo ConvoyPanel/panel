@@ -78,9 +78,19 @@ const config = {
             fontFamily: {
                 sans: ['Geist Sans', ...defaultTheme.fontFamily.sans],
             },
+            containers: {
+                'sm': '640px',
+                'md': '768px',
+                'lg': '1024px',
+                'xl': '1280px',
+                '2xl': '1536px',
+            },
         },
     },
-    plugins: [require('tailwindcss-animate')],
+    plugins: [
+        require('tailwindcss-animate'),
+        require('@tailwindcss/container-queries'),
+    ],
 }
 
 module.exports = config
