@@ -14,9 +14,6 @@ Route::prefix('/servers/{server}')->middleware(
 )->group(function () {
     Route::get('/', [Client\Servers\ServerController::class, 'show'])
          ->name('servers.show');
-    Route::get(
-        '/details', [Client\Servers\ServerController::class, 'details'],
-    );
 
     Route::get(
         '/state', [Client\Servers\ServerController::class, 'getState'],
@@ -29,6 +26,9 @@ Route::prefix('/servers/{server}')->middleware(
         '/create-console-session',
         [Client\Servers\ServerController::class, 'createConsoleSession'],
     );
+
+    Route::get('/addresses', Client\Servers\AddressController::class);
+
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);

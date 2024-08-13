@@ -26,7 +26,11 @@ const SimpleEmptyState = ({
             />
             <h3 className={'mt-3 text-sm font-semibold'}>{title}</h3>
             {description && (
-                <p className={'mt-0.5 text-sm text-muted-foreground'}>
+                <p
+                    className={
+                        'mx-auto mt-0.5 max-w-md text-sm text-muted-foreground'
+                    }
+                >
                     {description}
                 </p>
             )}
