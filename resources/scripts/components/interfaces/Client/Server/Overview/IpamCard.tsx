@@ -43,6 +43,7 @@ const Cell = ({
                 role='button'
                 tabIndex={0}
                 className={'cursor-pointer select-none truncate text-sm'}
+                aria-label={`Click to copy ${title} ${description}`}
                 onClick={copy}
                 onKeyDown={handleKeyDown}
             >

@@ -1,9 +1,8 @@
 import { cn } from '@/utils'
 
+import ConsoleButton from '@/components/interfaces/Client/Server/Overview/ConsoleButton.tsx'
 import PowerActionsDropdown from '@/components/interfaces/Client/Server/Overview/PowerActionsDropdown.tsx'
 import PowerActionsExpanded from '@/components/interfaces/Client/Server/Overview/PowerActionsExpanded.tsx'
-
-import { Button } from '@/components/ui/Button'
 
 
 export const actions = {
@@ -47,7 +46,7 @@ const Toolbar = ({ className }: Props) => {
                     className
                 )}
             >
-                <Button variant={'outline'}>Console</Button>
+                <ConsoleButton />
                 <PowerActionsDropdown />
                 <PowerActionsExpanded />
             </div>
