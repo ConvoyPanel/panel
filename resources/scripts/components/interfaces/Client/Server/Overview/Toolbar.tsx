@@ -1,11 +1,12 @@
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import { cn } from '@/utils'
 
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import PowerActionsDropdown from '@/components/interfaces/Client/Server/Overview/PowerActionsDropdown.tsx'
+import PowerActionsExpanded from '@/components/interfaces/Client/Server/Overview/PowerActionsExpanded.tsx'
+
 import { Button } from '@/components/ui/Button'
 
 
-const actions = {
+export const actions = {
     start: {
         buttonText: 'Start server',
         toastText: 'Server queued to start',
@@ -33,75 +34,22 @@ const actions = {
     },
 }
 
-const Toolbar = () => {
-    const confirm = useConfirmationStore(state => state.confirm)
-    const { data: server } = useServerSWR()
-    const { data } = useServerStateSWR()
-    // const [selectedAction, setSelectedAction] = useState<PowerAction | null>(
-    //     null
-    // )
-    // const selectedActionData = selectedAction ? actions[selectedAction] : null
-    //
-    // const handlePowerAction = async (
-    //     _: any,
-    //     { arg: action }: { arg: PowerAction }
-    // ) => {
-    //     try {
-    //         await updateState(server!.uuid, action)
-    //
-    //         toast({ description: selectedActionData?.toastText })
-    //     } catch (e) {
-    //         toast({
-    //             // @ts-ignore
-    //             description: `Power action failed: ${e.message}`,
-    //             variant: 'destructive',
-    //         })
-    //     } finally {
-    //         setSelectedAction(null)
-    //     }
-    // }
+interface Props {
+    className?: string
+}
 
-    // const { trigger, isMutating } = useSWRMutation(
-    //     ['server.state.update', server?.uuid],
-    //     handlePowerAction
-    // )
-
-    const test = async () => {
-        console.log(await confirm({ title: 'test' }))
-    }
-
+const Toolbar = ({ className }: Props) => {
     return (
         <>
             <div
-                className={
-                    'grid grid-cols-2 items-center justify-end gap-2 sm:flex'
-                }
+                className={cn(
+                    'grid grid-cols-2 justify-end gap-2 @sm:flex',
+                    className
+                )}
             >
-                <Button
-                    variant={'outline'}
-                    disabled={!data || data?.state === 'running'}
-                >
-                    Start
-                </Button>
-                <Button
-                    variant={'outline'}
-                    disabled={!data || data?.state === 'stopped'}
-                    onClick={test}
-                >
-                    Restart
-                </Button>
-                <Button
-                    variant={'destructiveOutline'}
-                    disabled={!data || data?.state === 'stopped'}
-                >
-                    Kill
-                </Button>
-                <Button
-                    variant={'destructive'}
-                    disabled={!data || data?.state === 'stopped'}
-                >
-                    Shutdown
-                </Button>
+                <Button variant={'outline'}>Console</Button>
+                <PowerActionsDropdown />
+                <PowerActionsExpanded />
             </div>
         </>
     )

@@ -23,26 +23,23 @@ const Header = () => {
     }
 
     return (
-        <div
-            className={
-                'flex flex-col justify-between gap-6 md:flex-row md:items-end md:gap-2'
-            }
-        >
+        <div className={'flex flex-col gap-6'}>
             <div className={'overflow-hidden'}>
                 <Heading className={'mt-2 truncate sm:mt-3'}>
                     {server?.name}
                 </Heading>
-                <button
-                    onClick={copyHostname}
-                    className={
-                        'text-sm text-muted-foreground sm:mt-2 sm:text-base'
-                    }
-                    aria-label={`Click to copy hostname: ${server?.hostname}`}
-                >
-                    {server?.hostname}
-                </button>
+                <div className={'flex justify-between sm:mt-2 '}>
+                    <button
+                        onClick={copyHostname}
+                        className={'text-sm text-muted-foreground sm:text-base'}
+                        aria-label={`Click to copy hostname: ${server?.hostname}`}
+                    >
+                        {server?.hostname}
+                    </button>
+                    <Toolbar className={'hidden @sm:flex'} />
+                </div>
             </div>
-            <Toolbar />
+            <Toolbar className={'grid @sm:hidden'} />
         </div>
     )
 }
