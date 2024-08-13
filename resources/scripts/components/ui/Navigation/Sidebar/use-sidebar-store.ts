@@ -1,15 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface SidebarStore {
+interface SidebarState {
     keepExpanded: boolean
     setKeepExpanded: (keepExpanded: boolean) => void
     expanded: boolean
     setExpanded: (expanded: boolean) => void
 }
 
-export const useSidebarStore = create(
-    persist<SidebarStore>(
+const useSidebarStore = create(
+    persist<SidebarState>(
         set => ({
             keepExpanded: false,
             setKeepExpanded: (keepExpanded: boolean) => set({ keepExpanded }),
@@ -21,3 +21,5 @@ export const useSidebarStore = create(
         }
     )
 )
+
+export default useSidebarStore

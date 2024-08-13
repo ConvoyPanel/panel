@@ -11,7 +11,7 @@ import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
 import SidebarLink from '@/components/ui/Navigation/Sidebar/SidebarLink.tsx'
-import { useSidebarStore } from '@/components/ui/Navigation/Sidebar/use-sidebar-store.ts'
+import useSidebarStore from '@/components/ui/Navigation/Sidebar/use-sidebar-store.ts'
 
 
 interface Props {
