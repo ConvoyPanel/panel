@@ -7,6 +7,7 @@ import ToastDescription from './ToastDescription.tsx'
 import ToastTitle from './ToastTitle.tsx'
 import ToastViewport from './ToastViewport.tsx'
 import Toaster from './Toaster.tsx'
+import { toast, useToast } from './use-toast.ts'
 
 
 export {
@@ -20,4 +21,6 @@ export {
     ToastDescription,
     ToastClose,
     ToastAction,
+    useToast,
+    toast,
 }
