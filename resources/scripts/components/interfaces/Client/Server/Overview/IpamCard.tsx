@@ -1,5 +1,5 @@
 import { Address } from '@/types/address.ts'
-import { IconWifi } from '@tabler/icons-react'
+import { IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
 
 import useAddressesSWR from '@/api/servers/use-addresses-swr.ts'
@@ -59,7 +59,7 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
 
         return (
             <SimpleEmptyState
-                icon={IconWifi}
+                icon={IconWifiOff}
                 title={'No IP Addresses'}
                 description={
                     'Your server does not have any IP addresses assigned to it. Network connectivity may not be available.'
