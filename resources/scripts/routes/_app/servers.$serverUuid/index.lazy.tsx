@@ -1,5 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
+import BandwidthUsageCard from '@/components/interfaces/Client/Server/Overview/BandwidthUsageCard.tsx'
 import Header from '@/components/interfaces/Client/Server/Overview/Header.tsx'
 import Statistics from '@/components/interfaces/Client/Server/Overview/Statistics.tsx'
 
@@ -15,6 +16,9 @@ function ServerOverview() {
         <>
             <Header />
             <Statistics />
+            <div className={'grid grid-cols-2 gap-2 @md:grid-cols-4 @md:gap-4'}>
+                <BandwidthUsageCard />
+            </div>
         </>
     )
 }
