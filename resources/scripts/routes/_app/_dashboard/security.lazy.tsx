@@ -11,7 +11,7 @@ export const Route = createLazyFileRoute('/_app/_dashboard/security')({
     component: () => (
         <>
             <Heading>Security</Heading>
-            <div className={'grid grid-cols-1 gap-5 md:grid-cols-2'}>
+            <div className={'@md:grid-cols-2 grid grid-cols-1 gap-5'}>
                 <KeychainCard />
                 <AuthenticationCard />
                 <SessionListCard />
