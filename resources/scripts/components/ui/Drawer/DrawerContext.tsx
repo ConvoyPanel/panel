@@ -2,7 +2,7 @@ import { cn } from '@/utils'
 import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
-import { DrawerOverlay, DrawerPortal } from '@/components/ui/drawer.tsx'
+import { DrawerOverlay, DrawerPortal } from '@/components/ui/Drawer/index.ts'
 
 
 const DrawerContent = forwardRef<

@@ -8,7 +8,7 @@ import byteSize from 'byte-size'
 
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
-import StatisticCard from '@/components/interfaces/Server/Overview/StatisticCard.tsx'
+import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
 import Progress from '@/components/ui/Progress.tsx'
 
