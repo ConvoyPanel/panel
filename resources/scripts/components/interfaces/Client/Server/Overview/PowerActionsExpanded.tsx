@@ -1,5 +1,3 @@
-import { toast } from '@/hooks/use-toast.ts'
-
 import updateState, { PowerAction } from '@/api/servers/updateState.ts'
 import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
 import useServerSWR from '@/api/servers/use-server-swr.ts'
@@ -8,6 +6,7 @@ import { actions } from '@/components/interfaces/Client/Server/Overview/Toolbar.
 
 import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Button } from '@/components/ui/Button'
+import { toast } from '@/components/ui/Toast/use-toast.ts'
 
 
 const PowerActionsExpanded = () => {

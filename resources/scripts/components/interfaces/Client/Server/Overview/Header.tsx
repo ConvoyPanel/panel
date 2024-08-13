@@ -1,9 +1,8 @@
-import { toast } from '@/hooks/use-toast.ts'
-
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
 import Toolbar from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 
+import { toast } from '@/components/ui/Toast/use-toast.ts'
 import { Heading } from '@/components/ui/Typography'
 
 
