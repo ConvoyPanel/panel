@@ -14,14 +14,18 @@ const UptimeCard = () => {
     return (
         <StatisticCard title={'Uptime'} icon={IconStopwatch}>
             {state ? (
-                <p className={'@sm:text-2xl relative text-lg font-bold'}>
+                <p
+                    className={
+                        'relative truncate text-lg font-bold @sm:text-2xl'
+                    }
+                >
                     {formatDistance(
                         new Date(),
                         addSeconds(new Date(), state.uptime)
                     )}
                 </p>
             ) : (
-                <Skeleton className={'@sm:h-8 h-7 w-full'} />
+                <Skeleton className={'h-7 w-full @sm:h-8'} />
             )}
         </StatisticCard>
     )
