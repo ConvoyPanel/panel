@@ -81,7 +81,7 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
                         >
                             <Cell
                                 title={'Address'}
-                                description={address.address}
+                                description={`${address.address}/${address.cidr}`}
                                 className={'w-full @sm:max-w-[30%]'}
                             />
                             <Cell

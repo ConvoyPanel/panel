@@ -10,8 +10,6 @@ import StorageUsageCard from '@/components/interfaces/Client/Server/Overview/Sto
 
 export const Route = createLazyFileRoute('/_app/servers/$serverUuid/')({
     component: ServerOverview,
-    // @ts-ignore
-    meta: () => [{ title: 'Dashboard' }],
 })
 
 function ServerOverview() {
