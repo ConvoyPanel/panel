@@ -7,7 +7,6 @@ import StatisticCard from '@/components/interfaces/Client/Server/Overview/Statis
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-
 const MemoryUsageCard = () => {
     const { data: state } = useServerStateSWR()
 
@@ -32,14 +31,14 @@ const MemoryUsageCard = () => {
                     </span>
                     <span
                         className={
-                            '@sm:bottom-auto @sm:right-auto @sm:mt-1 absolute -bottom-2.5 right-0 ml-1.5 text-xs'
+                            'absolute -bottom-2.5 right-0 ml-1.5 text-xs text-muted-foreground @sm:bottom-auto @sm:right-auto @sm:mt-1'
                         }
                     >
                         / {total.value} {total.unit}
                     </span>
                 </p>
             ) : (
-                <Skeleton className={'@sm:h-8 h-7 w-full'} />
+                <Skeleton className={'h-7 w-full @sm:h-8'} />
             )}
         </StatisticCard>
     )
