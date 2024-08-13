@@ -12,6 +12,9 @@ import AlertDialogFooter from './AlertDialogFooter'
 import AlertDialogHeader from './AlertDialogHeader'
 import AlertDialogOverlay from './AlertDialogOverlay'
 import AlertDialogTitle from './AlertDialogTitle'
+import ConfirmDialog from './ConfirmDialog'
+import ConfirmDialogProvider from './ConfirmDialogProvider'
+import useConfirmationStore from './use-confirmation-store'
 
 export {
     AlertDialog,
@@ -25,4 +28,7 @@ export {
     AlertDialogDescription,
     AlertDialogAction,
     AlertDialogCancel,
+    useConfirmationStore,
+    ConfirmDialog,
+    ConfirmDialogProvider,
 }
