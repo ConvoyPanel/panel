@@ -1,6 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import LiveCpuUsageCard from '@/components/interfaces/Client/Server/Graphs/LiveCpuUsageCard.tsx'
+import LiveMemoryUsageCard from '@/components/interfaces/Client/Server/Graphs/LiveMemoryUsageCard.tsx'
 import Header from '@/components/interfaces/Client/Server/Overview/Header.tsx'
 import Statistics from '@/components/interfaces/Client/Server/Overview/Statistics.tsx'
 
@@ -16,8 +17,9 @@ function ServerGraphs() {
         <>
             <Header />
             <Statistics />
-            <div className={'grid grid-cols-1 gap-2 @md:grid-cols-2 @md:gap-4'}>
+            <div className={'grid grid-cols-1 gap-2 @md:grid-cols-4 @md:gap-4'}>
                 <LiveCpuUsageCard />
+                <LiveMemoryUsageCard />
             </div>
         </>
     )
