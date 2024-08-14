@@ -2,18 +2,24 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
-use Convoy\Enums\Server\MetricParameter;
-use Convoy\Enums\Server\MetricTimeframe;
+use Carbon\CarbonImmutable;
+use Convoy\Data\Server\Proxmox\Usages\ServerDiskData;
+use Convoy\Data\Server\Proxmox\Usages\ServerNetworkData;
+use Convoy\Data\Server\Proxmox\Usages\ServerTimepointData;
+use Convoy\Enums\Server\StatisticConsolidatorFunction;
+use Convoy\Enums\Server\StatisticTimeRange;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Support\Arr;
+use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
 
 class ProxmoxStatisticsRepository extends ProxmoxRepository
 {
     public function getStatistics(
-        MetricTimeframe $timeframe, MetricParameter $parameter = MetricParameter::AVERAGE,
-    ): array
+        StatisticTimeRange            $timeframe,
+        StatisticConsolidatorFunction $consolidator = StatisticConsolidatorFunction::AVERAGE,
+    ): DataCollection
     {
         Assert::isInstanceOf($this->server, Server::class);
 
@@ -24,19 +30,26 @@ class ProxmoxStatisticsRepository extends ProxmoxRepository
                          ])
                          ->get('/api2/json/nodes/{node}/qemu/{server}/rrddata', [
                              'timeframe' => $timeframe->value,
-                             'cf' => $parameter->value,
+                             'cf' => $consolidator->value,
                          ])
                          ->json();
 
-        return Arr::map($this->getData($response), function (array $metric) {
-            $metric['netin'] = array_key_exists('netin', $metric) ? intval(
-                floor($metric['netin']),
-            ) : 0;
-            $metric['netout'] = array_key_exists('netout', $metric) ? intval(
-                floor($metric['netout']),
-            ) : 0;
-
-            return $metric;
+        $test = Arr::map($this->getData($response), function (array $statistic) {
+            return new ServerTimepointData(
+                cpuUsed   : $statistic['cpu'] ?? 0,
+                memoryUsed: $statistic['mem'] ?? 0,
+                network   : new ServerNetworkData(
+                    in : $statistic['netin'] ?? 0,
+                    out: $statistic['netout'] ?? 0,
+                ),
+                disk      : new ServerDiskData(
+                    write: $statistic['diskwrite'] ?? 0,
+                    read : $statistic['diskread'] ?? 0,
+                ),
+                timestamp : CarbonImmutable::createFromTimestamp($statistic['time']),
+            );
         });
+
+        return ServerTimepointData::collection($test);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Convoy\Enums\Server;
 
-enum MetricParameter: string
+enum StatisticConsolidatorFunction: string
 {
     case AVERAGE = 'AVERAGE';
     case MAX = 'MAX';

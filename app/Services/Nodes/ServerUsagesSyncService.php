@@ -3,7 +3,8 @@
 namespace Convoy\Services\Nodes;
 
 use Carbon\Carbon;
-use Convoy\Enums\Server\MetricTimeframe;
+use Convoy\Data\Server\Proxmox\Usages\ServerTimepointData;
+use Convoy\Enums\Server\StatisticTimeRange;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
@@ -15,14 +16,14 @@ class ServerUsagesSyncService
     {
     }
 
-    public function handle(Node $node)
+    public function handle(Node $node): void
     {
         $servers = $node->servers;
 
         $servers->each(function (Server $server) {
             try {
-                $metrics = $this->repository->setServer($server)->getStatistics(
-                    MetricTimeframe::HOUR,
+                $timepoints = $this->repository->setServer($server)->getStatistics(
+                    StatisticTimeRange::HOUR_AGO,
                 );
 
                 $bandwidth = $server->bandwidth_usage;
@@ -30,12 +31,13 @@ class ServerUsagesSyncService
                     $server->hydrated_at,
                 ) : Carbon::now()->firstOfMonth();
 
-                foreach ($metrics as $metric) {
-                    if (Carbon::createFromTimestamp($metric['time'])->gt($endingDate)) {
+                foreach ($timepoints as $timepoint) {
+                    /* @var ServerTimepointData $timepoint */
+                    if ($timepoint->timestamp->gt($endingDate)) {
                         // we multiply it by 60 seconds because each metric is
                         // recorded every 1 minute but the values like netin and
                         // netout are in bytes/sec
-                        $bandwidth += (int)$metric['netin'] * 60 + (int)$metric['netout'] * 60;
+                        $bandwidth += $timepoint->network->in * 60 + $timepoint->network->out * 60;
                     }
                 }
 
