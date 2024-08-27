@@ -7,6 +7,7 @@ import StatisticCard from '@/components/interfaces/Client/Server/Overview/Statis
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
+
 const MemoryUsageCard = () => {
     const { data: state } = useServerStateSWR()
 
@@ -26,7 +27,11 @@ const MemoryUsageCard = () => {
         >
             {state ? (
                 <p className={'relative'}>
-                    <span className={'inline-block text-lg font-bold'}>
+                    <span
+                        className={
+                            'inline-block text-lg font-bold @xl:text-2xl'
+                        }
+                    >
                         {used.value} {used.unit}
                     </span>
                     <span

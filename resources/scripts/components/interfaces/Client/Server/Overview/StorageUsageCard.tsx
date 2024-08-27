@@ -36,7 +36,7 @@ const StorageUsageCard = () => {
             }
         >
             <p>
-                <span className={'text-lg font-bold @sm:text-xl'}>
+                <span className={'text-lg font-bold @sm:text-xl @xl:text-2xl'}>
                     {used.value} {used.unit} used
                 </span>
                 <span className={'block text-sm text-muted-foreground'}>
