@@ -29,7 +29,8 @@ Route::prefix('/servers/{server}')->middleware(
 
     Route::get('/addresses', Client\Servers\AddressController::class);
 
-
+    Route::get('/statistics', Client\Servers\StatisticController::class);
+    
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
         Route::post('/', [Client\Servers\BackupController::class, 'store'],

@@ -17,7 +17,7 @@ use Webmozart\Assert\Assert;
 class ProxmoxStatisticsRepository extends ProxmoxRepository
 {
     public function getStatistics(
-        StatisticTimeRange            $timeframe,
+        StatisticTimeRange            $from,
         StatisticConsolidatorFunction $consolidator = StatisticConsolidatorFunction::AVERAGE,
     ): DataCollection
     {
@@ -29,7 +29,7 @@ class ProxmoxStatisticsRepository extends ProxmoxRepository
                              'server' => $this->server->vmid,
                          ])
                          ->get('/api2/json/nodes/{node}/qemu/{server}/rrddata', [
-                             'timeframe' => $timeframe->value,
+                             'timeframe' => $from->value,
                              'cf' => $consolidator->value,
                          ])
                          ->json();
