@@ -44,7 +44,7 @@ const LiveMemoryUsageCard = () => {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={{}} className='min-h-[200px] w-full'>
+                <ChartContainer config={{}} className='min-h-[12rem] w-full'>
                     <AreaChart accessibilityLayer data={data}>
                         <YAxis
                             ticks={[0, total.size / 2, total.size]}
