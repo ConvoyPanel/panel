@@ -36,17 +36,17 @@ class ProxmoxStatisticsRepository extends ProxmoxRepository
 
         $test = Arr::map($this->getData($response), function (array $statistic) {
             return new ServerTimepointData(
-                cpuUsed   : $statistic['cpu'] ?? 0,
-                memoryUsed: $statistic['mem'] ?? 0,
-                network   : new ServerNetworkData(
+                cpu_used   : $statistic['cpu'] ?? 0,
+                memory_used: $statistic['mem'] ?? 0,
+                network    : new ServerNetworkData(
                     in : $statistic['netin'] ?? 0,
                     out: $statistic['netout'] ?? 0,
                 ),
-                disk      : new ServerDiskData(
+                disk       : new ServerDiskData(
                     write: $statistic['diskwrite'] ?? 0,
                     read : $statistic['diskread'] ?? 0,
                 ),
-                timestamp : CarbonImmutable::createFromTimestamp($statistic['time']),
+                timestamp  : CarbonImmutable::createFromTimestamp($statistic['time']),
             );
         });
 
