@@ -8,8 +8,8 @@ use Spatie\LaravelData\Data;
 class ServerTimepointData extends Data
 {
     public function __construct(
-        public int               $cpu_used,
-        public int               $memory_used,
+        public float             $cpu_used,
+        public float             $memory_used,
         public ServerNetworkData $network,
         public ServerDiskData    $disk,
         public CarbonImmutable   $timestamp,
