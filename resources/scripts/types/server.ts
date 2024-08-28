@@ -41,3 +41,17 @@ export interface ServerStateData {
     memoryUsed: number
     uptime: number
 }
+
+export interface ServerTimepointData {
+    cpuUsed: number
+    memoryUsed: number
+    network: {
+        in: number
+        out: number
+    }
+    disk: {
+        write: number
+        read: number
+    }
+    timestamp: Date
+}

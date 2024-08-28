@@ -1,4 +1,4 @@
-import { Server, ServerStateData } from '@/types/server.ts'
+import { Server, ServerStateData, ServerTimepointData } from '@/types/server.ts'
 
 export const rawDataToServer = (data: any): Server => ({
     id: data.id,
@@ -24,4 +24,20 @@ export const rawDataToServerStateData = (data: any): ServerStateData => ({
     memoryTotal: data.memory_total,
     memoryUsed: data.memory_used,
     uptime: data.uptime,
+})
+
+export const rawDataToServerTimepointData = (
+    data: any
+): ServerTimepointData => ({
+    cpuUsed: data.cpu_used,
+    memoryUsed: data.memory_used,
+    network: {
+        in: data.network_in,
+        out: data.network_out,
+    },
+    disk: {
+        write: data.disk_write,
+        read: data.disk_read,
+    },
+    timestamp: new Date(data.timestamp),
 })
