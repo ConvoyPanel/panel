@@ -16,7 +16,7 @@ export const getKey = (
 const useServerStatisticsSWR = (args: {
     uuid?: string
     from: TimeRange
-    consolidator: ConsolidatorFn
+    consolidator?: ConsolidatorFn
 }) => {
     const params = useParams({ strict: false }) as { serverUuid: string }
     const serverUuid = args.uuid ?? params.serverUuid

@@ -13,7 +13,7 @@ const getStatistics = async (
 ) => {
     const {
         data: { data },
-    } = await axios.get(`/servers/${uuid}/statistics`, {
+    } = await axios.get(`/api/client/servers/${uuid}/statistics`, {
         params: {
             from,
             consolidator,
