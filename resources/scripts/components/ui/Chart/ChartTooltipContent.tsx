@@ -15,6 +15,7 @@ const ChartTooltipContent = React.forwardRef<
             indicator?: 'line' | 'dot' | 'dashed'
             nameKey?: string
             labelKey?: string
+            styledFormatter?: (payload: any) => React.ReactNode
         }
 >(
     (
@@ -32,6 +33,7 @@ const ChartTooltipContent = React.forwardRef<
             color,
             nameKey,
             labelKey,
+            styledFormatter,
         },
         ref
     ) => {
@@ -127,7 +129,7 @@ const ChartTooltipContent = React.forwardRef<
                                             !hideIndicator && (
                                                 <div
                                                     className={cn(
-                                                        'shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]',
+                                                        'shrink-0 rounded-[2px] border-[var(--color-border)] bg-[var(--color-bg)]',
                                                         {
                                                             'h-2.5 w-2.5':
                                                                 indicator ===
@@ -174,7 +176,11 @@ const ChartTooltipContent = React.forwardRef<
                                             </div>
                                             {item.value && (
                                                 <span className='font-mono font-medium tabular-nums text-foreground'>
-                                                    {item.value.toLocaleString()}
+                                                    {styledFormatter
+                                                        ? styledFormatter(
+                                                              item.value
+                                                          )
+                                                        : item.value.toLocaleString()}
                                                 </span>
                                             )}
                                         </div>

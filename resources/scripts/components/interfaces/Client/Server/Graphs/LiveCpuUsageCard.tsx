@@ -49,7 +49,7 @@ const LiveCpuUsageCard = () => {
                             dataKey={'value'}
                             type={'monotone'}
                             stroke={'none'}
-                            fill='#3b82f6'
+                            fill='hsl(var(--chart-2))'
                         />
                     </AreaChart>
                 </ChartContainer>

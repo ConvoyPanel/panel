@@ -1,3 +1,5 @@
+import { ServerTimepointData } from '@/types/server.ts'
+
 import axios from '@/lib/axios.ts'
 
 import { rawDataToServerTimepointData } from '@/api/transformers/server.ts'
@@ -10,7 +12,7 @@ const getStatistics = async (
     uuid: string,
     from: TimeRange,
     consolidator: ConsolidatorFn = 'AVERAGE'
-) => {
+): Promise<ServerTimepointData[]> => {
     const {
         data: { data },
     } = await axios.get(`/api/client/servers/${uuid}/statistics`, {

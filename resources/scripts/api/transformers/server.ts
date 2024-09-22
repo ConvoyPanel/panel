@@ -32,12 +32,12 @@ export const rawDataToServerTimepointData = (
     cpuUsed: data.cpu_used,
     memoryUsed: data.memory_used,
     network: {
-        in: data.network_in,
-        out: data.network_out,
+        in: data.network.in,
+        out: data.network.out,
     },
     disk: {
-        write: data.disk_write,
-        read: data.disk_read,
+        write: data.disk.write,
+        read: data.disk.read,
     },
     timestamp: new Date(data.timestamp),
 })

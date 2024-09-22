@@ -1,5 +1,5 @@
-import { oldFormatBytes } from '@/utils'
-import { useEffect, useMemo, useState } from 'react'
+import byteSize from 'byte-size'
+import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, YAxis } from 'recharts'
 
 import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
@@ -11,16 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { ChartContainer } from '@/components/ui/Chart'
 
 
+const YTickFormatter = (bytes: number) => {
+    return byteSize(bytes, { units: 'iec', precision: 0 }).toString()
+}
+
 const LiveMemoryUsageCard = () => {
     const { data: server } = useServerSWR()
     const { data: state } = useServerStateSWR()
     const [data, setData] = useState(
         Array.from({ length: 10 }, () => ({ value: 0 }))
-    )
-
-    const total = useMemo(
-        () => oldFormatBytes(server?.memory ?? 0, 2),
-        [server?.memory]
     )
 
     useEffect(() => {
@@ -29,9 +28,7 @@ const LiveMemoryUsageCard = () => {
         setData(prev => {
             const next = [...prev]
             next.shift()
-            // @ts-ignore
-            const used = oldFormatBytes(state.memoryUsed, 2, total.unit)
-            next.push({ value: used.size })
+            next.push({ value: state.memoryUsed })
             return next
         })
     }, [state])
@@ -47,10 +44,12 @@ const LiveMemoryUsageCard = () => {
                 <ChartContainer config={{}} className='min-h-[12rem] w-full'>
                     <AreaChart accessibilityLayer data={data}>
                         <YAxis
-                            ticks={[0, total.size / 2, total.size]}
-                            unit={` ${total.unit}`}
+                            tickCount={4}
+                            tickFormatter={YTickFormatter}
+                            domain={[0, server?.memory ?? 0]}
                             axisLine={false}
-                            width={50}
+                            scale={'linear'}
+                            width={64}
                             interval='preserveStartEnd'
                         />
                         <CartesianGrid vertical={false} />
@@ -59,7 +58,7 @@ const LiveMemoryUsageCard = () => {
                             dataKey={'value'}
                             type={'monotone'}
                             stroke={'none'}
-                            fill='#3b82f6'
+                            fill='hsl(var(--chart-1))'
                         />
                     </AreaChart>
                 </ChartContainer>
