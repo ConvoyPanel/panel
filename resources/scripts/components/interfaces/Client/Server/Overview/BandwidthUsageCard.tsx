@@ -5,7 +5,7 @@ import useServerSWR from '@/api/servers/use-server-swr.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
-import Progress from '@/components/ui/Progress.tsx'
+import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 
 
 const BandwidthUsageCard = () => {
@@ -30,7 +30,7 @@ const BandwidthUsageCard = () => {
             icon={IconWifi}
             className={'col-span-2 @sm:col-span-1'}
             footer={
-                <Progress
+                <LinearProgressBar
                     value={bandwidthUsedPercent}
                     aria-label={`${bandwidthUsedPercent}% of your bandwidth allowance is used`}
                 />

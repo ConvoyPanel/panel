@@ -3,7 +3,7 @@ import byteSize from 'byte-size'
 
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
-import Progress from '@/components/ui/Progress.tsx'
+import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 
 import StatisticCard from './StatisticCard'
 
@@ -28,7 +28,7 @@ const StorageUsageCard = () => {
             icon={IconDatabase}
             className={'col-span-2 @sm:col-span-1'}
             footer={
-                <Progress
+                <LinearProgressBar
                     className={'bottom-0'}
                     value={usedPercent}
                     aria-label={`${usedPercent}% of your storage is used`}

@@ -1,0 +1,15 @@
+.quota-title {
+    @apply text-sm font-medium;
+}
+
+.quota-value {
+    @apply mt-2 mb-4;
+}
+
+.quota-value .quota-emphasized {
+    @apply block text-2xl font-bold text-foreground;
+}
+
+.quota-value span {
+    @apply text-muted-foreground;
+}

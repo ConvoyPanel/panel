@@ -70,6 +70,11 @@ class Server extends Model
         return $this->hasMany(Backup::class);
     }
 
+    public function snapshots(): HasMany
+    {
+        return $this->hasMany(Snapshot::class);
+    }
+
     public function deployments(): HasMany
     {
         return $this->hasMany(Deployment::class);

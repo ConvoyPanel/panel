@@ -5,11 +5,12 @@ namespace Convoy\Models;
 use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Backup extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+
+    const UPDATED_AT = null;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
@@ -25,7 +26,7 @@ class Backup extends Model
         'is_locked' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',
         'file_name' => 'nullable|string',
-        'size' => 'sometimes|numeric|min:0',
+        'size' => 'nullable|numeric|min:0',
         'completed_at' => 'nullable|date',
     ];
 

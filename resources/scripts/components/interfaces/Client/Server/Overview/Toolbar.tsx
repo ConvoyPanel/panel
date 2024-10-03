@@ -10,26 +10,28 @@ export const actions = {
         buttonText: 'Start server',
         toastText: 'Server queued to start',
         title: 'Start server?',
-        description: 'This action will start your server.',
+        description: 'This action will start your server',
     },
     restart: {
         buttonText: 'Restart server',
         toastText: 'Server queued to restart',
         title: 'Restart server?',
-        description: 'Make sure to save your work before restarting.',
+        description:
+            'Please save your work and close out of any running processes. Any unsaved changes will be lost, and active sessions may be interrupted. Proceed only when it is safe to restart',
     },
     kill: {
         buttonText: 'Kill server',
         toastText: 'Server queued to be killed',
         title: 'Kill server?',
-        description: 'Data may be lost if you kill your server.',
+        description:
+            'This action will immediately stop all processes, resulting in loss of any unsaved data. Ensure that all critical tasks are saved and completed before proceeding',
     },
     shutdown: {
         buttonText: 'Shutdown server',
         toastText: 'Server queued to be shutdown',
         title: 'Shutdown server?',
         description:
-            'Make sure to save your work before shutting down your server.',
+            'This will power off all services and processes, potentially causing data loss if there are unsaved changes. Please ensure all work is saved and close any active connections before proceeding',
     },
 }
 

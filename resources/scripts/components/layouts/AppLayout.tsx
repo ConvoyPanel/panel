@@ -15,8 +15,12 @@ const AppLayout = ({ routes, children }: Props) => {
             <Sidebar routes={routes} />
             <div className='flex grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
                 <Header routes={routes} />
-                <main className={'h-full  p-4 @container  sm:px-6 sm:py-0'}>
-                    <div className={'flex h-full flex-col gap-2 @md:gap-4'}>
+                <main className={'h-full @container'}>
+                    <div
+                        className={
+                            'flex h-full flex-col gap-2 p-4 @md:gap-4 sm:px-6 sm:py-0'
+                        }
+                    >
                         {children}
                     </div>
                 </main>
