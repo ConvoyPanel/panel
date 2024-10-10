@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -26,8 +26,8 @@ class Node extends Model
      */
     protected $casts = [
         'verify_tls' => 'boolean',
-        'memory' => MebibytesToAndFromBytes::class,
-        'disk' => MebibytesToAndFromBytes::class,
+        'memory' => StorageSizeCast::class,
+        'disk' => StorageSizeCast::class,
         'secret' => 'encrypted',
     ];
 
@@ -47,11 +47,6 @@ class Node extends Model
         'port' => 'required|integer|min:1|max:65535',
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
-        'disk' => 'required|integer',
-        'disk_overallocate' => 'required|integer',
-        'vm_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'backup_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'iso_storage' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
     ];

@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,7 +16,7 @@ class Backup extends Model
 
     protected $casts = [
         'completed_at' => 'datetime',
-        'size' => MebibytesToAndFromBytes::class,
+        'size' => StorageSizeCast::class,
     ];
 
     public static array $validationRules = [

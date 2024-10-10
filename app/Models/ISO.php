@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -17,7 +17,7 @@ class ISO extends Model
 
     protected $casts = [
         'is_successful' => 'boolean',
-        'size' => MebibytesToAndFromBytes::class,
+        'size' => StorageSizeCast::class,
         'hidden' => 'boolean',
     ];
 

@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\StorageSizeCast;
 use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,10 +16,10 @@ class Server extends Model
     use HasFactory;
 
     protected $casts = [
-        'memory' => MebibytesToAndFromBytes::class,
-        'disk' => MebibytesToAndFromBytes::class,
-        'bandwidth_usage' => MebibytesToAndFromBytes::class,
-        'bandwidth_limit' => MebibytesToAndFromBytes::class,
+        'memory' => StorageSizeCast::class,
+        'disk' => StorageSizeCast::class,
+        'bandwidth_usage' => StorageSizeCast::class,
+        'bandwidth_limit' => StorageSizeCast::class,
     ];
 
     protected $guarded = [
@@ -39,9 +39,11 @@ class Server extends Model
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
         'bandwidth_usage' => 'sometimes|numeric|min:0',
-        'snapshot_limit' => 'present|nullable|integer|min:0',
-        'backup_limit' => 'present|nullable|integer|min:0',
-        'bandwidth_limit' => 'present|nullable|integer|min:0',
+        'snapshot_count_limit' => 'required|integer|min:-1',
+        'snapshot_size_limit' => 'required|integer|min:-1',
+        'backup_count_limit' => 'required|integer|min:-1',
+        'backup_size_limit' => 'required|integer|min:-1',
+        'bandwidth_limit' => 'present|integer|min:-1',
         'hydrated_at' => 'nullable|date',
     ];
 

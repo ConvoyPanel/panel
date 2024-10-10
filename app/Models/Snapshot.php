@@ -2,7 +2,7 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
+use Convoy\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,14 +15,14 @@ class Snapshot extends Model
     const UPDATED_AT = null;
 
     protected $casts = [
-        'size' => MebibytesToAndFromBytes::class,
+        'size' => StorageSizeCast::class,
         'completed_at' => 'datetime',
     ];
 
     public static array $validationRules = [
         'server_id' => 'required|integer|exists:servers,id',
         'snapshot_id' => 'nullable|integer|exists:snapshots,id',
-        'name' => 'required|string|min:1|max:40',
+        'name' => 'required|string|max:40',
         'description' => 'nullable|string|max:191',
         'errors' => 'nullable|string|max:191',
         'is_locked' => 'sometimes|boolean',

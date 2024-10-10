@@ -21,11 +21,6 @@ class NodeFactory extends Factory
             'port' => 8006,
             'memory' => 68719476736, // 64 gb
             'memory_overallocate' => 0,
-            'disk' => 137438953472, // 128 gb
-            'disk_overallocate' => 0,
-            'vm_storage' => 'local',
-            'backup_storage' => 'local',
-            'iso_storage' => 'local',
             'network' => 'vmbr0',
             'coterm_id' => null,
         ];

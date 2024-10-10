@@ -2,17 +2,17 @@
 
 namespace Convoy\Casts;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 
-class MebibytesToAndFromBytes implements CastsAttributes
+class StorageSizeCast implements CastsAttributes
 {
     /**
      * Cast the given value.
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?int
     {
-        return !is_null($value) ? $value * 1048576 : $value; // Convert from megabytes to bytes
+        return $value >= 0 ? $value * 1048576 : -1; // Convert from megabytes to bytes
     }
 
     /**
@@ -20,6 +20,8 @@ class MebibytesToAndFromBytes implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): ?int
     {
-        return !is_null($value) ? intval(floor($value / 1048576)) : $value; // Convert from bytes to megabytes to prevent overflow
+        return $value >= 0 ? intval(
+            floor($value / 1048576),
+        ) : -1; // Convert from bytes to megabytes to prevent overflow
     }
 }

@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class AddressPool extends Model
 {
     use HasFactory;
-    
+
+    public $timestamps = false;
+
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     public static array $validationRules = [
