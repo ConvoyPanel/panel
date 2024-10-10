@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('description')->nullable();
             $table->string('name');
             $table->unsignedBigInteger('size');
-            $table->boolean('is_shared')->default(false);
+            $table->boolean('is_shareable')->default(false);
             $table->boolean('has_kvm');
             $table->boolean('has_lxc');
             $table->boolean('has_lxc_templates');
