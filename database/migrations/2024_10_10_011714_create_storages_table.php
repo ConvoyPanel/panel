@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('nickname')->nullable();
             $table->string('description')->nullable();
             $table->string('name');
-            $table->unsignedBigInteger('size');
+            $table->unsignedInteger('size');
             $table->boolean('is_shareable')->default(false);
             $table->boolean('has_kvm');
             $table->boolean('has_lxc');
