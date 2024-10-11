@@ -14,8 +14,19 @@ export const rawDataToServer = (data: any): Server => ({
     cpu: data.cpu,
     memory: data.memory,
     disk: data.disk,
-    bandwidthUsage: data.bandwidth_usage,
-    bandwidthLimit: data.bandwidth_limit,
+    snapshot: {
+        countLimit: data.snapshot_count_limit,
+        sizeLimit: data.snapshot_size_limit,
+    },
+    backup: {
+        countLimit: data.backup_count_limit,
+        sizeLimit: data.backup_size_limit,
+    },
+    bandwidth: {
+        usage: data.bandwidth_usage,
+        limit: data.bandwidth_limit,
+    },
+    createdAt: new Date(data.created_at),
 })
 
 export const rawDataToServerStateData = (data: any): ServerStateData => ({

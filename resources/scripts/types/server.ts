@@ -26,8 +26,19 @@ export interface Server {
     cpu: number
     memory: number
     disk: number
-    bandwidthUsage: number
-    bandwidthLimit: number | null
+    snapshot: {
+        countLimit: number
+        sizeLimit: number
+    }
+    backup: {
+        countLimit: number
+        sizeLimit: number
+    }
+    bandwidth: {
+        usage: number
+        limit: number
+    }
+    createdAt: Date
 }
 
 export type PaginatedServers = PaginatedResult<Server>

@@ -11,7 +11,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const SnapshotView = () => {
     const { data, isLoading } = useSnapshotsSWR()
-    const { containerRef, dimensions } = useContainerDimensions()
+    const { containerRef } = useContainerDimensions()
 
     if (isLoading) {
         return <Skeleton className={'h-96 w-full'} />

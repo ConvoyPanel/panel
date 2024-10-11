@@ -1,6 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import BackupQuotaSidebar from '@/components/interfaces/Client/Server/Backups/BackupQuotaSidebar.tsx'
+import BackupView from '@/components/interfaces/Client/Server/Backups/BackupView.tsx'
 
 import Heading from '@/components/ui/Typography/Heading.tsx'
 
@@ -16,6 +17,7 @@ function ServerBackups() {
         <>
             <Heading>Backups</Heading>
             <BackupQuotaSidebar />
+            <BackupView />
         </>
     )
 }

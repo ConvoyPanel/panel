@@ -11,7 +11,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/Sheet'
-import Skeleton from '@/components/ui/Skeleton.tsx'
 
 
 const quotas = [
@@ -42,6 +41,8 @@ const quotas = [
 const BackupQuotaSidebar = () => {
     const { data: server } = useServerSWR()
 
+    console.log({ styles })
+
     return (
         <>
             <div className={'flex justify-end'}>
@@ -62,40 +63,18 @@ const BackupQuotaSidebar = () => {
                     </SheetTrigger>
                     <SheetContent side={'right'}>
                         <SheetHeader>
-                            <SheetTitle>Snapshot Quota</SheetTitle>
+                            <SheetTitle>Backup Quota</SheetTitle>
                         </SheetHeader>
                         <dl className={'mt-4 flex flex-col gap-10'}>
-                            {server ? (
-                                <>
-                                    <div>
-                                        <dt className={styles.quotaSidebar}>
-                                            Count
-                                        </dt>
-                                        <dd className={styles.quotaValue}>
-                                            <span
-                                                className={
-                                                    styles.quotaEmphasized
-                                                }
-                                            ></span>
-                                        </dd>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <Skeleton />
-                                </>
-                            )}
-                            {/*{quotas.map(quota => (*/}
-                            {/*    <div key={quota.label}>*/}
-                            {/*        <dt className={'text-sm font-medium'}>*/}
-                            {/*            {quota.label}*/}
-                            {/*        </dt>*/}
-                            {/*        <dd className={'mt-2 mb-4'}>*/}
-                            {/*            {quota.value}*/}
-                            {/*        </dd>*/}
-                            {/*        {quota.footer}*/}
-                            {/*    </div>*/}
-                            {/*))}*/}
+                            <div>
+                                <dt className={styles.quotaSidebar}>Count</dt>
+                                <dd className={styles.quotaValue}>
+                                    <span className={styles.quotaEmphasized}>
+                                        3 snapshots
+                                    </span>
+                                    out of 10 snapshots
+                                </dd>
+                            </div>
                         </dl>
                     </SheetContent>
                 </Sheet>

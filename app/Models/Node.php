@@ -130,6 +130,13 @@ class Node extends Model
         return $this->belongsTo(Coterm::class);
     }
 
+    public function storages(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Storage::class, 'storage_to_node', 'node_id', 'storage_id',
+        );
+    }
+
     /**
      * Gets the total disk used from adding up all the associated servers' disk sizes.
      */

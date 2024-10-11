@@ -37,7 +37,7 @@ class Storage extends Model
     public function nodes(): BelongsToMany
     {
         return $this->belongsToMany(
-            Node::class, 'storage_to', 'address_pool_id', 'node_id',
+            Node::class, 'storage_to_node', 'storage_id', 'node_id',
         );
     }
 }

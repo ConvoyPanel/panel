@@ -20,7 +20,7 @@ return new class extends Migration {
             'ALTER TABLE servers MODIFY COLUMN bandwidth_limit INT NULL;',
         );
         DB::statement(
-            'ALTER TABLE servers MODIFY COLUMN bandwidth_usage INT UNSIGNED DEFAULT 0;',
+            'ALTER TABLE servers MODIFY COLUMN bandwidth_usage INT UNSIGNED NOT NULL DEFAULT 0;',
         );
 
         DB::statement('UPDATE servers SET snapshot_limit = -1 WHERE snapshot_limit IS NULL;');
@@ -59,7 +59,7 @@ return new class extends Migration {
             'ALTER TABLE servers MODIFY COLUMN bandwidth_limit INT NULL;',
         );
         DB::statement(
-            'ALTER TABLE servers MODIFY COLUMN bandwidth_usage INT DEFAULT 0;',
+            'ALTER TABLE servers MODIFY COLUMN bandwidth_usage INT NOT NULL DEFAULT 0;',
         );
 
         DB::statement(

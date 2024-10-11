@@ -24,7 +24,12 @@ class ServerTransformer extends TransformerAbstract
             'memory' => $server->memory,
             'disk' => $server->disk,
             'bandwidth_usage' => $server->bandwidth_usage,
+            'snapshot_count_limit' => $server->snapshot_count_limit,
+            'snapshot_size_limit' => $server->snapshot_size_limit,
+            'backup_count_limit' => $server->backup_count_limit,
+            'backup_size_limit' => $server->backup_size_limit,
             'bandwidth_limit' => $server->bandwidth_limit,
+            'created_at' => $server->created_at,
         ];
     }
 }
