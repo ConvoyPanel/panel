@@ -141,7 +141,11 @@ class NetworkService
             $payload .= ',rate=' . $mebibytes;
         }
 
-        $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
+        $rawConfig = collect($this->allocationRepository->setServer($server)->getConfig())->where('key', '=', 'net0')->first()['value'] ?? null;
+
+        if ($rawConfig !== null && strpos($rawConfig, "rate") !== false) {
+            $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
+        }
     }
 
     public function updateAddresses(Server $server, array $addressIds)
