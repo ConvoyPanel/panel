@@ -3,12 +3,12 @@
 namespace Convoy\Repositories\Proxmox\Server;
 
 use Convoy\Models\Server;
-use Webmozart\Assert\Assert;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxConfigRepository extends ProxmoxRepository
 {
-    public function getConfig()
+    public function getConfig(): array
     {
         Assert::isInstanceOf($this->server, Server::class);
 
