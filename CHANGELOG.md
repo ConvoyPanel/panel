@@ -4,7 +4,10 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
-## v4.2.2
+## v4.2.3
+
+- Updated code for applying rate limits to NIC. Convoy will no longer override settings other than ratelimit, NIC
+  model (e.g., e1000, vmxnet3, virtio, etc.), and firewall status.
 
 ### Changes
 
