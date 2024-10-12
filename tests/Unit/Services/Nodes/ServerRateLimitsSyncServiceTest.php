@@ -14,6 +14,13 @@ it('can rate limit servers if over limit', function () {
                     ),
                 ),
             ], 200),
+            Http::response([
+                file_get_contents(
+                    base_path(
+                        'tests/Fixtures/Repositories/Server/GetServerConfigData.json',
+                    ),
+                ),
+            ], 200),
             Http::response(['data' => 'dummy-upid'], 200)
         ]),
     ]);
