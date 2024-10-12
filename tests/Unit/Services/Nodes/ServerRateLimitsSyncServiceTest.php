@@ -20,8 +20,7 @@ it('can rate limit servers if over limit', function () {
                         'tests/Fixtures/Repositories/Server/GetServerConfigData.json',
                     ),
                 ),
-            ], 200),
-            Http::response(['data' => 'dummy-upid'], 200)
+            ], 200)
         ]),
     ]);
 
