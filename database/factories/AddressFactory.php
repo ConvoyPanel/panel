@@ -21,10 +21,10 @@ class AddressFactory extends Factory
 
         return [
             'type' => $type,
-            'address' => $type === 'ipv4' ? $this->faker->ipv4 : $this->faker->ipv6,
+            'address' => $type === 'ipv4' ? $this->faker->ipv4() : $this->faker->ipv6(),
             'cidr' => $this->faker->numberBetween(0, 128),
-            'gateway' => $type === 'ipv4' ? $this->faker->ipv4 : $this->faker->ipv6,
-            'mac_address' => $this->faker->randomElement([null, $this->faker->macAddress]),
+            'gateway' => $type === 'ipv4' ? $this->faker->ipv4() : $this->faker->ipv6(),
+            'mac_address' => $this->faker->randomElement([null, $this->faker->macAddress()]),
         ];
     }
 }
