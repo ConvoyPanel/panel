@@ -4,6 +4,12 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.2.4
+
+### Changes
+
+- Fixed a bug where initiating a backup with no compression fails. #87
+
 ## v4.2.3
 
 ### Changes
