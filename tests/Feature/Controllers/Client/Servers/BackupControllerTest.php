@@ -1,17 +1,16 @@
 <?php
 
-use Convoy\Jobs\Server\MonitorBackupJob;
-use Convoy\Jobs\Server\MonitorBackupRestorationJob;
-use Convoy\Models\Backup;
-use Convoy\Models\User;
+use App\Jobs\Server\MonitorBackupJob;
+use App\Jobs\Server\MonitorBackupRestorationJob;
+use App\Models\Backup;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
 function testCreateBackup(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*' => Http::response(['data' => 'upid'], 200),
@@ -26,7 +25,8 @@ function testCreateBackup(
         }
 
         $response = $this->actingAs($user)->postJson(
-            "/api/client/servers/{$server->uuid}/backups", [
+            "/api/client/servers/{$server->uuid}/backups",
+            [
             'name' => 'Test Backup',
             'mode' => 'snapshot',
             'compression_type' => 'none',
@@ -51,14 +51,14 @@ function testCreateBackup(
 function testRestoreBackups(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*/status/current' => Http::response(
                 file_get_contents(
                     base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json'),
-                ), 200,
+                ),
+                200,
             ),
             '*' => Http::response(['data' => 'dummy-upid'], 200),
         ]);
@@ -96,8 +96,7 @@ function testRestoreBackups(
 function testDeleteBackups(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*' => Http::response(['data' => 'dummy-upid'], 200),
@@ -150,7 +149,8 @@ describe('other servers', function () {
             '*/status/current' => Http::response(
                 file_get_contents(
                     base_path('tests/Fixtures/Repositories/Server/GetStoppedServerStatusData.json'),
-                ), 200,
+                ),
+                200,
             ),
             '*' => Http::response(['data' => 'dummy-upid'], 200),
         ]);

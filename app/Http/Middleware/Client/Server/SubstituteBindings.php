@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Middleware\Client\Server;
+namespace App\Http\Middleware\Client\Server;
 
 use Closure;
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings as Middleware;
 use Symfony\Component\HttpFoundation\Response;

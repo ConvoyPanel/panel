@@ -1,7 +1,7 @@
 <?php
 
-use Convoy\Http\Controllers\Admin;
-use Convoy\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
+use App\Http\Controllers\Admin;
+use App\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,10 +60,12 @@ Route::prefix('/nodes')->group(function () {
         */
         Route::prefix('/template-groups')->group(function () {
             Route::get(
-                '/', [Admin\Nodes\TemplateGroupController::class, 'index'],
+                '/',
+                [Admin\Nodes\TemplateGroupController::class, 'index'],
             );
             Route::post(
-                '/', [Admin\Nodes\TemplateGroupController::class, 'store'],
+                '/',
+                [Admin\Nodes\TemplateGroupController::class, 'store'],
             );
             Route::post(
                 '/reorder',
@@ -104,7 +106,8 @@ Route::prefix('/nodes')->group(function () {
                 });
 
                 Route::apiResource(
-                    'templates', Admin\Nodes\TemplateController::class,
+                    'templates',
+                    Admin\Nodes\TemplateController::class,
                 )
                      ->only(['index', 'store', 'update', 'destroy']);
             });
@@ -119,7 +122,8 @@ Route::prefix('/nodes')->group(function () {
         |
         */
         Route::get(
-            '/addresses', [Admin\Nodes\AddressController::class, 'index'],
+            '/addresses',
+            [Admin\Nodes\AddressController::class, 'index'],
         );
 
         /*
@@ -146,7 +150,8 @@ Route::prefix('/servers')->group(function () {
     Route::get('/', [Admin\ServerController::class, 'index']);
     Route::post('/', [Admin\ServerController::class, 'store']);
 
-    Route::group(['prefix' => '/{server}', 'middleware' => ValidateServerStatusMiddleware::class],
+    Route::group(
+        ['prefix' => '/{server}', 'middleware' => ValidateServerStatusMiddleware::class],
         function () {
             Route::get('/', [Admin\ServerController::class, 'show'])
                  ->withoutMiddleware(
@@ -165,14 +170,16 @@ Route::prefix('/servers')->group(function () {
                 );
 
                 Route::post(
-                    '/suspend', [Admin\ServerController::class, 'suspend'],
+                    '/suspend',
+                    [Admin\ServerController::class, 'suspend'],
                 );
                 Route::post(
                     '/unsuspend',
                     [Admin\ServerController::class, 'unsuspend'],
                 );
             });
-        });
+        }
+    );
 });
 
 /*
@@ -185,15 +192,18 @@ Route::prefix('/servers')->group(function () {
 */
 Route::prefix('/address-pools')->group(function () {
     Route::get(
-        '/', [Admin\AddressPools\AddressPoolController::class, 'index'],
+        '/',
+        [Admin\AddressPools\AddressPoolController::class, 'index'],
     );
     Route::post(
-        '/', [Admin\AddressPools\AddressPoolController::class, 'store'],
+        '/',
+        [Admin\AddressPools\AddressPoolController::class, 'store'],
     );
 
     Route::prefix('/{address_pool}')->group(function () {
         Route::get(
-            '/', [Admin\AddressPools\AddressPoolController::class, 'show'],
+            '/',
+            [Admin\AddressPools\AddressPoolController::class, 'show'],
         );
         Route::put(
             '/',
@@ -210,10 +220,12 @@ Route::prefix('/address-pools')->group(function () {
 
         Route::prefix('/addresses')->group(function () {
             Route::get(
-                '/', [Admin\AddressPools\AddressController::class, 'index'],
+                '/',
+                [Admin\AddressPools\AddressController::class, 'index'],
             );
             Route::post(
-                '/', [Admin\AddressPools\AddressController::class, 'store'],
+                '/',
+                [Admin\AddressPools\AddressController::class, 'store'],
             );
             Route::put(
                 '/{address}',
@@ -265,7 +277,8 @@ Route::prefix('/coterms')->group(function () {
         );
         Route::delete('/', [Admin\CotermController::class, 'destroy']);
         Route::get(
-            '/nodes', [Admin\CotermController::class, 'getAttachedNodes'],
+            '/nodes',
+            [Admin\CotermController::class, 'getAttachedNodes'],
         );
         Route::put(
             '/nodes',

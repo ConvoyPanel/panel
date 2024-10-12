@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Deployment;
+namespace App\Exceptions\Service\Deployment;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class InvalidTemplateException extends DisplayException
 {

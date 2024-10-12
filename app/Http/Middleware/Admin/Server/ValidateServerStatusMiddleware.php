@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Http\Middleware\Admin\Server;
+namespace App\Http\Middleware\Admin\Server;
 
 use Closure;
-use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
-use Convoy\Models\Server;
+use App\Enums\Server\Status;
+use App\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

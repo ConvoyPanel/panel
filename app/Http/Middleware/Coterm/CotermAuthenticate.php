@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Middleware\Coterm;
+namespace App\Http\Middleware\Coterm;
 
-use Convoy\Models\Coterm;
+use App\Models\Coterm;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -28,7 +28,9 @@ class CotermAuthenticate
 
         if (is_null($bearer = $request->bearerToken())) {
             throw new HttpException(
-                401, 'Access to this endpoint must include an Authorization header.', null,
+                401,
+                'Access to this endpoint must include an Authorization header.',
+                null,
                 ['WWW-Authenticate' => 'Bearer'],
             );
         }

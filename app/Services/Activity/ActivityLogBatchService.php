@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Services\Activity;
+namespace App\Services\Activity;
 
 use Closure;
 use Ramsey\Uuid\Uuid;

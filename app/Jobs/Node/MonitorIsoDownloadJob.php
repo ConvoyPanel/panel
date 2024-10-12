@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Jobs\Node;
+namespace App\Jobs\Node;
 
-use Convoy\Models\ISO;
-use Convoy\Services\Isos\IsoMonitorService;
+use App\Models\ISO;
+use App\Services\Isos\IsoMonitorService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

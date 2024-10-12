@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox\Config;
+namespace App\Data\Server\Proxmox\Config;
 
 use Spatie\LaravelData\Data;
 
@@ -10,7 +10,6 @@ class AddressData extends Data
         public string $address,
         public int    $cidr,
         public string $gateway,
-    )
-    {
+    ) {
     }
 }

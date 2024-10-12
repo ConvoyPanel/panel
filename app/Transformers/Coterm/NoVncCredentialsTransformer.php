@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Transformers\Coterm;
+namespace App\Transformers\Coterm;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use League\Fractal\TransformerAbstract;
-use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
+use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
 
 class NoVncCredentialsTransformer extends TransformerAbstract
 {

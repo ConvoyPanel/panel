@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Models\Backup;
-use Convoy\Models\Server;
+use App\Models\Backup;
+use App\Models\Server;
 use Webmozart\Assert\Assert;
-use Convoy\Enums\Server\BackupMode;
-use Convoy\Enums\Server\BackupCompressionType;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Enums\Server\BackupMode;
+use App\Enums\Server\BackupCompressionType;
+use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxBackupRepository extends ProxmoxRepository
 {

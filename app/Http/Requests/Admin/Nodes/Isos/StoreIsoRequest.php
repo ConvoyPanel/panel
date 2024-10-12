@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Nodes\Isos;
+namespace App\Http\Requests\Admin\Nodes\Isos;
 
-use Convoy\Enums\Helpers\ChecksumAlgorithm;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\ISO;
-use Convoy\Models\Node;
-use Convoy\Services\Isos\IsoService;
+use App\Enums\Helpers\ChecksumAlgorithm;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\ISO;
+use App\Models\Node;
+use App\Services\Isos\IsoService;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
 
@@ -37,7 +37,8 @@ class StoreIsoRequest extends BaseApiRequest
             function (Validator $validator) {
                 if (ISO::where('file_name', $this->string('file_name'))->exists()) {
                     $validator->errors()->add(
-                        'file_name', __('validation.unique', ['attribute' => 'file name']),
+                        'file_name',
+                        __('validation.unique', ['attribute' => 'file name']),
                     );
                 }
             },

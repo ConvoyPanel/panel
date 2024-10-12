@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Models\Filters;
+namespace App\Models\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;

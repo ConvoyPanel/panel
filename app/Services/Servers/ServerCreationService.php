@@ -1,15 +1,15 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Service\Deployment\InvalidTemplateException;
-use Convoy\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
-use Convoy\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Repositories\Eloquent\ServerRepository;
+use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Enums\Server\Status;
+use App\Exceptions\Service\Deployment\InvalidTemplateException;
+use App\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
+use App\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
+use App\Models\Server;
+use App\Models\Template;
+use App\Repositories\Eloquent\ServerRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -19,10 +19,10 @@ use Illuminate\Support\Str;
 class ServerCreationService
 {
     public function __construct(
-        private NetworkService             $networkService, private ServerRepository $repository,
+        private NetworkService             $networkService,
+        private ServerRepository $repository,
         private ServerBuildDispatchService $buildDispatchService,
-    )
-    {
+    ) {
     }
 
     public function handle(array $data)
@@ -31,7 +31,9 @@ class ServerCreationService
 
         $shouldCreateServer = Arr::get($data, 'should_create_server');
         $template = $shouldCreateServer ? Template::where(
-            'uuid', '=', Arr::get($data, 'template_uuid'),
+            'uuid',
+            '=',
+            Arr::get($data, 'template_uuid'),
         )->firstOrFail() : null;
 
         if ($template) {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Enums\Api\ApiKeyType;
+use App\Enums\Api\ApiKeyType;
 use Eloquent;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -72,8 +72,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         string     $name,
         ApiKeyType $type,
         array      $abilities = ['*'],
-    ): NewAccessToken
-    {
+    ): NewAccessToken {
         $token = $this->tokens()->create([
             'type' => $type,
             'name' => $name,

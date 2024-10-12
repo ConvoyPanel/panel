@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Services\Coterm;
+namespace App\Services\Coterm;
 
-use Convoy\Models\Coterm;
+use App\Models\Coterm;
 use Illuminate\Support\Str;
 
 /**

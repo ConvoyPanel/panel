@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Contracts\Repository;
+namespace App\Contracts\Repository;
 
 use Closure;
 use Illuminate\Support\Collection;
-use Convoy\Exceptions\Model\DataValidationException;
+use App\Exceptions\Model\DataValidationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
+use App\Exceptions\Repository\RecordNotFoundException;
 
 interface RepositoryInterface
 {

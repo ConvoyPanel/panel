@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Extensions\Lcobucci\JWT\Validation;
+namespace App\Extensions\Lcobucci\JWT\Validation;
 
 use DateTimeImmutable;
 use Carbon\CarbonInterface;
@@ -11,7 +11,8 @@ class Clock implements ClockInterface
 {
     private CarbonInterface $date;
 
-    public function __construct(?CarbonInterface $date = null) {
+    public function __construct(?CarbonInterface $date = null)
+    {
         $this->date = $date ?? CarbonImmutable::now();
     }
 

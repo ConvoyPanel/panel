@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers;
+namespace App\Http\Requests\Client\Servers;
 
-use Convoy\Enums\Server\StatisticConsolidatorFunction;
-use Convoy\Enums\Server\StatisticTimeRange;
-use Convoy\Http\Requests\BaseApiRequest;
+use App\Enums\Server\StatisticConsolidatorFunction;
+use App\Enums\Server\StatisticTimeRange;
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Validation\Rule;
 
 class GetStatisticRequest extends BaseApiRequest

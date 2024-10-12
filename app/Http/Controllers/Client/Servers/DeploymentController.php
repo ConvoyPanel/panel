@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Http\Controllers\Controller;
-use Convoy\Models\Server;
-use Convoy\Transformers\Client\DeploymentTransformer;
+use App\Http\Controllers\Controller;
+use App\Models\Server;
+use App\Transformers\Client\DeploymentTransformer;
 
 class DeploymentController extends Controller
 {

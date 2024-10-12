@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Models\Server;
-use Convoy\Transformers\Admin\AddressTransformer;
+use App\Models\Server;
+use App\Transformers\Admin\AddressTransformer;
 use function fractal;
 
 class AddressController

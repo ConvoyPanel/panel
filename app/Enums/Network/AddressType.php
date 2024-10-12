@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Network;
+namespace App\Enums\Network;
 
 enum AddressType: string
 {

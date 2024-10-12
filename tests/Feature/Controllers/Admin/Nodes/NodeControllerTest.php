@@ -1,10 +1,10 @@
 <?php
 
 
-use Convoy\Models\Location;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Models\User;
+use App\Models\Location;
+use App\Models\Node;
+use App\Models\Server;
+use App\Models\User;
 
 beforeEach(function () {
     $this->user = User::factory()->create([

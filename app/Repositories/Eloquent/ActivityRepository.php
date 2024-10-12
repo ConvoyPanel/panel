@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Repositories\Eloquent;
+namespace App\Repositories\Eloquent;
 
-use Convoy\Models\Server;
-use Convoy\Models\ActivityLog;
-use Convoy\Contracts\Repository\ActivityRepositoryInterface;
+use App\Models\Server;
+use App\Models\ActivityLog;
+use App\Contracts\Repository\ActivityRepositoryInterface;
 
 class ActivityRepository extends EloquentRepository implements ActivityRepositoryInterface
 {

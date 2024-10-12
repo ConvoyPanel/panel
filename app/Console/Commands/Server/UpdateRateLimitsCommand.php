@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Console\Commands\Server;
+namespace App\Console\Commands\Server;
 
-use Convoy\Models\Node;
+use App\Models\Node;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
-use Convoy\Jobs\Node\SyncServerRateLimitsJob;
+use App\Jobs\Node\SyncServerRateLimitsJob;
 
 class UpdateRateLimitsCommand extends Command
 {

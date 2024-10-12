@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Providers;
+namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\HorizonApplicationServiceProvider;

@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Middleware\Activity;
+namespace App\Http\Middleware\Activity;
 
 use Closure;
-use Convoy\Facades\LogTarget;
-use Convoy\Models\Server;
+use App\Facades\LogTarget;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 

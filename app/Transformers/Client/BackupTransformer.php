@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
-use Convoy\Models\Backup;
+use App\Models\Backup;
 use League\Fractal\TransformerAbstract;
 
 class BackupTransformer extends TransformerAbstract

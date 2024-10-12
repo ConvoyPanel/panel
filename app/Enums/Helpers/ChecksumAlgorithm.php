@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Helpers;
+namespace App\Enums\Helpers;
 
 enum ChecksumAlgorithm: string
 {

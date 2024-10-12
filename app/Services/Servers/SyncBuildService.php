@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\DiskInterface;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxDiskRepository;
+use App\Data\Server\Proxmox\Config\DiskData;
+use App\Enums\Server\DiskInterface;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Illuminate\Support\Arr;
 
 readonly class SyncBuildService
@@ -18,8 +18,7 @@ readonly class SyncBuildService
         private ServerDetailService     $detailService,
         private ProxmoxConfigRepository $allocationRepository,
         private ProxmoxDiskRepository   $diskRepository,
-    )
-    {
+    ) {
     }
 
     public function handle(Server $server): void
@@ -43,7 +42,8 @@ readonly class SyncBuildService
         $bootOrder = array_filter(
             collect($bootOrder->filter(fn (DiskData $disk) => !$disk->is_media)->toArray())->pluck(
                 'interface',
-            )->toArray(), fn ($disk) => in_array($disk, $disksArray),
+            )->toArray(),
+            fn ($disk) => in_array($disk, $disksArray),
         );
 
         if (count($bootOrder) > 0) {
@@ -55,7 +55,8 @@ readonly class SyncBuildService
 
             if ($diff > 0) {
                 $this->diskRepository->setServer($server)->resizeDisk(
-                    $disk->interface, $server->disk,
+                    $disk->interface,
+                    $server->disk,
                 );
             }
         }

@@ -1,6 +1,6 @@
 <?php
 
-use Convoy\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 /*

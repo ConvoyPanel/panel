@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin\Nodes;
+namespace App\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Nodes\TemplateGroups\TemplateGroupRequest;
-use Convoy\Http\Requests\Admin\Nodes\TemplateGroups\UpdateGroupOrderRequest;
-use Convoy\Models\Node;
-use Convoy\Models\TemplateGroup;
-use Convoy\Transformers\Admin\TemplateGroupTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Nodes\TemplateGroups\TemplateGroupRequest;
+use App\Http\Requests\Admin\Nodes\TemplateGroups\UpdateGroupOrderRequest;
+use App\Models\Node;
+use App\Models\TemplateGroup;
+use App\Transformers\Admin\TemplateGroupTransformer;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TemplateGroupController extends ApiController

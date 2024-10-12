@@ -1,24 +1,24 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin;
 
-use Convoy\Enums\Server\Status;
-use Convoy\Enums\Server\SuspensionAction;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
-use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
-use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
-use Convoy\Models\Filters\FiltersServerByAddressPoolId;
-use Convoy\Models\Filters\FiltersServerWildcard;
-use Convoy\Models\Server;
-use Convoy\Services\Servers\CloudinitService;
-use Convoy\Services\Servers\NetworkService;
-use Convoy\Services\Servers\ServerCreationService;
-use Convoy\Services\Servers\ServerDeletionService;
-use Convoy\Services\Servers\ServerSuspensionService;
-use Convoy\Services\Servers\SyncBuildService;
-use Convoy\Transformers\Admin\ServerBuildTransformer;
+use App\Enums\Server\Status;
+use App\Enums\Server\SuspensionAction;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
+use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
+use App\Http\Requests\Admin\Servers\StoreServerRequest;
+use App\Models\Filters\FiltersServerByAddressPoolId;
+use App\Models\Filters\FiltersServerWildcard;
+use App\Models\Server;
+use App\Services\Servers\CloudinitService;
+use App\Services\Servers\NetworkService;
+use App\Services\Servers\ServerCreationService;
+use App\Services\Servers\ServerDeletionService;
+use App\Services\Servers\ServerSuspensionService;
+use App\Services\Servers\SyncBuildService;
+use App\Transformers\Admin\ServerBuildTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -35,8 +35,7 @@ class ServerController extends ApiController
         private ServerCreationService   $creationService,
         private CloudinitService        $cloudinitService,
         private SyncBuildService        $buildModificationService,
-    )
-    {
+    ) {
     }
 
     public function index(Request $request)
@@ -47,7 +46,8 @@ class ServerController extends ApiController
                                ->allowedFilters(
                                    [
                                        AllowedFilter::custom(
-                                           '*', new FiltersServerWildcard(),
+                                           '*',
+                                           new FiltersServerWildcard(),
                                        ),
                                        AllowedFilter::custom(
                                            'address_pool_id',
@@ -59,8 +59,8 @@ class ServerController extends ApiController
                                    ],
                                )
                                ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                   $request->query(),
+                               );
 
         return fractal($servers, new ServerBuildTransformer())->parseIncludes($request->include)
                                                               ->respond();

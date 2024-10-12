@@ -1,16 +1,16 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Node;
+namespace App\Repositories\Proxmox\Node;
 
 use Carbon\CarbonImmutable;
-use Convoy\Data\Helpers\ChecksumData;
-use Convoy\Data\Node\Storage\FileMetaData;
-use Convoy\Data\Node\Storage\IsoData;
-use Convoy\Enums\Node\Storage\ContentType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
-use Convoy\Models\Node;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Data\Helpers\ChecksumData;
+use App\Data\Node\Storage\FileMetaData;
+use App\Data\Node\Storage\IsoData;
+use App\Enums\Node\Storage\ContentType;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
+use App\Models\Node;
+use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
@@ -18,11 +18,12 @@ use Webmozart\Assert\Assert;
 class ProxmoxStorageRepository extends ProxmoxRepository
 {
     public function download(
-        ContentType   $contentType, string $fileName, string $link,
+        ContentType   $contentType,
+        string $fileName,
+        string $link,
         ?bool         $verifyCertificates = true,
         ?ChecksumData $checksumData = null,
-    )
-    {
+    ) {
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 

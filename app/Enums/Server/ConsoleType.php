@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Server;
+namespace App\Enums\Server;
 
 enum ConsoleType: string
 {

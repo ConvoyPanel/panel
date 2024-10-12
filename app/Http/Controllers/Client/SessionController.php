@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client;
+namespace App\Http\Controllers\Client;
 
-use Convoy\Transformers\Client\UserTransformer;
+use App\Transformers\Client\UserTransformer;
 use Illuminate\Http\Request;
 
 class SessionController

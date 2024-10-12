@@ -1,14 +1,14 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Webmozart\Assert\Assert;
 use GuzzleHttp\Cookie\CookieJar;
-use Convoy\Data\Node\Access\UserCredentialsData;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
-use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
-use Convoy\Data\Server\Proxmox\Console\XTermCredentialsData;
+use App\Data\Node\Access\UserCredentialsData;
+use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
+use App\Data\Server\Proxmox\Console\XTermCredentialsData;
 
 class ProxmoxConsoleRepository extends ProxmoxRepository
 {

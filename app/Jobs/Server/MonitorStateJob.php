@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Jobs\Server;
+namespace App\Jobs\Server;
 
 use Closure;
-use Convoy\Enums\Server\State;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Enums\Server\State;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,8 +28,7 @@ class MonitorStateJob implements ShouldQueue
         protected int      $serverId,
         protected State    $targetState,
         protected ?Closure $callback = null,
-    )
-    {
+    ) {
         //
     }
 

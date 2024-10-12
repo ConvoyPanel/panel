@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Providers;
+namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Convoy\Services\Activity\ActivityLogBatchService;
-use Convoy\Services\Activity\ActivityLogTargetableService;
+use App\Services\Activity\ActivityLogBatchService;
+use App\Services\Activity\ActivityLogTargetableService;
 
 class ActivityLogServiceProvider extends ServiceProvider
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Controllers\Base;
+namespace App\Http\Controllers\Base;
 
-use Convoy\Http\Controllers\Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\View\Factory as ViewFactory;
 use Illuminate\View\View;
 
@@ -13,8 +13,7 @@ class IndexController extends Controller
      */
     public function __construct(
         protected ViewFactory $view,
-    )
-    {
+    ) {
     }
 
     /**

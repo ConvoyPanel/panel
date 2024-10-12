@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Server\Allocation;
+namespace App\Exceptions\Service\Server\Allocation;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class NoUniqueVmidException extends DisplayException
 {

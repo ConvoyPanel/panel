@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Casts\StorageSizeCast;
-use Convoy\Enums\Server\Status;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Casts\StorageSizeCast;
+use App\Enums\Server\Status;
+use App\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

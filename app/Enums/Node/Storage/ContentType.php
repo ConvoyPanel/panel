@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Node\Storage;
+namespace App\Enums\Node\Storage;
 
 enum ContentType: string
 {

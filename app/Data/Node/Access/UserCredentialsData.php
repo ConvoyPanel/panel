@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Data\Node\Access;
+namespace App\Data\Node\Access;
 
 use Spatie\LaravelData\Data;
-use Convoy\Enums\Node\Access\RealmType;
+use App\Enums\Node\Access\RealmType;
 
 class UserCredentialsData extends Data
 {
@@ -12,8 +12,7 @@ class UserCredentialsData extends Data
         public RealmType $realm_type,
         public string    $ticket,
         public string    $csrf_token,
-    )
-    {
+    ) {
 
     }
 

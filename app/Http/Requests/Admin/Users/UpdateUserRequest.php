@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Users;
+namespace App\Http\Requests\Admin\Users;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\User;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\User;
 use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends BaseApiRequest

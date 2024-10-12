@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Application;
+namespace App\Transformers\Application;
 
-use Convoy\Models\SSOToken;
+use App\Models\SSOToken;
 use League\Fractal\TransformerAbstract;
 
 class SSOTokenTransformer extends TransformerAbstract

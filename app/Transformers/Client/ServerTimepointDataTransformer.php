@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
-use Convoy\Data\Server\Proxmox\Usages\ServerTimepointData;
+use App\Data\Server\Proxmox\Usages\ServerTimepointData;
 use League\Fractal\TransformerAbstract;
 
 class ServerTimepointDataTransformer extends TransformerAbstract

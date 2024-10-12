@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Servers\Settings;
+namespace App\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 
 class UpdateDetailsRequest extends BaseApiRequest
 {

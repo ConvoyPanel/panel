@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Backups;
+namespace App\Http\Requests\Client\Servers\Backups;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 
 class RestoreBackupRequest extends BaseApiRequest
 {

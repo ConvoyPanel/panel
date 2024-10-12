@@ -1,15 +1,17 @@
 <?php
 
-namespace Convoy\Policies;
+namespace App\Policies;
 
-use Convoy\Models\Server;
-use Convoy\Models\User;
+use App\Models\Server;
+use App\Models\User;
 
 class BackupPolicy
 {
-    public function before(User $user, string $ability, Server $server,
-    ): ?bool
-    {
+    public function before(
+        User $user,
+        string $ability,
+        Server $server,
+    ): ?bool {
         if ($user->root_admin || $user->id === $server->user_id) {
             return true;
         }

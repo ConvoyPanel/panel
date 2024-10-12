@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\ISO;
+use App\Models\ISO;
 use League\Fractal\TransformerAbstract;
 
 class IsoTransformer extends TransformerAbstract

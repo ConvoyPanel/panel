@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Nodes\Templates;
+namespace App\Http\Requests\Admin\Nodes\Templates;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;

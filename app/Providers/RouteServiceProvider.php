@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Providers;
+namespace App\Providers;
 
-use Convoy\Http\Middleware\AdminAuthenticate;
-use Convoy\Http\Middleware\Coterm\CotermAuthenticate;
-use Convoy\Models\Server;
+use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\Coterm\CotermAuthenticate;
+use App\Models\Server;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
 

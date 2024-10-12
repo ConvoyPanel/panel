@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Api;
+namespace App\Enums\Api;
 
 enum ApiKeyType: string
 {

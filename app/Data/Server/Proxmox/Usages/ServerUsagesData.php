@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox\Usages;
+namespace App\Data\Server\Proxmox\Usages;
 
 use Spatie\LaravelData\Data;
 
@@ -10,7 +10,6 @@ class ServerUsagesData extends Data
         public int               $bandwidth,
         public ServerNetworkData $network,
         public ServerDiskData    $disk,
-    )
-    {
+    ) {
     }
 }

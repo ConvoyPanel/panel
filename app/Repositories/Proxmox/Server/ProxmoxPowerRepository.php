@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Webmozart\Assert\Assert;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Enums\Server\PowerAction;
+use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {

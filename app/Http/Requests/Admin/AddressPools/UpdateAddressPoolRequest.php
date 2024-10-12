@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\AddressPools;
+namespace App\Http\Requests\Admin\AddressPools;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\AddressPool;
-use Convoy\Models\Node;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\AddressPool;
+use App\Models\Node;
 use Illuminate\Validation\Validator;
 
 class UpdateAddressPoolRequest extends BaseApiRequest
@@ -41,7 +41,9 @@ class UpdateAddressPoolRequest extends BaseApiRequest
                         'servers.node_id',
                     )
                                                 ->join(
-                                                    'ip_addresses', 'servers.id', '=',
+                                                    'ip_addresses',
+                                                    'servers.id',
+                                                    '=',
                                                     'ip_addresses.server_id',
                                                 )
                                                 ->where(

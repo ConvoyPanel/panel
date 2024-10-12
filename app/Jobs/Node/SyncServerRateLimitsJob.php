@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Jobs\Node;
+namespace App\Jobs\Node;
 
-use Convoy\Models\Node;
-use Convoy\Services\Nodes\ServerRateLimitsSyncService;
+use App\Models\Node;
+use App\Services\Nodes\ServerRateLimitsSyncService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

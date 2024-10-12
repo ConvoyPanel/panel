@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Policies;
+namespace App\Policies;
 
-use Convoy\Models\Coterm;
-use Convoy\Models\User;
+use App\Models\Coterm;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CotermPolicy

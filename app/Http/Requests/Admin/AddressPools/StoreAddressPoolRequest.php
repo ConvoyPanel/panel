@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\AddressPools;
+namespace App\Http\Requests\Admin\AddressPools;
 
-use Convoy\Models\AddressPool;
+use App\Models\AddressPool;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAddressPoolRequest extends FormRequest

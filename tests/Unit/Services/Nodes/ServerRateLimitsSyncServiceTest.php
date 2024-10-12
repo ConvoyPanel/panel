@@ -1,6 +1,6 @@
 <?php
 
-use Convoy\Services\Nodes\ServerRateLimitsSyncService;
+use App\Services\Nodes\ServerRateLimitsSyncService;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Eloquent;
+namespace App\Data\Server\Eloquent;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\IP;
@@ -19,7 +19,6 @@ class AddressData extends Data
         public int     $cidr,
         public string  $gateway,
         public ?string $mac_address,
-    )
-    {
+    ) {
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Services\Nodes;
+namespace App\Services\Nodes;
 
-use Convoy\Models\Node;
-use Convoy\Data\Node\Access\UserData;
-use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
+use App\Models\Node;
+use App\Data\Node\Access\UserData;
+use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
 
 class UserPruneService
 {

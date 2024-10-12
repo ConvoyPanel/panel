@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Data\Server\Proxmox\ServerStateData;
-use Convoy\Enums\Node\Access\RealmType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Data\Server\Proxmox\ServerStateData;
+use App\Enums\Node\Access\RealmType;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Server;
+use App\Models\Template;
+use App\Repositories\Proxmox\ProxmoxRepository;
 use Webmozart\Assert\Assert;
 
 class ProxmoxServerRepository extends ProxmoxRepository

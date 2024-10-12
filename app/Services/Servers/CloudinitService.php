@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Support\Arr;
-use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Data\Server\Proxmox\Config\AddressConfigData;
+use App\Data\Server\Deployments\CloudinitAddressConfigData;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 /**
  * Class SnapshotService

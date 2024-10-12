@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Middleware\Client\Server;
+namespace App\Http\Middleware\Client\Server;
 
 use Closure;
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -14,9 +14,10 @@ class ServerNotInstalled
     /**
      * Checks that the server is installed before allowing access through the route.
      */
-    public function handle(Request $request, Closure $next,
-    ): \Symfony\Component\HttpFoundation\Response
-    {
+    public function handle(
+        Request $request,
+        Closure $next,
+    ): \Symfony\Component\HttpFoundation\Response {
         /** @var Server|null $server */
         $server = $request->route()->parameter('server');
 

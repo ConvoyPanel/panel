@@ -1,14 +1,14 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin\Nodes;
+namespace App\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
-use Convoy\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
-use Convoy\Models\Node;
-use Convoy\Models\Template;
-use Convoy\Models\TemplateGroup;
-use Convoy\Transformers\Admin\TemplateTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
+use App\Http\Requests\Admin\Nodes\Templates\UpdateTemplateOrderRequest;
+use App\Models\Node;
+use App\Models\Template;
+use App\Models\TemplateGroup;
+use App\Transformers\Admin\TemplateTransformer;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TemplateController extends ApiController
@@ -36,9 +36,11 @@ class TemplateController extends ApiController
     }
 
     public function update(
-        TemplateRequest $request, Node $node, TemplateGroup $templateGroup, Template $template,
-    )
-    {
+        TemplateRequest $request,
+        Node $node,
+        TemplateGroup $templateGroup,
+        Template $template,
+    ) {
         $template->update($request->validated());
 
         return fractal($template, new TemplateTransformer())->respond();
@@ -52,13 +54,15 @@ class TemplateController extends ApiController
     }
 
     public function updateOrder(
-        UpdateTemplateOrderRequest $request, Node $node, TemplateGroup $templateGroup,
-    )
-    {
+        UpdateTemplateOrderRequest $request,
+        Node $node,
+        TemplateGroup $templateGroup,
+    ) {
         Template::setNewOrder($request->order);
 
         return fractal(
-            $templateGroup->templates()->ordered()->get(), new TemplateTransformer(),
+            $templateGroup->templates()->ordered()->get(),
+            new TemplateTransformer(),
         )->respond();
     }
 }

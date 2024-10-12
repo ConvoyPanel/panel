@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Backups;
+namespace App\Http\Requests\Client\Servers\Backups;
 
-use Convoy\Enums\Server\BackupCompressionType;
-use Convoy\Enums\Server\BackupMode;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Backup;
-use Convoy\Models\Server;
+use App\Enums\Server\BackupCompressionType;
+use App\Enums\Server\BackupMode;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Backup;
+use App\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreBackupRequest extends BaseApiRequest

@@ -1,8 +1,8 @@
 <?php
 
-use Convoy\Http\Controllers\Client;
-use Convoy\Http\Middleware\Activity\ServerSubject;
-use Convoy\Http\Middleware\Client\Server\AuthenticateServerAccess;
+use App\Http\Controllers\Client;
+use App\Http\Middleware\Activity\ServerSubject;
+use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', Client\SessionController::class);
@@ -16,10 +16,12 @@ Route::prefix('/servers/{server}')->middleware(
          ->name('servers.show');
 
     Route::get(
-        '/state', [Client\Servers\ServerController::class, 'getState'],
+        '/state',
+        [Client\Servers\ServerController::class, 'getState'],
     );
     Route::patch(
-        '/state', [Client\Servers\ServerController::class, 'updateState'],
+        '/state',
+        [Client\Servers\ServerController::class, 'updateState'],
     );
 
     Route::post(
@@ -37,7 +39,9 @@ Route::prefix('/servers/{server}')->middleware(
 
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
-        Route::post('/', [Client\Servers\BackupController::class, 'store'],
+        Route::post(
+            '/',
+            [Client\Servers\BackupController::class, 'store'],
         );
         Route::post(
             '/{backup}/restore',
@@ -51,7 +55,8 @@ Route::prefix('/servers/{server}')->middleware(
 
     Route::prefix('/settings')->group(function () {
         Route::post(
-            '/rename', [Client\Servers\SettingsController::class, 'rename'],
+            '/rename',
+            [Client\Servers\SettingsController::class, 'rename'],
         );
         Route::get(
             '/template-groups',

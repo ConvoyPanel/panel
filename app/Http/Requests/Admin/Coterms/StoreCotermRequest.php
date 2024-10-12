@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Coterms;
+namespace App\Http\Requests\Admin\Coterms;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Coterm;
-use Convoy\Rules\Fqdn;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Coterm;
+use App\Rules\Fqdn;
 use Illuminate\Support\Arr;
 
 class StoreCotermRequest extends BaseApiRequest

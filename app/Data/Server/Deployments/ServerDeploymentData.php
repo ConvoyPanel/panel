@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Data\Server\Deployments;
+namespace App\Data\Server\Deployments;
 
-use Convoy\Models\Server;
-use Convoy\Models\Template;
+use App\Models\Server;
+use App\Models\Template;
 use Spatie\LaravelData\Data;
 
 class ServerDeploymentData extends Data
@@ -14,7 +14,6 @@ class ServerDeploymentData extends Data
         public string    $account_password,
         public bool      $should_create_server,
         public bool      $start_on_completion,
-    )
-    {
+    ) {
     }
 }

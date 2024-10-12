@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Repository\Eloquent;
+namespace App\Exceptions\Repository\Eloquent;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class TooManyRootSnapshotsException extends DisplayException
 {

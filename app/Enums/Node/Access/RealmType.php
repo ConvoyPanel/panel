@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Enums\Node\Access;
+namespace App\Enums\Node\Access;
 
 enum RealmType: string
 {

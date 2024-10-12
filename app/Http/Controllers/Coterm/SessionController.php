@@ -1,14 +1,14 @@
 <?php
 
-namespace Convoy\Http\Controllers\Coterm;
+namespace App\Http\Controllers\Coterm;
 
-use Convoy\Enums\Server\ConsoleType;
-use Convoy\Http\Controllers\Controller;
-use Convoy\Http\Requests\Coterm\StoreSessionRequest;
-use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerConsoleService;
-use Convoy\Transformers\Coterm\NoVncCredentialsTransformer;
-use Convoy\Transformers\Coterm\XTermCredentialsTransformer;
+use App\Enums\Server\ConsoleType;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Coterm\StoreSessionRequest;
+use App\Models\Server;
+use App\Services\Servers\ServerConsoleService;
+use App\Transformers\Coterm\NoVncCredentialsTransformer;
+use App\Transformers\Coterm\XTermCredentialsTransformer;
 
 class SessionController extends Controller
 {

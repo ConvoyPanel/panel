@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Repositories\Eloquent;
+namespace App\Repositories\Eloquent;
 
-use Convoy\Contracts\Repository\ServerRepositoryInterface;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
-use Convoy\Models\Server;
+use App\Contracts\Repository\ServerRepositoryInterface;
+use App\Exceptions\Repository\RecordNotFoundException;
+use App\Models\Server;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 

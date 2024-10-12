@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Repositories;
+namespace App\Repositories;
 
 use Closure;
 use InvalidArgumentException;
 use Illuminate\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
-use Convoy\Contracts\Repository\RepositoryInterface;
+use App\Contracts\Repository\RepositoryInterface;
 
 abstract class Repository implements RepositoryInterface
 {

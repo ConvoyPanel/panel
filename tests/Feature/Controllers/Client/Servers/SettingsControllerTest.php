@@ -1,6 +1,6 @@
 <?php
 
-use Convoy\Models\ISO;
+use App\Models\ISO;
 use Illuminate\Support\Facades\Http;
 
 it('can rename servers', function () {
@@ -11,7 +11,8 @@ it('can rename servers', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->postJson(
-        "/api/client/servers/{$server->uuid}/settings/rename", [
+        "/api/client/servers/{$server->uuid}/settings/rename",
+        [
         'name' => 'advinservers is king',
         'hostname' => 'advinservers.com',
     ],
@@ -27,7 +28,8 @@ it('can change nameservers', function () {
         '*/config' => Http::response(
             file_get_contents(
                 base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ), 200,
+            ),
+            200,
         ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
@@ -35,7 +37,8 @@ it('can change nameservers', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->putJson(
-        "/api/client/servers/{$server->uuid}/settings/network", [
+        "/api/client/servers/{$server->uuid}/settings/network",
+        [
         'nameservers' => [
             '1.1.1.1',
             '1.0.0.1',
@@ -51,7 +54,8 @@ it('can fetch sshkeys', function () {
         '*/config' => Http::response(
             file_get_contents(
                 base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ), 200,
+            ),
+            200,
         ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
@@ -70,7 +74,8 @@ it('can change server passwords', function () {
         '*/config' => Http::response(
             file_get_contents(
                 base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ), 200,
+            ),
+            200,
         ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
@@ -78,7 +83,8 @@ it('can change server passwords', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->putJson(
-        "/api/client/servers/{$server->uuid}/settings/auth", [
+        "/api/client/servers/{$server->uuid}/settings/auth",
+        [
         'type' => 'password',
         'password' => 'Advinservers is king!123',
     ],
@@ -92,7 +98,8 @@ it('can fetch available ISOs', function () {
         '*/config' => Http::response(
             file_get_contents(
                 base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ), 200,
+            ),
+            200,
         ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
@@ -116,7 +123,8 @@ it('can mount visible ISOs', function () {
         '*/config' => Http::response(
             file_get_contents(
                 base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ), 200,
+            ),
+            200,
         ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);

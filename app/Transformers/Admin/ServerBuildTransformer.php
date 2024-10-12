@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
-use Convoy\Services\Servers\ServerDetailService;
+use App\Services\Servers\ServerDetailService;
 
 class ServerBuildTransformer extends TransformerAbstract
 {

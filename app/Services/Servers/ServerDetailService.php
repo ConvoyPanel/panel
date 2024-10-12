@@ -1,16 +1,16 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Support\Arr;
-use Convoy\Data\Server\Proxmox\ServerProxmoxData;
-use Convoy\Data\Server\Eloquent\ServerEloquentData;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Data\Server\Proxmox\ServerProxmoxData;
+use App\Data\Server\Eloquent\ServerEloquentData;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 
 class ServerDetailService
 {
-    public function __construct(private NetworkService $networkService, private ProxmoxConfigRepository $allocationRepository, private AllocationService $allocationService,)
+    public function __construct(private NetworkService $networkService, private ProxmoxConfigRepository $allocationRepository, private AllocationService $allocationService)
     {
     }
 

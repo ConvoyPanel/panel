@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Eloquent;
+namespace App\Data\Server\Eloquent;
 
 use Spatie\LaravelData\Data;
 
@@ -15,7 +15,6 @@ class ServerLimitsData extends Data
         public ?int                $bandwidth,
         public ServerAddressesData $addresses,
         public ?string             $mac_address,
-    )
-    {
+    ) {
     }
 }

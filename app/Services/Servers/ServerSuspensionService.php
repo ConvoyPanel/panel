@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
 use Exception;
-use Convoy\Models\Server;
-use Convoy\Enums\Server\Status;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Enums\Server\SuspensionAction;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Models\Server;
+use App\Enums\Server\Status;
+use App\Enums\Server\PowerAction;
+use App\Enums\Server\SuspensionAction;
+use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 
 class ServerSuspensionService
 {

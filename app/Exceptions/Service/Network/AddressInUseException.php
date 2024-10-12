@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Network;
+namespace App\Exceptions\Service\Network;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class AddressInUseException extends DisplayException
 {

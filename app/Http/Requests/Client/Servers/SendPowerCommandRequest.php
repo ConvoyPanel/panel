@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers;
+namespace App\Http\Requests\Client\Servers;
 
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
+use App\Enums\Server\PowerAction;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 
 class SendPowerCommandRequest extends BaseApiRequest

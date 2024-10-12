@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Validation;
+namespace App\Validation;
 
-use Convoy\Models\Address;
+use App\Models\Address;
 use Illuminate\Validation\Validator;
 
 readonly class ValidateAddressUniqueness
@@ -16,14 +16,15 @@ readonly class ValidateAddressUniqueness
         $data = $validator->validated();
 
         if (!$this->existingAddress) {
-            if (Address::where([['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
+            if (Address::where(
+                [['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
             )->exists()) {
                 $validator->errors()->add('address', __('validation.unique_exists', ['attribute' => 'address']));
             }
         } else {
             if ($this->existingAddress !== $data['address'] && Address::where(
-                    [['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
-                )->exists()) {
+                [['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
+            )->exists()) {
                 $validator->errors()->add('address', __('validation.unique_exists', ['attribute' => 'address']));
             }
         }

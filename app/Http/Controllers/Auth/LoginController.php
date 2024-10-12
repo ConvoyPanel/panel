@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Controllers\Auth;
+namespace App\Http\Controllers\Auth;
 
-use Convoy\Exceptions\Service\Api\InvalidJWTException;
-use Convoy\Http\Controllers\Controller;
-use Convoy\Models\SSOToken;
-use Convoy\Models\User;
-use Convoy\Services\Api\JWTService;
+use App\Exceptions\Service\Api\InvalidJWTException;
+use App\Http\Controllers\Controller;
+use App\Models\SSOToken;
+use App\Models\User;
+use App\Services\Api\JWTService;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;

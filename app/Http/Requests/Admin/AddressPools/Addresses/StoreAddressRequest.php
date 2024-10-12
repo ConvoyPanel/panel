@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\AddressPools\Addresses;
+namespace App\Http\Requests\Admin\AddressPools\Addresses;
 
-use Convoy\Enums\Network\AddressType;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Address;
-use Convoy\Models\AddressPool;
-use Convoy\Validation\ValidateAddressType;
-use Convoy\Validation\ValidateAddressUniqueness;
+use App\Enums\Network\AddressType;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Address;
+use App\Models\AddressPool;
+use App\Validation\ValidateAddressType;
+use App\Validation\ValidateAddressUniqueness;
 use Illuminate\Support\Arr;
 
 class StoreAddressRequest extends BaseApiRequest
@@ -39,7 +39,8 @@ class StoreAddressRequest extends BaseApiRequest
         if (!$this->boolean('is_bulk_action')) {
             $pool = $this->parameter('address_pool', AddressPool::class);
             $rules[] = new ValidateAddressType(
-                $this->enum('type', AddressType::class), ['address', 'gateway'],
+                $this->enum('type', AddressType::class),
+                ['address', 'gateway'],
             );
             $rules[] = new ValidateAddressUniqueness($pool->id);
         }

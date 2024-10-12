@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Backup;
+namespace App\Exceptions\Service\Backup;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class BackupLockedException extends DisplayException
 {

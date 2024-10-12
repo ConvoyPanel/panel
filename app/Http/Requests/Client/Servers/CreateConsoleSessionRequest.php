@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers;
+namespace App\Http\Requests\Client\Servers;
 
-use Convoy\Enums\Server\ConsoleType;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
+use App\Enums\Server\ConsoleType;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 
 class CreateConsoleSessionRequest extends BaseApiRequest
@@ -12,7 +12,8 @@ class CreateConsoleSessionRequest extends BaseApiRequest
     public function authorize(): bool
     {
         return $this->user()->can(
-            'createConsoleSession', $this->parameter('server', Server::class),
+            'createConsoleSession',
+            $this->parameter('server', Server::class),
         );
     }
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Casts\NullableEncrypter;
+use App\Casts\NullableEncrypter;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coterm extends Model

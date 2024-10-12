@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Services\Activity;
+namespace App\Services\Activity;
 
-use Convoy\Enums\Network\AddressType;
-use Convoy\Models\Address;
+use App\Enums\Network\AddressType;
+use App\Models\Address;
 use Illuminate\Support\Arr;
-use function Convoy\Helpers\getAddressesFromRange;
+use function App\Helpers\getAddressesFromRange;
 
 class BulkAddressCreationService
 {
@@ -18,8 +18,7 @@ class BulkAddressCreationService
         int         $cidr,
         string      $gateway,
         ?string     $macAddress = null,
-    ): void
-    {
+    ): void {
         $addresses = getAddressesFromRange($type, $from, $to);
         $existingAddresses = Address::where('address_pool_id', '=', $poolId)
                                     ->whereIn('address', $addresses)
@@ -29,7 +28,12 @@ class BulkAddressCreationService
         $addresses = array_diff($addresses, $existingAddresses);
 
         $transformer = function (string $address) use (
-            $poolId, $serverId, $type, $cidr, $gateway, $macAddress,
+            $poolId,
+            $serverId,
+            $type,
+            $cidr,
+            $gateway,
+            $macAddress,
         ) {
             return [
                 'address_pool_id' => $poolId,
@@ -54,7 +58,8 @@ class BulkAddressCreationService
          * } $addresses
          */
         $addresses = Arr::map(
-            $addresses, $transformer,
+            $addresses,
+            $transformer,
         );
 
         Address::insert($addresses);

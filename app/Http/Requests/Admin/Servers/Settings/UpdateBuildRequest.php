@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Servers\Settings;
+namespace App\Http\Requests\Admin\Servers\Settings;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Address;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Address;
+use App\Models\Node;
+use App\Models\Server;
 use Illuminate\Validation\Validator;
 
 class UpdateBuildRequest extends BaseApiRequest

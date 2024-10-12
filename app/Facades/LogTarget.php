@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Facades;
+namespace App\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Convoy\Services\Activity\ActivityLogTargetableService;
+use App\Services\Activity\ActivityLogTargetableService;
 
 class LogTarget extends Facade
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Data\Node\Access;
+namespace App\Data\Node\Access;
 
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Casts\EnumCast;
-use Convoy\Enums\Node\Access\RealmType;
+use App\Enums\Node\Access\RealmType;
 use Spatie\LaravelData\Attributes\WithCast;
 
 class UserData extends Data
@@ -18,8 +18,7 @@ class UserData extends Data
         public RealmType $realm_type,
         public bool      $enabled,
         public ?Carbon   $expires_at,
-    )
-    {
+    ) {
     }
 
     public static function fromRaw(array $raw): UserData

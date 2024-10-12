@@ -1,7 +1,7 @@
 <?php
 
 use Carbon\Carbon;
-use Convoy\Services\Nodes\ServerUsagesSyncService;
+use App\Services\Nodes\ServerUsagesSyncService;
 use Illuminate\Support\Facades\Http;
 
 it('can sync server usages', function () {
@@ -11,7 +11,8 @@ it('can sync server usages', function () {
                 base_path(
                     'tests/Fixtures/Repositories/Server/GetServerMetricsData.hourly.average.json',
                 ),
-            ), 200,
+            ),
+            200,
         ),
     ]);
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Middleware\Activity;
+namespace App\Http\Middleware\Activity;
 
 use Closure;
-use Convoy\Facades\LogTarget;
+use App\Facades\LogTarget;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 

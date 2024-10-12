@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Policies;
+namespace App\Policies;
 
-use Convoy\Models\Server;
-use Convoy\Models\User;
+use App\Models\Server;
+use App\Models\User;
 
 class ServerPolicy
 {

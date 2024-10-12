@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Tokens;
+namespace App\Http\Requests\Admin\Tokens;
 
 use Illuminate\Foundation\Http\FormRequest;
 

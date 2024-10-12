@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 
 class ServerAuthService
 {

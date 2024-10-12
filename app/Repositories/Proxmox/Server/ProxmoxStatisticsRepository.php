@@ -1,15 +1,15 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
 use Carbon\CarbonImmutable;
-use Convoy\Data\Server\Proxmox\Usages\ServerDiskData;
-use Convoy\Data\Server\Proxmox\Usages\ServerNetworkData;
-use Convoy\Data\Server\Proxmox\Usages\ServerTimepointData;
-use Convoy\Enums\Server\StatisticConsolidatorFunction;
-use Convoy\Enums\Server\StatisticTimeRange;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Data\Server\Proxmox\Usages\ServerDiskData;
+use App\Data\Server\Proxmox\Usages\ServerNetworkData;
+use App\Data\Server\Proxmox\Usages\ServerTimepointData;
+use App\Enums\Server\StatisticConsolidatorFunction;
+use App\Enums\Server\StatisticTimeRange;
+use App\Models\Server;
+use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
@@ -19,8 +19,7 @@ class ProxmoxStatisticsRepository extends ProxmoxRepository
     public function getStatistics(
         StatisticTimeRange            $from,
         StatisticConsolidatorFunction $consolidator = StatisticConsolidatorFunction::AVERAGE,
-    ): DataCollection
-    {
+    ): DataCollection {
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient()

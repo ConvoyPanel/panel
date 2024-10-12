@@ -23,13 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace Convoy\Console\Commands\User;
+namespace App\Console\Commands\User;
 
 use Exception;
-use Convoy\Models\User;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
-use Convoy\Exceptions\Model\DataValidationException;
+use App\Exceptions\Model\DataValidationException;
 
 class MakeUserCommand extends Command
 {

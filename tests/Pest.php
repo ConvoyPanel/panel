@@ -1,9 +1,9 @@
 <?php
 
-use Convoy\Models\Location;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Models\User;
+use App\Models\Location;
+use App\Models\Node;
+use App\Models\Server;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Queue;
 uses(
     Tests\TestCase::class,
     DatabaseTransactions::class,
-// Illuminate\Foundation\Testing\RefreshDatabase::class,
+    // Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->beforeEach(function () {
     Http::preventStrayRequests();
     Queue::fake();
@@ -61,7 +61,7 @@ function createServerModel(): array
     $user = User::factory()->create();
     /** @var Node $node */
     $node = Node::factory()->for($location)->create();
-    $service = app(Convoy\Services\Servers\ServerCreationService::class);
+    $service = app(App\Services\Servers\ServerCreationService::class);
     /** @var Server $server */
     $server = Server::factory()->create(function () use ($user, $node, $service) {
         $uuid = $service->generateUniqueUuidCombo();

@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Http\Controllers\Controller;
-use Convoy\Models\Server;
-use Convoy\Repositories\Eloquent\SnapshotRepository;
+use App\Http\Controllers\Controller;
+use App\Models\Server;
+use App\Repositories\Eloquent\SnapshotRepository;
 
 class SnapshotController extends Controller
 {

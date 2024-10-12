@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Http\Requests;
+namespace App\Http\Requests;
 
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;

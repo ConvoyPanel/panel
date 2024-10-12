@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Services\Backups;
+namespace App\Services\Backups;
 
 use Carbon\Carbon;
 use Closure;
-use Convoy\Models\Backup;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Models\Backup;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -16,8 +16,7 @@ class BackupMonitorService
     public function __construct(
         private ProxmoxActivityRepository $repository,
         private ProxmoxBackupRepository   $backupRepository,
-    )
-    {
+    ) {
     }
 
     public function checkCreationProgress(Backup $backup, string $upid, ?Closure $callback = null)
@@ -45,7 +44,8 @@ class BackupMonitorService
         if (Str::lower(Arr::get($status, 'exitstatus')) === 'ok') {
             $archives = $this->backupRepository->setServer($backup->server)->getBackups();
             $archive = collect($archives)->where(
-                'volid', "{$backup->server->node->backup_storage}:backup/{$fileName}",
+                'volid',
+                "{$backup->server->node->backup_storage}:backup/{$fileName}",
             )->first();
 
             $backup->update([
@@ -62,9 +62,11 @@ class BackupMonitorService
         }
     }
 
-    public function checkRestorationProgress(Server $server, string $upid, ?Closure $callback = null,
-    )
-    {
+    public function checkRestorationProgress(
+        Server $server,
+        string $upid,
+        ?Closure $callback = null,
+    ) {
         $status = $this->repository->setServer($server)->getStatus($upid);
 
         if (Arr::get($status, 'status') === 'running') {

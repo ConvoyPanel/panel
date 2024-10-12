@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
 use League\Fractal\TransformerAbstract;
-use Convoy\Data\Server\Proxmox\ServerStateData;
+use App\Data\Server\Proxmox\ServerStateData;
 
 class ServerStateTransformer extends TransformerAbstract
 {

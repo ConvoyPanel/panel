@@ -1,21 +1,21 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Models\Server;
-use Convoy\Enums\Server\State;
-use Convoy\Enums\Server\Status;
+use App\Models\Server;
+use App\Enums\Server\State;
+use App\Enums\Server\Status;
 use Illuminate\Support\Facades\Bus;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Jobs\Server\SyncBuildJob;
-use Convoy\Jobs\Server\BuildServerJob;
-use Convoy\Jobs\Server\DeleteServerJob;
-use Convoy\Jobs\Server\MonitorStateJob;
-use Convoy\Jobs\Server\UpdatePasswordJob;
-use Convoy\Jobs\Server\SendPowerCommandJob;
-use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
-use Convoy\Jobs\Server\WaitUntilVmIsDeletedJob;
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use App\Enums\Server\PowerAction;
+use App\Jobs\Server\SyncBuildJob;
+use App\Jobs\Server\BuildServerJob;
+use App\Jobs\Server\DeleteServerJob;
+use App\Jobs\Server\MonitorStateJob;
+use App\Jobs\Server\UpdatePasswordJob;
+use App\Jobs\Server\SendPowerCommandJob;
+use App\Jobs\Server\WaitUntilVmIsCreatedJob;
+use App\Jobs\Server\WaitUntilVmIsDeletedJob;
+use App\Data\Server\Deployments\ServerDeploymentData;
 
 class ServerBuildDispatchService
 {

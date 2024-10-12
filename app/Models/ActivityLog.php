@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -75,7 +75,9 @@ class ActivityLog extends Model
         }
 
         return static::where(
-            'created_at', '<=', Carbon::now()->subDays(config('activity.prune_days')),
+            'created_at',
+            '<=',
+            Carbon::now()->subDays(config('activity.prune_days')),
         );
     }
 }

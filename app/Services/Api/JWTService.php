@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Services\Api;
+namespace App\Services\Api;
 
-use Convoy\Models\User;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Lcobucci\JWT\Token\Plain;
@@ -13,9 +13,9 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
-use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
+use App\Extensions\Lcobucci\JWT\Validation\Clock;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Convoy\Exceptions\Service\Api\InvalidJWTException;
+use App\Exceptions\Service\Api\InvalidJWTException;
 
 class JWTService
 {

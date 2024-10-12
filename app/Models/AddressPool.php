@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +24,10 @@ class AddressPool extends Model
     public function nodes(): BelongsToMany
     {
         return $this->belongsToMany(
-            Node::class, 'address_pool_to_node', 'address_pool_id', 'node_id',
+            Node::class,
+            'address_pool_to_node',
+            'address_pool_id',
+            'node_id',
         );
     }
 

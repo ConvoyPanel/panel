@@ -1,15 +1,15 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\DiskInterface;
-use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
-use Convoy\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
-use Convoy\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
-use Convoy\Models\ISO;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Data\Server\Proxmox\Config\DiskData;
+use App\Enums\Server\DiskInterface;
+use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
+use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
+use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
+use App\Models\ISO;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\DataCollection;
 

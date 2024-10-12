@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\Location;
+use App\Models\Location;
 use League\Fractal\TransformerAbstract;
 
 class LocationTransformer extends TransformerAbstract

@@ -1,6 +1,6 @@
 <?php
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Support\Facades\Broadcast;
 
 /*

@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Contracts\Repository;
+namespace App\Contracts\Repository;
 
-use Convoy\Models\Server;
-use Convoy\Models\ActivityLog;
+use App\Models\Server;
+use App\Models\ActivityLog;
 
 interface ActivityRepositoryInterface extends RepositoryInterface
 {

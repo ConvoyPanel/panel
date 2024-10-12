@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\PersonalAccessToken;
+use App\Models\PersonalAccessToken;
 use League\Fractal\TransformerAbstract;
 
 class ApiKeyTransformer extends TransformerAbstract

@@ -1,19 +1,19 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin\AddressPools;
+namespace App\Http\Controllers\Admin\AddressPools;
 
-use Convoy\Enums\Network\AddressType;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
-use Convoy\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
-use Convoy\Jobs\Server\SyncNetworkSettings;
-use Convoy\Models\Address;
-use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\FiltersAddressWildcard;
-use Convoy\Services\Activity\BulkAddressCreationService;
-use Convoy\Services\Servers\NetworkService;
-use Convoy\Transformers\Admin\AddressTransformer;
+use App\Enums\Network\AddressType;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
+use App\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
+use App\Jobs\Server\SyncNetworkSettings;
+use App\Models\Address;
+use App\Models\AddressPool;
+use App\Models\Filters\FiltersAddressWildcard;
+use App\Services\Activity\BulkAddressCreationService;
+use App\Services\Servers\NetworkService;
+use App\Transformers\Admin\AddressTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -26,8 +26,7 @@ class AddressController extends ApiController
         private NetworkService             $networkService,
         private ConnectionInterface        $connection,
         private BulkAddressCreationService $bulkAddressCreationService,
-    )
-    {
+    ) {
     }
 
     public function index(Request $request, AddressPool $addressPool)
@@ -49,8 +48,8 @@ class AddressController extends ApiController
                                      ],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                     $request->query(),
+                                 );
 
         return fractal($addresses, new AddressTransformer())->parseIncludes($request->include)
                                                             ->respond();
@@ -104,9 +103,10 @@ class AddressController extends ApiController
     }
 
     public function update(
-        UpdateAddressRequest $request, AddressPool $addressPool, Address $address,
-    )
-    {
+        UpdateAddressRequest $request,
+        AddressPool $addressPool,
+        Address $address,
+    ) {
         $address = $this->connection->transaction(function () use ($request, $address) {
             $oldLinkedServer = $address->server;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Extensions\Spatie\Fractal;
+namespace App\Extensions\Spatie\Fractal;
 
 use League\Fractal\Serializer\ArraySerializer;
 
@@ -35,7 +35,9 @@ class RecursiveSerializer extends ArraySerializer
         foreach ($includedData as $include) {
             if (isset($data[$include])) {
                 $data[$include] = $this->recursiveInclude(
-                    $include, $data[$include], $includedData[$include],
+                    $include,
+                    $data[$include],
+                    $includedData[$include],
                 );
             }
         }
@@ -58,7 +60,9 @@ class RecursiveSerializer extends ArraySerializer
         foreach ($includedData as $key => $value) {
             if (isset($transformedData[$key])) {
                 $transformedData[$key] = $this->recursiveInclude(
-                    $key, $transformedData[$key], $value,
+                    $key,
+                    $transformedData[$key],
+                    $value,
                 );
             }
         }

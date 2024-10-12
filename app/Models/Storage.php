@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Casts\StorageSizeCast;
+use App\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -37,7 +37,10 @@ class Storage extends Model
     public function nodes(): BelongsToMany
     {
         return $this->belongsToMany(
-            Node::class, 'storage_to_node', 'storage_id', 'node_id',
+            Node::class,
+            'storage_to_node',
+            'storage_id',
+            'node_id',
         );
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox;
+namespace App\Data\Server\Proxmox;
 
 use Spatie\LaravelData\Data;
-use Convoy\Data\Server\Proxmox\Config\ServerConfigData;
+use App\Data\Server\Proxmox\Config\ServerConfigData;
 
 class ServerProxmoxData extends Data
 {
@@ -15,7 +15,6 @@ class ServerProxmoxData extends Data
         public string           $state,
         public bool             $locked,
         public ServerConfigData $config,
-    )
-    {
+    ) {
     }
 }

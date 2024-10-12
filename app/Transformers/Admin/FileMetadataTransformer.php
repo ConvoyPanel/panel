@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
 use League\Fractal\TransformerAbstract;
-use Convoy\Data\Node\Storage\FileMetaData;
+use App\Data\Node\Storage\FileMetaData;
 
 class FileMetadataTransformer extends TransformerAbstract
 {

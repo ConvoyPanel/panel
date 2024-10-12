@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Providers;
+namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Convoy\Repositories\Eloquent\ActivityRepository;
-use Convoy\Contracts\Repository\ActivityRepositoryInterface;
+use App\Repositories\Eloquent\ActivityRepository;
+use App\Contracts\Repository\ActivityRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

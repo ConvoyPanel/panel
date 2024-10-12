@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin\Nodes;
+namespace App\Http\Controllers\Admin\Nodes;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
-use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
-use Convoy\Models\Filters\FiltersNodeWildcard;
-use Convoy\Models\Node;
-use Convoy\Transformers\Admin\NodeTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
+use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use App\Models\Filters\FiltersNodeWildcard;
+use App\Models\Node;
+use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -30,8 +30,8 @@ class NodeController extends ApiController
                                  )],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }

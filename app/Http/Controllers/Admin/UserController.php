@@ -1,16 +1,16 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin;
 
 use Carbon\CarbonImmutable;
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
-use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
-use Convoy\Models\Filters\FiltersUserWildcard;
-use Convoy\Models\SSOToken;
-use Convoy\Models\User;
-use Convoy\Services\Api\JWTService;
-use Convoy\Transformers\Admin\UserTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Users\StoreUserRequest;
+use App\Http\Requests\Admin\Users\UpdateUserRequest;
+use App\Models\Filters\FiltersUserWildcard;
+use App\Models\SSOToken;
+use App\Models\User;
+use App\Services\Api\JWTService;
+use App\Transformers\Admin\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -34,8 +34,8 @@ class UserController extends ApiController
                                  ), AllowedFilter::custom('*', new FiltersUserWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($users, new UserTransformer())->respond();
     }

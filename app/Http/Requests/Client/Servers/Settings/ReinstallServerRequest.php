@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Settings;
+namespace App\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Rules\Password;
-use Convoy\Rules\USKeyboardCharacters;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
+use App\Models\Template;
+use App\Rules\Password;
+use App\Rules\USKeyboardCharacters;
 
 class ReinstallServerRequest extends BaseApiRequest
 {

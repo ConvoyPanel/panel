@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Enums\Server\DiskInterface;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Enums\Server\DiskInterface;
+use App\Models\Server;
+use App\Repositories\Proxmox\ProxmoxRepository;
 use Webmozart\Assert\Assert;
 
 class ProxmoxDiskRepository extends ProxmoxRepository

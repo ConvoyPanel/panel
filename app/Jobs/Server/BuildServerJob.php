@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Jobs\Server;
+namespace App\Jobs\Server;
 
-use Convoy\Enums\Server\Status;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Services\Servers\ServerBuildService;
+use App\Enums\Server\Status;
+use App\Models\Server;
+use App\Models\Template;
+use App\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

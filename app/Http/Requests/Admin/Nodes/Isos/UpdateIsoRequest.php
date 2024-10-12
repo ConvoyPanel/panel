@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Nodes\Isos;
+namespace App\Http\Requests\Admin\Nodes\Isos;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\ISO;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\ISO;
 
 class UpdateIsoRequest extends BaseApiRequest
 {

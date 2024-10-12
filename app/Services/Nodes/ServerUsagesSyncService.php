@@ -1,14 +1,14 @@
 <?php
 
-namespace Convoy\Services\Nodes;
+namespace App\Services\Nodes;
 
 use Carbon\Carbon;
-use Convoy\Data\Server\Proxmox\Usages\ServerTimepointData;
-use Convoy\Enums\Server\StatisticTimeRange;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
+use App\Data\Server\Proxmox\Usages\ServerTimepointData;
+use App\Enums\Server\StatisticTimeRange;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Node;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
 
 class ServerUsagesSyncService
 {

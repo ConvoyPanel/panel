@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Coterms;
+namespace App\Http\Requests\Admin\Coterms;
 
-use Convoy\Http\Requests\BaseApiRequest;
+use App\Http\Requests\BaseApiRequest;
 
 class UpdateAttachedNodesRequest extends BaseApiRequest
 {

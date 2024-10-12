@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
 use Laravel\Sanctum\NewAccessToken;
 use League\Fractal\TransformerAbstract;

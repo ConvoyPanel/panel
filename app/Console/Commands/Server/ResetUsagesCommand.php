@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Console\Commands\Server;
+namespace App\Console\Commands\Server;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Console\Command;
 
 class ResetUsagesCommand extends Command

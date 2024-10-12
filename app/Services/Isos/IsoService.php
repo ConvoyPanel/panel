@@ -1,35 +1,44 @@
 <?php
 
-namespace Convoy\Services\Isos;
+namespace App\Services\Isos;
 
-use Convoy\Data\Helpers\ChecksumData;
-use Convoy\Data\Node\Storage\IsoData;
-use Convoy\Enums\Node\Storage\ContentType;
-use Convoy\Jobs\Node\MonitorIsoDownloadJob;
-use Convoy\Models\ISO;
-use Convoy\Models\Node;
-use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Data\Helpers\ChecksumData;
+use App\Data\Node\Storage\IsoData;
+use App\Enums\Node\Storage\ContentType;
+use App\Jobs\Node\MonitorIsoDownloadJob;
+use App\Models\ISO;
+use App\Models\Node;
+use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use Illuminate\Database\ConnectionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class IsoService
 {
     public function __construct(
-        private ConnectionInterface $connection, private ProxmoxStorageRepository $repository,
-    )
-    {
+        private ConnectionInterface $connection,
+        private ProxmoxStorageRepository $repository,
+    ) {
     }
 
     public function download(
-        Node          $node, string $name, ?string $fileName, string $link,
-        ?ChecksumData $checksumData = null, ?bool $hidden = false,
-    )
-    {
+        Node          $node,
+        string $name,
+        ?string $fileName,
+        string $link,
+        ?ChecksumData $checksumData = null,
+        ?bool $hidden = false,
+    ) {
         $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(
             function () use (
-                $queriedFileMetadata, $node, $hidden, $fileName, $link, $name, $checksumData,
+                $queriedFileMetadata,
+                $node,
+                $hidden,
+                $fileName,
+                $link,
+                $name,
+                $checksumData,
             ) {
                 $iso = ISO::create([
                     'node_id' => $node->id,
@@ -40,7 +49,11 @@ class IsoService
                 ]);
 
                 $upid = $this->repository->setNode($node)->download(
-                    ContentType::ISO, $iso->file_name, $link, true, $checksumData,
+                    ContentType::ISO,
+                    $iso->file_name,
+                    $link,
+                    true,
+                    $checksumData,
                 );
 
                 MonitorIsoDownloadJob::dispatch($iso->id, $upid);

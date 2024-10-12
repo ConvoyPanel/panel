@@ -1,14 +1,14 @@
 <?php
 
-namespace Convoy\Http;
+namespace App\Http;
 
-use Convoy\Http\Middleware\Authenticate;
-use Convoy\Http\Middleware\EncryptCookies;
-use Convoy\Http\Middleware\PreventRequestsDuringMaintenance;
-use Convoy\Http\Middleware\RedirectIfAuthenticated;
-use Convoy\Http\Middleware\TrimStrings;
-use Convoy\Http\Middleware\TrustProxies;
-use Convoy\Http\Middleware\VerifyCsrfToken;
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\TrimStrings;
+use App\Http\Middleware\TrustProxies;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
@@ -36,7 +36,7 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $middleware = [
-        // \Convoy\Http\Middleware\TrustHosts::class,
+        // \App\Http\Middleware\TrustHosts::class,
         TrustProxies::class,
         HandleCors::class,
         PreventRequestsDuringMaintenance::class,

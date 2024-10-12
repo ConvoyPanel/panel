@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Jobs\Server;
+namespace App\Jobs\Server;
 
-use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerBuildService;
+use App\Models\Server;
+use App\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

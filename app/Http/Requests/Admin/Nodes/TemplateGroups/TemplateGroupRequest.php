@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Nodes\TemplateGroups;
+namespace App\Http\Requests\Admin\Nodes\TemplateGroups;
 
-use Convoy\Models\TemplateGroup;
+use App\Models\TemplateGroup;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TemplateGroupRequest extends FormRequest

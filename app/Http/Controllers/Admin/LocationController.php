@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\LocationFormRequest;
-use Convoy\Models\Filters\FiltersLocationWildcard;
-use Convoy\Models\Location;
-use Convoy\Transformers\Admin\LocationTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\LocationFormRequest;
+use App\Models\Filters\FiltersLocationWildcard;
+use App\Models\Location;
+use App\Transformers\Admin\LocationTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -21,11 +21,11 @@ class LocationController extends ApiController
                                  ->defaultSort('-id')
             // @phpstan-ignore-next-line
                                  ->allowedFilters(
-                ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard())],
-            )
+                                     ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard())],
+                                 )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                     $request->query(),
+                                 );
 
         return fractal($locations, new LocationTransformer())->respond();
     }

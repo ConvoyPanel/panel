@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
-use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Transformers\Admin\NodeTransformer;
-use Convoy\Transformers\Admin\UserTransformer;
+use App\Models\Server;
+use App\Services\Servers\ServerDetailService;
+use App\Transformers\Admin\NodeTransformer;
+use App\Transformers\Admin\UserTransformer;
 use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
 

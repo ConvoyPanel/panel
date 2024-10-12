@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
-use Convoy\Models\User;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Convoy\Models\ActivityLog;
+use App\Models\ActivityLog;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\TransformerAbstract;

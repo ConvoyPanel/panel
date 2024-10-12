@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Jobs\Server;
+namespace App\Jobs\Server;
 
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Enums\Server\PowerAction;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

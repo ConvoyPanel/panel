@@ -1,18 +1,18 @@
 <?php
 
-namespace Convoy\Services\Backups;
+namespace App\Services\Backups;
 
-use Convoy\Exceptions\Service\Backup\BackupLockedException;
-use Convoy\Models\Backup;
-use Convoy\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Exceptions\Service\Backup\BackupLockedException;
+use App\Models\Backup;
+use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Illuminate\Database\ConnectionInterface;
 
 class BackupDeletionService
 {
-    public function __construct(private ConnectionInterface     $connection,
-                                private ProxmoxBackupRepository $proxmoxRepository,
-    )
-    {
+    public function __construct(
+        private ConnectionInterface     $connection,
+        private ProxmoxBackupRepository $proxmoxRepository,
+    ) {
     }
 
     public function handle(Backup $backup)

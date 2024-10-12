@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
-use Convoy\Models\Deployment;
+use App\Models\Deployment;
 use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 

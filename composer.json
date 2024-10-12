@@ -49,7 +49,7 @@
       "app/Helpers/Network.php"
     ],
     "psr-4": {
-      "Convoy\\": "app/",
+      "App\\": "app/",
       "Database\\Factories\\": "database/factories/",
       "Database\\Seeders\\": "database/seeders/"
     }

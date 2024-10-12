@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Contracts\Repository;
+namespace App\Contracts\Repository;
 
-use Convoy\Models\Server;
-use Convoy\Exceptions\Repository\RecordNotFoundException;
+use App\Models\Server;
+use App\Exceptions\Repository\RecordNotFoundException;
 
 interface ServerRepositoryInterface extends RepositoryInterface
 {

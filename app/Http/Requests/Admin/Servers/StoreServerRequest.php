@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\Servers;
+namespace App\Http\Requests\Admin\Servers;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Address;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Rules\Password;
-use Convoy\Rules\USKeyboardCharacters;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Address;
+use App\Models\Node;
+use App\Models\Server;
+use App\Rules\Password;
+use App\Rules\USKeyboardCharacters;
 use Illuminate\Validation\Validator;
 
 /**
@@ -73,13 +73,15 @@ class StoreServerRequest extends BaseApiRequest
 
             if ($memory > $nodeMemoryLimit || $memory < 0) {
                 $validator->errors()->add(
-                    'limits.memory', 'The memory value exceeds the node\'s limit.',
+                    'limits.memory',
+                    'The memory value exceeds the node\'s limit.',
                 );
             }
 
             if ($disk > $nodeDiskLimit || $disk < 0) {
                 $validator->errors()->add(
-                    'limits.disk', 'The disk value exceeds the node\'s limit.',
+                    'limits.disk',
+                    'The disk value exceeds the node\'s limit.',
                 );
             }
         });

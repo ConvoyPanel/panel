@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Enums\Api\ApiKeyType;
+use App\Enums\Api\ApiKeyType;
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 
 class PersonalAccessToken extends SanctumPersonalAccessToken

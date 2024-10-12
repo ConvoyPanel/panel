@@ -1,16 +1,16 @@
 <?php
 
-namespace Convoy\Console;
+namespace App\Console;
 
-use Convoy\Models\ActivityLog;
+use App\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
-use Convoy\Console\Commands\Server\ResetUsagesCommand;
-use Convoy\Console\Commands\Server\UpdateUsagesCommand;
+use App\Console\Commands\Server\ResetUsagesCommand;
+use App\Console\Commands\Server\UpdateUsagesCommand;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Convoy\Console\Commands\Maintenance\PruneUsersCommand;
-use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
-use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
+use App\Console\Commands\Maintenance\PruneUsersCommand;
+use App\Console\Commands\Server\UpdateRateLimitsCommand;
+use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 
 class Kernel extends ConsoleKernel
 {

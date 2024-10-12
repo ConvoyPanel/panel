@@ -1,32 +1,32 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
-use Convoy\Data\Server\Proxmox\Config\DiskData;
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Enums\Server\Status;
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\RenameServerRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
-use Convoy\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
-use Convoy\Models\ISO;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Models\TemplateGroup;
-use Convoy\Services\Servers\AllocationService;
-use Convoy\Services\Servers\CloudinitService;
-use Convoy\Services\Servers\ServerAuthService;
-use Convoy\Services\Servers\ServerBuildDispatchService;
-use Convoy\Transformers\Client\MediaTransformer;
-use Convoy\Transformers\Client\RenamedServerTransformer;
-use Convoy\Transformers\Client\ServerBootOrderTransformer;
-use Convoy\Transformers\Client\ServerNetworkTransformer;
-use Convoy\Transformers\Client\ServerSecurityTransformer;
-use Convoy\Transformers\Client\TemplateGroupTransformer;
+use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Data\Server\Proxmox\Config\DiskData;
+use App\Enums\Server\AuthenticationType;
+use App\Enums\Server\Status;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Client\Servers\Settings\MountMediaRequest;
+use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
+use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
+use App\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
+use App\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
+use App\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
+use App\Models\ISO;
+use App\Models\Server;
+use App\Models\Template;
+use App\Models\TemplateGroup;
+use App\Services\Servers\AllocationService;
+use App\Services\Servers\CloudinitService;
+use App\Services\Servers\ServerAuthService;
+use App\Services\Servers\ServerBuildDispatchService;
+use App\Transformers\Client\MediaTransformer;
+use App\Transformers\Client\RenamedServerTransformer;
+use App\Transformers\Client\ServerBootOrderTransformer;
+use App\Transformers\Client\ServerNetworkTransformer;
+use App\Transformers\Client\ServerSecurityTransformer;
+use App\Transformers\Client\TemplateGroupTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -39,8 +39,7 @@ class SettingsController extends ApiController
         private CloudinitService           $cloudinitService,
         private ServerBuildDispatchService $buildDispatchService,
         private AllocationService          $allocationService,
-    )
-    {
+    ) {
     }
 
     public function rename(RenameServerRequest $request, Server $server)
@@ -71,7 +70,9 @@ class SettingsController extends ApiController
                                              }])->get();
         } else {
             $templateGroups = $templateGroups->where(
-                'template_groups.node_id', '=', $server->node->id,
+                'template_groups.node_id',
+                '=',
+                $server->node->id,
             )
                                              ->with(['templates' => function ($query) {
                                                  $query->orderBy('order_column');

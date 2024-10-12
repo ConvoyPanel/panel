@@ -1,19 +1,19 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\Coterms\DeleteCotermRequest;
-use Convoy\Http\Requests\Admin\Coterms\StoreCotermRequest;
-use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
-use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
-use Convoy\Models\Coterm;
-use Convoy\Models\Filters\FiltersCotermWildcard;
-use Convoy\Models\Filters\FiltersNodeWildcard;
-use Convoy\Models\Node;
-use Convoy\Services\Coterm\CotermTokenCreationService;
-use Convoy\Transformers\Admin\CotermTransformer;
-use Convoy\Transformers\Admin\NodeTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\Coterms\DeleteCotermRequest;
+use App\Http\Requests\Admin\Coterms\StoreCotermRequest;
+use App\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
+use App\Http\Requests\Admin\Coterms\UpdateCotermRequest;
+use App\Models\Coterm;
+use App\Models\Filters\FiltersCotermWildcard;
+use App\Models\Filters\FiltersNodeWildcard;
+use App\Models\Node;
+use App\Services\Coterm\CotermTokenCreationService;
+use App\Transformers\Admin\CotermTransformer;
+use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -31,12 +31,13 @@ class CotermController extends ApiController
                                     ->defaultSort('-id')
                                     ->allowedFilters(
                                         ['name', AllowedFilter::custom(
-                                            '*', new FiltersCotermWildcard(),
+                                            '*',
+                                            new FiltersCotermWildcard(),
                                         )],
                                     )
                                     ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                        $request->query(),
+                                    );
 
         return fractal($addressPools, new CotermTransformer())->respond();
     }
@@ -91,8 +92,8 @@ class CotermController extends ApiController
                                  ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }

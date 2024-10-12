@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin\AddressPools\Addresses;
+namespace App\Http\Requests\Admin\AddressPools\Addresses;
 
-use Convoy\Enums\Network\AddressType;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Address;
-use Convoy\Models\AddressPool;
-use Convoy\Validation\ValidateAddressType;
-use Convoy\Validation\ValidateAddressUniqueness;
+use App\Enums\Network\AddressType;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Address;
+use App\Models\AddressPool;
+use App\Validation\ValidateAddressType;
+use App\Validation\ValidateAddressUniqueness;
 use Illuminate\Support\Arr;
 
 class UpdateAddressRequest extends BaseApiRequest

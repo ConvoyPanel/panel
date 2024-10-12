@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Settings;
+namespace App\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\ISO;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\ISO;
 
 class MountMediaRequest extends BaseApiRequest
 {

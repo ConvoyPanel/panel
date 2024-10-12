@@ -1,7 +1,7 @@
 <?php
 
-use Convoy\Models\Location;
-use Convoy\Models\User;
+use App\Models\Location;
+use App\Models\User;
 
 it('can fetch locations', function () {
     $user = User::factory()->create([

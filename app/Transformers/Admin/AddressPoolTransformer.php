@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\AddressPool;
+use App\Models\AddressPool;
 use League\Fractal\TransformerAbstract;
 use League\Fractal\Resource\Collection;
 

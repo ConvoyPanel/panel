@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Exceptions\Model;
+namespace App\Exceptions\Model;
 
 use Illuminate\Support\MessageBag;
-use Convoy\Exceptions\ConvoyException;
+use App\Exceptions\ConvoyException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Contracts\Support\MessageProvider;

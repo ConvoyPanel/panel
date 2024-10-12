@@ -1,13 +1,13 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Enums\Server\StatisticConsolidatorFunction;
-use Convoy\Enums\Server\StatisticTimeRange;
-use Convoy\Http\Requests\Client\Servers\GetStatisticRequest;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
-use Convoy\Transformers\Client\ServerTimepointDataTransformer;
+use App\Enums\Server\StatisticConsolidatorFunction;
+use App\Enums\Server\StatisticTimeRange;
+use App\Http\Requests\Client\Servers\GetStatisticRequest;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
+use App\Transformers\Client\ServerTimepointDataTransformer;
 
 class StatisticController
 {
@@ -19,11 +19,13 @@ class StatisticController
     {
         $from = $request->enum('from', StatisticTimeRange::class);
         $consolidator = $request->enum(
-            'consolidator', StatisticConsolidatorFunction::class,
+            'consolidator',
+            StatisticConsolidatorFunction::class,
         ) ?? StatisticConsolidatorFunction::AVERAGE;
 
         $data = $this->statisticsRepository->setServer($server)->getStatistics(
-            $from, $consolidator,
+            $from,
+            $consolidator,
         );
 
         return fractal($data, new ServerTimepointDataTransformer())->respond();

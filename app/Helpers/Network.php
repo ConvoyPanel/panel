@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Helpers;
+namespace App\Helpers;
 
-use Convoy\Enums\Network\AddressType;
+use App\Enums\Network\AddressType;
 use GMP;
 
 function ipv6ToInteger(string $ip): GMP

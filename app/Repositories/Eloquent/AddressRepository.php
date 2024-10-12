@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Repositories\Eloquent;
+namespace App\Repositories\Eloquent;
 
-use Convoy\Models\Server;
+use App\Models\Server;
 use Illuminate\Support\Facades\DB;
 
 class AddressRepository

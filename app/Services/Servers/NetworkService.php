@@ -1,17 +1,17 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Data\Server\Eloquent\ServerAddressesData;
-use Convoy\Data\Server\MacAddressData;
-use Convoy\Enums\Network\AddressType;
-use Convoy\Models\Address;
-use Convoy\Models\Server;
-use Convoy\Repositories\Eloquent\AddressRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
+use App\Data\Server\Deployments\CloudinitAddressConfigData;
+use App\Data\Server\Eloquent\ServerAddressesData;
+use App\Data\Server\MacAddressData;
+use App\Enums\Network\AddressType;
+use App\Models\Address;
+use App\Models\Server;
+use App\Repositories\Eloquent\AddressRepository;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
 
@@ -24,8 +24,7 @@ class NetworkService
         private ProxmoxCloudinitRepository $cloudinitRepository,
         private ProxmoxConfigRepository    $allocationRepository,
         private ConnectionInterface        $connection,
-    )
-    {
+    ) {
     }
 
     public function deleteIpset(Server $server, string $name)
@@ -78,7 +77,8 @@ class NetworkService
             $proxmoxMacAddress = null;
             if (preg_match(
                 "/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su",
-                Arr::get($config, 'net0', ''), $matches,
+                Arr::get($config, 'net0', ''),
+                $matches,
             )) {
                 $proxmoxMacAddress = $matches[0];
             }
@@ -113,7 +113,8 @@ class NetworkService
             'ipv6' => $addresses->ipv6->first()?->toArray(),
         ]));
         $this->lockIps(
-            $server, array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())),
+            $server,
+            array_unique(Arr::flatten($server->addresses()->get(['address'])->toArray())),
             'ipfilter-net0',
         );
         $this->firewallRepository->setServer($server)->updateOptions([
@@ -150,7 +151,8 @@ class NetworkService
 
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_filter(
-            $currentAddresses, fn ($id) => !in_array($id, $addressIds),
+            $currentAddresses,
+            fn ($id) => !in_array($id, $addressIds),
         );
 
         if (!empty($addressesToAdd)) {

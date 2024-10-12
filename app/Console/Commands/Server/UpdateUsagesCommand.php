@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Console\Commands\Server;
+namespace App\Console\Commands\Server;
 
-use Convoy\Models\Node;
+use App\Models\Node;
 use Illuminate\Console\Command;
-use Convoy\Jobs\Node\SyncServerUsagesJob;
+use App\Jobs\Node\SyncServerUsagesJob;
 use Illuminate\Console\View\Components\Task;
 
 class UpdateUsagesCommand extends Command

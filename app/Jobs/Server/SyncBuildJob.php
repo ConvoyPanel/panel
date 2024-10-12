@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Jobs\Server;
+namespace App\Jobs\Server;
 
-use Convoy\Models\Server;
-use Convoy\Services\Servers\SyncBuildService;
+use App\Models\Server;
+use App\Services\Servers\SyncBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

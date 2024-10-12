@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox;
+namespace App\Repositories\Proxmox;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Node;
+use App\Models\Server;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -65,9 +65,10 @@ abstract class ProxmoxRepository
      * Return an instance of the Guzzle HTTP Client to be used for requests.
      */
     public function getHttpClient(
-        array $headers = [], array $options = [], bool $shouldAuthorize = true,
-    ): PendingRequest
-    {
+        array $headers = [],
+        array $options = [],
+        bool $shouldAuthorize = true,
+    ): PendingRequest {
         Assert::isInstanceOf($this->node, Node::class);
 
         return Http::withOptions(array_merge([

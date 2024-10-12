@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Repositories\Eloquent;
+namespace App\Repositories\Eloquent;
 
-use Convoy\Exceptions\Repository\Eloquent\TooManyRootSnapshotsException;
-use Convoy\Models\Snapshot;
+use App\Exceptions\Repository\Eloquent\TooManyRootSnapshotsException;
+use App\Models\Snapshot;
 use Illuminate\Support\Arr;
 
 class SnapshotRepository

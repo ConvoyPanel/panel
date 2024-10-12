@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Settings;
+namespace App\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Enums\Server\BiosType;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
+use App\Enums\Server\BiosType;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateBiosTypeRequest extends BaseApiRequest

@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Requests\Coterm;
+namespace App\Http\Requests\Coterm;
 
-use Convoy\Enums\Server\ConsoleType;
+use App\Enums\Server\ConsoleType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

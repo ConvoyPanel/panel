@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Http\Requests\Client\Servers\Settings;
+namespace App\Http\Requests\Client\Servers\Settings;
 
-use Convoy\Enums\Server\AuthenticationType;
-use Convoy\Http\Requests\BaseApiRequest;
-use Convoy\Models\Server;
-use Convoy\Rules\Password;
-use Convoy\Rules\USKeyboardCharacters;
+use App\Enums\Server\AuthenticationType;
+use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
+use App\Rules\Password;
+use App\Rules\USKeyboardCharacters;
 use Exception;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;

@@ -5,17 +5,17 @@
  *
 */
 
-namespace Convoy\Services\Activity;
+namespace App\Services\Activity;
 
 use Closure;
 use Exception;
 use Throwable;
 use Illuminate\Support\Arr;
 use Webmozart\Assert\Assert;
-use Convoy\Models\ActivityLog;
+use App\Models\ActivityLog;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Convoy\Models\ActivityLogSubject;
+use App\Models\ActivityLogSubject;
 use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Convoy\Models\Snapshot;
+use App\Models\Snapshot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SnapshotFactory extends Factory

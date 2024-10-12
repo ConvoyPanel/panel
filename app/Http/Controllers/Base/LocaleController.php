@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace Convoy\Http\Controllers\Base;
+namespace App\Http\Controllers\Base;
 
-use Convoy\Http\Controllers\Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

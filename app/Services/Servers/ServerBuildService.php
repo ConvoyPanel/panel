@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
-use Convoy\Models\Server;
-use Convoy\Models\Template;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Server;
+use App\Models\Template;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 
 /**
  * Class SnapshotService
@@ -16,8 +16,7 @@ class ServerBuildService
     public function __construct(
         private ProxmoxConfigRepository $configRepository,
         private ProxmoxServerRepository $serverRepository,
-    )
-    {
+    ) {
     }
 
     public function delete(Server $server): void

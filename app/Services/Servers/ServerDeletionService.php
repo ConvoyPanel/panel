@@ -1,12 +1,12 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Models\Server;
-use Convoy\Enums\Server\Status;
+use App\Models\Server;
+use App\Enums\Server\Status;
 use Illuminate\Support\Facades\Bus;
-use Convoy\Jobs\Server\PurgeBackupsJob;
-use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Jobs\Server\PurgeBackupsJob;
+use App\Exceptions\Http\Server\ServerStatusConflictException;
 
 class ServerDeletionService
 {

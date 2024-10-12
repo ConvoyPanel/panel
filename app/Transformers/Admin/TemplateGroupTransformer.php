@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\TemplateGroup;
+use App\Models\TemplateGroup;
 use League\Fractal\TransformerAbstract;
 
 class TemplateGroupTransformer extends TransformerAbstract

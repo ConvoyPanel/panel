@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox\Usages;
+namespace App\Data\Server\Proxmox\Usages;
 
 use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Data;
@@ -13,7 +13,6 @@ class ServerTimepointData extends Data
         public ServerNetworkData $network,
         public ServerDiskData    $disk,
         public CarbonImmutable   $timestamp,
-    )
-    {
+    ) {
     }
 }

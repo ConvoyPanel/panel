@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Http\Controllers;
+namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 

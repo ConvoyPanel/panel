@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Data\Node\Access;
+namespace App\Data\Node\Access;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Casts\EnumCast;
-use Convoy\Enums\Node\Access\RealmType;
+use App\Enums\Node\Access\RealmType;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Max;
@@ -21,7 +21,6 @@ class CreateUserData extends Data
         #[Min(1), Max(64)]
         public ?string   $password = null,
         public ?Carbon   $expires_at = null,
-    )
-    {
+    ) {
     }
 }

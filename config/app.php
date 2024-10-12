@@ -172,15 +172,15 @@ return [
         /*
          * Application Service Providers...
          */
-        Convoy\Providers\ActivityLogServiceProvider::class,
-        Convoy\Providers\AppServiceProvider::class,
-        Convoy\Providers\AuthServiceProvider::class,
-        Convoy\Providers\BroadcastServiceProvider::class,
-        Convoy\Providers\EventServiceProvider::class,
-        Convoy\Providers\HorizonServiceProvider::class,
-        Convoy\Providers\RouteServiceProvider::class,
-        Convoy\Providers\RepositoryServiceProvider::class,
-        Convoy\Providers\FortifyServiceProvider::class,
+        App\Providers\ActivityLogServiceProvider::class,
+        App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
+        App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
+        App\Providers\RepositoryServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -196,9 +196,9 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // Custom Facades
-        'Activity' => Convoy\Facades\Activity::class,
-        'LogBatch' => Convoy\Facades\LogBatch::class,
-        'LogTarget' => Convoy\Facades\LogTarget::class,
+        'Activity' => App\Facades\Activity::class,
+        'LogBatch' => App\Facades\LogBatch::class,
+        'LogTarget' => App\Facades\LogTarget::class,
     ])->toArray(),
 
 ];

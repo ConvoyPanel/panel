@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
-use Convoy\Casts\StorageSizeCast;
+use App\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -57,7 +57,9 @@ class Node extends Model
     public function getCotermConnectionAddress(): string
     {
         return sprintf(
-            '%s://%s:%s', $this->coterm_tls_enabled ? 'https' : 'http', $this->coterm_fqdn,
+            '%s://%s:%s',
+            $this->coterm_tls_enabled ? 'https' : 'http',
+            $this->coterm_fqdn,
             $this->coterm_port,
         );
     }
@@ -133,7 +135,10 @@ class Node extends Model
     public function storages(): BelongsToMany
     {
         return $this->belongsToMany(
-            Storage::class, 'storage_to_node', 'node_id', 'storage_id',
+            Storage::class,
+            'storage_to_node',
+            'node_id',
+            'storage_id',
         );
     }
 

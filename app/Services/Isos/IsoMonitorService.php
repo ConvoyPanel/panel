@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Services\Isos;
+namespace App\Services\Isos;
 
 use Carbon\Carbon;
 use Closure;
-use Convoy\Models\ISO;
-use Convoy\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use App\Models\ISO;
+use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 

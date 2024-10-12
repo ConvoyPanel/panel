@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Node\Storage;
+namespace App\Data\Node\Storage;
 
 use Spatie\LaravelData\Data;
 
@@ -10,7 +10,6 @@ class FileMetaData extends Data
         public string $file_name,
         public string $mime_type,
         public int    $size,
-    )
-    {
+    ) {
     }
 }

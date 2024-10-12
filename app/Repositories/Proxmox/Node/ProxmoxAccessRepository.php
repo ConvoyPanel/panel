@@ -1,15 +1,15 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Node;
+namespace App\Repositories\Proxmox\Node;
 
-use Convoy\Models\Node;
+use App\Models\Node;
 use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
-use Convoy\Data\Node\Access\UserData;
-use Convoy\Enums\Node\Access\RealmType;
-use Convoy\Data\Node\Access\CreateUserData;
-use Convoy\Data\Node\Access\UserCredentialsData;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Data\Node\Access\UserData;
+use App\Enums\Node\Access\RealmType;
+use App\Data\Node\Access\CreateUserData;
+use App\Data\Node\Access\UserCredentialsData;
+use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxAccessRepository extends ProxmoxRepository
 {

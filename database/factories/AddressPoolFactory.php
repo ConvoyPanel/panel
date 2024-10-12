@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Convoy\Models\AddressPool;
+use App\Models\AddressPool;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 

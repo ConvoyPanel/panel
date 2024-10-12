@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Exceptions;
+namespace App\Exceptions;
 
 use Exception;
 use Throwable;

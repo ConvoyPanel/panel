@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Eloquent;
+namespace App\Data\Server\Eloquent;
 
 use Spatie\LaravelData\Data;
 
@@ -17,7 +17,6 @@ class ServerEloquentData extends Data
         public ?string          $status,
         public ServerUsagesData $usages,
         public ServerLimitsData $limits,
-    )
-    {
+    ) {
     }
 }

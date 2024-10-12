@@ -1,17 +1,17 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
 use Exception;
-use Convoy\Models\Server;
-use Convoy\Enums\Node\Access\RealmType;
-use Convoy\Data\Node\Access\CreateUserData;
-use Convoy\Data\Node\Access\UserCredentialsData;
-use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
-use Convoy\Data\Server\Proxmox\Console\XTermCredentialsData;
-use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConsoleRepository;
+use App\Models\Server;
+use App\Enums\Node\Access\RealmType;
+use App\Data\Node\Access\CreateUserData;
+use App\Data\Node\Access\UserCredentialsData;
+use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
+use App\Data\Server\Proxmox\Console\XTermCredentialsData;
+use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Repositories\Proxmox\Server\ProxmoxConsoleRepository;
 
 class ServerConsoleService
 {

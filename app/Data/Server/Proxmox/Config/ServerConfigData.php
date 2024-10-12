@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox\Config;
+namespace App\Data\Server\Proxmox\Config;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
@@ -15,7 +15,6 @@ class ServerConfigData extends Data
         #[DataCollectionOf(DiskData::class)]
         public DataCollection $disks,
         /* public AddressConfigData $addresses */
-    )
-    {
+    ) {
     }
 }

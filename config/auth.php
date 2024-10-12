@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => Convoy\Models\User::class,
+            'model' => App\Models\User::class,
         ],
 
         // 'users' => [

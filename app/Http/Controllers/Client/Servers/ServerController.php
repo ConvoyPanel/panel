@@ -1,23 +1,23 @@
 <?php
 
-namespace Convoy\Http\Controllers\Client\Servers;
+namespace App\Http\Controllers\Client\Servers;
 
-use Convoy\Enums\Server\ConsoleType;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
-use Convoy\Http\Requests\Client\Servers\SendPowerCommandRequest;
-use Convoy\Models\Server;
-use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Convoy\Services\Coterm\CotermJWTService;
-use Convoy\Services\Servers\ServerConsoleService;
-use Convoy\Services\Servers\ServerDetailService;
-use Convoy\Services\Servers\VncService;
-use Convoy\Transformers\Client\ServerDetailTransformer;
-use Convoy\Transformers\Client\ServerStateTransformer;
-use Convoy\Transformers\Client\ServerTerminalTransformer;
-use Convoy\Transformers\Client\ServerTransformer;
+use App\Enums\Server\ConsoleType;
+use App\Enums\Server\PowerAction;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
+use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Coterm\CotermJWTService;
+use App\Services\Servers\ServerConsoleService;
+use App\Services\Servers\ServerDetailService;
+use App\Services\Servers\VncService;
+use App\Transformers\Client\ServerDetailTransformer;
+use App\Transformers\Client\ServerStateTransformer;
+use App\Transformers\Client\ServerTerminalTransformer;
+use App\Transformers\Client\ServerTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -32,8 +32,7 @@ class ServerController extends ApiController
         private ServerDetailService     $detailService,
         private ProxmoxServerRepository $serverRepository,
         private ProxmoxPowerRepository  $powerRepository,
-    )
-    {
+    ) {
     }
 
     public function index(Request $request)
@@ -54,14 +53,16 @@ class ServerController extends ApiController
     public function details(Server $server)
     {
         return fractal(
-            $this->detailService->getByProxmox($server), new ServerDetailTransformer(),
+            $this->detailService->getByProxmox($server),
+            new ServerDetailTransformer(),
         )->respond();
     }
 
     public function getState(Server $server)
     {
         return fractal()->item(
-            $this->serverRepository->setServer($server)->getState(), new ServerStateTransformer(),
+            $this->serverRepository->setServer($server)->getState(),
+            new ServerStateTransformer(),
         )->respond();
     }
 
@@ -84,7 +85,9 @@ class ServerController extends ApiController
                     'fqdn' => $coterm->fqdn,
                     'port' => $coterm->port,
                     'token' => $this->cotermJWTService->handle(
-                        $server, $request->user(), $request->enum('type', ConsoleType::class),
+                        $server,
+                        $request->user(),
+                        $request->enum('type', ConsoleType::class),
                     )
                                                       ->toString(),
                 ],

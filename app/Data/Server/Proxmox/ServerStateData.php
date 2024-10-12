@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Data\Server\Proxmox;
+namespace App\Data\Server\Proxmox;
 
 use Spatie\LaravelData\Data;
-use Convoy\Enums\Server\State;
+use App\Enums\Server\State;
 
 class ServerStateData extends Data
 {
@@ -13,8 +13,7 @@ class ServerStateData extends Data
         public int   $memory_total,
         public int   $memory_used,
         public int   $uptime,
-    )
-    {
+    ) {
     }
 
     public static function fromRaw(array $raw)

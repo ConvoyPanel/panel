@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Providers;
+namespace App\Providers;
 
-use Convoy\Models\PersonalAccessToken;
+use App\Models\PersonalAccessToken;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 

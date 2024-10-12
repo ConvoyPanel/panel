@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Casts;
+namespace App\Casts;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Encryption\Encrypter;

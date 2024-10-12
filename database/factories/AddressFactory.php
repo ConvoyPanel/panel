@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Convoy\Models\Address;
+use App\Models\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

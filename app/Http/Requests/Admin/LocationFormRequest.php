@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Http\Requests\Admin;
+namespace App\Http\Requests\Admin;
 
-use Convoy\Models\Location;
+use App\Models\Location;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LocationFormRequest extends FormRequest

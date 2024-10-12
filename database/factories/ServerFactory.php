@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Convoy\Models\Server;
-use Convoy\Services\Servers\ServerCreationService;
+use App\Models\Server;
+use App\Services\Servers\ServerCreationService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\App;
 

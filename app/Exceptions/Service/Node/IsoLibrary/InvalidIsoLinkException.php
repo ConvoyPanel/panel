@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Exceptions\Service\Node\IsoLibrary;
+namespace App\Exceptions\Service\Node\IsoLibrary;
 
-use Convoy\Exceptions\DisplayException;
+use App\Exceptions\DisplayException;
 
 class InvalidIsoLinkException extends DisplayException
 {

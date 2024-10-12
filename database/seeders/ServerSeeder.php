@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Convoy\Models\Location;
-use Convoy\Models\Node;
-use Convoy\Models\Server;
-use Convoy\Models\User;
-use Convoy\Services\Servers\ServerCreationService;
+use App\Models\Location;
+use App\Models\Node;
+use App\Models\Server;
+use App\Models\User;
+use App\Services\Servers\ServerCreationService;
 use Illuminate\Database\Seeder;
 
 class ServerSeeder extends Seeder

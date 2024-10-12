@@ -1,10 +1,10 @@
 <?php
 
-namespace Convoy\Console\Commands\Maintenance;
+namespace App\Console\Commands\Maintenance;
 
-use Convoy\Models\Node;
+use App\Models\Node;
 use Illuminate\Console\Command;
-use Convoy\Jobs\Node\PruneUsersJob;
+use App\Jobs\Node\PruneUsersJob;
 use Illuminate\Console\View\Components\Task;
 
 class PruneUsersCommand extends Command

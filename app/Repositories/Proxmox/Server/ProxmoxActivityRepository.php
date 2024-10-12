@@ -1,11 +1,11 @@
 <?php
 
-namespace Convoy\Repositories\Proxmox\Server;
+namespace App\Repositories\Proxmox\Server;
 
-use Convoy\Models\Node;
-use Convoy\Models\Server;
+use App\Models\Node;
+use App\Models\Server;
 use Webmozart\Assert\Assert;
-use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxActivityRepository extends ProxmoxRepository
 {

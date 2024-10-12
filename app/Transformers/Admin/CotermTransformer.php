@@ -1,8 +1,8 @@
 <?php
 
-namespace Convoy\Transformers\Admin;
+namespace App\Transformers\Admin;
 
-use Convoy\Models\Coterm;
+use App\Models\Coterm;
 use League\Fractal\TransformerAbstract;
 
 class CotermTransformer extends TransformerAbstract

@@ -1,6 +1,6 @@
 <?php
 
-namespace Convoy\Transformers\Client;
+namespace App\Transformers\Client;
 
 use League\Fractal\TransformerAbstract;
 

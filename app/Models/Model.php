@@ -1,9 +1,9 @@
 <?php
 
-namespace Convoy\Models;
+namespace App\Models;
 
 use Carbon\CarbonImmutable;
-use Convoy\Exceptions\Model\DataValidationException;
+use App\Exceptions\Model\DataValidationException;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
@@ -119,9 +119,9 @@ abstract class Model extends IlluminateModel
      * rather than just creating it.
      */
     public static function getRulesForUpdate(
-        IlluminateModel|int|string $model, string $column = 'id',
-    ): array
-    {
+        IlluminateModel|int|string $model,
+        string $column = 'id',
+    ): array {
         if ($model instanceof Model) {
             [$id, $column] = [$model->getKey(), $model->getKeyName()];
         }
@@ -158,9 +158,9 @@ abstract class Model extends IlluminateModel
 
         $validator = $this->getValidator();
         $validator->setData(
-        // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
-        // for that model. Doing this will return all the attributes in a format that can
-        // properly be validated.
+            // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
+            // for that model. Doing this will return all the attributes in a format that can
+            // properly be validated.
             $this->addCastAttributesToArray(
                 $this->getAttributes(),
                 $this->getMutatedAttributes(),

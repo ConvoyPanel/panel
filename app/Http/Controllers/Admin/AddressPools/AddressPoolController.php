@@ -1,15 +1,15 @@
 <?php
 
-namespace Convoy\Http\Controllers\Admin\AddressPools;
+namespace App\Http\Controllers\Admin\AddressPools;
 
-use Convoy\Http\Controllers\ApiController;
-use Convoy\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
-use Convoy\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
-use Convoy\Models\AddressPool;
-use Convoy\Models\Filters\FiltersAddressPoolWildcard;
-use Convoy\Models\Filters\FiltersNodeWildcard;
-use Convoy\Transformers\Admin\AddressPoolTransformer;
-use Convoy\Transformers\Admin\NodeTransformer;
+use App\Http\Controllers\ApiController;
+use App\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
+use App\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
+use App\Models\AddressPool;
+use App\Models\Filters\FiltersAddressPoolWildcard;
+use App\Models\Filters\FiltersNodeWildcard;
+use App\Transformers\Admin\AddressPoolTransformer;
+use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -24,12 +24,13 @@ class AddressPoolController extends ApiController
                                     ->defaultSort('-id')
                                     ->allowedFilters(
                                         ['name', AllowedFilter::custom(
-                                            '*', new FiltersAddressPoolWildcard(),
+                                            '*',
+                                            new FiltersAddressPoolWildcard(),
                                         )],
                                     )
                                     ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                        $request->query(),
+                                    );
 
         return fractal($addressPools, new AddressPoolTransformer())->respond();
     }
@@ -51,8 +52,8 @@ class AddressPoolController extends ApiController
                                  ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }
