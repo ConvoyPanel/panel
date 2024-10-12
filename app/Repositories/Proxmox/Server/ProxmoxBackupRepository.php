@@ -2,12 +2,12 @@
 
 namespace App\Repositories\Proxmox\Server;
 
+use App\Enums\Server\BackupCompressionType;
+use App\Enums\Server\BackupMode;
 use App\Models\Backup;
 use App\Models\Server;
-use Webmozart\Assert\Assert;
-use App\Enums\Server\BackupMode;
-use App\Enums\Server\BackupCompressionType;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxBackupRepository extends ProxmoxRepository
 {
@@ -16,15 +16,15 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-                'storage' => $this->node->backup_storage,
-            ])
-            ->get('/api2/json/nodes/{node}/storage/{storage}/content', [
-                'content' => 'backup',
-                'vmid' => $this->server->vmid,
-            ])
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $this->node->backup_storage,
+                         ])
+                         ->get('/api2/json/nodes/{node}/storage/{storage}/content', [
+                             'content' => 'backup',
+                             'vmid' => $this->server->vmid,
+                         ])
+                         ->json();
 
         return $this->getData($response);
     }
@@ -43,16 +43,16 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         }
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-            ])
-            ->post('/api2/json/nodes/{node}/vzdump', [
-                'vmid' => $this->server->vmid,
-                'storage' => $this->node->backup_storage,
-                'mode' => $parsedMode,
-                'compress' => $compressionType === BackupCompressionType::NONE ? false : $compressionType->value,
-            ])
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                         ])
+                         ->post('/api2/json/nodes/{node}/vzdump', [
+                             'vmid' => $this->server->vmid,
+                             'storage' => $this->node->backup_storage,
+                             'mode' => $parsedMode,
+                             'compress' => $compressionType === BackupCompressionType::NONE ? (int)false : $compressionType->value,
+                         ])
+                         ->json();
 
         return $this->getData($response);
     }
@@ -62,15 +62,15 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-            ])
-            ->post('/api2/json/nodes/{node}/qemu', [
-                'vmid' => $this->server->vmid,
-                'force' => true,
-                'archive' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
-            ])
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                         ])
+                         ->post('/api2/json/nodes/{node}/qemu', [
+                             'vmid' => $this->server->vmid,
+                             'force' => true,
+                             'archive' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
+                         ])
+                         ->json();
 
         return $this->getData($response);
     }
@@ -80,13 +80,13 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient()
-            ->withUrlParameters([
-                'node' => $this->node->cluster,
-                'storage' => $this->node->backup_storage,
-                'backup' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
-            ])
-            ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{backup}')
-            ->json();
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $this->node->backup_storage,
+                             'backup' => "{$this->node->backup_storage}:backup/{$backup->file_name}",
+                         ])
+                         ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{backup}')
+                         ->json();
 
         return $this->getData($response);
     }
