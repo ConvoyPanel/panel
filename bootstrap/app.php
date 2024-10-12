@@ -1,6 +1,6 @@
 <?php
 
-use App\Providers\AppServiceProvider;
+use Convoy\Providers\AppServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
+            'auth' => \Convoy\Http\Middleware\Authenticate::class,
             'guest' => \Convoy\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
     })

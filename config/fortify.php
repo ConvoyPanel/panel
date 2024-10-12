@@ -1,6 +1,6 @@
 <?php
 
-use App\Providers\AppServiceProvider;
+use Convoy\Providers\AppServiceProvider;
 use Convoy\Providers\RouteServiceProvider;
 
 return [

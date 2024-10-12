@@ -7,7 +7,6 @@ return [
 
     'version' => 'canary',
 
-
     'aliases' => Facade::defaultAliases()->merge([
         // Custom Facades
         'Activity' => Convoy\Facades\Activity::class,
