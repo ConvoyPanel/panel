@@ -6,6 +6,13 @@ use Illuminate\Support\Facades\Http;
 
 it('can rate limit servers if over limit', function () {
     Http::fake([
+        '/api2/json/nodes/*/qemu/*/config' => Http::response([
+            file_get_contents(
+                base_path(
+                    'tests/Fixtures/Repositories/Server/GetServerConfigData.json',
+                ),
+            ),
+        ], 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
 
