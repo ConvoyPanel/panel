@@ -22,16 +22,6 @@ class Node extends Model
     ];
 
     /**
-     * Cast values to correct type.
-     */
-    protected $casts = [
-        'verify_tls' => 'boolean',
-        'memory' => StorageSizeCast::class,
-        'disk' => StorageSizeCast::class,
-        'secret' => 'encrypted',
-    ];
-
-    /**
      * Fields that aren't mass assignable
      */
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -50,6 +40,21 @@ class Node extends Model
         'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'verify_tls' => 'boolean',
+            'memory' => StorageSizeCast::class,
+            'disk' => StorageSizeCast::class,
+            'secret' => 'encrypted',
+        ];
+    }
 
     /**
      * Get the connection address to use when making calls to this node's assigned Coterm endpoint.
