@@ -37,12 +37,12 @@ class Snapshot extends Model
 
     public function snapshot(): BelongsTo
     {
-        return $this->belongsTo(Snapshot::class);
+        return $this->belongsTo(self::class);
     }
 
     public function children(): HasMany
     {
-        return $this->hasMany(Snapshot::class, 'snapshot_id')->with('children');
+        return $this->hasMany(self::class, 'snapshot_id')->with('children');
     }
 
     protected static function boot(): void

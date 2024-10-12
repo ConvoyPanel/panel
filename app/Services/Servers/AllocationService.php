@@ -86,7 +86,7 @@ class AllocationService
             array_filter(
                 explode(';', Arr::last(explode('=', $raw['pending'] ?? $raw['value']))),
                 function ($disk) {
-                    return !ctype_space($disk) && in_array(
+                    return ! ctype_space($disk) && in_array(
                         $disk,
                         array_column(DiskInterface::cases(), 'value'),
                     ); // filter literally whitespace entries because Proxmox keeps empty strings for some reason >:(
@@ -109,7 +109,7 @@ class AllocationService
     public function setBootOrder(Server $server, array $disks)
     {
         return $this->repository->setServer($server)->update([
-            'boot' => count($disks) > 0 ? 'order=' . Arr::join($disks, ';') : '',
+            'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }
 
@@ -141,7 +141,7 @@ class AllocationService
                 throw new NoAvailableDiskInterfaceException();
             }
 
-            if (!in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
+            if (! in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
                 $ideIndex = $i;
                 break;
             }
@@ -165,7 +165,7 @@ class AllocationService
     public function convertToBytes(string $from): ?int
     {
         $units = ['B', 'K', 'M', 'G', 'T', 'P'];
-        $number = (int)substr($from, 0, -1);
+        $number = (int) substr($from, 0, -1);
         $suffix = strtoupper(substr($from, -1));
 
         //B or no suffix

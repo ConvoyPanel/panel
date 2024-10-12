@@ -66,8 +66,7 @@ abstract class ProxmoxRepository
      */
     public function getHttpClient(
         array $headers = [], array $options = [], bool $shouldAuthorize = true,
-    ): PendingRequest
-    {
+    ): PendingRequest {
         Assert::isInstanceOf($this->node, Node::class);
 
         return Http::withOptions(array_merge([

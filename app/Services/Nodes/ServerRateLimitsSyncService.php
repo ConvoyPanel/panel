@@ -2,10 +2,10 @@
 
 namespace Convoy\Services\Nodes;
 
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Services\Servers\NetworkService;
-use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 class ServerRateLimitsSyncService
 {

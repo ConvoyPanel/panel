@@ -2,12 +2,12 @@
 
 namespace Convoy\Repositories\Proxmox\Server;
 
+use Convoy\Enums\Server\BackupCompressionType;
+use Convoy\Enums\Server\BackupMode;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
-use Webmozart\Assert\Assert;
-use Convoy\Enums\Server\BackupMode;
-use Convoy\Enums\Server\BackupCompressionType;
 use Convoy\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxBackupRepository extends ProxmoxRepository
 {

@@ -2,12 +2,12 @@
 
 namespace Convoy\Services\Servers;
 
-use Exception;
-use Convoy\Models\Server;
-use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\PowerAction;
+use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\SuspensionAction;
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Exception;
 
 class ServerSuspensionService
 {

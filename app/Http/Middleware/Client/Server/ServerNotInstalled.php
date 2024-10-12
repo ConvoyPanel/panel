@@ -15,18 +15,17 @@ class ServerNotInstalled
      * Checks that the server is installed before allowing access through the route.
      */
     public function handle(Request $request, Closure $next,
-    ): \Symfony\Component\HttpFoundation\Response
-    {
+    ): \Symfony\Component\HttpFoundation\Response {
         /** @var Server|null $server */
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException(
                 'No server resource was located in the request parameters.',
             );
         }
 
-        if (!$server->isInstalled()) {
+        if (! $server->isInstalled()) {
             throw new HttpException(
                 Response::HTTP_FORBIDDEN,
                 'Access to this resource is not allowed due to the current non-installation state.',

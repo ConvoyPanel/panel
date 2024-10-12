@@ -16,15 +16,13 @@ class IsoService
 {
     public function __construct(
         private ConnectionInterface $connection, private ProxmoxStorageRepository $repository,
-    )
-    {
+    ) {
     }
 
     public function download(
-        Node          $node, string $name, ?string $fileName, string $link,
+        Node $node, string $name, ?string $fileName, string $link,
         ?ChecksumData $checksumData = null, ?bool $hidden = false,
-    )
-    {
+    ) {
         $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(

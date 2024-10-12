@@ -9,7 +9,6 @@ class ServerNetworkData extends Data
     public function __construct(
         public int $in,
         public int $out,
-    )
-    {
+    ) {
     }
 }

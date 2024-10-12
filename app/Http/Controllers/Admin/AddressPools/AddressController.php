@@ -23,11 +23,10 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class AddressController extends ApiController
 {
     public function __construct(
-        private NetworkService             $networkService,
-        private ConnectionInterface        $connection,
+        private NetworkService $networkService,
+        private ConnectionInterface $connection,
         private BulkAddressCreationService $bulkAddressCreationService,
-    )
-    {
+    ) {
     }
 
     public function index(Request $request, AddressPool $addressPool)
@@ -49,8 +48,8 @@ class AddressController extends ApiController
                                      ],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                     $request->query(),
+                                 );
 
         return fractal($addresses, new AddressTransformer())->parseIncludes($request->include)
                                                             ->respond();
@@ -72,7 +71,7 @@ class AddressController extends ApiController
                 macAddress: $data['mac_address'],
             );
 
-            if (!is_null($request->server_id)) {
+            if (! is_null($request->server_id)) {
                 SyncNetworkSettings::dispatch($request->integer('server_id'));
             }
 
@@ -105,8 +104,7 @@ class AddressController extends ApiController
 
     public function update(
         UpdateAddressRequest $request, AddressPool $addressPool, Address $address,
-    )
-    {
+    ) {
         $address = $this->connection->transaction(function () use ($request, $address) {
             $oldLinkedServer = $address->server;
 
@@ -125,11 +123,11 @@ class AddressController extends ApiController
                     $this->networkService->syncSettings($address->server);
                 }
             } catch (ProxmoxConnectionException) {
-                if ($oldLinkedServer && !$address->server) {
+                if ($oldLinkedServer && ! $address->server) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$oldLinkedServer->uuid} failed to sync network settings.",
                     );
-                } elseif (!$oldLinkedServer && $address->server) {
+                } elseif (! $oldLinkedServer && $address->server) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$address->server->uuid} failed to sync network settings.",
                     );

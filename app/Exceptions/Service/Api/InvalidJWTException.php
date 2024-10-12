@@ -1,8 +1,9 @@
 <?php
 
 namespace Convoy\Exceptions\Service\Api;
-use Throwable;
+
 use Convoy\Exceptions\ConvoyException;
+use Throwable;
 
 class InvalidJWTException extends ConvoyException
 {

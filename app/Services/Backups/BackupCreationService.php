@@ -19,16 +19,14 @@ class BackupCreationService
 {
     public function __construct(
         private ConnectionInterface $connection, private ProxmoxBackupRepository $proxmoxRepository,
-        private BackupRepository    $eloquentRepository,
-    )
-    {
+        private BackupRepository $eloquentRepository,
+    ) {
     }
 
     public function create(
         Server $server, string $name, BackupMode $mode, BackupCompressionType $compressionType,
-        ?bool  $isLocked = false,
-    ): ?Backup
-    {
+        ?bool $isLocked = false,
+    ): ?Backup {
         $limit = config('backups.throttles.limit');
         $period = config('backups.throttles.period');
         if ($period > 0) {
@@ -50,9 +48,9 @@ class BackupCreationService
         }
 
         $successful = $this->eloquentRepository->getNonFailedBackups($server);
-        if (!$server->backup_limit || $successful->count() >= $server->backup_limit) {
+        if (! $server->backup_limit || $successful->count() >= $server->backup_limit) {
             if (isset($server->backup_limit)) {
-                throw new TooManyBackupsException((int)$server->backup_limit);
+                throw new TooManyBackupsException((int) $server->backup_limit);
             }
         }
 

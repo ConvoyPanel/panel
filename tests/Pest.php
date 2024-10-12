@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Queue;
 uses(
     Tests\TestCase::class,
     DatabaseTransactions::class,
-// Illuminate\Foundation\Testing\RefreshDatabase::class,
+    // Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->beforeEach(function () {
     Http::preventStrayRequests();
     Queue::fake();

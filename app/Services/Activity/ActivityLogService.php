@@ -8,18 +8,18 @@
 namespace Convoy\Services\Activity;
 
 use Closure;
-use Exception;
-use Throwable;
-use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
 use Convoy\Models\ActivityLog;
+use Convoy\Models\ActivityLogSubject;
+use Exception;
+use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Convoy\Models\ActivityLogSubject;
-use Illuminate\Contracts\Auth\Factory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Database\ConnectionInterface;
+use Throwable;
+use Webmozart\Assert\Assert;
 
 class ActivityLogService
 {

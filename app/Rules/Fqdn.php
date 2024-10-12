@@ -26,9 +26,9 @@ SOFTWARE.
 namespace Convoy\Rules;
 
 use Closure;
-use Illuminate\Support\Arr;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Arr;
 
 class Fqdn implements ValidationRule, DataAwareRule
 {

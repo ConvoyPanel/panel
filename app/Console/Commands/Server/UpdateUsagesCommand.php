@@ -2,9 +2,9 @@
 
 namespace Convoy\Console\Commands\Server;
 
+use Convoy\Jobs\Node\SyncServerUsagesJob;
 use Convoy\Models\Node;
 use Illuminate\Console\Command;
-use Convoy\Jobs\Node\SyncServerUsagesJob;
 use Illuminate\Console\View\Components\Task;
 
 class UpdateUsagesCommand extends Command

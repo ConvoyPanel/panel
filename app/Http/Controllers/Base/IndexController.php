@@ -13,8 +13,7 @@ class IndexController extends Controller
      */
     public function __construct(
         protected ViewFactory $view,
-    )
-    {
+    ) {
     }
 
     /**

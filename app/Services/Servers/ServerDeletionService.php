@@ -2,11 +2,11 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Server;
 use Convoy\Enums\Server\Status;
-use Illuminate\Support\Facades\Bus;
-use Convoy\Jobs\Server\PurgeBackupsJob;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
+use Convoy\Jobs\Server\PurgeBackupsJob;
+use Convoy\Models\Server;
+use Illuminate\Support\Facades\Bus;
 
 class ServerDeletionService
 {

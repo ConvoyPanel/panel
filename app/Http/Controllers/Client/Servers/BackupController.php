@@ -21,12 +21,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 class BackupController extends ApiController
 {
     public function __construct(
-        private BackupCreationService    $backupCreationService,
-        private BackupDeletionService    $backupDeletionService,
+        private BackupCreationService $backupCreationService,
+        private BackupDeletionService $backupDeletionService,
         private RestoreFromBackupService $restoreFromBackupService,
-        private BackupRepository         $backupRepository,
-    )
-    {
+        private BackupRepository $backupRepository,
+    ) {
     }
 
     public function index(Request $request, Server $server)

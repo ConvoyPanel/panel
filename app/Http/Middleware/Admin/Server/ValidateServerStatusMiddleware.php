@@ -16,7 +16,7 @@ class ValidateServerStatusMiddleware
     {
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 

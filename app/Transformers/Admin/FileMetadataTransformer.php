@@ -2,8 +2,8 @@
 
 namespace Convoy\Transformers\Admin;
 
-use League\Fractal\TransformerAbstract;
 use Convoy\Data\Node\Storage\FileMetaData;
+use League\Fractal\TransformerAbstract;
 
 class FileMetadataTransformer extends TransformerAbstract
 {

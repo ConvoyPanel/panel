@@ -9,15 +9,14 @@ use Illuminate\Database\ConnectionInterface;
 
 class BackupDeletionService
 {
-    public function __construct(private ConnectionInterface     $connection,
+    public function __construct(private ConnectionInterface $connection,
                                 private ProxmoxBackupRepository $proxmoxRepository,
-    )
-    {
+    ) {
     }
 
     public function handle(Backup $backup)
     {
-        if ($backup->is_locked && ($backup->is_successful && !is_null($backup->completed_at))) {
+        if ($backup->is_locked && ($backup->is_successful && ! is_null($backup->completed_at))) {
             throw new BackupLockedException();
         }
 

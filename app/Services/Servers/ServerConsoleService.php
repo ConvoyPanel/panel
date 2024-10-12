@@ -2,16 +2,16 @@
 
 namespace Convoy\Services\Servers;
 
-use Exception;
-use Convoy\Models\Server;
-use Convoy\Enums\Node\Access\RealmType;
 use Convoy\Data\Node\Access\CreateUserData;
 use Convoy\Data\Node\Access\UserCredentialsData;
 use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use Convoy\Data\Server\Proxmox\Console\XTermCredentialsData;
+use Convoy\Enums\Node\Access\RealmType;
+use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConsoleRepository;
+use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Exception;
 
 class ServerConsoleService
 {

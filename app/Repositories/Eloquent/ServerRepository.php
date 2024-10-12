@@ -17,7 +17,7 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
 
     public function isUniqueVmId(int $nodeId, int $vmid): bool
     {
-        return !$this->getBuilder()
+        return ! $this->getBuilder()
                      ->where('vmid', '=', $vmid)
                      ->where('node_id', '=', $nodeId)
                      ->exists();
@@ -28,7 +28,7 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
      */
     public function isUniqueUuidCombo(string $uuid, string $short): bool
     {
-        return !$this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)
+        return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)
                      ->exists();
     }
 

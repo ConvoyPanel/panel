@@ -2,8 +2,8 @@
 
 namespace Convoy\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Convoy\Services\Activity\ActivityLogBatchService;
+use Illuminate\Support\Facades\Facade;
 
 class LogBatch extends Facade
 {

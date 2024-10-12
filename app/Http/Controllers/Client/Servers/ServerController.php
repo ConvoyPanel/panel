@@ -18,22 +18,21 @@ use Convoy\Transformers\Client\ServerDetailTransformer;
 use Convoy\Transformers\Client\ServerStateTransformer;
 use Convoy\Transformers\Client\ServerTerminalTransformer;
 use Convoy\Transformers\Client\ServerTransformer;
+use function fractal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
-use function fractal;
 use function min;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ServerController extends ApiController
 {
     public function __construct(
-        private CotermJWTService        $cotermJWTService,
-        private ServerConsoleService    $consoleService,
-        private ServerDetailService     $detailService,
+        private CotermJWTService $cotermJWTService,
+        private ServerConsoleService $consoleService,
+        private ServerDetailService $detailService,
         private ProxmoxServerRepository $serverRepository,
-        private ProxmoxPowerRepository  $powerRepository,
-    )
-    {
+        private ProxmoxPowerRepository $powerRepository,
+    ) {
     }
 
     public function index(Request $request)

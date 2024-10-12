@@ -20,8 +20,8 @@ class TokenController extends ApiController
                               ->defaultSort('-id')
                               ->where('personal_access_tokens.type', ApiKeyType::APPLICATION->value)
                               ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                  $request->query(),
+                              );
 
         return fractal($tokens, new ApiKeyTransformer())->respond();
     }

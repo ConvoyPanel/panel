@@ -34,8 +34,8 @@ class UserController extends ApiController
                                  ), AllowedFilter::custom('*', new FiltersUserWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($users, new UserTransformer())->respond();
     }

@@ -2,22 +2,20 @@
 
 namespace Convoy\Data\Node\Access;
 
-use Spatie\LaravelData\Data;
 use Convoy\Enums\Node\Access\RealmType;
+use Spatie\LaravelData\Data;
 
 class UserCredentialsData extends Data
 {
     public function __construct(
-        public string    $username,
+        public string $username,
         public RealmType $realm_type,
-        public string    $ticket,
-        public string    $csrf_token,
-    )
-    {
-
+        public string $ticket,
+        public string $csrf_token,
+    ) {
     }
 
-    public static function fromRaw(array $raw): UserCredentialsData
+    public static function fromRaw(array $raw): self
     {
         return new self(...[
             'username' => explode('@', $raw['username'])[0],

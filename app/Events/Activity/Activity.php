@@ -2,9 +2,9 @@
 
 namespace Convoy\Events\Activity;
 
-use Illuminate\Support\Str;
 use Convoy\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 abstract class Activity
 {

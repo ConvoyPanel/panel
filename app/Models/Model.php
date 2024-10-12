@@ -120,9 +120,8 @@ abstract class Model extends IlluminateModel
      */
     public static function getRulesForUpdate(
         IlluminateModel|int|string $model, string $column = 'id',
-    ): array
-    {
-        if ($model instanceof Model) {
+    ): array {
+        if ($model instanceof self) {
             [$id, $column] = [$model->getKey(), $model->getKeyName()];
         }
 
@@ -133,7 +132,7 @@ abstract class Model extends IlluminateModel
             // working model, so we don't run into errors due to the way that field validation
             // works.
             foreach ($data as &$datum) {
-                if (!is_string($datum) || !Str::startsWith($datum, 'unique')) {
+                if (! is_string($datum) || ! Str::startsWith($datum, 'unique')) {
                     continue;
                 }
 
@@ -158,16 +157,16 @@ abstract class Model extends IlluminateModel
 
         $validator = $this->getValidator();
         $validator->setData(
-        // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
-        // for that model. Doing this will return all the attributes in a format that can
-        // properly be validated.
+            // Trying to do self::toArray() here will leave out keys based on the whitelist/blacklist
+            // for that model. Doing this will return all the attributes in a format that can
+            // properly be validated.
             $this->addCastAttributesToArray(
                 $this->getAttributes(),
                 $this->getMutatedAttributes(),
             ),
         );
 
-        if (!$validator->passes()) {
+        if (! $validator->passes()) {
             throw new ValidationException($validator);
         }
     }
@@ -177,7 +176,7 @@ abstract class Model extends IlluminateModel
      */
     protected function asDateTime(mixed $value): Carbon|CarbonImmutable
     {
-        if (!$this->immutableDates) {
+        if (! $this->immutableDates) {
             return parent::asDateTime($value);
         }
 

@@ -2,15 +2,15 @@
 
 namespace Convoy\Providers;
 
-use Illuminate\Http\Request;
-use Laravel\Fortify\Fortify;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Cache\RateLimiting\Limit;
 use Convoy\Actions\Fortify\CreateNewUser;
-use Illuminate\Support\Facades\RateLimiter;
 use Convoy\Actions\Fortify\ResetUserPassword;
 use Convoy\Actions\Fortify\UpdateUserPassword;
 use Convoy\Actions\Fortify\UpdateUserProfileInformation;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {

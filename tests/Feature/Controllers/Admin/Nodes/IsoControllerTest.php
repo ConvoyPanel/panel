@@ -113,7 +113,7 @@ it('can query link', function () {
     ]);
 
     $response = $this->actingAs($this->user)->getJson(
-        '/tools/query-remote-file?link=' . urlencode(
+        '/tools/query-remote-file?link='.urlencode(
             'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso',
         ),
     );

@@ -37,7 +37,7 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
 
         $isDeleted = $service->isVmDeleted($server);
 
-        if (!$isDeleted) {
+        if (! $isDeleted) {
             $this->release(3);
         }
     }

@@ -2,11 +2,11 @@
 
 namespace Convoy\Exceptions\Model;
 
-use Illuminate\Support\MessageBag;
 use Convoy\Exceptions\ConvoyException;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Contracts\Support\MessageProvider;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\MessageBag;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class DataValidationException extends ConvoyException implements HttpExceptionInterface, MessageProvider

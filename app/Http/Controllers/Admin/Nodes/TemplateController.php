@@ -37,8 +37,7 @@ class TemplateController extends ApiController
 
     public function update(
         TemplateRequest $request, Node $node, TemplateGroup $templateGroup, Template $template,
-    )
-    {
+    ) {
         $template->update($request->validated());
 
         return fractal($template, new TemplateTransformer())->respond();
@@ -53,8 +52,7 @@ class TemplateController extends ApiController
 
     public function updateOrder(
         UpdateTemplateOrderRequest $request, Node $node, TemplateGroup $templateGroup,
-    )
-    {
+    ) {
         Template::setNewOrder($request->order);
 
         return fractal(

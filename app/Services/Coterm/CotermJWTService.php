@@ -33,7 +33,7 @@ class CotermJWTService
             ])
             ->handle(
                 $server->node->coterm->token, $server->node->getCotermConnectionAddress(),
-                $user->uuid . $server->uuid,
+                $user->uuid.$server->uuid,
             );
 
         return $token;

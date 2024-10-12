@@ -16,8 +16,7 @@ class ServerBuildService
     public function __construct(
         private ProxmoxConfigRepository $configRepository,
         private ProxmoxServerRepository $serverRepository,
-    )
-    {
+    ) {
     }
 
     public function delete(Server $server): void

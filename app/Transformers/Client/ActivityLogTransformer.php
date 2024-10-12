@@ -2,12 +2,12 @@
 
 namespace Convoy\Transformers\Client;
 
-use Convoy\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Convoy\Models\ActivityLog;
+use Convoy\Models\User;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
 
 class ActivityLogTransformer extends TransformerAbstract

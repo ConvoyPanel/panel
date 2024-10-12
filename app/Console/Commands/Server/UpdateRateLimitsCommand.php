@@ -2,10 +2,10 @@
 
 namespace Convoy\Console\Commands\Server;
 
+use Convoy\Jobs\Node\SyncServerRateLimitsJob;
 use Convoy\Models\Node;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
-use Convoy\Jobs\Node\SyncServerRateLimitsJob;
 
 class UpdateRateLimitsCommand extends Command
 {

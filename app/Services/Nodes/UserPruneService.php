@@ -2,8 +2,8 @@
 
 namespace Convoy\Services\Nodes;
 
-use Convoy\Models\Node;
 use Convoy\Data\Node\Access\UserData;
+use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxAccessRepository;
 
 class UserPruneService

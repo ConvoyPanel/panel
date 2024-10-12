@@ -76,8 +76,8 @@ class ProxmoxServerRepository extends ProxmoxRepository
 
         $response = $this->getHttpClient()
                          ->put('/api2/json/access/acl', [
-                             'path' => '/vms/' . $this->server->vmid,
-                             'users' => $userId . '@' . $realmType->value,
+                             'path' => '/vms/'.$this->server->vmid,
+                             'users' => $userId.'@'.$realmType->value,
                              'roles' => $roleId,
                          ])
                          ->json();

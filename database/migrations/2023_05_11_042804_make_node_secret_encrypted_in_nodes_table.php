@@ -14,7 +14,6 @@ return new class extends Migration {
         Schema::table('nodes', function (Blueprint $table) {
             $nodes = DB::table('nodes')->get()->toArray();
 
-
             foreach ($nodes as $node) {
                 DB::table('nodes')
                     ->where('id', $node->id)
@@ -30,7 +29,6 @@ return new class extends Migration {
     {
         Schema::table('nodes', function (Blueprint $table) {
             $nodes = DB::table('nodes')->get()->toArray();
-
 
             foreach ($nodes as $node) {
                 DB::table('nodes')

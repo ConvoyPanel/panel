@@ -2,12 +2,12 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Server;
-use Illuminate\Support\Arr;
-use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
 use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use Convoy\Data\Server\Proxmox\Config\AddressConfigData;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Models\Server;
+use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use Illuminate\Support\Arr;
 
 /**
  * Class SnapshotService

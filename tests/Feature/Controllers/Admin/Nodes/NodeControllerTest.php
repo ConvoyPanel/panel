@@ -1,6 +1,5 @@
 <?php
 
-
 use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;

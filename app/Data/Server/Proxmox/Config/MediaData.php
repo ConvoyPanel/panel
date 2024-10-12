@@ -8,7 +8,6 @@ class MediaData extends Data
 {
     public function __construct(
         //
-    )
-    {
+    ) {
     }
 }

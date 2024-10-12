@@ -15,16 +15,15 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class RestoreFromBackupService
 {
     public function __construct(
-        private ConnectionInterface     $connection,
+        private ConnectionInterface $connection,
         private ProxmoxServerRepository $serverRepository,
         private ProxmoxBackupRepository $proxmoxRepository,
-    )
-    {
+    ) {
     }
 
     public function handle(Server $server, Backup $backup)
     {
-        if (!is_null($server->status)) {
+        if (! is_null($server->status)) {
             throw new BadRequestHttpException(
                 'This server is not currently in a state that allows for a backup to be restored.',
             );
@@ -37,7 +36,7 @@ class RestoreFromBackupService
             );
         }
 
-        if (!$backup->successful && is_null($backup->completed_at)) {
+        if (! $backup->successful && is_null($backup->completed_at)) {
             throw new BadRequestHttpException(
                 'This backup cannot be restored at this time: not completed or failed.',
             );

@@ -21,8 +21,7 @@ class IsoController extends ApiController
 {
     public function __construct(
         private IsoService $isoService, private ProxmoxStorageRepository $repository,
-    )
-    {
+    ) {
     }
 
     public function index(Node $node, Request $request)
@@ -31,8 +30,8 @@ class IsoController extends ApiController
                             ->where('iso_library.node_id', $node->id)
                             ->allowedFilters(['name'])
                             ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                $request->query(),
+                            );
 
         return fractal($isos, new IsoTransformer())->respond();
     }
@@ -42,7 +41,7 @@ class IsoController extends ApiController
         $shouldDownload = $request->boolean('should_download');
 
         if ($shouldDownload) {
-            $checksumData = (bool)$request->checksum_algorithum ? ChecksumData::from([
+            $checksumData = (bool) $request->checksum_algorithum ? ChecksumData::from([
                 'algorithm' => ChecksumAlgorithm::from($request->checksum_algorithum),
                 'checksum' => $request->checksum,
             ]) : null;

@@ -3,14 +3,14 @@
 namespace Convoy\Exceptions;
 
 use Exception;
-use Throwable;
-use Psr\Log\LoggerInterface;
+use Illuminate\Container\Container;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Container\Container;
-use Illuminate\Http\RedirectResponse;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class DisplayException extends ConvoyException implements HttpExceptionInterface
 {

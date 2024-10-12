@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Address extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'ip_addresses';
 
     protected $guarded = ['id', 'updated_at', 'created_at'];

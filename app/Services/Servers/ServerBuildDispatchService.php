@@ -2,20 +2,20 @@
 
 namespace Convoy\Services\Servers;
 
-use Convoy\Models\Server;
+use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Enums\Server\PowerAction;
 use Convoy\Enums\Server\State;
 use Convoy\Enums\Server\Status;
-use Illuminate\Support\Facades\Bus;
-use Convoy\Enums\Server\PowerAction;
-use Convoy\Jobs\Server\SyncBuildJob;
 use Convoy\Jobs\Server\BuildServerJob;
 use Convoy\Jobs\Server\DeleteServerJob;
 use Convoy\Jobs\Server\MonitorStateJob;
-use Convoy\Jobs\Server\UpdatePasswordJob;
 use Convoy\Jobs\Server\SendPowerCommandJob;
+use Convoy\Jobs\Server\SyncBuildJob;
+use Convoy\Jobs\Server\UpdatePasswordJob;
 use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
 use Convoy\Jobs\Server\WaitUntilVmIsDeletedJob;
-use Convoy\Data\Server\Deployments\ServerDeploymentData;
+use Convoy\Models\Server;
+use Illuminate\Support\Facades\Bus;
 
 class ServerBuildDispatchService
 {

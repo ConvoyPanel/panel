@@ -3,9 +3,9 @@
 namespace Convoy\Transformers\Admin;
 
 use Convoy\Models\Server;
+use Convoy\Services\Servers\ServerDetailService;
 use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
-use Convoy\Services\Servers\ServerDetailService;
 
 class ServerBuildTransformer extends TransformerAbstract
 {

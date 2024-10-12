@@ -25,11 +25,10 @@ class MonitorStateJob implements ShouldQueue
     }
 
     public function __construct(
-        protected int      $serverId,
-        protected State    $targetState,
+        protected int $serverId,
+        protected State $targetState,
         protected ?Closure $callback = null,
-    )
-    {
+    ) {
         //
     }
 

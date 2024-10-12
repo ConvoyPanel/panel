@@ -16,7 +16,6 @@ class AddressRepository
     {
         $placeholders = implode(',', array_fill(0, count($addressIds), '?'));
 
-
         $query = <<<'SQL'
             UPDATE ip_addresses
             SET server_id = ?

@@ -8,8 +8,7 @@ use Convoy\Models\User;
 class BackupPolicy
 {
     public function before(User $user, string $ability, Server $server,
-    ): ?bool
-    {
+    ): ?bool {
         if ($user->root_admin || $user->id === $server->user_id) {
             return true;
         }

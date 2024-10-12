@@ -25,11 +25,11 @@ SOFTWARE.
 
 namespace Convoy\Console\Commands\User;
 
-use Exception;
+use Convoy\Exceptions\Model\DataValidationException;
 use Convoy\Models\User;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
-use Convoy\Exceptions\Model\DataValidationException;
 
 class MakeUserCommand extends Command
 {

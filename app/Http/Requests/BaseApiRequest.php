@@ -29,7 +29,7 @@ abstract class BaseApiRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (!$this->passesAuthorization()) {
+        if (! $this->passesAuthorization()) {
             $this->failedAuthorization();
         }
 
@@ -54,7 +54,7 @@ abstract class BaseApiRequest extends FormRequest
             return true;
         }
 
-        if (!parent::passesAuthorization()) {
+        if (! parent::passesAuthorization()) {
             return false;
         }
 

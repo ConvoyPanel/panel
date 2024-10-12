@@ -15,9 +15,8 @@ class BackupMonitorService
 {
     public function __construct(
         private ProxmoxActivityRepository $repository,
-        private ProxmoxBackupRepository   $backupRepository,
-    )
-    {
+        private ProxmoxBackupRepository $backupRepository,
+    ) {
     }
 
     public function checkCreationProgress(Backup $backup, string $upid, ?Closure $callback = null)
@@ -63,8 +62,7 @@ class BackupMonitorService
     }
 
     public function checkRestorationProgress(Server $server, string $upid, ?Closure $callback = null,
-    )
-    {
+    ) {
         $status = $this->repository->setServer($server)->getStatus($upid);
 
         if (Arr::get($status, 'status') === 'running') {

@@ -3,23 +3,22 @@
 namespace Convoy\Services\Activity;
 
 use Convoy\Enums\Network\AddressType;
+use function Convoy\Helpers\getAddressesFromRange;
 use Convoy\Models\Address;
 use Illuminate\Support\Arr;
-use function Convoy\Helpers\getAddressesFromRange;
 
 class BulkAddressCreationService
 {
     public function handle(
         AddressType $type,
-        string      $from,
-        string      $to,
-        int         $poolId,
-        ?int        $serverId = null,
-        int         $cidr,
-        string      $gateway,
-        ?string     $macAddress = null,
-    ): void
-    {
+        string $from,
+        string $to,
+        int $poolId,
+        ?int $serverId,
+        int $cidr,
+        string $gateway,
+        ?string $macAddress = null,
+    ): void {
         $addresses = getAddressesFromRange($type, $from, $to);
         $existingAddresses = Address::where('address_pool_id', '=', $poolId)
                                     ->whereIn('address', $addresses)

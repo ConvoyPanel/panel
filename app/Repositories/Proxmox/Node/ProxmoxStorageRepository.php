@@ -18,11 +18,10 @@ use Webmozart\Assert\Assert;
 class ProxmoxStorageRepository extends ProxmoxRepository
 {
     public function download(
-        ContentType   $contentType, string $fileName, string $link,
-        ?bool         $verifyCertificates = true,
+        ContentType $contentType, string $fileName, string $link,
+        ?bool $verifyCertificates = true,
         ?ChecksumData $checksumData = null,
-    )
-    {
+    ) {
         Assert::isInstanceOf($this->node, Node::class);
         Assert::regex($link, '/^(http|https):\/\//');
 

@@ -2,15 +2,15 @@
 
 namespace Convoy\Console;
 
+use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
+use Convoy\Console\Commands\Maintenance\PruneUsersCommand;
+use Convoy\Console\Commands\Server\ResetUsagesCommand;
+use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
+use Convoy\Console\Commands\Server\UpdateUsagesCommand;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
-use Convoy\Console\Commands\Server\ResetUsagesCommand;
-use Convoy\Console\Commands\Server\UpdateUsagesCommand;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Convoy\Console\Commands\Maintenance\PruneUsersCommand;
-use Convoy\Console\Commands\Server\UpdateRateLimitsCommand;
-use Convoy\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 
 class Kernel extends ConsoleKernel
 {

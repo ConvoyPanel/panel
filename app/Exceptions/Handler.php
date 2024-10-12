@@ -3,9 +3,9 @@
 namespace Convoy\Exceptions;
 
 use Exception;
-use Throwable;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {

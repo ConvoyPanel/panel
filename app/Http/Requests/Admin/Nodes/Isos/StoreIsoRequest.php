@@ -43,7 +43,7 @@ class StoreIsoRequest extends BaseApiRequest
             },
         ];
 
-        if (!$this->boolean('should_download')) {
+        if (! $this->boolean('should_download')) {
             $rules[] = function (Validator $validator) {
                 $node = $this->parameter('node', Node::class);
 

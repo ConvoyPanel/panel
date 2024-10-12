@@ -2,9 +2,9 @@
 
 namespace Convoy\Transformers\Coterm;
 
+use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use Convoy\Models\Server;
 use League\Fractal\TransformerAbstract;
-use Convoy\Data\Server\Proxmox\Console\NoVncCredentialsData;
 
 class NoVncCredentialsTransformer extends TransformerAbstract
 {

@@ -9,10 +9,9 @@ use Convoy\Repositories\Eloquent\BackupRepository;
 class PurgeBackupsService
 {
     public function __construct(
-        private BackupRepository      $backupRepository,
+        private BackupRepository $backupRepository,
         private BackupDeletionService $backupDeletionService,
-    )
-    {
+    ) {
     }
 
     public function handle(Server $server)

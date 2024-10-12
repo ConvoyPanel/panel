@@ -2,12 +2,14 @@
 
 namespace Convoy\Validation;
 
-use Illuminate\Validation\Validator;
 use Convoy\Enums\Network\AddressType;
+use Illuminate\Validation\Validator;
 
 class ValidateAddressType
 {
-    public function __construct(private AddressType $addressType, private array $fields) {}
+    public function __construct(private AddressType $addressType, private array $fields)
+    {
+    }
 
     public function __invoke(Validator $validator)
     {

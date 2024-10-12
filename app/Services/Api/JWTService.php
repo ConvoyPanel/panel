@@ -2,20 +2,20 @@
 
 namespace Convoy\Services\Api;
 
-use Convoy\Models\User;
 use Carbon\CarbonImmutable;
+use Convoy\Exceptions\Service\Api\InvalidJWTException;
+use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
+use Convoy\Models\User;
 use Illuminate\Support\Str;
-use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\UnencryptedToken;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
-use Lcobucci\JWT\Encoding\CannotDecodeContent;
+use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
-use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
+use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Convoy\Exceptions\Service\Api\InvalidJWTException;
 
 class JWTService
 {
@@ -86,7 +86,7 @@ class JWTService
             $builder = $builder->expiresAt($this->expiresAt);
         }
 
-        if (!empty($this->subject)) {
+        if (! empty($this->subject)) {
             $builder = $builder->relatedTo($this->subject)->withHeader('sub', $this->subject);
         }
 
@@ -94,7 +94,7 @@ class JWTService
             $builder = $builder->withClaim($key, $value);
         }
 
-        if (!is_null($this->user)) {
+        if (! is_null($this->user)) {
             $builder = $builder
                 ->withClaim('user_uuid', $this->user->uuid);
         }
@@ -116,7 +116,7 @@ class JWTService
 
         assert($parsedToken instanceof UnencryptedToken);
 
-        if (!$config->validator()->validate($parsedToken, new StrictValidAt(new Clock))) {
+        if (! $config->validator()->validate($parsedToken, new StrictValidAt(new Clock))) {
             throw new InvalidJWTException;
         }
 

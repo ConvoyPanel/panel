@@ -26,11 +26,11 @@ class UpdateNodeRequest extends BaseApiRequest
             $node = $this->parameter('node', Node::class);
             // multiply memory by memory_overallocate (which indicates how much you can go over) percentage
             $memory = intval($this->input('memory')) * ((intval(
-                            $this->input('memory_overallocate'),
-                        ) / 100) + 1);
+                $this->input('memory_overallocate'),
+            ) / 100) + 1);
             $disk = intval($this->input('disk')) * ((intval(
-                            $this->input('disk_overallocate'),
-                        ) / 100) + 1);
+                $this->input('disk_overallocate'),
+            ) / 100) + 1);
 
             if ($memory < $node->memory_allocated) {
                 $validator->errors()->add(

@@ -3,8 +3,8 @@
 namespace Convoy\Transformers\Admin;
 
 use Convoy\Models\AddressPool;
-use League\Fractal\TransformerAbstract;
 use League\Fractal\Resource\Collection;
+use League\Fractal\TransformerAbstract;
 
 class AddressPoolTransformer extends TransformerAbstract
 {

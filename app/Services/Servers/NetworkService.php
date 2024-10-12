@@ -18,14 +18,13 @@ use Illuminate\Support\Arr;
 class NetworkService
 {
     public function __construct(
-        private AddressRepository          $repository,
-        private ProxmoxFirewallRepository  $firewallRepository,
-        private CloudinitService           $cloudinitService,
+        private AddressRepository $repository,
+        private ProxmoxFirewallRepository $firewallRepository,
+        private CloudinitService $cloudinitService,
         private ProxmoxCloudinitRepository $cloudinitRepository,
-        private ProxmoxConfigRepository    $allocationRepository,
-        private ConnectionInterface        $connection,
-    )
-    {
+        private ProxmoxConfigRepository $allocationRepository,
+        private ConnectionInterface $connection,
+    ) {
     }
 
     public function deleteIpset(Server $server, string $name)
@@ -137,8 +136,8 @@ class NetworkService
 
         $payload = "virtio={$macAddress},bridge={$server->node->network},firewall=1";
 
-        if (!is_null($mebibytes)) {
-            $payload .= ',rate=' . $mebibytes;
+        if (! is_null($mebibytes)) {
+            $payload .= ',rate='.$mebibytes;
         }
 
         $this->allocationRepository->setServer($server)->update(['net0' => $payload]);
@@ -150,14 +149,14 @@ class NetworkService
 
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_filter(
-            $currentAddresses, fn ($id) => !in_array($id, $addressIds),
+            $currentAddresses, fn ($id) => ! in_array($id, $addressIds),
         );
 
-        if (!empty($addressesToAdd)) {
+        if (! empty($addressesToAdd)) {
             $this->repository->attachAddresses($server, $addressesToAdd);
         }
 
-        if (!empty($addressesToRemove)) {
+        if (! empty($addressesToRemove)) {
             Address::query()
                    ->where('server_id', $server->id)
                    ->whereIn('id', $addressesToRemove)

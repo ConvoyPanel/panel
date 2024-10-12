@@ -48,7 +48,7 @@ class StoreServerRequest extends BaseApiRequest
         $validator->after(function ($validator) {
             $addressIds = $this->input('limits.address_ids');
 
-            if (!is_null($addressIds)) {
+            if (! is_null($addressIds)) {
                 $addresses = Address::whereIn('id', $addressIds)->get();
 
                 foreach ($addresses as $address) {

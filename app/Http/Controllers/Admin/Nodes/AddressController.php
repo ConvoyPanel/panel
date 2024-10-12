@@ -26,8 +26,8 @@ class AddressController extends Controller
                                      ), AllowedFilter::exact('server_id')->nullable()],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                     $request->query(),
+                                 );
 
         return fractal($addresses, new AddressTransformer())->parseIncludes($request->include)
                                                             ->respond();

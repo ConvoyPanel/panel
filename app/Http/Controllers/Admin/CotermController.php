@@ -35,8 +35,8 @@ class CotermController extends ApiController
                                         )],
                                     )
                                     ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                        $request->query(),
+                                    );
 
         return fractal($addressPools, new CotermTransformer())->respond();
     }
@@ -91,8 +91,8 @@ class CotermController extends ApiController
                                  ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }

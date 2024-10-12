@@ -2,9 +2,9 @@
 
 namespace Convoy\Casts;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Contracts\Encryption\Encrypter;
+use Illuminate\Database\Eloquent\Model;
 
 class NullableEncrypter implements CastsAttributes
 {
@@ -15,7 +15,7 @@ class NullableEncrypter implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        return !empty($value) ? app(Encrypter::class)->decrypt($value) : null;
+        return ! empty($value) ? app(Encrypter::class)->decrypt($value) : null;
     }
 
     /**
@@ -25,6 +25,6 @@ class NullableEncrypter implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        return !empty($value) ? app(Encrypter::class)->encrypt($value) : null;
+        return ! empty($value) ? app(Encrypter::class)->encrypt($value) : null;
     }
 }

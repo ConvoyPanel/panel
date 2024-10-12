@@ -2,9 +2,9 @@
 
 namespace Convoy\Console\Commands\Maintenance;
 
+use Convoy\Jobs\Node\PruneUsersJob;
 use Convoy\Models\Node;
 use Illuminate\Console\Command;
-use Convoy\Jobs\Node\PruneUsersJob;
 use Illuminate\Console\View\Components\Task;
 
 class PruneUsersCommand extends Command

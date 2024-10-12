@@ -9,7 +9,6 @@ class ServerDiskData extends Data
     public function __construct(
         public int $write,
         public int $read,
-    )
-    {
+    ) {
     }
 }

@@ -30,8 +30,8 @@ class NodeController extends ApiController
                                  )],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(
-                $request->query(),
-            );
+                                 $request->query(),
+                             );
 
         return fractal($nodes, new NodeTransformer())->respond();
     }

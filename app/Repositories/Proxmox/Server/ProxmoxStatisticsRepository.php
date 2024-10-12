@@ -17,10 +17,9 @@ use Webmozart\Assert\Assert;
 class ProxmoxStatisticsRepository extends ProxmoxRepository
 {
     public function getStatistics(
-        StatisticTimeRange            $from,
+        StatisticTimeRange $from,
         StatisticConsolidatorFunction $consolidator = StatisticConsolidatorFunction::AVERAGE,
-    ): DataCollection
-    {
+    ): DataCollection {
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient()

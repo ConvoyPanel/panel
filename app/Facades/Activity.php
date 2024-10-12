@@ -2,8 +2,8 @@
 
 namespace Convoy\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Convoy\Services\Activity\ActivityLogService;
+use Illuminate\Support\Facades\Facade;
 
 class Activity extends Facade
 {

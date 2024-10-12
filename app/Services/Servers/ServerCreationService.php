@@ -19,10 +19,9 @@ use Illuminate\Support\Str;
 class ServerCreationService
 {
     public function __construct(
-        private NetworkService             $networkService, private ServerRepository $repository,
+        private NetworkService $networkService, private ServerRepository $repository,
         private ServerBuildDispatchService $buildDispatchService,
-    )
-    {
+    ) {
     }
 
     public function handle(array $data)
@@ -85,7 +84,7 @@ class ServerCreationService
         $vmid = random_int(100, 999999999);
         $attempts = 0;
 
-        while (!$this->repository->isUniqueVmId($nodeId, $vmid)) {
+        while (! $this->repository->isUniqueVmId($nodeId, $vmid)) {
             $vmid = random_int(100, 999999999);
 
             if ($attempts++ > 10) {
@@ -102,7 +101,7 @@ class ServerCreationService
         $short = substr($uuid, 0, 8);
         $attempts = 0;
 
-        while (!$this->repository->isUniqueUuidCombo($uuid, $short)) {
+        while (! $this->repository->isUniqueUuidCombo($uuid, $short)) {
             $uuid = Str::uuid()->toString();
             $short = substr($uuid, 0, 8);
 

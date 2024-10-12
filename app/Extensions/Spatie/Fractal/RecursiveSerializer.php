@@ -7,7 +7,7 @@ use League\Fractal\Serializer\ArraySerializer;
 class RecursiveSerializer extends ArraySerializer
 {
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function collection(?string $resourceKey, array $data): array
     {
@@ -15,7 +15,7 @@ class RecursiveSerializer extends ArraySerializer
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function item(?string $resourceKey, array $data): array
     {

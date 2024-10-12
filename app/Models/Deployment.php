@@ -2,7 +2,6 @@
 
 namespace Convoy\Models;
 
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Deployment extends Model

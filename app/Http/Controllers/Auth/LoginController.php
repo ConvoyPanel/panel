@@ -35,7 +35,7 @@ class LoginController extends Controller
         /** @var User $user */
         $user = User::where('uuid', '=', $token->claims()->get('user_uuid'))->first();
 
-        if (!$user) {
+        if (! $user) {
             throw new UnauthorizedHttpException('', 'Invalid JWT claims');
         }
 

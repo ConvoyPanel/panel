@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Queue;
 function testCreateBackup(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*' => Http::response(['data' => 'upid'], 200),
@@ -27,14 +26,14 @@ function testCreateBackup(
 
         $response = $this->actingAs($user)->postJson(
             "/api/client/servers/{$server->uuid}/backups", [
-            'name' => 'Test Backup',
-            'mode' => 'snapshot',
-            'compression_type' => 'none',
-            'is_locked' => false,
-        ],
+                'name' => 'Test Backup',
+                'mode' => 'snapshot',
+                'compression_type' => 'none',
+                'is_locked' => false,
+            ],
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;
@@ -51,8 +50,7 @@ function testCreateBackup(
 function testRestoreBackups(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*/status/current' => Http::response(
@@ -81,7 +79,7 @@ function testRestoreBackups(
             "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore",
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;
@@ -96,8 +94,7 @@ function testRestoreBackups(
 function testDeleteBackups(
     bool $useSecondUser = false,
     bool $secondUserIsAdmin = false,
-): Closure
-{
+): Closure {
     return function () use ($useSecondUser, $secondUserIsAdmin) {
         Http::fake([
             '*' => Http::response(['data' => 'dummy-upid'], 200),
@@ -111,19 +108,17 @@ function testDeleteBackups(
             ]);
         }
 
-
         $backup = Backup::factory()->create([
             'is_successful' => true,
             'is_locked' => false,
             'server_id' => $server->id,
         ]);
 
-
         $response = $this->actingAs($user)->deleteJson(
             "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}",
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;

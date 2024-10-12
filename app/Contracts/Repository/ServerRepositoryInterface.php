@@ -2,8 +2,8 @@
 
 namespace Convoy\Contracts\Repository;
 
-use Convoy\Models\Server;
 use Convoy\Exceptions\Repository\RecordNotFoundException;
+use Convoy\Models\Server;
 
 interface ServerRepositoryInterface extends RepositoryInterface
 {

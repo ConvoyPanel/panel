@@ -3,10 +3,10 @@
 namespace Convoy\Contracts\Repository;
 
 use Closure;
-use Illuminate\Support\Collection;
 use Convoy\Exceptions\Model\DataValidationException;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Convoy\Exceptions\Repository\RecordNotFoundException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface RepositoryInterface
 {
