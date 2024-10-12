@@ -25,3 +25,4 @@ lang/php_*.json
 **/.DS_Store
 **/._.DS_Store
 .php-cs-fixer.cache
+.phpunit.cache
