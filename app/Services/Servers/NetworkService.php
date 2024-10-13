@@ -1,17 +1,17 @@
 <?php
 
-namespace Convoy\Services\Servers;
+namespace App\Services\Servers;
 
-use Convoy\Data\Server\Deployments\CloudinitAddressConfigData;
-use Convoy\Data\Server\Eloquent\ServerAddressesData;
-use Convoy\Data\Server\MacAddressData;
-use Convoy\Enums\Network\AddressType;
-use Convoy\Models\Address;
-use Convoy\Models\Server;
-use Convoy\Repositories\Eloquent\AddressRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
+use App\Data\Server\Deployments\CloudinitAddressConfigData;
+use App\Data\Server\Eloquent\ServerAddressesData;
+use App\Data\Server\MacAddressData;
+use App\Enums\Network\AddressType;
+use App\Models\Address;
+use App\Models\Server;
+use App\Repositories\Eloquent\AddressRepository;
+use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Illuminate\Support\Arr;
 use function collect;
 use function is_null;
@@ -24,7 +24,8 @@ class NetworkService
         private CloudinitService           $cloudinitService,
         private ProxmoxCloudinitRepository $cloudinitRepository,
         private ProxmoxConfigRepository    $allocationRepository,
-    ) {
+    )
+    {
     }
 
     public function deleteIpset(Server $server, string $name)
@@ -62,7 +63,8 @@ class NetworkService
         }
     }
 
-    public function getMacAddresses(Server $server, bool $eloquent = true, bool $proxmox = false): MacAddressData
+    public function getMacAddresses(Server $server, bool $eloquent = true, bool $proxmox = false,
+    ): MacAddressData
     {
         if ($eloquent) {
             $addresses = $this->getAddresses($server);
@@ -159,7 +161,7 @@ class NetworkService
 
         // If no model key exists, add the default model with the MAC address
         if (!$modelFound) {
-            $parsedConfig[] = (object) ['key' => 'virtio', 'value' => $macAddress];
+            $parsedConfig[] = (object)['key' => 'virtio', 'value' => $macAddress];
         }
 
         // Update or create the bridge value
@@ -173,7 +175,7 @@ class NetworkService
         }
 
         if (!$bridgeFound) {
-            $parsedConfig[] = (object) ['key' => 'bridge', 'value' => $server->node->network];
+            $parsedConfig[] = (object)['key' => 'bridge', 'value' => $server->node->network];
         }
 
         // Update or create the firewall key
@@ -187,7 +189,7 @@ class NetworkService
         }
 
         if (!$firewallFound) {
-            $parsedConfig[] = (object) ['key' => 'firewall', 'value' => 1];
+            $parsedConfig[] = (object)['key' => 'firewall', 'value' => 1];
         }
 
         // Handle the rate limit
@@ -206,12 +208,14 @@ class NetworkService
             }
 
             if (!$rateUpdated) {
-                $parsedConfig[] = (object) ['key' => 'rate', 'value' => $mebibytes];
+                $parsedConfig[] = (object)['key' => 'rate', 'value' => $mebibytes];
             }
         }
 
         // Rebuild the configuration string
-        $newConfig = implode(',', array_map(fn ($item) => "{$item->key}={$item->value}", $parsedConfig));
+        $newConfig = implode(
+            ',', array_map(fn ($item) => "{$item->key}={$item->value}", $parsedConfig),
+        );
 
         // Update the Proxmox configuration
         $this->allocationRepository->setServer($server)->update(['net0' => $newConfig]);
@@ -230,7 +234,7 @@ class NetworkService
             [$key, $value] = explode('=', $component);
 
             // Create an associative array (or object) for key-value pairs
-            $parsedObjects[] = (object) ['key' => $key, 'value' => $value];
+            $parsedObjects[] = (object)['key' => $key, 'value' => $value];
         }
 
         return $parsedObjects;
