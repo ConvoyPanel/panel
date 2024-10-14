@@ -25,7 +25,17 @@ jobs:
 
       - name: Create Release Archive
         run: |
-          files_to_remove=(
+          files_to_include=(
+            "."
+            ".editorconfig"
+            ".env.example"
+            ".gitattributes"
+            ".gitignore"
+            ".prettierignore"
+            ".prettierrc.json"
+          )
+
+          files_to_exclude=(
             "node_modules/"
             "tests/"
             "CODE_OF_CONDUCT.md"
@@ -36,20 +46,14 @@ jobs:
             "phpunit.xml"
             "stats.html"
           )
-          
-          rm -rf "${files_to_remove[@]}"
-          
-          files_to_include=(
-            "."
-            ".editorconfig"
-            ".env.example"
-            ".gitattributes"
-            ".gitignore"
-            ".prettierignore"
-            ".prettierrc.json"
-          )
-          
-          tar -czf panel.tar.gz "${files_to_include[@]}"
+
+          # Build the exclude parameters for tar
+          exclude_params=()
+          for file in "${files_to_exclude[@]}"; do
+            exclude_params+=(--exclude="$file")
+          done
+
+          tar "${exclude_params[@]}" -czf panel.tar.gz "${files_to_include[@]}"
 
       - name: Extract Changelog
         id: extract_changelog
