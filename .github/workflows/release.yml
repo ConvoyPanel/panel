@@ -52,7 +52,7 @@ jobs:
           )
 
           # Archive files, using * directly outside the array for proper expansion
-          tar -czf panel.tar.gz * "${files_to_include[@]}"
+          tar --exclude=panel.tar.gz -czf panel.tar.gz * "${files_to_include[@]}"
 
       - name: Extract Changelog
         id: extract_changelog
