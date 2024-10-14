@@ -25,32 +25,9 @@ jobs:
 
       - name: Create Release Archive
         run: |
-          files_to_exclude=(
-            "node_modules/"
-            "tests/"
-            "CODE_OF_CONDUCT.md"
-            "CONTRIBUTOR_LICENSE_AGREEMENT"
-            "crowdin.yml"
-            "docker-compose.ci.yml"
-            "phpstan.neon"
-            "phpunit.xml"
-            "stats.html"
-          )
+          rm -rf node_modules/ tests/ CODE_OF_CONDUCT.md CONTRIBUTOR_LICENSE_AGREEMENT crowdin.yml docker-compose.ci.yml phpstan.neon phpunit.xml stats.html
           
-          files_to_include=(
-            "."
-            ".editorconfig"
-            ".env.example"
-            ".gitattributes"
-            ".gitignore"
-            ".prettierignore"
-            ".prettierrc.json"
-          )
-          
-          rm -rf "${files_to_exclude[@]}"
-          sync
-          
-          tar -czf panel.tar.gz "${files_to_include[@]}"
+          tar -czf panel.tar.gz * .editorconfig .env.example .gitattributes .gitignore .prettierignore .prettierrc.json
 
       - name: Extract Changelog
         id: extract_changelog
