@@ -47,7 +47,8 @@ jobs:
             ".prettierrc.json"
           )
           
-          rm -rf "${files_to_exclude[@]}"  
+          rm -rf "${files_to_exclude[@]}"
+          sync
           
           tar -czf panel.tar.gz "${files_to_include[@]}"
 
