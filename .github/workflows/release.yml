@@ -28,8 +28,6 @@ jobs:
           files_to_remove=(
             "node_modules/"
             "tests/"
-            ".env.ci"
-            ".styleci.yml"
             "CODE_OF_CONDUCT.md"
             "CONTRIBUTOR_LICENSE_AGREEMENT"
             "crowdin.yml"
@@ -39,11 +37,19 @@ jobs:
             "stats.html"
           )
           
-          for file in "${files_to_remove[@]}"; do
-            rm -rf "$file"
-          done
+          rm -rf "${files_to_remove[@]}"
           
-          tar --exclude-vcs -czf panel.tar.gz ./*
+          files_to_include=(
+            "."
+            ".editorconfig"
+            ".env.example"
+            ".gitattributes"
+            ".gitignore"
+            ".prettierignore"
+            ".prettierrc.json"
+          )
+          
+          tar -czf panel.tar.gz "${files_to_include[@]}"
 
       - name: Extract Changelog
         id: extract_changelog
