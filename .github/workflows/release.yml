@@ -26,7 +26,6 @@ jobs:
       - name: Create Release Archive
         run: |
           files_to_include=(
-            "*"
             ".editorconfig"
             ".env.example"
             ".gitattributes"
@@ -37,8 +36,8 @@ jobs:
           
           rm -rf node_modules/ tests/ CODE_OF_CONDUCT.md CONTRIBUTOR_LICENSE_AGREEMENT crowdin.yml docker-compose.ci.yml phpstan.neon phpunit.xml stats.html
 
-          # Use array to include specific files
-          tar -czf panel.tar.gz "${files_to_include[@]}"
+          # Archive files, using * directly outside the array for proper expansion
+          tar -czf panel.tar.gz * "${files_to_include[@]}"
 
       - name: Extract Changelog
         id: extract_changelog
