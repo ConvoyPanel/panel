@@ -25,6 +25,23 @@ jobs:
 
       - name: Create Release Archive
         run: |
+          # Array of files and directories to remove
+          files_to_remove=(
+            "node_modules/"
+            "tests/"
+            "CODE_OF_CONDUCT.md"
+            "CONTRIBUTOR_LICENSE_AGREEMENT"
+            "crowdin.yml"
+            "docker-compose.ci.yml"
+            "phpstan.neon"
+            "phpunit.xml"
+            "stats.html"
+          )
+          
+          # Loop over the files to remove and delete them
+          rm -rf "${files_to_remove[@]}"
+          
+          # Array of specific dot files to include
           files_to_include=(
             ".editorconfig"
             ".env.example"
@@ -33,8 +50,6 @@ jobs:
             ".prettierignore"
             ".prettierrc.json"
           )
-          
-          rm -rf node_modules/ tests/ CODE_OF_CONDUCT.md CONTRIBUTOR_LICENSE_AGREEMENT crowdin.yml docker-compose.ci.yml phpstan.neon phpunit.xml stats.html
 
           # Archive files, using * directly outside the array for proper expansion
           tar -czf panel.tar.gz * "${files_to_include[@]}"
