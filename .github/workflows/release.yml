@@ -38,7 +38,7 @@ jobs:
           )
           
           files_to_include=(
-            "*"
+            "."
             ".editorconfig"
             ".env.example"
             ".gitattributes"
