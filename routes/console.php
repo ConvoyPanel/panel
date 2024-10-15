@@ -15,7 +15,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-
 Schedule::command('queue:prune-batches')->daily();
 
 if (config('backups.prune_age')) {

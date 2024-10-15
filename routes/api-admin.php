@@ -151,32 +151,32 @@ Route::prefix('/servers')->group(function () {
     Route::post('/', [Admin\ServerController::class, 'store']);
 
     Route::prefix('/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
-            Route::get('/', [Admin\ServerController::class, 'show'])
-                 ->withoutMiddleware(
-                     ValidateServerStatusMiddleware::class,
-                 );
-            Route::patch('/', [Admin\ServerController::class, 'update'])
-                 ->withoutMiddleware(
-                     ValidateServerStatusMiddleware::class,
-                 );
-            Route::delete('/', [Admin\ServerController::class, 'destroy']);
+        Route::get('/', [Admin\ServerController::class, 'show'])
+             ->withoutMiddleware(
+                 ValidateServerStatusMiddleware::class,
+             );
+        Route::patch('/', [Admin\ServerController::class, 'update'])
+             ->withoutMiddleware(
+                 ValidateServerStatusMiddleware::class,
+             );
+        Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
-            Route::prefix('/settings')->group(function () {
-                Route::patch(
-                    '/build',
-                    [Admin\ServerController::class, 'updateBuild'],
-                );
+        Route::prefix('/settings')->group(function () {
+            Route::patch(
+                '/build',
+                [Admin\ServerController::class, 'updateBuild'],
+            );
 
-                Route::post(
-                    '/suspend',
-                    [Admin\ServerController::class, 'suspend'],
-                );
-                Route::post(
-                    '/unsuspend',
-                    [Admin\ServerController::class, 'unsuspend'],
-                );
-            });
-        }
+            Route::post(
+                '/suspend',
+                [Admin\ServerController::class, 'suspend'],
+            );
+            Route::post(
+                '/unsuspend',
+                [Admin\ServerController::class, 'unsuspend'],
+            );
+        });
+    }
     );
 });
 
