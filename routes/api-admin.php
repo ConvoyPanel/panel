@@ -150,9 +150,7 @@ Route::prefix('/servers')->group(function () {
     Route::get('/', [Admin\ServerController::class, 'index']);
     Route::post('/', [Admin\ServerController::class, 'store']);
 
-    Route::group(
-        ['prefix' => '/{server}', 'middleware' => ValidateServerStatusMiddleware::class],
-        function () {
+    Route::prefix('/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
             Route::get('/', [Admin\ServerController::class, 'show'])
                  ->withoutMiddleware(
                      ValidateServerStatusMiddleware::class,
