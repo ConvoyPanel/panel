@@ -82,6 +82,7 @@ class Kernel extends HttpKernel
         'can' => Authorize::class,
         'guest' => RedirectIfAuthenticated::class,
         'password.confirm' => RequirePassword::class,
+        'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
