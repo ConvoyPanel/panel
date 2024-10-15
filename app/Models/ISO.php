@@ -15,12 +15,6 @@ class ISO extends Model
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
-    protected $casts = [
-        'is_successful' => 'boolean',
-        'size' => StorageSizeCast::class,
-        'hidden' => 'boolean',
-    ];
-
     public static array $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
         'is_successful' => 'sometimes|boolean',
@@ -30,6 +24,15 @@ class ISO extends Model
         'hidden' => 'sometimes|boolean',
         'completed_at' => 'nullable|date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_successful' => 'boolean',
+            'size' => StorageSizeCast::class,
+            'hidden' => 'boolean',
+        ];
+    }
 
     public function node(): BelongsTo
     {
