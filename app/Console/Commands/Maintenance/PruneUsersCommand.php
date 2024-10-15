@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Maintenance;
 
+use App\Jobs\Node\PruneUsersJob;
 use App\Models\Node;
 use Illuminate\Console\Command;
-use App\Jobs\Node\PruneUsersJob;
 use Illuminate\Console\View\Components\Task;
 
 class PruneUsersCommand extends Command

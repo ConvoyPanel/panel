@@ -2,8 +2,8 @@
 
 namespace App\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use App\Services\Activity\ActivityLogBatchService;
+use Illuminate\Support\Facades\Facade;
 
 class LogBatch extends Facade
 {

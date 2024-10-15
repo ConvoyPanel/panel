@@ -2,7 +2,6 @@
 
 namespace App\Services\Backups;
 
-use Carbon\CarbonImmutable;
 use App\Enums\Server\BackupCompressionType;
 use App\Enums\Server\BackupMode;
 use App\Exceptions\Service\Backup\TooManyBackupsException;
@@ -11,6 +10,7 @@ use App\Models\Backup;
 use App\Models\Server;
 use App\Repositories\Eloquent\BackupRepository;
 use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
@@ -20,7 +20,7 @@ class BackupCreationService
     public function __construct(
         private ConnectionInterface $connection,
         private ProxmoxBackupRepository $proxmoxRepository,
-        private BackupRepository    $eloquentRepository,
+        private BackupRepository $eloquentRepository,
     ) {
     }
 
@@ -29,7 +29,7 @@ class BackupCreationService
         string $name,
         BackupMode $mode,
         BackupCompressionType $compressionType,
-        ?bool  $isLocked = false,
+        ?bool $isLocked = false,
     ): ?Backup {
         $limit = config('backups.throttles.limit');
         $period = config('backups.throttles.period');
@@ -55,9 +55,9 @@ class BackupCreationService
         }
 
         $successful = $this->eloquentRepository->getNonFailedBackups($server);
-        if (!$server->backup_limit || $successful->count() >= $server->backup_limit) {
+        if (! $server->backup_limit || $successful->count() >= $server->backup_limit) {
             if (isset($server->backup_limit)) {
-                throw new TooManyBackupsException((int)$server->backup_limit);
+                throw new TooManyBackupsException((int) $server->backup_limit);
             }
         }
 

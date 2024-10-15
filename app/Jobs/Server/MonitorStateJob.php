@@ -2,10 +2,10 @@
 
 namespace App\Jobs\Server;
 
-use Closure;
 use App\Enums\Server\State;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Closure;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,8 +25,8 @@ class MonitorStateJob implements ShouldQueue
     }
 
     public function __construct(
-        protected int      $serverId,
-        protected State    $targetState,
+        protected int $serverId,
+        protected State $targetState,
         protected ?Closure $callback = null,
     ) {
         //

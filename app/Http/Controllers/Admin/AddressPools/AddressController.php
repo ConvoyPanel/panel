@@ -23,8 +23,8 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class AddressController extends ApiController
 {
     public function __construct(
-        private NetworkService             $networkService,
-        private ConnectionInterface        $connection,
+        private NetworkService $networkService,
+        private ConnectionInterface $connection,
         private BulkAddressCreationService $bulkAddressCreationService,
     ) {
     }
@@ -71,7 +71,7 @@ class AddressController extends ApiController
                 macAddress: $data['mac_address'],
             );
 
-            if (!is_null($request->server_id)) {
+            if (! is_null($request->server_id)) {
                 SyncNetworkSettings::dispatch($request->integer('server_id'));
             }
 
@@ -125,11 +125,11 @@ class AddressController extends ApiController
                     $this->networkService->syncSettings($address->server);
                 }
             } catch (ProxmoxConnectionException) {
-                if ($oldLinkedServer && !$address->server) {
+                if ($oldLinkedServer && ! $address->server) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$oldLinkedServer->uuid} failed to sync network settings.",
                     );
-                } elseif (!$oldLinkedServer && $address->server) {
+                } elseif (! $oldLinkedServer && $address->server) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$address->server->uuid} failed to sync network settings.",
                     );

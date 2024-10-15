@@ -2,10 +2,10 @@
 
 namespace App\Services\Nodes;
 
+use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Models\Node;
 use App\Models\Server;
 use App\Services\Servers\NetworkService;
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 
 class ServerRateLimitsSyncService
 {

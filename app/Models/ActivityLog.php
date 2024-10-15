@@ -18,11 +18,6 @@ class ActivityLog extends Model
         'timestamp',
     ];
 
-    protected $casts = [
-        'properties' => 'collection',
-        'timestamp' => 'datetime',
-    ];
-
     protected $with = ['subjects'];
 
     public static array $validationRules = [
@@ -32,6 +27,14 @@ class ActivityLog extends Model
         'description' => ['nullable', 'string'],
         'properties' => ['array'],
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'properties' => 'collection',
+            'timestamp' => 'datetime',
+        ];
+    }
 
     public function actor(): MorphTo
     {
@@ -66,7 +69,7 @@ class ActivityLog extends Model
      *
      * @see https://laravel.com/docs/9.x/eloquent#pruning-models
      */
-    public function prunable(): ActivityLog
+    public function prunable(): self
     {
         if (is_null(config('activity.prune_days'))) {
             throw new LogicException(

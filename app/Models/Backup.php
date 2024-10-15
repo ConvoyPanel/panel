@@ -14,11 +14,6 @@ class Backup extends Model
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
-    protected $casts = [
-        'completed_at' => 'datetime',
-        'size' => StorageSizeCast::class,
-    ];
-
     public static array $validationRules = [
         'uuid' => 'required|uuid',
         'server_id' => 'required|exists:servers,id',
@@ -29,6 +24,14 @@ class Backup extends Model
         'size' => 'nullable|numeric|min:0',
         'completed_at' => 'nullable|date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'completed_at' => 'datetime',
+            'size' => StorageSizeCast::class,
+        ];
+    }
 
     public function server(): BelongsTo
     {

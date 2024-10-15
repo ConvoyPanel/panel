@@ -28,13 +28,13 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class ServerController extends ApiController
 {
     public function __construct(
-        private ConnectionInterface     $connection,
-        private ServerDeletionService   $deletionService,
-        private NetworkService          $networkService,
+        private ConnectionInterface $connection,
+        private ServerDeletionService $deletionService,
+        private NetworkService $networkService,
         private ServerSuspensionService $suspensionService,
-        private ServerCreationService   $creationService,
-        private CloudinitService        $cloudinitService,
-        private SyncBuildService        $buildModificationService,
+        private ServerCreationService $creationService,
+        private CloudinitService $cloudinitService,
+        private SyncBuildService $buildModificationService,
     ) {
     }
 
@@ -87,7 +87,7 @@ class ServerController extends ApiController
     public function update(UpdateGeneralInfoRequest $request, Server $server)
     {
         $this->connection->transaction(function () use ($request, $server) {
-            if ($request->hostname !== $server->hostname && !empty($request->hostname)) {
+            if ($request->hostname !== $server->hostname && ! empty($request->hostname)) {
                 try {
                     $this->cloudinitService->updateHostname($server, $request->hostname);
                 } catch (ProxmoxConnectionException) {

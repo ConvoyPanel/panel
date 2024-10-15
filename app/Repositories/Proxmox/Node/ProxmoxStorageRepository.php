@@ -32,7 +32,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
                          ->json();
 
         $response = $this->getData($response);
-        
+
         $has = fn (string $content) => Str::contains($response['content'], $content);
 
         return new StorageData(
@@ -52,10 +52,10 @@ class ProxmoxStorageRepository extends ProxmoxRepository
     }
 
     public function download(
-        ContentType   $contentType,
-        string        $fileName,
-        string        $link,
-        ?bool         $verifyCertificates = true,
+        ContentType $contentType,
+        string $fileName,
+        string $link,
+        ?bool $verifyCertificates = true,
         ?ChecksumData $checksumData = null,
     ) {
         Assert::isInstanceOf($this->node, Node::class);

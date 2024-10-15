@@ -12,12 +12,12 @@ use Illuminate\Support\Arr;
 readonly class SyncBuildService
 {
     public function __construct(
-        private AllocationService       $allocationService,
-        private CloudinitService        $cloudinitService,
-        private NetworkService          $networkService,
-        private ServerDetailService     $detailService,
+        private AllocationService $allocationService,
+        private CloudinitService $cloudinitService,
+        private NetworkService $networkService,
+        private ServerDetailService $detailService,
         private ProxmoxConfigRepository $allocationRepository,
-        private ProxmoxDiskRepository   $diskRepository,
+        private ProxmoxDiskRepository $diskRepository,
     ) {
     }
 
@@ -40,7 +40,7 @@ readonly class SyncBuildService
         // find a disk that has a corresponding disk in the deployment
         $disksArray = collect($disks->toArray())->pluck('interface')->all();
         $bootOrder = array_filter(
-            collect($bootOrder->filter(fn (DiskData $disk) => !$disk->is_media)->toArray())->pluck(
+            collect($bootOrder->filter(fn (DiskData $disk) => ! $disk->is_media)->toArray())->pluck(
                 'interface',
             )->toArray(),
             fn ($disk) => in_array($disk, $disksArray),

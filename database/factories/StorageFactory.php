@@ -8,8 +8,6 @@ use function rand;
 
 class StorageFactory extends Factory
 {
-    protected $model = Storage::class;
-
     public function definition(): array
     {
         return [

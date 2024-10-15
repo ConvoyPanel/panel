@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use App\Models\Server;
-use Webmozart\Assert\Assert;
 use App\Enums\Server\PowerAction;
+use App\Models\Server;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {

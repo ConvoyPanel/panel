@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware\Client\Server;
 
-use Closure;
 use App\Models\Server;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -21,13 +21,13 @@ class ServerNotInstalled
         /** @var Server|null $server */
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException(
                 'No server resource was located in the request parameters.',
             );
         }
 
-        if (!$server->isInstalled()) {
+        if (! $server->isInstalled()) {
             throw new HttpException(
                 Response::HTTP_FORBIDDEN,
                 'Access to this resource is not allowed due to the current non-installation state.',

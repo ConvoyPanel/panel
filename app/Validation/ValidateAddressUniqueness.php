@@ -15,7 +15,7 @@ readonly class ValidateAddressUniqueness
     {
         $data = $validator->validated();
 
-        if (!$this->existingAddress) {
+        if (! $this->existingAddress) {
             if (Address::where(
                 [['address_pool_id', '=', $this->addressPoolId], ['address', '=', $data['address']]],
             )->exists()) {

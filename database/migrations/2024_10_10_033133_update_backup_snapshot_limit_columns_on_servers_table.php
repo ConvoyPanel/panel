@@ -37,7 +37,6 @@ return new class extends Migration {
             'ALTER TABLE servers CHANGE COLUMN bandwidth_limit bandwidth_limit INT NOT NULL;',
         );
 
-
         Schema::table('servers', function (Blueprint $table) {
             $table->integer('snapshot_size_limit')->after('snapshot_count_limit');
             $table->integer('backup_size_limit')->after('backup_count_limit');

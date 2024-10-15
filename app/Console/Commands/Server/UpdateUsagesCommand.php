@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Server;
 
+use App\Jobs\Node\SyncServerUsagesJob;
 use App\Models\Node;
 use Illuminate\Console\Command;
-use App\Jobs\Node\SyncServerUsagesJob;
 use Illuminate\Console\View\Components\Task;
 
 class UpdateUsagesCommand extends Command

@@ -2,19 +2,19 @@
 
 namespace App\Repositories\Eloquent;
 
-use Closure;
-use Illuminate\Http\Request;
-use Webmozart\Assert\Assert;
-use Illuminate\Support\Collection;
-use App\Repositories\Repository;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use App\Contracts\Repository\RepositoryInterface;
 use App\Exceptions\Model\DataValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Exceptions\Repository\RecordNotFoundException;
+use App\Repositories\Repository;
+use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Webmozart\Assert\Assert;
 
 abstract class EloquentRepository extends Repository implements RepositoryInterface
 {

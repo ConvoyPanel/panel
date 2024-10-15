@@ -2,12 +2,12 @@
 
 namespace App\Transformers\Client;
 
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
 
 class ActivityLogTransformer extends TransformerAbstract

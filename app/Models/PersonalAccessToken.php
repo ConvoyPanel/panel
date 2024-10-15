@@ -17,9 +17,12 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'abilities',
     ];
 
-    protected $casts = [
-        'type' => ApiKeyType::class,
-        'abilities' => 'json',
-        'last_used_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'type' => ApiKeyType::class,
+            'abilities' => 'json',
+            'last_used_at' => 'datetime',
+        ];
+    }
 }

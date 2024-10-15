@@ -37,7 +37,7 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
 
         $isCreated = $service->isVmCreated($server);
 
-        if (!$isCreated) {
+        if (! $isCreated) {
             $this->release(3);
         }
     }

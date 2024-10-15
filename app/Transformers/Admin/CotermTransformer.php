@@ -14,12 +14,12 @@ class CotermTransformer extends TransformerAbstract
     public function transform(Coterm $coterm): array
     {
         $transformed = [
-            'id' => (int)$coterm->id,
+            'id' => (int) $coterm->id,
             'name' => $coterm->name,
-            'is_tls_enabled' => (boolean)$coterm->is_tls_enabled,
+            'is_tls_enabled' => (bool) $coterm->is_tls_enabled,
             'fqdn' => $coterm->fqdn,
-            'port' => (int)$coterm->port,
-            'nodes_count' => (int)$coterm->nodes_count,
+            'port' => (int) $coterm->port,
+            'nodes_count' => (int) $coterm->nodes_count,
         ];
 
         if ($this->includeToken) {

@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Models\Server;
-use App\Models\ActivityLog;
 use App\Contracts\Repository\ActivityRepositoryInterface;
+use App\Models\ActivityLog;
+use App\Models\Server;
 
 class ActivityRepository extends EloquentRepository implements ActivityRepositoryInterface
 {

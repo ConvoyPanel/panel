@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
 use App\Exceptions\Model\DataValidationException;
+use Carbon\CarbonImmutable;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
@@ -122,7 +122,7 @@ abstract class Model extends IlluminateModel
         IlluminateModel|int|string $model,
         string $column = 'id',
     ): array {
-        if ($model instanceof Model) {
+        if ($model instanceof self) {
             [$id, $column] = [$model->getKey(), $model->getKeyName()];
         }
 
@@ -133,7 +133,7 @@ abstract class Model extends IlluminateModel
             // working model, so we don't run into errors due to the way that field validation
             // works.
             foreach ($data as &$datum) {
-                if (!is_string($datum) || !Str::startsWith($datum, 'unique')) {
+                if (! is_string($datum) || ! Str::startsWith($datum, 'unique')) {
                     continue;
                 }
 
@@ -167,7 +167,7 @@ abstract class Model extends IlluminateModel
             ),
         );
 
-        if (!$validator->passes()) {
+        if (! $validator->passes()) {
             throw new ValidationException($validator);
         }
     }
@@ -177,7 +177,7 @@ abstract class Model extends IlluminateModel
      */
     protected function asDateTime(mixed $value): Carbon|CarbonImmutable
     {
-        if (!$this->immutableDates) {
+        if (! $this->immutableDates) {
             return parent::asDateTime($value);
         }
 

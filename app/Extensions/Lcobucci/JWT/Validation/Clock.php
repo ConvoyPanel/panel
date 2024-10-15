@@ -2,9 +2,9 @@
 
 namespace App\Extensions\Lcobucci\JWT\Validation;
 
-use DateTimeImmutable;
-use Carbon\CarbonInterface;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use DateTimeImmutable;
 use Psr\Clock\ClockInterface;
 
 class Clock implements ClockInterface

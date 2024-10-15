@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use Closure;
-use InvalidArgumentException;
-use Illuminate\Foundation\Application;
-use Illuminate\Database\Eloquent\Model;
 use App\Contracts\Repository\RepositoryInterface;
+use Closure;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
+use InvalidArgumentException;
 
 abstract class Repository implements RepositoryInterface
 {
@@ -49,7 +49,7 @@ abstract class Repository implements RepositoryInterface
      * @param  array|string  $columns
      * @return $this
      */
-    public function setColumns($columns = ['*']): Repository|static
+    public function setColumns($columns = ['*']): self|static
     {
         $clone = clone $this;
         $clone->columns = is_array($columns) ? $columns : func_get_args();
@@ -71,7 +71,7 @@ abstract class Repository implements RepositoryInterface
      *
      * @return $this
      */
-    public function withoutFreshModel(): Repository|static
+    public function withoutFreshModel(): self|static
     {
         return $this->setFreshModel(false);
     }

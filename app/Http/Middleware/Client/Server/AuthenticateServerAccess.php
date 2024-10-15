@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware\Client\Server;
 
-use Closure;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use App\Models\Server;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -24,11 +24,11 @@ class AuthenticateServerAccess
         $user = $request->user();
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($user->id !== $server->user_id && !$user->root_admin) {
+        if ($user->id !== $server->user_id && ! $user->root_admin) {
             throw new NotFoundHttpException('Server not found');
         }
 

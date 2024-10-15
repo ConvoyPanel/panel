@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware\Client\Server;
 
-use Closure;
 use App\Models\Server;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings as Middleware;
 use Symfony\Component\HttpFoundation\Response;

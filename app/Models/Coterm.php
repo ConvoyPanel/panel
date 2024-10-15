@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coterm extends Model
 {
-
     /**
      * The constants for generating Coterm secret keys
      */
     public const COTERM_TOKEN_ID_LENGTH = 16;
+
     public const COTERM_TOKEN_LENGTH = 64;
-    
+
     protected $guarded = [
         'id',
         'created_at',
@@ -24,11 +24,6 @@ class Coterm extends Model
         'token_id', 'token',
     ];
 
-    protected $casts = [
-        'is_tls_enabled' => 'boolean',
-        'coterm_token' => NullableEncrypter::class,
-    ];
-
     public static array $validationRules = [
         'name' => 'required|string|max:191',
         'is_tls_enabled' => 'required|boolean',
@@ -37,6 +32,14 @@ class Coterm extends Model
         'token_id' => 'required|string|max:191',
         'token' => 'required|string|max:191',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_tls_enabled' => 'boolean',
+            'coterm_token' => NullableEncrypter::class,
+        ];
+    }
 
     public function nodes(): HasMany
     {

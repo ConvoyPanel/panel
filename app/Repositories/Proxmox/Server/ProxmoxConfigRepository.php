@@ -3,8 +3,8 @@
 namespace App\Repositories\Proxmox\Server;
 
 use App\Models\Server;
-use Webmozart\Assert\Assert;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxConfigRepository extends ProxmoxRepository
 {

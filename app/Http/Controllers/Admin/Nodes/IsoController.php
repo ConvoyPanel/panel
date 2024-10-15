@@ -42,7 +42,7 @@ class IsoController extends ApiController
         $shouldDownload = $request->boolean('should_download');
 
         if ($shouldDownload) {
-            $checksumData = (bool)$request->checksum_algorithum ? ChecksumData::from([
+            $checksumData = (bool) $request->checksum_algorithum ? ChecksumData::from([
                 'algorithm' => ChecksumAlgorithm::from($request->checksum_algorithum),
                 'checksum' => $request->checksum,
             ]) : null;

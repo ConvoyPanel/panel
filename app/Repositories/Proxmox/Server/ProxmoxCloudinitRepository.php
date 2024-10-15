@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use App\Models\Server;
-use Webmozart\Assert\Assert;
-use App\Repositories\Proxmox\ProxmoxRepository;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Server;
+use App\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxCloudinitRepository extends ProxmoxRepository
 {

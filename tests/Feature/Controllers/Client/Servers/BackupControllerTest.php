@@ -27,14 +27,14 @@ function testCreateBackup(
         $response = $this->actingAs($user)->postJson(
             "/api/client/servers/{$server->uuid}/backups",
             [
-            'name' => 'Test Backup',
-            'mode' => 'snapshot',
-            'compression_type' => 'none',
-            'is_locked' => false,
-        ],
+                'name' => 'Test Backup',
+                'mode' => 'snapshot',
+                'compression_type' => 'none',
+                'is_locked' => false,
+            ],
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;
@@ -81,7 +81,7 @@ function testRestoreBackups(
             "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}/restore",
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;
@@ -110,19 +110,17 @@ function testDeleteBackups(
             ]);
         }
 
-
         $backup = Backup::factory()->create([
             'is_successful' => true,
             'is_locked' => false,
             'server_id' => $server->id,
         ]);
 
-
         $response = $this->actingAs($user)->deleteJson(
             "/api/client/servers/{$server->uuid}/backups/{$backup->uuid}",
         );
 
-        if ($useSecondUser && !$secondUserIsAdmin) {
+        if ($useSecondUser && ! $secondUserIsAdmin) {
             $response->assertNotFound();
 
             return;

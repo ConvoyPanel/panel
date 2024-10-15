@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class NodeFactory extends Factory
 {
-    protected $model = Node::class;
-
     public function definition(): array
     {
         return [

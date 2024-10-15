@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Maintenance;
 
-use Carbon\CarbonImmutable;
-use InvalidArgumentException;
-use Illuminate\Console\Command;
 use App\Repositories\Eloquent\BackupRepository;
+use Carbon\CarbonImmutable;
+use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 class PruneOrphanedBackupsCommand extends Command
 {

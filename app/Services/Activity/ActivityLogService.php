@@ -7,19 +7,19 @@
 
 namespace App\Services\Activity;
 
+use App\Models\ActivityLog;
+use App\Models\ActivityLogSubject;
 use Closure;
 use Exception;
-use Throwable;
+use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Webmozart\Assert\Assert;
-use App\Models\ActivityLog;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\Models\ActivityLogSubject;
-use Illuminate\Contracts\Auth\Factory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Database\ConnectionInterface;
+use Throwable;
+use Webmozart\Assert\Assert;
 
 class ActivityLogService
 {

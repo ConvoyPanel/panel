@@ -2,8 +2,8 @@
 
 namespace App\Exceptions\Service\Api;
 
-use Throwable;
 use App\Exceptions\ConvoyException;
+use Throwable;
 
 class InvalidJWTException extends ConvoyException
 {

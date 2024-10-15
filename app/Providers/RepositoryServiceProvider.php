@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Repositories\Eloquent\ActivityRepository;
 use App\Contracts\Repository\ActivityRepositoryInterface;
+use App\Repositories\Eloquent\ActivityRepository;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

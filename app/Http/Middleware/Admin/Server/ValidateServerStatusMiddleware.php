@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware\Admin\Server;
 
-use Closure;
 use App\Enums\Server\Status;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use App\Models\Server;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -16,7 +16,7 @@ class ValidateServerStatusMiddleware
     {
         $server = $request->route()->parameter('server');
 
-        if (!$server instanceof Server) {
+        if (! $server instanceof Server) {
             throw new NotFoundHttpException('Server not found');
         }
 

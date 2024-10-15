@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ISOFactory extends Factory
 {
-    protected $model = ISO::class;
-
     /**
      * Define the model's default state.
      *

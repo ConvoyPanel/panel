@@ -2,12 +2,12 @@
 
 namespace App\Services\Backups;
 
-use Carbon\Carbon;
-use Closure;
 use App\Models\Backup;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use Carbon\Carbon;
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -15,7 +15,7 @@ class BackupMonitorService
 {
     public function __construct(
         private ProxmoxActivityRepository $repository,
-        private ProxmoxBackupRepository   $backupRepository,
+        private ProxmoxBackupRepository $backupRepository,
     ) {
     }
 

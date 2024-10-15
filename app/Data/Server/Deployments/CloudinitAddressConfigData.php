@@ -2,8 +2,8 @@
 
 namespace App\Data\Server\Deployments;
 
-use Spatie\LaravelData\Data;
 use App\Data\Server\Eloquent\AddressData;
+use Spatie\LaravelData\Data;
 
 class CloudinitAddressConfigData extends Data
 {

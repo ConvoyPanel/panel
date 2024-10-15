@@ -2,8 +2,8 @@
 
 namespace App\Contracts\Repository;
 
-use App\Models\Server;
 use App\Exceptions\Repository\RecordNotFoundException;
+use App\Models\Server;
 
 interface ServerRepositoryInterface extends RepositoryInterface
 {

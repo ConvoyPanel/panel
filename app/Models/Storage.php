@@ -16,10 +16,6 @@ class Storage extends Model
         'id',
     ];
 
-    protected $casts = [
-        'size' => StorageSizeCast::class,
-    ];
-
     public static array $validationRules = [
         'nickname' => 'required_if:is_shareable,1|string|max:40',
         'description' => 'nullable|string|max:191',
@@ -33,6 +29,13 @@ class Storage extends Model
         'has_iso' => 'required|boolean',
         'has_snippets' => 'required|boolean',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'size' => StorageSizeCast::class,
+        ];
+    }
 
     public function nodes(): BelongsToMany
     {

@@ -1,7 +1,7 @@
 <?php
 
-use Carbon\Carbon;
 use App\Services\Nodes\ServerUsagesSyncService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 
 it('can sync server usages', function () {

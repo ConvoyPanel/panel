@@ -21,7 +21,7 @@ class IsoService
     }
 
     public function download(
-        Node          $node,
+        Node $node,
         string $name,
         ?string $fileName,
         string $link,

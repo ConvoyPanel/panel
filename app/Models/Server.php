@@ -15,13 +15,6 @@ class Server extends Model
 {
     use HasFactory;
 
-    protected $casts = [
-        'memory' => StorageSizeCast::class,
-        'disk' => StorageSizeCast::class,
-        'bandwidth_usage' => StorageSizeCast::class,
-        'bandwidth_limit' => StorageSizeCast::class,
-    ];
-
     protected $guarded = [
         'id',
         'updated_at',
@@ -46,6 +39,16 @@ class Server extends Model
         'bandwidth_limit' => 'present|integer|min:-1',
         'hydrated_at' => 'nullable|date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'memory' => StorageSizeCast::class,
+            'disk' => StorageSizeCast::class,
+            'bandwidth_usage' => StorageSizeCast::class,
+            'bandwidth_limit' => StorageSizeCast::class,
+        ];
+    }
 
     public function node(): BelongsTo
     {
@@ -115,7 +118,7 @@ class Server extends Model
     public function validateCurrentState(): void
     {
         if (
-            !is_null($this->status)
+            ! is_null($this->status)
         ) {
             throw new ServerStatusConflictException($this);
         }

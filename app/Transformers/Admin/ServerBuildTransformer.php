@@ -3,9 +3,9 @@
 namespace App\Transformers\Admin;
 
 use App\Models\Server;
+use App\Services\Servers\ServerDetailService;
 use Illuminate\Support\Facades\App;
 use League\Fractal\TransformerAbstract;
-use App\Services\Servers\ServerDetailService;
 
 class ServerBuildTransformer extends TransformerAbstract
 {

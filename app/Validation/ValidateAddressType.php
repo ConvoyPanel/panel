@@ -2,8 +2,8 @@
 
 namespace App\Validation;
 
-use Illuminate\Validation\Validator;
 use App\Enums\Network\AddressType;
+use Illuminate\Validation\Validator;
 
 class ValidateAddressType
 {
