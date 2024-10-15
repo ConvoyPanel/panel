@@ -50,7 +50,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
                              'vmid' => $this->server->vmid,
                              'storage' => $this->node->backup_storage,
                              'mode' => $parsedMode,
-                             'compress' => $compressionType === BackupCompressionType::NONE ? (int)false : $compressionType->value,
+                             'compress' => $compressionType === BackupCompressionType::NONE ? (int) false : $compressionType->value,
                          ])
                          ->json();
 

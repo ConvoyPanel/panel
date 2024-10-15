@@ -3,8 +3,8 @@
 namespace App\Transformers\Admin;
 
 use App\Models\AddressPool;
-use League\Fractal\TransformerAbstract;
 use League\Fractal\Resource\Collection;
+use League\Fractal\TransformerAbstract;
 
 class AddressPoolTransformer extends TransformerAbstract
 {

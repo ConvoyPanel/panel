@@ -2,9 +2,9 @@
 
 namespace App\Transformers\Coterm;
 
+use App\Data\Server\Proxmox\Console\XTermCredentialsData;
 use App\Models\Server;
 use League\Fractal\TransformerAbstract;
-use App\Data\Server\Proxmox\Console\XTermCredentialsData;
 
 class XTermCredentialsTransformer extends TransformerAbstract
 {

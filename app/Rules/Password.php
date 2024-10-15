@@ -14,7 +14,7 @@ class Password implements ValidationRule
      */
     public function validate(string $attribute, $value, Closure $fail): void
     {
-        if (!(bool)preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/', $value)) {
+        if (! (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/', $value)) {
             $fail(__('validation.password.default'));
         }
     }

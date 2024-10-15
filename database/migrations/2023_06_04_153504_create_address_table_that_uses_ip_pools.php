@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -33,7 +33,7 @@ return new class extends Migration {
 
         /**
          * The key is the node id and the value is the address pool id
-         * @var array<integer, integer> $pools
+         * @var array<int, int> $pools
          */
         $pools = [];
 
@@ -53,14 +53,14 @@ return new class extends Migration {
             $payload = [];
 
             foreach ($addresses as $address) {
-                if (!array_key_exists($address->node_id, $pools)) {
+                if (! array_key_exists($address->node_id, $pools)) {
                     $poolId = DB::table('address_pools')->insertGetId([
-                        'name' => "Node {$address->fqdn}"
+                        'name' => "Node {$address->fqdn}",
                     ]);
 
                     DB::table('address_pool_to_node')->insert([
                         'address_pool_id' => $poolId,
-                        'node_id' => $address->node_id
+                        'node_id' => $address->node_id,
                     ]);
 
                     $pools[$address->node_id] = $poolId;
@@ -134,9 +134,7 @@ return new class extends Migration {
 
                 $addresses = DB::table('temp_ip_addresses')->where('address_pool_id', '=', $pool->id)->get();
                 foreach ($addresses as $address) {
-
                     foreach ($linkedNodeIds as $linkedNodeId) {
-
                         $payload[] = [
                             'node_id' => $linkedNodeId,
                             'server_id' => $address->server_id,
@@ -151,7 +149,6 @@ return new class extends Migration {
                         ];
                     }
                 }
-
             }
 
             DB::table('ip_addresses')->insert($payload);

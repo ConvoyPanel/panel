@@ -2,12 +2,12 @@
 
 namespace App\Services\Servers;
 
-use App\Models\Server;
-use Illuminate\Support\Arr;
-use App\Data\Server\Proxmox\Config\AddressConfigData;
 use App\Data\Server\Deployments\CloudinitAddressConfigData;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Data\Server\Proxmox\Config\AddressConfigData;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use Illuminate\Support\Arr;
 
 /**
  * Class SnapshotService

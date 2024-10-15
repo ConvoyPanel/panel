@@ -12,7 +12,7 @@ class MountMediaRequest extends BaseApiRequest
         $iso = $this->parameter('iso', ISO::class);
 
         // check if they're authorized to mount a hidden media (iso)
-        if ($iso->hidden && !$this->user()->root_admin) {
+        if ($iso->hidden && ! $this->user()->root_admin) {
             return false;
         }
 

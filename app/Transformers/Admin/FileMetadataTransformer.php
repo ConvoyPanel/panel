@@ -2,8 +2,8 @@
 
 namespace App\Transformers\Admin;
 
-use League\Fractal\TransformerAbstract;
 use App\Data\Node\Storage\FileMetaData;
+use League\Fractal\TransformerAbstract;
 
 class FileMetadataTransformer extends TransformerAbstract
 {

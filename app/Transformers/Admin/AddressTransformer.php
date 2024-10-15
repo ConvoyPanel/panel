@@ -21,7 +21,7 @@ class AddressTransformer extends TransformerAbstract
 
     public function includeServer(Address $address): ?Item
     {
-        return !is_null($address->server) ? $this->item(
+        return ! is_null($address->server) ? $this->item(
             $address->server,
             new ServerTransformer(),
         ) : null;

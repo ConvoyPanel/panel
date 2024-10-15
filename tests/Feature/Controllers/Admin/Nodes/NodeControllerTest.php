@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;

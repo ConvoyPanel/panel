@@ -2,8 +2,8 @@
 
 namespace App\Services\Nodes;
 
-use App\Models\Node;
 use App\Data\Node\Access\UserData;
+use App\Models\Node;
 use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
 
 class UserPruneService

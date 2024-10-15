@@ -14,7 +14,7 @@ class Hostname implements ValidationRule
      */
     public function validate(string $attribute, $value, Closure $fail): void
     {
-        if (!(bool)filter_var($value, FILTER_VALIDATE_DOMAIN)) {
+        if (! (bool) filter_var($value, FILTER_VALIDATE_DOMAIN)) {
             $fail(__('validation.hostname'));
         }
     }

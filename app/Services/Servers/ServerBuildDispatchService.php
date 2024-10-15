@@ -2,20 +2,20 @@
 
 namespace App\Services\Servers;
 
-use App\Models\Server;
+use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Enums\Server\PowerAction;
 use App\Enums\Server\State;
 use App\Enums\Server\Status;
-use Illuminate\Support\Facades\Bus;
-use App\Enums\Server\PowerAction;
-use App\Jobs\Server\SyncBuildJob;
 use App\Jobs\Server\BuildServerJob;
 use App\Jobs\Server\DeleteServerJob;
 use App\Jobs\Server\MonitorStateJob;
-use App\Jobs\Server\UpdatePasswordJob;
 use App\Jobs\Server\SendPowerCommandJob;
+use App\Jobs\Server\SyncBuildJob;
+use App\Jobs\Server\UpdatePasswordJob;
 use App\Jobs\Server\WaitUntilVmIsCreatedJob;
 use App\Jobs\Server\WaitUntilVmIsDeletedJob;
-use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Models\Server;
+use Illuminate\Support\Facades\Bus;
 
 class ServerBuildDispatchService
 {

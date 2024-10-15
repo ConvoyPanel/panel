@@ -2,13 +2,13 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use App\Models\Server;
-use Webmozart\Assert\Assert;
-use GuzzleHttp\Cookie\CookieJar;
 use App\Data\Node\Access\UserCredentialsData;
-use App\Repositories\Proxmox\ProxmoxRepository;
 use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use App\Data\Server\Proxmox\Console\XTermCredentialsData;
+use App\Models\Server;
+use App\Repositories\Proxmox\ProxmoxRepository;
+use GuzzleHttp\Cookie\CookieJar;
+use Webmozart\Assert\Assert;
 
 class ProxmoxConsoleRepository extends ProxmoxRepository
 {
@@ -17,18 +17,18 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient(headers: [
-            'CSRFPreventionToken' => $credentials->csrf_token
+            'CSRFPreventionToken' => $credentials->csrf_token,
         ], options: [
             'cookies' => CookieJar::fromArray([
                 'PVEAuthCookie' => $credentials->ticket,
-            ], $this->node->fqdn)
+            ], $this->node->fqdn),
         ], shouldAuthorize: false)
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/vncproxy', [
-                'websocket' => true
+                'websocket' => true,
             ])
             ->json();
 
@@ -46,18 +46,18 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
         Assert::isInstanceOf($this->server, Server::class);
 
         $response = $this->getHttpClient(headers: [
-            'CSRFPreventionToken' => $credentials->csrf_token
+            'CSRFPreventionToken' => $credentials->csrf_token,
         ], options: [
             'cookies' => CookieJar::fromArray([
                 'PVEAuthCookie' => $credentials->ticket,
-            ], $this->node->fqdn)
+            ], $this->node->fqdn),
         ], shouldAuthorize: false)
             ->withUrlParameters([
                 'node' => $this->node->cluster,
                 'server' => $this->server->vmid,
             ])
             ->post('/api2/json/nodes/{node}/qemu/{server}/termproxy', [
-                'vmid' => $this->server->vmid // this is to fix the "NOT A HASH REFERENCE" stupid error Proxmox has if there's no JSON body
+                'vmid' => $this->server->vmid, // this is to fix the "NOT A HASH REFERENCE" stupid error Proxmox has if there's no JSON body
                 // bruh fix ur shit proxmox
             ])
             ->json();

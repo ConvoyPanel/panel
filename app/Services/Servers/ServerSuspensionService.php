@@ -2,12 +2,12 @@
 
 namespace App\Services\Servers;
 
-use Exception;
-use App\Models\Server;
-use App\Enums\Server\Status;
 use App\Enums\Server\PowerAction;
+use App\Enums\Server\Status;
 use App\Enums\Server\SuspensionAction;
+use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use Exception;
 
 class ServerSuspensionService
 {

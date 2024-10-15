@@ -2,16 +2,16 @@
 
 namespace App\Services\Servers;
 
-use Exception;
-use App\Models\Server;
-use App\Enums\Node\Access\RealmType;
 use App\Data\Node\Access\CreateUserData;
 use App\Data\Node\Access\UserCredentialsData;
 use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use App\Data\Server\Proxmox\Console\XTermCredentialsData;
+use App\Enums\Node\Access\RealmType;
+use App\Models\Server;
 use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxConsoleRepository;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use Exception;
 
 class ServerConsoleService
 {

@@ -18,7 +18,7 @@ class AddressFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['ipv4', 'ipv6']);
-        
+
         return [
             'type' => $type,
             'address' => $type === 'ipv4' ? $this->faker->ipv4 : $this->faker->ipv6,

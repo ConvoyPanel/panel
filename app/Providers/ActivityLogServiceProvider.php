@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\Activity\ActivityLogBatchService;
 use App\Services\Activity\ActivityLogTargetableService;
+use Illuminate\Support\ServiceProvider;
 
 class ActivityLogServiceProvider extends ServiceProvider
 {

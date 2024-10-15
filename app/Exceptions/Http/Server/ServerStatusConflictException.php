@@ -2,9 +2,9 @@
 
 namespace App\Exceptions\Http\Server;
 
-use Throwable;
 use App\Models\Server;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Throwable;
 
 class ServerStatusConflictException extends ConflictHttpException
 {

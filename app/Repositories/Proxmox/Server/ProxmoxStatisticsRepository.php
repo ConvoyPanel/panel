@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use Carbon\CarbonImmutable;
 use App\Data\Server\Proxmox\Usages\ServerDiskData;
 use App\Data\Server\Proxmox\Usages\ServerNetworkData;
 use App\Data\Server\Proxmox\Usages\ServerTimepointData;
@@ -10,6 +9,7 @@ use App\Enums\Server\StatisticConsolidatorFunction;
 use App\Enums\Server\StatisticTimeRange;
 use App\Models\Server;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
@@ -17,7 +17,7 @@ use Webmozart\Assert\Assert;
 class ProxmoxStatisticsRepository extends ProxmoxRepository
 {
     public function getStatistics(
-        StatisticTimeRange            $from,
+        StatisticTimeRange $from,
         StatisticConsolidatorFunction $consolidator = StatisticConsolidatorFunction::AVERAGE,
     ): DataCollection {
         Assert::isInstanceOf($this->server, Server::class);

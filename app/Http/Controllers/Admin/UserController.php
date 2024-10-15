@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\CarbonImmutable;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
@@ -11,6 +10,7 @@ use App\Models\SSOToken;
 use App\Models\User;
 use App\Services\Api\JWTService;
 use App\Transformers\Admin\UserTransformer;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;

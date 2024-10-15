@@ -69,9 +69,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     ];
 
     public function createToken(
-        string     $name,
+        string $name,
         ApiKeyType $type,
-        array      $abilities = ['*'],
+        array $abilities = ['*'],
     ): NewAccessToken {
         $token = $this->tokens()->create([
             'type' => $type,
@@ -80,7 +80,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'abilities' => $abilities,
         ]);
 
-        return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
+        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 
     public function servers(): HasMany

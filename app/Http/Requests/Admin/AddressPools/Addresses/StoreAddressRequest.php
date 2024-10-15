@@ -36,7 +36,7 @@ class StoreAddressRequest extends BaseApiRequest
             );
         }
 
-        if (!$this->boolean('is_bulk_action')) {
+        if (! $this->boolean('is_bulk_action')) {
             $pool = $this->parameter('address_pool', AddressPool::class);
             $rules[] = new ValidateAddressType(
                 $this->enum('type', AddressType::class),
@@ -63,7 +63,7 @@ class StoreAddressRequest extends BaseApiRequest
             ]);
         }
 
-        if (!is_null($this->mac_address)) {
+        if (! is_null($this->mac_address)) {
             $this->replace([
                 'mac_address' => strtolower($this->string('mac_address')),
             ]);

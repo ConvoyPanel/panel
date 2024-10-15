@@ -13,9 +13,9 @@ it('can rename servers', function () {
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/settings/rename",
         [
-        'name' => 'advinservers is king',
-        'hostname' => 'advinservers.com',
-    ],
+            'name' => 'advinservers is king',
+            'hostname' => 'advinservers.com',
+        ],
     );
 
     $response->assertOk()
@@ -39,11 +39,11 @@ it('can change nameservers', function () {
     $response = $this->actingAs($user)->putJson(
         "/api/client/servers/{$server->uuid}/settings/network",
         [
-        'nameservers' => [
-            '1.1.1.1',
-            '1.0.0.1',
+            'nameservers' => [
+                '1.1.1.1',
+                '1.0.0.1',
+            ],
         ],
-    ],
     );
 
     $response->assertOk();
@@ -85,9 +85,9 @@ it('can change server passwords', function () {
     $response = $this->actingAs($user)->putJson(
         "/api/client/servers/{$server->uuid}/settings/auth",
         [
-        'type' => 'password',
-        'password' => 'Advinservers is king!123',
-    ],
+            'type' => 'password',
+            'password' => 'Advinservers is king!123',
+        ],
     );
 
     $response->assertNoContent();

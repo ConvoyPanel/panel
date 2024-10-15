@@ -34,11 +34,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 class SettingsController extends ApiController
 {
     public function __construct(
-        private ServerAuthService          $authService,
-        private ConnectionInterface        $connection,
-        private CloudinitService           $cloudinitService,
+        private ServerAuthService $authService,
+        private ConnectionInterface $connection,
+        private CloudinitService $cloudinitService,
         private ServerBuildDispatchService $buildDispatchService,
-        private AllocationService          $allocationService,
+        private AllocationService $allocationService,
     ) {
     }
 
@@ -59,7 +59,7 @@ class SettingsController extends ApiController
                                       ->defaultSort('order_column')
                                       ->allowedFilters(['name']);
 
-        if (!$request->user()->root_admin) {
+        if (! $request->user()->root_admin) {
             $templateGroups = $templateGroups->where(
                 [['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]],
             )

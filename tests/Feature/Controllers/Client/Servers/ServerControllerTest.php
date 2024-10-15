@@ -26,8 +26,8 @@ it('can generate noVNC authorization token', function () {
 
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/create-console-session", [
-        'type' => 'novnc',
-    ],
+            'type' => 'novnc',
+        ],
     );
 
     $response->assertOk();

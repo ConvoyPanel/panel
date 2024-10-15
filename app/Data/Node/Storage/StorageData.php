@@ -13,12 +13,12 @@ class StorageData extends Data
         public int $total,
         public bool $enabled,
         public bool $online,
-        public bool   $has_kvm,
-        public bool   $has_lxc,
-        public bool   $has_lxc_templates,
-        public bool   $has_backups,
-        public bool   $has_iso,
-        public bool   $has_snippets,
+        public bool $has_kvm,
+        public bool $has_lxc,
+        public bool $has_lxc_templates,
+        public bool $has_backups,
+        public bool $has_iso,
+        public bool $has_snippets,
     ) {
     }
 }

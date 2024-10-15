@@ -66,7 +66,7 @@ class ActivityLog extends Model
      *
      * @see https://laravel.com/docs/9.x/eloquent#pruning-models
      */
-    public function prunable(): ActivityLog
+    public function prunable(): self
     {
         if (is_null(config('activity.prune_days'))) {
             throw new LogicException(

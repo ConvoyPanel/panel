@@ -4,8 +4,8 @@ namespace App\Repositories\Proxmox\Server;
 
 use App\Models\Node;
 use App\Models\Server;
-use Webmozart\Assert\Assert;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Webmozart\Assert\Assert;
 
 class ProxmoxActivityRepository extends ProxmoxRepository
 {

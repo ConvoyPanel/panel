@@ -23,7 +23,7 @@ it('can rate limit servers if over limit', function () {
                 ),
                 200,
             )
-            ->push(['data' => 'dummy-upid'], 200)
+            ->push(['data' => 'dummy-upid'], 200),
 
     ]);
 

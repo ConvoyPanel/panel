@@ -2,8 +2,8 @@
 
 namespace App\Transformers\Client;
 
-use League\Fractal\TransformerAbstract;
 use App\Data\Server\Proxmox\ServerProxmoxData;
+use League\Fractal\TransformerAbstract;
 
 class ServerDetailTransformer extends TransformerAbstract
 {

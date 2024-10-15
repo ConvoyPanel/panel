@@ -2,11 +2,11 @@
 
 namespace App\Services\Servers;
 
-use App\Models\Server;
-use Illuminate\Support\Arr;
-use App\Data\Server\Proxmox\ServerProxmoxData;
 use App\Data\Server\Eloquent\ServerEloquentData;
+use App\Data\Server\Proxmox\ServerProxmoxData;
+use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use Illuminate\Support\Arr;
 
 class ServerDetailService
 {

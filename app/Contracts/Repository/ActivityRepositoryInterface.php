@@ -2,8 +2,8 @@
 
 namespace App\Contracts\Repository;
 
-use App\Models\Server;
 use App\Models\ActivityLog;
+use App\Models\Server;
 
 interface ActivityRepositoryInterface extends RepositoryInterface
 {

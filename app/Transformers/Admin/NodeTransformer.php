@@ -28,7 +28,7 @@ class NodeTransformer extends TransformerAbstract
             'iso_storage' => $node->iso_storage,
             'network' => $node->network,
             'coterm_id' => $node->coterm_id,
-            'servers_count' => (int)$node->servers_count,
+            'servers_count' => (int) $node->servers_count,
         ];
     }
 }

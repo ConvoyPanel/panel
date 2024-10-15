@@ -25,11 +25,11 @@ SOFTWARE.
 
 namespace App\Console\Commands\User;
 
-use Exception;
+use App\Exceptions\Model\DataValidationException;
 use App\Models\User;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
-use App\Exceptions\Model\DataValidationException;
 
 class MakeUserCommand extends Command
 {

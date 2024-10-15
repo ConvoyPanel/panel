@@ -2,11 +2,11 @@
 
 namespace App\Contracts\Repository;
 
-use Closure;
-use Illuminate\Support\Collection;
 use App\Exceptions\Model\DataValidationException;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Exceptions\Repository\RecordNotFoundException;
+use Closure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface RepositoryInterface
 {

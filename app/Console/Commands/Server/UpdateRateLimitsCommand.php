@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Server;
 
+use App\Jobs\Node\SyncServerRateLimitsJob;
 use App\Models\Node;
 use Illuminate\Console\Command;
 use Illuminate\Console\View\Components\Task;
-use App\Jobs\Node\SyncServerRateLimitsJob;
 
 class UpdateRateLimitsCommand extends Command
 {

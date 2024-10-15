@@ -115,7 +115,7 @@ class Server extends Model
     public function validateCurrentState(): void
     {
         if (
-            !is_null($this->status)
+            ! is_null($this->status)
         ) {
             throw new ServerStatusConflictException($this);
         }

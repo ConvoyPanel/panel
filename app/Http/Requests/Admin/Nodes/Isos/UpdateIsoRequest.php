@@ -16,5 +16,4 @@ class UpdateIsoRequest extends BaseApiRequest
             'hidden' => $rules['hidden'],
         ];
     }
-
 }

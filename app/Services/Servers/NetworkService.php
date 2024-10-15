@@ -12,20 +12,19 @@ use App\Repositories\Eloquent\AddressRepository;
 use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
-use Illuminate\Support\Arr;
 use function collect;
+use Illuminate\Support\Arr;
 use function is_null;
 
 class NetworkService
 {
     public function __construct(
-        private AddressRepository          $repository,
-        private ProxmoxFirewallRepository  $firewallRepository,
-        private CloudinitService           $cloudinitService,
+        private AddressRepository $repository,
+        private ProxmoxFirewallRepository $firewallRepository,
+        private CloudinitService $cloudinitService,
         private ProxmoxCloudinitRepository $cloudinitRepository,
-        private ProxmoxConfigRepository    $allocationRepository,
-    )
-    {
+        private ProxmoxConfigRepository $allocationRepository,
+    ) {
     }
 
     public function deleteIpset(Server $server, string $name)
@@ -64,8 +63,7 @@ class NetworkService
     }
 
     public function getMacAddresses(Server $server, bool $eloquent = true, bool $proxmox = false,
-    ): MacAddressData
-    {
+    ): MacAddressData {
         if ($eloquent) {
             $addresses = $this->getAddresses($server);
 
@@ -160,8 +158,8 @@ class NetworkService
         }
 
         // If no model key exists, add the default model with the MAC address
-        if (!$modelFound) {
-            $parsedConfig[] = (object)['key' => 'virtio', 'value' => $macAddress];
+        if (! $modelFound) {
+            $parsedConfig[] = (object) ['key' => 'virtio', 'value' => $macAddress];
         }
 
         // Update or create the bridge value
@@ -174,8 +172,8 @@ class NetworkService
             }
         }
 
-        if (!$bridgeFound) {
-            $parsedConfig[] = (object)['key' => 'bridge', 'value' => $server->node->network];
+        if (! $bridgeFound) {
+            $parsedConfig[] = (object) ['key' => 'bridge', 'value' => $server->node->network];
         }
 
         // Update or create the firewall key
@@ -188,8 +186,8 @@ class NetworkService
             }
         }
 
-        if (!$firewallFound) {
-            $parsedConfig[] = (object)['key' => 'firewall', 'value' => 1];
+        if (! $firewallFound) {
+            $parsedConfig[] = (object) ['key' => 'firewall', 'value' => 1];
         }
 
         // Handle the rate limit
@@ -207,8 +205,8 @@ class NetworkService
                 }
             }
 
-            if (!$rateUpdated) {
-                $parsedConfig[] = (object)['key' => 'rate', 'value' => $mebibytes];
+            if (! $rateUpdated) {
+                $parsedConfig[] = (object) ['key' => 'rate', 'value' => $mebibytes];
             }
         }
 
@@ -234,7 +232,7 @@ class NetworkService
             [$key, $value] = explode('=', $component);
 
             // Create an associative array (or object) for key-value pairs
-            $parsedObjects[] = (object)['key' => $key, 'value' => $value];
+            $parsedObjects[] = (object) ['key' => $key, 'value' => $value];
         }
 
         return $parsedObjects;
@@ -247,14 +245,14 @@ class NetworkService
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_filter(
             $currentAddresses,
-            fn ($id) => !in_array($id, $addressIds),
+            fn ($id) => ! in_array($id, $addressIds),
         );
 
-        if (!empty($addressesToAdd)) {
+        if (! empty($addressesToAdd)) {
             $this->repository->attachAddresses($server, $addressesToAdd);
         }
 
-        if (!empty($addressesToRemove)) {
+        if (! empty($addressesToRemove)) {
             Address::query()
                    ->where('server_id', $server->id)
                    ->whereIn('id', $addressesToRemove)
