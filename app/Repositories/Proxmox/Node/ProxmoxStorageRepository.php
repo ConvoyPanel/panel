@@ -2,25 +2,59 @@
 
 namespace App\Repositories\Proxmox\Node;
 
-use Carbon\CarbonImmutable;
 use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\FileMetaData;
 use App\Data\Node\Storage\IsoData;
+use App\Data\Node\Storage\StorageData;
 use App\Enums\Node\Storage\ContentType;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
 use App\Models\Node;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
 
 class ProxmoxStorageRepository extends ProxmoxRepository
 {
+    public function getStorage(string $name): StorageData
+    {
+        Assert::isInstanceOf($this->node, Node::class);
+
+        $response = $this->getHttpClient()
+                         ->withUrlParameters([
+                             'node' => $this->node->cluster,
+                             'storage' => $name,
+                         ])
+                         ->get('/api2/json/nodes/{node}/storage/{storage}/status')
+                         ->json();
+
+        $response = $this->getData($response);
+        
+        $has = fn (string $content) => Str::contains($response['content'], $content);
+
+        return new StorageData(
+            name   : $name,
+            used   : $response['used'],
+            free   : $response['avail'],
+            total  : $response['total'],
+            enabled: $response['enabled'],
+            online : $response['active'],
+            has_kvm: $has('images'),
+            has_lxc: $has('rootdir'),
+            has_lxc_templates: $has('templates'),
+            has_backups: $has('backup'),
+            has_iso: $has('iso'),
+            has_snippets: $has('snippets'),
+        );
+    }
+
     public function download(
         ContentType   $contentType,
-        string $fileName,
-        string $link,
+        string        $fileName,
+        string        $link,
         ?bool         $verifyCertificates = true,
         ?ChecksumData $checksumData = null,
     ) {
@@ -83,11 +117,11 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         $isos = [];
 
         foreach ($response as $iso) {
-            $isos[] = IsoData::from([
-                'file_name' => explode('/', $iso['volid'])[1],
-                'size' => $iso['size'],
-                'created_at' => CarbonImmutable::createFromTimestamp($iso['ctime']),
-            ]);
+            $isos[] = new IsoData(
+                file_name : explode('/', $iso['volid'])[1],
+                size      : $iso['size'],
+                created_at: CarbonImmutable::createFromTimestamp($iso['ctime']),
+            );
         }
 
         return IsoData::collection($isos);

@@ -30,7 +30,7 @@ class Storage extends Model
         'has_lxc' => 'required|boolean',
         'has_lxc_templates' => 'required|boolean',
         'has_backups' => 'required|boolean',
-        'has_isos' => 'required|boolean',
+        'has_iso' => 'required|boolean',
         'has_snippets' => 'required|boolean',
     ];
 

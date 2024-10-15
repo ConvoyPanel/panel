@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->boolean('has_lxc');
             $table->boolean('has_lxc_templates');
             $table->boolean('has_backups');
-            $table->boolean('has_isos');
+            $table->boolean('has_iso');
             $table->boolean('has_snippets');
         });
     }
