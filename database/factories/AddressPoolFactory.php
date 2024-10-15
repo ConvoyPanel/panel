@@ -8,8 +8,6 @@ use Illuminate\Support\Carbon;
 
 class AddressPoolFactory extends Factory
 {
-    protected $model = AddressPool::class;
-
     public function definition(): array
     {
         return [

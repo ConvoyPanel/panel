@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SnapshotFactory extends Factory
 {
-    protected $model = Snapshot::class;
-
     public function definition(): array
     {
         return [
