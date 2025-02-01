@@ -1,5 +1,6 @@
 import { PaginatedResult } from '@/utils/http.ts'
 import { TableOptions } from '@tanstack/react-table'
+import { ReactNode } from 'react'
 
 export interface DataTableProps<TData>
     extends Omit<
@@ -55,6 +56,8 @@ export interface DataTableProps<TData>
     setPerPage?: (perPage: number) => void
     perPageOptions?: number[]
     showPerPageOptions?: boolean
+
+    rightActions?: ReactNode
 }
 
 export interface DataTableFilterField<TData> {

@@ -1,6 +1,7 @@
 import { DataTableFilterField } from '@/types/data-table.ts'
 import { IconX } from '@tabler/icons-react'
 import { Table } from '@tanstack/react-table'
+import { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -12,12 +13,14 @@ interface DataTableToolbarProps<TData> {
     table: Table<TData>
     filterFields?: DataTableFilterField<TData>[]
     searchable?: boolean
+    rightActions?: ReactNode
 }
 
 const DataTableToolbar = <TData,>({
     table,
     filterFields = [],
     searchable,
+    rightActions,
 }: DataTableToolbarProps<TData>) => {
     const isFiltered = table.getState().columnFilters.length > 0
 
@@ -56,7 +59,10 @@ const DataTableToolbar = <TData,>({
                     </Button>
                 )}
             </div>
-            <DataTableViewOptions table={table} />
+            <div className={'ml-auto flex space-x-2'}>
+                <DataTableViewOptions table={table} />
+                {rightActions}
+            </div>
         </div>
     )
 }

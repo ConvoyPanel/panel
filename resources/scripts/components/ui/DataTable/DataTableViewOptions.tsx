@@ -26,7 +26,7 @@ const DataTableViewOptions = <TData,>({
                 <Button
                     variant='outline'
                     size='sm'
-                    className='ml-auto hidden h-8 lg:flex'
+                    className='hidden h-8 lg:flex'
                 >
                     <IconSettings className={'mr-2 size-4'} />
                     View

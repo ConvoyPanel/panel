@@ -1,0 +1,108 @@
+import { PaginatedLocations, locationSchema } from '@/types/location.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { IconPlus } from '@tabler/icons-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { KeyedMutator } from 'swr'
+import { z } from 'zod'
+
+import createLocation from '@/api/admin/locations/createLocation.ts'
+
+import { Button } from '@/components/ui/Button'
+import {
+    Credenza,
+    CredenzaBody,
+    CredenzaClose,
+    CredenzaContent,
+    CredenzaFooter,
+    CredenzaHeader,
+    CredenzaTitle,
+    CredenzaTrigger,
+} from '@/components/ui/Credenza'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
+
+interface Props {
+    mutate: KeyedMutator<PaginatedLocations>
+}
+
+const CreateLocationModal = ({ mutate }: Props) => {
+    const [open, setOpen] = useState(false)
+
+    const form = useForm({
+        resolver: zodResolver(locationSchema),
+        defaultValues: {
+            shortCode: '',
+            description: '',
+        },
+    })
+
+    const submit = async (data: z.infer<typeof locationSchema>) => {
+        try {
+            const location = await createLocation(data)
+
+            await mutate(data => {
+                if (!data) return
+
+                return {
+                    ...data,
+                    items: [location, ...data.items],
+                }
+            }, false)
+
+            toast({
+                description: 'Location created',
+            })
+
+            setOpen(false)
+        } catch (e) {
+            toast({
+                description: 'Failed to save changes',
+                variant: 'destructive',
+            })
+            throw e
+        }
+    }
+
+    return (
+        <>
+            <Credenza open={open} onOpenChange={setOpen}>
+                <CredenzaTrigger asChild>
+                    <Button className={'flex'} size={'sm'}>
+                        <IconPlus className={'mr-2 size-4'} /> Add location
+                    </Button>
+                </CredenzaTrigger>
+                <CredenzaContent>
+                    <CredenzaHeader>
+                        <CredenzaTitle>New Location</CredenzaTitle>
+                    </CredenzaHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(submit)}>
+                            <CredenzaBody className={'space-y-2'}>
+                                <InputForm
+                                    name={'shortCode'}
+                                    label={'Short Code'}
+                                />
+                                <InputForm
+                                    name={'description'}
+                                    label={'Description'}
+                                />
+                            </CredenzaBody>
+                            <CredenzaFooter className={'mt-4'}>
+                                <CredenzaClose asChild>
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                </CredenzaClose>
+                                <FormButton>Add location</FormButton>
+                            </CredenzaFooter>
+                        </form>
+                    </Form>
+                </CredenzaContent>
+            </Credenza>
+        </>
+    )
+}
+
+export default CreateLocationModal

@@ -1,11 +1,14 @@
 import usePagination from '@/hooks/use-pagination.ts'
 import { Node } from '@/types/node.ts'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { cn } from '@/utils'
+import { IconPlus } from '@tabler/icons-react'
+import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
 
 import useNodesSWR from '@/api/admin/nodes/use-nodes-swr.ts'
 
+import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
     DropdownMenuItem,
@@ -30,6 +33,14 @@ function NodesIndex() {
             meta: {
                 skeletonWidth: '5rem',
             },
+            cell: ({ cell }) => (
+                <Link
+                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
+                    to={`/admin/nodes/${cell.row.original.id}`}
+                >
+                    {cell.getValue<string>()}
+                </Link>
+            ),
         },
         {
             header: 'FQDN',
@@ -52,7 +63,7 @@ function NodesIndex() {
                 return `${memory.value} ${memory.unit}`
             },
         },
-        actionsColumn<Node>(data => (
+        actionsColumn<Node>(_data => (
             <>
                 <DropdownMenuItem>Edit</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -70,6 +81,15 @@ function NodesIndex() {
                 toolbar
                 data={data}
                 columns={columns}
+                rightActions={
+                    <Link
+                        className={cn(buttonVariants({ size: 'sm' }), 'flex')}
+                        to='/admin/nodes/create'
+                    >
+                        <IconPlus className={'mr-2 size-4'} />
+                        Add node
+                    </Link>
+                }
                 {...pagination}
             />
         </>

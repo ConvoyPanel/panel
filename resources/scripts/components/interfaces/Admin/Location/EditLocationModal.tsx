@@ -1,5 +1,5 @@
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
-import { PaginatedLocations } from '@/types/location.ts'
+import { PaginatedLocations, locationSchema } from '@/types/location.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -7,7 +7,7 @@ import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import updateLocation, { schema } from '@/api/admin/locations/updateLocation.ts'
+import updateLocation from '@/api/admin/locations/updateLocation.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -37,7 +37,7 @@ const EditLocationModal = ({ mutate }: Props) => {
     )
 
     const form = useForm({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(locationSchema),
         defaultValues: {
             shortCode: '',
             description: '',
@@ -53,7 +53,7 @@ const EditLocationModal = ({ mutate }: Props) => {
         })
     }, [location])
 
-    const submit = async (data: z.infer<typeof schema>) => {
+    const submit = async (data: z.infer<typeof locationSchema>) => {
         try {
             const updatedLocation = await updateLocation(location!.id, data)
 

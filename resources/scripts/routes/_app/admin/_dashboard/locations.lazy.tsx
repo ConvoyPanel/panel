@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import useLocationsSWR from '@/api/admin/locations/use-locations-swr.ts'
 
+import CreateLocationModal from '@/components/interfaces/Admin/Location/CreateLocationModal.tsx'
 import DeleteLocationModal from '@/components/interfaces/Admin/Location/DeleteLocationModal.tsx'
 import EditLocationModal from '@/components/interfaces/Admin/Location/EditLocationModal.tsx'
 import ShowLocationModal from '@/components/interfaces/Admin/Location/ShowLocationModal.tsx'
@@ -119,6 +120,7 @@ function LocationsIndex() {
                 paginated
                 searchable
                 toolbar
+                rightActions={<CreateLocationModal mutate={mutate} />}
                 {...pagination}
             />
             <ShowLocationModal />

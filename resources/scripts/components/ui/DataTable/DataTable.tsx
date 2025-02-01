@@ -43,6 +43,7 @@ const DataTable = <TData,>({
     setPage: _setPage,
     perPage: _perPage,
     setPerPage: _setPerPage,
+    rightActions,
     ...props
 }: DataTableProps<TData>) => {
     const [query, setQuery] = useControllableState({
@@ -128,6 +129,7 @@ const DataTable = <TData,>({
                 <DataTableToolbar
                     filterFields={filterFields}
                     searchable={searchable}
+                    rightActions={rightActions}
                     table={table}
                 />
             )}
