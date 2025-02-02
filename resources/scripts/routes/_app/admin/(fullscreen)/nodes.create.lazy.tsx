@@ -8,6 +8,8 @@ import { nodeSchema } from '@/api/admin/nodes/createNode.ts'
 
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 
+import LocationPickerModal from '@/components/interfaces/Admin/Location/LocationPickerModal.tsx'
+
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
@@ -23,7 +25,7 @@ function CreateNodePage() {
         resolver: zodResolver(nodeSchema),
         defaultValues: {
             name: '',
-            locationId: '',
+            locationId: null,
             cluster: '',
             verifyTls: true,
             tokenId: '',
@@ -51,7 +53,7 @@ function CreateNodePage() {
                     <Tabs
                         defaultValue={'general'}
                         className={
-                            'mt-3 flex w-full max-w-lg flex-col items-center'
+                            'mt-3 flex w-full max-w-md flex-col items-center'
                         }
                     >
                         <TabsList>
@@ -63,8 +65,12 @@ function CreateNodePage() {
                                 Specifications
                             </TabsTrigger>
                         </TabsList>
-                        <TabsContent value={'general'} className={'w-full'}>
+                        <TabsContent
+                            value={'general'}
+                            className={'w-full space-y-2'}
+                        >
                             <InputForm name={'name'} label={'Display Name'} />
+                            <LocationPickerModal />
                         </TabsContent>
                     </Tabs>
                 </FullscreenLayout>

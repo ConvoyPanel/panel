@@ -4,6 +4,7 @@ import { IconServer } from '@tabler/icons-react'
 import useAttachedNodesSWR from '@/api/admin/locations/use-attached-nodes-swr.ts'
 
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { Entity, EntityGroup } from '@/components/ui/Entity'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
@@ -28,23 +29,16 @@ const AttachedNodesList = ({ location }: Props) => {
     }
 
     return (
-        <ul
-            className={
-                'flex flex-col divide-y divide-accent rounded-md border border-accent'
-            }
-        >
+        <EntityGroup>
             {data.map(node => (
-                <li
-                    key={node.id}
-                    className={'flex flex-col truncate px-3 py-2 leading-tight'}
-                >
+                <Entity className={'flex-col'} key={node.id}>
                     <p className={'text-sm'}>{node.name}</p>
                     <p className={'text-xs text-muted-foreground'}>
                         {node.fqdn}
                     </p>
-                </li>
+                </Entity>
             ))}
-        </ul>
+        </EntityGroup>
     )
 }
 
