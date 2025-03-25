@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
             });
 
             Route::middleware(['api'])->group(function () {
-                Route::middleware(['auth:sanctum'])
+                Route::middleware(['auth:sanctum', AdminAuthenticate::class])
                      ->prefix('/api/application')
                      ->as('application.')
                      ->scopeBindings()
