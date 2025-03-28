@@ -30,6 +30,13 @@ class LocationController
         return fractal($locations, new LocationTransformer)->respond();
     }
 
+    public function show(Location $location)
+    {
+        $location->loadCount('nodes', 'servers');
+
+        return fractal($location, new LocationTransformer)->respond();
+    }
+
     public function showAttachedNodes(Location $location)
     {
         $nodes = $location->nodes()

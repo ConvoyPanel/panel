@@ -17,6 +17,7 @@ Route::prefix('/locations')->group(function () {
     Route::post('/', [Admin\LocationController::class, 'store']);
 
     Route::prefix('/{location}')->group(function () {
+        Route::get('/', [Admin\LocationController::class, 'show']);
         Route::get('/nodes', [Admin\LocationController::class, 'showAttachedNodes']);
         Route::put('/', [Admin\LocationController::class, 'update']);
         Route::delete('/', [Admin\LocationController::class, 'destroy']);
