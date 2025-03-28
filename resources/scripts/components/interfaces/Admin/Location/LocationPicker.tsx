@@ -53,7 +53,7 @@ const LocationPicker = () => {
             renderTrigger={() => (
                 <>
                     {isLoadingSelection ? (
-                        <Skeleton className={'w-24'} />
+                        <Skeleton className={'w-24 h-3'} />
                     ) : selectedLocation ? (
                         selectedLocation.shortCode
                     ) : (

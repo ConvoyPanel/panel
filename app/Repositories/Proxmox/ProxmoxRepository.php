@@ -76,7 +76,7 @@ abstract class ProxmoxRepository
 
         if ($shouldAuthorize) {
             $client->withHeaders([
-                'Authorization' => "PVEAPIToken={$this->node->token_id}={$this->node->secret}",
+                'Authorization' => "PVEAPIToken={$this->node->token_id}={$this->node->token_secret}",
             ]);
         }
 

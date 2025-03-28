@@ -18,7 +18,7 @@ class Node extends Model
      */
     protected $hidden = [
         'token_id',
-        'secret',
+        'token_secret',
     ];
 
     /**
@@ -33,7 +33,7 @@ class Node extends Model
         'verify_tls' => 'sometimes|boolean',
         'fqdn' => 'required|string|max:191',
         'token_id' => 'required|string|max:191',
-        'secret' => 'required|string|max:191',
+        'token_secret' => 'required|string|max:191',
         'port' => 'required|integer|min:1|max:65535',
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
