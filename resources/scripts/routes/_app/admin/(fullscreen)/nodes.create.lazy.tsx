@@ -38,7 +38,9 @@ function CreateNodePage() {
             name: '',
             verifyTls: true,
             tokenId: '',
-            secret: '',
+            tokenSecret: '',
+            rootPrivileges: false,
+            privilegeSeparationDisabled: false,
             fqdn: '',
             port: '8006',
         },
@@ -121,13 +123,59 @@ function CreateNodePage() {
                                     label={'Proxmox Node Name'}
                                 />
                             </div>
+                            <div className={'flex flex-col'}>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={'link'}
+                                            size={'sm'}
+                                            className={
+                                                'absolute self-end px-0 pt-0'
+                                            }
+                                        >
+                                            What's this?
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent>
+                                        <p className={'text-sm'}>
+                                            Proxmox API tokens provide secure,
+                                            token-based access to your Proxmox
+                                            VE installation. They consist of a
+                                            Token ID and a Token Secret, which
+                                            allow you to authenticate API
+                                            requests without using your account
+                                            password. Generate and manage these
+                                            tokens in your Proxmox interface and
+                                            keep them confidential.
+                                        </p>
+                                    </PopoverContent>
+                                </Popover>
+                                <InputForm
+                                    name={'tokenId'}
+                                    label={'Token ID'}
+                                />
+                            </div>
                             <InputForm
-                                name={'tokenId'}
-                                label={'Token ID'}
-                            />
-                            <InputForm
-                                name={'secret'}
+                                name={'tokenSecret'}
                                 label={'Token Secret'}
+                                type={'password'}
+                                autoComplete='off'
+                            />
+                            <CheckboxForm
+                                name={'rootPrivileges'}
+                                label={
+                                    'I granted root privileges to this token'
+                                }
+                                description={
+                                    'For Convoy to function correctly, this token must have root privileges. If necessary, you may experiment with more fine-grained permissions.'
+                                }
+                            />
+                            <CheckboxForm
+                                name={'privilegeSeparationDisabled'}
+                                label={'I disabled privilege separation'}
+                                description={
+                                    'Privilege separation must be disabled to enable the token to inherit root privileges.'
+                                }
                             />
                             <CheckboxForm
                                 name={'verifyTls'}
@@ -136,6 +184,9 @@ function CreateNodePage() {
                                     'Disabling TLS verification can compromise security by exposing you to man-in-the-middle attacks. Only disable this option if you are absolutely certain your environment is secure.'
                                 }
                             />
+                            <Button type={'button'} className={'self-end'}>
+                                Test connection
+                            </Button>
                         </div>
                         <div className={'flex flex-col space-y-4'}>
                             <Heading as={'h3'}>Specifications</Heading>

@@ -7,13 +7,15 @@ import {
     FormDescription,
     FormField,
     FormItem,
-    FormLabel, FormMessage,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/Form'
 
 interface Props extends CheckboxProps {
     name: string
     label?: string
     description?: ReactNode
+    showErrors?: boolean
     formItemProps?: HTMLAttributes<HTMLDivElement>
 }
 
@@ -21,6 +23,7 @@ const CheckboxForm = ({
     name,
     label,
     description,
+    showErrors,
     formItemProps,
     ...props
 }: Props) => {
@@ -48,8 +51,8 @@ const CheckboxForm = ({
                         {description && (
                             <FormDescription>{description}</FormDescription>
                         )}
+                        {showErrors && <FormMessage />}
                     </div>
-                    <FormMessage />
                 </FormItem>
             )}
         />

@@ -12,5 +12,7 @@ export const nodeSchema = z.object({
     name: z.string().min(1).max(191),
     verifyTls: z.boolean(),
     tokenId: z.string().min(1).max(191),
-    secret: z.string().min(1).max(191),
+    tokenSecret: z.string().min(1).max(191),
+    rootPrivileges: z.literal(true),
+    privilegeSeparationDisabled: z.literal(true),
 })
