@@ -1,31 +1,20 @@
-import { useControllableState } from '@/hooks/use-controllable-state.ts'
-import useTransientValue from '@/hooks/use-transient-value.ts'
-import { DataTableProps } from '@/types/data-table.ts'
-import { getCommonPinningStyles } from '@/utils/data-table.ts'
-import {
-    ColumnFiltersState,
-    PaginationState,
-    SortingState,
-    Updater,
-    VisibilityState,
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
-} from '@tanstack/react-table'
-import { useState } from 'react'
+import { useControllableState } from '@/hooks/use-controllable-state.ts';
+import useTransientValue from '@/hooks/use-transient-value.ts';
+import { DataTableProps } from '@/types/data-table.ts';
+import { getCommonPinningStyles } from '@/utils/data-table.ts';
+import { ColumnFiltersState, PaginationState, SortingState, Updater, VisibilityState, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { useEffect, useRef, useState } from 'react'
 
-import Skeleton from '@/components/ui/Skeleton.tsx'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/Table'
 
-import DataTablePagination from './DataTablePagination'
-import DataTableToolbar from './DataTableToolbar.tsx'
+
+import Skeleton from '@/components/ui/Skeleton.tsx';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+
+
+
+import DataTablePagination from './DataTablePagination';
+import DataTableToolbar from './DataTableToolbar.tsx';
+
 
 const DataTable = <TData,>({
     data,
@@ -108,7 +97,6 @@ const DataTable = <TData,>({
             globalFilter: query,
             pagination,
         },
-        autoResetPageIndex: true,
         getCoreRowModel: getCoreRowModel(),
         //getPaginationRowModel: getPaginationRowModel(),
         enableRowSelection: true,
@@ -122,6 +110,17 @@ const DataTable = <TData,>({
         manualSorting: true,
         manualFiltering: true,
     })
+
+    const prevQueryRef = useRef(query);
+    const prevPerPageRef = useRef(perPage);
+    useEffect(() => {
+        if (prevQueryRef.current !== query || prevPerPageRef.current !== perPage) {
+            setPage(1);
+        }
+        // Update previous values
+        prevQueryRef.current = query;
+        prevPerPageRef.current = perPage;
+    }, [query, perPage])
 
     return (
         <div className='space-y-4'>
