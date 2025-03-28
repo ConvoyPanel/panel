@@ -52,7 +52,7 @@ class Node extends Model
             'verify_tls' => 'boolean',
             'memory' => StorageSizeCast::class,
             'disk' => StorageSizeCast::class,
-            'secret' => 'encrypted',
+            'token_secret' => 'encrypted',
         ];
     }
 
