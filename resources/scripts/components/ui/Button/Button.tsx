@@ -41,7 +41,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             >
                 {loading ? (
                     <Spinner
-                        className={'animate-spin duration-700 mr-2 h-4 w-4'}
+                        className={'mr-2 h-4 w-4'}
                     />
                 ) : (
                     icon
