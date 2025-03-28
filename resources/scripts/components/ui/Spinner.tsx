@@ -13,7 +13,7 @@ const Spinner = ({ className, ...props }: Props) => {
             strokeWidth='2'
             strokeLinecap='round'
             strokeLinejoin='round'
-            className={cn('spin-animation', className)}
+            className={cn('animate-spin duration-700', className)}
             {...props}
         >
             <line x1='12' y1='2' x2='12' y2='6'></line>
