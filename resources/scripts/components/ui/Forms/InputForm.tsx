@@ -19,20 +19,17 @@ interface Props extends InputProps {
 }
 
 const InputForm = ({ name, label, description, formItemProps, ...props }: Props) => {
-    const { control, formState } = useFormContext()
-
     return (
         <FormField
-            control={control}
             name={name}
-            render={({ field }) => (
+            render={({ field, formState }) => (
                 <FormItem {...formItemProps}>
                     {label && <FormLabel>{label}</FormLabel>}
                     <FormControl>
                         <Input
-                            disabled={formState.isSubmitting}
                             {...props}
                             {...field}
+                            disabled={formState.isSubmitting}
                         />
                     </FormControl>
                     {description && (
