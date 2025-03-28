@@ -8,11 +8,11 @@ import { nodeSchema } from '@/api/admin/nodes/createNode.ts'
 
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 
-import LocationPickerModal from '@/components/interfaces/Admin/Location/LocationPickerModal.tsx'
+import LocationPicker from '@/components/interfaces/Admin/Location/LocationPicker.tsx'
 
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/(fullscreen)/nodes/create'
@@ -25,17 +25,17 @@ function CreateNodePage() {
         resolver: zodResolver(nodeSchema),
         defaultValues: {
             name: '',
-            locationId: null,
+            locationId: '',
             cluster: '',
             verifyTls: true,
             tokenId: '',
             secret: '',
             fqdn: '',
-            port: '',
+            port: '8006',
         },
     })
 
-    const submit = async (data: z.infer<typeof nodeSchema>) => {}
+    const submit = async (_data: z.infer<typeof nodeSchema>) => {}
 
     return (
         <Form {...form}>
@@ -50,29 +50,33 @@ function CreateNodePage() {
                     }
                     center
                 >
-                    <Tabs
-                        defaultValue={'general'}
-                        className={
-                            'mt-3 flex w-full max-w-md flex-col items-center'
-                        }
-                    >
-                        <TabsList>
-                            <TabsTrigger value={'general'}>General</TabsTrigger>
-                            <TabsTrigger value={'connection'}>
-                                Connection
-                            </TabsTrigger>
-                            <TabsTrigger value={'specifications'}>
-                                Specifications
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent
-                            value={'general'}
-                            className={'w-full space-y-2'}
-                        >
+                    <div className={'flex w-full max-w-lg flex-col space-y-16'}>
+                        <div className={'flex flex-col space-y-4'}>
+                            <Heading as={'h3'}>General</Heading>
                             <InputForm name={'name'} label={'Display Name'} />
-                            <LocationPickerModal />
-                        </TabsContent>
-                    </Tabs>
+                            <LocationPicker />
+                        </div>
+                        <div className={'flex flex-col space-y-4'}>
+                            <Heading as={'h3'}>Connection</Heading>
+                            <div className={'flex space-x-3'}>
+                                <InputForm
+                                    name={'fqdn'}
+                                    label={'FQDN'}
+                                    placeholder={'advinservers.com'}
+                                    formItemProps={{ className: 'grow'}}
+                                />
+                                <InputForm
+                                    name={'port'}
+                                    label={'Port'}
+                                    type={'number'}
+                                    formItemProps={{ className: 'max-w-[5rem]'}}
+                                />
+                            </div>
+                        </div>
+                        <div className={'flex flex-col space-y-4'}>
+                            <Heading as={'h3'}>Specifications</Heading>
+                        </div>
+                    </div>
                 </FullscreenLayout>
             </form>
         </Form>

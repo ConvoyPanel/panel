@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { HTMLAttributes, ReactNode } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import {
@@ -15,9 +15,10 @@ interface Props extends InputProps {
     name: string
     label?: string
     description?: ReactNode
+    formItemProps?: HTMLAttributes<HTMLDivElement>
 }
 
-const InputForm = ({ name, label, description, ...props }: Props) => {
+const InputForm = ({ name, label, description, formItemProps, ...props }: Props) => {
     const { control, formState } = useFormContext()
 
     return (
@@ -25,7 +26,7 @@ const InputForm = ({ name, label, description, ...props }: Props) => {
             control={control}
             name={name}
             render={({ field }) => (
-                <FormItem>
+                <FormItem {...formItemProps}>
                     {label && <FormLabel>{label}</FormLabel>}
                     <FormControl>
                         <Input

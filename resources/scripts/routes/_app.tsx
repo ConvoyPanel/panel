@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
 
 const searchSchema = z.object({
+    query: z.string().optional(),
     page: z.number().optional(),
     perPage: z.number().optional(),
 })
