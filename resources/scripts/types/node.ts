@@ -3,8 +3,8 @@ import { PaginatedResult } from '@/utils/http.ts'
 export interface Node {
     id: number
     locationId: number
+    displayName: string
     name: string
-    cluster: string
     verifyTls: boolean
     fqdn: string
     port: number

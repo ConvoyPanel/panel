@@ -32,7 +32,7 @@ const AttachedNodesList = ({ location }: Props) => {
         <EntityGroup>
             {data.map(node => (
                 <Entity className={'flex-col'} key={node.id}>
-                    <p className={'text-sm'}>{node.name}</p>
+                    <p className={'text-sm'}>{node.displayName}</p>
                     <p className={'text-xs text-muted-foreground'}>
                         {node.fqdn}
                     </p>

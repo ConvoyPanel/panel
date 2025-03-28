@@ -12,8 +12,8 @@ class NodeTransformer extends TransformerAbstract
         return [
             'id' => $node->id,
             'location_id' => $node->location_id,
+            'display_name' => $node->display_name,
             'name' => $node->name,
-            'cluster' => $node->cluster,
             'verify_tls' => $node->verify_tls,
             'fqdn' => $node->fqdn,
             'port' => $node->port,

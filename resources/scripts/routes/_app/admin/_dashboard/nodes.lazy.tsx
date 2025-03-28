@@ -28,7 +28,7 @@ function NodesIndex() {
     const columns: ColumnDef<Node>[] = [
         {
             header: 'Name',
-            accessorKey: 'name',
+            accessorKey: 'displayName',
             enableHiding: false,
             meta: {
                 skeletonWidth: '5rem',

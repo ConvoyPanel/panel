@@ -91,7 +91,7 @@ abstract class ProxmoxRepository
     ): PendingRequest {
         return $this->getHttpClient($shouldAuthorize)
             ->withUrlParameters(array_merge_recursive([
-                'node' => $this->node->cluster,
+                'node' => $this->node->name,
                 'server' => $this->server->vmid,
             ], $params));
     }

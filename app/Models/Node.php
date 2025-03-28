@@ -28,8 +28,8 @@ class Node extends Model
 
     public static array $validationRules = [
         'location_id' => 'required|integer|exists:locations,id',
+        'display_name' => 'required|string|max:191',
         'name' => 'required|string|max:191',
-        'cluster' => 'required|string|max:191',
         'verify_tls' => 'sometimes|boolean',
         'fqdn' => 'required|string|max:191',
         'token_id' => 'required|string|max:191',

@@ -24,9 +24,9 @@ function CreateNodePage() {
     const form = useForm({
         resolver: zodResolver(nodeSchema),
         defaultValues: {
-            name: '',
+            displayName: '',
             locationId: '',
-            cluster: '',
+            name: '',
             verifyTls: true,
             tokenId: '',
             secret: '',
@@ -53,7 +53,7 @@ function CreateNodePage() {
                     <div className={'flex w-full max-w-lg flex-col space-y-16'}>
                         <div className={'flex flex-col space-y-4'}>
                             <Heading as={'h3'}>General</Heading>
-                            <InputForm name={'name'} label={'Display Name'} />
+                            <InputForm name={'displayName'} label={'Display Name'} />
                             <LocationPicker />
                         </div>
                         <div className={'flex flex-col space-y-4'}>
