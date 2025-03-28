@@ -61,7 +61,7 @@ const FullscreenLayout = ({
             </header>
             <main
                 className={cn(
-                    'flex h-full w-full grow flex-col p-4 sm:px-6 sm:py-0',
+                    'flex h-full w-full grow flex-col p-4 sm:px-6 sm:py-9',
                     center && 'items-center'
                 )}
             >
