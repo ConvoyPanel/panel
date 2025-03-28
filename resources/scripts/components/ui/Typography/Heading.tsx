@@ -1,12 +1,19 @@
 import { cn } from '@/utils'
-import { ComponentProps } from 'react'
+import { ComponentPropsWithoutRef, ElementType } from 'react'
 
-interface Props extends ComponentProps<'h1'> {}
+type HeadingProps<T extends ElementType> = {
+    as?: T
+} & ComponentPropsWithoutRef<T>
 
-const Heading = ({ className, ...props }: Props) => {
+const Heading = <T extends ElementType = 'h1'>({
+    as,
+    className,
+    ...props
+}: HeadingProps<T>) => {
+    const Component = as || 'h1'
     return (
-        <h1
-            className={cn('text-xl font-semibold sm:text-3xl', className)}
+        <Component
+            className={cn('text-2xl font-semibold sm:text-3xl', className)}
             {...props}
         />
     )
