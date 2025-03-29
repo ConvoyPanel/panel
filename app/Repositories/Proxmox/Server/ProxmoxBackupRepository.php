@@ -25,14 +25,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
 
     public function backup(BackupMode $mode, BackupCompressionType $compressionType)
     {
-        switch ($mode) {
-            case BackupMode::KILL:
-                $parsedMode = 'stop';
-                break;
-            default:
-                $parsedMode = $mode->value;
-                break;
-        }
+        $parsedMode = match ($mode) {
+            BackupMode::KILL => 'stop',
+            default => $mode->value,
+        };
 
         $response = $this->getHttpClientWithParams()
             ->post('/api2/json/nodes/{node}/vzdump', [

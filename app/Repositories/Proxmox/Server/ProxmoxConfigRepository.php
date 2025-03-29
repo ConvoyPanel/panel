@@ -3,9 +3,13 @@
 namespace App\Repositories\Proxmox\Server;
 
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Illuminate\Http\Client\ConnectionException;
 
 class ProxmoxConfigRepository extends ProxmoxRepository
 {
+    /**
+     * @throws ConnectionException
+     */
     public function getConfig(): array
     {
         $response = $this->getHttpClientWithParams()
@@ -25,6 +29,9 @@ class ProxmoxConfigRepository extends ProxmoxRepository
         return $parsed;
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function getResources()
     {
         $server = $this->getServer();
@@ -38,6 +45,9 @@ class ProxmoxConfigRepository extends ProxmoxRepository
         return collect($data)->where('vmid', $server->vmid)->firstOrFail();
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function update(array $payload = [])
     {
         $response = $this->getHttpClientWithParams()

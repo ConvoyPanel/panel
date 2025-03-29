@@ -10,8 +10,6 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Webmozart\Assert\Assert;
 
-use function array_merge_recursive;
-
 abstract class ProxmoxRepository
 {
     protected Server $server;
@@ -89,10 +87,15 @@ abstract class ProxmoxRepository
         array $params = [],
         bool $shouldAuthorize = true,
     ): PendingRequest {
+        if (isset($this->node)) {
+            $params['node'] = $this->node->name;
+        }
+
+        if (isset($this->server)) {
+            $params['server'] = $this->server->vmid;
+        }
+
         return $this->getHttpClient($shouldAuthorize)
-            ->withUrlParameters(array_merge_recursive([
-                'node' => $this->node->name,
-                'server' => $this->server->vmid,
-            ], $params));
+            ->withUrlParameters($params);
     }
 }

@@ -15,8 +15,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 {
     public function getUsers()
     {
-        Assert::isInstanceOf($this->node, Node::class);
-
         $response = $this->getHttpClient()
             ->get('/api2/json/access/users')
             ->json();
@@ -28,8 +26,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
     public function createUser(CreateUserData $data): CreateUserData
     {
-        Assert::isInstanceOf($this->node, Node::class);
-
         $payload = [
             'enable' => $data->enabled,
             'userid' => ($data->username ?? 'convoy-'.Str::random(53)).'@'.$data->realm_type->value,
@@ -52,8 +48,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
     public function deleteUser(string $id, RealmType $realmType)
     {
-        Assert::isInstanceOf($this->node, Node::class);
-
         $response = $this->getHttpClient()
             ->withUrlParameters([
                 'user' => $id.'@'.$realmType->value,
@@ -66,8 +60,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
     public function createRole(string $name, string $privileges)
     {
-        Assert::isInstanceOf($this->node, Node::class);
-
         $payload = [
             'roleid' => $name,
             'privs' => $privileges,
@@ -82,8 +74,6 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
     public function createUserCredentials(RealmType $realmType, string $userid, string $password): UserCredentialsData
     {
-        Assert::isInstanceOf($this->node, Node::class);
-
         $response = $this->getHttpClient(shouldAuthorize: false)
             ->post('/api2/json/access/ticket', [
                 'username' => $userid,
