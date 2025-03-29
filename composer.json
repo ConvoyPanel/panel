@@ -33,12 +33,12 @@
   },
   "require-dev": {
     "fakerphp/faker": "^1.23",
-    "larastan/larastan": "^2.8",
+    "larastan/larastan": "^3.2",
     "laravel/pint": "^1.13",
     "mockery/mockery": "^1.6",
     "nunomaduro/collision": "^8.0",
     "pestphp/pest-plugin-laravel": "^2.2",
-    "phpstan/phpstan": "^1.10"
+    "phpstan/phpstan": "^2.1"
   },
   "autoload": {
     "files": [
