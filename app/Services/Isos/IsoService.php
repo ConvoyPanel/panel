@@ -43,7 +43,7 @@ class IsoService
                 $iso = ISO::create([
                     'node_id' => $node->id,
                     'name' => $name,
-                    'file_name' => $fileName ?? $queriedFileMetadata->file_name,
+                    'file_name' => $fileName ?? $queriedFileMetadata->fileName,
                     'hidden' => $hidden,
                     'size' => $queriedFileMetadata->size,
                 ]);

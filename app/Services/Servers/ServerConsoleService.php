@@ -25,9 +25,9 @@ class ServerConsoleService
         $this->serverRepository->setServer($server);
 
         $user = $this->accessRepository->createUser(CreateUserData::from([
-            'realm_type' => 'pve',
+            'realmType' => 'pve',
             'enabled' => true,
-            'expires_at' => now()->addDay(),
+            'expiresAt' => now()->addDay(),
         ]));
 
         try {

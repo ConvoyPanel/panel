@@ -12,7 +12,6 @@ use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\ServerConsoleService;
 use App\Services\Servers\ServerDetailService;
-use App\Transformers\Client\ServerDetailTransformer;
 use App\Transformers\Client\ServerStateTransformer;
 use App\Transformers\Client\ServerTerminalTransformer;
 use App\Transformers\Client\ServerTransformer;
@@ -28,7 +27,6 @@ class ServerController
     public function __construct(
         private CotermJWTService $cotermJWTService,
         private ServerConsoleService $consoleService,
-        private ServerDetailService $detailService,
         private ProxmoxServerRepository $serverRepository,
         private ProxmoxPowerRepository $powerRepository,
     ) {}
@@ -46,14 +44,6 @@ class ServerController
     public function show(Server $server)
     {
         return fractal($server, new ServerTransformer)->respond();
-    }
-
-    public function details(Server $server)
-    {
-        return fractal(
-            $this->detailService->getByProxmox($server),
-            new ServerDetailTransformer,
-        )->respond();
     }
 
     public function getState(Server $server)

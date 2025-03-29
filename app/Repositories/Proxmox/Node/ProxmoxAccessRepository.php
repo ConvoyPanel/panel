@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Proxmox\Node;
 
+use Spatie\LaravelData\DataCollection;
 use App\Data\Node\Access\CreateUserData;
 use App\Data\Node\Access\UserCredentialsData;
 use App\Data\Node\Access\UserData;
@@ -13,7 +14,7 @@ use Webmozart\Assert\Assert;
 
 class ProxmoxAccessRepository extends ProxmoxRepository
 {
-    public function getUsers()
+    public function getUsers(): DataCollection
     {
         $response = $this->getHttpClient()
             ->get('/api2/json/access/users')
@@ -21,16 +22,16 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         $users = array_map(fn ($user) => UserData::fromRaw($user), $this->getData($response));
 
-        return UserData::collection($users);
+        return UserData::collect($users);
     }
 
     public function createUser(CreateUserData $data): CreateUserData
     {
         $payload = [
             'enable' => $data->enabled,
-            'userid' => ($data->username ?? 'convoy-'.Str::random(53)).'@'.$data->realm_type->value,
+            'userid' => ($data->username ?? 'convoy-'.Str::random(53)).'@'.$data->realmType->value,
             'password' => $data->password ?? Str::random(64),
-            'expire' => $data->expires_at?->timestamp ?? false,
+            'expire' => $data->expiresAt?->timestamp ?? false,
         ];
 
         $this->getHttpClient()
@@ -39,10 +40,10 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         return CreateUserData::from([
             'username' => explode('@', $payload['userid'])[0],
-            'realm_type' => $data->realm_type,
+            'realmType' => $data->realmType,
             'password' => $payload['password'],
             'enabled' => $payload['enable'],
-            'expires_at' => $data->expires_at,
+            'expiresAt' => $data->expiresAt,
         ]);
     }
 

@@ -12,16 +12,16 @@ class UserPruneService
     {
     }
 
-    public function handle(Node $node)
+    public function handle(Node $node): void
     {
         $users = $this->repository->setNode($node)->getUsers();
 
         $users = $users->filter(function (UserData $user) {
-            return str_starts_with($user->username, 'convoy-') && $user->expires_at?->isPast();
+            return str_starts_with($user->username, 'convoy-') && $user->expiresAt?->isPast();
         });
 
         $users->each(function (UserData $user) {
-            $this->repository->deleteUser($user->username, $user->realm_type);
+            $this->repository->deleteUser($user->username, $user->realmType);
         });
     }
 }

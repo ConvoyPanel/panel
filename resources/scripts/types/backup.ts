@@ -16,7 +16,7 @@ export interface Backup {
 }
 
 export enum BackupError {
-    StorageExceeded = 'STORAGE_EXCEEDED',
+    StorageExceeded,
 }
 
 export type PaginatedBackups = PaginatedResult<Backup> & { backupCount: number }

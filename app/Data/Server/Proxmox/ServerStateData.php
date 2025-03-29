@@ -9,21 +9,21 @@ class ServerStateData extends Data
 {
     public function __construct(
         public State $state,
-        public float $cpu_used,
-        public int $memory_total,
-        public int $memory_used,
-        public int $uptime,
+        public float $cpuUsed,
+        public int   $memoryTotal,
+        public int   $memoryUsed,
+        public int   $uptime,
     ) {
     }
 
-    public static function fromRaw(array $raw)
+    public static function fromRaw(array $raw): self
     {
         return new self(...[
             'state' => State::from($raw['status']),
             'uptime' => $raw['uptime'],
-            'cpu_used' => $raw['cpu'],
-            'memory_total' => $raw['maxmem'],
-            'memory_used' => $raw['mem'],
+            'cpuUsed' => $raw['cpu'],
+            'memoryTotal' => $raw['maxmem'],
+            'memoryUsed' => $raw['mem'],
         ]);
     }
 }

@@ -13,7 +13,7 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
     public function createNoVncCredentials(UserCredentialsData $credentials): NoVncCredentialsData
     {
         $response = $this->getHttpClientWithParams(shouldAuthorize: false)
-            ->withHeader('CSRFPreventionToken', $credentials->csrf_token)
+            ->withHeader('CSRFPreventionToken', $credentials->csrfToken)
             ->withOptions([
                 'cookies' => CookieJar::fromArray([
                     'PVEAuthCookie' => $credentials->ticket,
@@ -29,14 +29,14 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
         return NoVncCredentialsData::from([
             'port' => $response['port'],
             'ticket' => $response['ticket'],
-            'pve_auth_cookie' => $credentials->ticket,
+            'pveAuthCookie' => $credentials->ticket,
         ]);
     }
 
     public function createXTermjsCredentials(UserCredentialsData $credentials): XTermCredentialsData
     {
         $response = $this->getHttpClientWithParams(shouldAuthorize: false)
-            ->withHeader('CSRFPreventionToken', $credentials->csrf_token)
+            ->withHeader('CSRFPreventionToken', $credentials->csrfToken)
             ->withOptions([
                 'cookies' => CookieJar::fromArray([
                     'PVEAuthCookie' => $credentials->ticket,
@@ -54,8 +54,8 @@ class ProxmoxConsoleRepository extends ProxmoxRepository
             'port' => $response['port'],
             'ticket' => $response['ticket'],
             'username' => $credentials->username,
-            'realm_type' => $credentials->realm_type,
-            'pve_auth_cookie' => $credentials->ticket,
+            'realmType' => $credentials->realmType,
+            'pveAuthCookie' => $credentials->ticket,
         ]);
     }
 }

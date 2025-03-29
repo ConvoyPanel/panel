@@ -13,7 +13,6 @@ use App\Repositories\Proxmox\ProxmoxRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
 
@@ -28,23 +27,9 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             ->json();
 
         $response = $this->getData($response);
+        $response['storage'] = $name; // Ensure the storage name is included in the response
 
-        $has = fn (string $content) => Str::contains($response['content'], $content);
-
-        return new StorageData(
-            name   : $name,
-            used   : $response['used'],
-            free   : $response['avail'],
-            total  : $response['total'],
-            enabled: $response['enabled'],
-            online : $response['active'],
-            has_kvm: $has('images'),
-            has_lxc: $has('rootdir'),
-            has_lxc_templates: $has('templates'),
-            has_backups: $has('backup'),
-            has_iso: $has('iso'),
-            has_snippets: $has('snippets'),
-        );
+        return StorageData::fromRaw($response);
     }
 
     public function download(
@@ -103,9 +88,9 @@ class ProxmoxStorageRepository extends ProxmoxRepository
 
         foreach ($response as $iso) {
             $isos[] = new IsoData(
-                file_name : explode('/', $iso['volid'])[1],
-                size      : $iso['size'],
-                created_at: CarbonImmutable::createFromTimestamp($iso['ctime']),
+                file_name: explode('/', $iso['volid'])[1],
+                size     : $iso['size'],
+                createdAt: CarbonImmutable::createFromTimestamp($iso['ctime']),
             );
         }
 
@@ -140,8 +125,8 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         $data = $this->getData($response);
 
         return FileMetaData::from([
-            'file_name' => $data['filename'],
-            'mime_type' => $data['mimetype'],
+            'fileName' => $data['filename'],
+            'mimeType' => $data['mimetype'],
             'size' => $data['size'],
         ]);
     }

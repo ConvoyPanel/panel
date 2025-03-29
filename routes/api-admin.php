@@ -35,6 +35,7 @@ Route::prefix('/locations')->group(function () {
 Route::prefix('/nodes')->group(function () {
     Route::get('/', [Admin\Nodes\NodeController::class, 'index']);
     Route::post('/', [Admin\Nodes\NodeController::class, 'store']);
+    Route::post('/test-connection', Admin\Nodes\NodeConnectionTestController::class);
 
     Route::prefix('/{node}')->group(function () {
         Route::get('/', [Admin\Nodes\NodeController::class, 'show']);

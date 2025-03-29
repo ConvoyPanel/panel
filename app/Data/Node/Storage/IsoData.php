@@ -10,7 +10,6 @@ class IsoData extends Data
     public function __construct(
         public string $file_name,
         public int $size,
-        public CarbonInterface $created_at,
-    ) {
-    }
+        public CarbonInterface $createdAt,
+    ) {}
 }

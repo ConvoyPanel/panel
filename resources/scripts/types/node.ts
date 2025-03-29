@@ -16,3 +16,47 @@ export interface Node {
 }
 
 export type PaginatedNodes = PaginatedResult<Node>
+
+export enum ConnectionErrorType {
+    TlsError = 'TLS_ERROR',
+    ConnectionRefused = 'CONNECTION_REFUSED',
+    Timeout = 'TIMEOUT',
+    DnsError = 'DNS_ERROR',
+    TokenInvalid = 'INVALID_TOKEN',
+    TokenMissingPermissions = 'TOKEN_MISSING_PERMISSIONS',
+    Other = 'OTHER',
+}
+
+export interface ConnectionResult {
+    success: boolean
+    errorMessage: string | null,
+    errorCode: ConnectionErrorType | null
+    data: NodeStatus | null
+}
+
+export interface NodeStatus {
+    kernel: {
+        build: string
+        release: string
+        os: string
+        architecture: string
+    }
+    cpu: {
+        cpuCount: number
+        socketCount: number
+        coreCount: number
+        model: string
+        flags: string
+    }
+    memory: {
+        used: number
+        free: number
+        total: number
+    }
+    swap: {
+        used: number
+        free: number
+        total: number
+    }
+    uptime: Duration
+}

@@ -17,17 +17,17 @@ class Storage extends Model
     ];
 
     public static array $validationRules = [
-        'nickname' => 'required_if:is_shareable,1|string|max:40',
+        'display_name' => 'required_if:is_shareable,1|string|max:40',
         'description' => 'nullable|string|max:191',
         'name' => 'required|string|max:191',
         'size' => 'required|numeric|min:1',
         'is_shareable' => 'required|boolean',
-        'has_kvm' => 'required|boolean',
-        'has_lxc' => 'required|boolean',
-        'has_lxc_templates' => 'required|boolean',
-        'has_backups' => 'required|boolean',
-        'has_iso' => 'required|boolean',
-        'has_snippets' => 'required|boolean',
+        'stores_kvm' => 'required|boolean',
+        'stores_lxc' => 'required|boolean',
+        'stores_lxc_templates' => 'required|boolean',
+        'stores_backups' => 'required|boolean',
+        'stores_iso' => 'required|boolean',
+        'stores_snippets' => 'required|boolean',
     ];
 
     protected function casts(): array
