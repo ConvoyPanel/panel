@@ -26,11 +26,20 @@ const TestConnectionButton = () => {
 
     const [state, handle] = useAsyncFunction(async () => {
         try {
+            setResult(null)
             // @ts-expect-error
             const result = await testConnection(form.getValues())
             setResult(result)
             if (!result.success) {
                 setOpen(true)
+            } else {
+                form.setValue('socketCount', result.data!.cpu.socketCount)
+                form.setValue('coreCount', result.data!.cpu.coreCount)
+                form.setValue('cpuCount', result.data!.cpu.cpuCount)
+                form.setValue(
+                    'memory',
+                    Math.floor(result.data!.memory.total / (1024 * 1024))
+                )
             }
         } catch (e) {
             toast({
@@ -42,9 +51,9 @@ const TestConnectionButton = () => {
     })
 
     const askChatGPT = () => {
-        const url = new URL('https://chat.openai.com/');
-        url.searchParams.set('q', result?.errorMessage ?? '');
-        window.open(url.toString(), '_blank');
+        const url = new URL('https://chat.openai.com/')
+        url.searchParams.set('q', result?.errorMessage ?? '')
+        window.open(url.toString(), '_blank')
     }
 
     return (
@@ -98,9 +107,7 @@ const TestConnectionButton = () => {
                         <CredenzaClose asChild>
                             <Button variant={'outline'}>Close</Button>
                         </CredenzaClose>
-                        <Button onClick={askChatGPT}>
-                            Ask ChatGPT
-                        </Button>
+                        <Button onClick={askChatGPT}>Ask ChatGPT</Button>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

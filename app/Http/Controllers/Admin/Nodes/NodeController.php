@@ -37,16 +37,17 @@ class NodeController
 
     public function show(Node $node)
     {
-        $node->append(['memory_allocated', 'disk_allocated']);
-
-        $node->loadCount('servers');
+        $node->append(['memory_allocated'])
+            ->loadCount('servers');
 
         return fractal($node, new NodeTransformer)->respond();
     }
 
     public function store(StoreNodeRequest $request)
     {
-        $node = Node::create($request->validated());
+        $node = Node::create($request->validated())
+            ->append(['memory_allocated'])
+            ->loadCount('servers');
 
         return fractal($node, new NodeTransformer)->respond();
     }
@@ -54,6 +55,9 @@ class NodeController
     public function update(UpdateNodeRequest $request, Node $node)
     {
         $node->update($request->validated());
+
+        $node->append(['memory_allocated'])
+            ->loadCount('servers');
 
         return fractal($node, new NodeTransformer)->respond();
     }

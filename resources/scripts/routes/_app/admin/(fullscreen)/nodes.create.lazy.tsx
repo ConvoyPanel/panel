@@ -1,18 +1,20 @@
+import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCheck } from '@tabler/icons-react'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { nodeSchema } from '@/api/admin/nodes/createNode.ts'
+import createNode, { nodeSchema } from '@/api/admin/nodes/createNode.ts'
 
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 
 import ConnectionSettingsForm from '@/components/interfaces/Admin/Node/Create/ConnectionSettingsForm.tsx'
 import GeneralSettingsForm from '@/components/interfaces/Admin/Node/Create/GeneralSettingsForm.tsx'
+import SpecificationsSettingsForm from '@/components/interfaces/Admin/Node/Create/SpecificationsSettingsForm.tsx'
 
 import { Form, FormButton } from '@/components/ui/Form'
-import { Heading } from '@/components/ui/Typography'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/(fullscreen)/nodes/create'
@@ -21,6 +23,8 @@ export const Route = createLazyFileRoute(
 })
 
 function CreateNodePage() {
+    const navigate = useNavigate()
+
     const form = useForm({
         resolver: zodResolver(nodeSchema),
         defaultValues: {
@@ -34,10 +38,41 @@ function CreateNodePage() {
             privilegeSeparationDisabled: false,
             fqdn: '',
             port: '8006',
+            socketCount: '',
+            coreCount: '',
+            cpuCount: '',
+            memory: '',
+            memoryOverallocate: '',
         },
     })
 
-    const submit = async (_data: z.infer<typeof nodeSchema>) => {}
+    const submit = async (data: z.infer<typeof nodeSchema>) => {
+        try {
+            const node = await createNode(data)
+
+            toast({
+                description: 'Node created',
+            })
+
+            navigate({
+                to: '/admin/nodes/$nodeId',
+                replace: true,
+                params: {
+                    nodeId: node.id,
+                },
+                search: {
+                    oobe: true,
+                },
+            })
+        } catch (e) {
+            handleFormErrors(e, form.setError)
+            toast({
+                description: 'Failed to create node',
+                variant: 'destructive',
+            })
+            console.error(e)
+        }
+    }
 
     return (
         <Form {...form}>
@@ -55,9 +90,7 @@ function CreateNodePage() {
                     <div className={'flex w-full max-w-lg flex-col space-y-16'}>
                         <GeneralSettingsForm />
                         <ConnectionSettingsForm />
-                        <div className={'flex flex-col space-y-4'}>
-                            <Heading as={'h3'}>Specifications</Heading>
-                        </div>
+                        <SpecificationsSettingsForm />
                     </div>
                 </FullscreenLayout>
             </form>

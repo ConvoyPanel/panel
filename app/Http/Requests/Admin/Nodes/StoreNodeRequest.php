@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin\Nodes;
 
 use App\Models\Node;
-use App\Rules\Fqdn;
+use App\Rules\Hostname;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreNodeRequest extends FormRequest
@@ -12,7 +12,7 @@ class StoreNodeRequest extends FormRequest
     {
         $rules = Node::getRules();
 
-        $rules['fqdn'][] = Fqdn::make();
+        $rules['fqdn'][] = new Hostname;
 
         return $rules;
     }

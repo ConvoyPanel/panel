@@ -8,6 +8,9 @@ export interface Node {
     verifyTls: boolean
     fqdn: string
     port: number
+    socketCount: number
+    coreCount: number
+    cpuCount: number
     memory: number
     memoryOverallocate: number
     memoryAllocated: number
@@ -42,9 +45,9 @@ export interface NodeStatus {
         architecture: string
     }
     cpu: {
-        cpuCount: number
         socketCount: number
         coreCount: number
+        cpuCount: number
         model: string
         flags: string
     }

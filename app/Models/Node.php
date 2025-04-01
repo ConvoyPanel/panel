@@ -35,9 +35,12 @@ class Node extends Model
         'token_id' => 'required|string|max:191',
         'token_secret' => 'required|string|max:191',
         'port' => 'required|integer|min:1|max:65535',
+        'socket_count' => 'required|integer|min:1',
+        'core_count' => 'required|integer|min:1',
+        'cpu_count' => 'required|integer|min:1',
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
-        'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        //'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
     ];
 
@@ -51,7 +54,6 @@ class Node extends Model
         return [
             'verify_tls' => 'boolean',
             'memory' => StorageSizeCast::class,
-            'disk' => StorageSizeCast::class,
             'token_secret' => 'encrypted',
         ];
     }
@@ -145,14 +147,6 @@ class Node extends Model
             'node_id',
             'storage_id',
         );
-    }
-
-    /**
-     * Gets the total disk used from adding up all the associated servers' disk sizes.
-     */
-    public function getDiskAllocatedAttribute(): int
-    {
-        return $this->servers->sum('disk');
     }
 
     /**
