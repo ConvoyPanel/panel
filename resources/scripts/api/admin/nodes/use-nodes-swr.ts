@@ -1,12 +1,12 @@
 import { PaginatedNodes } from '@/types/node.ts'
 import useSWR from 'swr'
 
-import getNodes from '@/api/admin/nodes/getNodes.ts'
+import getNodes, { NodeQueryParams } from '@/api/admin/nodes/getNodes.ts'
 
-export const getKey = () => ['nodes']
+export const getKey = (params: NodeQueryParams) => ['nodes', params]
 
-const useNodesSWR = () => {
-    return useSWR<PaginatedNodes>(getKey(), getNodes)
+const useNodesSWR = (params: NodeQueryParams) => {
+    return useSWR<PaginatedNodes>(getKey(params), () => getNodes(params))
 }
 
 export default useNodesSWR

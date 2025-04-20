@@ -18,6 +18,26 @@ use Webmozart\Assert\Assert;
 
 class ProxmoxStorageRepository extends ProxmoxRepository
 {
+    /**
+     * @return DataCollection<int, StorageData>
+     *
+     * @throws ConnectionException
+     */
+    public function getStorages(): DataCollection
+    {
+        $response = $this->getHttpClientWithParams()
+            ->get('/api2/json/nodes/{node}/storage')
+            ->json();
+
+        $response = $this->getData($response);
+        $storages = [];
+        foreach ($response as $storage) {
+            $storages[] = StorageData::fromRaw($storage);
+        }
+
+        return StorageData::collect($storages, DataCollection::class);
+    }
+
     public function getStorage(string $name): StorageData
     {
         $response = $this->getHttpClientWithParams([

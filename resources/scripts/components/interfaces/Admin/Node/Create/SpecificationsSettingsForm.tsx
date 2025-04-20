@@ -50,10 +50,10 @@ const SpecificationsSettingsForm = () => {
             <Alert>
                 <IconInfoCircleFilled className={'size-4'} />
                 <AlertTitle>
-                    Disk and network configuration has moved
+                    Storage and network configuration has moved
                 </AlertTitle>
                 <AlertDescription>
-                    The disk and network configuration options have been moved
+                    The storage and network configuration options have been moved
                     to the <strong>Advanced</strong> tab. This change was made
                     to simplify the node creation process and make it easier to
                     configure the most important settings.

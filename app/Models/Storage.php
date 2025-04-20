@@ -44,6 +44,6 @@ class Storage extends Model
             'storage_to_node',
             'storage_id',
             'node_id',
-        );
+        )->withPivot('backup_order');
     }
 }

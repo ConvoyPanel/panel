@@ -11,17 +11,17 @@ import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 const BandwidthUsageCard = () => {
     const { data: server } = useServerSWR()
 
-    const used = byteSize(server?.bandwidthUsage ?? 0, {
+    const used = byteSize(server?.bandwidth.usage ?? 0, {
         units: 'iec',
         precision: 1,
     })
-    const limit = byteSize(server?.bandwidthLimit ?? 0, {
+    const limit = byteSize(server?.bandwidth.limit ?? 0, {
         units: 'iec',
         precision: 1,
     })
     const bandwidthUsedPercent =
-        server && server.bandwidthLimit
-            ? (server.bandwidthUsage / server.bandwidthLimit) * 100
+        server && server.bandwidth.limit
+            ? (server.bandwidth.usage / server.bandwidth.limit) * 100
             : 0
 
     return (

@@ -42,6 +42,11 @@ Route::prefix('/nodes')->group(function () {
         Route::put('/', [Admin\Nodes\NodeController::class, 'update']);
         Route::delete('/', [Admin\Nodes\NodeController::class, 'destroy']);
 
+        Route::prefix('/storages')->group(function () {
+            Route::get('/', [Admin\Nodes\StorageController::class, 'index']);
+            Route::get('/proxmox', [Admin\Nodes\StorageController::class, 'fetchFromProxmox']);
+        });
+
         /*
         |--------------------------------------------------------------------------
         | Node ISOs Controller Routes

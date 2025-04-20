@@ -19,14 +19,14 @@ class NodeController
         $nodes = QueryBuilder::for(Node::query())
             ->withCount(['servers'])
             ->allowedFilters(
-                [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact(
-                    'location_id',
-                ), AllowedFilter::exact(
-                    'coterm_id',
-                )->nullable(), AllowedFilter::custom(
-                    '*',
-                    new FiltersNodeWildcard,
-                )],
+                [
+                    AllowedFilter::custom('*', new FiltersNodeWildcard),
+                    AllowedFilter::exact('id'),
+                    'display_name',
+                    'fqdn',
+                    AllowedFilter::exact('location_id'),
+                    AllowedFilter::exact('coterm_id')->nullable(),
+                ],
             )
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

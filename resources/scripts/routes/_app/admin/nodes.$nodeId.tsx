@@ -1,26 +1,28 @@
 import useTitle from '@/hooks/use-title.ts'
+import { processAxiosError } from '@/utils/http.ts'
 import {
     IconDatabase,
     IconLayoutGrid,
-    IconMapPin,
+    IconMapPins,
+    IconServer,
     IconSettings,
     IconWifi,
 } from '@tabler/icons-react'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import useNodeSWR, { preloadNode } from '@/api/admin/nodes/use-node-swr.ts'
 
-import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
 import AppLayout from '@/components/layouts/AppLayout.tsx'
-import { processAxiosError } from '@/utils/http.ts'
+
+import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
 
 export const Route = createFileRoute('/_app/admin/nodes/$nodeId')({
-    loader: ({ params: { nodeId }}) =>
+    loader: ({ params: { nodeId } }) =>
         preloadNode(Number(nodeId)).catch(processAxiosError),
     component: NodeLayout,
     staticData: {
         title: 'Dashboard',
-    }
+    },
 })
 
 function NodeLayout() {
@@ -38,9 +40,14 @@ function NodeLayout() {
             },
         },
         {
+            icon: IconServer,
+            label: 'Servers',
+            path: `/admin/nodes/${nodeId}/servers`,
+        },
+        {
             icon: IconDatabase,
-            label: 'Disks',
-            path: `/admin/nodes/${nodeId}/disks`,
+            label: 'Storages',
+            path: `/admin/nodes/${nodeId}/storages`,
         },
         {
             icon: IconWifi,
@@ -48,7 +55,7 @@ function NodeLayout() {
             path: `/admin/nodes/${nodeId}/network`,
         },
         {
-            icon: IconMapPin,
+            icon: IconMapPins,
             label: 'IPAM',
             path: `/admin/nodes/${nodeId}/ipam`,
         },
@@ -59,7 +66,9 @@ function NodeLayout() {
         },
     ]
 
-    return <AppLayout routes={routes}>
-        <Outlet />
-    </AppLayout>
+    return (
+        <AppLayout routes={routes}>
+            <Outlet />
+        </AppLayout>
+    )
 }

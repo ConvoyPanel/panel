@@ -12,7 +12,6 @@ import {
     SheetTrigger,
 } from '@/components/ui/Sheet'
 
-
 const quotas = [
     {
         label: 'Count',
@@ -40,8 +39,6 @@ const quotas = [
 
 const BackupQuotaSidebar = () => {
     const { data: server } = useServerSWR()
-
-    console.log({ styles })
 
     return (
         <>

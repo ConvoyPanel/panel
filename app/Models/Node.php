@@ -146,7 +146,8 @@ class Node extends Model
             'storage_to_node',
             'node_id',
             'storage_id',
-        );
+        )
+            ->withPivot('backup_order');
     }
 
     /**
