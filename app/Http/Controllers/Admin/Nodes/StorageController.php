@@ -24,7 +24,7 @@ class StorageController extends Controller
 
     public function index(Node $node): JsonResponse
     {
-        return fractal($node->storages, new StorageTransformer)->respond();
+        return fractal($node->storages()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
 
     /**
@@ -39,12 +39,14 @@ class StorageController extends Controller
 
     public function store(StoreStorageRequest $request, Node $node): JsonResponse
     {
-        $this->connection->transaction(function () use ($request, $node) {
+        $storage = $this->connection->transaction(function () use ($request, $node) {
             $storage = Storage::create($request->validated());
 
             $node->storages()->attach($storage->id, [
                 'backup_order' => $request->input('backup_order'),
             ]);
+
+            return $storage;
         });
 
         return fractal($storage, new StorageTransformer)->respond();

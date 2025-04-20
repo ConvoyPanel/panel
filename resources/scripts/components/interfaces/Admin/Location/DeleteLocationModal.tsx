@@ -19,7 +19,7 @@ import {
     CredenzaTitle,
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
+import { toast } from 'sonner'
 
 interface Props {
     mutate: KeyedMutator<PaginatedLocations>
@@ -50,16 +50,11 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                     }
                 })
 
-                toast({
-                    description: 'Location deleted',
-                })
+                toast.success('Location deleted')
 
                 closeModal('delete')
             } catch (e) {
-                toast({
-                    description: 'Deletion failed',
-                    variant: 'destructive',
-                })
+                toast.error('Deletion failed')
                 throw e
             }
         }

@@ -6,7 +6,7 @@ import { rawDataToNodeStorage } from '@/api/transformers/storage.ts'
 
 export const storageSchema = z
     .object({
-        displayName: z.string().min(1).max(40).optional(),
+        displayName: z.string().max(40).optional(),
         description: z.string().max(191).nullable(),
         name: z.string().min(1).max(191),
         size: z.coerce.number().min(1),
@@ -18,20 +18,15 @@ export const storageSchema = z
         storesIso: z.boolean(),
         storesSnippets: z.boolean(),
     })
-    .refine(
-        data => {
-            // If isShareable is true, displayName must be provided
-            if (data.isShareable) {
-                return !!data.displayName
-            }
-            // If isShareable is false, we don't care about displayName
-            return true
-        },
-        {
-            message: 'Display name is required when storage is shareable',
-            path: ['displayName'], // This will show the error on the displayName field
+    .superRefine((data, ctx) => {
+        if (data.isShareable && !data.displayName) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['displayName'],
+                message: 'Display name is required when storage is shareable',
+            });
         }
-    )
+    })
 
 const createStorage = async (
     nodeId: number,

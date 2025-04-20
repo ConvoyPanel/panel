@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import verifyAuthenticatorChallenge from '@/api/auth/verifyAuthenticatorChallenge.ts'
@@ -30,7 +31,6 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from '@/components/ui/InputOTP'
-import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute(
     '/auth/(authenticator)/login/authenticator'
@@ -84,10 +84,7 @@ function Authenticator() {
         } catch (e) {
             if (handleFormErrors(e, form.setError)) return
 
-            toast({
-                description: 'Failed to verify code',
-                variant: 'destructive',
-            })
+            toast.error('Failed to verify code')
 
             throw e
         }

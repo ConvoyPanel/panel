@@ -3,6 +3,7 @@ import { ConnectionResult } from '@/types/node.ts'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import testConnection from '@/api/admin/nodes/testConnection.ts'
 
@@ -17,7 +18,6 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
 
 const TestConnectionButton = () => {
     const form = useFormContext()
@@ -42,10 +42,7 @@ const TestConnectionButton = () => {
                 )
             }
         } catch (e) {
-            toast({
-                description: 'Failed to test connection',
-                variant: 'destructive',
-            })
+            toast.error('Failed to test connection')
             console.error(e)
         }
     })

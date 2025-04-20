@@ -1,4 +1,5 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import regenerateRecoveryCodes from '@/api/account/authenticator/regenerateRecoveryCodes.ts'
@@ -15,7 +16,6 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
 
 const AuthenticatorResetRecoveryCodesDialog = () => {
     const [open, closeModal, pushToQueue] = useAuthenticatorModalStore(
@@ -30,18 +30,13 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
         try {
             await regenerateRecoveryCodes()
 
-            toast({
-                description: 'Recovery codes reset',
-            })
+            toast.success('Recovery codes reset')
 
             pushToQueue('recovery-codes')
 
             closeModal('reset-recovery-codes')
         } catch (e) {
-            toast({
-                description: 'Failed to reset recovery codes',
-                variant: 'destructive',
-            })
+            toast.error('Failed to reset recovery codes')
             throw e
         }
     })

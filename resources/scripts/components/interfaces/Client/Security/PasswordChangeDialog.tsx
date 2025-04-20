@@ -2,6 +2,7 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import updatePassword from '@/api/account/updatePassword.ts'
@@ -22,7 +23,6 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
-import { toast } from '@/components/ui/Toast'
 
 const schema = z
     .object({
@@ -56,9 +56,7 @@ const PasswordChangeDialog = () => {
             await updatePassword(data)
             form.reset()
             setOpen(false)
-            toast({
-                description: 'Password updated',
-            })
+            toast.success('Password updated')
         } catch (error) {
             handleFormErrors(error, form.setError)
 

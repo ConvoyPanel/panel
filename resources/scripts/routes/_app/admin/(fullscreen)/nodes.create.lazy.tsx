@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCheck } from '@tabler/icons-react'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import createNode, { nodeSchema } from '@/api/admin/nodes/createNode.ts'
@@ -14,7 +15,6 @@ import GeneralSettingsForm from '@/components/interfaces/Admin/Node/Create/Gener
 import SpecificationsSettingsForm from '@/components/interfaces/Admin/Node/Create/SpecificationsSettingsForm.tsx'
 
 import { Form, FormButton } from '@/components/ui/Form'
-import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/(fullscreen)/nodes/create'
@@ -46,13 +46,14 @@ function CreateNodePage() {
         },
     })
 
-    const submit = async (data: z.infer<typeof nodeSchema>) => {
+    const submit = async ({ memory, ...data }: z.infer<typeof nodeSchema>) => {
         try {
-            const node = await createNode(data)
-
-            toast({
-                description: 'Node created',
+            const node = await createNode({
+                memory: memory * 1024 * 1024,
+                ...data,
             })
+
+            toast.success('Node created')
 
             navigate({
                 to: '/admin/nodes/$nodeId',
@@ -66,10 +67,7 @@ function CreateNodePage() {
             })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast({
-                description: 'Failed to create node',
-                variant: 'destructive',
-            })
+            toast.error('Failed to create node')
             console.error(e)
         }
     }

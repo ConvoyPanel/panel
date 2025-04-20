@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import useRecoveryCodesSWR from '@/api/account/authenticator/use-recovery-codes-swr.ts'
@@ -17,7 +18,6 @@ import {
     CredenzaTitle,
 } from '@/components/ui/Credenza'
 import Skeleton from '@/components/ui/Skeleton.tsx'
-import { toast } from '@/components/ui/Toast'
 
 const AuthenticatorRecoveryCodesDialog = () => {
     const [open, closeModal] = useAuthenticatorModalStore(
@@ -42,7 +42,7 @@ const AuthenticatorRecoveryCodesDialog = () => {
 
         await navigator.clipboard.writeText(codes.join('\n'))
 
-        toast({ description: 'Copied recovery codes to clipboard' })
+        toast.success('Copied recovery codes to clipboard')
     }
 
     return (

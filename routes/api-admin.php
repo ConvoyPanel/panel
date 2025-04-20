@@ -45,6 +45,7 @@ Route::prefix('/nodes')->group(function () {
         Route::prefix('/storages')->group(function () {
             Route::get('/', [Admin\Nodes\StorageController::class, 'index']);
             Route::get('/proxmox', [Admin\Nodes\StorageController::class, 'fetchFromProxmox']);
+            Route::post('/', [Admin\Nodes\StorageController::class, 'store']);
         });
 
         /*

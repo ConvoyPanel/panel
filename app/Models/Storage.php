@@ -17,7 +17,7 @@ class Storage extends Model
     ];
 
     public static array $validationRules = [
-        'display_name' => 'required_if:is_shareable,1|string|max:40',
+        'display_name' => 'nullable|string|max:40',
         'description' => 'nullable|string|max:191',
         'name' => 'required|string|max:191',
         'size' => 'required|numeric|min:1',
@@ -34,6 +34,12 @@ class Storage extends Model
     {
         return [
             'size' => StorageSizeCast::class,
+            'stores_kvm' => 'boolean',
+            'stores_lxc' => 'boolean',
+            'stores_lxc_templates' => 'boolean',
+            'stores_backups' => 'boolean',
+            'stores_iso' => 'boolean',
+            'stores_snippets' => 'boolean',
         ];
     }
 

@@ -1,5 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { Passkey } from '@/types/passkey.ts'
+import { toast } from 'sonner'
 import { mutate } from 'swr'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -18,7 +19,6 @@ import {
     CredenzaTitle,
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
 
 const PasskeyDeleteDialog = () => {
     const [passkey, isDeleteDialogOpen, closeModal] = usePasskeysModalStore(
@@ -34,18 +34,13 @@ const PasskeyDeleteDialog = () => {
             try {
                 await deletePasskey(currentPasskey.id)
 
-                toast({
-                    description: 'Passkey deleted',
-                })
+                toast.success('Passkey deleted')
 
                 await mutate(getPasskeysSWRKey())
 
                 closeModal('delete')
             } catch (e) {
-                toast({
-                    description: 'Deletion failed',
-                    variant: 'destructive',
-                })
+                toast.error('Deletion failed')
                 throw e
             }
         }

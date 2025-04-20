@@ -3,6 +3,7 @@ import { PaginatedLocations, locationSchema } from '@/types/location.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
@@ -21,7 +22,6 @@ import {
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
-import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: KeyedMutator<PaginatedLocations>
@@ -68,16 +68,11 @@ const EditLocationModal = ({ mutate }: Props) => {
                 }
             }, false)
 
-            toast({
-                description: 'Location updated',
-            })
+            toast.success('Location updated')
 
             closeModal('edit')
         } catch (e) {
-            toast({
-                description: 'Failed to save changes',
-                variant: 'destructive',
-            })
+            toast.error('Failed to save changes')
             throw e
         }
     }

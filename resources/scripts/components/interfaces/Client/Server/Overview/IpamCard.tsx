@@ -1,14 +1,13 @@
 import { Address } from '@/types/address.ts'
 import { IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
+import { toast } from 'sonner'
 
 import useAddressesSWR from '@/api/servers/use-addresses-swr.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
-import { toast } from '@/components/ui/Toast'
-
 
 const Cell = ({
     title,
@@ -22,12 +21,9 @@ const Cell = ({
     const copy = async () => {
         try {
             await navigator.clipboard.writeText(description)
-            toast({ description: 'Copied to clipboard' })
+            toast.success('Copied to clipboard')
         } catch {
-            toast({
-                description: 'Failed to copy to clipboard',
-                variant: 'destructive',
-            })
+            toast.error('Failed to copy to clipboard')
         }
     }
 
@@ -73,7 +69,7 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
         return (
             <ul className={'divide-y rounded-md border'}>
                 {addresses.map(address => (
-                    <li key={address.id} className={'py-2 px-3'}>
+                    <li key={address.id} className={'px-3 py-2'}>
                         <dl
                             className={
                                 'relative flex flex-col gap-2 @sm:flex-row'

@@ -1,10 +1,10 @@
+import { toast } from 'sonner'
+
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
 import Toolbar from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 
-import { toast } from '@/components/ui/Toast/use-toast.ts'
 import { Heading } from '@/components/ui/Typography'
-
 
 const Header = () => {
     const { data: server } = useServerSWR()
@@ -12,12 +12,9 @@ const Header = () => {
     const copyHostname = async () => {
         try {
             await navigator.clipboard.writeText(server!.hostname)
-            toast({ description: 'Copied hostname to clipboard' })
+            toast.success('Copied hostname to clipboard')
         } catch {
-            toast({
-                description: 'Failed to copy hostname to clipboard',
-                variant: 'destructive',
-            })
+            toast.error('Failed to copy hostname to clipboard')
         }
     }
 

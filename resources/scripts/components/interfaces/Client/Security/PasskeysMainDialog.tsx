@@ -1,5 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { startRegistration } from '@simplewebauthn/browser'
+import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import getRegistrationOptions from '@/api/account/passkeys/getRegistrationOptions.ts'
@@ -22,7 +23,6 @@ import {
     CredenzaTitle,
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
 
 const PasskeysContainer = () => {
     const [isMainDialogOpen, openModal, closeModal] = usePasskeysModalStore(
@@ -43,19 +43,14 @@ const PasskeysContainer = () => {
 
             openModal('rename', passkey)
 
-            toast({
-                description: 'Passkey added',
-            })
+            toast.success('Passkey added')
         } catch (e) {
             let message = 'Registration failed'
             if (e instanceof Error && e.name === 'InvalidStateError') {
                 message = 'This authenticator is already registered'
             }
 
-            toast({
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
             throw e
         }
     })

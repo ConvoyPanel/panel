@@ -1,18 +1,39 @@
-import { useState } from 'react'
-import { Credenza, CredenzaContent, CredenzaHeader, CredenzaTitle, CredenzaTrigger } from '@/components/ui/Credenza'
-import { IconPlus } from '@tabler/icons-react'
-import { Button } from '@/components/ui/Button'
-import { KeyedMutator } from 'swr'
-import { Storage } from '@/types/storage.ts'
-import { useForm } from 'react-hook-form'
+import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
+import { NodeStorage } from '@/types/storage.ts'
+import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { storageSchema } from '@/api/admin/nodes/storages/createStorage.ts'
+import { IconPlus } from '@tabler/icons-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { KeyedMutator } from 'swr'
+import { z } from 'zod'
+
+import createStorage, {
+    storageSchema,
+} from '@/api/admin/nodes/storages/createStorage.ts'
+
+import { Button } from '@/components/ui/Button'
+import {
+    Credenza,
+    CredenzaBody,
+    CredenzaClose,
+    CredenzaContent,
+    CredenzaFooter,
+    CredenzaHeader,
+    CredenzaTitle,
+    CredenzaTrigger,
+} from '@/components/ui/Credenza'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 
 interface Props {
-    mutate: KeyedMutator<Storage[]>
+    mutate: KeyedMutator<NodeStorage[]>
 }
 
 const CreateStorageModal = ({ mutate }: Props) => {
+    const { nodeId } = StorageRoute.useParams()
     const [open, setOpen] = useState(false)
 
     const form = useForm({
@@ -32,19 +53,120 @@ const CreateStorageModal = ({ mutate }: Props) => {
         },
     })
 
-    return <Credenza open={open} onOpenChange={setOpen}>
-        <CredenzaTrigger asChild>
-            <Button className={'flex ml-auto'} size={'sm'}>
-                <IconPlus className={'mr-2 size-4'} /> Add storage
-            </Button>
-        </CredenzaTrigger>
-        <CredenzaContent>
-            <CredenzaHeader>
-                <CredenzaTitle>New Storage</CredenzaTitle>
-            </CredenzaHeader>
+    const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
+        try {
+            const storage = await createStorage(nodeId, {
+                size: size * 1024 * 1024,
+                ...data,
+            })
 
-        </CredenzaContent>
-    </Credenza>
+            await mutate(data => {
+                if (!data) return
+
+                return data.concat(storage)
+            })
+
+            form.reset()
+
+            setOpen(false)
+
+            toast.success('Storage created')
+        } catch (e) {
+            handleFormErrors(e, form.setError)
+            toast.error('Failed to save changes')
+            throw e
+        }
+    }
+
+    return (
+        <Credenza open={open} onOpenChange={setOpen}>
+            <CredenzaTrigger asChild>
+                <Button className={'ml-auto flex'} size={'sm'}>
+                    <IconPlus className={'mr-2 size-4'} /> Add storage
+                </Button>
+            </CredenzaTrigger>
+            <CredenzaContent>
+                <CredenzaHeader>
+                    <CredenzaTitle>New Storage</CredenzaTitle>
+                </CredenzaHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(submit as any)}>
+                        <CredenzaBody className={'space-y-2'}>
+                            <InputForm
+                                name={'displayName'}
+                                label={'Display Name'}
+                            />
+                            <InputForm
+                                name={'description'}
+                                label={'Description'}
+                            />
+                            <InputForm name={'name'} label={'Name'} />
+                            <InputForm name={'size'} label={'Size (MiB)'} />
+                            <div>
+                                <h3 className={'text-sm font-semibold'}>
+                                    Content Types
+                                </h3>
+                                <p
+                                    className={
+                                        'text-[0.8rem] text-muted-foreground'
+                                    }
+                                >
+                                    Select which content types this storage
+                                    should be able to store.
+                                </p>
+                                <ul className={'mt-2 space-y-2'}>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesKvm'}
+                                            label={'KVM'}
+                                        />
+                                    </li>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesLxc'}
+                                            label={'LXC'}
+                                        />
+                                    </li>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesLxcTemplates'}
+                                            label={'LXC Templates'}
+                                        />
+                                    </li>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesBackups'}
+                                            label={'Backups'}
+                                        />
+                                    </li>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesIso'}
+                                            label={'ISO Images'}
+                                        />
+                                    </li>
+                                    <li>
+                                        <CheckboxItemForm
+                                            name={'storesSnippets'}
+                                            label={'Snippets'}
+                                        />
+                                    </li>
+                                </ul>
+                            </div>
+                        </CredenzaBody>
+                        <CredenzaFooter className={'mt-4'}>
+                            <CredenzaClose asChild>
+                                <Button variant={'outline'} type={'button'}>
+                                    Cancel
+                                </Button>
+                            </CredenzaClose>
+                            <FormButton>Add storage</FormButton>
+                        </CredenzaFooter>
+                    </form>
+                </Form>
+            </CredenzaContent>
+        </Credenza>
+    )
 }
 
 export default CreateStorageModal

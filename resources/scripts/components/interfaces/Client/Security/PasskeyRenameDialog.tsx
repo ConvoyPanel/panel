@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { mutate } from 'swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
@@ -23,7 +24,6 @@ import {
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
-import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     name: z.string().min(1).max(40),
@@ -52,9 +52,7 @@ const PasskeyRenameDialog = () => {
     const submit = async (data: z.infer<typeof schema>) => {
         await renamePasskey(passkey!.id, data.name)
 
-        toast({
-            description: 'Passkey renamed',
-        })
+        toast.success('Passkey renamed')
 
         await mutate(getPasskeysSWRKey())
 

@@ -1,3 +1,5 @@
+import { toast } from 'sonner'
+
 import updateState, { PowerAction } from '@/api/servers/updateState.ts'
 import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
 import useServerSWR from '@/api/servers/use-server-swr.ts'
@@ -12,8 +14,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import { toast } from '@/components/ui/Toast/use-toast.ts'
-
 
 const PowerActionsDropdown = () => {
     const confirm = useConfirmationStore(state => state.confirm)
@@ -32,13 +32,10 @@ const PowerActionsDropdown = () => {
             if (!confirmed) return
 
             await updateState(server!.uuid, action)
-            toast({ description: actions[action].toastText })
+            toast.success(actions[action].toastText)
         } catch (e) {
-            toast({
-                // @ts-ignore
-                description: `Power action failed: ${e.message}`,
-                variant: 'destructive',
-            })
+            toast.error('Power action failed')
+            throw e
         }
     }
 

@@ -7,6 +7,7 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -26,7 +27,6 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
-import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     type: z.enum([ConfirmationType.Password, ConfirmationType.Passkey]),
@@ -104,10 +104,7 @@ const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
             const message =
                 e instanceof Error ? e.message : 'An unexpected error occurred'
 
-            toast({
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
 
             throw e
         }

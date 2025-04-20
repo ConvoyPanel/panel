@@ -1,15 +1,14 @@
 import { NodeStorage } from '@/types/storage.ts'
+import { cn } from '@/utils'
 import { IconDots } from '@tabler/icons-react'
 
-import { Badge } from '@/components/ui/Badge.tsx'
+import { Badge, badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 
@@ -24,9 +23,16 @@ const StorageCard = ({ storage }: Props) => {
                 <p className={'inline font-semibold'}>
                     {storage.displayName ?? storage.name}{' '}
                     {storage.displayName && (
-                        <Badge variant={'secondary'} className={'inline-flex align-middle'}>
+                        <span
+                            className={cn(
+                                'inline-flex align-middle',
+                                badgeVariants({
+                                    variant: 'secondary',
+                                })
+                            )}
+                        >
                             {storage.name}
-                        </Badge>
+                        </span>
                     )}
                 </p>
                 {storage.description && (
@@ -38,7 +44,7 @@ const StorageCard = ({ storage }: Props) => {
                         {storage.description}
                     </p>
                 )}
-                <div className={'flex flex-wrap gap-1 mt-1'}>
+                <div className={'mt-1 flex flex-wrap gap-1'}>
                     {storage.storesKvm && (
                         <Badge variant={'secondary'}>KVM</Badge>
                     )}

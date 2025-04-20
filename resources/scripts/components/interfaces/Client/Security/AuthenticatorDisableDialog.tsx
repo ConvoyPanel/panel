@@ -1,4 +1,5 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { toast } from 'sonner'
 import { mutate } from 'swr'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -17,7 +18,6 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
-import { toast } from '@/components/ui/Toast'
 
 const AuthenticatorDisableDialog = () => {
     const [open, closeModal] = useAuthenticatorModalStore(
@@ -30,16 +30,11 @@ const AuthenticatorDisableDialog = () => {
 
             await mutate(getAuthStatusKey())
 
-            toast({
-                description: 'Authenticator disabled',
-            })
+            toast.success('Authenticator disabled')
 
             closeModal('disable')
         } catch (e) {
-            toast({
-                description: 'Failed to disable authenticator',
-                variant: 'destructive',
-            })
+            toast.error('Failed to disable authenticator')
             throw e
         }
     })
