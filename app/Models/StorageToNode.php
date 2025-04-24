@@ -14,6 +14,11 @@ class StorageToNode extends Model implements Sortable
 
     public $timestamps = false;
 
+    public array $sortable = [
+        'order_column_name' => 'backup_order',
+        'sort_when_creating' => true,
+    ];
+
     public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);

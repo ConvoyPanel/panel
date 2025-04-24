@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StoreStorageRequest;
+use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateStorageRequest;
 use App\Models\Node;
 use App\Models\Storage;
+use App\Models\StorageToNode;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use App\Transformers\Admin\StorageDataTransformer;
 use App\Transformers\Admin\StorageTransformer;
@@ -53,10 +55,20 @@ class StorageController extends Controller
         return fractal($storage, new StorageTransformer)->respond();
     }
 
-    public function update(UpdateStorageRequest $request, Node $node, Storage $storage): JsonResponse
+    public function update(UpdateStorageRequest $request, Node $_, Storage $storage): JsonResponse
     {
         $storage->update($request->validated());
 
         return fractal($storage, new StorageTransformer)->respond();
+    }
+
+    public function updateBackupOrder(UpdateBackupOrderRequest $request, Node $node): JsonResponse
+    {
+        StorageToNode::setNewOrder(
+            ids: $request->array('ids'),
+            primaryKeyColumn: 'storage_id'
+        );
+
+        return fractal($node->storages()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
 }

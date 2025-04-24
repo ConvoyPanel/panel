@@ -1,9 +1,12 @@
+import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import { NodeStorage } from '@/types/storage.ts'
 import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core'
 import { SortableContext } from '@dnd-kit/sortable'
 import { IconDatabase } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
+import updateBackupOrder from '@/api/admin/nodes/storages/updateBackupOrder.ts'
 import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
 
 import SortableStorageCard from '@/components/interfaces/Admin/Node/Storages/SortableStorageCard.tsx'
@@ -21,6 +24,7 @@ import {
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const LoadBalancerSidebar = () => {
+    const { nodeId } = StorageRoute.useParams()
     const { data: storages, mutate, isLoading } = useStoragesSWR()
     const [draggingStorage, setDraggingStorage] = useState<NodeStorage | null>()
 
@@ -33,8 +37,6 @@ const LoadBalancerSidebar = () => {
             return a.backupOrder - b.backupOrder
         })
     }, [storages])
-
-    const updateOrder = async (storages: number[]) => {}
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
         setDraggingStorage(null)
@@ -65,8 +67,17 @@ const LoadBalancerSidebar = () => {
                     return storage
                 })
 
-                // Call updateOrder with the new order
-                updateOrder(updatedStorages.map(s => s.id))
+                toast.promise(
+                    updateBackupOrder(
+                        nodeId,
+                        updatedStorages.map(s => s.id)
+                    ),
+                    {
+                        loading: 'Saving changes...',
+                        success: 'Changes saved successfully',
+                        error: 'Save failed',
+                    }
+                )
 
                 return updatedStorages
             }, false)
@@ -114,7 +125,7 @@ const LoadBalancerSidebar = () => {
                         }
                         onDragEnd={handleDragEnd}
                     >
-                        <ol className={'flex flex-col gap-3 h-full'}>
+                        <ol className={'flex h-full flex-col gap-3'}>
                             <SortableContext
                                 items={sortedStorages.map(
                                     storage => storage.id
