@@ -2,6 +2,7 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
 import { Location, PaginatedLocations } from '@/types/location.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
+import { toast } from 'sonner'
 import { KeyedMutator } from 'swr'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -12,14 +13,13 @@ import { Button } from '@/components/ui/Button'
 import {
     Credenza,
     CredenzaBody,
+    CredenzaClose,
     CredenzaContent,
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
     CredenzaTitle,
-    CredenzaTrigger,
 } from '@/components/ui/Credenza'
-import { toast } from 'sonner'
 
 interface Props {
     mutate: KeyedMutator<PaginatedLocations>
@@ -87,10 +87,11 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                     )}
                 </CredenzaBody>
                 <CredenzaFooter className={'mt-4'}>
-                    <CredenzaTrigger asChild>
+                    <CredenzaClose asChild>
                         <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaTrigger>
+                    </CredenzaClose>
                     <Button
+                        autoFocus
                         loading={state.loading}
                         variant={'destructive'}
                         onClick={() => submit(location!)}

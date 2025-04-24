@@ -84,7 +84,7 @@ class FindPasskeyToAuthenticateAction
     ): ?PublicKeyCredentialSource {
         $csmFactory = new CeremonyStepManagerFactory;
         if (app()->environment('local') && config('app.version') === 'canary') {
-            $csmFactory->setSecuredRelyingPartyId(['localhost']);
+            $csmFactory->setAllowedOrigins(['localhost']);
         }
         $requestCsm = $csmFactory->requestCeremony();
 

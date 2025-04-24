@@ -38,7 +38,7 @@ const quotas = [
 ]
 
 const BackupQuotaSidebar = () => {
-    const { data: server } = useServerSWR()
+    const { data: _server } = useServerSWR()
 
     return (
         <>

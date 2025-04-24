@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
-use App\Models\Storage;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Nodes\Storages\StoreStorageRequest;
+use App\Http\Requests\Admin\Nodes\Storages\UpdateStorageRequest;
 use App\Models\Node;
-use Illuminate\Database\ConnectionInterface;
+use App\Models\Storage;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use App\Transformers\Admin\StorageDataTransformer;
 use App\Transformers\Admin\StorageTransformer;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 
-use App\Http\Requests\Admin\Nodes\Storages\StoreStorageRequest;
 use function fractal;
 
 class StorageController extends Controller
@@ -48,6 +49,13 @@ class StorageController extends Controller
 
             return $storage;
         });
+
+        return fractal($storage, new StorageTransformer)->respond();
+    }
+
+    public function update(UpdateStorageRequest $request, Node $node, Storage $storage): JsonResponse
+    {
+        $storage->update($request->validated());
 
         return fractal($storage, new StorageTransformer)->respond();
     }

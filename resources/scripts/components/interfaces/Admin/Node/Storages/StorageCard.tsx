@@ -1,6 +1,8 @@
+import { useStoragesModalStore } from '@/routes/_app/admin/nodes.$nodeId/storages.lazy.tsx'
 import { NodeStorage } from '@/types/storage.ts'
 import { cn } from '@/utils'
 import { IconDots } from '@tabler/icons-react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Badge, badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +19,10 @@ interface Props {
 }
 
 const StorageCard = ({ storage }: Props) => {
+    const openModal = useStoragesModalStore(
+        useShallow(state => state.openModal)
+    )
+
     return (
         <Card className={'flex px-5 py-2.5 pr-2.5'}>
             <div className={'flex grow flex-col justify-center'}>
@@ -25,7 +31,7 @@ const StorageCard = ({ storage }: Props) => {
                     {storage.displayName && (
                         <span
                             className={cn(
-                                'inline-flex align-middle',
+                                'inline-flex align-middle tracking-tight',
                                 badgeVariants({
                                     variant: 'secondary',
                                 })
@@ -73,8 +79,21 @@ const StorageCard = ({ storage }: Props) => {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end' className={'w-60'}>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => openModal('show', storage)}
+                        >
+                            Usage
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => openModal('edit', storage)}
+                        >
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => openModal('delete', storage)}
+                        >
+                            Delete
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

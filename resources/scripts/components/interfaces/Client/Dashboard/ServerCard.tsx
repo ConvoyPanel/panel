@@ -40,7 +40,7 @@ const ServerCard = ({ server }: Props) => {
                     params={{
                         serverUuid: server.uuidShort,
                     }}
-                    className={'font-semibold'}
+                    className={'font-semibold tracking-tight'}
                 >
                     {server.name}
                 </Link>

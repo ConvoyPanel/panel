@@ -13,7 +13,7 @@ const Heading = <T extends ElementType = 'h1'>({
     const Component = as || 'h1'
     return (
         <Component
-            className={cn('text-2xl font-semibold sm:text-3xl', className)}
+            className={cn('text-2xl font-semibold sm:text-3xl tracking-tight', className)}
             {...props}
         />
     )

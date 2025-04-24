@@ -2,7 +2,7 @@ import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
 
 import { ConfirmDialogProvider } from '@/components/ui/AlertDialog'
-import { TooltipProvider } from '@/components/ui/Tooltip.tsx'
+import { TooltipProvider } from '@/components/ui/Tooltip'
 
 export const Route = createRootRoute({
     component: RootComponent,

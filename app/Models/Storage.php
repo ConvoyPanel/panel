@@ -34,6 +34,7 @@ class Storage extends Model
     {
         return [
             'size' => StorageSizeCast::class,
+            'is_shareable' => 'boolean',
             'stores_kvm' => 'boolean',
             'stores_lxc' => 'boolean',
             'stores_lxc_templates' => 'boolean',
@@ -51,5 +52,10 @@ class Storage extends Model
             'storage_id',
             'node_id',
         )->withPivot('backup_order');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
     }
 }
