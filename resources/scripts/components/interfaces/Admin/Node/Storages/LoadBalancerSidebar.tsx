@@ -17,6 +17,7 @@ import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     Sheet,
     SheetContent,
+    SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
@@ -94,6 +95,12 @@ const LoadBalancerSidebar = () => {
             <SheetContent side={'right'}>
                 <SheetHeader>
                     <SheetTitle>Load Balancer</SheetTitle>
+                    <SheetDescription>
+                        Manage the order in which storages are used by the load
+                        balancer for storing KVM backups. The uppermost storage
+                        will be used first, followed by the second storage, and
+                        so on.
+                    </SheetDescription>
                 </SheetHeader>
                 {isLoading ? (
                     <div className={'flex flex-col gap-2 @md:gap-4'}>
@@ -125,7 +132,7 @@ const LoadBalancerSidebar = () => {
                         }
                         onDragEnd={handleDragEnd}
                     >
-                        <ol className={'flex h-full flex-col gap-3'}>
+                        <ol className={'flex h-full flex-col gap-3 py-3'}>
                             <SortableContext
                                 items={sortedStorages.map(
                                     storage => storage.id

@@ -1,5 +1,3 @@
-import createModalStore from '@/hooks/create-modal-store.ts'
-import { NodeStorage } from '@/types/storage.ts'
 import { IconDatabase } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
@@ -20,11 +18,6 @@ import { Heading } from '@/components/ui/Typography'
 export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/storages')({
     component: NodeStorages,
 })
-
-export const useStoragesModalStore = createModalStore<
-    NodeStorage,
-    'show' | 'edit' | 'delete'
->()
 
 function NodeStorages() {
     const { data: storages, isLoading } = useStoragesSWR()
@@ -52,7 +45,9 @@ function NodeStorages() {
                         <SimpleEmptyState
                             icon={IconDatabase}
                             title={'Storages'}
-                            description={'No storages have been created for this node yet. Add a storage to enable server deployments and resource management.'}
+                            description={
+                                'No storages have been created for this node yet. Add a storage to enable server deployments and resource management.'
+                            }
                         />
                     </CardContent>
                 </Card>

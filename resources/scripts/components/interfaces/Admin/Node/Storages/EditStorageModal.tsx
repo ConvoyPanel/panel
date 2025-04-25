@@ -1,17 +1,17 @@
-import { useStoragesModalStore } from '@/routes/_app/admin/nodes.$nodeId/storages.lazy.tsx'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/types/storage.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
 import { storageSchema } from '@/api/admin/nodes/storages/createStorage.ts'
 import updateStorage from '@/api/admin/nodes/storages/updateStorage.ts'
+import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+
+import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -26,7 +26,6 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
 
 const EditStorageModal = () => {
     const { mutate } = useStoragesSWR()

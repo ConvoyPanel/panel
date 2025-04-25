@@ -1,12 +1,10 @@
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/types/storage.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
 import { z } from 'zod'
 
 import createStorage, {

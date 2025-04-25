@@ -1,6 +1,7 @@
-import { useStoragesModalStore } from '@/routes/_app/admin/nodes.$nodeId/storages.lazy.tsx'
 import byteSize from 'byte-size'
 import { useShallow } from 'zustand/react/shallow'
+
+import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
 import {
     Credenza,
