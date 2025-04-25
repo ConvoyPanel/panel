@@ -29,7 +29,7 @@ const MemoryUsageCard = () => {
                 <p className={'relative'}>
                     <span
                         className={
-                            'inline-block text-lg font-bold @xl:text-2xl'
+                            'inline-block text-lg font-semibold tracking-tight @xl:text-2xl'
                         }
                     >
                         {used.value} {used.unit}

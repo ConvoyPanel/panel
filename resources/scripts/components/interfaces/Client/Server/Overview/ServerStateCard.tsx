@@ -16,7 +16,7 @@ const ServerStateCard = () => {
             {state ? (
                 <p
                     className={
-                        '@sm:text-2xl flex items-center text-lg font-bold'
+                        '@sm:text-2xl flex items-center text-lg font-semibold tracking-tight'
                     }
                 >
                     <span className='@sm:mr-4 relative mx-1 mr-2 flex h-2 w-2'>

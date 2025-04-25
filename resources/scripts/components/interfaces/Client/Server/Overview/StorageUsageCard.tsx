@@ -7,7 +7,6 @@ import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 
 import StatisticCard from './StatisticCard'
 
-
 const StorageUsageCard = () => {
     const { data: server } = useServerSWR()
 
@@ -36,7 +35,11 @@ const StorageUsageCard = () => {
             }
         >
             <p>
-                <span className={'text-lg font-bold @sm:text-xl @xl:text-2xl'}>
+                <span
+                    className={
+                        'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                    }
+                >
                     {used.value} {used.unit} used
                 </span>
                 <span className={'block text-sm text-muted-foreground'}>

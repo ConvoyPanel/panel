@@ -16,7 +16,7 @@ const UptimeCard = () => {
             {state ? (
                 <p
                     className={
-                        'relative truncate text-lg font-bold @sm:text-2xl'
+                        'relative truncate text-lg font-semibold tracking-tight @sm:text-2xl'
                     }
                 >
                     {formatDistance(

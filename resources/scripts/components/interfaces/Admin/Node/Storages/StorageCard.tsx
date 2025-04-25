@@ -1,8 +1,9 @@
-import { useStoragesModalStore } from '@/routes/_app/admin/nodes.$nodeId/storages.lazy.tsx'
 import { NodeStorage } from '@/types/storage.ts'
 import { cn } from '@/utils'
 import { IconDots } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
+
+import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
 import { Badge, badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
