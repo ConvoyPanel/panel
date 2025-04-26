@@ -4,7 +4,7 @@ namespace App\Services\Isos;
 
 use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\IsoData;
-use App\Enums\Node\Storage\ContentType;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Jobs\Node\MonitorIsoDownloadJob;
 use App\Models\ISO;
 use App\Models\Node;
@@ -49,7 +49,7 @@ class IsoService
                 ]);
 
                 $upid = $this->repository->setNode($node)->download(
-                    ContentType::ISO,
+                    StorageContentType::ISO,
                     $iso->file_name,
                     $link,
                     true,
@@ -80,7 +80,7 @@ class IsoService
 
         $this->connection->transaction(function () use ($node, $iso) {
             if ($iso->is_successful) {
-                $this->repository->setNode($node)->deleteFile(ContentType::ISO, $iso->file_name);
+                $this->repository->setNode($node)->deleteFile(StorageContentType::ISO, $iso->file_name);
             }
 
             $iso->delete();

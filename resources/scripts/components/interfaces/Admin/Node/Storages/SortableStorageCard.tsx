@@ -44,15 +44,16 @@ const SortableStorageCard = ({ storage, isOverlay = false }: Props) => {
                 className={
                     'absolute left-1 top-1/2 shrink-0 -translate-y-1/2 text-muted-foreground'
                 }
+                stroke={1.5}
             />
             <div className={'flex items-center'}>
                 <p className={'inline truncate font-semibold'}>
-                    {storage?.displayName ?? storage.name} as f df s
+                    {storage?.displayName ?? storage.name}
                 </p>
                 {storage.displayName && (
                     <span
                         className={cn(
-                            'shrink-0F ml-1.5 inline-flex align-middle tracking-tight',
+                            'shrink-0 ml-1.5 inline-flex align-middle tracking-tight',
                             badgeVariants({
                                 variant: 'secondary',
                             })

@@ -121,7 +121,7 @@ const EditStorageModal = () => {
                                 name={'description'}
                                 label={'Description'}
                             />
-                            <InputForm name={'name'} label={'Name'} />
+                            <InputForm name={'name'} label={'Name'} autoComplete={'off'} />
                             <InputForm name={'size'} label={'Size (MiB)'} />
                             <div>
                                 <h3 className={'text-sm font-semibold'}>

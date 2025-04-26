@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Node extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRelationships;
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -40,7 +42,7 @@ class Node extends Model
         'cpu_count' => 'required|integer|min:1',
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
-        //'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
+        // 'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
     ];
 
@@ -118,9 +120,22 @@ class Node extends Model
     /**
      * Gets the ISOs downloaded on a node.
      */
-    public function isos(): HasMany
+    public function isos(): HasManyDeep
     {
-        return $this->hasMany(ISO::class);
+        return $this->hasManyDeep(
+            ISO::class, // The final related model
+            ['storage_to_node', Storage::class], // Intermediate models/tables [pivot, related]
+            [
+                'node_id',    // Foreign key on the 'storage_to_node' pivot table for the Node model
+                'id',         // Foreign key on the 'storages' table (belongs to Storage model)
+                'storage_id',  // Foreign key on the 'iso_library' table for the Storage model
+            ],
+            [
+                'id',         // Local key on the 'nodes' table
+                'storage_id', // Local key on the 'storage_to_node' pivot table for the Storage model
+                'id',          // Local key on the 'storages' table
+            ]
+        );
     }
 
     /**

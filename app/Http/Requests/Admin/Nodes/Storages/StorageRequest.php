@@ -7,7 +7,7 @@ use App\Models\Node;
 use App\Models\Storage;
 use App\Rules\UniqueStorageNamePerNode;
 
-class StoreStorageRequest extends BaseApiRequest
+class StorageRequest extends BaseApiRequest
 {
     public function rules(): array
     {
@@ -15,7 +15,16 @@ class StoreStorageRequest extends BaseApiRequest
 
         /** @var Node $node */
         $node = $this->parameter('node', Node::class);
-        $rules['name'][] = new UniqueStorageNamePerNode($node->id);
+
+        $storageId = null;
+
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            /** @var Storage $storage */
+            $storage = $this->parameter('storage', Storage::class);
+            // Set the ID to ignore for the uniqueness check
+            $storageId = $storage->id;
+        }
+        $rules['name'][] = new UniqueStorageNamePerNode($node->id, $storageId);
 
         // Override display_name validation based on is_shareable
         if ($this->boolean('is_shareable')) {

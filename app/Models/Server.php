@@ -15,6 +15,8 @@ class Server extends Model
 {
     use HasFactory;
 
+    public const UPDATED_AT = null;
+
     protected $guarded = [
         'id',
         'updated_at',
@@ -24,6 +26,7 @@ class Server extends Model
     public static array $validationRules = [
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|integer|exists:nodes,id',
+        'storage_id' => 'required|integer|exists:storages,id',
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',

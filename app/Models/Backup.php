@@ -16,7 +16,8 @@ class Backup extends Model
 
     public static array $validationRules = [
         'uuid' => 'required|uuid',
-        'server_id' => 'required|exists:servers,id',
+        'server_id' => 'required|integer|exists:servers,id',
+        'storage_id' => 'required|integer|exists:storages,id',
         'is_successful' => 'sometimes|boolean',
         'is_locked' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',

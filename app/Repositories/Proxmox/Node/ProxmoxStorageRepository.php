@@ -6,7 +6,7 @@ use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\FileMetaData;
 use App\Data\Node\Storage\IsoData;
 use App\Data\Node\Storage\StorageData;
-use App\Enums\Node\Storage\ContentType;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
 use App\Repositories\Proxmox\ProxmoxRepository;
@@ -53,11 +53,11 @@ class ProxmoxStorageRepository extends ProxmoxRepository
     }
 
     public function download(
-        ContentType $contentType,
-        string $fileName,
-        string $link,
-        ?bool $verifyCertificates = true,
-        ?ChecksumData $checksumData = null,
+        StorageContentType $contentType,
+        string             $fileName,
+        string             $link,
+        ?bool              $verifyCertificates = true,
+        ?ChecksumData      $checksumData = null,
     ) {
         Assert::regex($link, '/^(http|https):\/\//', 'Invalid URL provided');
 
@@ -82,7 +82,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function deleteFile(ContentType $contentType, string $fileName)
+    public function deleteFile(StorageContentType $contentType, string $fileName)
     {
         $response = $this->getHttpClientWithParams([
             'storage' => $this->node->iso_storage,

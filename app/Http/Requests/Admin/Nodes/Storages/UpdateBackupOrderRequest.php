@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Admin\Nodes\Storages;
 
+use App\Enums\Node\Storage\StorageContentType;
 use App\Http\Requests\BaseApiRequest;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\StorageAllows;
 
 class UpdateBackupOrderRequest extends BaseApiRequest
 {
@@ -19,6 +20,7 @@ class UpdateBackupOrderRequest extends BaseApiRequest
                 'required',
                 'integer',
                 'exists:storages,id',
+                new StorageAllows(StorageContentType::BACKUPS),
             ],
         ];
     }

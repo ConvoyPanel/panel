@@ -95,7 +95,7 @@ abstract class BaseApiRequest extends FormRequest
      *
      * @noinspection PhpDocSignatureInspection
      */
-    public function parameter(string $key, string $expect)
+    public function parameter(string $key, string $expect): Model
     {
         $value = $this->route()->parameter($key);
 
@@ -103,7 +103,6 @@ abstract class BaseApiRequest extends FormRequest
         Assert::isInstanceOf($value, Model::class);
         Assert::true($value->exists);
 
-        /* @var Model $value */
         return $value;
     }
 }

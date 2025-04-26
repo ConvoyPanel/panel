@@ -13,10 +13,12 @@ class ISO extends Model
 
     protected $table = 'iso_library';
 
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $guarded = ['id', 'created_at'];
+
+    public const UPDATED_AT = null;
 
     public static array $validationRules = [
-        'node_id' => 'required|integer|exists:nodes,id',
+        'storage_id' => 'required|integer|exists:storages,id',
         'is_successful' => 'sometimes|boolean',
         'name' => 'required|string|min:1|max:40',
         'file_name' => 'required|string|ends_with:.iso|max:191',

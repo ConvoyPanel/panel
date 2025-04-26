@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Nodes\Storages\StoreStorageRequest;
+use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
-use App\Http\Requests\Admin\Nodes\Storages\UpdateStorageRequest;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
@@ -40,13 +39,14 @@ class StorageController extends Controller
         return fractal($storages, new StorageDataTransformer)->respond();
     }
 
-    public function store(StoreStorageRequest $request, Node $node): JsonResponse
+    public function store(StorageRequest $request, Node $node): JsonResponse
     {
         $storage = $this->connection->transaction(function () use ($request, $node) {
             $storage = Storage::create($request->validated());
 
-            $node->storages()->attach($storage->id, [
-                'backup_order' => $request->input('backup_order'),
+            StorageToNode::create([
+                'storage_id' => $storage->id,
+                'node_id' => $node->id,
             ]);
 
             return $storage;
@@ -55,7 +55,7 @@ class StorageController extends Controller
         return fractal($storage, new StorageTransformer)->respond();
     }
 
-    public function update(UpdateStorageRequest $request, Node $_, Storage $storage): JsonResponse
+    public function update(StorageRequest $request, Node $node, Storage $storage): JsonResponse
     {
         $storage->update($request->validated());
 
