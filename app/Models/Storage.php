@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Str;
 
 class Storage extends Model
 {
@@ -96,6 +98,85 @@ class Storage extends Model
             'id',            // Local key on Storage table
             'id'             // Local key on Server table
         );
+    }
+
+    /**
+     * Query Scope to automatically include the sums of related storage usage.
+     *
+     * Call this like: Storage::withUsageSums()->find(1);
+     *
+     * @param  Builder  $query  The Eloquent query builder.
+     * @return Builder The modified query builder.
+     */
+    public function scopeWithUsageSums(Builder $query): Builder
+    {
+        return $query->withSum('servers as servers_sum_disk', 'disk')
+            ->withSum('backups as backups_sum_size', 'size')
+            ->withSum('isos as isos_sum_size', 'size')
+            ->withSum('snapshots as snapshots_sum_size', 'size');
+    }
+
+    /**
+     * Helper method to get usage value, checking for pre-loaded sums first.
+     *
+     * @param  string  $relationshipName  The name of the relationship method (e.g., 'servers').
+     * @param  string  $sumColumn  The column to sum on the related table (e.g., 'disk').
+     * @param  string  $preloadedSumAttribute  The expected attribute name if loaded via withSum (e.g., 'servers_sum_disk').
+     */
+    private function getUsageAttributeValue(string $relationshipName, string $sumColumn, string $preloadedSumAttribute): int
+    {
+        // Check if a sum was loaded via withSum() using the expected attribute name
+        if (array_key_exists($preloadedSumAttribute, $this->attributes)) {
+            // Return the preloaded value, defaulting to 0 if null
+            return (int) ($this->attributes[$preloadedSumAttribute] ?? 0);
+        }
+
+        // Fallback: Calculate on the fly using the relationship method
+        // Warning: Can cause N+1 query issues if withSum wasn't used on collections
+        // Use Str::camel to call the relationship method dynamically (e.g., 'servers' -> $this->servers())
+        $relationshipMethod = Str::camel($relationshipName);
+        if (method_exists($this, $relationshipMethod)) {
+            return (int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0);
+        }
+
+        // Return 0 if the relationship method doesn't exist (should not happen with the correct usage)
+        return 0;
+    }
+
+    /**
+     * Accessor for server disk usage.
+     * Uses the helper method for calculation.
+     */
+    public function getServerUsageAttribute(): int
+    {
+        return $this->getUsageAttributeValue('servers', 'disk', 'servers_sum_disk');
+    }
+
+    /**
+     * Accessor for backup size usage.
+     * Uses the helper method for calculation.
+     */
+    public function getBackupUsageAttribute(): int
+    {
+        return $this->getUsageAttributeValue('backups', 'size', 'backups_sum_size');
+    }
+
+    /**
+     * Accessor for ISO size usage.
+     * Uses the helper method for calculation.
+     */
+    public function getIsoUsageAttribute(): int
+    {
+        return $this->getUsageAttributeValue('isos', 'size', 'isos_sum_size');
+    }
+
+    /**
+     * Accessor for snapshot size usage.
+     * Uses the helper method for calculation.
+     */
+    public function getSnapshotUsageAttribute(): int
+    {
+        return $this->getUsageAttributeValue('snapshots', 'size', 'snapshots_sum_size');
     }
 
     public function getRouteKeyName(): string
