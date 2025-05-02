@@ -145,7 +145,6 @@ class Storage extends Model
 
     /**
      * Accessor for server disk usage.
-     * Uses the helper method for calculation.
      */
     public function getServerUsageAttribute(): int
     {
@@ -154,7 +153,6 @@ class Storage extends Model
 
     /**
      * Accessor for backup size usage.
-     * Uses the helper method for calculation.
      */
     public function getBackupUsageAttribute(): int
     {
@@ -163,7 +161,6 @@ class Storage extends Model
 
     /**
      * Accessor for ISO size usage.
-     * Uses the helper method for calculation.
      */
     public function getIsoUsageAttribute(): int
     {
@@ -172,7 +169,6 @@ class Storage extends Model
 
     /**
      * Accessor for snapshot size usage.
-     * Uses the helper method for calculation.
      */
     public function getSnapshotUsageAttribute(): int
     {
