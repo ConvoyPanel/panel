@@ -26,7 +26,7 @@ class StorageController extends Controller
 
     public function index(Node $node): JsonResponse
     {
-        return fractal($node->storages()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
+        return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
 
     /**
@@ -69,6 +69,6 @@ class StorageController extends Controller
             primaryKeyColumn: 'storage_id'
         );
 
-        return fractal($node->storages()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
+        return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
 }

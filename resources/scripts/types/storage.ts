@@ -13,6 +13,12 @@ export interface Storage {
     storesBackups: boolean
     storesIso: boolean
     storesSnippets: boolean
+    usages: {
+        server: number
+        backup: number
+        iso: number
+        snapshot: number
+    }
 }
 
 export interface NodeStorage extends Storage {

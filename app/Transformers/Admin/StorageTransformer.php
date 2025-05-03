@@ -7,7 +7,6 @@ use League\Fractal\TransformerAbstract;
 
 class StorageTransformer extends TransformerAbstract
 {
-
     public function transform(Storage $storage): array
     {
         return [
@@ -24,6 +23,10 @@ class StorageTransformer extends TransformerAbstract
             'stores_iso' => $storage->stores_iso,
             'stores_snippets' => $storage->stores_snippets,
             'backup_order' => $storage?->pivot?->backup_order,
+            'server_usage' => $storage->server_usage,
+            'backup_usage' => $storage->backup_usage,
+            'iso_usage' => $storage->iso_usage,
+            'snapshot_usage' => $storage->snapshot_usage,
         ];
     }
 }

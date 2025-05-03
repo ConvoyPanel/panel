@@ -13,6 +13,12 @@ export const rawDataToStorage = (raw: any): Storage => ({
     storesBackups: raw.stores_backups,
     storesIso: raw.stores_iso,
     storesSnippets: raw.stores_snippets,
+    usages: {
+        server: raw.server_usage,
+        backup: raw.backup_usage,
+        iso: raw.iso_usage,
+        snapshot: raw.snapshot_usage,
+    }
 })
 
 export const rawDataToNodeStorage = (raw: any): NodeStorage => ({
