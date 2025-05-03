@@ -19,7 +19,6 @@ import { Button, buttonVariants } from '@/components/ui/Button'
 const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
     const router = useRouter()
     const isAdmin = useLocation({
-        // @ts-expect-error
         select: location => location.pathname,
     }).startsWith('/admin')
 

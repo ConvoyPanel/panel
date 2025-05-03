@@ -14,7 +14,6 @@ import { Button, buttonVariants } from '@/components/ui/Button'
 const NotFoundComponent = () => {
     const router = useRouter()
     const isAdmin = useLocation({
-        // @ts-expect-error
         select: location => location.pathname,
     }).startsWith('/admin')
 

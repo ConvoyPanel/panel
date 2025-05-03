@@ -29,7 +29,7 @@ export const ErrorCode = ({ children }: Props) => {
 
 export const ErrorTitle = ({ children }: Props) => {
     return (
-        <h2 className={'mt-2 text-4xl font-bold tracking-tight'}>{children}</h2>
+        <h2 className={'mt-2 text-4xl font-semibold tracking-tight'}>{children}</h2>
     )
 }
 
