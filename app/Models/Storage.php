@@ -128,7 +128,7 @@ class Storage extends Model
         // Check if a sum was loaded via withSum() using the expected attribute name
         if (array_key_exists($preloadedSumAttribute, $this->attributes)) {
             // Return the preloaded value, defaulting to 0 if null
-            return (int) ($this->attributes[$preloadedSumAttribute] ?? 0);
+            return (int) ($this->attributes[$preloadedSumAttribute] ?? 0) * 1024 * 1024; // convert from MiB to bytes
         }
 
         // Fallback: Calculate on the fly using the relationship method
@@ -136,7 +136,7 @@ class Storage extends Model
         // Use Str::camel to call the relationship method dynamically (e.g., 'servers' -> $this->servers())
         $relationshipMethod = Str::camel($relationshipName);
         if (method_exists($this, $relationshipMethod)) {
-            return (int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0);
+            return (int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0) * 1024 * 1024; // convert from MiB to bytes
         }
 
         // Return 0 if the relationship method doesn't exist (should not happen with the correct usage)
