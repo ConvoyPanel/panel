@@ -27,7 +27,11 @@ const StorageCard = ({ storage }: Props) => {
     return (
         <Card className={'flex px-5 py-2.5 pr-2.5'}>
             <div className={'flex grow flex-col justify-center'}>
-                <p className={'inline font-semibold'}>
+                <button
+                    className={'inline-block text-left font-semibold'}
+                    onClick={() => openModal('show', storage)}
+                    title={`View details for ${storage.displayName ?? storage.name}`}
+                >
                     {storage.displayName ?? storage.name}{' '}
                     {storage.displayName && (
                         <span
@@ -41,7 +45,7 @@ const StorageCard = ({ storage }: Props) => {
                             {storage.name}
                         </span>
                     )}
-                </p>
+                </button>
                 {storage.description && (
                     <p
                         className={

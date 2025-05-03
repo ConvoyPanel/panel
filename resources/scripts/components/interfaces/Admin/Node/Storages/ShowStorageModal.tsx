@@ -1,4 +1,5 @@
 import byteSize from 'byte-size'
+import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
@@ -22,7 +23,15 @@ const ShowStorageModal = () => {
         ])
     )
 
-    const used = byteSize(4000, {
+    const usedTotal = useMemo(() => {
+        const usages = storage?.usages
+
+        return usages
+            ? usages.server + usages.backup + usages.iso + usages.snapshot
+            : 0
+    }, [storage])
+
+    const used = byteSize(usedTotal, {
         units: 'iec',
         precision: 2,
     })
@@ -31,7 +40,7 @@ const ShowStorageModal = () => {
         precision: 2,
     })
 
-    const usedPercent = storage ? (4000 / storage.size) * 100 : 0
+    const usedPercent = storage ? (usedTotal / storage.size) * 100 : 0
 
     return (
         <Credenza open={open} onOpenChange={open => !open && close('show')}>
@@ -55,22 +64,22 @@ const ShowStorageModal = () => {
                         segments={[
                             {
                                 label: 'KVM',
-                                value: 24,
+                                value: storage ? (storage.usages.server / storage.size) * 100 : 0,
                                 color: 'hsl(var(--chart-1))',
                             },
                             {
                                 label: 'Backups',
-                                value: 12,
+                                value: storage ? (storage.usages.backup / storage.size) * 100 : 0,
                                 color: 'hsl(var(--chart-2))',
                             },
                             {
                                 label: 'Snapshots',
-                                value: 14,
+                                value: storage ? (storage.usages.snapshot / storage.size) * 100 : 0,
                                 color: 'hsl(var(--chart-3))',
                             },
                             {
                                 label: 'ISO Images',
-                                value: 15,
+                                value: storage ? (storage.usages.iso / storage.size) * 100 : 0,
                                 color: 'hsl(var(--chart-4))',
                             },
                         ]}
