@@ -7,7 +7,7 @@ import { rawDataToNodeStorage } from '@/api/transformers/storage.ts'
 export const storageSchema = z
     .object({
         displayName: z.string().max(40).optional(),
-        description: z.string().max(191).nullable(),
+        description: z.string().max(191),
         name: z.string().min(1).max(191),
         size: z.coerce.number().min(1),
         isShareable: z.boolean(),
