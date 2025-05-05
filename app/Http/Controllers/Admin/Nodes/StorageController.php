@@ -71,4 +71,11 @@ class StorageController extends Controller
 
         return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
+
+    public function destroy(Node $node, Storage $storage): JsonResponse
+    {
+        // TODO: implement StorageController destroy method
+
+        return response()->noContent();
+    }
 }

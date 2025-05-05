@@ -50,7 +50,15 @@ Route::prefix('/nodes')->group(function () {
 
             Route::prefix('/{storage}')->group(function () {
                 Route::put('/', [Admin\Nodes\StorageController::class, 'update']);
+                Route::delete('/', [Admin\Nodes\StorageController::class, 'destroy']);
             });
+        });
+
+        Route::prefix('/network-interfaces')->group(function () {
+            Route::get('/', [Admin\Nodes\NetworkInterfaceController::class, 'index']);
+            Route::post('/', [Admin\Nodes\NetworkInterfaceController::class, 'store']);
+            Route::put('/{interface}', [Admin\Nodes\NetworkInterfaceController::class, 'update']);
+            Route::delete('/{interface}', [Admin\Nodes\NetworkInterfaceController::class, 'destroy']);
         });
 
         /*

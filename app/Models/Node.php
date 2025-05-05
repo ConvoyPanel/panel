@@ -146,6 +146,11 @@ class Node extends Model
         return $this->belongsTo(Location::class);
     }
 
+    public function networkInterfaces(): HasMany
+    {
+        return $this->hasMany(NetworkInterface::class);
+    }
+
     /**
      * Gets the instance of Coterm that's connected with this node.
      */
