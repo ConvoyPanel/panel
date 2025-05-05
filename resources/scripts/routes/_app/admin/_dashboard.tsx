@@ -2,7 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
     IconHome,
-    IconMapPin,
+    IconMapPin, IconMapPins,
     IconServer,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
@@ -49,6 +49,11 @@ const routes: RouteDef[] = [
         icon: IconServer,
         label: 'Servers',
         path: '/admin/servers',
+    },
+    {
+      icon: IconMapPins,
+      label: 'IPAM',
+      path: '/admin/ipam',
     },
     {
         icon: IconBoxMargin,
