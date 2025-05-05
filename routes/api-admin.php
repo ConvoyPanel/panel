@@ -57,8 +57,8 @@ Route::prefix('/nodes')->group(function () {
         Route::prefix('/network-interfaces')->group(function () {
             Route::get('/', [Admin\Nodes\NetworkInterfaceController::class, 'index']);
             Route::post('/', [Admin\Nodes\NetworkInterfaceController::class, 'store']);
-            Route::put('/{interface}', [Admin\Nodes\NetworkInterfaceController::class, 'update']);
-            Route::delete('/{interface}', [Admin\Nodes\NetworkInterfaceController::class, 'destroy']);
+            Route::put('/{network_interface}', [Admin\Nodes\NetworkInterfaceController::class, 'update']);
+            Route::delete('/{network_interface}', [Admin\Nodes\NetworkInterfaceController::class, 'destroy']);
         });
 
         /*

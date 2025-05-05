@@ -1,12 +1,13 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/types/storage.ts'
+import { Route } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
+import { NetworkInterface } from '@/types/network-interface.ts'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import deleteNetworkInterface from '@/api/admin/nodes/networkInterfaces/deleteNetworkInterface.ts'
+import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
 
-import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
+import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -19,10 +20,10 @@ import {
     CredenzaTitle,
 } from '@/components/ui/Credenza'
 
-const DeleteStorageModal = () => {
-    const { mutate } = useStoragesSWR()
-    const { nodeId } = StorageRoute.useParams()
-    const [storage, open, close] = useStoragesModalStore(
+const DeleteNetworkInterfaceModal = () => {
+    const { nodeId } = Route.useParams()
+    const { mutate } = useNetworkInterfacesSWR()
+    const [networkInterface, open, close] = useNetworkInterfacesModalStore(
         useShallow(state => [
             state.modalData,
             state.activeModal === 'delete',
@@ -31,16 +32,24 @@ const DeleteStorageModal = () => {
     )
 
     const [state, submit] = useAsyncFunction(
-        async (currentStorage: NodeStorage) => {
+        async (currentNetworkInterface: NetworkInterface) => {
             try {
-                toast.success('Storage deleted')
+                await deleteNetworkInterface(nodeId, currentNetworkInterface.id)
 
+                await mutate(data => {
+                    if (!data) return data
+                    return data.filter(
+                        item => item.id !== currentNetworkInterface.id
+                    )
+                })
+
+                toast.success('Network interface deleted')
                 close('delete')
             } catch (e) {
                 toast.error('Deletion failed')
                 throw e
             }
-         }
+        }
     )
 
     return (
@@ -48,11 +57,10 @@ const DeleteStorageModal = () => {
             <CredenzaContent>
                 <CredenzaHeader>
                     <CredenzaTitle>
-                        Delete {storage?.displayName ?? storage?.name}
+                        Delete {networkInterface?.name}
                     </CredenzaTitle>
                     <CredenzaDescription>
-                        Are you sure you want to delete this storage? This will
-                        not delete the data on the storage.
+                        Are you sure you want to delete this network interface?
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaFooter className={'mt-4'}>
@@ -63,7 +71,7 @@ const DeleteStorageModal = () => {
                         autoFocus
                         loading={state.loading}
                         variant={'destructive'}
-                        onClick={() => submit(storage!)}
+                        onClick={() => submit(networkInterface!)}
                     >
                         Delete
                     </Button>
@@ -73,4 +81,4 @@ const DeleteStorageModal = () => {
     )
 }
 
-export default DeleteStorageModal
+export default DeleteNetworkInterfaceModal

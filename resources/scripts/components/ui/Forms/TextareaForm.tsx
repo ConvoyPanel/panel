@@ -8,16 +8,16 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
-import { Input, InputProps } from '@/components/ui/Input'
+import { Textarea, TextareaProps } from '@/components/ui/Textarea.tsx'
 
-interface Props extends InputProps {
+interface Props extends TextareaProps {
     name: string
     label?: string
     description?: ReactNode
     formItemProps?: HTMLAttributes<HTMLDivElement>
 }
 
-const InputForm = ({
+const TextareaForm = ({
     name,
     label,
     description,
@@ -31,7 +31,7 @@ const InputForm = ({
                 <FormItem {...formItemProps}>
                     {label && <FormLabel>{label}</FormLabel>}
                     <FormControl>
-                        <Input
+                        <Textarea
                             {...props}
                             {...field}
                             disabled={formState.isSubmitting}
@@ -47,4 +47,4 @@ const InputForm = ({
     )
 }
 
-export default InputForm
+export default TextareaForm

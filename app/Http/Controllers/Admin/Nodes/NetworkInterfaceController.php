@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
+use App\Models\NetworkInterface;
+use App\Http\Requests\Admin\Nodes\NetworkInterfaces\NetworkInterfaceRequest;
 use App\Models\Node;
-use Illuminate\Http\Request;
 use App\Transformers\Admin\NetworkInterfaceTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -16,19 +17,21 @@ class NetworkInterfaceController
         return fractal($node->networkInterfaces, new NetworkInterfaceTransformer)->respond();
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(NetworkInterfaceRequest $request, Node $node): JsonResponse
     {
-        // TODO: finish store method
-        return response()->noContent();
+        $interface = $node->networkInterfaces()->create($request->validated());
+
+        return fractal($interface, new NetworkInterfaceTransformer)->respond();
     }
 
-    public function update(Request $request, Node $node): JsonResponse
+    public function update(NetworkInterfaceRequest $request, Node $node, NetworkInterface $networkInterface): JsonResponse
     {
-        // TODO: finish update method
-        return response()->noContent();
+        $networkInterface->update($request->validated());
+
+        return fractal($networkInterface, new NetworkInterfaceTransformer)->respond();
     }
 
-    public function destroy(Node $node): JsonResponse
+    public function destroy(Node $node, NetworkInterface $networkInterface): JsonResponse
     {
         // TODO: finish destroy method
         return response()->noContent();
