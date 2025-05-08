@@ -23,6 +23,7 @@
     "laravel/sanctum": "^4.0",
     "laravel/tinker": "^2.9",
     "lcobucci/jwt": "^5.0",
+    "mlocati/ip-lib": "^1.20",
     "phpseclib/phpseclib": "^3.0",
     "spatie/eloquent-sortable": "^4.2",
     "spatie/laravel-data": "^4.1",

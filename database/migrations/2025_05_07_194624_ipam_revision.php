@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use IPLib\Factory as IPFactory;
 
 return new class extends Migration
 {
@@ -13,9 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::rename('address_pools', 'address_block_groups');
-
         Schema::rename('address_pool_to_node', 'address_block_group_to_node');
-
         Schema::rename('ip_addresses', 'addresses');
 
         Schema::table('address_block_group_to_node', function (Blueprint $table) {
@@ -58,17 +57,18 @@ return new class extends Migration
 
             // Fetch addresses and group them by a composite key
             $potentialBlocks = DB::table('addresses')
-                                 ->select($selectColumns)
-                                 ->whereNotNull('address_pool_id') // Only migrate addresses that belonged to a pool
-                                 ->orderBy('id') // Consistent ordering helps grouping
-                                 ->get()
+                ->select($selectColumns)
+                ->whereNotNull('address_pool_id') // Only migrate addresses that belonged to a pool
+                ->orderBy('id') // Consistent ordering helps grouping
+                ->get()
                 // Group by a generated composite key string instead of an array
-                                 ->groupBy(function ($item) use ($groupByColumns) {
+                ->groupBy(function ($item) use ($groupByColumns) {
                     $keyParts = [];
                     foreach ($groupByColumns as $col) {
                         // Use 'NULL_VALUE' or similar for actual nulls to make key distinct
                         $keyParts[] = $item->{$col} ?? 'NULL_VALUE';
                     }
+
                     // Use a separator unlikely to appear in the data itself
                     return implode('||', $keyParts);
                 });
@@ -83,7 +83,9 @@ return new class extends Migration
                 /** @var \Illuminate\Support\Collection<int, \stdClass> $addressesInBlock */
                 // $addressesInBlock is now the final collection for this group
                 $firstAddress = $addressesInBlock->first();
-                if (!$firstAddress) continue; // Skip if group is somehow empty
+                if (! $firstAddress) {
+                    continue;
+                } // Skip if group is somehow empty
 
                 // Now access properties directly from the first item in the group
                 $oldPoolId = $firstAddress->address_pool_id;
@@ -94,15 +96,26 @@ return new class extends Migration
                 $firstIp = $firstAddress->ip;
 
                 $group = $addressBlockGroups->get($oldPoolId);
-                if (!$group) {
-                    Log::warning("Address Block Group (formerly Pool) with ID {$oldPoolId} not found during migration (composite key: {$compositeKey}).");
-                    continue;
+                if (! $group) {
+                    throw new \RuntimeException("Migration Error: Address Block Group (formerly Pool) with ID {$oldPoolId} not found during migration (composite key: {$compositeKey}). Cannot migrate addresses associated with it.");
                 }
 
                 // Create a new address_block record
                 $blockName = "Migrated Block ({$gateway}/{$prefixLength})"; // Example name
-                // TODO: Determine a better way to calculate base_ip if possible without external libraries/raw SQL
-                $baseIp = $firstIp; // Placeholder
+                $baseIp = null; // Initialize baseIp
+                try {
+                    // Attempt to parse the range using the correct Factory method
+                    // Use the first IP and prefix length to define the subnet range
+                    $range = IPFactory::parseRangeString($firstIp.'/'.$prefixLength);
+                    if ($range) {
+                        // Get the network address (start address of the range)
+                        $baseIp = $range->getStartAddress()->toString();
+                    } else {
+                        throw new \RuntimeException("Migration Error: Failed to parse range for {$firstIp}/{$prefixLength} using ip-lib (composite key: {$compositeKey}).");
+                    }
+                } catch (\Exception $e) {
+                    throw new \RuntimeException("Migration Error: Could not calculate base IP for {$firstIp}/{$prefixLength} during migration (composite key: {$compositeKey}): ".$e->getMessage());
+                }
 
                 $newBlockId = DB::table('address_blocks')->insertGetId([
                     'address_block_group_id' => $group->id,
@@ -119,10 +132,10 @@ return new class extends Migration
                 // Update all addresses belonging to this specific group
                 $addressIdsToUpdate = $addressesInBlock->pluck('id')->toArray();
 
-                if (!empty($addressIdsToUpdate)) {
+                if (! empty($addressIdsToUpdate)) {
                     DB::table('addresses')
-                      ->whereIn('id', $addressIdsToUpdate)
-                      ->update(['address_block_id' => $newBlockId]);
+                        ->whereIn('id', $addressIdsToUpdate)
+                        ->update(['address_block_id' => $newBlockId]);
                 }
             }
         });
@@ -136,7 +149,6 @@ return new class extends Migration
             $table->dropColumn('address_pool_id');
 
             $table->foreignId('address_block_id')->nullable(false)->change();
-
 
             $table->dropColumn('type', 'gateway', 'mac_address', 'created_at', 'updated_at');
         });
@@ -166,12 +178,8 @@ return new class extends Migration
             $table->timestamps(); // Re-add timestamps
 
             // Drop the new foreign key (constraint first, then column)
-            try {
-                // Use Laravel's convention-based drop for the FK
-                $table->dropForeign(['address_block_id']);
-            } catch (\Exception $e) {
-                Log::info("Could not drop foreign key for 'address_block_id' (might not exist or different name): " . $e->getMessage());
-            }
+            // Use Laravel's convention-based drop for the FK
+            $table->dropForeign(['address_block_id']);
             $table->dropColumn('address_block_id');
 
             // Rename columns back
@@ -188,14 +196,7 @@ return new class extends Migration
         });
 
         Schema::table('address_block_group_to_node', function (Blueprint $table) {
-            // Need to drop FK before renaming if it exists
-            try {
-                // Drop the foreign key constraint using its specific original name
-                // Original table: address_pool_to_node, Original column: address_pool_id
-                $table->dropForeign('address_pool_to_node_address_pool_id_foreign');
-            } catch (\Exception $e) {
-                Log::info("Could not drop foreign key for 'address_block_group_id' (using original name 'address_pool_to_node_address_pool_id_foreign'): " . $e->getMessage());
-            }
+            $table->dropForeign('address_pool_to_node_address_pool_id_foreign');
             $table->renameColumn('address_block_group_id', 'address_pool_id');
             // Re-add foreign key if necessary (adjust table name)
             // Assuming 'address_pools' table exists after rename below
