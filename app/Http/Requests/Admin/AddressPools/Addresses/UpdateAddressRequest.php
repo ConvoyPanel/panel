@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\AddressPools\Addresses;
 
-use App\Enums\Network\AddressType;
+use App\Enums\Network\AddressVersion;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
@@ -25,7 +25,7 @@ class UpdateAddressRequest extends BaseApiRequest
         $address = $this->parameter('address', Address::class);
 
         return [
-            new ValidateAddressType($this->enum('type', AddressType::class), ['address']),
+            new ValidateAddressType($this->enum('type', AddressVersion::class), ['address']),
             new ValidateAddressUniqueness($pool->id, $address->address),
         ];
     }

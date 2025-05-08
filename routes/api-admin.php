@@ -48,10 +48,8 @@ Route::prefix('/nodes')->group(function () {
             Route::post('/', [Admin\Nodes\StorageController::class, 'store']);
             Route::put('/backup-order', [Admin\Nodes\StorageController::class, 'updateBackupOrder']);
 
-            Route::prefix('/{storage}')->group(function () {
-                Route::put('/', [Admin\Nodes\StorageController::class, 'update']);
-                Route::delete('/', [Admin\Nodes\StorageController::class, 'destroy']);
-            });
+            Route::put('/{storage}', [Admin\Nodes\StorageController::class, 'update']);
+            Route::delete('/{storage}', [Admin\Nodes\StorageController::class, 'destroy']);
         });
 
         Route::prefix('/network-interfaces')->group(function () {
@@ -61,25 +59,9 @@ Route::prefix('/nodes')->group(function () {
             Route::delete('/{network_interface}', [Admin\Nodes\NetworkInterfaceController::class, 'destroy']);
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Node ISOs Controller Routes
-        |--------------------------------------------------------------------------
-        |
-        | Endpoint: /api/admin/nodes/{node}/isos
-        |
-        */
         Route::resource('/isos', Admin\Nodes\IsoController::class)
             ->only(['index', 'store', 'update', 'destroy']);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Node Templates Controller Routes
-        |--------------------------------------------------------------------------
-        |
-        | Endpoint: /api/admin/nodes/{node}/template-groups
-        |
-        */
         Route::prefix('/template-groups')->group(function () {
             Route::get(
                 '/',
@@ -203,7 +185,12 @@ Route::prefix('/servers')->group(function () {
 });
 
 Route::prefix('/address-block-groups')->group(function () {
-   Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+    Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+
+    Route::prefix('/{address_block_group}')->group(function () {
+        Route::get('/', [Admin\AddressBlockGroupController::class, 'show']);
+        Route::get('/address-blocks', [Admin\AddressBlockGroupController::class, 'showAddressBlocks']);
+    });
 });
 
 /*
@@ -214,54 +201,54 @@ Route::prefix('/address-block-groups')->group(function () {
 | Endpoint: /api/admin/address-pools
 |
 */
-Route::prefix('/address-pools')->group(function () {
-    Route::get(
-        '/',
-        [Admin\AddressPools\AddressPoolController::class, 'index'],
-    );
-    Route::post(
-        '/',
-        [Admin\AddressPools\AddressPoolController::class, 'store'],
-    );
-
-    Route::prefix('/{address_pool}')->group(function () {
-        Route::get(
-            '/',
-            [Admin\AddressPools\AddressPoolController::class, 'show'],
-        );
-        Route::put(
-            '/',
-            [Admin\AddressPools\AddressPoolController::class, 'update'],
-        );
-        Route::delete(
-            '/',
-            [Admin\AddressPools\AddressPoolController::class, 'destroy'],
-        );
-        Route::get(
-            '/attached-nodes',
-            [Admin\AddressPools\AddressPoolController::class, 'getAttachedNodes'],
-        );
-
-        Route::prefix('/addresses')->group(function () {
-            Route::get(
-                '/',
-                [Admin\AddressPools\AddressController::class, 'index'],
-            );
-            Route::post(
-                '/',
-                [Admin\AddressPools\AddressController::class, 'store'],
-            );
-            Route::put(
-                '/{address}',
-                [Admin\AddressPools\AddressController::class, 'update'],
-            );
-            Route::delete(
-                '/{address}',
-                [Admin\AddressPools\AddressController::class, 'destroy'],
-            );
-        });
-    });
-});
+// Route::prefix('/address-pools')->group(function () {
+//    Route::get(
+//        '/',
+//        [Admin\AddressPools\AddressPoolController::class, 'index'],
+//    );
+//    Route::post(
+//        '/',
+//        [Admin\AddressPools\AddressPoolController::class, 'store'],
+//    );
+//
+//    Route::prefix('/{address_pool}')->group(function () {
+//        Route::get(
+//            '/',
+//            [Admin\AddressPools\AddressPoolController::class, 'show'],
+//        );
+//        Route::put(
+//            '/',
+//            [Admin\AddressPools\AddressPoolController::class, 'update'],
+//        );
+//        Route::delete(
+//            '/',
+//            [Admin\AddressPools\AddressPoolController::class, 'destroy'],
+//        );
+//        Route::get(
+//            '/attached-nodes',
+//            [Admin\AddressPools\AddressPoolController::class, 'getAttachedNodes'],
+//        );
+//
+//        Route::prefix('/addresses')->group(function () {
+//            Route::get(
+//                '/',
+//                [Admin\AddressPools\AddressController::class, 'index'],
+//            );
+//            Route::post(
+//                '/',
+//                [Admin\AddressPools\AddressController::class, 'store'],
+//            );
+//            Route::put(
+//                '/{address}',
+//                [Admin\AddressPools\AddressController::class, 'update'],
+//            );
+//            Route::delete(
+//                '/{address}',
+//                [Admin\AddressPools\AddressController::class, 'destroy'],
+//            );
+//        });
+//    });
+// });
 
 /*
 |--------------------------------------------------------------------------

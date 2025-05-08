@@ -2,7 +2,6 @@
 
 namespace App\Transformers\Admin;
 
-use App\Data\Server\Eloquent\AddressData;
 use App\Models\Address;
 use App\Transformers\Client\ServerTransformer;
 use League\Fractal\Resource\Item;
@@ -16,14 +15,23 @@ class AddressTransformer extends TransformerAbstract
 
     public function transform(Address $address): array
     {
-        return AddressData::from($address->toArray())->toArray();
+        return [
+            'id' => $address->id,
+            'address_block_id' => $address->address_block_id,
+            'server_id' => $address->server_id,
+            'type' => $address->type,
+            'ip' => $address->ip,
+            'prefix_length' => $address->prefix_length,
+            'gateway' => $address->gateway,
+            'mac_address' => $address->mac_address,
+        ];
     }
 
     public function includeServer(Address $address): ?Item
     {
         return ! is_null($address->server) ? $this->item(
             $address->server,
-            new ServerTransformer(),
+            new ServerTransformer,
         ) : null;
     }
 }

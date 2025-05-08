@@ -5,7 +5,7 @@ namespace App\Services\Servers;
 use App\Data\Server\Deployments\CloudinitAddressConfigData;
 use App\Data\Server\Eloquent\ServerAddressesData;
 use App\Data\Server\MacAddressData;
-use App\Enums\Network\AddressType;
+use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\Server;
 use App\Repositories\Eloquent\AddressRepository;
@@ -94,10 +94,10 @@ class NetworkService
     {
         return ServerAddressesData::from([
             'ipv4' => array_values(
-                $server->addresses->where('type', AddressType::IPV4->value)->toArray(),
+                $server->addresses->where('type', AddressVersion::IPV4->value)->toArray(),
             ),
             'ipv6' => array_values(
-                $server->addresses->where('type', AddressType::IPV6->value)->toArray(),
+                $server->addresses->where('type', AddressVersion::IPV6->value)->toArray(),
             ),
         ]);
     }

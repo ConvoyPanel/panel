@@ -14,6 +14,7 @@ class AddressBlockGroupTransformer extends TransformerAbstract
             'id' => $group->id,
             'name' => $group->name,
             'description' => $group->description,
+            'address_blocks_count' => (int) $group->address_blocks_count,
             'nodes_count' => (int) $group->nodes_count,
         ];
     }

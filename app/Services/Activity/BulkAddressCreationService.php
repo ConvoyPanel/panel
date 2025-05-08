@@ -2,7 +2,7 @@
 
 namespace App\Services\Activity;
 
-use App\Enums\Network\AddressType;
+use App\Enums\Network\AddressVersion;
 use function App\Helpers\getAddressesFromRange;
 use App\Models\Address;
 use Illuminate\Support\Arr;
@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 class BulkAddressCreationService
 {
     public function handle(
-        AddressType $type,
-        string $from,
-        string $to,
-        int $poolId,
-        ?int $serverId,
-        int $cidr,
-        string $gateway,
-        ?string $macAddress = null,
+        AddressVersion $type,
+        string         $from,
+        string         $to,
+        int            $poolId,
+        ?int           $serverId,
+        int            $cidr,
+        string         $gateway,
+        ?string        $macAddress = null,
     ): void {
         $addresses = getAddressesFromRange($type, $from, $to);
         $existingAddresses = Address::where('address_pool_id', '=', $poolId)

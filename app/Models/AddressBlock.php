@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AddressBlock extends Model
 {
@@ -23,6 +23,13 @@ class AddressBlock extends Model
         'prefix_length_from' => 'required|integer|min:0|max:128',
         'prefix_length_to' => 'required|integer|min:0|max:128',
     ];
+
+    public function casts(): array
+    {
+        return [
+            'type' => AddressVersion::class,
+        ];
+    }
 
     public function addressBlockGroup(): BelongsTo
     {

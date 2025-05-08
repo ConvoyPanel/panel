@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin\AddressPools;
 
-use App\Enums\Network\AddressType;
+use App\Enums\Network\AddressVersion;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
 use App\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
@@ -59,7 +59,7 @@ class AddressController
 
         if ($data['is_bulk_action']) {
             $this->bulkAddressCreationService->handle(
-                type      : AddressType::from($data['type']),
+                type      : AddressVersion::from($data['type']),
                 from      : $data['starting_address'],
                 to        : $data['ending_address'],
                 poolId    : $addressPool->id,

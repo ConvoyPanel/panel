@@ -52,8 +52,6 @@ const Cell = ({
 
 const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
     if (addresses.length === 0) {
-        // make a description
-
         return (
             <SimpleEmptyState
                 icon={IconWifiOff}
@@ -77,7 +75,7 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
                         >
                             <Cell
                                 title={'Address'}
-                                description={`${address.address}/${address.cidr}`}
+                                description={`${address.ip}/${address.prefixLength}`}
                                 className={'w-full @sm:max-w-[30%]'}
                             />
                             <Cell

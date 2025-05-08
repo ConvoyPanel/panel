@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Enums\Network\AddressType;
+use App\Enums\Network\AddressVersion;
 use GMP;
 
 function ipv6ToInteger(string $ip): GMP
@@ -20,12 +20,12 @@ function ipv6FromInteger(GMP $integer): ?string
 /**
  * @return string[]
  */
-function getAddressesFromRange(AddressType $type, string $from, string $to): array
+function getAddressesFromRange(AddressVersion $type, string $from, string $to): array
 {
     /** @var string[] */
     $addresses = [];
 
-    if ($type === AddressType::IPV4) {
+    if ($type === AddressVersion::IPV4) {
         $from = ip2long($from);
         $to = ip2long($to);
 

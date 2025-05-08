@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,9 +21,29 @@ class Address extends Model
         'prefix_length' => ['numeric', 'min:0', 'max:128', 'required'],
     ];
 
+    public function addressBlock(): BelongsTo
+    {
+        return $this->belongsTo(AddressBlock::class);
+    }
+
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
+    }
+
+    public function getTypeAttribute(): AddressVersion
+    {
+        return $this->addressBlock->type;
+    }
+
+    public function getGatewayAttribute(): ?string
+    {
+        return $this->addressBlock->gateway;
+    }
+
+    public function getMacAddressAttribute(): ?string
+    {
+        return $this->addressBlock->mac_address;
     }
 
     public function getRouteKeyName(): string

@@ -1,14 +1,17 @@
 import { Server } from '@/types/server.ts'
 
-export type AddressType = 'ipv4' | 'ipv6'
+export enum AddressVersion {
+    IPv4 = 'ipv4',
+    IPv6 = 'ipv6',
+}
 
 export interface Address {
     id: number
-    addressPoolId: number
+    addressBlockId: number
     serverId: number | null
-    type: AddressType
-    address: string
-    cidr: number
+    type: AddressVersion
+    ip: string
+    prefixLength: number
     gateway: string
     macAddress?: string
     server?: Server
