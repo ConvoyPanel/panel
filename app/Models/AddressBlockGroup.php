@@ -26,18 +26,15 @@ class AddressBlockGroup extends Model
     {
         return $this->belongsToMany(
             Node::class,
-            'address_pool_to_node',
-            'address_pool_id',
+            'address_block_group_to_node',
+            'address_block_group_id',
             'node_id',
         );
     }
 
-    /**
-     * Gets the addresses that are associated with an address pool.
-     */
-    public function addresses(): HasMany
+    public function addressBlocks(): HasMany
     {
-        return $this->hasMany(Address::class);
+        return $this->hasMany(AddressBlock::class);
     }
 
     /**

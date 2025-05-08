@@ -1,4 +1,5 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
 import { Toaster } from 'sonner'
 
 import { ConfirmDialogProvider } from '@/components/ui/AlertDialog'
@@ -10,10 +11,12 @@ export const Route = createRootRoute({
 
 function RootComponent() {
     return (
-        <TooltipProvider>
-            <Toaster richColors />
-            <ConfirmDialogProvider />
-            <Outlet />
-        </TooltipProvider>
+        <NuqsAdapter>
+            <TooltipProvider>
+                <Toaster richColors />
+                <ConfirmDialogProvider />
+                <Outlet />
+            </TooltipProvider>
+        </NuqsAdapter>
     )
 }

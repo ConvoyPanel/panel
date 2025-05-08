@@ -202,6 +202,10 @@ Route::prefix('/servers')->group(function () {
     );
 });
 
+Route::prefix('/address-block-groups')->group(function () {
+   Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Address Pool Controller Routes

@@ -23,7 +23,12 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes')({
 
 function NodesIndex() {
     const pagination = usePagination()
-    const { data } = useNodesSWR()
+    const { data } = useNodesSWR({
+        page: pagination.page,
+        filters: {
+            '*': pagination.debouncedQuery,
+        }
+    })
 
     const columns: ColumnDef<Node>[] = [
         {

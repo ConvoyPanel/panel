@@ -7,7 +7,7 @@ use App\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressPoolWildcard;
 use App\Models\Filters\FiltersNodeWildcard;
-use App\Transformers\Admin\AddressPoolTransformer;
+use App\Transformers\Admin\AddressBlockGroupTransformer;
 use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -31,14 +31,14 @@ class AddressPoolController
                 $request->query(),
             );
 
-        return fractal($addressPools, new AddressPoolTransformer)->respond();
+        return fractal($addressPools, new AddressBlockGroupTransformer)->respond();
     }
 
     public function show(AddressBlockGroup $addressPool)
     {
         $addressPool->loadCount(['addresses', 'nodes']);
 
-        return fractal($addressPool, new AddressPoolTransformer)->respond();
+        return fractal($addressPool, new AddressBlockGroupTransformer)->respond();
     }
 
     public function getAttachedNodes(Request $request, AddressBlockGroup $addressPool)
@@ -63,7 +63,7 @@ class AddressPoolController
         $pool->nodes()->attach($request->node_ids);
         $pool->loadCount(['addresses', 'nodes']);
 
-        return fractal($pool, new AddressPoolTransformer)->respond();
+        return fractal($pool, new AddressBlockGroupTransformer)->respond();
     }
 
     public function update(UpdateAddressPoolRequest $request, AddressBlockGroup $addressPool)
@@ -72,7 +72,7 @@ class AddressPoolController
         $addressPool->nodes()->sync($request->node_ids);
         $addressPool->loadCount(['addresses', 'nodes']);
 
-        return fractal($addressPool, new AddressPoolTransformer)->respond();
+        return fractal($addressPool, new AddressBlockGroupTransformer)->respond();
     }
 
     public function destroy(AddressBlockGroup $addressPool)
