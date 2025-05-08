@@ -9,18 +9,15 @@ class Address extends Model
 {
     use HasFactory;
 
-    protected $table = 'ip_addresses';
+    public $timestamps = false;
 
-    protected $guarded = ['id', 'updated_at', 'created_at'];
+    protected $guarded = ['id'];
 
     public static array $validationRules = [
-        'address_pool_id' => ['exists:address_pools,id', 'required'],
+        'address_block_id' => ['exists:address_blocks,id', 'required'],
         'server_id' => ['exists:servers,id', 'nullable'],
-        'type' => ['in:ipv4,ipv6', 'required'],
-        'address' => ['ip'],
-        'cidr' => ['numeric', 'min:0', 'max:128', 'required'],
-        'gateway' => ['ip'],
-        'mac_address' => ['mac_address', 'nullable'],
+        'ip' => ['ip'],
+        'prefix_length' => ['numeric', 'min:0', 'max:128', 'required'],
     ];
 
     public function server(): BelongsTo

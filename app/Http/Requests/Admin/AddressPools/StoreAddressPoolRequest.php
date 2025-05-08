@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests\Admin\AddressPools;
 
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAddressPoolRequest extends FormRequest
 {
     public function rules(): array
     {
-        $rules = AddressPool::getRules();
+        $rules = AddressBlockGroup::getRules();
 
         return [
             ...$rules,

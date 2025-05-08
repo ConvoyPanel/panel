@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin\AddressPools\Addresses;
 use App\Enums\Network\AddressType;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use App\Validation\ValidateAddressType;
 use App\Validation\ValidateAddressUniqueness;
 use Illuminate\Support\Arr;
@@ -37,7 +37,7 @@ class StoreAddressRequest extends BaseApiRequest
         }
 
         if (! $this->boolean('is_bulk_action')) {
-            $pool = $this->parameter('address_pool', AddressPool::class);
+            $pool = $this->parameter('address_pool', AddressBlockGroup::class);
             $rules[] = new ValidateAddressType(
                 $this->enum('type', AddressType::class),
                 ['address', 'gateway'],

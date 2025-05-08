@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\AddressPool;
-use App\Models\AddressPoolToNode;
+use App\Models\AddressBlockGroup;
+use App\Models\AddressBlockGroupToNode;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\User;
@@ -12,8 +12,8 @@ beforeEach(function () {
     ]);
     $this->location = Location::factory()->create();
     $this->node = Node::factory()->for($this->location)->create();
-    $this->pool = AddressPool::factory()->create();
-    AddressPoolToNode::create([
+    $this->pool = AddressBlockGroup::factory()->create();
+    AddressBlockGroupToNode::create([
         'address_pool_id' => $this->pool->id,
         'node_id' => $this->node->id,
     ]);

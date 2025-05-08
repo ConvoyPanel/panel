@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin\AddressPools\Addresses;
 use App\Enums\Network\AddressType;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use App\Validation\ValidateAddressType;
 use App\Validation\ValidateAddressUniqueness;
 use Illuminate\Support\Arr;
@@ -21,7 +21,7 @@ class UpdateAddressRequest extends BaseApiRequest
 
     public function after(): array
     {
-        $pool = $this->parameter('address_pool', AddressPool::class);
+        $pool = $this->parameter('address_pool', AddressBlockGroup::class);
         $address = $this->parameter('address', Address::class);
 
         return [

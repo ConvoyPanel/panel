@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin\AddressPools;
 
 use App\Http\Requests\BaseApiRequest;
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use App\Models\Node;
 use Illuminate\Validation\Validator;
 
@@ -11,11 +11,11 @@ class UpdateAddressPoolRequest extends BaseApiRequest
 {
     public function rules(): array
     {
-        /** @var AddressPool $addressPool */
-        $addressPool = $this->parameter('address_pool', AddressPool::class);
+        /** @var AddressBlockGroup $addressPool */
+        $addressPool = $this->parameter('address_pool', AddressBlockGroup::class);
 
         return [
-            ...AddressPool::getRulesForUpdate($addressPool),
+            ...AddressBlockGroup::getRulesForUpdate($addressPool),
             'node_ids' => 'sometimes|array',
             'node_ids.*' => 'exists:nodes,id|integer',
         ];
@@ -23,8 +23,8 @@ class UpdateAddressPoolRequest extends BaseApiRequest
 
     public function after(): array
     {
-        /** @var AddressPool $addressPool */
-        $addressPool = $this->parameter('address_pool', AddressPool::class);
+        /** @var AddressBlockGroup $addressPool */
+        $addressPool = $this->parameter('address_pool', AddressBlockGroup::class);
 
         return [
             function (Validator $validator) use ($addressPool) {

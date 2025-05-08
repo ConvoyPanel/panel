@@ -2,18 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-class AddressPoolFactory extends Factory
+class AddressBlockGroupFactory extends Factory
 {
     public function definition(): array
     {
         return [
             'name' => $this->faker->name(),
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'description' => rand(0, 3) === 3 ? $this->faker->sentence() : null,
         ];
     }
 }

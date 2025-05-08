@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\AddressPools\Addresses\StoreAddressRequest;
 use App\Http\Requests\Admin\AddressPools\Addresses\UpdateAddressRequest;
 use App\Jobs\Server\SyncNetworkSettings;
 use App\Models\Address;
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressWildcard;
 use App\Services\Activity\BulkAddressCreationService;
 use App\Services\Servers\NetworkService;
@@ -27,7 +27,7 @@ class AddressController
         private BulkAddressCreationService $bulkAddressCreationService,
     ) {}
 
-    public function index(Request $request, AddressPool $addressPool)
+    public function index(Request $request, AddressBlockGroup $addressPool)
     {
         $addresses = QueryBuilder::for($addressPool->addresses())
             ->with('server')
@@ -53,7 +53,7 @@ class AddressController
             ->respond();
     }
 
-    public function store(StoreAddressRequest $request, AddressPool $addressPool)
+    public function store(StoreAddressRequest $request, AddressBlockGroup $addressPool)
     {
         $data = $request->validated();
 
@@ -102,8 +102,8 @@ class AddressController
 
     public function update(
         UpdateAddressRequest $request,
-        AddressPool $addressPool,
-        Address $address,
+        AddressBlockGroup    $addressPool,
+        Address              $address,
     ) {
         $address = $this->connection->transaction(function () use ($request, $address) {
             $oldLinkedServer = $address->server;
@@ -145,7 +145,7 @@ class AddressController
             ->respond();
     }
 
-    public function destroy(AddressPool $addressPool, Address $address)
+    public function destroy(AddressBlockGroup $addressPool, Address $address)
     {
         $this->connection->transaction(function () use ($address) {
             $address->delete();

@@ -87,7 +87,7 @@ class Node extends Model
     public function addressPools(): BelongsToMany
     {
         return $this->belongsToMany(
-            AddressPool::class,
+            AddressBlockGroup::class,
             'address_pool_to_node',
             'node_id',
             'address_pool_id',
@@ -101,7 +101,7 @@ class Node extends Model
     {
         return $this->hasManyThrough(
             Address::class,
-            AddressPoolToNode::class,
+            AddressBlockGroupToNode::class,
             'node_id',
             'address_pool_id',
             'id',

@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AddressPool extends Model
+class AddressBlockGroup extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
 
-    protected $guarded = ['id', 'updated_at', 'created_at'];
+    protected $guarded = ['id'];
 
     public static array $validationRules = [
         'name' => 'required|string|max:191',
+        'description' => 'nullable|string|max:191',
     ];
 
     /**

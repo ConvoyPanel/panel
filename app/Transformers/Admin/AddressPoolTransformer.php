@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Admin;
 
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 
@@ -10,7 +10,7 @@ class AddressPoolTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = ['addresses'];
 
-    public function transform(AddressPool $pool): array
+    public function transform(AddressBlockGroup $pool): array
     {
         return [
             'id' => $pool->id,
@@ -20,7 +20,7 @@ class AddressPoolTransformer extends TransformerAbstract
         ];
     }
 
-    public function includeAddresses(AddressPool $pool): Collection
+    public function includeAddresses(AddressBlockGroup $pool): Collection
     {
         return $this->collection($pool->addresses, new AddressTransformer());
     }

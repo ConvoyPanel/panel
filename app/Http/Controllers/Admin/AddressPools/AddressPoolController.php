@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\AddressPools;
 
 use App\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
 use App\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
-use App\Models\AddressPool;
+use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressPoolWildcard;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Transformers\Admin\AddressPoolTransformer;
@@ -18,7 +18,7 @@ class AddressPoolController
 {
     public function index(Request $request)
     {
-        $addressPools = QueryBuilder::for(AddressPool::query())
+        $addressPools = QueryBuilder::for(AddressBlockGroup::query())
             ->withCount(['addresses', 'nodes'])
             ->defaultSort('-id')
             ->allowedFilters(
@@ -34,14 +34,14 @@ class AddressPoolController
         return fractal($addressPools, new AddressPoolTransformer)->respond();
     }
 
-    public function show(AddressPool $addressPool)
+    public function show(AddressBlockGroup $addressPool)
     {
         $addressPool->loadCount(['addresses', 'nodes']);
 
         return fractal($addressPool, new AddressPoolTransformer)->respond();
     }
 
-    public function getAttachedNodes(Request $request, AddressPool $addressPool)
+    public function getAttachedNodes(Request $request, AddressBlockGroup $addressPool)
     {
         $nodes = QueryBuilder::for($addressPool->nodes())
             ->withCount('servers')
@@ -59,14 +59,14 @@ class AddressPoolController
 
     public function store(StoreAddressPoolRequest $request)
     {
-        $pool = AddressPool::create($request->safe()->except('node_ids'));
+        $pool = AddressBlockGroup::create($request->safe()->except('node_ids'));
         $pool->nodes()->attach($request->node_ids);
         $pool->loadCount(['addresses', 'nodes']);
 
         return fractal($pool, new AddressPoolTransformer)->respond();
     }
 
-    public function update(UpdateAddressPoolRequest $request, AddressPool $addressPool)
+    public function update(UpdateAddressPoolRequest $request, AddressBlockGroup $addressPool)
     {
         $addressPool->update($request->safe()->except('node_ids'));
         $addressPool->nodes()->sync($request->node_ids);
@@ -75,7 +75,7 @@ class AddressPoolController
         return fractal($addressPool, new AddressPoolTransformer)->respond();
     }
 
-    public function destroy(AddressPool $addressPool)
+    public function destroy(AddressBlockGroup $addressPool)
     {
         $addressPool->loadCount('nodes');
 
