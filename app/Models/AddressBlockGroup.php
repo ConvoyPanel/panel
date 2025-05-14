@@ -15,7 +15,7 @@ class AddressBlockGroup extends Model
     protected $guarded = ['id'];
 
     public static array $validationRules = [
-        'name' => 'required|string|max:191',
+        'name' => 'required|string|max:40',
         'description' => 'nullable|string|max:191',
     ];
 

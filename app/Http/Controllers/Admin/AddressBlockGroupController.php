@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockGroupWildcard;
 use App\Models\Filters\FiltersAddressBlockWildcard;
@@ -9,6 +10,7 @@ use App\Transformers\Admin\AddressBlockGroupTransformer;
 use App\Transformers\Admin\AddressBlockTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -63,5 +65,24 @@ class AddressBlockGroupController
             ->appends($request->query());
 
         return fractal($blocks, new AddressBlockTransformer)->respond();
+    }
+
+    public function store(AddressBlockGroupRequest $request): JsonResponse
+    {
+        $addressBlockGroup = AddressBlockGroup::create($request->validated());
+
+        return fractal($addressBlockGroup, new AddressBlockGroupTransformer)->respond();
+    }
+
+    public function update(AddressBlockGroupRequest $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    {
+        $addressBlockGroup->update($request->validated());
+
+        return fractal($addressBlockGroup, new AddressBlockGroupTransformer)->respond();
+    }
+
+    public function destroy(AddressBlockGroup $addressBlockGroup): Response
+    {
+        return response()->noContent();
     }
 }

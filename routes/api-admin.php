@@ -186,9 +186,13 @@ Route::prefix('/servers')->group(function () {
 
 Route::prefix('/address-block-groups')->group(function () {
     Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+    Route::post('/', [Admin\AddressBlockGroupController::class, 'store']);
 
     Route::prefix('/{address_block_group}')->group(function () {
         Route::get('/', [Admin\AddressBlockGroupController::class, 'show']);
+        Route::put('/', [Admin\AddressBlockGroupController::class, 'update']);
+        Route::delete('/', [Admin\AddressBlockGroupController::class, 'destroy']);
+
         Route::get('/address-blocks', [Admin\AddressBlockGroupController::class, 'showAddressBlocks']);
     });
 });

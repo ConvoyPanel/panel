@@ -6,86 +6,89 @@ import { ColumnDef } from '@tanstack/react-table'
 
 import useAddressBlockGroupsSWR from '@/api/admin/addressBlockGroups/use-address-block-groups-swr.ts'
 
+import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
+
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/ipam/')({
-  component: IpamIndex,
+    component: IpamIndex,
 })
 
 function IpamIndex() {
-  const pagination = usePagination()
-  const { data } = useAddressBlockGroupsSWR({
-    page: pagination.page,
-    filters: {
-      '*': pagination.debouncedQuery,
-    },
-  })
+    const pagination = usePagination()
+    const { data, mutate } = useAddressBlockGroupsSWR({
+        page: pagination.page,
+        filters: {
+            '*': pagination.debouncedQuery,
+        },
+    })
 
-  const columns: ColumnDef<AddressBlockGroup>[] = [
-    {
-      header: 'IP Block Group',
-      accessorKey: 'name',
-      enableHiding: false,
-      meta: {
-        skeletonWidth: '5rem',
-      },
-      cell: ({ cell }) => (
-        <Link
-          className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-          to={`/admin/ipam/${cell.row.original.id}`}
-        >
-          {cell.getValue<string>()}
-        </Link>
-      ),
-    },
-    {
-      header: 'Description',
-      accessorKey: 'description',
-      meta: {
-        skeletonWidth: '10rem',
-      },
-    },
-    {
-      header: 'Nodes',
-      accessorKey: 'nodesCount',
-      meta: {
-        skeletonWidth: '1rem',
-        align: 'center',
-      },
-      cell: ({ cell }) => (
-        <Badge variant={'secondary'} className={'font-mono'}>
-          {cell.getValue<number>()}
-        </Badge>
-      ),
-    },
-    actionsColumn(({ row: _ }) => (
-      <>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>Delete</DropdownMenuItem>
-      </>
-    )),
-  ]
+    const columns: ColumnDef<AddressBlockGroup>[] = [
+        {
+            header: 'IP Block Group',
+            accessorKey: 'name',
+            enableHiding: false,
+            meta: {
+                skeletonWidth: '5rem',
+            },
+            cell: ({ cell }) => (
+                <Link
+                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
+                    to={`/admin/ipam/${cell.row.original.id}`}
+                >
+                    {cell.getValue<string>()}
+                </Link>
+            ),
+        },
+        {
+            header: 'Description',
+            accessorKey: 'description',
+            meta: {
+                skeletonWidth: '10rem',
+            },
+        },
+        {
+            header: 'Nodes',
+            accessorKey: 'nodesCount',
+            meta: {
+                skeletonWidth: '1rem',
+                align: 'center',
+            },
+            cell: ({ cell }) => (
+                <Badge variant={'secondary'} className={'font-mono'}>
+                    {cell.getValue<number>()}
+                </Badge>
+            ),
+        },
+        actionsColumn(({ row: _ }) => (
+            <>
+                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Delete</DropdownMenuItem>
+            </>
+        )),
+    ]
 
-  return (
-    <>
-      <Heading>IPAM</Heading>
-      <DataTable
-        data={data}
-        columns={columns}
-        paginated
-        searchable
-        toolbar
-        {...pagination}
-      />
-    </>
-  )
+    return (
+        <>
+            <Heading>IPAM</Heading>
+            <DataTable
+                data={data}
+                columns={columns}
+                paginated
+                searchable
+                toolbar
+                rightActions={<CreateBlockGroupModal mutate={mutate} />}
+                {...pagination}
+            />
+        </>
+    )
 }

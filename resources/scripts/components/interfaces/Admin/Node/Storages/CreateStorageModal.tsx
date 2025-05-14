@@ -64,9 +64,7 @@ const CreateStorageModal = () => {
             })
 
             form.reset()
-
             setOpen(false)
-
             toast.success('Storage created')
         } catch (e) {
             handleFormErrors(e, form.setError)
