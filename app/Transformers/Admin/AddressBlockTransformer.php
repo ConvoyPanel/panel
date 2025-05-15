@@ -14,7 +14,7 @@ class AddressBlockTransformer extends TransformerAbstract
             'address_block_group_id' => $block->address_block_group_id,
             'name' => $block->name,
             'description' => $block->description,
-            'type' => $block->type,
+            'version' => $block->version,
             'base_ip' => $block->base_ip,
             'gateway' => $block->gateway,
             'mac_address' => $block->mac_address,

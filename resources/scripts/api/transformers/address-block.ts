@@ -6,7 +6,7 @@ export const rawDataToAddressBlock = (data: any): AddressBlock => ({
     addressBlockGroupId: data.address_block_group_id,
     name: data.name,
     description: data.description,
-    type: data.type === 'ipv4' ? AddressVersion.IPv4 : AddressVersion.IPv6,
+    version: data.version === 'ipv4' ? AddressVersion.IPv4 : AddressVersion.IPv6,
     baseIp: data.base_ip,
     gateway: data.gateway,
     macAddress: data.mac_address,

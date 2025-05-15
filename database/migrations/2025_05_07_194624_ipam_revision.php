@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreignId('address_block_group_id')->constrained()->cascadeOnDelete();
             $table->string('name')->nullable();
             $table->string('description')->nullable();
-            $table->string('type');
+            $table->string('version');
             $table->string('base_ip');
             $table->string('gateway')->nullable();
             $table->string('mac_address')->nullable();
@@ -91,7 +91,7 @@ return new class extends Migration
                 $oldPoolId = $firstAddress->address_pool_id;
                 $gateway = $firstAddress->gateway;
                 $prefixLength = $firstAddress->prefix_length;
-                $type = $firstAddress->type;
+                $version = $firstAddress->type;
                 $macAddress = $firstAddress->mac_address;
                 $firstIp = $firstAddress->ip;
 
@@ -102,7 +102,6 @@ return new class extends Migration
 
                 // Create a new address_block record
                 $blockName = "Migrated Block ({$gateway}/{$prefixLength})"; // Example name
-                $baseIp = null; // Initialize baseIp
                 try {
                     // Attempt to parse the range using the correct Factory method
                     // Use the first IP and prefix length to define the subnet range
@@ -121,7 +120,7 @@ return new class extends Migration
                     'address_block_group_id' => $group->id,
                     'name' => $blockName,
                     'description' => $group->description,
-                    'type' => $type,
+                    'version' => $version,
                     'base_ip' => $baseIp,
                     'gateway' => $gateway,
                     'mac_address' => $macAddress,

@@ -185,15 +185,21 @@ Route::prefix('/servers')->group(function () {
 });
 
 Route::prefix('/address-block-groups')->group(function () {
-    Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
-    Route::post('/', [Admin\AddressBlockGroupController::class, 'store']);
+    Route::get('/', [Admin\Ipam\AddressBlockGroupController::class, 'index']);
+    Route::post('/', [Admin\Ipam\AddressBlockGroupController::class, 'store']);
 
     Route::prefix('/{address_block_group}')->group(function () {
-        Route::get('/', [Admin\AddressBlockGroupController::class, 'show']);
-        Route::put('/', [Admin\AddressBlockGroupController::class, 'update']);
-        Route::delete('/', [Admin\AddressBlockGroupController::class, 'destroy']);
+        Route::get('/', [Admin\Ipam\AddressBlockGroupController::class, 'show']);
+        Route::put('/', [Admin\Ipam\AddressBlockGroupController::class, 'update']);
+        Route::delete('/', [Admin\Ipam\AddressBlockGroupController::class, 'destroy']);
 
-        Route::get('/address-blocks', [Admin\AddressBlockGroupController::class, 'showAddressBlocks']);
+        Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
+
+        Route::prefix('/{address_block}')->group(function () {
+           Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
+           Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
+           Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);
+        });
     });
 });
 

@@ -7,7 +7,7 @@ export interface AddressBlock {
     addressBlockGroupId: number
     name: string | null
     description: string | null
-    type: AddressVersion
+    version: AddressVersion
     baseIp: string
     gateway: string | null
     macAddress: string | null

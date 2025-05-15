@@ -16,7 +16,7 @@ class AddressBlock extends Model
         'address_block_group_id' => 'required|integer|exists:address_block_groups,id',
         'name' => 'required|string|max:40',
         'description' => 'nullable|string|max:191',
-        'type' => 'in:ipv4,ipv6|required',
+        'version' => 'in:ipv4,ipv6|required',
         'base_ip' => 'required|ip',
         'gateway' => 'nullable|ip',
         'mac_address' => 'nullable|mac_address',
@@ -27,7 +27,7 @@ class AddressBlock extends Model
     public function casts(): array
     {
         return [
-            'type' => AddressVersion::class,
+            'version' => AddressVersion::class,
         ];
     }
 

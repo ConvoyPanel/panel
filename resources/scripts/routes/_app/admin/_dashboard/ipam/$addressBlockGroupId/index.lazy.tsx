@@ -49,7 +49,7 @@ function GroupBlocks() {
         },
         {
             header: 'Version',
-            accessorKey: 'type',
+            accessorKey: 'version',
             meta: {
                 skeletonWidth: '1rem',
                 align: 'center',
@@ -91,6 +91,7 @@ function GroupBlocks() {
                 paginated
                 searchable
                 toolbar
+                rightActions={<></>}
                 {...pagination}
             />
         </>

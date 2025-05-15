@@ -3,6 +3,7 @@ import { AddressBlockGroup } from '@/types/address-block-group.ts'
 import { cn } from '@/utils'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
+import { useShallow } from 'zustand/react/shallow'
 
 import useAddressBlockGroupsSWR from '@/api/admin/addressBlockGroups/use-address-block-groups-swr.ts'
 
@@ -33,6 +34,9 @@ function IpamIndex() {
             '*': pagination.debouncedQuery,
         },
     })
+    const openModal = useBlockGroupModalStore(
+        useShallow(state => state.openModal)
+    )
 
     const columns: ColumnDef<AddressBlockGroup>[] = [
         {
@@ -72,14 +76,17 @@ function IpamIndex() {
             ),
         },
         actionsColumn(({ row }) => {
-            const openModal = useBlockGroupModalStore(state => state.openModal)
             return (
                 <>
-                    <DropdownMenuItem onClick={() => openModal('edit', row.original)}>
+                    <DropdownMenuItem
+                        onClick={() => openModal('edit', row.original)}
+                    >
                         Edit
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => openModal('delete', row.original)}>
+                    <DropdownMenuItem
+                        onClick={() => openModal('delete', row.original)}
+                    >
                         Delete
                     </DropdownMenuItem>
                 </>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
+use Response;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
@@ -72,7 +73,7 @@ class StorageController extends Controller
         return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
     }
 
-    public function destroy(Node $node, Storage $storage): JsonResponse
+    public function destroy(Node $node, Storage $storage): Response
     {
         // TODO: implement StorageController destroy method
 

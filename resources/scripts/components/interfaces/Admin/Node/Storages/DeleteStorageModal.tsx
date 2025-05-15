@@ -18,6 +18,7 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
+import deleteStorage from '@/api/admin/nodes/storages/deleteStorage.ts'
 
 const DeleteStorageModal = () => {
     const { mutate } = useStoragesSWR()
@@ -33,8 +34,17 @@ const DeleteStorageModal = () => {
     const [state, submit] = useAsyncFunction(
         async (currentStorage: NodeStorage) => {
             try {
-                toast.success('Storage deleted')
+                await deleteStorage(nodeId, currentStorage.id)
 
+                await mutate(data => {
+                    if (!data) return data
+
+                    return data.filter(
+                        item => item.id !== currentStorage.id
+                    )
+                }, false)
+
+                toast.success('Storage deleted')
                 close('delete')
             } catch (e) {
                 toast.error('Deletion failed')
