@@ -1,16 +1,17 @@
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconPlus } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { KeyedMutator } from 'swr'
 import { z } from 'zod'
+import { useShallow } from 'zustand/react/shallow'
 
-import createAddressBlockGroup, {
-    addressBlockGroupSchema,
-} from '@/api/admin/addressBlockGroups/createAddressBlockGroup.ts'
+import { addressBlockGroupSchema } from '@/api/admin/addressBlockGroups/createAddressBlockGroup.ts'
+import updateAddressBlockGroup from '@/api/admin/addressBlockGroups/updateAddressBlockGroup.ts'
+
+import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -21,7 +22,6 @@ import {
     CredenzaFooter,
     CredenzaHeader,
     CredenzaTitle,
-    CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
@@ -30,8 +30,14 @@ interface Props {
     mutate: KeyedMutator<PaginatedAddressBlockGroups>
 }
 
-const CreateBlockGroupModal = ({ mutate }: Props) => {
-    const [open, setOpen] = useState(false)
+const EditBlockGroupModal = ({ mutate }: Props) => {
+    const [blockGroup, open, close] = useBlockGroupModalStore(
+        useShallow(state => [
+            state.modalData,
+            state.activeModal === 'edit',
+            state.closeModal,
+        ])
+    )
 
     const form = useForm({
         resolver: zodResolver(addressBlockGroupSchema),
@@ -41,22 +47,38 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
         },
     })
 
+    useEffect(() => {
+        if (!blockGroup) return
+
+        form.reset({
+            name: blockGroup.name,
+            description: blockGroup.description || '',
+        })
+    }, [blockGroup])
+
     const submit = async (data: z.infer<typeof addressBlockGroupSchema>) => {
         try {
-            const blockGroup = await createAddressBlockGroup(data)
+            const updatedBlockGroup = await updateAddressBlockGroup(
+                blockGroup!.id,
+                data
+            )
 
             await mutate(data => {
                 if (!data) return
 
                 return {
                     ...data,
-                    items: [blockGroup, ...data.items],
+                    items: data.items.map(item => {
+                        if (item.id === updatedBlockGroup.id) {
+                            return updatedBlockGroup
+                        }
+                        return item
+                    }),
                 }
             })
 
-            form.reset()
-            setOpen(false)
-            toast.success('Block group created')
+            close('edit')
+            toast.success('Block group updated')
         } catch (e) {
             handleFormErrors(e, form.setError)
             toast.error('Failed to save changes')
@@ -65,15 +87,10 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button size={'sm'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add block group
-                </Button>
-            </CredenzaTrigger>
+        <Credenza open={open} onOpenChange={open => !open && close('edit')}>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>New Block Group</CredenzaTitle>
+                    <CredenzaTitle>Editing {blockGroup?.name}</CredenzaTitle>
                 </CredenzaHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
@@ -90,7 +107,7 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
                                     Cancel
                                 </Button>
                             </CredenzaClose>
-                            <FormButton>Add block group</FormButton>
+                            <FormButton>Save</FormButton>
                         </CredenzaFooter>
                     </form>
                 </Form>
@@ -99,4 +116,4 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
     )
 }
 
-export default CreateBlockGroupModal
+export default EditBlockGroupModal

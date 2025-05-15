@@ -7,6 +7,9 @@ import { ColumnDef } from '@tanstack/react-table'
 import useAddressBlockGroupsSWR from '@/api/admin/addressBlockGroups/use-address-block-groups-swr.ts'
 
 import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
+import DeleteBlockGroupModal from '@/components/interfaces/Admin/Ipam/DeleteBlockGroupModal.tsx'
+import EditBlockGroupModal from '@/components/interfaces/Admin/Ipam/EditBlockGroupModal.tsx'
+import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -68,13 +71,20 @@ function IpamIndex() {
                 </Badge>
             ),
         },
-        actionsColumn(({ row: _ }) => (
-            <>
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-            </>
-        )),
+        actionsColumn(({ row }) => {
+            const openModal = useBlockGroupModalStore(state => state.openModal)
+            return (
+                <>
+                    <DropdownMenuItem onClick={() => openModal('edit', row.original)}>
+                        Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => openModal('delete', row.original)}>
+                        Delete
+                    </DropdownMenuItem>
+                </>
+            )
+        }),
     ]
 
     return (
@@ -89,6 +99,8 @@ function IpamIndex() {
                 rightActions={<CreateBlockGroupModal mutate={mutate} />}
                 {...pagination}
             />
+            <EditBlockGroupModal mutate={mutate} />
+            <DeleteBlockGroupModal mutate={mutate} />
         </>
     )
 }
