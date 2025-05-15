@@ -4,7 +4,7 @@ import { AddressVersion } from '@/types/address.ts'
 import { rawDataToAddressBlock } from '@/api/transformers/address-block.ts'
 
 export const addressBlockSchema = z.object({
-    name: z.string().min(1).max(40),
+    name: z.string().max(40),
     description: z.string().max(191),
     version: z.nativeEnum(AddressVersion),
     baseIp: z.string().min(1),

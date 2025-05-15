@@ -7,6 +7,11 @@ import { ColumnDef } from '@tanstack/react-table'
 import useAddressBlocksSWR from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks-swr.ts'
 import useAddressBlockGroupSWR from '@/api/admin/addressBlockGroups/use-address-block-group-swr.ts'
 
+import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
+import DeleteAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressBlockModal.tsx'
+import EditAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/EditAddressBlockModal.tsx'
+import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
+
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
 import {
@@ -25,7 +30,7 @@ export const Route = createLazyFileRoute(
 function GroupBlocks() {
     const { data: group } = useAddressBlockGroupSWR()
     const pagination = usePagination()
-    const { data } = useAddressBlocksSWR({
+    const { data, mutate } = useAddressBlocksSWR({
         page: pagination.page,
         filters: {
             '*': pagination.debouncedQuery,
@@ -73,14 +78,29 @@ function GroupBlocks() {
                 </Badge>
             ),
         },
-        actionsColumn(({ row: _ }) => (
-            <>
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-            </>
-        )),
+        actionsColumn(({ row }) => {
+            const openModal = useAddressBlockModal(state => state.openModal)
+
+            return (
+                <>
+                    <DropdownMenuItem
+                        onClick={() => openModal('edit', row.original)}
+                    >
+                        Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={() => openModal('delete', row.original)}
+                    >
+                        Delete
+                    </DropdownMenuItem>
+                </>
+            )
+        }),
     ]
+
+    const { addressBlockGroupId } = Route.useParams()
+    const groupId = parseInt(addressBlockGroupId)
 
     return (
         <>
@@ -91,8 +111,22 @@ function GroupBlocks() {
                 paginated
                 searchable
                 toolbar
-                rightActions={<></>}
+                rightActions={
+                    <CreateAddressBlockModal 
+                        addressBlockGroupId={groupId} 
+                        mutate={mutate}
+                    />
+                }
                 {...pagination}
+            />
+
+            <EditAddressBlockModal 
+                addressBlockGroupId={groupId} 
+                mutate={mutate}
+            />
+            <DeleteAddressBlockModal 
+                addressBlockGroupId={groupId} 
+                mutate={mutate}
             />
         </>
     )

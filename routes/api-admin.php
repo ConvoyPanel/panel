@@ -194,8 +194,7 @@ Route::prefix('/address-block-groups')->group(function () {
         Route::delete('/', [Admin\Ipam\AddressBlockGroupController::class, 'destroy']);
 
         Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
-
-        Route::prefix('/{address_block}')->group(function () {
+        Route::prefix('/address-blocks/{address_block}')->group(function () {
            Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
            Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
            Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);

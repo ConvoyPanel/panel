@@ -14,7 +14,7 @@ class AddressBlock extends Model
 
     public static array $validationRules = [
         'address_block_group_id' => 'required|integer|exists:address_block_groups,id',
-        'name' => 'required|string|max:40',
+        'name' => 'nullable|string|max:40',
         'description' => 'nullable|string|max:191',
         'version' => 'in:ipv4,ipv6|required',
         'base_ip' => 'required|ip',

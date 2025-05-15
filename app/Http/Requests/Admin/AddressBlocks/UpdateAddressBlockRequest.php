@@ -15,7 +15,7 @@ class UpdateAddressBlockRequest extends BaseApiRequest
 
         // Get the address block from the route
         /** @var AddressBlock $addressBlock */
-        $addressBlock = $this->parameter('addressBlock', AddressBlock::class);
+        $addressBlock = $this->parameter('address_block', AddressBlock::class);
 
         // Check if any addresses are attached to servers
         $hasAttachedAddresses = $addressBlock->addresses()->whereNotNull('server_id')->exists();
