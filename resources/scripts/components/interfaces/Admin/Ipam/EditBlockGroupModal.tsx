@@ -75,7 +75,7 @@ const EditBlockGroupModal = ({ mutate }: Props) => {
                         return item
                     }),
                 }
-            })
+            }, false)
 
             close('edit')
             toast.success('Block group updated')

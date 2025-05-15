@@ -61,7 +61,7 @@ const CreateStorageModal = () => {
                 if (!data) return
 
                 return data.concat(storage)
-            })
+            }, false)
 
             form.reset()
             setOpen(false)

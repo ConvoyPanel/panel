@@ -52,7 +52,7 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
                     ...data,
                     items: [blockGroup, ...data.items],
                 }
-            })
+            }, false)
 
             form.reset()
             setOpen(false)

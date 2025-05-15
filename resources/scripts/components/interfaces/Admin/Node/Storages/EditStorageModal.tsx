@@ -90,7 +90,7 @@ const EditStorageModal = () => {
                     }
                     return item
                 })
-            })
+            }, false)
 
             close('edit')
 

@@ -48,7 +48,7 @@ const CreateNetworkModal = () => {
                 if (!data) return
 
                 return data.concat(networkInterface)
-            })
+            }, false)
 
             form.reset()
             setOpen(false)

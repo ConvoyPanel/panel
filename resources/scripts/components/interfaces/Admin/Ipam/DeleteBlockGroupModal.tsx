@@ -45,7 +45,7 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
                     ...data,
                     items: data.items.filter(item => item.id !== blockGroup.id),
                 }
-            })
+            }, false)
 
             toast.success('Block group deleted')
             close('delete')

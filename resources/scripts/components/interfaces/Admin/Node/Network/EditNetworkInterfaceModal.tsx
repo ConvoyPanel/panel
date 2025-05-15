@@ -73,7 +73,7 @@ const EditNetworkInterfaceModal = () => {
                     }
                     return item
                 })
-            })
+            }, false)
 
             close('edit')
             toast.success('Network interface updated')

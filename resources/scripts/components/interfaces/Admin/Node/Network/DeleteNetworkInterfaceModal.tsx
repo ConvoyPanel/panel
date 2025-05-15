@@ -41,7 +41,7 @@ const DeleteNetworkInterfaceModal = () => {
                     return data.filter(
                         item => item.id !== currentNetworkInterface.id
                     )
-                })
+                }, false)
 
                 toast.success('Network interface deleted')
                 close('delete')
