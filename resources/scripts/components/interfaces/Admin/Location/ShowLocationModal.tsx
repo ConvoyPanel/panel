@@ -1,4 +1,4 @@
-import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
+import { useLocationsModalStore } from '@/routes/_app/admin/(dashboard)/locations.lazy.tsx'
 import { useShallow } from 'zustand/react/shallow'
 
 import AttachedNodesList from '@/components/interfaces/Admin/Location/AttachedNodesList.tsx'

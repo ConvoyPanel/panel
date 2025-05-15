@@ -1,4 +1,4 @@
-import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
+import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid/route.tsx'
 import { Server } from '@/types/server.ts'
 import {
     IconAirConditioningDisabled,

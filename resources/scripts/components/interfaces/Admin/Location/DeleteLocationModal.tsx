@@ -1,5 +1,5 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
+import { useLocationsModalStore } from '@/routes/_app/admin/(dashboard)/locations.lazy.tsx'
 import { Location, PaginatedLocations } from '@/types/location.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
 import { toast } from 'sonner'

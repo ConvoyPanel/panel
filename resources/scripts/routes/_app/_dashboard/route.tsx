@@ -7,29 +7,29 @@ import AppLayout from '@/components/layouts/AppLayout.tsx'
 import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
 
 export const Route = createFileRoute('/_app/_dashboard')({
-    component: () => {
-        useTitle()
+  component: () => {
+    useTitle()
 
-        return (
-            <AppLayout routes={routes}>
-                <Outlet />
-            </AppLayout>
-        )
-    },
-    staticData: {
-        title: 'Dashboard',
-    },
+    return (
+      <AppLayout routes={routes}>
+        <Outlet />
+      </AppLayout>
+    )
+  },
+  staticData: {
+    title: 'Dashboard',
+  },
 })
 
 const routes: RouteDef[] = [
-    {
-        icon: IconHome,
-        label: 'Dashboard',
-        path: '/',
-    },
-    {
-        icon: IconLock,
-        label: 'Security',
-        path: '/security',
-    },
+  {
+    icon: IconHome,
+    label: 'Dashboard',
+    path: '/',
+  },
+  {
+    icon: IconLock,
+    label: 'Security',
+    path: '/security',
+  },
 ]

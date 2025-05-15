@@ -22,7 +22,7 @@ import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute(
-    '/_app/admin/_dashboard/ipam/$addressBlockGroupId/'
+    '/_app/admin/(dashboard)/ipam/$addressBlockGroupId/'
 )({
     component: GroupBlocks,
 })
@@ -112,20 +112,20 @@ function GroupBlocks() {
                 searchable
                 toolbar
                 rightActions={
-                    <CreateAddressBlockModal 
-                        addressBlockGroupId={groupId} 
+                    <CreateAddressBlockModal
+                        addressBlockGroupId={groupId}
                         mutate={mutate}
                     />
                 }
                 {...pagination}
             />
 
-            <EditAddressBlockModal 
-                addressBlockGroupId={groupId} 
+            <EditAddressBlockModal
+                addressBlockGroupId={groupId}
                 mutate={mutate}
             />
-            <DeleteAddressBlockModal 
-                addressBlockGroupId={groupId} 
+            <DeleteAddressBlockModal
+                addressBlockGroupId={groupId}
                 mutate={mutate}
             />
         </>
