@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use App\Enums\Network\AddressVersion;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -44,5 +46,13 @@ class AddressBlock extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    protected function macAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => Str::lower($value),
+            set: fn (string $value) => Str::lower($value),
+        );
     }
 }
