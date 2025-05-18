@@ -1,5 +1,5 @@
-import { Route as ClientDashboardRoute } from '@/routes/_app/_dashboard/route.tsx'
-import { Route as AdminDashboardRoute } from '@/routes/_app/admin/(dashboard)/route.tsx'
+import { Route as ClientDashboardRoute } from '@/routes/_app/_dashboard.tsx'
+import { Route as AdminDashboardRoute } from '@/routes/_app/admin/_dashboard.tsx'
 import { Link, useLocation, useRouter } from '@tanstack/react-router'
 
 import ErrorPageLayout, {
