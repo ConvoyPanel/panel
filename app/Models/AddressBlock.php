@@ -51,8 +51,8 @@ class AddressBlock extends Model
     protected function macAddress(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => Str::lower($value),
-            set: fn (string $value) => Str::lower($value),
+            get: fn (?string $value) => $value ? Str::lower($value) : null,
+            set: fn (?string $value) => $value ? Str::lower($value) : null,
         );
     }
 }
