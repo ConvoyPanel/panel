@@ -1,7 +1,7 @@
 import usePagination from '@/hooks/use-pagination.ts'
 import { AddressBlock } from '@/types/address-block.ts'
 import { AddressVersion } from '@/types/address.ts'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
 import useAddressBlocksSWR from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks-swr.ts'
@@ -83,6 +83,13 @@ function GroupBlocks() {
 
             return (
                 <>
+                    <DropdownMenuItem asChild>
+                        <Link
+                            to={`/admin/ipam/${row.original.addressBlockGroupId}/blocks/${row.original.id}`}
+                        >
+                            View
+                        </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => openModal('edit', row.original)}
                     >

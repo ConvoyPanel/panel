@@ -10,8 +10,6 @@ export type ServerLifecycleStatus =
     | 'deletion_failed'
     | null
 
-export type ServerPowerState = 'running' | 'stopped' | 'suspended'
-
 export interface Server {
     id: number
     uuid: string

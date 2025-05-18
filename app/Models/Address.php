@@ -31,9 +31,9 @@ class Address extends Model
         return $this->belongsTo(Server::class);
     }
 
-    public function getTypeAttribute(): AddressVersion
+    public function getVersionAttribute(): AddressVersion
     {
-        return $this->addressBlock->type;
+        return $this->addressBlock->version;
     }
 
     public function getGatewayAttribute(): ?string

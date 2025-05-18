@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin\Ipam;
 
-use Illuminate\Http\Response;
 use App\Http\Requests\Admin\AddressBlocks\StoreAddressBlockRequest;
 use App\Http\Requests\Admin\AddressBlocks\UpdateAddressBlockRequest;
 use App\Models\AddressBlock;
@@ -12,6 +11,7 @@ use App\Transformers\Admin\AddressBlockTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Throwable;
@@ -39,6 +39,12 @@ class AddressBlockController
             ->appends($request->query());
 
         return fractal($blocks, new AddressBlockTransformer)->respond();
+    }
+
+    public function show(
+        AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock,
+    ): JsonResponse {
+        return fractal($addressBlock, new AddressBlockTransformer)->respond();
     }
 
     public function store(StoreAddressBlockRequest $request, AddressBlockGroup $addressBlockGroup,

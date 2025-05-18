@@ -13,10 +13,10 @@ export const Route = createFileRoute(
         preloadAddressBlockGroup(Number(addressBlockGroupId)).catch(
             processAxiosError
         ),
-    component: GroupBlocksLayout,
+    component: BlockGroupsLayout,
 })
 
-function GroupBlocksLayout() {
+function BlockGroupsLayout() {
     const { data: group } = useAddressBlockGroupSWR()
 
     useTitle(group?.name)

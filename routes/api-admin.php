@@ -195,9 +195,11 @@ Route::prefix('/address-block-groups')->group(function () {
 
         Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
         Route::prefix('/address-blocks/{address_block}')->group(function () {
-           Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
-           Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
-           Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);
+            Route::get('/', [Admin\Ipam\AddressBlockController::class, 'show']);
+            Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
+            Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
+            Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);
+            Route::get('/addresses', [Admin\Ipam\AddressController::class, 'index']);
         });
     });
 });

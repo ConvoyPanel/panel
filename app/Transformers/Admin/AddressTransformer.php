@@ -11,6 +11,7 @@ class AddressTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
         'server',
+        'addressBlock',
     ];
 
     public function transform(Address $address): array
@@ -19,7 +20,7 @@ class AddressTransformer extends TransformerAbstract
             'id' => $address->id,
             'address_block_id' => $address->address_block_id,
             'server_id' => $address->server_id,
-            'type' => $address->type,
+            'version' => $address->version,
             'ip' => $address->ip,
             'prefix_length' => $address->prefix_length,
             'gateway' => $address->gateway,
@@ -33,5 +34,10 @@ class AddressTransformer extends TransformerAbstract
             $address->server,
             new ServerTransformer,
         ) : null;
+    }
+
+    public function includeAddressBlock(Address $address): ?Item
+    {
+        return $this->item($address->addressBlock, new AddressBlockTransformer);
     }
 }
