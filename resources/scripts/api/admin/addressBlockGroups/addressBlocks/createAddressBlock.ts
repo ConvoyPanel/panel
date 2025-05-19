@@ -10,8 +10,8 @@ export const addressBlockSchema = z.object({
     baseIp: z.string().min(1),
     gateway: z.string(),
     macAddress: z.string(),
-    prefixLengthFrom: z.number().int().min(0).max(128),
-    prefixLengthTo: z.number().int().min(0).max(128),
+    prefixLengthFrom: z.coerce.number().int().min(0).max(128),
+    prefixLengthTo: z.coerce.number().int().min(0).max(128),
 }).superRefine((data, ctx) => {
     // IPv4 validation regex
     const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;

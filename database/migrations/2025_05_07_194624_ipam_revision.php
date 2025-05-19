@@ -42,6 +42,8 @@ return new class extends Migration
             $table->foreignId('address_block_id')->after('address_pool_id')->nullable()->constrained()->cascadeOnDelete();
             $table->renameColumn('address', 'ip');
             $table->renameColumn('cidr', 'prefix_length');
+
+            $table->unique(['address_block_id', 'ip']);
         });
 
         // Previously IPAM was this structure: IPs belong to Address Pools. Address Pools can be connected to nodes
@@ -89,7 +91,7 @@ return new class extends Migration
 
                 // Now access properties directly from the first item in the group
                 $oldPoolId = $firstAddress->address_pool_id;
-                $gateway = $firstAddress->gateway;
+                $gateway = $firstAddress->gateway ? IPFactory::parseAddressString($firstAddress->gateway)->toString() : null;
                 $prefixLength = $firstAddress->prefix_length;
                 $version = $firstAddress->type;
                 $macAddress = $firstAddress->mac_address;
@@ -101,7 +103,6 @@ return new class extends Migration
                 }
 
                 // Create a new address_block record
-                $blockName = "Migrated Block ({$gateway}/{$prefixLength})"; // Example name
                 try {
                     // Attempt to parse the range using the correct Factory method
                     // Use the first IP and prefix length to define the subnet range
@@ -109,6 +110,7 @@ return new class extends Migration
                     if ($range) {
                         // Get the network address (start address of the range)
                         $baseIp = $range->getStartAddress()->toString();
+                        $blockName = "Migrated Block ({$baseIp}/{$prefixLength})";
                     } else {
                         throw new \RuntimeException("Migration Error: Failed to parse range for {$firstIp}/{$prefixLength} using ip-lib (composite key: {$compositeKey}).");
                     }

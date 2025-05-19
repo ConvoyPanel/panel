@@ -4,6 +4,6 @@ namespace App\Enums\Network;
 
 enum AddressVersion: string
 {
-    case IPV4 = 'ipv4';
-    case IPV6 = 'ipv6';
+    case IPv4 = 'ipv4';
+    case IPv6 = 'ipv6';
 }

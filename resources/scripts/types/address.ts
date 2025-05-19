@@ -21,3 +21,9 @@ export interface Address {
 }
 
 export type PaginatedAddresses = PaginatedResult<Address>
+
+export interface GeneratedAddressesResult {
+    createdCount: number
+    remaining: number
+    isComplete: boolean
+}

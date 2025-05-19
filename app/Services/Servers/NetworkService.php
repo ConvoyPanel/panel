@@ -94,10 +94,10 @@ class NetworkService
     {
         return ServerAddressesData::from([
             'ipv4' => array_values(
-                $server->addresses->where('type', AddressVersion::IPV4->value)->toArray(),
+                $server->addresses->where('type', AddressVersion::IPv4->value)->toArray(),
             ),
             'ipv6' => array_values(
-                $server->addresses->where('type', AddressVersion::IPV6->value)->toArray(),
+                $server->addresses->where('type', AddressVersion::IPv6->value)->toArray(),
             ),
         ]);
     }

@@ -5,9 +5,22 @@ namespace App\Http\Requests\Admin\AddressBlocks;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\AddressBlock;
 use Illuminate\Support\Arr;
+use IPLib\Factory as IPFactory;
 
 class StoreAddressBlockRequest extends BaseApiRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $baseIp = $this->string('base_ip')->toString();
+        /** @var ?string $gateway */
+        $gateway = $this->input('gateway');
+
+        $this->merge([
+            'ip' => IPFactory::parseAddressString($baseIp)->toString(),
+            'gateway' => $gateway ? IPFactory::parseAddressString($gateway)->toString() : null,
+        ]);
+    }
+
     public function rules(): array
     {
         $rules = Arr::except(AddressBlock::getRules(), ['address_block_group_id']);
@@ -18,37 +31,34 @@ class StoreAddressBlockRequest extends BaseApiRequest
             function (string $attribute, mixed $value, \Closure $fail) {
                 $version = request()->input('version');
 
-                if ($version === 'ipv4' && !filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                if ($version === 'ipv4' && ! filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                     $fail('The base IP must be a valid IPv4 address when version is IPv4.');
-                } elseif ($version === 'ipv6' && !filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                } elseif ($version === 'ipv6' && ! filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
                     $fail('The base IP must be a valid IPv6 address when version is IPv6.');
-                } elseif (!filter_var($value, FILTER_VALIDATE_IP)) {
+                } elseif (! filter_var($value, FILTER_VALIDATE_IP)) {
                     $fail('The base IP must be a valid IP address.');
                 }
-            }
+            },
         ];
 
-        // Also validate gateway if provided
-        if (array_key_exists('gateway', $rules)) {
-            $rules['gateway'] = [
-                'nullable',
-                function (string $attribute, mixed $value, \Closure $fail) {
-                    if (empty($value)) {
-                        return;
-                    }
-
-                    $version = request()->input('version');
-
-                    if ($version === 'ipv4' && !filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                        $fail('The gateway must be a valid IPv4 address when version is IPv4.');
-                    } elseif ($version === 'ipv6' && !filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-                        $fail('The gateway must be a valid IPv6 address when version is IPv6.');
-                    } elseif (!filter_var($value, FILTER_VALIDATE_IP)) {
-                        $fail('The gateway must be a valid IP address.');
-                    }
+        $rules['gateway'] = [
+            'nullable',
+            function (string $attribute, mixed $value, \Closure $fail) {
+                if (empty($value)) {
+                    return;
                 }
-            ];
-        }
+
+                $version = request()->input('version');
+
+                if ($version === 'ipv4' && ! filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $fail('The gateway must be a valid IPv4 address when version is IPv4.');
+                } elseif ($version === 'ipv6' && ! filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                    $fail('The gateway must be a valid IPv6 address when version is IPv6.');
+                } elseif (! filter_var($value, FILTER_VALIDATE_IP)) {
+                    $fail('The gateway must be a valid IP address.');
+                }
+            },
+        ];
 
         return $rules;
     }

@@ -106,7 +106,9 @@ const EditAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
         <Credenza open={open} onOpenChange={open => !open && close('edit')}>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>Editing {addressBlock?.name || 'Address Block'}</CredenzaTitle>
+                    <CredenzaTitle>
+                        Editing {addressBlock?.name || 'Address Block'}
+                    </CredenzaTitle>
                 </CredenzaHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
@@ -118,21 +120,26 @@ const EditAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
                             />
                             <InputForm name={'baseIp'} label={'Base IP'} />
                             <InputForm name={'gateway'} label={'Gateway'} />
-                            <InputForm name={'macAddress'} label={'MAC Address'} />
-                            <InputForm 
-                                name={'prefixLengthFrom'} 
-                                label={'Prefix Length From'} 
-                                type={'number'}
-                                min={0}
-                                max={128}
+                            <InputForm
+                                name={'macAddress'}
+                                label={'MAC Address'}
                             />
-                            <InputForm 
-                                name={'prefixLengthTo'} 
-                                label={'Prefix Length To'} 
-                                type={'number'}
-                                min={0}
-                                max={128}
-                            />
+                            <div className={'grid grid-cols-2 gap-2'}>
+                                <InputForm
+                                    name={'prefixLengthFrom'}
+                                    label={'Source Prefix Length'}
+                                    type={'number'}
+                                    min={0}
+                                    max={128}
+                                />
+                                <InputForm
+                                    name={'prefixLengthTo'}
+                                    label={'Output Prefix Length'}
+                                    type={'number'}
+                                    min={0}
+                                    max={128}
+                                />
+                            </div>
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>
                             <CredenzaClose asChild>

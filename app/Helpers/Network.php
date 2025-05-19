@@ -25,7 +25,7 @@ function getAddressesFromRange(AddressVersion $type, string $from, string $to): 
     /** @var string[] */
     $addresses = [];
 
-    if ($type === AddressVersion::IPV4) {
+    if ($type === AddressVersion::IPv4) {
         $from = ip2long($from);
         $to = ip2long($to);
 

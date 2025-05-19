@@ -199,67 +199,12 @@ Route::prefix('/address-block-groups')->group(function () {
             Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
             Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
             Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);
+
             Route::get('/addresses', [Admin\Ipam\AddressController::class, 'index']);
+            Route::post('/addresses/generate', [Admin\Ipam\AddressController::class, 'generate']);
         });
     });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Address Pool Controller Routes
-|--------------------------------------------------------------------------
-|
-| Endpoint: /api/admin/address-pools
-|
-*/
-// Route::prefix('/address-pools')->group(function () {
-//    Route::get(
-//        '/',
-//        [Admin\AddressPools\AddressPoolController::class, 'index'],
-//    );
-//    Route::post(
-//        '/',
-//        [Admin\AddressPools\AddressPoolController::class, 'store'],
-//    );
-//
-//    Route::prefix('/{address_pool}')->group(function () {
-//        Route::get(
-//            '/',
-//            [Admin\AddressPools\AddressPoolController::class, 'show'],
-//        );
-//        Route::put(
-//            '/',
-//            [Admin\AddressPools\AddressPoolController::class, 'update'],
-//        );
-//        Route::delete(
-//            '/',
-//            [Admin\AddressPools\AddressPoolController::class, 'destroy'],
-//        );
-//        Route::get(
-//            '/attached-nodes',
-//            [Admin\AddressPools\AddressPoolController::class, 'getAttachedNodes'],
-//        );
-//
-//        Route::prefix('/addresses')->group(function () {
-//            Route::get(
-//                '/',
-//                [Admin\AddressPools\AddressController::class, 'index'],
-//            );
-//            Route::post(
-//                '/',
-//                [Admin\AddressPools\AddressController::class, 'store'],
-//            );
-//            Route::put(
-//                '/{address}',
-//                [Admin\AddressPools\AddressController::class, 'update'],
-//            );
-//            Route::delete(
-//                '/{address}',
-//                [Admin\AddressPools\AddressController::class, 'destroy'],
-//            );
-//        });
-//    });
-// });
 
 /*
 |--------------------------------------------------------------------------

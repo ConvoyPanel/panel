@@ -106,20 +106,22 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
                                 name={'macAddress'}
                                 label={'MAC Address'}
                             />
-                            <InputForm
-                                name={'prefixLengthFrom'}
-                                label={'Source Prefix Length'}
-                                type={'number'}
-                                min={0}
-                                max={128}
-                            />
-                            <InputForm
-                                name={'prefixLengthTo'}
-                                label={'Output Prefix Length'}
-                                type={'number'}
-                                min={0}
-                                max={128}
-                            />
+                            <div className={'grid grid-cols-2 gap-2'}>
+                                <InputForm
+                                    name={'prefixLengthFrom'}
+                                    label={'Source Prefix Length'}
+                                    type={'number'}
+                                    min={0}
+                                    max={128}
+                                />
+                                <InputForm
+                                    name={'prefixLengthTo'}
+                                    label={'Output Prefix Length'}
+                                    type={'number'}
+                                    min={0}
+                                    max={128}
+                                />
+                            </div>
                         </CredenzaBody>
                         <CredenzaFooter className={'sm:mt-4'}>
                             <CredenzaClose asChild>

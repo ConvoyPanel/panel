@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Ipam;
 
+use Illuminate\Support\Str;
 use App\Http\Requests\Admin\AddressBlocks\StoreAddressBlockRequest;
 use App\Http\Requests\Admin\AddressBlocks\UpdateAddressBlockRequest;
 use App\Models\AddressBlock;
@@ -66,7 +67,7 @@ class AddressBlockController
         $this->connection->transaction(
             function () use ($request, $addressBlock) {
                 if (
-                    $addressBlock->base_ip !== $request->string('base_ip') ||
+                    $addressBlock->base_ip !== $request->string('base_ip')->toString() ||
                     $addressBlock->prefix_length_from !== $request->integer('prefix_length_from') ||
                     $addressBlock->prefix_length_to !== $request->integer('prefix_length_to')
                 ) {

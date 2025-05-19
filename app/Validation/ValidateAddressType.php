@@ -15,13 +15,13 @@ class ValidateAddressType
     {
         $data = $validator->validated();
 
-        if ($this->addressType === AddressVersion::IPV4) {
+        if ($this->addressType === AddressVersion::IPv4) {
             foreach ($this->fields as $field) {
                 if (! filter_var($data[$field], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                     $validator->errors()->add('address', __('validation.ipv4', ['attribute' => $field]));
                 }
             }
-        } elseif ($this->addressType === AddressVersion::IPV6) {
+        } elseif ($this->addressType === AddressVersion::IPv6) {
             foreach ($this->fields as $field) {
                 if (! filter_var($data[$field], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
                     $validator->errors()->add('address', __('validation.ipv6', ['attribute' => $field]));
