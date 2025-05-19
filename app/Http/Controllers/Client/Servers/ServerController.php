@@ -11,7 +11,6 @@ use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\ServerConsoleService;
-use App\Services\Servers\ServerDetailService;
 use App\Transformers\Client\ServerStateTransformer;
 use App\Transformers\Client\ServerTerminalTransformer;
 use App\Transformers\Client\ServerTransformer;

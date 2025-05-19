@@ -15,24 +15,21 @@ readonly class SyncBuildService
         private AllocationService $allocationService,
         private CloudinitService $cloudinitService,
         private NetworkService $networkService,
-        private ServerDetailService $detailService,
         private ProxmoxConfigRepository $allocationRepository,
         private ProxmoxDiskRepository $diskRepository,
-    ) {
-    }
+    ) {}
 
     public function handle(Server $server): void
     {
         $this->allocationRepository->setServer($server);
 
-        $eloquentDetails = $this->detailService->getByEloquent($server);
         $disks = $this->allocationService->getDisks($server);
         $bootOrder = $this->allocationService->getBootOrder($server);
 
         $this->allocationService->syncSettings($server);
 
         /* Sync metadata */
-        $this->cloudinitService->updateHostname($server, $eloquentDetails->hostname);
+        $this->cloudinitService->updateHostname($server, $server->hostname);
 
         /* Sync network configuration */
         $this->networkService->syncSettings($server);
@@ -49,7 +46,7 @@ readonly class SyncBuildService
         if (count($bootOrder) > 0) {
             /** @var DiskData $disk */
             $disk = $disks->where('interface', '=', DiskInterface::from(Arr::first($bootOrder)))
-                          ->first();
+                ->first();
 
             $diff = $server->disk - $disk->size;
 

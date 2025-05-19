@@ -17,7 +17,7 @@ use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
 use App\Services\Servers\ServerSuspensionService;
 use App\Services\Servers\SyncBuildService;
-use App\Transformers\Admin\ServerBuildTransformer;
+use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -60,7 +60,7 @@ class ServerController
                 $request->query(),
             );
 
-        return fractal($servers, new ServerBuildTransformer)->parseIncludes($request->include)
+        return fractal($servers, new ServerTransformer)->parseIncludes($request->include)
             ->respond();
     }
 
@@ -68,7 +68,7 @@ class ServerController
     {
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes($request->include)
+        return fractal($server, new ServerTransformer)->parseIncludes($request->include)
             ->respond();
     }
 
@@ -78,7 +78,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])
+        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
             ->respond();
     }
 
@@ -100,7 +100,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])
+        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
             ->respond();
     }
 
@@ -118,7 +118,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerBuildTransformer)->parseIncludes(['user', 'node'])
+        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
             ->respond();
     }
 

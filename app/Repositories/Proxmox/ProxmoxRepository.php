@@ -58,6 +58,15 @@ abstract class ProxmoxRepository
         return $response['data'] ?? $response;
     }
 
+    /**
+     * Get a pre-configured HTTP client for Proxmox API requests.
+     *
+     * Note: Operations performed with the returned client are configured to throw
+     * a RequestException on HTTP request failures.
+     *
+     * @noinspection PhpDocRedundantThrowsInspection PhpStorm might flag this as redundant because the method itself doesn't throw.
+     * @throws RequestException
+     */
     public function getHttpClient(
         bool $shouldAuthorize = true,
     ): PendingRequest {
