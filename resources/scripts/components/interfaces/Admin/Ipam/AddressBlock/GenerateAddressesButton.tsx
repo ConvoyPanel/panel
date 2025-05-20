@@ -23,7 +23,7 @@ const GenerateAddressesButton = ({ mutate }: Props) => {
         {
             async onSuccess(data) {
                 await mutate()
-                toast.success(`Generated ${data.createdCount} addresses`)
+                toast.success(`Generated ${data.createdCount.toLocaleString()} addresses`)
             },
             async onError() {
                 toast.error('Failed to generate addresses')
