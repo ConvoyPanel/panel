@@ -2,13 +2,14 @@
 
 namespace App\Repositories\Proxmox\Server;
 
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Http\Client\ConnectionException;
 
 class ProxmoxConfigRepository extends ProxmoxRepository
 {
     /**
-     * @throws ConnectionException
+     * @throws RequestException
      */
     public function getConfig(): array
     {
@@ -30,7 +31,7 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     }
 
     /**
-     * @throws ConnectionException
+     * @throws RequestException
      */
     public function getResources()
     {
@@ -46,7 +47,7 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     }
 
     /**
-     * @throws ConnectionException
+     * @throws RequestException
      */
     public function update(array $payload = [])
     {
