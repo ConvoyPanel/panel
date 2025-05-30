@@ -21,7 +21,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
     /**
      * @return DataCollection<int, StorageData>
      *
-     * @throws ConnectionException
+     * @throws RequestException
      */
     public function getStorages(): DataCollection
     {

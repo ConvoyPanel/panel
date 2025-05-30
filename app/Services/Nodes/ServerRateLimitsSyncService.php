@@ -5,15 +5,15 @@ namespace App\Services\Nodes;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Models\Node;
 use App\Models\Server;
-use App\Services\Servers\NetworkService;
+use App\Services\Servers\ServerNetworkService;
 
 class ServerRateLimitsSyncService
 {
-    public function __construct(private NetworkService $service)
+    public function __construct(private ServerNetworkService $service)
     {
     }
 
-    public function handle(Node $node)
+    public function handle(Node $node): void
     {
         $servers = $node->servers;
 

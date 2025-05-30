@@ -22,7 +22,7 @@ export interface Storage {
 }
 
 export interface NodeStorage extends Storage {
-    backupOrder: number
+    backupOrder: number | null
 }
 
 export interface StorageProxmox {

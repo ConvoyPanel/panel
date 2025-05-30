@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
-use Response;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
@@ -13,8 +13,9 @@ use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use App\Transformers\Admin\StorageDataTransformer;
 use App\Transformers\Admin\StorageTransformer;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
+use Response;
+use Throwable;
 
 use function fractal;
 
@@ -31,7 +32,7 @@ class StorageController extends Controller
     }
 
     /**
-     * @throws ConnectionException
+     * @throws RequestException
      */
     public function fetchFromProxmox(Node $node): JsonResponse
     {
@@ -40,6 +41,9 @@ class StorageController extends Controller
         return fractal($storages, new StorageDataTransformer)->respond();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function store(StorageRequest $request, Node $node): JsonResponse
     {
         $storage = $this->connection->transaction(function () use ($request, $node) {
@@ -56,9 +60,21 @@ class StorageController extends Controller
         return fractal($storage, new StorageTransformer)->respond();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function update(StorageRequest $request, Node $node, Storage $storage): JsonResponse
     {
-        $storage->update($request->validated());
+        $this->connection->transaction(function () use ($request, $storage) {
+            $storage->update($request->validated());
+
+            // if the storage now supports backups, we need to update the order
+            if ($request->boolean('stores_backups') && $storage->stores_backups !== $request->boolean('stores_backups')) {
+                $storageToNode = StorageToNode::where('storage_id', '=', $storage->id)->firstOrFail();
+                $storageToNode->backup_order = $storageToNode->getHighestOrderNumber() + 1;
+                $storageToNode->save();
+            }
+        });
 
         return fractal($storage, new StorageTransformer)->respond();
     }

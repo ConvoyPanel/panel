@@ -14,11 +14,50 @@ return new class extends Migration
     public function up(): void
     {
         Schema::rename('address_pools', 'address_block_groups');
-        Schema::rename('address_pool_to_node', 'address_block_group_to_node');
+        Schema::rename('address_pool_to_node', 'address_block_group_to_network_interface');
         Schema::rename('ip_addresses', 'addresses');
 
-        Schema::table('address_block_group_to_node', function (Blueprint $table) {
+        Schema::table('address_block_group_to_network_interface', function (Blueprint $table) {
             $table->renameColumn('address_pool_id', 'address_block_group_id');
+            $table->unsignedBigInteger('network_interface_id')->nullable()->after('node_id');
+            // Use a descriptive but shorter name for the foreign key constraint
+            $table->foreign('network_interface_id', 'address_block_network_interface_foreign')
+                ->references('id')
+                ->on('network_interfaces')
+                ->onDelete('cascade');
+        });
+
+        /**
+         * Fill the network_interface_id column with the first network interface of the node.
+         */
+        DB::table('address_block_group_to_network_interface')
+            ->select('address_block_group_to_network_interface.address_block_group_id',
+                    'address_block_group_to_network_interface.node_id',
+                    'network_interfaces.id as interface_id')
+            ->join('network_interfaces', 'address_block_group_to_network_interface.node_id', '=', 'network_interfaces.node_id')
+            ->whereNull('address_block_group_to_network_interface.network_interface_id')
+            ->orderBy('network_interfaces.id')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->address_block_group_id . '-' . $item->node_id;
+            })
+            ->each(function ($records) {
+                $first = $records->first();
+                if ($first && isset($first->interface_id)) {
+                    DB::table('address_block_group_to_network_interface')
+                        ->where('address_block_group_id', $first->address_block_group_id)
+                        ->where('node_id', $first->node_id)
+                        ->update(['network_interface_id' => $first->interface_id]);
+                }
+            });
+
+        // Make network_interface_id non-nullable and remove node_id constraint
+        Schema::table('address_block_group_to_network_interface', function (Blueprint $table) {
+            // Make network_interface_id non-nullable
+            $table->foreignId('network_interface_id')->nullable(false)->change();
+
+            $table->dropForeign('address_pool_to_node_node_id_foreign');
+            $table->dropColumn('node_id');
         });
 
         Schema::table('address_block_groups', function (Blueprint $table) {
@@ -161,17 +200,11 @@ return new class extends Migration
     public function down(): void
     {
         // --- Clear Addresses Data ---
-        // Delete all records from the 'addresses' table before modifying schema
-        // to avoid foreign key constraint issues during rollback.
-        // Use truncate for efficiency if possible and acceptable (resets auto-increment).
-        // DB::table('addresses')->truncate();
-        // Or use delete if truncate causes issues with foreign keys referencing this table (unlikely here)
-        DB::table('addresses')->delete();
+        DB::table('addresses')->truncate();
 
         // --- Reverse Final Schema Cleanup ---
         Schema::table('addresses', function (Blueprint $table) {
             // Re-add columns (nullable for safety during rollback)
-            // Assuming target table 'address_block_groups' exists during rollback
             $table->foreignId('address_pool_id')->after('id')->constrained('address_block_groups');
             $table->string('type')->nullable();
             $table->string('gateway')->nullable();
@@ -179,7 +212,6 @@ return new class extends Migration
             $table->timestamps(); // Re-add timestamps
 
             // Drop the new foreign key (constraint first, then column)
-            // Use Laravel's convention-based drop for the FK
             $table->dropForeign(['address_block_id']);
             $table->dropColumn('address_block_id');
 
@@ -196,19 +228,24 @@ return new class extends Migration
             $table->dropColumn('description');
         });
 
-        Schema::table('address_block_group_to_node', function (Blueprint $table) {
-            $table->dropForeign('address_pool_to_node_address_pool_id_foreign');
+        // Purge all records from address_block_group_to_network_interface
+        DB::table('address_block_group_to_network_interface')->truncate();
+
+        // Revert schema changes to address_block_group_to_network_interface
+        Schema::table('address_block_group_to_network_interface', function (Blueprint $table) {
+            // Drop network_interface_id column
+            $table->dropConstrainedForeignId('network_interface_id');
+
+            // Restore node_id foreign key
+            $table->foreign('node_id')->references('id')->on('nodes')->onDelete('cascade');
+
+            // Rename the column back
             $table->renameColumn('address_block_group_id', 'address_pool_id');
-            // Re-add foreign key if necessary (adjust table name)
-            // Assuming 'address_pools' table exists after rename below
-            // $table->foreign('address_pool_id')->references('id')->on('address_pools');
         });
 
         // --- Reverse Renames ---
         Schema::rename('addresses', 'ip_addresses');
-        Schema::rename('address_block_group_to_node', 'address_pool_to_node');
+        Schema::rename('address_block_group_to_network_interface', 'address_pool_to_node');
         Schema::rename('address_block_groups', 'address_pools');
-
-        // Note: Data rollback is not implemented here.
     }
 };

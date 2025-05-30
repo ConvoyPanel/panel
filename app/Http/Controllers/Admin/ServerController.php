@@ -12,7 +12,7 @@ use App\Models\Filters\FiltersServerByAddressPoolId;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
-use App\Services\Servers\NetworkService;
+use App\Services\Servers\ServerNetworkService;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
 use App\Services\Servers\ServerSuspensionService;
@@ -27,13 +27,13 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class ServerController
 {
     public function __construct(
-        private ConnectionInterface $connection,
-        private ServerDeletionService $deletionService,
-        private NetworkService $networkService,
+        private ConnectionInterface     $connection,
+        private ServerDeletionService   $deletionService,
+        private ServerNetworkService    $networkService,
         private ServerSuspensionService $suspensionService,
-        private ServerCreationService $creationService,
-        private CloudinitService $cloudinitService,
-        private SyncBuildService $buildModificationService,
+        private ServerCreationService   $creationService,
+        private CloudinitService        $cloudinitService,
+        private SyncBuildService        $buildModificationService,
     ) {}
 
     public function index(Request $request)
@@ -87,7 +87,7 @@ class ServerController
         $this->connection->transaction(function () use ($request, $server) {
             if ($request->hostname !== $server->hostname && ! empty($request->hostname)) {
                 try {
-                    $this->cloudinitService->updateHostname($server, $request->hostname);
+                    $this->cloudinitService->setHostname($server, $request->hostname);
                 } catch (ProxmoxConnectionException) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$server->uuid} failed to sync hostname.",

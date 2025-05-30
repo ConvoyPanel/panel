@@ -63,4 +63,93 @@ enum DiskInterface: string
     case SATA5 = 'sata5';
     case EFIDISK0 = 'efidisk0';
     case TPMSTATE0 = 'tpmstate0';
+    
+    /**
+     * Get the maximum number of devices allowed for each interface type
+     */
+    public static function getMaxDevices(string $interfaceType): int
+    {
+        return match (strtolower($interfaceType)) {
+            'ide' => 4,       // IDE0-IDE3
+            'sata' => 6,      // SATA0-SATA5
+            'scsi' => 31,     // SCSI0-SCSI30
+            'virtio' => 16,   // VIRTIO0-VIRTIO15
+            'efidisk' => 1,   // EFIDISK0 only
+            'tpmstate' => 1,  // TPMSTATE0 only
+            default => throw new \InvalidArgumentException("Unknown interface type: {$interfaceType}"),
+        };
+    }
+    
+    /**
+     * Get the base interface type (ide, sata, scsi, virtio, efidisk, tpmstate)
+     */
+    public function getBaseType(): string
+    {
+        if (preg_match('/^([a-z]+)\d+$/', $this->value, $matches)) {
+            return $matches[1];
+        }
+        
+        throw new \RuntimeException("Could not determine base type for {$this->value}");
+    }
+    
+    /**
+     * Get the slot number for this interface
+     */
+    public function getSlot(): int
+    {
+        if (preg_match('/^[a-z]+(\d+)$/', $this->value, $matches)) {
+            return (int) $matches[1];
+        }
+        
+        throw new \RuntimeException("Could not determine slot number for {$this->value}");
+    }
+    
+    /**
+     * Check if a given interface type has available slots
+     * 
+     * @param string $interfaceType Base interface type (ide, sata, scsi, virtio, etc.)
+     * @param array $usedSlots Array of slot numbers already in use
+     * @return bool True if there are available slots
+     */
+    public static function hasAvailableSlots(string $interfaceType, array $usedSlots): bool
+    {
+        $maxSlots = self::getMaxDevices($interfaceType);
+        
+        // If we have fewer used slots than max, there's availability
+        return count($usedSlots) < $maxSlots;
+    }
+    
+    /**
+     * Get the next available slot for a given interface type
+     * 
+     * @param string $interfaceType Base interface type (ide, sata, scsi, virtio, etc.)
+     * @param array $usedSlots Array of slot numbers already in use
+     * @return int|null The next available slot or null if none available
+     */
+    public static function getNextAvailableSlot(string $interfaceType, array $usedSlots): ?int
+    {
+        $maxSlots = self::getMaxDevices($interfaceType);
+        
+        // Find the first unused slot
+        for ($i = 0; $i < $maxSlots; $i++) {
+            if (!in_array($i, $usedSlots)) {
+                return $i;
+            }
+        }
+        
+        return null; // No available slots
+    }
+    
+    /**
+     * Check if a specified interface and slot is valid
+     */
+    public static function isValid(string $interfaceType, int $slot): bool
+    {
+        try {
+            $maxSlots = self::getMaxDevices($interfaceType);
+            return $slot >= 0 && $slot < $maxSlots;
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
+    }
 }

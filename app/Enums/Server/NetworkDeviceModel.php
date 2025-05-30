@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
  * @see https://pve.proxmox.com/pve-docs/qm.1.html#qm_virtio
  * @see https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/%7Bnode%7D/qemu/%7Bvmid%7D/config
  */
-enum NicModel: string
+enum NetworkDeviceModel: string
 {
     case E1000 = 'e1000';
     case E1000_82540EM = 'e1000-82540em';

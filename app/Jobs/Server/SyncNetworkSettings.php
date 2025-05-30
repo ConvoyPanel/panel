@@ -3,7 +3,7 @@
 namespace App\Jobs\Server;
 
 use App\Models\Server;
-use App\Services\Servers\NetworkService;
+use App\Services\Servers\ServerNetworkService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,7 +33,7 @@ class SyncNetworkSettings implements ShouldQueue
         )];
     }
 
-    public function handle(NetworkService $service): void
+    public function handle(ServerNetworkService $service): void
     {
         $server = Server::findOrFail($this->serverId);
 

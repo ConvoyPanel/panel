@@ -43,6 +43,12 @@ class AddressController
         return fractal($result, new GeneratedAddressesResultTransformer)->respond();
     }
 
+    public function update(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address): Response
+    {
+        // TODO: implement AddressController update
+        return response()->noContent();
+    }
+
     public function destroy(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address): Response
     {
         //  TODO: implement deletes & sync affected servers networking configuration

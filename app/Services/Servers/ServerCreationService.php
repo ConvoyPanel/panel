@@ -19,8 +19,8 @@ use Illuminate\Support\Str;
 class ServerCreationService
 {
     public function __construct(
-        private NetworkService $networkService,
-        private ServerRepository $repository,
+        private ServerNetworkService       $networkService,
+        private ServerRepository           $repository,
         private ServerBuildDispatchService $buildDispatchService,
     ) {
     }

@@ -43,7 +43,7 @@ class SettingsController
     public function rename(RenameServerRequest $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $this->cloudinitService->updateHostname($server, $request->hostname);
+            $this->cloudinitService->setHostname($server, $request->hostname);
 
             $server->update($request->validated());
         });
@@ -175,7 +175,7 @@ class SettingsController
 
     public function updateNetworkSettings(UpdateNetworkRequest $request, Server $server)
     {
-        $this->cloudinitService->updateNameservers($server, $request->nameservers);
+        $this->cloudinitService->setNameservers($server, $request->nameservers);
 
         return fractal()->item([
             'nameservers' => $this->cloudinitService->getNameservers($server),

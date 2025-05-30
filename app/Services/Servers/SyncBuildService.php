@@ -12,11 +12,11 @@ use Illuminate\Support\Arr;
 readonly class SyncBuildService
 {
     public function __construct(
-        private AllocationService $allocationService,
-        private CloudinitService $cloudinitService,
-        private NetworkService $networkService,
+        private AllocationService       $allocationService,
+        private CloudinitService        $cloudinitService,
+        private ServerNetworkService    $networkService,
         private ProxmoxConfigRepository $allocationRepository,
-        private ProxmoxDiskRepository $diskRepository,
+        private ProxmoxDiskRepository   $diskRepository,
     ) {}
 
     public function handle(Server $server): void
@@ -29,7 +29,7 @@ readonly class SyncBuildService
         $this->allocationService->syncSettings($server);
 
         /* Sync metadata */
-        $this->cloudinitService->updateHostname($server, $server->hostname);
+        $this->cloudinitService->setHostname($server, $server->hostname);
 
         /* Sync network configuration */
         $this->networkService->syncSettings($server);

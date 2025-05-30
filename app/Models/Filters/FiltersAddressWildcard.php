@@ -10,14 +10,29 @@ class FiltersAddressWildcard implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): void
     {
-        if (is_array($value)) {
-            $query->whereIn('id', $value)
-                  ->orWhereIn('address', Arr::map($value, fn ($v) => strtolower($v)))
-                  ->orWhereIn('mac_address', Arr::map($value, fn ($v) => strtolower($v)));
-        } else {
-            $query->where('id', $value)
-                  ->orWhere('address', strtolower($value))
-                  ->orWhere('mac_address', strtolower($value));
-        }
+        $fields = [
+            'id' => false, // false = don't convert to lowercase
+            'address' => true, // true = convert to lowercase
+            'mac_address' => true,
+        ];
+        
+        $query->where(function (Builder $subQuery) use ($fields, $value) {
+            $first = true;
+            
+            foreach ($fields as $field => $convertCase) {
+                $method = $first ? 'where' : 'orWhere';
+                $first = false;
+                
+                if (is_array($value)) {
+                    $values = $convertCase 
+                        ? Arr::map($value, fn($v) => strtolower($v)) 
+                        : $value;
+                    $subQuery->$method . 'In'($field, $values);
+                } else {
+                    $fieldValue = $convertCase ? strtolower($value) : $value;
+                    $subQuery->$method($field, $fieldValue);
+                }
+            }
+        });
     }
 }

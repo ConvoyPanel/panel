@@ -2,9 +2,9 @@
 
 namespace App\Services\Servers;
 
-use App\Data\Server\Deployments\CloudinitAddressConfigData;
-use App\Data\Server\Proxmox\Config\AddressConfigData;
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Data\Server\Proxmox\Config\NetworkDeviceData;
+use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Models\Address;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
@@ -13,118 +13,84 @@ use function collect;
 use function explode;
 
 /**
- * Class SnapshotService
+ * Service for managing cloud-init configurations in Proxmox servers.
+ *
+ * @see https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/%7Bnode%7D/qemu/%7Bvmid%7D/config
  */
 class CloudinitService
 {
-    public function __construct(private ProxmoxConfigRepository $configRepository)
-    {
-    }
-
-    public function getSSHKeys(Server $server): string
-    {
-        $raw = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
-
-        return rawurldecode($raw);
-    }
+    public function __construct(private ProxmoxConfigRepository $configRepository) {}
 
     /**
-     * @param  string  $password
-     * @param  array  $params
-     * @return mixed
+     * Sets the hostname and search domain for a server in Proxmox.
+     *
+     * @throws RequestException
      */
-
-    /**
-     * @param  array  $params
-     * @return mixed
-     */
-    public function updateHostname(Server $server, string $hostname)
+    public function setHostname(Server $server, string $hostname): void
     {
         $this->configRepository->setServer($server)->update([
             'name' => $hostname,
+            'searchdomain' => $hostname,
         ]);
-
-        $this->configRepository->setServer($server)->update(['searchdomain' => $hostname]);
     }
 
-    public function getNameservers(Server $server)
+    /**
+     * @return string[]
+     *
+     * @throws RequestException
+     */
+    public function getNameservers(Server $server): array
     {
         $nameservers = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'nameserver')->first();
 
         return $nameservers ? explode(' ', $nameservers['value']) : [];
     }
 
-    public function updateNameservers(Server $server, array $nameservers)
+    public function setNameservers(Server $server, array $nameservers): void
     {
         $payload = [
             ...(count($nameservers) > 0 ? ['nameserver' => implode(' ', $nameservers)] : []),
             ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : []),
         ];
 
-        return $this->configRepository->setServer($server)->update($payload);
-    }
-
-    public function getIpConfig(Server $server): AddressConfigData
-    {
-        $rawConfig = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'ipconfig0')->first()['value'];
-
-        $config = [
-            'ipv4' => null,
-            'ipv6' => null,
-        ];
-
-        if ($rawConfig) {
-            $configs = explode(',', $rawConfig);
-
-            Arr::map($configs, function ($value) use (&$config) {
-                $property = explode('=', $value);
-
-                if ($property[0] === 'ip') {
-                    $cidr = explode('/', $property[1]);
-                    $config['ipv4']['address'] = $cidr[0];
-                    $config['ipv4']['cidr'] = $cidr[1];
-                }
-                if ($property[0] === 'ip6') {
-                    $cidr = explode('/', $property[1]);
-                    $config['ipv6']['address'] = $cidr[0];
-                    $config['ipv6']['cidr'] = $cidr[1];
-                }
-                if ($property[0] === 'gw') {
-                    $config['ipv4']['gateway'] = $property[1];
-                }
-                if ($property[0] === 'gw6') {
-                    $config['ipv6']['gateway'] = $property[1];
-                }
-            });
-        }
-
-        return AddressConfigData::from($config);
+        $this->configRepository->setServer($server)->update($payload);
     }
 
     /**
-     * @param  string|array  $config
-     * @return mixed|void
+     * Updates the IP configuration for a server in Proxmox.
+     * Configures IPv4 and IPv6 addresses with their respective gateways.
      *
-     * @throws ProxmoxConnectionException
+     * @throws RequestException
      */
-    public function updateIpConfig(Server $server, CloudinitAddressConfigData $addresses)
+    public function setIpConfig(Server $server, ?Address $ipv4, ?Address $ipv6): void
     {
         $payload = [];
 
-        if ($addresses?->ipv4) {
-            $ipv4 = $addresses->ipv4;
-            $payload[] = "ip={$ipv4->address}/{$ipv4->cidr}";
+        if ($ipv4) {
+            $payload[] = "ip={$ipv4->ip}/{$ipv4->prefix_length}";
             $payload[] = 'gw='.$ipv4->gateway;
         }
 
-        if ($addresses?->ipv6) {
-            $ipv6 = $addresses->ipv6;
-            $payload[] = "ip6={$ipv6->address}/{$ipv6->cidr}";
+        if ($ipv6) {
+            $payload[] = "ip6={$ipv6->ip}/{$ipv6->prefix_length}";
             $payload[] = 'gw6='.$ipv6->gateway;
         }
 
-        return $this->configRepository->setServer($server)->update([
-            'ipconfig0' => Arr::join($payload, ','),
-        ]);
+        $payload = Arr::join($payload, ',');
+
+        /** @var array<string, string> $networkDevices */
+        $networkDevices = $this->configRepository
+            ->setServer($server)
+            ->getConfig()
+            ->networkDevices
+            ->map(fn (NetworkDeviceData $device) => ["ipconfig$device->id", $payload])
+            ->reduce(function (array $carry, array $item) {
+                [$id, $config] = $item;
+                $carry[$id] = $config;
+
+                return $carry;
+            }, []);
+
+        $this->configRepository->setServer($server)->update($networkDevices);
     }
 }

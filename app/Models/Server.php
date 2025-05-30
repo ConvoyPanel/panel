@@ -88,6 +88,16 @@ class Server extends Model
         return $this->hasMany(Deployment::class);
     }
 
+    public function primaryIPv4Address(): HasOne
+    {
+        return $this->hasOne(Address::class, 'id', 'primary_ipv4_address_id');
+    }
+
+    public function primaryIPv6Address(): HasOne
+    {
+        return $this->hasOne(Address::class, 'id', 'primary_ipv6_address_id');
+    }
+
     /**
      * Returns all the activity log entries where the server is the subject.
      */

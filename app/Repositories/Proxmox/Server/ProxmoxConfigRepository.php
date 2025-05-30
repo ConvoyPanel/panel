@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Proxmox\Server;
 
+use App\Data\Server\Proxmox\Config\ServerConfigData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Http\Client\ConnectionException;
@@ -11,23 +12,15 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      */
-    public function getConfig(): array
+    public function getConfig(): ServerConfigData
     {
         $response = $this->getHttpClientWithParams()
             ->get('/api2/json/nodes/{node}/qemu/{server}/config')
             ->json();
 
-        $unparsed = $this->getData($response);
-        $parsed = [];
 
-        foreach ($unparsed as $key => $value) {
-            $parsed[] = [
-                'key' => $key,
-                'value' => $value,
-            ];
-        }
 
-        return $parsed;
+        return ServerConfigData::fromRaw($this->getData($response));
     }
 
     /**

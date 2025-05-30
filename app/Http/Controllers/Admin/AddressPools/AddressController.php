@@ -11,7 +11,7 @@ use App\Models\Address;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressWildcard;
 use App\Services\Activity\BulkAddressCreationService;
-use App\Services\Servers\NetworkService;
+use App\Services\Servers\ServerNetworkService;
 use App\Transformers\Admin\AddressTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
@@ -22,8 +22,8 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class AddressController
 {
     public function __construct(
-        private NetworkService $networkService,
-        private ConnectionInterface $connection,
+        private ServerNetworkService       $networkService,
+        private ConnectionInterface        $connection,
         private BulkAddressCreationService $bulkAddressCreationService,
     ) {}
 

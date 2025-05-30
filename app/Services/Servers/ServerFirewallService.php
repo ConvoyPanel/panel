@@ -10,7 +10,9 @@ use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 
 class ServerFirewallService
 {
-    public function __construct(private ProxmoxFirewallRepository $repository) {}
+    public function __construct(
+        private ProxmoxFirewallRepository $firewallRepository,
+    ) {}
 
     /**
      * Automatically configures the firewall options for IP address management.
@@ -19,7 +21,7 @@ class ServerFirewallService
      */
     public function configureFirewall(Server $server): void
     {
-        $this->repository->setServer($server)->updateOptions([
+        $this->firewallRepository->setServer($server)->updateOptions([
             'enable' => true,
             'ipfilter' => true,
             'policy_in' => 'ACCEPT',
@@ -34,17 +36,17 @@ class ServerFirewallService
      */
     public function deleteIpset(Server $server, string|IpsetData $ipset): void
     {
-        $this->repository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
         $this
-            ->repository
+            ->firewallRepository
             ->getLockedIps($ipset)
             ->toCollection()
             ->each(function (LockedIpData $lockedIp) use ($ipset) {
-                $this->repository->unlockIp($ipset, $lockedIp);
+                $this->firewallRepository->unlockIp($ipset, $lockedIp);
             });
 
-        $this->repository->deleteIpset($ipset);
+        $this->firewallRepository->deleteIpset($ipset);
     }
 
     /**
@@ -54,10 +56,10 @@ class ServerFirewallService
      */
     public function clearIpsets(Server $server): void
     {
-        $this->repository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
         $this
-            ->repository
+            ->firewallRepository
             ->getIpsets()
             ->toCollection()
             ->each(function (IpsetData $ipset) use ($server) {
@@ -76,12 +78,12 @@ class ServerFirewallService
             $ipset = $ipset->name;
         }
 
-        $this->repository->setServer($server);
+        $this->firewallRepository->setServer($server);
 
-        $this->repository->createIpset($ipset);
+        $this->firewallRepository->createIpset($ipset);
 
         foreach ($addresses as $address) {
-            $this->repository->lockIp($ipset, $address);
+            $this->firewallRepository->lockIp($ipset, $address);
         }
     }
 }
