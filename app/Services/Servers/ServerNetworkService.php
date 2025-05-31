@@ -8,9 +8,7 @@ use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Address;
 use App\Models\Server;
 use App\Repositories\Eloquent\AddressRepository;
-use App\Repositories\Proxmox\Server\ProxmoxCloudinitRepository;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
 use Illuminate\Support\Arr;
 
 use function array_unique;
@@ -19,10 +17,8 @@ class ServerNetworkService
 {
     public function __construct(
         private AddressRepository $repository,
-        private ProxmoxFirewallRepository $firewallRepository,
         private ServerFirewallService $firewallService,
         private CloudinitService $cloudinitService,
-        private ProxmoxCloudinitRepository $cloudinitRepository,
         private ProxmoxConfigRepository $configRepository,
     ) {}
 
@@ -32,17 +28,17 @@ class ServerNetworkService
     public function syncSettings(Server $server): void
     {
         $this->firewallService->configureFirewall($server);
+        echo "Firewall configured for server {$server->id}.\n";
         $this->firewallService->clearIpsets($server);
+        echo "IP sets cleared for server {$server->id}.\n";
         $this->lockServerAddresses($server);
+        echo "IP addresses locked for server {$server->id}.\n";
 
         $this->syncCloudinitIpConfig($server);
+        echo "Cloud-init IP configuration synced for server {$server->id}.\n";
 
-        // TODO: update NIC config sync
-        //        $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
-        //
-        //        $this->allocationRepository->setServer($server)->update(
-        //            ['net0' => "virtio={$macAddress},bridge={$server->node->network},firewall=1"],
-        //        );
+        $this->syncNetworkDeviceConfig($server);
+        echo "Network device configuration synced for server {$server->id}.\n";
     }
 
     /**
@@ -54,14 +50,17 @@ class ServerNetworkService
 
         /** @var string|null $macAddress */
         $macAddress = $primaryAddresses->ipv4?->mac_address ?? $primaryAddresses->ipv6?->mac_address;
-        $bridge = $primaryAddresses->ipv4->addressBlock()->addressBlockGroup()->nodes;
+        /** @var string|null $bridge */
+        $bridge = $primaryAddresses->ipv4?->networkInterfaces()->first()?->name ?? $primaryAddresses->ipv6?->networkInterfaces()->first()?->name;
 
         $networkDevices = $this->configRepository
             ->setServer($server)
             ->getConfig()
             ->networkDevices
-            ->map(function (NetworkDeviceData $device) use ($server) {
+            ->map(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
                 $device->isFirewallEnabled = true;
+                $device->macAddress = $macAddress ?? $device->macAddress;
+                $device->bridge = $bridge ?? $device->bridge;
 
                 return $device->toProxmoxString();
             })

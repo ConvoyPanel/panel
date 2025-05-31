@@ -45,11 +45,11 @@ class Address extends Model
             ]);
     }
 
-    public function nodes(): HasManyDeep
+    public function networkInterfaces(): HasManyDeep
     {
         return $this->hasManyDeep(
-            Node::class,
-            [AddressBlock::class, AddressBlockGroup::class, 'address_block_group_to_node'],
+            NetworkInterface::class,
+            [AddressBlock::class, AddressBlockGroup::class, 'address_block_group_to_network_interface'],
             [
                 'id',
                 'id',

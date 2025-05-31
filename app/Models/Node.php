@@ -101,7 +101,7 @@ class Node extends Model
     {
         return $this->hasManyThrough(
             Address::class,
-            AddressBlockGroupToNode::class,
+            AddressBlockGroupToInterface::class,
             'node_id',
             'address_pool_id',
             'id',

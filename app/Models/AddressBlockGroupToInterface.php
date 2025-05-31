@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * An address pool can be allocated to multiple nodes. Similarly, multiple nodes can
  * be allocated to a single address pool.
  */
-class AddressBlockGroupToNode extends Model
+class AddressBlockGroupToInterface extends Model
 {
-    protected $table = 'address_block_group_to_node';
+    protected $table = 'address_block_group_to_network_interface';
 
     public $guarded = [];
 
@@ -22,11 +22,6 @@ class AddressBlockGroupToNode extends Model
     public function addressBlockGroup(): BelongsTo
     {
         return $this->belongsTo(AddressBlockGroup::class);
-    }
-
-    public function node(): BelongsTo
-    {
-        return $this->belongsTo(Node::class);
     }
 
     public function addresses(): HasManyThrough

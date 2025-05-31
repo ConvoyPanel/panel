@@ -7,9 +7,9 @@ use App\Data\Server\Proxmox\Network\LockedIpData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use IPLib\Factory;
 use IPLib\Range\RangeInterface;
-use Spatie\LaravelData\DataCollection;
 
 class ProxmoxFirewallRepository extends ProxmoxRepository
 {
@@ -26,11 +26,11 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
     }
 
     /**
-     * @return DataCollection<int, IpsetData>
+     * @return Collection<int, IpsetData>
      *
      * @throws RequestException
      */
-    public function getIpsets(): DataCollection
+    public function getIpsets(): Collection
     {
         $response = $this->getHttpClientWithParams()
             ->get('/api2/json/nodes/{node}/qemu/{server}/firewall/ipset')
@@ -43,7 +43,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
                 'name' => $item['name'],
                 'comment' => $item['comment'] ?? null,
             ];
-        }));
+        }), Collection::class);
     }
 
     /**
@@ -74,11 +74,11 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
     }
 
     /**
-     * @return DataCollection<int, LockedIpData>
+     * @return Collection<int, LockedIpData>
      *
      * @throws RequestException
      */
-    public function getLockedIps(string|IpsetData $ipset): DataCollection
+    public function getLockedIps(string|IpsetData $ipset): Collection
     {
         if ($ipset instanceof IpsetData) {
             $ipset = $ipset->name;
@@ -95,9 +95,10 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
 
             return [
                 'ip' => Factory::parseRangeString($item['cidr']),
-                'comment' => $item['comment'],
+                'comment' => $item['comment'] ?? null,
+                'originalIp' => $item['cidr'],
             ];
-        }));
+        }), Collection::class);
     }
 
     /**
@@ -137,7 +138,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
         }
 
         if ($ip instanceof LockedIpData) {
-            $ip = $ip->ip->toString();
+            $ip = $ip->originalIp;
         }
 
         $this->getHttpClientWithParams([

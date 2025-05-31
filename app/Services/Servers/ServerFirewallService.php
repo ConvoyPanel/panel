@@ -41,7 +41,6 @@ class ServerFirewallService
         $this
             ->firewallRepository
             ->getLockedIps($ipset)
-            ->toCollection()
             ->each(function (LockedIpData $lockedIp) use ($ipset) {
                 $this->firewallRepository->unlockIp($ipset, $lockedIp);
             });
@@ -61,7 +60,6 @@ class ServerFirewallService
         $this
             ->firewallRepository
             ->getIpsets()
-            ->toCollection()
             ->each(function (IpsetData $ipset) use ($server) {
                 $this->deleteIpset($server, $ipset);
             });

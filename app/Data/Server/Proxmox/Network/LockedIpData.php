@@ -9,6 +9,7 @@ class LockedIpData extends Data
 {
     public function __construct(
         public RangeInterface $ip,
-        public string $comment,
+        public ?string $comment,
+        public string $originalIp,
     ) {}
 }
