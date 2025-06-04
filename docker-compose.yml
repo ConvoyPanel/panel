@@ -5,7 +5,7 @@ services:
       args:
         - APP_ENV=$APP_ENV
         - APP_URL=$APP_URL
-    restart: unless-stopped
+    restart: always
     volumes:
       - .:/var/www/
       - ./dockerfiles/caddy/data/config:/config
@@ -23,7 +23,7 @@ services:
         - APP_ENV=$APP_ENV
         - PHP_XDEBUG=$PHP_XDEBUG
         - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
-    restart: unless-stopped
+    restart: always
     volumes:
       - .:/var/www/
     expose:
@@ -49,6 +49,40 @@ services:
       - .:/var/www/
     extra_hosts:
       host.docker.internal: host-gateway
+  horizon:
+    build:
+      context: ./dockerfiles/workers
+      args:
+        - APP_ENV=$APP_ENV
+    command: php /var/www/artisan horizon
+    restart: always
+    volumes:
+        - .:/var/www/
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  scheduler:
+    build:
+      context: ./dockerfiles/workers
+      args:
+        - APP_ENV=$APP_ENV
+    command: /bin/sh -c "while [ true ]; do (php /var/www/artisan schedule:run --verbose --no-interaction &); sleep 60; done"
+    restart: always
+    volumes:
+      - .:/var/www/
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  logrotate:
+    build:
+      context: ./dockerfiles/logrotate
+    restart: always
+    volumes:
+      - .:/var/www/
   #  workers:
   #    build:
   #      context: ./dockerfiles/workers
@@ -64,7 +98,7 @@ services:
   #        condition: service_healthy
   redis:
     image: redis:7.0-alpine
-    restart: unless-stopped
+    restart: always
     command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
     ports:
       - 6379:6379
@@ -77,7 +111,7 @@ services:
       retries: 20
   database:
     image: mysql:8.0
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./dockerfiles/mysql/data:/var/lib/mysql/
     ports:
