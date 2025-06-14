@@ -25,11 +25,6 @@ export const Route = createFileRoute('/_app/admin/_dashboard')({
     staticData: {
         title: 'Dashboard',
     },
-    beforeLoad: () => {
-        return {
-            getTitle: () => 'Dashboard',
-        }
-    },
 })
 
 const routes: RouteDef[] = [

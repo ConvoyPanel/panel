@@ -24,16 +24,6 @@ const Breadcrumbs = () => {
             }
         })
 
-    // const breadcrumbs = matches
-    //     .filter(match => match.context.getTitle)
-    //     .map(({ pathname, context }) => ({
-    //         title: context.getTitle(),
-    //         path: pathname,
-    //     }))
-    //     .filter((breadcrumb, index, array) =>
-    //         array.findIndex(b => b.title === breadcrumb.title) === index
-    //     )
-
     return (
         <Breadcrumb className='hidden md:flex'>
             <BreadcrumbList>
