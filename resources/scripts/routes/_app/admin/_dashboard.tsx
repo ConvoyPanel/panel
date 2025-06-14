@@ -2,7 +2,8 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
     IconHome,
-    IconMapPin, IconMapPins,
+    IconMapPin,
+    IconMapPins,
     IconServer,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
@@ -23,6 +24,11 @@ export const Route = createFileRoute('/_app/admin/_dashboard')({
     },
     staticData: {
         title: 'Dashboard',
+    },
+    beforeLoad: () => {
+        return {
+            getTitle: () => 'Dashboard',
+        }
     },
 })
 
@@ -51,9 +57,9 @@ const routes: RouteDef[] = [
         path: '/admin/servers',
     },
     {
-      icon: IconMapPins,
-      label: 'IPAM',
-      path: '/admin/ipam',
+        icon: IconMapPins,
+        label: 'IPAM',
+        path: '/admin/ipam',
     },
     {
         icon: IconBoxMargin,

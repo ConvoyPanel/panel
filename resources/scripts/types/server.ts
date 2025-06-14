@@ -1,3 +1,4 @@
+import { Node } from '@/types/node'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export type ServerLifecycleStatus =
@@ -16,6 +17,7 @@ export interface Server {
     uuidShort: string
     userId: number
     nodeId: number
+    node?: Node
     vmid: number
     hostname: string
     name: string

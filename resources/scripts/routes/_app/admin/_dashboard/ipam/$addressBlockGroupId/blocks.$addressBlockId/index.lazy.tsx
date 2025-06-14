@@ -14,6 +14,9 @@ import { DataTable } from '@/components/ui/DataTable'
 import DropdownMenuItem from '@/components/ui/DropdownMenu/DropdownMenuItem.tsx'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
+import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
+import EditAddressModal from '@/components/interfaces/Admin/Ipam/AddressBlock/EditAddressModal'
+import DeleteAddressModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressModal.tsx'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'
@@ -24,12 +27,16 @@ export const Route = createLazyFileRoute(
 function BlockIndex() {
     const { data: block } = useAddressBlockSWR()
     const pagination = usePagination()
-    const { data, mutate } = useAddressesSWR({
-        page: pagination.page,
-        filters: {
-            ip: pagination.debouncedQuery,
+    const { data, mutate } = useAddressesSWR(
+        {
+            page: pagination.page,
+            filters: {
+                ip: pagination.debouncedQuery,
+            },
         },
-    })
+        ['server']
+    )
+    const openModal = useAddressModal(state => state.openModal)
 
     const columns: ColumnDef<Address>[] = [
         {
@@ -84,10 +91,11 @@ function BlockIndex() {
                 )
             },
         },
-        actionsColumn(({ row: _row }) => {
+        actionsColumn(({ row }) => {
             return (
                 <>
-                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openModal('edit', row.original)}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openModal('delete', row.original)}>Delete</DropdownMenuItem>
                 </>
             )
         }),
@@ -107,6 +115,8 @@ function BlockIndex() {
                 rightActions={<GenerateAddressesButton mutate={mutate} />}
                 {...pagination}
             />
+            <EditAddressModal mutate={mutate} />
+            <DeleteAddressModal mutate={mutate} />
         </>
     )
 }

@@ -83,19 +83,6 @@ services:
     restart: always
     volumes:
       - .:/var/www/
-  #  workers:
-  #    build:
-  #      context: ./dockerfiles/workers
-  #      args:
-  #        - APP_ENV=$APP_ENV
-  #    restart: unless-stopped
-  #    volumes:
-  #      - .:/var/www/
-  #    depends_on:
-  #      database:
-  #        condition: service_healthy
-  #      redis:
-  #        condition: service_healthy
   redis:
     image: redis:7.0-alpine
     restart: always

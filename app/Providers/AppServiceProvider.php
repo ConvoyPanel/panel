@@ -39,8 +39,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function bootRoute(): void
     {
-        Route::bind('server', function ($value) {
-            return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
+        Route::bind('server', function (string $value) {
+
+            return Server::query()
+                ->where('id', $value)
+                ->orWhere(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
                 ->firstOrFail();
         });
     }

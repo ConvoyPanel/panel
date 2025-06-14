@@ -1,0 +1,101 @@
+import { PaginatedAddresses } from '@/types/address.ts'
+import { useParams } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { KeyedMutator } from 'swr'
+import useSWRMutation from 'swr/mutation'
+import { useShallow } from 'zustand/react/shallow'
+
+import deleteAddress from '@/api/admin/addressBlockGroups/addressBlocks/addresses/deleteAddress.ts'
+
+import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
+
+import { Button } from '@/components/ui/Button'
+import {
+    Credenza,
+    CredenzaClose,
+    CredenzaContent,
+    CredenzaDescription,
+    CredenzaFooter,
+    CredenzaHeader,
+    CredenzaTitle,
+} from '@/components/ui/Credenza'
+
+interface Props {
+    mutate: KeyedMutator<PaginatedAddresses>
+}
+
+const DeleteAddressModal = ({ mutate }: Props) => {
+    const { addressBlockGroupId, addressBlockId } = useParams({
+        strict: false,
+    }) as { addressBlockGroupId: string; addressBlockId: string }
+
+    const [address, open, closeModal] = useAddressModal(
+        useShallow(state => [
+            state.modalData,
+            state.activeModal === 'delete',
+            state.closeModal,
+        ])
+    )
+
+    const { trigger: deleteAddressTrigger, isMutating } = useSWRMutation(
+        ['delete-address', addressBlockGroupId, addressBlockId, address?.id],
+        async () => {
+            if (!address) return
+
+            await deleteAddress(
+                Number(addressBlockGroupId),
+                Number(addressBlockId),
+                address.id
+            )
+
+            await mutate(data => {
+                if (!data) return
+                return {
+                    ...data,
+                    items: data.items.filter(item => item.id !== address.id),
+                }
+            }, false)
+
+            closeModal('delete')
+            toast.success('Address deleted')
+        },
+        {
+            onError: () => {
+                toast.error('Failed to delete address')
+            },
+        }
+    )
+
+    return (
+        <Credenza
+            open={open}
+            onOpenChange={open => !open && closeModal('delete')}
+        >
+            <CredenzaContent>
+                <CredenzaHeader>
+                    <CredenzaTitle>Delete {address?.ip}</CredenzaTitle>
+                    <CredenzaDescription>
+                        Are you sure you want to delete this address? This
+                        action cannot be undone.
+                    </CredenzaDescription>
+                </CredenzaHeader>
+                <CredenzaFooter>
+                    <CredenzaClose asChild>
+                        <Button variant={'outline'} type={'button'}>
+                            Cancel
+                        </Button>
+                    </CredenzaClose>
+                    <Button
+                        variant={'destructive'}
+                        onClick={() => deleteAddressTrigger()}
+                        loading={isMutating}
+                    >
+                        Delete
+                    </Button>
+                </CredenzaFooter>
+            </CredenzaContent>
+        </Credenza>
+    )
+}
+
+export default DeleteAddressModal

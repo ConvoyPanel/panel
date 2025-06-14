@@ -12,9 +12,7 @@ import {
 
 const Breadcrumbs = () => {
     const matches = useRouterState({
-        select: state => {
-            return state.matches
-        },
+        select: s => s.matches,
     })
 
     const breadcrumbs = matches
@@ -25,6 +23,16 @@ const Breadcrumbs = () => {
                 path: match.pathname,
             }
         })
+
+    // const breadcrumbs = matches
+    //     .filter(match => match.context.getTitle)
+    //     .map(({ pathname, context }) => ({
+    //         title: context.getTitle(),
+    //         path: pathname,
+    //     }))
+    //     .filter((breadcrumb, index, array) =>
+    //         array.findIndex(b => b.title === breadcrumb.title) === index
+    //     )
 
     return (
         <Breadcrumb className='hidden md:flex'>

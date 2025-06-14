@@ -28,17 +28,12 @@ class ServerNetworkService
     public function syncSettings(Server $server): void
     {
         $this->firewallService->configureFirewall($server);
-        echo "Firewall configured for server {$server->id}.\n";
         $this->firewallService->clearIpsets($server);
-        echo "IP sets cleared for server {$server->id}.\n";
         $this->lockServerAddresses($server);
-        echo "IP addresses locked for server {$server->id}.\n";
 
         $this->syncCloudinitIpConfig($server);
-        echo "Cloud-init IP configuration synced for server {$server->id}.\n";
 
         $this->syncNetworkDeviceConfig($server);
-        echo "Network device configuration synced for server {$server->id}.\n";
     }
 
     /**

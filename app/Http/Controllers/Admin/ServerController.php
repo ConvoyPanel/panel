@@ -66,7 +66,7 @@ class ServerController
 
     public function show(Request $request, Server $server)
     {
-        $server->load(['addresses', 'user', 'node']);
+        $server->load(['node']);
 
         return fractal($server, new ServerTransformer)->parseIncludes($request->include)
             ->respond();

@@ -15,6 +15,9 @@ export const Route = createFileRoute(
       Number(addressBlockId),
     ).catch(processAxiosError),
   component: AddressBlockLayout,
+    staticData: {
+      title: 'IP Block',
+    }
 })
 
 function AddressBlockLayout() {

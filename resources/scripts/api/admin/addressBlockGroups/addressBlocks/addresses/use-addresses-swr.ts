@@ -12,7 +12,7 @@ export const getKey = (
     include?: AddressInclude[]
 ) => ['address-block-group.address-block.addresses', blockId, params, include]
 
-const useAddressesSWR = (params: AddressQueryParams) => {
+const useAddressesSWR = (params: AddressQueryParams, include?: AddressInclude[]) => {
     const { addressBlockGroupId, addressBlockId } = useParams({
         strict: false,
     }) as {
@@ -20,8 +20,8 @@ const useAddressesSWR = (params: AddressQueryParams) => {
         addressBlockId: number
     }
 
-    return useSWR(getKey(addressBlockId, params), () =>
-        getAddresses(addressBlockGroupId, addressBlockId, params)
+    return useSWR(getKey(addressBlockId, params, include), () =>
+        getAddresses(addressBlockGroupId, addressBlockId, params, include)
     )
 }
 

@@ -3,10 +3,16 @@
 namespace App\Transformers\Client;
 
 use App\Models\Server;
+use App\Transformers\Admin\NodeTransformer;
+use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 
 class ServerTransformer extends TransformerAbstract
 {
+    protected array $availableIncludes = [
+        'node',
+    ];
+
     public function transform(Server $server): array
     {
         return [
@@ -31,5 +37,10 @@ class ServerTransformer extends TransformerAbstract
             'bandwidth_limit' => $server->bandwidth_limit,
             'created_at' => $server->created_at,
         ];
+    }
+
+    public function includeNode(Server $server): Item
+    {
+        return $this->item($server->node, new NodeTransformer);
     }
 }

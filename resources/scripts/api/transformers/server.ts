@@ -1,3 +1,4 @@
+import { rawDataToNode } from '@/api/transformers/node'
 import { Server, ServerStateData, ServerTimepointData } from '@/types/server.ts'
 
 export const rawDataToServer = (data: any): Server => ({
@@ -5,6 +6,7 @@ export const rawDataToServer = (data: any): Server => ({
     uuid: data.uuid,
     uuidShort: data.uuid_short,
     nodeId: data.nodeId,
+    node: data.node ? rawDataToNode(data.node.data) : undefined,
     userId: data.userId,
     vmid: data.vmid,
     hostname: data.hostname,

@@ -14,6 +14,9 @@ export const Route = createFileRoute(
             processAxiosError
         ),
     component: BlockGroupsLayout,
+    staticData: {
+        title: 'IP Block Group',
+    }
 })
 
 function BlockGroupsLayout() {

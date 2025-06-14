@@ -154,34 +154,36 @@ Route::prefix('/servers')->group(function () {
     Route::get('/', [Admin\ServerController::class, 'index']);
     Route::post('/', [Admin\ServerController::class, 'store']);
 
-    Route::prefix('/{server}')->middleware(ValidateServerStatusMiddleware::class)->group(function () {
-        Route::get('/', [Admin\ServerController::class, 'show'])
-            ->withoutMiddleware(
-                ValidateServerStatusMiddleware::class,
-            );
-        Route::patch('/', [Admin\ServerController::class, 'update'])
-            ->withoutMiddleware(
-                ValidateServerStatusMiddleware::class,
-            );
-        Route::delete('/', [Admin\ServerController::class, 'destroy']);
+    Route::prefix('/{server}')
+        ->middleware(ValidateServerStatusMiddleware::class)
+        ->group(function () {
+            Route::get('/', [Admin\ServerController::class, 'show'])
+                ->withoutMiddleware(
+                    ValidateServerStatusMiddleware::class,
+                );
+            Route::patch('/', [Admin\ServerController::class, 'update'])
+                ->withoutMiddleware(
+                    ValidateServerStatusMiddleware::class,
+                );
+            Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
-        Route::prefix('/settings')->group(function () {
-            Route::patch(
-                '/build',
-                [Admin\ServerController::class, 'updateBuild'],
-            );
+            Route::prefix('/settings')->group(function () {
+                Route::patch(
+                    '/build',
+                    [Admin\ServerController::class, 'updateBuild'],
+                );
 
-            Route::post(
-                '/suspend',
-                [Admin\ServerController::class, 'suspend'],
-            );
-            Route::post(
-                '/unsuspend',
-                [Admin\ServerController::class, 'unsuspend'],
-            );
-        });
-    }
-    );
+                Route::post(
+                    '/suspend',
+                    [Admin\ServerController::class, 'suspend'],
+                );
+                Route::post(
+                    '/unsuspend',
+                    [Admin\ServerController::class, 'unsuspend'],
+                );
+            });
+        }
+        );
 });
 
 Route::prefix('/address-block-groups')->group(function () {
@@ -192,6 +194,7 @@ Route::prefix('/address-block-groups')->group(function () {
         Route::get('/', [Admin\Ipam\AddressBlockGroupController::class, 'show']);
         Route::put('/', [Admin\Ipam\AddressBlockGroupController::class, 'update']);
         Route::delete('/', [Admin\Ipam\AddressBlockGroupController::class, 'destroy']);
+        Route::get('/compatible-servers', [Admin\Ipam\AddressBlockGroupController::class, 'getCompatibleServers']);
 
         Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
         Route::prefix('/address-blocks/{address_block}')->group(function () {
@@ -202,6 +205,8 @@ Route::prefix('/address-block-groups')->group(function () {
 
             Route::get('/addresses', [Admin\Ipam\AddressController::class, 'index']);
             Route::post('/addresses/generate', [Admin\Ipam\AddressController::class, 'generate']);
+            Route::patch('/addresses/{address}', [Admin\Ipam\AddressController::class, 'update']);
+            Route::delete('/addresses/{address}', [Admin\Ipam\AddressController::class, 'destroy']);
         });
     });
 });

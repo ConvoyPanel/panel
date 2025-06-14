@@ -1,5 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
+import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { KeyedMutator } from 'swr'
 import { useShallow } from 'zustand/react/shallow'
@@ -50,7 +51,21 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
             toast.success('Block group deleted')
             close('delete')
         } catch (e) {
-            toast.error('Deletion failed')
+            // Check if it's an Axios error with a response
+            if (e instanceof AxiosError && e.response) {
+                // For authorization failures (403 Forbidden)
+                if (e.response.status === 403) {
+                    // If there's a specific message about servers being attached
+                    const message =
+                        e.response.data.message || 'Deletion not authorized'
+                    toast.error(message)
+                } else {
+                    toast.error('Deletion failed')
+                }
+            } else {
+                toast.error('Deletion failed')
+            }
+            
             throw e
         }
     })

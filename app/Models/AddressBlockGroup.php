@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class AddressBlockGroup extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRelationships;
 
     public $timestamps = false;
 
@@ -20,21 +22,42 @@ class AddressBlockGroup extends Model
     ];
 
     /**
-     * Gets the nodes that an address pool is allocated to.
+     * Gets the nodes that this address block group is connected to via network interfaces.
      */
-    public function nodes(): BelongsToMany
+    public function nodes(): HasManyDeep
     {
-        return $this->belongsToMany(
+        return $this->hasManyDeep(
             Node::class,
-            'address_block_group_to_node',
-            'address_block_group_id',
-            'node_id',
+            ['address_block_group_to_network_interface', NetworkInterface::class],
+            [
+                'address_block_group_id', // Foreign key on the pivot table
+                'id',                     // Foreign key on the network_interfaces table
+                'id'                      // Local key on the nodes table
+            ],
+            [
+                'id',                     // Local key on the address_block_groups table
+                'network_interface_id',   // Foreign key on the pivot table
+                'node_id'                 // Foreign key on the network_interfaces table
+            ]
         );
     }
 
     public function addressBlocks(): HasMany
     {
         return $this->hasMany(AddressBlock::class);
+    }
+
+    /**
+     * Gets the network interfaces this address block group is allocated to.
+     */
+    public function networkInterfaces(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            NetworkInterface::class,
+            'address_block_group_to_network_interface',
+            'address_block_group_id',
+            'network_interface_id'
+        );
     }
 
     /**

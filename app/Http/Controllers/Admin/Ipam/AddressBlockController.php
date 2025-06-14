@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Admin\Ipam;
 
-use Illuminate\Support\Str;
 use App\Http\Requests\Admin\AddressBlocks\StoreAddressBlockRequest;
 use App\Http\Requests\Admin\AddressBlocks\UpdateAddressBlockRequest;
+use App\Jobs\Server\BatchSyncNetworkSettingsJob;
 use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockWildcard;
 use App\Transformers\Admin\AddressBlockTransformer;
+use Gate;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Throwable;
+use function dispatch;
 
 class AddressBlockController
 {
@@ -62,8 +64,6 @@ class AddressBlockController
         UpdateAddressBlockRequest $request, AddressBlockGroup $addressBlockGroup,
         AddressBlock $addressBlock,
     ): JsonResponse {
-        // TODO: batch sync server network configs if gateway or mac address is changed
-
         $this->connection->transaction(
             function () use ($request, $addressBlock) {
                 if (
@@ -75,15 +75,26 @@ class AddressBlockController
                 }
 
                 $addressBlock->update($request->validated());
+
+                if (
+                    $addressBlock->mac_address !== $request->input('mac_address') ||
+                    $addressBlock->gateway !== $request->input('gateway')
+                ) {
+                    dispatch(new BatchSyncNetworkSettingsJob($addressBlock));
+                }
             },
         );
+
+
 
         return fractal($addressBlock, new AddressBlockTransformer)->respond();
     }
 
     public function destroy(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock): Response
     {
-        // TODO: implement destroy
+        Gate::authorize('delete', $addressBlock);
+
+        $addressBlock->delete();
 
         return response()->noContent();
     }

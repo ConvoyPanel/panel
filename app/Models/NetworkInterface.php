@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class NetworkInterface extends Model
 {
@@ -22,6 +23,16 @@ class NetworkInterface extends Model
     public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);
+    }
+
+    public function addressBlockGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AddressBlockGroup::class,
+            'address_block_group_to_network_interface',
+            'network_interface_id',
+            'address_block_group_id'
+        );
     }
 
     public function getRouteKeyName(): string
