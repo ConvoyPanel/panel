@@ -14,6 +14,16 @@ import NotFoundComponent from '@/components/ui/Navigation/ErrorPages/NotFoundCom
 
 import { routeTree } from './routeTree.gen'
 
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: typeof router
+    }
+
+    interface StaticDataRouteOption {
+        title?: string
+    }
+}
+
 const router = createRouter({
     routeTree,
     defaultNotFoundComponent: NotFoundComponent,
