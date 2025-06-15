@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin\Ipam;
 use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockGroupWildcard;
+use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Server;
 use App\Transformers\Admin\AddressBlockGroupTransformer;
+use App\Transformers\Admin\NodeTransformer;
 use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,6 +73,21 @@ class AddressBlockGroupController
         $addressBlockGroup->delete();
 
         return response()->noContent();
+    }
+
+    public function getAttachedNodes(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    {
+        $nodes = QueryBuilder::for($addressBlockGroup->nodes())
+            ->withCount('servers')
+            ->defaultSort('-id')
+            ->allowedFilters([
+                AllowedFilter::custom('*', new FiltersNodeWildcard),
+                AllowedFilter::exact('id'),
+            ])
+            ->paginate(min($request->query('per_page', 50), 100))
+            ->appends($request->query());
+
+        return fractal($nodes, new NodeTransformer)->respond();
     }
 
     public function getCompatibleServers(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse

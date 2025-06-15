@@ -195,6 +195,7 @@ Route::prefix('/address-block-groups')->group(function () {
         Route::put('/', [Admin\Ipam\AddressBlockGroupController::class, 'update']);
         Route::delete('/', [Admin\Ipam\AddressBlockGroupController::class, 'destroy']);
         Route::get('/compatible-servers', [Admin\Ipam\AddressBlockGroupController::class, 'getCompatibleServers']);
+        Route::get('/nodes', [Admin\Ipam\AddressBlockGroupController::class, 'getAttachedNodes']);
 
         Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
         Route::prefix('/address-blocks/{address_block}')->group(function () {

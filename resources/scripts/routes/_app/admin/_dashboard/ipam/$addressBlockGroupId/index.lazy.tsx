@@ -1,25 +1,11 @@
-import usePagination from '@/hooks/use-pagination.ts'
-import { AddressBlock } from '@/types/address-block.ts'
-import { AddressVersion } from '@/types/address.ts'
-import { createLazyFileRoute, Link } from '@tanstack/react-router'
-import { ColumnDef } from '@tanstack/react-table'
+import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useAddressBlocksSWR from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks-swr.ts'
 import useAddressBlockGroupSWR from '@/api/admin/addressBlockGroups/use-address-block-group-swr.ts'
 
-import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
-import DeleteAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressBlockModal.tsx'
-import EditAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/EditAddressBlockModal.tsx'
-import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
-
-import { Badge } from '@/components/ui/Badge.tsx'
-import { DataTable } from '@/components/ui/DataTable'
-import {
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-} from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Heading } from '@/components/ui/Typography'
+import AddressBlockTab from '@/components/interfaces/Admin/Ipam/AddressBlock/AddressBlockTab.tsx'
+import AttachedNodesTab from '@/components/interfaces/Admin/Ipam/AddressBlock/AttachedNodesTab.tsx'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/'
@@ -29,112 +15,20 @@ export const Route = createLazyFileRoute(
 
 function GroupBlocks() {
     const { data: group } = useAddressBlockGroupSWR()
-    const pagination = usePagination()
-    const { data, mutate } = useAddressBlocksSWR({
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
-
-    const columns: ColumnDef<AddressBlock>[] = [
-        {
-            header: 'IP Block',
-            accessorKey: 'name',
-            meta: {
-                skeletonWidth: '5rem',
-            },
-        },
-        {
-            header: 'Description',
-            accessorKey: 'description',
-            meta: {
-                skeletonWidth: '10rem',
-            },
-        },
-        {
-            header: 'Version',
-            accessorKey: 'version',
-            meta: {
-                skeletonWidth: '1rem',
-                align: 'center',
-            },
-            cell: ({ cell }) =>
-                cell.getValue<AddressVersion>() === AddressVersion.IPv4
-                    ? 'IPv4'
-                    : 'IPv6',
-        },
-        {
-            header: 'IP',
-            accessorKey: 'baseIp',
-            meta: {
-                skeletonWidth: '10rem',
-            },
-            cell: ({ cell, row }) => (
-                <Badge variant={'secondary'} className={'font-mono'}>
-                    {cell.getValue<string>() +
-                        '/' +
-                        row.original.prefixLengthFrom}
-                </Badge>
-            ),
-        },
-        actionsColumn(({ row }) => {
-            const openModal = useAddressBlockModal(state => state.openModal)
-
-            return (
-                <>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            to={`/admin/ipam/${row.original.addressBlockGroupId}/blocks/${row.original.id}`}
-                        >
-                            View
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => openModal('edit', row.original)}
-                    >
-                        Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        onClick={() => openModal('delete', row.original)}
-                    >
-                        Delete
-                    </DropdownMenuItem>
-                </>
-            )
-        }),
-    ]
-
-    const { addressBlockGroupId } = Route.useParams()
-    const groupId = parseInt(addressBlockGroupId)
 
     return (
         <>
             <Heading>{group?.name}</Heading>
-            <DataTable
-                data={data}
-                columns={columns}
-                paginated
-                searchable
-                toolbar
-                rightActions={
-                    <CreateAddressBlockModal 
-                        addressBlockGroupId={groupId} 
-                        mutate={mutate}
-                    />
-                }
-                {...pagination}
-            />
-
-            <EditAddressBlockModal 
-                addressBlockGroupId={groupId} 
-                mutate={mutate}
-            />
-            <DeleteAddressBlockModal 
-                addressBlockGroupId={groupId} 
-                mutate={mutate}
-            />
+            <Tabs defaultValue={'addressBlocks'}>
+                <TabsList>
+                    <TabsTrigger value={'addressBlocks'}>IP Blocks</TabsTrigger>
+                    <TabsTrigger value={'attachedNodes'}>
+                        Attached Nodes
+                    </TabsTrigger>
+                </TabsList>
+                <AddressBlockTab />
+                <AttachedNodesTab />
+            </Tabs>
         </>
     )
 }
