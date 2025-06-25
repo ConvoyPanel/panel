@@ -1,63 +1,34 @@
 services:
-  caddy:
+  app:
     build:
-      context: ./dockerfiles/caddy
+      context: ./dockerfiles/app
       args:
         - APP_ENV=$APP_ENV
         - APP_URL=$APP_URL
+        - PHP_XDEBUG=$PHP_XDEBUG
+        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
     restart: always
     volumes:
-      - .:/var/www/
-      - ./dockerfiles/caddy/data/config:/config
-      - ./dockerfiles/caddy/data/data:/data
+      - .:/app
+      - caddy-data:/data
+      - caddy-config:/config
     ports:
       - 80:80
       - 443:443
-    depends_on:
-      - php
-    env_file: .env
-  php:
-    build:
-      context: ./dockerfiles/php
-      args:
-        - APP_ENV=$APP_ENV
-        - PHP_XDEBUG=$PHP_XDEBUG
-        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
-    restart: always
-    volumes:
-      - .:/var/www/
-    expose:
-      - 9000
-    depends_on:
-      database:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    env_file: .env
-    extra_hosts:
-      host.docker.internal: host-gateway
-  workspace:
-    build:
-      context: ./dockerfiles/workspace
-      args:
-        - PHP_XDEBUG=$PHP_XDEBUG
-        - PHP_XDEBUG_MODE=$PHP_XDEBUG_MODE
-    tty: true
-    ports:
       - 3000:3000
-    volumes:
-      - .:/var/www/
+    env_file: .env
+    tty: true
     extra_hosts:
       host.docker.internal: host-gateway
   horizon:
     build:
-      context: ./dockerfiles/workers
+      context: ./dockerfiles/app
       args:
         - APP_ENV=$APP_ENV
-    command: php /var/www/artisan horizon
+    command: php /app/artisan horizon
     restart: always
     volumes:
-        - .:/var/www/
+        - .:/app
     depends_on:
       database:
         condition: service_healthy
@@ -65,13 +36,13 @@ services:
         condition: service_healthy
   scheduler:
     build:
-      context: ./dockerfiles/workers
+      context: ./dockerfiles/app
       args:
         - APP_ENV=$APP_ENV
-    command: /bin/sh -c "while [ true ]; do (php /var/www/artisan schedule:run --verbose --no-interaction &); sleep 60; done"
+    command: /bin/sh -c "while [ true ]; do (php /app/artisan schedule:run --verbose --no-interaction &); sleep 60; done"
     restart: always
     volumes:
-      - .:/var/www/
+      - .:/app
     depends_on:
       database:
         condition: service_healthy
@@ -82,7 +53,7 @@ services:
       context: ./dockerfiles/logrotate
     restart: always
     volumes:
-      - .:/var/www/
+      - .:/app
   redis:
     image: redis:7.0-alpine
     restart: always
@@ -113,3 +84,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+
+volumes:
+  caddy-config:
+  caddy-data:
