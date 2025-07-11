@@ -61,53 +61,53 @@ Route::prefix('/nodes')->group(function () {
         Route::prefix('/template-groups')->group(function () {
             Route::get(
                 '/',
-                [Admin\Nodes\TemplateGroupController::class, 'index'],
+                [Admin\TemplateGroupController::class, 'index'],
             );
             Route::post(
                 '/',
-                [Admin\Nodes\TemplateGroupController::class, 'store'],
+                [Admin\TemplateGroupController::class, 'store'],
             );
             Route::post(
                 '/reorder',
-                [Admin\Nodes\TemplateGroupController::class, 'updateOrder'],
+                [Admin\TemplateGroupController::class, 'updateOrder'],
             );
 
             Route::prefix('/{template_group}')->group(function () {
                 Route::put(
                     '/',
-                    [Admin\Nodes\TemplateGroupController::class, 'update'],
+                    [Admin\TemplateGroupController::class, 'update'],
                 );
                 Route::delete(
                     '/',
-                    [Admin\Nodes\TemplateGroupController::class, 'destroy'],
+                    [Admin\TemplateGroupController::class, 'destroy'],
                 );
                 Route::prefix('/templates')->group(function () {
                     Route::get(
                         '/',
-                        [Admin\Nodes\TemplateController::class, 'index'],
+                        [Admin\TemplateController::class, 'index'],
                     );
                     Route::post(
                         '/',
-                        [Admin\Nodes\TemplateController::class, 'store'],
+                        [Admin\TemplateController::class, 'store'],
                     );
                     Route::post(
                         '/reorder',
-                        [Admin\Nodes\TemplateController::class, 'updateOrder'],
+                        [Admin\TemplateController::class, 'updateOrder'],
                     );
 
                     Route::get(
                         '/{template}',
-                        [Admin\Nodes\TemplateController::class, 'show'],
+                        [Admin\TemplateController::class, 'show'],
                     );
                     Route::delete(
                         '/{template}',
-                        [Admin\Nodes\TemplateController::class, 'destroy'],
+                        [Admin\TemplateController::class, 'destroy'],
                     );
                 });
 
                 Route::apiResource(
                     'templates',
-                    Admin\Nodes\TemplateController::class,
+                    Admin\TemplateController::class,
                 )
                      ->only(['index', 'store', 'update', 'destroy']);
             });

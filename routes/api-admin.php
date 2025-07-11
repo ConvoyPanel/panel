@@ -62,61 +62,6 @@ Route::prefix('/nodes')->group(function () {
         Route::resource('/isos', Admin\Nodes\IsoController::class)
             ->only(['index', 'store', 'update', 'destroy']);
 
-        Route::prefix('/template-groups')->group(function () {
-            Route::get(
-                '/',
-                [Admin\Nodes\TemplateGroupController::class, 'index'],
-            );
-            Route::post(
-                '/',
-                [Admin\Nodes\TemplateGroupController::class, 'store'],
-            );
-            Route::post(
-                '/reorder',
-                [Admin\Nodes\TemplateGroupController::class, 'updateOrder'],
-            );
-
-            Route::prefix('/{template_group}')->group(function () {
-                Route::put(
-                    '/',
-                    [Admin\Nodes\TemplateGroupController::class, 'update'],
-                );
-                Route::delete(
-                    '/',
-                    [Admin\Nodes\TemplateGroupController::class, 'destroy'],
-                );
-                Route::prefix('/templates')->group(function () {
-                    Route::get(
-                        '/',
-                        [Admin\Nodes\TemplateController::class, 'index'],
-                    );
-                    Route::post(
-                        '/',
-                        [Admin\Nodes\TemplateController::class, 'store'],
-                    );
-                    Route::post(
-                        '/reorder',
-                        [Admin\Nodes\TemplateController::class, 'updateOrder'],
-                    );
-
-                    Route::get(
-                        '/{template}',
-                        [Admin\Nodes\TemplateController::class, 'show'],
-                    );
-                    Route::delete(
-                        '/{template}',
-                        [Admin\Nodes\TemplateController::class, 'destroy'],
-                    );
-                });
-
-                Route::resource(
-                    'templates',
-                    Admin\Nodes\TemplateController::class,
-                )
-                    ->only(['index', 'store', 'update', 'destroy']);
-            });
-        });
-
         /*
         |--------------------------------------------------------------------------
         | Node Addresses Controller Routes
@@ -187,28 +132,42 @@ Route::prefix('/servers')->group(function () {
 });
 
 Route::prefix('/address-block-groups')->group(function () {
-    Route::get('/', [Admin\Ipam\AddressBlockGroupController::class, 'index']);
-    Route::post('/', [Admin\Ipam\AddressBlockGroupController::class, 'store']);
+    Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+    Route::post('/', [Admin\AddressBlockGroupController::class, 'store']);
 
     Route::prefix('/{address_block_group}')->group(function () {
-        Route::get('/', [Admin\Ipam\AddressBlockGroupController::class, 'show']);
-        Route::put('/', [Admin\Ipam\AddressBlockGroupController::class, 'update']);
-        Route::delete('/', [Admin\Ipam\AddressBlockGroupController::class, 'destroy']);
-        Route::get('/compatible-servers', [Admin\Ipam\AddressBlockGroupController::class, 'getCompatibleServers']);
-        Route::get('/nodes', [Admin\Ipam\AddressBlockGroupController::class, 'getAttachedNodes']);
+        Route::get('/', [Admin\AddressBlockGroupController::class, 'show']);
+        Route::put('/', [Admin\AddressBlockGroupController::class, 'update']);
+        Route::delete('/', [Admin\AddressBlockGroupController::class, 'destroy']);
+        Route::get('/compatible-servers', [Admin\AddressBlockGroupController::class, 'getCompatibleServers']);
+        Route::get('/nodes', [Admin\AddressBlockGroupController::class, 'getAttachedNodes']);
 
-        Route::get('/address-blocks', [Admin\Ipam\AddressBlockController::class, 'index']);
+        Route::get('/address-blocks', [Admin\AddressBlockController::class, 'index']);
         Route::prefix('/address-blocks/{address_block}')->group(function () {
-            Route::get('/', [Admin\Ipam\AddressBlockController::class, 'show']);
-            Route::post('/', [Admin\Ipam\AddressBlockController::class, 'store']);
-            Route::put('/', [Admin\Ipam\AddressBlockController::class, 'update']);
-            Route::delete('/', [Admin\Ipam\AddressBlockController::class, 'destroy']);
+            Route::get('/', [Admin\AddressBlockController::class, 'show']);
+            Route::post('/', [Admin\AddressBlockController::class, 'store']);
+            Route::put('/', [Admin\AddressBlockController::class, 'update']);
+            Route::delete('/', [Admin\AddressBlockController::class, 'destroy']);
 
-            Route::get('/addresses', [Admin\Ipam\AddressController::class, 'index']);
-            Route::post('/addresses/generate', [Admin\Ipam\AddressController::class, 'generate']);
-            Route::patch('/addresses/{address}', [Admin\Ipam\AddressController::class, 'update']);
-            Route::delete('/addresses/{address}', [Admin\Ipam\AddressController::class, 'destroy']);
+            Route::get('/addresses', [Admin\AddressController::class, 'index']);
+            Route::post('/addresses/generate', [Admin\AddressController::class, 'generate']);
+            Route::patch('/addresses/{address}', [Admin\AddressController::class, 'update']);
+            Route::delete('/addresses/{address}', [Admin\AddressController::class, 'destroy']);
         });
+    });
+});
+
+Route::prefix('/template-groups')->group(function () {
+    Route::get('/', [Admin\TemplateGroupController::class, 'index']);
+    Route::post('/', [Admin\TemplateGroupController::class, 'store']);
+
+    Route::prefix('/{template_group}')->group(function () {
+        Route::get('/', [Admin\TemplateGroupController::class, 'show']);
+        Route::put('/', [Admin\TemplateGroupController::class, 'update']);
+        Route::delete('/', [Admin\TemplateGroupController::class, 'destroy']);
+
+        Route::resource('/templates', Admin\TemplateController::class)
+            ->only(['index', 'store', 'show', 'update', 'destroy']);
     });
 });
 

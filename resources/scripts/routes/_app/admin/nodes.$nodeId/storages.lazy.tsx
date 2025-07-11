@@ -25,7 +25,7 @@ function NodeStorages() {
     return (
         <>
             <Heading>Storages</Heading>
-            <div className={'flex justify-end gap-2 @md:gap-4'}>
+            <div className={'flex justify-end gap-2'}>
                 <LoadBalancerSidebar />
                 <CreateStorageModal />
             </div>
@@ -33,7 +33,7 @@ function NodeStorages() {
             <ShowStorageModal />
             <EditStorageModal />
             {isLoading ? (
-                <div className={'flex flex-col gap-2 @md:gap-4'}>
+                <div className={'flex flex-col gap-2'}>
                     {Array.from({ length: 4 }).map((_, index) => (
                         <Skeleton key={index} className={'h-24'} />
                     ))}
@@ -52,7 +52,7 @@ function NodeStorages() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className={'flex flex-col gap-2 @md:gap-4'}>
+                <div className={'flex flex-col gap-2'}>
                     {storages!.map(storage => (
                         <StorageCard key={storage.id} storage={storage} />
                     ))}

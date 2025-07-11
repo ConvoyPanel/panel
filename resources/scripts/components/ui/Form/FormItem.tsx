@@ -12,7 +12,7 @@ const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
             <FormItemContext.Provider value={{ id }}>
                 <div
                     ref={ref}
-                    className={cn('space-y-2', className)}
+                    className={cn('space-y-1', className)}
                     {...props}
                 />
             </FormItemContext.Provider>

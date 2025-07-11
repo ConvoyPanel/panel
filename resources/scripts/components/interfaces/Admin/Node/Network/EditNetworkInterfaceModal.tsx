@@ -42,7 +42,6 @@ const EditNetworkInterfaceModal = () => {
         defaultValues: {
             name: '',
             description: '',
-            mtu: '',
         },
     })
 
@@ -52,14 +51,13 @@ const EditNetworkInterfaceModal = () => {
         form.reset({
             name: networkInterface.name,
             description: networkInterface.description ?? '',
-            mtu: networkInterface.mtu.toString(),
         })
     }, [networkInterface])
 
     const submit = async (data: z.infer<typeof networkInterfaceSchema>) => {
         try {
             const updatedInterface = await updateNetworkInterface(
-                nodeId,
+                Number(nodeId),
                 networkInterface!.id,
                 data
             )
@@ -103,15 +101,6 @@ const EditNetworkInterfaceModal = () => {
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
-                            />
-                            <InputForm
-                                name={'mtu'}
-                                label={'MTU'}
-                                type={'number'}
-                                min={1}
-                                max={65535}
-                                placeholder={'1500'}
-                                autoComplete={'off'}
                             />
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>

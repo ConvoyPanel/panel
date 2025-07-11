@@ -2,23 +2,19 @@
 
 namespace App\Http\Requests\Admin\Nodes\TemplateGroups;
 
-use App\Models\TemplateGroup;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Enums\TemplateIcon;
+use App\Http\Requests\BaseApiRequest;
+use Illuminate\Validation\Rules\Enum;
 
-class TemplateGroupRequest extends FormRequest
+class TemplateGroupRequest extends BaseApiRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
-        $rules = TemplateGroup::getRules();
-
         return [
-            'name' => $rules['name'],
-            'hidden' => $rules['hidden'],
+            'name' => 'required|string|max:40',
+            'description' => 'nullable|string|max:500',
+            'icon' => ['nullable', new Enum(TemplateIcon::class)],
+            'is_admin_only' => 'required|boolean',
         ];
     }
 }

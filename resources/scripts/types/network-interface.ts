@@ -3,5 +3,4 @@ export interface NetworkInterface {
     nodeId: number
     name: string
     description: string | null
-    mtu: number
 }

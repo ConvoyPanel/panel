@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Ipam;
+namespace App\Http\Controllers\Admin;
 
 use App\Actions\Ipam\GenerateAddressesAction;
 use App\Http\Requests\Admin\Addresses\UpdateAddressRequest;

@@ -3,31 +3,15 @@
 namespace App\Http\Requests\Admin\Nodes\Templates;
 
 use App\Models\Template;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseApiRequest;
+use Illuminate\Support\Arr;
 
-class TemplateRequest extends FormRequest
+class TemplateRequest extends BaseApiRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $rules = Template::getRules();
 
-        return [
-            'name' => $rules['name'],
-            'vmid' => $rules['vmid'],
-            'hidden' => $rules['hidden'],
-        ];
+        return Arr::only($rules, ['name', 'description', 'vmid', 'is_admin_only']);
     }
 }

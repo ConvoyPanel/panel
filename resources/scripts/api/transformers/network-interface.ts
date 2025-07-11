@@ -5,5 +5,4 @@ export const rawDataToNetworkInterface = (raw: any): NetworkInterface => ({
     nodeId: raw.node_id,
     name: raw.name,
     description: raw.description,
-    mtu: raw.mtu,
 })

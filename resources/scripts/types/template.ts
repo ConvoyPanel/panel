@@ -7,8 +7,11 @@ export interface TemplateGroup {
 }
 
 export interface Template {
-    uuid: string
-    name: string
-    hidden: boolean
-    orderColumn: number
+    id: number;
+    uuid: string;
+    templateGroupId: number;
+    name: string;
+    description: string | null;
+    vmid: number;
+    isAdminOnly: boolean;
 }

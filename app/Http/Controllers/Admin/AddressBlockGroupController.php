@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Ipam;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
 use App\Models\AddressBlockGroup;

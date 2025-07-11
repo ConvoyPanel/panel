@@ -82,19 +82,6 @@ class Node extends Model
     }
 
     /**
-     * Gets the address pools allocated to a node.
-     */
-    public function addressPools(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            AddressBlockGroup::class,
-            'address_pool_to_node',
-            'node_id',
-            'address_pool_id',
-        );
-    }
-
-    /**
      * Gets all the addresses associated with a node from the address pool(s) allocated to a node.
      */
     public function addresses(): HasManyThrough
@@ -107,14 +94,6 @@ class Node extends Model
             'id',
             'address_pool_id',
         );
-    }
-
-    /**
-     * Gets the template groups associated with a node. This is not the same as TEMPLATES.
-     */
-    public function templateGroups(): HasMany
-    {
-        return $this->hasMany(TemplateGroup::class);
     }
 
     /**

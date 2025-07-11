@@ -1,4 +1,3 @@
-import { Route as NetworkRoute } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
@@ -7,10 +6,10 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import createNetworkInterface, {
-    networkInterfaceSchema,
-} from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
+import createTemplateGroup, {
+    createTemplateGroupSchema,
+} from '@/api/admin/templateGroups/createTemplateGroup.ts'
+import useTemplateGroupsSWR from '@/api/admin/templateGroups/use-template-groups-swr.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -24,35 +23,38 @@ import {
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
+import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
 
-const CreateNetworkModal = () => {
-    const { nodeId } = NetworkRoute.useParams()
-    const { mutate } = useNetworkInterfacesSWR()
+const CreateTemplateGroupModal = () => {
+    const { mutate } = useTemplateGroupsSWR({})
     const [open, setOpen] = useState(false)
 
-    const form = useForm({
-        resolver: zodResolver(networkInterfaceSchema),
+    const form = useForm<z.infer<typeof createTemplateGroupSchema>>({
+        resolver: zodResolver(createTemplateGroupSchema),
         defaultValues: {
             name: '',
             description: '',
-            mtu: '',
+            icon: null,
+            isAdminOnly: false,
         },
     })
 
-    const submit = async (data: z.infer<typeof networkInterfaceSchema>) => {
+    const submit = async (data: z.infer<typeof createTemplateGroupSchema>) => {
         try {
-            const networkInterface = await createNetworkInterface(Number(nodeId), data)
+            const templateGroup = await createTemplateGroup(data)
 
-            await mutate(data => {
-                if (!data) return
-
-                return data.concat(networkInterface)
-            }, false)
+            await mutate(
+                currentData => {
+                    if (!currentData) return
+                    return [...currentData, templateGroup]
+                },
+                { revalidate: false }
+            )
 
             form.reset()
             setOpen(false)
-            toast.success('Network interface created')
+            toast.success('Template group created')
         } catch (e) {
             handleFormErrors(e, form.setError)
             toast.error('Failed to save changes')
@@ -64,33 +66,28 @@ const CreateNetworkModal = () => {
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
                 <Button size={'sm'} className={'self-end'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add network interface
+                    <IconPlus className={'mr-2 size-4'} /> Add template group
                 </Button>
             </CredenzaTrigger>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>New Network Interface</CredenzaTitle>
+                    <CredenzaTitle>New Template Group</CredenzaTitle>
                 </CredenzaHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody className={'space-y-2'}>
-                            <InputForm
-                                name={'name'}
-                                label={'Name'}
-                                autoComplete={'off'}
-                            />
+                    <form onSubmit={form.handleSubmit(submit)}>
+                        <CredenzaBody className={'space-y-4'}>
+                            <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
                             />
-                            <InputForm
-                                name={'mtu'}
-                                label={'MTU'}
-                                type={'number'}
-                                min={1}
-                                max={65535}
-                                placeholder={'1500'}
-                                autoComplete={'off'}
+                            <TemplateIconSelect />
+                            <CheckboxForm
+                                name={'isAdminOnly'}
+                                label={'Admin only'}
+                                description={
+                                    'If checked, this template group will only be accessible to admin users.'
+                                }
                             />
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>
@@ -99,7 +96,7 @@ const CreateNetworkModal = () => {
                                     Cancel
                                 </Button>
                             </CredenzaClose>
-                            <FormButton>Add network</FormButton>
+                            <FormButton>Add template group</FormButton>
                         </CredenzaFooter>
                     </form>
                 </Form>
@@ -108,4 +105,4 @@ const CreateNetworkModal = () => {
     )
 }
 
-export default CreateNetworkModal
+export default CreateTemplateGroupModal

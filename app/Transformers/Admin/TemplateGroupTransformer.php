@@ -4,6 +4,7 @@ namespace App\Transformers\Admin;
 
 use App\Models\TemplateGroup;
 use League\Fractal\TransformerAbstract;
+use League\Fractal\Resource\Collection;
 
 class TemplateGroupTransformer extends TransformerAbstract
 {
@@ -18,15 +19,15 @@ class TemplateGroupTransformer extends TransformerAbstract
     {
         return [
             'id' => $templateGroup->id,
-            'node_id' => $templateGroup->node_id,
             'uuid' => $templateGroup->uuid,
             'name' => $templateGroup->name,
-            'hidden' => $templateGroup->hidden,
-            'order_column' => $templateGroup->order_column,
+            'description' => $templateGroup->description,
+            'icon' => $templateGroup->icon,
+            'isAdminOnly' => $templateGroup->is_admin_only,
         ];
     }
 
-    public function includeTemplates(TemplateGroup $templateGroup)
+    public function includeTemplates(TemplateGroup $templateGroup): Collection
     {
         return $this->collection($templateGroup->templates, new TemplateTransformer);
     }

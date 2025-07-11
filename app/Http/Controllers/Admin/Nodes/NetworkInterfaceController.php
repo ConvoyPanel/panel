@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
+use Illuminate\Http\Response;
 use App\Models\NetworkInterface;
 use App\Http\Requests\Admin\Nodes\NetworkInterfaces\NetworkInterfaceRequest;
 use App\Models\Node;
@@ -31,7 +32,7 @@ class NetworkInterfaceController
         return fractal($networkInterface, new NetworkInterfaceTransformer)->respond();
     }
 
-    public function destroy(Node $node, NetworkInterface $networkInterface): JsonResponse
+    public function destroy(Node $node, NetworkInterface $networkInterface): Response
     {
         // TODO: finish destroy method
         return response()->noContent();
