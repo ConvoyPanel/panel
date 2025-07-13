@@ -4,7 +4,7 @@ import axios from '@/lib/axios';
 import { rawDataToTemplateGroup } from '@/api/transformers/template-group.ts';
 import { TemplateIcon } from '@/types/template-group.ts'
 
-export const createTemplateGroupSchema = z.object({
+export const templateGroupSchema = z.object({
     name: z.string().min(1).max(40),
     description: z.string().max(500),
     icon: z.preprocess(
@@ -15,7 +15,7 @@ export const createTemplateGroupSchema = z.object({
 });
 
 const createTemplateGroup = async (
-    payload: z.infer<typeof createTemplateGroupSchema>
+    payload: z.infer<typeof templateGroupSchema>
 ) => {
     const { isAdminOnly, ...rest } = payload;
     const {

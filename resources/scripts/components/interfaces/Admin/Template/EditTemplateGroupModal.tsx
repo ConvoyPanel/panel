@@ -8,7 +8,7 @@ import useSWRMutation from 'swr/mutation'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import { createTemplateGroupSchema } from '@/api/admin/templateGroups/createTemplateGroup.ts'
+import { templateGroupSchema } from '@/api/admin/templateGroups/createTemplateGroup.ts'
 import updateTemplateGroup from '@/api/admin/templateGroups/updateTemplateGroup.ts'
 import useTemplateGroupsSWR, {
     getKey,
@@ -41,8 +41,8 @@ const EditTemplateGroupModal = () => {
         }))
     )
 
-    const form = useForm<z.infer<typeof createTemplateGroupSchema>>({
-        resolver: zodResolver(createTemplateGroupSchema),
+    const form = useForm<z.infer<typeof templateGroupSchema>>({
+        resolver: zodResolver(templateGroupSchema),
     })
 
     useEffect(() => {
@@ -60,7 +60,7 @@ const EditTemplateGroupModal = () => {
         getKey({}),
         async (
             _key,
-            { arg }: { arg: z.infer<typeof createTemplateGroupSchema> }
+            { arg }: { arg: z.infer<typeof templateGroupSchema> }
         ) => {
             return await updateTemplateGroup(modalData!.uuid, arg)
         },
@@ -87,7 +87,7 @@ const EditTemplateGroupModal = () => {
         }
     )
 
-    const submit = async (data: z.infer<typeof createTemplateGroupSchema>) => {
+    const submit = async (data: z.infer<typeof templateGroupSchema>) => {
         await trigger(data)
     }
 

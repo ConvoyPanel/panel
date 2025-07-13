@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import createTemplateGroup, {
-    createTemplateGroupSchema,
+    templateGroupSchema,
 } from '@/api/admin/templateGroups/createTemplateGroup.ts'
 import useTemplateGroupsSWR from '@/api/admin/templateGroups/use-template-groups-swr.ts'
 
@@ -30,8 +30,8 @@ const CreateTemplateGroupModal = () => {
     const { mutate } = useTemplateGroupsSWR({})
     const [open, setOpen] = useState(false)
 
-    const form = useForm<z.infer<typeof createTemplateGroupSchema>>({
-        resolver: zodResolver(createTemplateGroupSchema),
+    const form = useForm<z.infer<typeof templateGroupSchema>>({
+        resolver: zodResolver(templateGroupSchema),
         defaultValues: {
             name: '',
             description: '',
@@ -40,7 +40,7 @@ const CreateTemplateGroupModal = () => {
         },
     })
 
-    const submit = async (data: z.infer<typeof createTemplateGroupSchema>) => {
+    const submit = async (data: z.infer<typeof templateGroupSchema>) => {
         try {
             const templateGroup = await createTemplateGroup(data)
 

@@ -1,17 +1,17 @@
 import { z } from 'zod';
 import axios from '@/lib/axios';
 import { rawDataToTemplate } from '@/api/transformers/template.ts';
-import { createTemplateSchema } from '@/api/admin/templateGroups/templates/createTemplate.ts';
+import { templateSchema } from '@/api/admin/templateGroups/templates/createTemplate.ts';
 
 const updateTemplate = async (
     templateGroupUuid: string,
-    templateId: number,
-    { isAdminOnly, ...rest }: z.infer<typeof createTemplateSchema>
+    templateUuid: string,
+    { isAdminOnly, ...rest }: z.infer<typeof templateSchema>
 ) => {
     const {
         data: { data },
     } = await axios.put(
-        `/api/admin/template-groups/${templateGroupUuid}/templates/${templateId}`,
+        `/api/admin/template-groups/${templateGroupUuid}/templates/${templateUuid}`,
         {
             ...rest,
             is_admin_only: isAdminOnly,
