@@ -12,6 +12,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/Sheet'
 
+// @ts-ignore
 const quotas = [
     {
         label: 'Count',

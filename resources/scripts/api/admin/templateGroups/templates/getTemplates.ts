@@ -1,21 +1,24 @@
-import { Template } from '@/types/template.ts';
-import { QueryBuilderParams, withQueryBuilderParams } from '@/utils/http';
-import axios from '@/lib/axios';
-import { rawDataToTemplate } from '@/api/transformers/template.ts';
+import { Template } from '@/types/template.ts'
+import { QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
 
-export type TemplateQueryParams = QueryBuilderParams<
-    'name' | 'isAdminOnly'
->;
+import axios from '@/lib/axios'
+
+import { rawDataToTemplate } from '@/api/transformers/template.ts'
+
+export type TemplateQueryParams = QueryBuilderParams<'name' | 'isAdminOnly'>
 
 const getTemplates = async (
-    templateGroupId: number,
+    templateGroupUuid: string,
     params: TemplateQueryParams
 ): Promise<Template[]> => {
-    const { data } = await axios.get(`/api/admin/template-groups/${templateGroupId}/templates`, {
-        params: withQueryBuilderParams(params),
-    });
+    const { data } = await axios.get(
+        `/api/admin/template-groups/${templateGroupUuid}/templates`,
+        {
+            params: withQueryBuilderParams(params),
+        }
+    )
 
-    return data.data.map(rawDataToTemplate);
+    return data.data.map(rawDataToTemplate)
 }
 
-export default getTemplates;
+export default getTemplates

@@ -1,5 +1,5 @@
 import { TemplateGroup } from '@/types/template-group.ts'
-import { IconCopy, IconDots, IconSquaresDiagonal } from '@tabler/icons-react'
+import { IconCopy, IconDots } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
 import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay.tsx'
@@ -37,15 +37,15 @@ const TemplateGroupCard = ({ group }: Props) => {
                     className={
                         'inline-block text-left font-semibold leading-tight'
                     }
-                    title={`Edit details for ${group.name}`}
-                    onClick={() => openModal('edit', group)}
+                    title={`View child templates for ${group.name}`}
+                    onClick={() => openModal('show', group)}
                 >
                     {group.name}
                 </button>
                 {group.description && (
                     <p
                         className={
-                            'text-ellipsis whitespace-nowrap text-sm text-muted-foreground'
+                            'truncate text-sm text-muted-foreground'
                         }
                     >
                         {group.description}
@@ -68,6 +68,11 @@ const TemplateGroupCard = ({ group }: Props) => {
                             onClick={() => openModal('edit', group)}
                         >
                             Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => openModal('show', group)}
+                        >
+                            View
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => openModal('delete', group)}

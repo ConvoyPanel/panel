@@ -1,7 +1,6 @@
 import { Template } from '@/types/template.ts'
 
 export interface TemplateGroup {
-    id: number
     uuid: string
     name: string
     description: string | null

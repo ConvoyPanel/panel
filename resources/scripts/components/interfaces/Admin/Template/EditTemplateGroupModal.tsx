@@ -30,13 +30,6 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
 
-export const formatIconLabel = (icon: string) => {
-    return icon
-        .split('_')
-        .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-        .join(' ')
-}
-
 const EditTemplateGroupModal = () => {
     const { mutate } = useTemplateGroupsSWR({})
 
@@ -77,7 +70,7 @@ const EditTemplateGroupModal = () => {
                     (currentData: TemplateGroup[] | undefined) => {
                         if (!currentData) return
                         return currentData.map(group =>
-                            group.id === updatedGroup.id ? updatedGroup : group
+                            group.uuid === updatedGroup.uuid ? updatedGroup : group
                         )
                     },
                     { revalidate: false }

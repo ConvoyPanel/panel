@@ -6,16 +6,17 @@ import {
 } from '@/api/admin/templateGroups/templates/getTemplates.ts'
 
 export const getKey = (
-    templateGroupId: number,
+    templateGroupUuid: string,
     params: TemplateQueryParams
-) => ['templates', templateGroupId, params]
+) => ['templates', templateGroupUuid, params]
 
 const useTemplatesSWR = (
-    templateGroupId: number,
+    templateGroupUuid: string | null | undefined,
     params: TemplateQueryParams
 ) => {
-    return useSWR(getKey(templateGroupId, params), () =>
-        getTemplates(templateGroupId, params)
+    return useSWR(
+        templateGroupUuid ? getKey(templateGroupUuid, params) : null,
+        () => getTemplates(templateGroupUuid!, params)
     )
 }
 

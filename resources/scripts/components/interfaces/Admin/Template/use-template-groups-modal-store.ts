@@ -3,7 +3,7 @@ import { TemplateGroup } from '@/types/template-group.ts';
 
 const useTemplateGroupsModalStore = createModalStore<
     TemplateGroup,
-    'edit' | 'delete'
+    'edit' | 'delete' | 'show'
 >();
 
 export default useTemplateGroupsModalStore;
