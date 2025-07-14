@@ -59,10 +59,7 @@ function CreateNodePage() {
                 to: '/admin/nodes/$nodeId',
                 replace: true,
                 params: {
-                    nodeId: node.id,
-                },
-                search: {
-                    oobe: true,
+                    nodeId: node.id.toString(),
                 },
             })
         } catch (e) {
