@@ -20,6 +20,7 @@ class TemplateController
                 'name',
                 AllowedFilter::exact('is_admin_only')
             ])
+            ->defaultSort('name')
             ->get();
 
         return fractal($templates, new TemplateTransformer)->respond();

@@ -7,6 +7,9 @@ use Ramsey\Uuid\Uuid;
 
 class Template extends Model
 {
+    const UPDATED_AT = null;
+    const CREATED_AT = null;
+
     public static array $validationRules = [
         'template_group_id' => 'required|integer|exists:template_groups,id',
         'name' => 'required|string|max:40',

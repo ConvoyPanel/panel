@@ -11,6 +11,8 @@ import createTemplateGroup, {
 } from '@/api/admin/templateGroups/createTemplateGroup.ts'
 import useTemplateGroupsSWR from '@/api/admin/templateGroups/use-template-groups-swr.ts'
 
+import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
+
 import { Button } from '@/components/ui/Button'
 import {
     Credenza,
@@ -24,7 +26,6 @@ import {
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
-import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
 
 const CreateTemplateGroupModal = () => {
     const { mutate } = useTemplateGroupsSWR({})
@@ -47,7 +48,9 @@ const CreateTemplateGroupModal = () => {
             await mutate(
                 currentData => {
                     if (!currentData) return
-                    return [...currentData, templateGroup]
+                    return [...currentData, templateGroup].sort((a, b) =>
+                        a.name.localeCompare(b.name)
+                    )
                 },
                 { revalidate: false }
             )

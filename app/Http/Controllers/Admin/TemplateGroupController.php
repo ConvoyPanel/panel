@@ -22,6 +22,7 @@ class TemplateGroupController
                 'name',
                 AllowedFilter::exact('is_admin_only'),
             ])
+            ->defaultSort('name')
             ->get();
 
         return fractal($templateGroups, new TemplateGroupTransformer)

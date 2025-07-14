@@ -29,7 +29,7 @@ const DeleteTemplateGroupModal = () => {
     )
 
     const { trigger, isMutating } = useSWRMutation(
-        ['delete-template-group', modalData?.id],
+        ['delete-template-group', modalData?.uuid],
         async (_, { arg: uuid }: { arg: string }) => {
             return deleteTemplateGroup(uuid)
         },
@@ -39,7 +39,7 @@ const DeleteTemplateGroupModal = () => {
                     currentData => {
                         if (!currentData || !modalData) return currentData
                         return currentData.filter(
-                            group => group.id !== modalData.id
+                            group => group.uuid !== modalData.uuid
                         )
                     },
                     { revalidate: false }

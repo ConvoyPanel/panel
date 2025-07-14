@@ -1,12 +1,12 @@
 import axios from '@/lib/axios';
 
 const deleteTemplate = async (
-    templateGroupId: number,
-    templateId: number
+    templateGroupUuid: string,
+    templateUuid: string,
 ) => {
     await axios.delete(
-        `/api/admin/template-groups/${templateGroupId}/templates/${templateId}`
-    );
+        `/api/admin/template-groups/${templateGroupUuid}/templates/${templateUuid}`,
+    )
 };
 
 export default deleteTemplate;

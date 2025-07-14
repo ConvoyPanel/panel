@@ -1,8 +1,10 @@
 import { IconPlus, IconTemplate } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import useTemplatesSWR from '@/api/admin/templateGroups/templates/use-templates-swr.ts'
 
+import CreateTemplateCard from '@/components/interfaces/Admin/Template/CreateTemplateCard.tsx'
 import TemplateCard from '@/components/interfaces/Admin/Template/TemplateCard.tsx'
 import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
 
@@ -25,17 +27,20 @@ const TemplateGroupSidebar = () => {
             closeModal: state.closeModal,
         }))
     )
+    const [isCreating, setIsCreating] = useState(false)
 
     const { data: templates, isLoading } = useTemplatesSWR(modalData?.uuid, {})
 
     return (
         <Sheet open={isOpen} onOpenChange={val => !val && closeModal('show')}>
-            <SheetContent className={'sm:max-w-lg'} side={'right'}>
+            <SheetContent className={'w-11/12 sm:max-w-lg'} side={'right'}>
                 <SheetHeader>
-                    <SheetTitle>{modalData?.name}</SheetTitle>
+                    <SheetTitle className={'truncate'}>
+                        {modalData?.name}
+                    </SheetTitle>
                 </SheetHeader>
                 <div className={'mb-4 flex justify-end'}>
-                    <Button size={'sm'}>
+                    <Button size={'sm'} onClick={() => setIsCreating(true)} disabled={isCreating}>
                         <IconPlus className={'mr-2 size-4'} /> New
                     </Button>
                 </div>
@@ -46,23 +51,41 @@ const TemplateGroupSidebar = () => {
                         ))}
                     </div>
                 ) : !templates || templates.length === 0 ? (
-                    <Card>
-                        <CardHeader />
-                        <CardContent>
-                            <SimpleEmptyState
-                                icon={IconTemplate}
-                                title={'No template groups found'}
-                                description={
-                                    'Create a new template group to get started.'
-                                }
-                            />
-                        </CardContent>
-                    </Card>
+                    isCreating ? (
+                        <CreateTemplateCard
+                            templateGroup={modalData!}
+                            onClose={() => setIsCreating(false)}
+                        />
+                    ) : (
+                        <Card>
+                            <CardHeader />
+                            <CardContent>
+                                <SimpleEmptyState
+                                    icon={IconTemplate}
+                                    title={'No template groups found'}
+                                    description={
+                                        'Create a new template group to get started.'
+                                    }
+                                />
+                            </CardContent>
+                        </Card>
+                    )
                 ) : (
-                    <div className={'flex flex-col divide-y border-y'}>
+                    <div
+                        className={
+                            'flex h-full flex-col overflow-y-auto border-t'
+                        }
+                    >
+                        {isCreating && (
+                            <CreateTemplateCard
+                                templateGroup={modalData!}
+                                onClose={() => setIsCreating(false)}
+                            />
+                        )}
                         {templates.map(template => (
                             <TemplateCard
                                 key={template.uuid}
+                                templateGroup={modalData!}
                                 template={template}
                             />
                         ))}
