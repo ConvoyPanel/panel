@@ -73,7 +73,7 @@ const CreateTemplateCard = ({ templateGroup, onClose }: Props) => {
                     <div className={'flex justify-end gap-2'}>
                         <Button
                             variant={'secondary'}
-                            onClick={() => console.log('cancel called')}
+                            onClick={() => onClose()}
                             size={'sm'}
                             type={'button'}
                         >
