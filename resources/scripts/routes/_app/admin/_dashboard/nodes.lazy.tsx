@@ -1,3 +1,4 @@
+import useClipboard from '@/hooks/use-clipboard.ts'
 import usePagination from '@/hooks/use-pagination.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
@@ -22,12 +23,13 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes')({
 })
 
 function NodesIndex() {
+    const { copy } = useClipboard()
     const pagination = usePagination()
     const { data } = useNodesSWR({
         page: pagination.page,
         filters: {
             '*': pagination.debouncedQuery,
-        }
+        },
     })
 
     const columns: ColumnDef<Node>[] = [
@@ -70,6 +72,11 @@ function NodesIndex() {
         },
         actionsColumn<Node>(_data => (
             <>
+                <DropdownMenuItem
+                    onClick={() => copy(_data.row.original.id.toString())}
+                >
+                    Copy ID
+                </DropdownMenuItem>{' '}
                 <DropdownMenuItem>Edit</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Delete</DropdownMenuItem>
