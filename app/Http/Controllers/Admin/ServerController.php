@@ -47,13 +47,10 @@ class ServerController
                         '*',
                         new FiltersServerWildcard,
                     ),
-                    AllowedFilter::custom(
-                        'address_pool_id',
-                        new FiltersServerByAddressPoolId,
-                    ),
                     AllowedFilter::exact('node_id'),
                     AllowedFilter::exact('user_id'),
                     'name',
+                    'hostname',
                 ],
             )
             ->paginate(min($request->query('per_page', 50), 100))->appends(
