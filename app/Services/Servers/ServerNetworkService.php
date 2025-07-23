@@ -112,21 +112,30 @@ class ServerNetworkService
         );
     }
 
-    public function updateAddresses(Server $server, array $addressIds): void
+    /**
+     * @param int[]|Address[] $addresses
+     */
+    public function syncAddresses(Server $server, array $addresses): void
     {
-        $currentAddresses = $server->addresses()->get()->pluck('id')->toArray();
+        // Normalize input: get array of address IDs
+        $addressIds = collect($addresses)->map(function ($address) {
+            return $address instanceof Address ? $address->id : $address;
+        })->unique()->values()->all();
 
+        // Get current address IDs attached to this server
+        $currentAddresses = $server->addresses()->pluck('id')->toArray();
+
+        // Determine which addresses to add and remove
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
-        $addressesToRemove = array_filter(
-            $currentAddresses,
-            fn ($id) => ! in_array($id, $addressIds),
-        );
+        $addressesToRemove = array_diff($currentAddresses, $addressIds);
 
-        if (! empty($addressesToAdd)) {
+        // Attach new addresses using the repository
+        if (!empty($addressesToAdd)) {
             $this->repository->attachAddresses($server, $addressesToAdd);
         }
 
-        if (! empty($addressesToRemove)) {
+        // Detach addresses no longer associated
+        if (!empty($addressesToRemove)) {
             Address::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)

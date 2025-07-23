@@ -30,7 +30,7 @@ class DisplayException extends ConvoyException implements HttpExceptionInterface
     /**
      * DisplayException constructor.
      */
-    public function __construct(string $message, ?Throwable $previous = null, protected string $level = self::LEVEL_ERROR, int $code = 0)
+    public function __construct(string $message, ?Throwable $previous = null, protected int $statusCode = Response::HTTP_BAD_REQUEST, protected string $level = self::LEVEL_ERROR, int $code = 0)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -42,7 +42,7 @@ class DisplayException extends ConvoyException implements HttpExceptionInterface
 
     public function getStatusCode(): int
     {
-        return Response::HTTP_BAD_REQUEST;
+        return $this->statusCode;
     }
 
     public function getHeaders(): array

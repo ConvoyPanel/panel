@@ -4,11 +4,14 @@ namespace App\Http\Requests\Admin\Servers;
 
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Models\Node;
 use App\Models\Server;
-use App\Rules\Password;
-use App\Rules\USKeyboardCharacters;
-use Illuminate\Validation\Validator;
+use App\Rules\HasSufficientCPU;
+use App\Rules\HasSufficientDiskSpace;
+use App\Rules\HasSufficientMemory;
+use App\Rules\TemplateIsAvailable;
+use App\Rules\VMIDIsAvailable;
+use App\Services\Servers\ServerCreationService;
+use Illuminate\Validation\Rule;
 
 /**
  * @property mixed $type
@@ -20,70 +23,93 @@ class StoreServerRequest extends BaseApiRequest
         $rules = Server::getRules();
 
         return [
-            'name' => $rules['name'],
-            'user_id' => $rules['user_id'],
-            'node_id' => $rules['node_id'],
-            // TODO: validation should be added for manually setting the vmid
-            'vmid' => 'present|nullable|numeric|min:100|max:999999999',
-            'hostname' => $rules['hostname'],
-            'limits' => 'required|array',
-            'limits.cpu' => $rules['cpu'],
-            'limits.memory' => $rules['memory'],
-            'limits.disk' => $rules['disk'],
-            'limits.snapshots' => $rules['snapshot_limit'],
-            'limits.backups' => $rules['backup_limit'],
-            'limits.bandwidth' => $rules['bandwidth_limit'],
-            'limits.address_ids' => 'sometimes|nullable|array',
-            'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(
-            ), new USKeyboardCharacters()],
-            'should_create_server' => 'present|boolean',
-            'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
-            'start_on_completion' => 'present|boolean',
+            // Basic server information
+            'name'       => $rules['name'],
+            'node_id'    => $rules['node_id'],
+            'storage_id' => $rules['storage_id'],
+            'user_id'    => $rules['user_id'],
+            'vmid'       => ['nullable', 'numeric', 'min:100', 'max:999999999', new VMIDIsAvailable($this->input('node_id'))],
+            'hostname'   => $rules['hostname'],
+
+            // Resource limits
+            'limits'                    => 'required|array',
+            'limits.cpu'                => [...$rules['cpu'], new HasSufficientCPU()],
+            'limits.memory'             => [...$rules['memory'], new HasSufficientMemory()],
+            'limits.disk'               => [...$rules['disk'], new HasSufficientDiskSpace()],
+            'limits.bandwidth'          => $rules['bandwidth_limit'],
+
+            // Snapshot limits
+            'limits.snapshots'          => 'required|array',
+            'limits.snapshots.count'    => $rules['snapshot_count_limit'],
+            'limits.snapshots.size'     => $rules['snapshot_size_limit'],
+
+            // Backup limits
+            'limits.backups'            => 'required|array',
+            'limits.backups.count'      => $rules['backup_count_limit'],
+            'limits.backups.size'       => $rules['backup_size_limit'],
+
+            // IP addresses
+            'limits.network_interface_id' => 'required|integer|exists:network_interfaces,id',
+            'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
+            'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
+            'limits.addresses'        => 'required|array',
+            'limits.addresses.*'      => [
+                'integer',
+                function ($attribute, $value, $fail) {
+                    $address = Address::find($value);
+
+                    if (!$address) {
+                        $fail("The address with ID {$value} could not be found.");
+
+                        return;
+                    }
+
+                    if ($address->server_id) {
+                        $fail("The address with ID {$value} is already allocated to another server.");
+                    }
+                },
+            ],
+
+            // Server creation options
+            'deferred_os_selection' => 'required|boolean',
+            'account_password'      => [
+                'nullable',
+                Rule::requiredIf(fn () => $this->input('should_create_vm') && !$this->input('deferred_os_selection')),
+                'string',
+                'min:8',
+                'max:191',
+            ],
+            'should_create_vm'  => 'required|boolean',
+            'template_uuid'         => [
+                'nullable',
+                Rule::requiredIf(fn () => $this->input('should_create_vm') && !$this->input('deferred_os_selection')),
+                'string',
+                'exists:templates,uuid',
+                new TemplateIsAvailable(),
+            ],
+            'start_on_completion'   => 'required|boolean',
         ];
     }
 
-    public function withValidator(Validator $validator): void
+    protected function prepareForValidation(): void
     {
-        $validator->after(function ($validator) {
-            $addressIds = $this->input('limits.address_ids');
+        $toMerge = [];
 
-            if (! is_null($addressIds)) {
-                $addresses = Address::whereIn('id', $addressIds)->get();
+        if ($this->filled('limits.addresses_ipv4_count') || $this->filled('limits.addresses_ipv6_count')) {
+            $limits = $this->input('limits', []);
+            $limits['addresses'] = [];
+            $toMerge['limits'] = $limits;
+        }
 
-                foreach ($addresses as $address) {
-                    if ($address->server_id !== null) {
-                        $validator->errors()->add(
-                            'limits.address_ids',
-                            'One or more of the selected addresses are already in use',
-                        );
-                        break;
-                    }
-                }
-            }
+        if ($this->boolean('deferred_os_selection')) {
+            $toMerge['should_create_vm'] = false;
+            $toMerge['start_on_completion'] = false;
+            $toMerge['account_password'] = null;
+            $toMerge['template_uuid'] = null;
+        }
 
-            // check if the memory and disk isn't exceeding the node limits
-            $node = Node::findOrFail($this->input('node_id'))->load('servers');
-
-            $nodeMemoryLimit = ($node->memory * (($node->memory_overallocate / 100) + 1)) - $node->memory_allocated;
-            $nodeDiskLimit = ($node->disk * (($node->disk_overallocate / 100) + 1)) - $node->disk_allocated;
-
-            $memory = intval($this->input('limits.memory'));
-            $disk = intval($this->input('limits.disk'));
-
-            if ($memory > $nodeMemoryLimit || $memory < 0) {
-                $validator->errors()->add(
-                    'limits.memory',
-                    'The memory value exceeds the node\'s limit.',
-                );
-            }
-
-            if ($disk > $nodeDiskLimit || $disk < 0) {
-                $validator->errors()->add(
-                    'limits.disk',
-                    'The disk value exceeds the node\'s limit.',
-                );
-            }
-        });
+        if (!empty($toMerge)) {
+            $this->merge($toMerge);
+        }
     }
 }

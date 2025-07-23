@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Data\Server\Deployments\ServerDeploymentData;
 use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\AuthenticationType;
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Http\Requests\Client\Servers\Settings\MountMediaRequest;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
@@ -83,7 +83,7 @@ class SettingsController
     public function reinstall(ReinstallServerRequest $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $server->update(['status' => Status::INSTALLING->value]);
+            $server->update(['status' => ServerStatus::INSTALLING->value]);
 
             $deployment = ServerDeploymentData::from([
                 'server' => $server,

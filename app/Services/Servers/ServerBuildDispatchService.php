@@ -5,7 +5,7 @@ namespace App\Services\Servers;
 use App\Data\Server\Deployments\ServerDeploymentData;
 use App\Enums\Server\PowerAction;
 use App\Enums\Server\State;
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Jobs\Server\BuildServerJob;
 use App\Jobs\Server\DeleteServerJob;
 use App\Jobs\Server\MonitorStateJob;
@@ -24,10 +24,10 @@ class ServerBuildDispatchService
         $jobs = $this->getChainedBuildJobs($deployment);
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED->value]))
             ->dispatch();
 
-        $deployment->server->update(['status' => Status::INSTALLING->value]);
+        $deployment->server->update(['status' => ServerStatus::INSTALLING->value]);
     }
 
     /* the delete virtual machine method is typically not used by itself and is accompanied by other logic like server reinstallations, server deletions */
@@ -47,10 +47,10 @@ class ServerBuildDispatchService
         ];
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED->value]))
             ->dispatch();
 
-        $deployment->server->update(['status' => Status::INSTALLING->value]);
+        $deployment->server->update(['status' => ServerStatus::INSTALLING->value]);
     }
 
     private function getChainedBuildJobs(ServerDeploymentData $deployment): array

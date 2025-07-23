@@ -1,12 +1,15 @@
 import usePagination from '@/hooks/use-pagination.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
+import { IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
+import useServersSWR from '@/api/admin/servers/use-servers-swr.ts'
+
 import { buttonVariants } from '@/components/ui/Button'
-import { Heading } from '@/components/ui/Typography'
 import { DataTable } from '@/components/ui/DataTable'
+import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/servers')({
     component: ServersIndex,
@@ -14,6 +17,12 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/servers')({
 
 function ServersIndex() {
     const pagination = usePagination()
+    const { data } = useServersSWR({
+        page: pagination.page,
+        filters: {
+            '*': pagination.debouncedQuery,
+        },
+    })
 
     const columns: ColumnDef<Server>[] = [
         {
@@ -37,11 +46,30 @@ function ServersIndex() {
             accessorKey: 'hostname',
             meta: {
                 skeletonWidth: '4rem',
-            }
+            },
         },
     ]
 
-    return <>
-        <Heading>Servers</Heading>
-    </>
+    return (
+        <>
+            <Heading>Servers</Heading>
+            <DataTable
+                paginated
+                searchable
+                toolbar
+                data={data}
+                columns={columns}
+                rightActions={
+                    <Link
+                        className={cn(buttonVariants({ size: 'sm' }), 'flex')}
+                        to='/admin/servers/create'
+                    >
+                        <IconPlus className={'mr-2 size-4'} />
+                        Add server
+                    </Link>
+                }
+                {...pagination}
+            />
+        </>
+    )
 }

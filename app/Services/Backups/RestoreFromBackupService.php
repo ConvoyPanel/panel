@@ -3,7 +3,7 @@
 namespace App\Services\Backups;
 
 use App\Enums\Server\State;
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Jobs\Server\MonitorBackupRestorationJob;
 use App\Models\Backup;
 use App\Models\Server;
@@ -44,7 +44,7 @@ class RestoreFromBackupService
 
         $this->connection->transaction(function () use ($server, $backup) {
             $server->update([
-                'status' => Status::RESTORING_BACKUP->value,
+                'status' => ServerStatus::RESTORING_BACKUP->value,
             ]);
 
             $upid = $this->proxmoxRepository->setServer($server)->restore($backup);

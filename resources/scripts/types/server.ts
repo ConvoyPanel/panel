@@ -2,6 +2,7 @@ import { Node } from '@/types/node'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export type ServerLifecycleStatus =
+    | 'ready'
     | 'installing'
     | 'install_failed'
     | 'suspended'
@@ -9,7 +10,6 @@ export type ServerLifecycleStatus =
     | 'restoring_snapshot'
     | 'deleting'
     | 'deletion_failed'
-    | null
 
 export interface Server {
     id: number

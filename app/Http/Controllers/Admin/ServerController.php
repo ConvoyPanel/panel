@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
@@ -136,7 +136,7 @@ class ServerController
     public function destroy(Request $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $server->update(['status' => Status::DELETING->value]);
+            $server->update(['status' => ServerStatus::DELETING->value]);
 
             $this->deletionService->handle($server, $request->input('no_purge', false));
         });

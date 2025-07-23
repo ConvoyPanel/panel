@@ -3,7 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Enums\Server\PowerAction;
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
@@ -27,14 +27,14 @@ class ServerSuspensionService
         }
 
         $server->update([
-            'status' => $isSuspending ? Status::SUSPENDED->value : null,
+            'status' => $isSuspending ? ServerStatus::SUSPENDED->value : null,
         ]);
 
         try {
             $this->powerRepository->setServer($server)->send($isSuspending ? PowerAction::KILL : PowerAction::START);
         } catch (Exception $exception) {
             $server->update([
-                'status' => $isSuspending ? null : Status::SUSPENDED->value,
+                'status' => $isSuspending ? null : ServerStatus::SUSPENDED->value,
             ]);
 
             throw $exception;

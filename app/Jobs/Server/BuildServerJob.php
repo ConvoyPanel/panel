@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Server;
 
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Models\Server;
 use App\Models\Template;
 use App\Services\Servers\ServerBuildService;
@@ -38,7 +38,7 @@ class BuildServerJob implements ShouldQueue
         $server = Server::findOrFail($this->serverId);
         $template = Template::findOrFail($this->templateId);
 
-        $server->update(['status' => Status::INSTALLING->value]);
+        $server->update(['status' => ServerStatus::INSTALLING->value]);
 
         $service->build($server, $template);
     }

@@ -2,8 +2,10 @@
 
 namespace App\Enums\Server;
 
-enum Status: string
+enum ServerStatus: string
 {
+    case READY = 'ready';
+    case DEFERRED_OS_SELECTION = 'deferred_os_selection';
     case INSTALLING = 'installing';
     case INSTALL_FAILED = 'install_failed';
     case SUSPENDED = 'suspended';

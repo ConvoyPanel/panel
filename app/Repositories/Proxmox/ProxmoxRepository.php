@@ -92,6 +92,9 @@ abstract class ProxmoxRepository
         });
     }
 
+    /**
+     * @throws RequestException
+     */
     public function getHttpClientWithParams(
         array $params = [],
         bool $shouldAuthorize = true,

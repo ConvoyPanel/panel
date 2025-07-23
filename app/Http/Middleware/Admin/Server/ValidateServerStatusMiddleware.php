@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware\Admin\Server;
 
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use App\Models\Server;
 use Closure;
@@ -20,7 +20,7 @@ class ValidateServerStatusMiddleware
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($server->status === Status::DELETING->value || $server->status === Status::DELETION_FAILED->value) {
+        if ($server->status === ServerStatus::DELETING->value || $server->status === ServerStatus::DELETION_FAILED->value) {
             throw new ServerStatusConflictException($server);
         }
 

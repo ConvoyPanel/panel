@@ -2,7 +2,7 @@
 
 namespace App\Services\Servers;
 
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use App\Jobs\Server\PurgeBackupsJob;
 use App\Models\Server;
@@ -18,7 +18,7 @@ class ServerDeletionService
     {
         $this->validateStatus($server);
 
-        $server->update(['status' => Status::DELETING->value]);
+        $server->update(['status' => ServerStatus::DELETING->value]);
 
         if (! $noPurge) {
             Bus::chain([
@@ -28,7 +28,7 @@ class ServerDeletionService
                     Server::findOrFail($server->id)->delete();
                 },
             ])
-                ->catch(fn () => $server->update(['status' => Status::DELETION_FAILED->value]))
+                ->catch(fn () => $server->update(['status' => ServerStatus::DELETION_FAILED->value]))
                 ->dispatch();
 
             return;
@@ -40,7 +40,7 @@ class ServerDeletionService
     public function validateStatus(Server $server, bool $verifyStatusOnly = false)
     {
         if (
-            ! is_null($server->status) && $server->status !== Status::DELETING->value
+            ! is_null($server->status) && $server->status !== ServerStatus::DELETING->value
         ) {
             throw new ServerStatusConflictException($server);
         }

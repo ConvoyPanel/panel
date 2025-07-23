@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
-use App\Enums\Server\Status;
+use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +46,7 @@ class Server extends Model
     protected function casts(): array
     {
         return [
+            'status' => ServerStatus::class,
             'memory' => StorageSizeCast::class,
             'disk' => StorageSizeCast::class,
             'bandwidth_usage' => StorageSizeCast::class,
@@ -108,17 +109,17 @@ class Server extends Model
 
     public function isInstalled(): bool
     {
-        return $this->status !== Status::INSTALLING->value;
+        return $this->status !== ServerStatus::INSTALLING->value;
     }
 
     public function isInstalling(): bool
     {
-        return $this->status === Status::INSTALLING->value;
+        return $this->status === ServerStatus::INSTALLING->value;
     }
 
     public function isSuspended(): bool
     {
-        return $this->status === Status::SUSPENDED->value;
+        return $this->status === ServerStatus::SUSPENDED->value;
     }
 
     /**
