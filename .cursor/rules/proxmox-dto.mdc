@@ -1,0 +1,113 @@
+---
+globs: app/Repositories/Proxmox/**/*.php,app/Data/**/*.php
+alwaysApply: false
+---
+You are an expert PHP developer specializing in creating clean, readable, and maintainable code. Your task is to refactor a PHP Data Transfer Object (DTO) that maps raw data from an API response to class properties.
+
+The goal is to transform the raw, often concise or abbreviated API keys into elegant, descriptive, and self-documenting property names. The new names should make the code's purpose immediately clear without needing to reference external documentation.
+
+## Instructions
+
+Analyze the provided "before" (raw API keys) and "after" (desired property names) examples. Then, apply the same logic to any new key-value pairs.
+
+### **Before: Raw API Data Example**
+
+Here is an example of the kind of raw data the DTO will receive. Notice the keys are short and sometimes cryptic.
+
+```php
+$rawData = [
+    'template' => false,
+    'acpi' => true,
+    'arch' => 'x86_64',
+    'args' => '-some-kvm-arg',
+    'autostart' => true, // This means restart if the VM crashes
+    'onboot' => false,   // This means start the VM when the host server boots
+    'protection' => true,
+    'tdf' => false,      // Time Drift Fix
+    'ostype' => 'l26',
+];
+```
+
+### **After: Desired PHP Class Properties**
+
+This is how the raw keys should be mapped to elegant and descriptive class properties.
+
+```php
+class ServerConfigData extends Data
+{
+    public function __construct(
+        public bool $isTemplate,
+        public bool $isAcpiEnabled,
+        public ?string $architecture,
+        public ?string $kvmArguments,
+        public bool $autoStartAfterCrash,
+        public bool $startOnHostBoot,
+        public bool $isProtected,
+        public bool $isTimeDriftFixEnabled,
+        public OperatingSystemType $operatingSystemType,
+    ) {}
+}
+```
+
+### **Transformation Rules**
+
+Based on the examples, follow these strict conventions for renaming:
+
+1.  **Clarity Over Brevity**: Always prefer full, descriptive names over short ones. The name should clearly state the property's purpose.
+    * `autostart` ➡️ `autoStartAfterCrash`
+    * `onboot` ➡️ `startOnHostBoot`
+
+2.  **Prefix Booleans**: For properties that hold a `boolean` value, always use a prefix like `is`.
+    * `template` ➡️ `isTemplate`
+    * `protection` ➡️ `isProtected`
+
+3.  **Expand Abbreviations**: Fully expand any abbreviations or shortened keys into their complete English words.
+    * `arch` ➡️ `architecture`
+    * `tdf` ➡️ `isTimeDriftFixEnabled`
+    * `args` ➡️ `kvmArguments`
+    * However, there are certain abbreviations that are so common like `max` that it doesn't need to be expanded to `maximum`.
+
+4.  **Use `camelCase`**: Ensure all final property names strictly follow the `camelCase` naming convention.
+
+5.  **Group Related Properties into Nested Data Classes**: When multiple properties share a common prefix and describe different aspects of the same concept (e.g., `memoryUsed`, `memoryFree`, `memoryTotal`), they should be refactored into a single property that holds a nested `Data` class. This improves organization and readability.
+
+    * **Before:** Flat properties with repeated prefixes.
+        ```php
+        public function __construct(
+            public int $memoryUsed,
+            public int $memoryFree,
+            public int $memoryTotal,
+        ) {}
+        ```
+
+    * **After:** A single property with a nested `Data` class.
+        ```php
+        // Parent Class
+        public function __construct(
+            public MemoryUsageData $memory,
+            // ... other properties
+        ) {}
+
+        // Nested Class
+        class MemoryUsageData extends Data
+        {
+            public function __construct(
+                public int $used,
+                public int $free,
+                public int $total,
+            ) {}
+        }
+        ```
+
+    **Reusability:** Aim to make these nested classes reusable where appropriate. If different parts of the API response share the same structure, they can be mapped to the same `Data` class. For instance, if the Proxmox API returns identical structures for `memory` and `swap` usage, the `MemoryUsageData` class can be used for both. Avoid creating reusable classes just for the sake of it; the reuse must be logical and based on the API's structure.
+
+    * **Example of Reusability:**
+        ```php
+        public function __construct(
+            public MemoryUsageData $memory,
+            public MemoryUsageData $swap,
+        ) {}
+
+6.  **Omit Units for Byte Values**: For variables representing a quantity of bytes, do not append `Bytes` to the property name. The base unit is assumed to be bytes throughout the codebase.
+    * `memoryUsedBytes` ➡️ `memoryUsed`
+    * `diskSizeBytes` ➡️ `diskSize`
