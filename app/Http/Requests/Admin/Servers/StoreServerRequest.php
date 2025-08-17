@@ -2,23 +2,22 @@
 
 namespace App\Http\Requests\Admin\Servers;
 
+use App\Rules\HasSufficientCPU;
+use App\Rules\HasSufficientMemory;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
 use App\Models\Server;
-use App\Rules\HasSufficientCPU;
+use App\Rules\HasSufficientAddresses;
 use App\Rules\HasSufficientDiskSpace;
-use App\Rules\HasSufficientMemory;
+use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\TemplateIsAvailable;
 use App\Rules\VMIDIsAvailable;
-use App\Services\Servers\ServerCreationService;
+use App\Services\Addresses\AddressAvailabilityService;
 use Illuminate\Validation\Rule;
 
-/**
- * @property mixed $type
- */
 class StoreServerRequest extends BaseApiRequest
 {
-    public function rules(): array
+    public function rules(AddressAvailabilityService $addressAvailabilityService): array
     {
         $rules = Server::getRules();
 
@@ -49,14 +48,20 @@ class StoreServerRequest extends BaseApiRequest
             'limits.backups.size'       => $rules['backup_size_limit'],
 
             // IP addresses
-            'limits.network_interface_id' => 'required|integer|exists:network_interfaces,id',
+            'limits.network_interface_id' => [
+                'required',
+                'integer',
+                'exists:network_interfaces,id',
+                new NetworkInterfaceBelongsToNode($this->input('node_id')),
+                new HasSufficientAddresses($addressAvailabilityService),
+            ],
             'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses'        => 'required|array',
             'limits.addresses.*'      => [
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $address = Address::find($value);
+                    $address = Address::with('addressBlock.addressBlockGroup.networkInterfaces')->find($value);
 
                     if (!$address) {
                         $fail("The address with ID {$value} could not be found.");
@@ -66,6 +71,11 @@ class StoreServerRequest extends BaseApiRequest
 
                     if ($address->server_id) {
                         $fail("The address with ID {$value} is already allocated to another server.");
+                    }
+
+                    $networkInterfaceId = $this->input('limits.network_interface_id');
+                    if (!$address->addressBlock->addressBlockGroup->networkInterfaces->contains('id', $networkInterfaceId)) {
+                        $fail("The address with ID {$value} does not belong to the selected network interface.");
                     }
                 },
             ],

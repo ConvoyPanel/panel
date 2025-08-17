@@ -3,7 +3,6 @@
 namespace App\Services\Servers;
 
 use App\Models\Node;
-use App\Models\Deployment;
 use Random\RandomException;
 use App\Data\Server\Deployments\ServerDeploymentData;
 use App\Enums\Server\ServerStatus;
@@ -16,12 +15,11 @@ use App\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
 use App\Models\Address;
 use App\Models\Server;
-use App\Models\Template;
 use App\Repositories\Eloquent\ServerRepository;
+use App\Services\Addresses\AddressAllocationService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use function collect;
-use function array_get;
 
 /**
  * Class ServerCreationService
@@ -34,6 +32,7 @@ class ServerCreationService
         private ServerBuildDispatchService $buildDispatchService,
         private ProxmoxAllocationRepository $allocationRepository,
         private ProxmoxResourceRepository $resourceRepository,
+        private AddressAllocationService $addressAllocationService,
     ) {
     }
 
@@ -48,7 +47,17 @@ class ServerCreationService
     {
         $uuid = $this->generateUniqueUuidCombo();
         $nodeId = $data['node_id'];
-        $addresses = Address::findMany(Arr::get($data, 'limits.address_ids', []))->load('addressBlock');
+
+        $addresses = collect();
+        if (Arr::has($data, 'limits.addresses') && !empty(Arr::get($data, 'limits.addresses'))) {
+            $addresses = Address::findMany(Arr::get($data, 'limits.addresses'))->load('addressBlock');
+        } else {
+            $ipv4Count = (int) Arr::get($data, 'limits.addresses_ipv4_count', 0);
+            $ipv6Count = (int) Arr::get($data, 'limits.addresses_ipv6_count', 0);
+            if ($ipv4Count > 0 || $ipv6Count > 0) {
+                $addresses = $this->addressAllocationService->handle($data['limits']['network_interface_id'], $ipv4Count, $ipv6Count);
+            }
+        }
 
         $server = Server::create([
             'uuid' => $uuid,
@@ -58,7 +67,7 @@ class ServerCreationService
             'vmid' => $data['vmid'] ?? $this->generateUniqueVmId($nodeId),
             'hostname' => $data['hostname'],
             'name' => $data['name'],
-            'description' => array_get($data, 'description'),
+            'description' => Arr::get($data, 'description'),
             'status' => $data['deferred_os_selection'] ? ServerStatus::READY : ($data['should_create_vm'] ? ServerStatus::INSTALLING : null),
             'cpu' => $data['limits']['cpu'],
             'memory' => $data['limits']['memory'],
@@ -69,7 +78,6 @@ class ServerCreationService
             'backup_limit' => Arr::get($data, 'limits.backups'),
             'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
         ]);
-
 
         $deployment = ServerDeploymentData::from([
             'server' => $server,

@@ -6,9 +6,15 @@ use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Node\Access\RealmType;
 use App\Models\Template;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Illuminate\Http\Client\ConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
 
 class ProxmoxServerRepository extends ProxmoxRepository
 {
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function getState(): ServerStateData
     {
         $response = $this->getHttpClientWithParams()
@@ -18,14 +24,18 @@ class ProxmoxServerRepository extends ProxmoxRepository
         return ServerStateData::fromRaw($this->getData($response));
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function create(Template $template)
     {
         $response = $this->getHttpClientWithParams([
             'template' => $template->vmid,
         ])
             ->post('/api2/json/nodes/{node}/qemu/{template}/clone', [
-                'storage' => $this->node->vm_storage,
-                'target' => $this->node->cluster,
+                'storage' => $this->server->storage->name,
+                'target' => $this->node->name,
                 'newid' => $this->server->vmid,
                 'full' => true,
             ])
@@ -34,6 +44,10 @@ class ProxmoxServerRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function delete()
     {
         $response = $this->getHttpClientWithParams()

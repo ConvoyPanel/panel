@@ -26,22 +26,6 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      */
-    public function getResources()
-    {
-        $server = $this->getServer();
-
-        $response = $this->getHttpClient()
-            ->get('/api2/json/cluster/resources')
-            ->json();
-
-        $data = $this->getData($response);
-
-        return collect($data)->where('vmid', $server->vmid)->firstOrFail();
-    }
-
-    /**
-     * @throws RequestException
-     */
     public function update(array $payload = [])
     {
         $response = $this->getHttpClientWithParams()

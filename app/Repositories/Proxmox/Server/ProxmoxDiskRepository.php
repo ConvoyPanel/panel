@@ -20,12 +20,4 @@ class ProxmoxDiskRepository extends ProxmoxRepository
 
         return $this->getData($response);
     }
-
-    public function getFilesystem()
-    {
-        $response = $this->getHttpClientWithParams()
-            ->get('/api2/json/nodes/{node}/qemu/{server}/config')
-            ->json();
-
-    }
 }
