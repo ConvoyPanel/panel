@@ -50,15 +50,6 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
         $deployment = $this->step->deployment;
         $server = $deployment->server;
 
-        if ($service->isVmCreated($server)) {
-            $this->step->update([
-                'status' => DeploymentStatus::COMPLETED,
-                'completed_at' => now(),
-            ]);
-
-            return;
-        }
-
         try {
             /** @var string $upid */
             $upid = cache()->get("server:$server->id:build-upid");
@@ -76,7 +67,14 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
             // Fail silently
         }
 
-        $this->release(3);
+        if ($service->isVmCreated($server)) {
+            $this->step->update([
+                'status' => DeploymentStatus::COMPLETED,
+                'completed_at' => now(),
+            ]);
+        } else {
+            $this->release(1);
+        }
     }
 
     public function failed(?Throwable $exception): void

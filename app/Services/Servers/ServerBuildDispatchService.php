@@ -2,12 +2,12 @@
 
 namespace App\Services\Servers;
 
+use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\State;
-use App\Data\Server\Proxmox\Config\DiskData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Jobs\Server\BuildServerJob;
 use App\Jobs\Server\ConfigureVmJob;
@@ -24,6 +24,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Bus;
 
 use function array_reduce;
+use function now;
 
 class ServerBuildDispatchService
 {
@@ -35,12 +36,32 @@ class ServerBuildDispatchService
      */
     public function build(Deployment $deployment, ?string $accountPassword): void
     {
-        $jobs = $this->getChainedBuildJobs($deployment, $accountPassword);
+        $jobs = [
+            function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::RUNNING,
+                ]);
+            },
+            ...$this->getChainedBuildJobs($deployment, $accountPassword),
+            function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::COMPLETED,
+                    'completed_at' => now(),
+                ]);
+                $deployment->server->update(['status' => ServerStatus::READY]);
+            },
+        ];
 
         $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]))
+            ->catch(function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::FAILED,
+                    'completed_at' => now(),
+                ]);
+                $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
+            })
             ->dispatch();
     }
 
@@ -52,21 +73,39 @@ class ServerBuildDispatchService
             ->dispatch();
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function rebuild(Deployment $deployment, ?string $accountPassword): void
     {
         $jobs = [
+            function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::RUNNING,
+                ]);
+            },
             ...$this->getChainedDeleteJobs($deployment->server),
             ...$this->getChainedBuildJobs($deployment, $accountPassword),
+            function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::COMPLETED,
+                    'completed_at' => now(),
+                ]);
+                $deployment->server->update(['status' => ServerStatus::READY]);
+            },
         ];
 
         $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
         Bus::chain($jobs)
-            ->catch(
-                fn () => $deployment->server->update(
-                    ['status' => ServerStatus::INSTALL_FAILED],
-                ),
-            )
+            ->catch(function () use ($deployment) {
+                $deployment->update([
+                    'status' => DeploymentStatus::FAILED,
+                    'completed_at' => now(),
+                ]);
+                $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
+            })
             ->dispatch();
     }
 
@@ -82,13 +121,7 @@ class ServerBuildDispatchService
             $jobs = $this->createConfigureStepsAndJobs($deployment);
         }
 
-        $jobs = $this->appendOptionalJobs($deployment, $accountPassword, $jobs);
-
-        $jobs[] = function () use ($deployment) {
-            $deployment->server->update(['status' => ServerStatus::READY]);
-        };
-
-        return $jobs;
+        return $this->appendOptionalJobs($deployment, $accountPassword, $jobs);
     }
 
     /**
@@ -105,9 +138,11 @@ class ServerBuildDispatchService
         ]);
         $configRepository = $this->repository->setServer($template);
         $templateConfig = $configRepository->getConfig();
-        $totalSize = array_reduce($templateConfig->disks->all(), function (int $carry, DiskData $disk) {
-            return $carry + $disk->size;
-        }, 0);
+        $totalSize = array_reduce(
+            $templateConfig->disks->all(), function (int $carry, DiskData $disk) {
+                return $carry + $disk->size;
+            }, 0,
+        );
 
         $steps = $deployment->steps()->createMany([
             [
@@ -142,8 +177,9 @@ class ServerBuildDispatchService
         ];
     }
 
-    private function appendOptionalJobs(Deployment $deployment, ?string $accountPassword, array $jobs): array
-    {
+    private function appendOptionalJobs(
+        Deployment $deployment, ?string $accountPassword, array $jobs,
+    ): array {
         if (filled($accountPassword)) {
             $step = $deployment->steps()->create([
                 'name' => 'update-password',
