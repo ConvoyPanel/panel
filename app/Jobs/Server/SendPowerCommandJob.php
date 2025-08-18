@@ -4,6 +4,7 @@ namespace App\Jobs\Server;
 
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
+use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Bus\Batchable;
@@ -21,7 +22,7 @@ use function now;
 
 class SendPowerCommandJob implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -53,15 +54,6 @@ class SendPowerCommandJob implements ShouldQueue
         $this->step->update([
             'status' => DeploymentStatus::COMPLETED,
             'completed_at' => now(),
-        ]);
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        $this->step->update([
-            'status' => DeploymentStatus::FAILED,
-            'completed_at' => now(),
-            'error_message' => $exception->getMessage() ?? 'Unknown error',
         ]);
     }
 }

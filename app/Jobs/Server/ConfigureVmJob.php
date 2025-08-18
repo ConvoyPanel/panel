@@ -6,6 +6,7 @@ use Throwable;
 use App\Enums\Server\DeploymentStatus;
 use Illuminate\Http\Client\ConnectionException;
 use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\VmSyncService;
 use Illuminate\Bus\Queueable;
@@ -19,7 +20,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ConfigureVmJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -58,15 +59,5 @@ class ConfigureVmJob implements ShouldQueue
             'status' => DeploymentStatus::COMPLETED,
             'completed_at' => now(),
         ]);
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        $this->step
-            ->update([
-                'status' => DeploymentStatus::FAILED,
-                'completed_at' => now(),
-                'error_message' => $exception?->getMessage() ?? 'Unknown error',
-            ]);
     }
 }

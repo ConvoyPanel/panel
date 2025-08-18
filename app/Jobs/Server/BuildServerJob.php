@@ -5,6 +5,7 @@ namespace App\Jobs\Server;
 use Throwable;
 use App\Enums\Server\DeploymentStatus;
 use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
@@ -19,7 +20,7 @@ use Illuminate\Queue\SerializesModels;
 
 class BuildServerJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -59,14 +60,5 @@ class BuildServerJob implements ShouldQueue
             $upid,
             now()->addHour()
         );
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        $this->step->update([
-            'status' => DeploymentStatus::FAILED,
-            'completed_at' => now(),
-            'error_message' => $exception?->getMessage() ?? 'Unknown error',
-        ]);
     }
 }

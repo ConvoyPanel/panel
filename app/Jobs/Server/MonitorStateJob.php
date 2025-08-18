@@ -2,25 +2,30 @@
 
 namespace App\Jobs\Server;
 
+use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\State;
-use App\Models\Server;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Queue\Attributes\WithoutRelations;
 use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Traits\Jobs\FailsWithStep;
+use App\Models\DeploymentStep;
+use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
-use Closure;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Throwable;
+
+use function now;
 
 class MonitorStateJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Batchable, Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public function retryUntil(): Carbon
     {
@@ -31,13 +36,15 @@ class MonitorStateJob implements ShouldQueue
         #[WithoutRelations]
         public Server $server,
         public State $targetState,
+        #[WithoutRelations]
+        public ?DeploymentStep $step = null,
     ) {
         //
     }
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled()];
+        return [new SkipIfBatchCancelled];
     }
 
     /**
@@ -48,8 +55,13 @@ class MonitorStateJob implements ShouldQueue
     {
         $stateData = $repository->setServer($this->server)->getState();
 
-        if ($stateData->state !== $this->targetState) {
-            $this->release(3);
+        if ($stateData->state === $this->targetState) {
+            $this?->step->update([
+                'status' => DeploymentStatus::COMPLETED,
+                'completed_at' => now(),
+            ]);
+        } else {
+            $this->release(1);
         }
     }
 }

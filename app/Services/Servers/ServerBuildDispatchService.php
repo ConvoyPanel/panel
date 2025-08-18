@@ -37,31 +37,15 @@ class ServerBuildDispatchService
     public function build(Deployment $deployment, ?string $accountPassword): void
     {
         $jobs = [
-            function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::RUNNING,
-                ]);
-            },
+            $this->onStart($deployment),
             ...$this->getChainedBuildJobs($deployment, $accountPassword),
-            function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::COMPLETED,
-                    'completed_at' => now(),
-                ]);
-                $deployment->server->update(['status' => ServerStatus::READY]);
-            },
+            $this->onComplete($deployment),
         ];
 
         $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
         Bus::chain($jobs)
-            ->catch(function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::FAILED,
-                    'completed_at' => now(),
-                ]);
-                $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
-            })
+            ->catch($this->onFail($deployment))
             ->dispatch();
     }
 
@@ -80,33 +64,44 @@ class ServerBuildDispatchService
     public function rebuild(Deployment $deployment, ?string $accountPassword): void
     {
         $jobs = [
-            function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::RUNNING,
-                ]);
-            },
+            $this->onStart($deployment),
             ...$this->getChainedDeleteJobs($deployment->server),
             ...$this->getChainedBuildJobs($deployment, $accountPassword),
-            function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::COMPLETED,
-                    'completed_at' => now(),
-                ]);
-                $deployment->server->update(['status' => ServerStatus::READY]);
-            },
+            $this->onComplete($deployment),
         ];
 
         $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
         Bus::chain($jobs)
-            ->catch(function () use ($deployment) {
-                $deployment->update([
-                    'status' => DeploymentStatus::FAILED,
-                    'completed_at' => now(),
-                ]);
-                $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
-            })
+            ->catch($this->onFail($deployment))
             ->dispatch();
+    }
+
+    private function onStart(Deployment $deployment): callable
+    {
+        return fn () => $deployment->update(['status' => DeploymentStatus::RUNNING]);
+    }
+
+    private function onComplete(Deployment $deployment): callable
+    {
+        return function () use ($deployment) {
+            $deployment->update([
+                'status' => DeploymentStatus::COMPLETED,
+                'completed_at' => now(),
+            ]);
+            $deployment->server->update(['status' => ServerStatus::READY]);
+        };
+    }
+
+    private function onFail(Deployment $deployment): callable
+    {
+        return function () use ($deployment) {
+            $deployment->update([
+                'status' => DeploymentStatus::FAILED,
+                'completed_at' => now(),
+            ]);
+            $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
+        };
     }
 
     /**
@@ -213,7 +208,7 @@ class ServerBuildDispatchService
 
         return [
             new SendPowerCommandJob($steps[0], PowerCommand::KILL),
-            new MonitorStateJob($server, State::STOPPED),
+            new MonitorStateJob($server, State::STOPPED, $steps[0]),
             new DeleteServerJob($server->id),
             new WaitUntilVmIsDeletedJob($server->id),
         ];

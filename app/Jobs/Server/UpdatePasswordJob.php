@@ -5,6 +5,7 @@ namespace App\Jobs\Server;
 use Throwable;
 use App\Models\DeploymentStep;
 use App\Enums\Server\DeploymentStatus;
+use App\Traits\Jobs\FailsWithStep;
 use App\Services\Servers\ServerAuthService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
 
 class UpdatePasswordJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -51,15 +52,6 @@ class UpdatePasswordJob implements ShouldQueue
         $this->step->update([
             'status' => DeploymentStatus::COMPLETED,
             'completed_at' => now(),
-        ]);
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        $this->step->update([
-            'status' => DeploymentStatus::FAILED,
-            'completed_at' => now(),
-            'error_message' => $exception->getMessage() ?? 'Unknown error',
         ]);
     }
 }
