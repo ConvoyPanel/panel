@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DeploymentStep extends Model
 {
     const UPDATED_AT = null;
+
     const CREATED_AT = null;
 
     /**
@@ -42,6 +43,22 @@ class DeploymentStep extends Model
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
+    }
+
+    public function start(): void
+    {
+        $this->update([
+            'status' => DeploymentStatus::RUNNING,
+            'started_at' => now(),
+        ]);
+    }
+
+    public function complete(): void
+    {
+        $this->update([
+            'status' => DeploymentStatus::COMPLETED,
+            'completed_at' => now(),
+        ]);
     }
 
     public function deployment(): BelongsTo

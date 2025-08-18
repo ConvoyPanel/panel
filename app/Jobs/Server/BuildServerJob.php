@@ -48,10 +48,7 @@ class BuildServerJob implements ShouldQueue
         $deployment = $this->step->deployment;
         $server = $deployment->server;
 
-        $this->step->update([
-            'status' => DeploymentStatus::RUNNING,
-            'started_at' => now(),
-        ]);
+        $this->step->start();
 
         $upid = $service->build($server, $deployment->template);
 

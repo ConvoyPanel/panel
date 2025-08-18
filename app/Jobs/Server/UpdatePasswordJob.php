@@ -42,16 +42,10 @@ class UpdatePasswordJob implements ShouldQueue
 
     public function handle(ServerAuthService $service): void
     {
-        $this->step->update([
-            'status' => DeploymentStatus::RUNNING,
-            'started_at' => now(),
-        ]);
+        $this->step->start();
 
         $service->setPassword($this->step->deployment->server, $this->password);
 
-        $this->step->update([
-            'status' => DeploymentStatus::COMPLETED,
-            'completed_at' => now(),
-        ]);
+        $this->step->complete();
     }
 }

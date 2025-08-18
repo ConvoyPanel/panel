@@ -44,16 +44,8 @@ class SendPowerCommandJob implements ShouldQueue
 
     public function handle(ProxmoxPowerRepository $repository): void
     {
-        $this->step->update([
-            'status' => DeploymentStatus::RUNNING,
-            'started_at' => now(),
-        ]);
+        $this->step->start();
 
         $repository->setServer($this->step->deployment->server)->send($this->power);
-
-        $this->step->update([
-            'status' => DeploymentStatus::COMPLETED,
-            'completed_at' => now(),
-        ]);
     }
 }

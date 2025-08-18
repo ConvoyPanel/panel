@@ -3,6 +3,9 @@
 namespace App\Jobs\Server;
 
 use App\Models\Server;
+use App\Models\DeploymentStep;
+use App\Traits\Jobs\FailsWithStep;
+use App\Enums\Server\DeploymentStatus;
 use App\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -15,10 +18,11 @@ use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use App\Exceptions\Repository\Proxmox\RequestException;
+use function now;
 
 class DeleteServerJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     public int $tries = 3;
 
@@ -26,7 +30,7 @@ class DeleteServerJob implements ShouldQueue
 
     public function __construct(
         #[WithoutRelations]
-        public Server $server,
+        public DeploymentStep $step,
     )
     {
     }
@@ -34,7 +38,7 @@ class DeleteServerJob implements ShouldQueue
     public function middleware(): array
     {
         return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            $this->server->id,
+            $this->step->deployment->server->id,
         )];
     }
 
@@ -44,6 +48,8 @@ class DeleteServerJob implements ShouldQueue
      */
     public function handle(ServerBuildService $service): void
     {
-        $service->delete($this->server);
+        $this->step->start();
+
+        $service->delete($this->step->deployment->server);
     }
 }

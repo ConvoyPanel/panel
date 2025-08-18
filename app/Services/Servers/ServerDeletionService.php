@@ -6,11 +6,12 @@ use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
 use App\Jobs\Server\PurgeBackupsJob;
 use App\Models\Server;
+use App\Actions\Server\DeleteServerAction;
 use Illuminate\Support\Facades\Bus;
 
 class ServerDeletionService
 {
-    public function __construct(private ServerBuildDispatchService $buildDispatchService)
+    public function __construct(private DeleteServerAction $deleteServerAction)
     {
     }
 
@@ -23,7 +24,7 @@ class ServerDeletionService
         if (! $noPurge) {
             Bus::chain([
                 new PurgeBackupsJob($server->id),
-                ...$this->buildDispatchService->getChainedDeleteJobs($server),
+                ...$this->deleteServerAction->execute($server),
                 function () use ($server) {
                     Server::findOrFail($server->id)->delete();
                 },

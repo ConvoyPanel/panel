@@ -28,6 +28,8 @@ use function collect;
 use function now;
 use function substr;
 
+use App\Actions\Server\BuildServerAction;
+
 /**
  * Class ServerCreationService
  */
@@ -36,11 +38,12 @@ class ServerCreationService
     public function __construct(
         private ServerNetworkService $networkService,
         private ServerRepository $repository,
-        private ServerBuildDispatchService $buildDispatchService,
+        private BuildServerAction $buildServerAction,
         private ProxmoxAllocationRepository $allocationRepository,
         private ProxmoxResourceRepository $resourceRepository,
         private AddressAllocationService $addressAllocationService,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws NoUniqueVmidException
@@ -106,7 +109,7 @@ class ServerCreationService
                     'requested_at' => now(),
                 ]);
 
-                $this->buildDispatchService->build($deployment, Arr::get($data, 'account_password'));
+                $this->buildServerAction->execute($deployment, Arr::get($data, 'account_password'));
             }
 
             return $server;

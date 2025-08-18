@@ -2,20 +2,23 @@
 
 namespace App\Jobs\Server;
 
-use App\Models\Server;
+use App\Traits\Jobs\FailsWithStep;
+use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\Attributes\WithoutRelations;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
 class WaitUntilVmIsDeletedJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
     public function retryUntil(): Carbon
     {
@@ -24,21 +27,25 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled()];
+        return [new SkipIfBatchCancelled];
     }
 
     public function __construct(
         #[WithoutRelations]
-        public Server $server,
-    )
-    {
-    }
+        public DeploymentStep $step,
+    ) {}
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function handle(ServerBuildService $service): void
     {
-        $isDeleted = $service->isVmDeleted($this->server);
+        $isDeleted = $service->isVmDeleted($this->step->deployment->server);
 
-        if (! $isDeleted) {
+        if ($isDeleted) {
+            $this->step->complete();
+        } else {
             $this->release(3);
         }
     }

@@ -34,10 +34,8 @@ class MonitorStateJob implements ShouldQueue
 
     public function __construct(
         #[WithoutRelations]
-        public Server $server,
+        public DeploymentStep $step,
         public State $targetState,
-        #[WithoutRelations]
-        public ?DeploymentStep $step = null,
     ) {
         //
     }
@@ -53,13 +51,10 @@ class MonitorStateJob implements ShouldQueue
      */
     public function handle(ProxmoxServerRepository $repository): void
     {
-        $stateData = $repository->setServer($this->server)->getState();
+        $stateData = $repository->setServer($this->step->deployment->server)->getState();
 
         if ($stateData->state === $this->targetState) {
-            $this?->step->update([
-                'status' => DeploymentStatus::COMPLETED,
-                'completed_at' => now(),
-            ]);
+            $this->step->complete();
         } else {
             $this->release(1);
         }

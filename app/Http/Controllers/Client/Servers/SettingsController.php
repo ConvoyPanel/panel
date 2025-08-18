@@ -19,7 +19,7 @@ use App\Models\TemplateGroup;
 use App\Services\Servers\AllocationService;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\ServerAuthService;
-use App\Services\Servers\ServerBuildDispatchService;
+use App\Actions\Server\RebuildServerAction;
 use App\Transformers\Client\MediaTransformer;
 use App\Transformers\Client\RenamedServerTransformer;
 use App\Transformers\Client\ServerBootOrderTransformer;
@@ -36,7 +36,7 @@ class SettingsController
         private ServerAuthService $authService,
         private ConnectionInterface $connection,
         private CloudinitService $cloudinitService,
-        private ServerBuildDispatchService $buildDispatchService,
+        private RebuildServerAction $rebuildServerAction,
         private AllocationService $allocationService,
     ) {}
 
@@ -93,7 +93,7 @@ class SettingsController
                 'start_on_completion' => $request->boolean('start_on_completion'),
             ]);
 
-            $this->buildDispatchService->rebuild($deployment);
+            $this->rebuildServerAction->execute($deployment);
         });
 
         return response()->noContent();
