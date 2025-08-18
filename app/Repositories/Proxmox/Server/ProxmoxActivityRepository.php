@@ -3,10 +3,13 @@
 namespace App\Repositories\Proxmox\Server;
 
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Illuminate\Http\Client\ConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
+use function array_pluck;
 
 class ProxmoxActivityRepository extends ProxmoxRepository
 {
-    public function getLogs(int $startAt = 0, int $limitRows = 500)
+    public function getTasks(int $startAt = 0, int $limitRows = 500)
     {
         $response = $this->getHttpClientWithParams()
             ->get(
@@ -22,6 +25,10 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function getStatus(string $upid)
     {
         $response = $this->getHttpClientWithParams([
@@ -33,7 +40,13 @@ class ProxmoxActivityRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function getLog(string $upid, int $startAt = 0, int $limitLinesTo = 100)
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     *
+     * @return string[]
+     */
+    public function getLogsByTask(string $upid, int $startAt = 0, int $limitLinesTo = 100): array
     {
         $response = $this->getHttpClientWithParams([
             'task' => $upid,
@@ -44,7 +57,7 @@ class ProxmoxActivityRepository extends ProxmoxRepository
             ])
             ->json();
 
-        return $this->getData($response);
+        return array_pluck($this->getData($response), 't');
     }
 
     public function delete(string $upid)

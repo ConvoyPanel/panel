@@ -6,4 +6,6 @@ enum DeploymentType: string
 {
     case INSTALL = 'install';
     case REINSTALL = 'reinstall';
+    case IMPORT = 'import';
+    case DELETE = 'delete';
 }

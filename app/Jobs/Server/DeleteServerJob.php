@@ -9,9 +9,12 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use App\Exceptions\Repository\Proxmox\RequestException;
 
 class DeleteServerJob implements ShouldQueue
 {
@@ -21,22 +24,26 @@ class DeleteServerJob implements ShouldQueue
 
     public int $timeout = 20;
 
-    public function __construct(protected int $serverId)
+    public function __construct(
+        #[WithoutRelations]
+        public Server $server,
+    )
     {
-        //
     }
 
     public function middleware(): array
     {
         return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.delete#{$this->serverId}",
+            $this->server->id,
         )];
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function handle(ServerBuildService $service): void
     {
-        $server = Server::findOrFail($this->serverId);
-
-        $service->delete($server);
+        $service->delete($this->server);
     }
 }

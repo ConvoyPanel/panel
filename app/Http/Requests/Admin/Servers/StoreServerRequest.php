@@ -17,6 +17,12 @@ use Illuminate\Validation\Rule;
 
 class StoreServerRequest extends BaseApiRequest
 {
+    public function authorize(): bool
+    {
+        // TODO: remove this
+        return true;
+    }
+
     public function rules(AddressAvailabilityService $addressAvailabilityService): array
     {
         $rules = Server::getRules();
@@ -57,7 +63,15 @@ class StoreServerRequest extends BaseApiRequest
             ],
             'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
-            'limits.addresses'        => 'required|array',
+            'limits.addresses'        => [
+                'array',
+                Rule::requiredIf(function () {
+                    $ipv4Count = $this->input('limits.addresses_ipv4_count');
+                    $ipv6Count = $this->input('limits.addresses_ipv6_count');
+
+                    return (blank($ipv4Count) || $ipv4Count == 0) && (blank($ipv6Count) || $ipv6Count == 0);
+                }),
+            ],
             'limits.addresses.*'      => [
                 'integer',
                 function ($attribute, $value, $fail) {
@@ -105,7 +119,7 @@ class StoreServerRequest extends BaseApiRequest
     {
         $toMerge = [];
 
-        if ($this->filled('limits.addresses_ipv4_count') || $this->filled('limits.addresses_ipv6_count')) {
+        if ($this->input('limits.addresses_ipv4_count', 0) > 0 || $this->input('limits.addresses_ipv6_count', 0) > 0) {
             $limits = $this->input('limits', []);
             $limits['addresses'] = [];
             $toMerge['limits'] = $limits;

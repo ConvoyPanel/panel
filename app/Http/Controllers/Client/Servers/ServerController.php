@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client\Servers;
 
 use App\Enums\Server\ConsoleType;
-use App\Enums\Server\PowerAction;
+use App\Enums\Server\PowerCommand;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use App\Models\Server;
@@ -56,7 +56,7 @@ class ServerController
     public function updateState(Server $server, SendPowerCommandRequest $request)
     {
         $this->powerRepository->setServer($server)
-            ->send($request->enum('state', PowerAction::class));
+            ->send($request->enum('state', PowerCommand::class));
 
         return response()->noContent();
     }

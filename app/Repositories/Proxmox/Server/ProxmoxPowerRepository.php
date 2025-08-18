@@ -2,22 +2,22 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use App\Enums\Server\PowerAction;
+use App\Enums\Server\PowerCommand;
 use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {
-    public function send(PowerAction $action)
+    public function send(PowerCommand $action)
     {
         // I added this because I don't like the naming scheme Proxmox has
         $parsedAction = match ($action) {
-            PowerAction::RESTART => 'reboot',
-            PowerAction::RESET => 'reset',
-            PowerAction::RESUME => 'resume',
-            PowerAction::SHUTDOWN => 'shutdown',
-            PowerAction::START => 'start',
-            PowerAction::KILL => 'stop',
-            PowerAction::SUSPEND => 'suspend',
+            PowerCommand::RESTART => 'reboot',
+            PowerCommand::RESET => 'reset',
+            PowerCommand::RESUME => 'resume',
+            PowerCommand::SHUTDOWN => 'shutdown',
+            PowerCommand::START => 'start',
+            PowerCommand::KILL => 'stop',
+            PowerCommand::SUSPEND => 'suspend',
         };
 
         $response = $this->getHttpClientWithParams([

@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class HasSufficientCPU implements ValidationRule, DataAwareRule
+class HasSufficientCPU implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -26,11 +26,11 @@ class HasSufficientCPU implements ValidationRule, DataAwareRule
         }
 
         $node = Node::find($nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
-        if ($value > $node->cpu) {
+        if ($value > $node->cpu_count) {
             $fail('The node does not have enough CPU cores available.');
         }
     }

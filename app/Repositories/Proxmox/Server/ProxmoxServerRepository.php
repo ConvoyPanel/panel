@@ -27,8 +27,10 @@ class ProxmoxServerRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      * @throws ConnectionException
+     *
+     * @return string Job UPID
      */
-    public function create(Template $template)
+    public function create(Template $template): string
     {
         $response = $this->getHttpClientWithParams([
             'template' => $template->vmid,

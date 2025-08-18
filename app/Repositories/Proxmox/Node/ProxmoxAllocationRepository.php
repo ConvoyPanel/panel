@@ -2,11 +2,11 @@
 
 namespace App\Repositories\Proxmox\Node;
 
-use Exception;
-use App\Repositories\Proxmox\ProxmoxRepository;
-use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Exceptions\Repository\Proxmox\NextVMIDRetrievalException;
+use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Repositories\Proxmox\ProxmoxRepository;
+use Exception;
+
 use function str_contains;
 
 class ProxmoxAllocationRepository extends ProxmoxRepository
@@ -18,11 +18,12 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
     {
         try {
             $response = $this->getHttpClient()
-                             ->get('/api2/json/cluster/nextid');
+                ->get('/api2/json/cluster/nextid')
+                ->json();
 
             return (int) $this->getData($response);
         } catch (Exception $e) {
-            throw new NextVMIDRetrievalException();
+            throw new NextVMIDRetrievalException;
         }
     }
 
@@ -33,6 +34,7 @@ class ProxmoxAllocationRepository extends ProxmoxRepository
     {
         try {
             $this->getHttpClient()
+                ->bodyFormat('query')
                 ->get('/api2/json/cluster/nextid', [
                     'vmid' => $vmid,
                 ]);

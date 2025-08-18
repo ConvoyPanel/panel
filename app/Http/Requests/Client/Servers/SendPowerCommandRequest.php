@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Client\Servers;
 
-use App\Enums\Server\PowerAction;
+use App\Enums\Server\PowerCommand;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Server;
 use Illuminate\Validation\Rules\Enum;
@@ -17,7 +17,7 @@ class SendPowerCommandRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'state' => ['required', new Enum(PowerAction::class)],
+            'state' => ['required', new Enum(PowerCommand::class)],
         ];
     }
 }

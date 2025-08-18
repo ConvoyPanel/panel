@@ -2,7 +2,7 @@
 
 namespace App\Enums\Server;
 
-enum PowerAction: string
+enum PowerCommand: string
 {
     case RESTART = 'restart';
     case RESET = 'reset';

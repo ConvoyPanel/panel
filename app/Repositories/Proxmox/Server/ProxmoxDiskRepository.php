@@ -2,18 +2,19 @@
 
 namespace App\Repositories\Proxmox\Server;
 
-use App\Enums\Server\DiskInterface;
+use App\Data\Server\Proxmox\Config\DiskData;
 use App\Repositories\Proxmox\ProxmoxRepository;
 
 class ProxmoxDiskRepository extends ProxmoxRepository
 {
-    public function resizeDisk(DiskInterface $disk, int $bytes)
+    public function setDiskSize(DiskData $disk, int $bytes)
     {
+
         $kibibytes = floor($bytes / 1024);
 
         $response = $this->getHttpClientWithParams()
             ->put('/api2/json/nodes/{node}/qemu/{server}/resize', [
-                'disk' => $disk->value,
+                'disk' => $disk->interface->value,
                 'size' => "{$kibibytes}K",
             ])
             ->json();

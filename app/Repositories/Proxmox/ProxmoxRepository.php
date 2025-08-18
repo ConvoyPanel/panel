@@ -12,11 +12,11 @@ use Webmozart\Assert\Assert;
 
 abstract class ProxmoxRepository
 {
-    protected Server $server;
+    protected ?Server $server = null;
 
     protected Node $node;
 
-    public function setServer(Server $server): self
+    public function setServer(Server $server): static
     {
         $this->server = $server;
         $this->node = $server->node;
@@ -24,7 +24,7 @@ abstract class ProxmoxRepository
         return $this;
     }
 
-    public function setNode(Node $node): self
+    public function setNode(Node $node): static
     {
         $this->node = $node;
 
@@ -99,11 +99,11 @@ abstract class ProxmoxRepository
         array $params = [],
         bool $shouldAuthorize = true,
     ): PendingRequest {
-        if (isset($this->node)) {
+        if (filled($this->node)) {
             $params['node'] = $this->node->name;
         }
 
-        if (isset($this->server)) {
+        if (filled($this->server)) {
             $params['server'] = $this->server->vmid;
         }
 

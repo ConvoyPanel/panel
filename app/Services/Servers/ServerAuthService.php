@@ -11,23 +11,19 @@ class ServerAuthService
     {
     }
 
-    public function updatePassword(Server $server, string $password)
+    public function setPassword(Server $server, string $password): void
     {
-        // if (!empty($password)) {
         $this->configRepository->setServer($server)->update(['cipassword' => $password]);
-        // } else {
-        //     $this->configRepository->setServer($server)->update(['delete' => 'cipassword']);
-        // }
     }
 
-    public function getSSHKeys(Server $server)
+    public function getSSHKeys(Server $server): string
     {
         $raw = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
 
         return rawurldecode($raw);
     }
 
-    public function updateSSHKeys(Server $server, ?string $keys)
+    public function setSSHKeys(Server $server, ?string $keys): void
     {
         if (! empty($keys)) {
             $this->configRepository->setServer($server)->update(['sshkeys' => rawurlencode($keys)]);

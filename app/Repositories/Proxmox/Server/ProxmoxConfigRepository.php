@@ -11,20 +11,20 @@ class ProxmoxConfigRepository extends ProxmoxRepository
 {
     /**
      * @throws RequestException
+     * @throws ConnectionException
      */
     public function getConfig(): ServerConfigData
     {
         $response = $this->getHttpClientWithParams()
             ->get('/api2/json/nodes/{node}/qemu/{server}/config')
             ->json();
-
-
-
+        
         return ServerConfigData::fromRaw($this->getData($response));
     }
 
     /**
      * @throws RequestException
+     * @throws ConnectionException
      */
     public function update(array $payload = [])
     {

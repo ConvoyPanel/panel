@@ -16,7 +16,7 @@ use App\Services\Servers\ServerNetworkService;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
 use App\Services\Servers\ServerSuspensionService;
-use App\Services\Servers\SyncBuildService;
+use App\Services\Servers\VmSyncService;
 use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
@@ -33,7 +33,7 @@ class ServerController
         private ServerSuspensionService $suspensionService,
         private ServerCreationService   $creationService,
         private CloudinitService        $cloudinitService,
-        private SyncBuildService        $buildModificationService,
+        private VmSyncService           $buildModificationService,
     ) {}
 
     public function index(Request $request)

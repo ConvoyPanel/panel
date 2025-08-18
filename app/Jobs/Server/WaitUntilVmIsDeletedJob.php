@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
@@ -26,16 +27,16 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
         return [new SkipIfBatchCancelled()];
     }
 
-    public function __construct(protected int $serverId)
+    public function __construct(
+        #[WithoutRelations]
+        public Server $server,
+    )
     {
-        //
     }
 
     public function handle(ServerBuildService $service): void
     {
-        $server = Server::findOrFail($this->serverId);
-
-        $isDeleted = $service->isVmDeleted($server);
+        $isDeleted = $service->isVmDeleted($this->server);
 
         if (! $isDeleted) {
             $this->release(3);

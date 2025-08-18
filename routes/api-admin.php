@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -97,7 +98,8 @@ Route::prefix('/nodes')->group(function () {
 */
 Route::prefix('/servers')->group(function () {
     Route::get('/', [Admin\ServerController::class, 'index']);
-    Route::post('/', [Admin\ServerController::class, 'store']);
+    // TODO: undo the withoutMiddleware when the admin authentication is implemented
+    Route::post('/', [Admin\ServerController::class, 'store'])->withoutMiddleware(['auth', AdminAuthenticate::class, 'web']);
 
     Route::prefix('/{server}')
         ->middleware(ValidateServerStatusMiddleware::class)

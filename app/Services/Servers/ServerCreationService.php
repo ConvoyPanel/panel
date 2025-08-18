@@ -2,24 +2,31 @@
 
 namespace App\Services\Servers;
 
-use App\Models\Node;
-use Random\RandomException;
-use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
 use App\Enums\Server\ServerStatus;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\Node\ProxmoxAllocationRepository;
-use App\Exceptions\Service\Deployment\InvalidTemplateException;
-use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
 use App\Exceptions\Repository\Proxmox\NextVMIDRetrievalException;
+use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
 use App\Models\Address;
+use App\Models\Node;
 use App\Models\Server;
+use App\Models\Template;
 use App\Repositories\Eloquent\ServerRepository;
+use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
+use App\Repositories\Proxmox\Node\ProxmoxAllocationRepository;
 use App\Services\Addresses\AddressAllocationService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
+
 use function collect;
+use function now;
+use function substr;
 
 /**
  * Class ServerCreationService
@@ -27,78 +34,94 @@ use function collect;
 class ServerCreationService
 {
     public function __construct(
-        private ServerNetworkService       $networkService,
-        private ServerRepository           $repository,
+        private ServerNetworkService $networkService,
+        private ServerRepository $repository,
         private ServerBuildDispatchService $buildDispatchService,
         private ProxmoxAllocationRepository $allocationRepository,
         private ProxmoxResourceRepository $resourceRepository,
         private AddressAllocationService $addressAllocationService,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NoUniqueVmidException
      * @throws NextVMIDRetrievalException
      * @throws NoUniqueUuidComboException
+     * @throws InsufficientAddressesException
      * @throws RequestException
-     * @throws InvalidTemplateException
+     * @throws ConnectionException
+     * @throws Throwable
      */
     public function handle(array $data): Server
     {
-        $uuid = $this->generateUniqueUuidCombo();
-        $nodeId = $data['node_id'];
+        return DB::transaction(function () use ($data) {
+            $uuid = $this->generateUniqueUuidCombo();
+            $node = Node::find($data['node_id']);
 
-        $addresses = collect();
-        if (Arr::has($data, 'limits.addresses') && !empty(Arr::get($data, 'limits.addresses'))) {
-            $addresses = Address::findMany(Arr::get($data, 'limits.addresses'))->load('addressBlock');
-        } else {
-            $ipv4Count = (int) Arr::get($data, 'limits.addresses_ipv4_count', 0);
-            $ipv6Count = (int) Arr::get($data, 'limits.addresses_ipv6_count', 0);
-            if ($ipv4Count > 0 || $ipv6Count > 0) {
-                $addresses = $this->addressAllocationService->handle($data['limits']['network_interface_id'], $ipv4Count, $ipv6Count);
+            $addresses = collect();
+            if (Arr::has($data, 'limits.addresses') && ! empty(Arr::get($data, 'limits.addresses'))) {
+                $addresses = Address::findMany(Arr::get($data, 'limits.addresses'))->load('addressBlock');
+            } else {
+                $ipv4Count = (int) Arr::get($data, 'limits.addresses_ipv4_count', 0);
+                $ipv6Count = (int) Arr::get($data, 'limits.addresses_ipv6_count', 0);
+                if ($ipv4Count > 0 || $ipv6Count > 0) {
+                    $addresses = $this->addressAllocationService->handle($data['limits']['network_interface_id'], $ipv4Count, $ipv6Count);
+                }
             }
-        }
 
-        $server = Server::create([
-            'uuid' => $uuid,
-            'uuid_short' => substr($uuid, 0, 8),
-            'user_id' => $data['user_id'],
-            'node_id' => $nodeId,
-            'vmid' => $data['vmid'] ?? $this->generateUniqueVmId($nodeId),
-            'hostname' => $data['hostname'],
-            'name' => $data['name'],
-            'description' => Arr::get($data, 'description'),
-            'status' => $data['deferred_os_selection'] ? ServerStatus::READY : ($data['should_create_vm'] ? ServerStatus::INSTALLING : null),
-            'cpu' => $data['limits']['cpu'],
-            'memory' => $data['limits']['memory'],
-            'disk' => $data['limits']['disk'],
-            'primary_ipv4_address_id' => $addresses->firstWhere('version', 'IPv4')?->id,
-            'primary_ipv6_address_id' => $addresses->firstWhere('version', 'IPv6')?->id,
-            'snapshot_limit' => Arr::get($data, 'limits.snapshots'),
-            'backup_limit' => Arr::get($data, 'limits.backups'),
-            'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
-        ]);
+            $server = Server::create([
+                'uuid' => $uuid,
+                'uuid_short' => substr($uuid, 0, 8),
+                'user_id' => $data['user_id'],
+                'node_id' => $node->id,
+                'storage_id' => $data['storage_id'],
+                'vmid' => $data['vmid'] ?? $this->generateUniqueVmId($node),
+                'hostname' => $data['hostname'],
+                'name' => $data['name'],
+                'description' => Arr::get($data, 'description'),
+                'status' => $data['deferred_os_selection'] ? ServerStatus::DEFERRED_OS_SELECTION : ServerStatus::INSTALLING,
+                'cpu' => $data['limits']['cpu'],
+                'memory' => $data['limits']['memory'],
+                'disk' => $data['limits']['disk'],
+                'primary_ipv4_address_id' => $addresses->firstWhere('version', 'IPv4')?->id,
+                'primary_ipv6_address_id' => $addresses->firstWhere('version', 'IPv6')?->id,
+                'snapshot_count_limit' => Arr::get($data, 'limits.snapshots.count'),
+                'snapshot_size_limit' => Arr::get($data, 'limits.snapshots.size'),
+                'backup_count_limit' => Arr::get($data, 'limits.backups.count'),
+                'backup_size_limit' => Arr::get($data, 'limits.backups.size'),
+                'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
+            ]);
 
-        $deployment = ServerDeploymentData::from([
-            'server' => $server,
-            'account_password' => Arr::get($data, 'account_password'),
-        ]);
+            if ($addresses->isNotEmpty()) {
+                $this->networkService->syncAddresses($server, $addresses->pluck('id')->all());
+            }
 
-        if ($addresses->isNotEmpty()) {
-            $this->networkService->syncAddresses($server, $addresses->pluck('id')->all());
-        }
+            if (! $data['deferred_os_selection']) {
+                $templateUuid = Arr::get($data, 'template_uuid');
 
-        $this->buildDispatchService->build($deployment);
+                $deployment = $server->deployments()->create([
+                    'template_id' => filled($templateUuid) ? Template::where('uuid', $templateUuid)->value('id') : null,
+                    'type' => $data['should_create_vm'] ? DeploymentType::INSTALL : DeploymentType::IMPORT,
+                    'status' => DeploymentStatus::PENDING,
+                    'start_on_completion' => $data['start_on_completion'],
+                    'requested_at' => now(),
+                ]);
 
-        return $server;
+                $this->buildDispatchService->build($deployment, Arr::get($data, 'account_password'));
+            }
+
+            return $server;
+        });
     }
 
-    public function isTemplateAvailable(Node $node, int $vmid): bool
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function isTemplateAvailable(Node $node, string $templateUuid): bool
     {
-        $this->resourceRepository->setNode($node);
-        $template = collect($this->resourceRepository->getResources())
-            ->where('vmid', $vmid)
-            ->where('template', true)
+        $template = $this->resourceRepository->setNode($node)->getResources()
+            ->where('vmid', Template::where('uuid', $templateUuid)->value('vmid'))
+            ->where('isTemplate', true)
             ->first();
 
         return filled($template);
@@ -107,28 +130,27 @@ class ServerCreationService
     /**
      * @throws NoUniqueVmidException
      * @throws NextVMIDRetrievalException
-     * @throws RequestException
      */
-    public function generateUniqueVmId(int $nodeId): int
+    public function generateUniqueVmId(Node $node): int
     {
-        $vmid = $this->allocationRepository->getNextVMID();
+        $vmid = $this->allocationRepository->setNode($node)->getNextVMID();
         $attempts = 0;
 
         while (true) {
             // Check uniqueness in our database
-            if ($this->repository->isUniqueVmId($nodeId, $vmid)) {
+            if ($this->repository->isUniqueVmId($node, $vmid)) {
                 // Check uniqueness in Proxmox
-                $nextVmid = $this->allocationRepository->isVMIDAvailable($vmid);
-                if ($nextVmid === $vmid) {
+                if ($this->allocationRepository->isVMIDAvailable($vmid)) {
                     break;
                 }
-                $vmid = $nextVmid;
+
+                $vmid++;
             } else {
                 $vmid++;
             }
 
             if ($attempts++ > 10) {
-                throw new NoUniqueVmidException();
+                throw new NoUniqueVmidException;
             }
         }
 
@@ -149,7 +171,7 @@ class ServerCreationService
             $short = substr($uuid, 0, 8);
 
             if ($attempts++ > 10) {
-                throw new NoUniqueUuidComboException();
+                throw new NoUniqueUuidComboException;
             }
         }
 

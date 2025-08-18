@@ -192,9 +192,9 @@ class SettingsController
     public function updateAuthSettings(UpdateAuthSettingsRequest $request, Server $server)
     {
         if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
-            $this->authService->updateSSHKeys($server, $request->ssh_keys);
+            $this->authService->setSSHKeys($server, $request->ssh_keys);
         } else {
-            $this->authService->updatePassword($server, $request->password);
+            $this->authService->setPassword($server, $request->password);
         }
 
         return response()->noContent();

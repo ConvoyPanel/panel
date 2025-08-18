@@ -2,41 +2,66 @@
 
 namespace App\Jobs\Server;
 
-use App\Enums\Server\PowerAction;
-use App\Models\Server;
+use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\PowerCommand;
+use App\Models\DeploymentStep;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
+
+use function now;
 
 class SendPowerCommandJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
     public int $timeout = 15;
 
-    public function __construct(protected int $serverId, protected PowerAction $power)
-    {
-    }
+    public function __construct(
+        #[WithoutRelations]
+        public DeploymentStep $step,
+        public PowerCommand $power,
+    ) {}
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.send-power-command#{$this->serverId}",
-        )];
+        return [
+            new SkipIfBatchCancelled,
+            new WithoutOverlapping($this->step->deployment->server->id),
+        ];
     }
 
     public function handle(ProxmoxPowerRepository $repository): void
     {
-        $server = Server::findOrFail($this->serverId);
+        $this->step->update([
+            'status' => DeploymentStatus::RUNNING,
+            'started_at' => now(),
+        ]);
 
-        $repository->setServer($server)->send($this->power);
+        $repository->setServer($this->step->deployment->server)->send($this->power);
+
+        $this->step->update([
+            'status' => DeploymentStatus::COMPLETED,
+            'completed_at' => now(),
+        ]);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $this->step->update([
+            'status' => DeploymentStatus::FAILED,
+            'completed_at' => now(),
+            'error_message' => $exception->getMessage() ?? 'Unknown error',
+        ]);
     }
 }

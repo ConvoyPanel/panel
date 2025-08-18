@@ -2,11 +2,14 @@
 
 namespace App\Jobs\Server;
 
-use App\Models\Server;
+use Throwable;
+use App\Models\DeploymentStep;
+use App\Enums\Server\DeploymentStatus;
 use App\Services\Servers\ServerAuthService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -20,22 +23,43 @@ class UpdatePasswordJob implements ShouldQueue
 
     public int $timeout = 10;
 
-    public function __construct(protected int $serverId, protected string $password)
-    {
-        //
-    }
+    public function __construct(
+        #[WithoutRelations]
+        public DeploymentStep $step,
+        public string $password,
+    ) {}
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.update-password#{$this->serverId}",
-        )];
+        return [
+            new SkipIfBatchCancelled,
+            new WithoutOverlapping(
+                $this->step->deployment->server->id
+            ),
+        ];
     }
 
     public function handle(ServerAuthService $service): void
     {
-        $server = Server::findOrFail($this->serverId);
+        $this->step->update([
+            'status' => DeploymentStatus::RUNNING,
+            'started_at' => now(),
+        ]);
 
-        $service->updatePassword($server, $this->password);
+        $service->setPassword($this->step->deployment->server, $this->password);
+
+        $this->step->update([
+            'status' => DeploymentStatus::COMPLETED,
+            'completed_at' => now(),
+        ]);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $this->step->update([
+            'status' => DeploymentStatus::FAILED,
+            'completed_at' => now(),
+            'error_message' => $exception->getMessage() ?? 'Unknown error',
+        ]);
     }
 }

@@ -2,35 +2,48 @@
 
 namespace App\Services\Servers;
 
-use App\Data\Server\Deployments\ServerDeploymentData;
-use App\Enums\Server\PowerAction;
-use App\Enums\Server\State;
+use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
+use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
+use App\Enums\Server\State;
+use App\Data\Server\Proxmox\Config\DiskData;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Jobs\Server\BuildServerJob;
+use App\Jobs\Server\ConfigureVmJob;
 use App\Jobs\Server\DeleteServerJob;
 use App\Jobs\Server\MonitorStateJob;
 use App\Jobs\Server\SendPowerCommandJob;
-use App\Jobs\Server\SyncBuildJob;
 use App\Jobs\Server\UpdatePasswordJob;
 use App\Jobs\Server\WaitUntilVmIsCreatedJob;
 use App\Jobs\Server\WaitUntilVmIsDeletedJob;
+use App\Models\Deployment;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Bus;
+
+use function array_reduce;
 
 class ServerBuildDispatchService
 {
-    public function build(ServerDeploymentData $deployment): void
+    public function __construct(private ProxmoxConfigRepository $repository) {}
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function build(Deployment $deployment, ?string $accountPassword): void
     {
-        $jobs = $this->getChainedBuildJobs($deployment);
+        $jobs = $this->getChainedBuildJobs($deployment, $accountPassword);
+
+        $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED->value]))
+            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]))
             ->dispatch();
-
-        $deployment->server->update(['status' => ServerStatus::INSTALLING->value]);
     }
 
-    /* the delete virtual machine method is typically not used by itself and is accompanied by other logic like server reinstallations, server deletions */
     public function delete(Server $server): void
     {
         $jobs = $this->getChainedDeleteJobs($server);
@@ -39,54 +52,132 @@ class ServerBuildDispatchService
             ->dispatch();
     }
 
-    public function rebuild(ServerDeploymentData $deployment): void
+    public function rebuild(Deployment $deployment, ?string $accountPassword): void
     {
         $jobs = [
             ...$this->getChainedDeleteJobs($deployment->server),
-            ...$this->getChainedBuildJobs($deployment),
+            ...$this->getChainedBuildJobs($deployment, $accountPassword),
         ];
 
-        Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED->value]))
-            ->dispatch();
+        $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
-        $deployment->server->update(['status' => ServerStatus::INSTALLING->value]);
+        Bus::chain($jobs)
+            ->catch(
+                fn () => $deployment->server->update(
+                    ['status' => ServerStatus::INSTALL_FAILED],
+                ),
+            )
+            ->dispatch();
     }
 
-    private function getChainedBuildJobs(ServerDeploymentData $deployment): array
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    private function getChainedBuildJobs(Deployment $deployment, ?string $accountPassword): array
     {
-        if ($deployment->should_create_server) {
-            $jobs = [
-                new BuildServerJob($deployment->server->id, $deployment->template->id),
-                new WaitUntilVmIsCreatedJob($deployment->server->id),
-                new SyncBuildJob($deployment->server->id),
-            ];
+        if ($deployment->type === DeploymentType::INSTALL) {
+            $jobs = $this->createInstallStepsAndJobs($deployment);
         } else {
-            $jobs = [
-                new SyncBuildJob($deployment->server->id),
-            ];
+            $jobs = $this->createConfigureStepsAndJobs($deployment);
         }
 
-        if (! empty($deployment->account_password)) {
-            $jobs[] = new UpdatePasswordJob($deployment->server->id, $deployment->account_password);
+        $jobs = $this->appendOptionalJobs($deployment, $accountPassword, $jobs);
+
+        $jobs[] = function () use ($deployment) {
+            $deployment->server->update(['status' => ServerStatus::READY]);
+        };
+
+        return $jobs;
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    private function createInstallStepsAndJobs(Deployment $deployment): array
+    {
+        /* This code determines the size of the template */
+        $server = $deployment->server;
+        $template = new Server([
+            'node_id' => $server->node_id,
+            'vmid' => $deployment->template->vmid,
+        ]);
+        $configRepository = $this->repository->setServer($template);
+        $templateConfig = $configRepository->getConfig();
+        $totalSize = array_reduce($templateConfig->disks->all(), function (int $carry, DiskData $disk) {
+            return $carry + $disk->size;
+        }, 0);
+
+        $steps = $deployment->steps()->createMany([
+            [
+                'name' => 'clone',
+                'status' => DeploymentStatus::PENDING,
+                'progress_total' => $totalSize,
+            ],
+            [
+                'name' => 'configure',
+                'status' => DeploymentStatus::PENDING,
+                'progress_total' => 3,
+            ],
+        ]);
+
+        return [
+            new BuildServerJob($steps[0]),
+            new WaitUntilVmIsCreatedJob($steps[0]),
+            new ConfigureVmJob($steps[1]),
+        ];
+    }
+
+    private function createConfigureStepsAndJobs(Deployment $deployment): array
+    {
+        $step = $deployment->steps()->create([
+            'name' => 'configure',
+            'status' => DeploymentStatus::PENDING,
+            'progress_total' => 99,
+        ]);
+
+        return [
+            new ConfigureVmJob($step),
+        ];
+    }
+
+    private function appendOptionalJobs(Deployment $deployment, ?string $accountPassword, array $jobs): array
+    {
+        if (filled($accountPassword)) {
+            $step = $deployment->steps()->create([
+                'name' => 'update-password',
+                'status' => DeploymentStatus::PENDING,
+            ]);
+            $jobs[] = new UpdatePasswordJob($step, $accountPassword);
         }
 
         if ($deployment->start_on_completion) {
-            $jobs[] = new SendPowerCommandJob($deployment->server->id, PowerAction::START);
+            $step = $deployment->steps()->create([
+                'name' => 'start',
+                'status' => DeploymentStatus::PENDING,
+            ]);
+            $jobs[] = new SendPowerCommandJob($step, PowerCommand::START);
         }
-
-        $jobs[] = function () use ($deployment) {
-            Server::findOrFail($deployment->server->id)->update(['status' => null]);
-        };
 
         return $jobs;
     }
 
     public function getChainedDeleteJobs(Server $server): array
     {
+        $deployment = Deployment::create([
+            'server_id' => $server->id,
+            'type' => DeploymentType::DELETE,
+        ]);
+
+        $steps = $deployment->steps()->createMany([
+            ['name' => 'kill'],
+            ['name' => 'delete'],
+        ]);
+
         return [
-            new SendPowerCommandJob($server->id, PowerAction::KILL),
-            new MonitorStateJob($server->id, State::STOPPED),
+            new SendPowerCommandJob($steps[0], PowerCommand::KILL),
+            new MonitorStateJob($server, State::STOPPED),
             new DeleteServerJob($server->id),
             new WaitUntilVmIsDeletedJob($server->id),
         ];

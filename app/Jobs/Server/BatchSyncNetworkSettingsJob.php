@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Throwable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 
 class BatchSyncNetworkSettingsJob implements ShouldQueue
 {
@@ -22,6 +23,7 @@ class BatchSyncNetworkSettingsJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
+        #[WithoutRelations]
         public AddressBlock $addressBlock
     ) {}
 

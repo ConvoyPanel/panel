@@ -2,7 +2,7 @@
 
 namespace App\Services\Servers;
 
-use App\Enums\Server\PowerAction;
+use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Models\Server;
@@ -31,7 +31,7 @@ class ServerSuspensionService
         ]);
 
         try {
-            $this->powerRepository->setServer($server)->send($isSuspending ? PowerAction::KILL : PowerAction::START);
+            $this->powerRepository->setServer($server)->send($isSuspending ? PowerCommand::KILL : PowerCommand::START);
         } catch (Exception $exception) {
             $server->update([
                 'status' => $isSuspending ? null : ServerStatus::SUSPENDED->value,

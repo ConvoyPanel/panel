@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class HasSufficientDiskSpace implements ValidationRule, DataAwareRule
+class HasSufficientDiskSpace implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -31,16 +31,18 @@ class HasSufficientDiskSpace implements ValidationRule, DataAwareRule
         }
 
         $node = Node::find($nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
         $storage = $node->storages()->find($storageId);
-        if (!$storage) {
+        if (! $storage) {
             return;
         }
 
-        if ($value > ($storage->disk - $storage->disk_used)) {
+        $used = $storage->server_usage + $storage->backup_usage + $storage->iso_usage + $storage->snapshot_usage;
+
+        if ($value > ($storage->size - $used)) {
             $fail('The storage location does not have enough disk space available.');
         }
     }

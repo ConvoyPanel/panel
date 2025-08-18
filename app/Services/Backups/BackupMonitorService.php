@@ -22,7 +22,7 @@ class BackupMonitorService
     public function checkCreationProgress(Backup $backup, string $upid, ?Closure $callback = null)
     {
         $status = $this->repository->setServer($backup->server)->getStatus($upid);
-        $logs = $this->repository->setServer($backup->server)->getLog($upid);
+        $logs = $this->repository->setServer($backup->server)->getLogsByTask($upid);
 
         // get the filename of the backup (e.g. vzdump-qemu-101-2021_01_01-00_00_00.vma.zstd)
         $fileName = null;

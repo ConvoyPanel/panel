@@ -113,6 +113,9 @@ class ServerNetworkService
     }
 
     /**
+     * Allocates the addresses to the server. Changes do not fully activate without running syncSettings().
+     * Also, you better fucking make sure that the addresses are accessible to the server's node.
+     *
      * @param int[]|Address[] $addresses
      */
     public function syncAddresses(Server $server, array $addresses): void
@@ -131,7 +134,10 @@ class ServerNetworkService
 
         // Attach new addresses using the repository
         if (!empty($addressesToAdd)) {
-            $this->repository->attachAddresses($server, $addressesToAdd);
+            Address::query()
+                ->whereNull('server_id')
+                ->whereIn('id', $addressesToAdd)
+                ->update(['server_id' => $server->id]);
         }
 
         // Detach addresses no longer associated

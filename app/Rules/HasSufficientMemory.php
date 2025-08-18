@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class HasSufficientMemory implements ValidationRule, DataAwareRule
+class HasSufficientMemory implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -26,11 +26,11 @@ class HasSufficientMemory implements ValidationRule, DataAwareRule
         }
 
         $node = Node::find($nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
-        if ($value > $node->memory) {
+        if ($value > $node->memory + ($node->memory * ($node->memory_overallocate / 100))) {
             $fail('The node does not have enough memory available.');
         }
     }

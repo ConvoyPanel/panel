@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Contracts\Repository\ServerRepositoryInterface;
 use App\Exceptions\Repository\RecordNotFoundException;
+use App\Models\Node;
 use App\Models\Server;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,12 +16,12 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
         return Server::class;
     }
 
-    public function isUniqueVmId(int $nodeId, int $vmid): bool
+    public function isUniqueVmId(Node $node, int $vmid): bool
     {
         return ! $this->getBuilder()
-                     ->where('vmid', '=', $vmid)
-                     ->where('node_id', '=', $nodeId)
-                     ->exists();
+            ->where('node_id', '=', $node->id)
+            ->where('vmid', '=', $vmid)
+            ->exists();
     }
 
     /**
@@ -29,7 +30,7 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
     public function isUniqueUuidCombo(string $uuid, string $short): bool
     {
         return ! $this->getBuilder()->where('uuid', '=', $uuid)->orWhere('uuid_short', '=', $short)
-                     ->exists();
+            ->exists();
     }
 
     /**
@@ -42,14 +43,14 @@ class ServerRepository extends EloquentRepository implements ServerRepositoryInt
         try {
             /** @var Server $model */
             $model = $this->getBuilder()
-                          ->where(function (Builder $query) use ($uuid) {
-                              $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);
-                          })
-                          ->firstOrFail($this->getColumns());
+                ->where(function (Builder $query) use ($uuid) {
+                    $query->where('uuid_short', $uuid)->orWhere('uuid', $uuid);
+                })
+                ->firstOrFail($this->getColumns());
 
             return $model;
         } catch (ModelNotFoundException $exception) {
-            throw new RecordNotFoundException();
+            throw new RecordNotFoundException;
         }
     }
 }

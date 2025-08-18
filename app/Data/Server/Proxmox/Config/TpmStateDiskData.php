@@ -99,7 +99,7 @@ class TpmStateDiskData extends Data
         return new self(
             volume: $parsedValues['volume'],
             version: $parsedValues['version'],
-            size: $parsedValues['size'] ?? null // Size is optional
+            size: intval($parsedValues['size']) ?? null // Size is optional
         );
     }
 
