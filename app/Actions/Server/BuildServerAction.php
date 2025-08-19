@@ -21,15 +21,12 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Bus;
 
 use function array_reduce;
-use function now;
 
 class BuildServerAction
 {
     use ManagesDeploymentLifecycle;
 
-    public function __construct(private ProxmoxConfigRepository $repository)
-    {
-    }
+    public function __construct(private ProxmoxConfigRepository $repository) {}
 
     /**
      * @throws RequestException
@@ -37,9 +34,15 @@ class BuildServerAction
      */
     public function execute(Deployment $deployment, ?string $accountPassword): void
     {
+        $jobs = array_flatten([
+            $this->onStart($deployment),
+            $this->getJobs($deployment, $accountPassword),
+            $this->onComplete($deployment),
+        ]);
+
         $deployment->server->update(['status' => ServerStatus::INSTALLING]);
 
-        Bus::chain($this->getJobs($deployment, $accountPassword))
+        Bus::chain($jobs)
             ->catch($this->onFail($deployment))
             ->dispatch();
     }
@@ -75,8 +78,8 @@ class BuildServerAction
         $templateConfig = $configRepository->getConfig();
         $totalSize = array_reduce(
             $templateConfig->disks->all(), function (int $carry, DiskData $disk) {
-            return $carry + $disk->size;
-        }, 0,
+                return $carry + $disk->size;
+            }, 0,
         );
 
         $steps = $deployment->steps()->createMany([

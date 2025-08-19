@@ -2,33 +2,70 @@
 
 namespace App\Actions\Server;
 
-use App\Enums\Server\DeploymentType;
+use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
+use App\Enums\Server\ServerStatus;
 use App\Enums\Server\State;
+use App\Jobs\Backup\BatchPurgeServerBackupsJob;
 use App\Jobs\Server\DeleteServerJob;
 use App\Jobs\Server\MonitorStateJob;
 use App\Jobs\Server\SendPowerCommandJob;
 use App\Jobs\Server\WaitUntilVmIsDeletedJob;
 use App\Models\Deployment;
-use App\Models\Server;
+use App\Traits\Actions\ManagesDeploymentLifecycle;
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+
+use function array_flatten;
 
 class DeleteServerAction
 {
-    public function execute(Server $server): array
-    {
-        return $this->getChainedDeleteJobs($server);
-    }
+    use ManagesDeploymentLifecycle;
 
-    public function getChainedDeleteJobs(Server $server): array
+    public function execute(Deployment $deployment): void
     {
-        $deployment = Deployment::create([
-            'server_id' => $server->id,
-            'type' => DeploymentType::DELETE,
+        $step = $deployment->steps()->create([
+            'name' => 'delete-backups',
+            'status' => DeploymentStatus::PENDING,
+            'progress_total' => $deployment->server->backups()->successful()->count() * 2, // 2 jobs for each backup: purge and monitor
         ]);
 
+        $jobs = array_flatten([
+            Bus::batch(new BatchPurgeServerBackupsJob($deployment->server))
+                ->before(function () use ($step) {
+                    $step->start();
+                })
+                ->progress(function (Batch $batch) use ($step) {
+                    $step->update(['progress_current' => max($batch->processedJobs() - 1, 0)]);
+                })
+                ->then(function () use ($step) {
+                    $step->complete();
+                }),
+            $this->getJobs($deployment),
+            function () use ($deployment) {
+                $deployment->server->delete();
+            },
+        ]);
+
+        $deployment->server->update(['status' => ServerStatus::DELETING]);
+
+        Bus::chain($jobs)
+            ->catch($this->onFail($deployment, ServerStatus::DELETION_FAILED))
+            ->dispatch();
+
+    }
+
+    public function getJobs(Deployment $deployment): array
+    {
         $steps = $deployment->steps()->createMany([
-            ['name' => 'kill'],
-            ['name' => 'delete'],
+            [
+                'name' => 'kill-vm',
+                'status' => DeploymentStatus::PENDING,
+            ],
+            [
+                'name' => 'delete-vm',
+                'status' => DeploymentStatus::PENDING,
+            ],
         ]);
 
         return [

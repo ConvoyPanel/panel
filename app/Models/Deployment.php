@@ -27,7 +27,7 @@ class Deployment extends Model
     public static array $validationRules = [
         'server_id' => 'required|exists:servers,id',
         'template_id' => 'nullable|exists:templates,id',
-        'type' => 'required|string|in:install,reinstall,import',
+        'type' => 'required|string|in:install,reinstall,delete,import',
         'status' => 'required|string|in:pending,running,completed,failed',
         'start_on_completion' => 'required|boolean',
         'requested_at' => 'required|date',

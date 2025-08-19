@@ -19,6 +19,8 @@ class BatchSyncNetworkSettingsJob implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
     /**
      * Create a new job instance.
      */

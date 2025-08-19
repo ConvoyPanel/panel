@@ -108,9 +108,9 @@ class Storage extends Model
      * @param  Builder  $query  The Eloquent query builder.
      * @return Builder The modified query builder.
      */
-    public function scopeWithUsageSums(Builder $query): Builder
+    public function scopeWithUsageSums(Builder $query): void
     {
-        return $query->withSum('servers as servers_sum_disk', 'disk')
+        $query->withSum('servers as servers_sum_disk', 'disk')
             ->withSum('backups as backups_sum_size', 'size')
             ->withSum('isos as isos_sum_size', 'size')
             ->withSum('snapshots as snapshots_sum_size', 'size');

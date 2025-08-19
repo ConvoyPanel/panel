@@ -2,6 +2,7 @@
 
 namespace App\Traits\Actions;
 
+use App\Models\Server;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\ServerStatus;
 use App\Models\Deployment;
@@ -25,14 +26,14 @@ trait ManagesDeploymentLifecycle
         };
     }
 
-    private function onFail(Deployment $deployment): callable
+    private function onFail(Deployment $deployment, ServerStatus $serverStatus = ServerStatus::INSTALL_FAILED): callable
     {
-        return function () use ($deployment) {
+        return function () use ($deployment, $serverStatus) {
             $deployment->update([
                 'status' => DeploymentStatus::FAILED,
                 'completed_at' => now(),
             ]);
-            $deployment->server->update(['status' => ServerStatus::INSTALL_FAILED]);
+            $deployment->server->update(['status' => $serverStatus]);
         };
     }
 }

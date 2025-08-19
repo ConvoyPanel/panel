@@ -53,12 +53,12 @@ class ProxmoxServerRepository extends ProxmoxRepository
     public function delete()
     {
         $response = $this->getHttpClientWithParams()
-            ->withOptions([
-                'query' => [
-                    'destroy-unreferenced-disks' => true,
-                    'purge' => true,
-                ],
-            ])
+//            ->withOptions([
+//                'query' => [
+//                    'destroy-unreferenced-disks' => true,
+//                    'purge' => true,
+//                ],
+//            ])
             ->delete('/api2/json/nodes/{node}/qemu/{server}')
             ->json();
 

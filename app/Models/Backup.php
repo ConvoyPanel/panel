@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -37,5 +38,21 @@ class Backup extends Model
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
+    }
+
+    public function storage(): BelongsTo
+    {
+        return $this->belongsTo(Storage::class);
+    }
+
+    public function scopeSuccessful(Builder $query): void
+    {
+        $query->whereNull('errors')
+            ->whereNotNull('completed_at');
+    }
+
+    public function scopeRunning(Builder $query): void
+    {
+        $query->whereNull('completed_at');
     }
 }
