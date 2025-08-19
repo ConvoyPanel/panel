@@ -2,6 +2,7 @@
 
 namespace App\Actions\Server;
 
+use Throwable;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
@@ -40,7 +41,14 @@ class DeleteServerAction
                 })
                 ->then(function () use ($step) {
                     $step->complete();
-                }),
+                })
+            ->catch(function (Batch $_, Throwable $e) use ($step) {
+                $step->update([
+                    'status' => DeploymentStatus::FAILED,
+                    'completed_at' => now(),
+                    'error_message' => $e->getMessage(),
+                ]);
+            }),
             $this->getJobs($deployment),
             function () use ($deployment) {
                 $deployment->server->delete();
