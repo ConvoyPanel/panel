@@ -77,8 +77,8 @@ class DeleteServerAction
         ]);
 
         return [
-            new SendPowerCommandJob($steps[0], PowerCommand::KILL),
-            new MonitorStateJob($steps[0], State::STOPPED),
+            new SendPowerCommandJob($steps[0], PowerCommand::KILL, skipIfDeleted: true),
+            new MonitorStateJob($steps[0], State::STOPPED, skipIfDeleted: true),
             new DeleteServerJob($steps[1]),
             new WaitUntilVmIsDeletedJob($steps[1]),
         ];

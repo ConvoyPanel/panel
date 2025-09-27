@@ -2,13 +2,12 @@
 
 namespace App\Jobs\Server;
 
-use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\State;
 use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
-use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Traits\HandlesProxmoxErrors;
+use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,13 +18,12 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
-use Throwable;
 
 use function now;
 
 class MonitorStateJob implements ShouldQueue
 {
-    use Batchable, Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, FailsWithStep, HandlesProxmoxErrors, InteractsWithQueue, Queueable, SerializesModels;
 
     public function retryUntil(): Carbon
     {
@@ -36,6 +34,7 @@ class MonitorStateJob implements ShouldQueue
         #[WithoutRelations]
         public DeploymentStep $step,
         public State $targetState,
+        public bool $skipIfDeleted = false,
     ) {
         //
     }
@@ -51,12 +50,22 @@ class MonitorStateJob implements ShouldQueue
      */
     public function handle(ProxmoxServerRepository $repository): void
     {
-        $stateData = $repository->setServer($this->step->deployment->server)->getState();
+        try {
+            $stateData = $repository->setServer($this->step->deployment->server)->getState();
 
-        if ($stateData->state === $this->targetState) {
-            $this->step->complete();
-        } else {
-            $this->release(1);
+            if ($stateData->state === $this->targetState) {
+                $this->step->complete();
+            } else {
+                $this->release(1);
+            }
+        } catch (RequestException $e) {
+            if ($this->isNonexistentVMError($e)) {
+                $this->step->complete();
+
+                return;
+            }
+
+            throw $e;
         }
     }
 }

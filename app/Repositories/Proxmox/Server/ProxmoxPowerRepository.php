@@ -4,9 +4,15 @@ namespace App\Repositories\Proxmox\Server;
 
 use App\Enums\Server\PowerCommand;
 use App\Repositories\Proxmox\ProxmoxRepository;
+use Illuminate\Http\Client\ConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
 
 class ProxmoxPowerRepository extends ProxmoxRepository
 {
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function send(PowerCommand $action)
     {
         // I added this because I don't like the naming scheme Proxmox has

@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Traits;
+
+use App\Exceptions\Repository\Proxmox\RequestException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+
+trait HandlesProxmoxErrors
+{
+    /**
+     * Determine if a "does not exist" error should be ignored.
+     *
+     * @param  RequestException  $e
+     * @param  string  $message
+     * @return bool
+     */
+    protected function isNonexistentVMError(RequestException $e, string $message = 'does not exist'): bool
+    {
+        if ($e->response && Str::contains(Arr::get($e->response->json(), 'message', ''), $message)) {
+            return true;
+        }
+
+        return false;
+    }
+}

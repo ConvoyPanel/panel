@@ -10,13 +10,13 @@ use App\Models\Template;
 use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
 use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Traits\HandlesProxmoxErrors;
 use Illuminate\Http\Client\ConnectionException;
-
-use function array_get;
-use function str_contains;
 
 class ServerBuildService
 {
+    use HandlesProxmoxErrors;
+
     public function __construct(
         private ProxmoxServerRepository $serverRepository,
         private ProxmoxResourceRepository $resourceRepository,
@@ -32,7 +32,7 @@ class ServerBuildService
         try {
             $this->serverRepository->setServer($server)->delete();
         } catch (RequestException $e) {
-            if (str_contains(array_get($e->response->json(), 'message'), 'does not exist')) {
+            if ($this->isNonexistentVMError($e)) {
                 return;
             }
 
