@@ -1,6 +1,7 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { Route } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
 import { NetworkInterface } from '@/types/network-interface.ts'
+import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -34,7 +35,10 @@ const DeleteNetworkInterfaceModal = () => {
     const [state, submit] = useAsyncFunction(
         async (currentNetworkInterface: NetworkInterface) => {
             try {
-                await deleteNetworkInterface(Number(nodeId), currentNetworkInterface.id)
+                await deleteNetworkInterface(
+                    Number(nodeId),
+                    currentNetworkInterface.id
+                )
 
                 await mutate(data => {
                     if (!data) return data
@@ -46,7 +50,14 @@ const DeleteNetworkInterfaceModal = () => {
                 toast.success('Network interface deleted')
                 close('delete')
             } catch (e) {
-                toast.error('Deletion failed')
+                let message = 'Deletion failed'
+
+                if (e instanceof AxiosError && e.response?.data.message) {
+                    message = e.response.data.message
+                }
+
+                toast.error(message)
+
                 throw e
             }
         }

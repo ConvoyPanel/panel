@@ -10,7 +10,7 @@ class DeleteNetworkInterfaceRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('delete', $this->parameter('networkInterface', NetworkInterface::class));
+        return $this->user()->can('delete', $this->parameter('network_interface', NetworkInterface::class));
     }
 
     public function rules(): array
@@ -25,7 +25,7 @@ class DeleteNetworkInterfaceRequest extends BaseApiRequest
         return [
             function (Validator $validator) {
                 /** @var NetworkInterface $networkInterface */
-                $networkInterface = $this->parameter('networkInterface', NetworkInterface::class);
+                $networkInterface = $this->parameter('network_interface', NetworkInterface::class);
                 $nodeId = $networkInterface->node_id;
 
                 $isInUse = $networkInterface->addressBlockGroups()
