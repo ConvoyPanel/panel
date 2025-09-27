@@ -34,7 +34,7 @@ const DeleteNetworkInterfaceModal = () => {
     const [state, submit] = useAsyncFunction(
         async (currentNetworkInterface: NetworkInterface) => {
             try {
-                await deleteNetworkInterface(nodeId, currentNetworkInterface.id)
+                await deleteNetworkInterface(Number(nodeId), currentNetworkInterface.id)
 
                 await mutate(data => {
                     if (!data) return data
