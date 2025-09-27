@@ -17,12 +17,6 @@ use Illuminate\Validation\Rule;
 
 class StoreServerRequest extends BaseApiRequest
 {
-    public function authorize(): bool
-    {
-        // TODO: remove this
-        return true;
-    }
-
     public function rules(AddressAvailabilityService $addressAvailabilityService): array
     {
         $rules = Server::getRules();
