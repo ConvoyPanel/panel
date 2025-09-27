@@ -19,6 +19,8 @@ services:
       - 443:443
       - 3000:3000
     env_file: .env
+    environment:
+      - PHP_IDE_CONFIG=serverName=app
     tty: true
     extra_hosts:
       host.docker.internal: host-gateway
