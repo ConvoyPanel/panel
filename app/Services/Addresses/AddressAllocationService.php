@@ -48,9 +48,10 @@ class AddressAllocationService
 
                     $addressAtOffset = $range->getAddressAtOffset($i);
                     if ($addressAtOffset && !$allocatedIps->contains($addressAtOffset->toString())) {
-                        $address = new Address([
+                        $address = Address::firstOrCreate([
                             'address_block_id' => $block->id,
                             'ip' => $addressAtOffset->toString(),
+                        ], [
                             'prefix_length' => $block->prefix_length_to,
                         ]);
                         $address->setRelation('addressBlock', $block);
