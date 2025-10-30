@@ -76,7 +76,7 @@ const EditStorageModal = () => {
 
     const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
         try {
-            const updatedStorage = await updateStorage(nodeId, storage!.id, {
+            const updatedStorage = await updateStorage(Number(nodeId), storage!.id, {
                 size: size * 1024 * 1024,
                 ...data,
             })

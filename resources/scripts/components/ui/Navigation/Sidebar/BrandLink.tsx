@@ -4,10 +4,8 @@ import { Link, useLocation } from '@tanstack/react-router'
 import Logo from '@/components/ui/Branding/Logo.tsx'
 
 const BrandLink = () => {
-    const isAdmin = useLocation({
-        // @ts-expect-error
-        select: location => location.pathname,
-    }).startsWith('/admin')
+    const pathname = useLocation({ select: l => l.pathname })
+    const isAdmin = pathname.startsWith('/admin')
 
     return (
         <Link to={isAdmin ? '/admin' : '/'} className='mx-1'>

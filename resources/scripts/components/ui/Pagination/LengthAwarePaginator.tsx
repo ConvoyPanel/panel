@@ -52,7 +52,7 @@ const LengthAwarePaginator = <T,>({
                 <PaginationContent>
                     <PaginationPrevious
                         onClick={() =>
-                            navigate({ search: { page: currentPage - 1 } })
+                            navigate({ search: prev => ({ ...prev, page: currentPage - 1 }) })
                         }
                         disabled={currentPage <= 1}
                         role='button'
@@ -67,7 +67,7 @@ const LengthAwarePaginator = <T,>({
                                 <PaginationLink
                                     isActive={currentPage === page}
                                     onClick={() =>
-                                        navigate({ search: { page } })
+                                        navigate({ search: prev => ({ ...prev, page }) })
                                     }
                                 >
                                     {page}
@@ -77,7 +77,7 @@ const LengthAwarePaginator = <T,>({
                     })}
                     <PaginationNext
                         onClick={() =>
-                            navigate({ search: { page: currentPage + 1 } })
+                            navigate({ search: prev => ({ ...prev, page: currentPage + 1 }) })
                         }
                         disabled={currentPage >= cachedTotalPages.current}
                     />

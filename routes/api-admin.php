@@ -98,8 +98,7 @@ Route::prefix('/nodes')->group(function () {
 */
 Route::prefix('/servers')->group(function () {
     Route::get('/', [Admin\ServerController::class, 'index']);
-    // TODO: undo the withoutMiddleware when the admin authentication is implemented
-    Route::post('/', [Admin\ServerController::class, 'store'])->withoutMiddleware(['auth', AdminAuthenticate::class, 'web']);
+    Route::post('/', [Admin\ServerController::class, 'store']);
 
     Route::prefix('/{server}')
         ->middleware(ValidateServerStatusMiddleware::class)

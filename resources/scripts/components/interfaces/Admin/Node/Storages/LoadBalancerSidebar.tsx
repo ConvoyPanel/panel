@@ -120,7 +120,7 @@ const LoadBalancerSidebar = () => {
                 await mutate(
                     async () => {
                         // This function is called to perform the actual API request
-                        await updateBackupOrder(nodeId, idsToSend)
+                        await updateBackupOrder(Number(nodeId), idsToSend)
                         // Return the data that should be in the cache after successful update.
                         // This should match optimisticData if the backend assigns orders correctly.
                         // If the backend returns the updated list, you could return that instead.

@@ -3,7 +3,6 @@ import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover'
 import { Button } from '@/components/ui/Button'
 
-// @ts-expect-error
 import ProxmoxNodeName from '@/assets/images/proxmox-node-name.png'
 import TestConnectionButton from '@/components/interfaces/Admin/Node/Create/TestConnectionButton.tsx'
 

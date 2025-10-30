@@ -34,7 +34,7 @@ const DeleteStorageModal = () => {
     const [state, submit] = useAsyncFunction(
         async (currentStorage: NodeStorage) => {
             try {
-                await deleteStorage(nodeId, currentStorage.id)
+                await deleteStorage(Number(nodeId), currentStorage.id)
 
                 await mutate(data => {
                     if (!data) return data

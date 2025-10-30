@@ -32,7 +32,12 @@ const SheetContent = <C extends ElementType = 'div'>({
                 as={Component}
                 className='relative z-50 focus:outline-none'
                 onClose={onOpenChange}
-            ></Dialog>
+                {...(props as any)}
+            >
+                {children}
+            </Dialog>
         </Transition>
     )
 }
+
+export default SheetContent

@@ -52,7 +52,7 @@ const CreateStorageModal = () => {
 
     const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
         try {
-            const storage = await createStorage(nodeId, {
+            const storage = await createStorage(Number(nodeId), {
                 size: size * 1024 * 1024,
                 ...data,
             })

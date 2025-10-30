@@ -12,3 +12,4 @@ class NetworkInterfacePolicy
         return $user->root_admin;
     }
 }
+

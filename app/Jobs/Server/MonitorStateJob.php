@@ -34,7 +34,6 @@ class MonitorStateJob implements ShouldQueue
         #[WithoutRelations]
         public DeploymentStep $step,
         public State $targetState,
-        public bool $skipIfDeleted = false,
     ) {
         //
     }

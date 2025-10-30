@@ -31,7 +31,7 @@ class SendPowerCommandJob implements ShouldQueue
         #[WithoutRelations]
         public DeploymentStep $step,
         public PowerCommand $power,
-        public bool $skipIfDeleted = false,
+        public bool $markComplete = false,
     ) {}
 
     public function middleware(): array
@@ -57,6 +57,10 @@ class SendPowerCommandJob implements ShouldQueue
             }
 
             throw $e;
+        } finally {
+            if ($this->markComplete) {
+                $this->step->complete();
+            }
         }
     }
 }

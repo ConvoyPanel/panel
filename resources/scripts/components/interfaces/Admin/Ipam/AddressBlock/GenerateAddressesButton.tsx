@@ -17,9 +17,12 @@ interface Props {
 const GenerateAddressesButton = ({ mutate }: Props) => {
     const { addressBlockGroupId, addressBlockId } = Route.useParams()
 
+    const blockGroupIdNum = Number(addressBlockGroupId)
+    const blockIdNum = Number(addressBlockId)
+
     const { trigger, isMutating } = useSWRMutation(
-        getKey(addressBlockId, {}),
-        () => generateAddresses(addressBlockGroupId, addressBlockId),
+        getKey(blockIdNum, {}),
+        () => generateAddresses(blockGroupIdNum, blockIdNum),
         {
             async onSuccess(data) {
                 await mutate()

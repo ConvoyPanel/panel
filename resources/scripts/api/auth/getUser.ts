@@ -1,6 +1,6 @@
 import axios from '@/lib/axios.ts'
 
-import { transformAuthenticatedUser } from '@/api/transformers/user.ts'
+import { rawDataToAuthenticatedUser } from '@/api/transformers/user.ts'
 
 
 const getUser = async () => {
@@ -8,7 +8,7 @@ const getUser = async () => {
         data: { data },
     } = await axios.get('/api/client/user')
 
-    return transformAuthenticatedUser(data)
+    return rawDataToAuthenticatedUser(data)
 }
 
 export default getUser

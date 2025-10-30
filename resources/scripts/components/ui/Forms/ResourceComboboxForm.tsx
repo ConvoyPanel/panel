@@ -145,34 +145,41 @@ const ResourceComboboxForm = <T,>({
                                         <CommandGroup>
                                             {data &&
                                                 data.map(pageData =>
-                                                    pageData.items.map(item => (
-                                                        <CommandItem
-                                                            key={
-                                                                (item as any)[
-                                                                    accessorKey
-                                                                ]
-                                                            } // Assumes each item has a unique 'id'
-                                                            value={(
-                                                                item as any
-                                                            ).id.toString()}
-                                                            onSelect={val => {
-                                                                field.onChange(
-                                                                    val
-                                                                )
-                                                                setOpen(false)
-                                                            }}
-                                                        >
-                                                            {renderItem(
-                                                                item,
-                                                                field.value ===
-                                                                    String(
-                                                                        item[
-                                                                            accessorKey
-                                                                        ]
+                                                    pageData.items.map(item => {
+                                                        const rawVal = (item as any)[
+                                                            accessorKey
+                                                        ]
+                                                        if (
+                                                            rawVal === undefined ||
+                                                            rawVal === null
+                                                        )
+                                                            return null
+                                                        const strVal = String(
+                                                            rawVal
+                                                        )
+                                                        return (
+                                                            <CommandItem
+                                                                key={strVal}
+                                                                value={strVal}
+                                                                onSelect={val => {
+                                                                    field.onChange(
+                                                                        val
                                                                     )
-                                                            )}
-                                                        </CommandItem>
-                                                    ))
+                                                                    setOpen(false)
+                                                                }}
+                                                            >
+                                                                {renderItem(
+                                                                    item,
+                                                                    field.value ===
+                                                                        String(
+                                                                            (item as any)[
+                                                                                accessorKey
+                                                                            ]
+                                                                        )
+                                                                )}
+                                                            </CommandItem>
+                                                        )
+                                                    })
                                                 )}
                                         </CommandGroup>
                                         {!isReachingEnd && isLoadingMore && (

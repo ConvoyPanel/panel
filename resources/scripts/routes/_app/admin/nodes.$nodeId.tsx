@@ -27,7 +27,7 @@ export const Route = createFileRoute('/_app/admin/nodes/$nodeId')({
 
 function NodeLayout() {
     const { nodeId } = Route.useParams()
-    const { data: node } = useNodeSWR(nodeId)
+    const { data: node } = useNodeSWR(Number(nodeId))
     useTitle(node?.displayName)
 
     const routes: RouteDef[] = [
