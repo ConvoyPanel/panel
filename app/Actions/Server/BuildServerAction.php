@@ -133,7 +133,7 @@ class BuildServerAction
                 'name' => 'start',
                 'status' => DeploymentStatus::PENDING,
             ]);
-            $jobs[] = new SendPowerCommandJob($step, PowerCommand::START);
+            $jobs[] = new SendPowerCommandJob($step, PowerCommand::START, markComplete: true);
         }
 
         return $jobs;
