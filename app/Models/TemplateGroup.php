@@ -27,6 +27,11 @@ class TemplateGroup extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     public function templates(): HasMany
     {
         return $this->hasMany(Template::class);

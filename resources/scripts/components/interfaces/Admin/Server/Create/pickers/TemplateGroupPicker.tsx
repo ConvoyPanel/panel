@@ -4,7 +4,9 @@ import { IconCheck, IconFolder } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton'
+import getTemplateGroup from '@/api/admin/templateGroups/getTemplateGroup'
 import getTemplateGroups from '@/api/admin/templateGroups/getTemplateGroups'
+import useSWR from 'swr'
 
 const TemplateGroupPicker = () => {
     const { field } = useController<{
@@ -14,8 +16,11 @@ const TemplateGroupPicker = () => {
     })
 
     // We don't fetch the selected entity by id; just show skeleton or fallback label
-    const isLoadingSelection = false
-    const selectedName = undefined
+    const { data: selected, isLoading: isLoadingSelection } = useSWR(
+        field.value ? ['template-group', field.value] : null,
+        () => getTemplateGroup(field.value)
+    )
+    const selectedName = selected?.name
 
     return (
         <ResourceComboboxForm<TemplateGroup>
