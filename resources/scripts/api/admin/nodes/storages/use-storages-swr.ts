@@ -6,12 +6,12 @@ import { useParams } from '@tanstack/react-router'
 export const getKey = (nodeId: number) => ['node.storages', nodeId]
 
 const useStoragesSWR = (nodeId?: number) => {
-    const params = useParams({ strict: false }) as { nodeId?: number }
-    const id = nodeId ?? params.nodeId
+    const params = useParams({ strict: false })
+    const id = nodeId ?? Number(params.nodeId)
 
     return useSWR(
-        typeof id === 'number' ? getKey(id) : null,
-        () => getStorages(id as number)
+        id ? getKey(id) : null,
+        () => getStorages(id)
     )
 }
 
