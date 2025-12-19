@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:bookworm
+FROM dunglas/frankenphp:php8.4-trixie
 
 ARG PHP_XDEBUG
 ARG PHP_XDEBUG_MODE='debug'
@@ -6,7 +6,7 @@ ARG APP_ENV
 ENV PHP_IDE_CONFIG="serverName=convoy"
 
 RUN apt-get update
-RUN apt-get -y install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client
+RUN apt-get -y install ca-certificates gnupg curl sudo unzip default-mysql-client
 RUN install-php-extensions pdo_mysql pcntl redis gmp @composer
 
 RUN if [ $APP_ENV = "production" ]; then \
