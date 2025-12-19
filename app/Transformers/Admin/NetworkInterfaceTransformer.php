@@ -14,7 +14,6 @@ class NetworkInterfaceTransformer extends TransformerAbstract
             'node_id' => $interface->node_id,
             'name' => $interface->name,
             'description' => $interface->description,
-            'mtu' => $interface->mtu,
         ];
     }
 }

@@ -142,11 +142,13 @@ Route::prefix('/address-block-groups')->group(function () {
         Route::delete('/', [Admin\AddressBlockGroupController::class, 'destroy']);
         Route::get('/compatible-servers', [Admin\AddressBlockGroupController::class, 'getCompatibleServers']);
         Route::get('/nodes', [Admin\AddressBlockGroupController::class, 'getAttachedNodes']);
+        Route::post('/nodes', [Admin\AddressBlockGroupController::class, 'attachNode']);
+        Route::delete('/nodes/{node}', [Admin\AddressBlockGroupController::class, 'detachNode']);
 
         Route::get('/address-blocks', [Admin\AddressBlockController::class, 'index']);
+        Route::post('/address-blocks', [Admin\AddressBlockController::class, 'store']);
         Route::prefix('/address-blocks/{address_block}')->group(function () {
             Route::get('/', [Admin\AddressBlockController::class, 'show']);
-            Route::post('/', [Admin\AddressBlockController::class, 'store']);
             Route::put('/', [Admin\AddressBlockController::class, 'update']);
             Route::delete('/', [Admin\AddressBlockController::class, 'destroy']);
 

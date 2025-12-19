@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
+use App\Http\Requests\Admin\AddressBlockGroups\AttachNodeRequest;
+use App\Http\Requests\Admin\AddressBlockGroups\DetachNodeRequest;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockGroupWildcard;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Filters\FiltersServerWildcard;
+use App\Models\Node;
 use App\Models\Server;
 use App\Transformers\Admin\AddressBlockGroupTransformer;
 use App\Transformers\Admin\NodeTransformer;
@@ -88,6 +91,23 @@ class AddressBlockGroupController
             ->appends($request->query());
 
         return fractal($nodes, new NodeTransformer)->respond();
+    }
+
+    public function attachNode(AttachNodeRequest $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    {
+        $addressBlockGroup->networkInterfaces()->syncWithoutDetaching([
+            $request->input('network_interface_id')
+        ]);
+
+        return response()->json([], 201);
+    }
+
+    public function detachNode(DetachNodeRequest $request, AddressBlockGroup $addressBlockGroup, Node $node): Response
+    {
+        $interfaceIds = $node->networkInterfaces()->pluck('id');
+        $addressBlockGroup->networkInterfaces()->detach($interfaceIds);
+
+        return response()->noContent();
     }
 
     public function getCompatibleServers(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse

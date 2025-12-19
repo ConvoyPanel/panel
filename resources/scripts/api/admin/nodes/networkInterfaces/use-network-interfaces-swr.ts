@@ -5,12 +5,12 @@ import getNetworkInterfaces from '@/api/admin/nodes/networkInterfaces/getNetwork
 export const getKey = (nodeId: number) => ['node.network-interfaces', nodeId]
 
 const useNetworkInterfacesSWR = (id?: number | null) => {
-    const { nodeId: routeNodeId } = useParams({ strict: false }) as { nodeId?: number }
-    const nodeId = (id ?? routeNodeId)
+    const { nodeId: routeNodeId } = useParams({ strict: false })
+    const nodeId = id ?? Number(routeNodeId)
 
     return useSWR(
-        typeof nodeId === 'number' ? getKey(nodeId) : null,
-        () => getNetworkInterfaces(nodeId as number)
+        nodeId ? getKey(nodeId) : null,
+        () => getNetworkInterfaces(nodeId)
     )
 }
 

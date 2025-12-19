@@ -37,7 +37,7 @@ export interface ResourceComboBoxFormProps<T> {
     renderTrigger: () => ReactNode
     label: string
     searchPlaceholder?: string
-    nothingFoundMessage?: string
+    nothingFoundMessage?: ReactNode
 }
 
 const getKey = <T,>(

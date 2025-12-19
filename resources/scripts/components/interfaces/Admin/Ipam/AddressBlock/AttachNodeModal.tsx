@@ -4,9 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { IconPlus } from '@tabler/icons-react'
+import { KeyedMutator } from 'swr'
 import { handleFormErrors } from '@/utils/http.ts'
 import attachNode from '@/api/admin/addressBlockGroups/attachNode.ts'
-import useAttachedNodesSWR from '@/api/admin/addressBlockGroups/use-attached-nodes-swr.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
 import { Button } from '@/components/ui/Button'
 import {
@@ -22,15 +22,19 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import NodePicker from '@/components/interfaces/Admin/Server/Create/pickers/NodePicker.tsx'
 import NetworkInterfacePicker from '@/components/interfaces/Admin/Server/Create/pickers/NetworkInterfacePicker.tsx'
+import { PaginatedNodes } from '@/types/node.ts'
 
 const schema = z.object({
     nodeId: z.string().min(1, 'A node is required'),
     networkInterfaceId: z.string().min(1, 'A network interface is required'),
 })
 
-const AttachNodeModal = () => {
+interface Props {
+    mutate: KeyedMutator<PaginatedNodes>
+}
+
+const AttachNodeModal = ({ mutate }: Props) => {
     const { addressBlockGroupId } = Route.useParams()
-    const { mutate } = useAttachedNodesSWR(Number(addressBlockGroupId))
     const [open, setOpen] = useState(false)
 
     const form = useForm({
@@ -59,7 +63,7 @@ const AttachNodeModal = () => {
     return (
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
-                <Button>
+                <Button size="sm">
                     <IconPlus className="mr-2 size-4" /> Attach Node
                 </Button>
             </CredenzaTrigger>
@@ -71,11 +75,9 @@ const AttachNodeModal = () => {
                     <form onSubmit={form.handleSubmit(submit)}>
                         <CredenzaBody className="space-y-4">
                             <NodePicker />
-                            {nodeId && (
-                                <NetworkInterfacePicker
-                                    nodeId={Number(nodeId)}
-                                />
-                            )}
+                            <NetworkInterfacePicker
+                                nodeId={nodeId ? Number(nodeId) : null}
+                            />
                         </CredenzaBody>
                         <CredenzaFooter className="mt-4">
                             <CredenzaClose asChild>

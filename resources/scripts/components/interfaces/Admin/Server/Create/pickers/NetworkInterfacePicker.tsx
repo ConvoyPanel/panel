@@ -1,6 +1,8 @@
 import { useFormContext } from 'react-hook-form'
 
 import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr'
+import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
+import { IconNetwork } from '@tabler/icons-react'
 import {
     Select,
     SelectContent,
@@ -42,14 +44,24 @@ const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            {data?.map(item => (
-                                <SelectItem
-                                    key={item.id}
-                                    value={item.id.toString()}
-                                >
-                                    {item.name}
-                                </SelectItem>
-                            ))}
+                            {data?.length === 0 ? (
+                                <div className="p-2">
+                                    <SimpleEmptyState
+                                        icon={IconNetwork}
+                                        title="No Network Interfaces"
+                                        description="There are no network interfaces available for this node."
+                                    />
+                                </div>
+                            ) : (
+                                data?.map(item => (
+                                    <SelectItem
+                                        key={item.id}
+                                        value={item.id.toString()}
+                                    >
+                                        {item.name}
+                                    </SelectItem>
+                                ))
+                            )}
                         </SelectContent>
                     </Select>
                     <FormMessage />

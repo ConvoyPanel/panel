@@ -12,25 +12,33 @@ import {
     CredenzaTitle,
 } from '@/components/ui/Credenza'
 import { Node } from '@/types/node.ts'
-import useAttachedNodesSWR from '@/api/admin/addressBlockGroups/use-attached-nodes-swr.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
+import { KeyedMutator } from 'swr'
+import { PaginatedNodes } from '@/types/node.ts'
 
 interface Props {
+    mutate: KeyedMutator<PaginatedNodes>
     node: Node | null
     open: boolean
     onOpenChange: (open: boolean) => void
 }
 
-const DetachNodeModal = ({ node, open, onOpenChange }: Props) => {
+const DetachNodeModal = ({ mutate, node, open, onOpenChange }: Props) => {
     const { addressBlockGroupId } = Route.useParams()
-    const { mutate } = useAttachedNodesSWR(Number(addressBlockGroupId))
 
     const [state, submit] = useAsyncFunction(async () => {
         try {
             if (!node) return
 
             await detachNode(Number(addressBlockGroupId), node.id)
-            await mutate()
+            await mutate(data => {
+                if (!data) return
+
+                return {
+                    ...data,
+                    items: data.items.filter(item => item.id !== node.id),
+                }
+            }, false)
             toast.success('Node detached successfully')
             onOpenChange(false)
         } catch (e) {

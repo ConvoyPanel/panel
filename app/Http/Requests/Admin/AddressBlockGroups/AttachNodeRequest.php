@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests\Admin\AddressBlockGroups;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Models\AddressBlockGroup;
+use App\Http\Requests\BaseApiRequest;
 
-class AttachNodeRequest extends FormRequest
+class AttachNodeRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

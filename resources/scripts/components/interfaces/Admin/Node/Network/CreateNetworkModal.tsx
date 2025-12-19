@@ -36,7 +36,6 @@ const CreateNetworkModal = () => {
         defaultValues: {
             name: '',
             description: '',
-            mtu: '',
         },
     })
 
@@ -82,15 +81,6 @@ const CreateNetworkModal = () => {
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
-                            />
-                            <InputForm
-                                name={'mtu'}
-                                label={'MTU'}
-                                type={'number'}
-                                min={1}
-                                max={65535}
-                                placeholder={'1500'}
-                                autoComplete={'off'}
                             />
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>

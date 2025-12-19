@@ -1,3 +1,8 @@
+import { useState } from 'react'
+import AttachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/AttachNodeModal.tsx'
+import DetachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DetachNodeModal.tsx'
+import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
+import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import usePagination from '@/hooks/use-pagination.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
 import { Node } from '@/types/node.ts'
@@ -15,12 +20,14 @@ import { TabsContent } from '@/components/ui/Tabs'
 const AttachedNodesTab = () => {
     const pagination = usePagination()
     const { addressBlockGroupId } = Route.useParams()
-    const { data } = useAttachedNodesSWR(Number(addressBlockGroupId), {
+    const { data, mutate } = useAttachedNodesSWR(Number(addressBlockGroupId), {
         page: pagination.page,
         filters: {
             '*': pagination.debouncedQuery,
         },
     })
+
+    const [selectedNode, setSelectedNode] = useState<Node | null>(null)
 
     const columns: ColumnDef<Node>[] = [
         {
@@ -60,6 +67,11 @@ const AttachedNodesTab = () => {
                 return `${memory.value} ${memory.unit}`
             },
         },
+        actionsColumn(({ row }) => (
+            <DropdownMenuItem onClick={() => setSelectedNode(row.original)}>
+                Detach
+            </DropdownMenuItem>
+        )),
     ]
 
     return (
@@ -70,7 +82,14 @@ const AttachedNodesTab = () => {
                 toolbar
                 data={data}
                 columns={columns}
+                rightActions={<AttachNodeModal mutate={mutate} />}
                 {...pagination}
+            />
+            <DetachNodeModal
+                mutate={mutate}
+                node={selectedNode}
+                open={!!selectedNode}
+                onOpenChange={open => !open && setSelectedNode(null)}
             />
         </TabsContent>
     )
