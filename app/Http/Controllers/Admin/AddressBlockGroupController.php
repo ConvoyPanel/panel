@@ -12,6 +12,7 @@ use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Node;
 use App\Models\Server;
 use App\Transformers\Admin\AddressBlockGroupTransformer;
+use App\Transformers\Admin\NetworkInterfaceTransformer;
 use App\Transformers\Admin\NodeTransformer;
 use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\Eloquent\Builder;
@@ -80,17 +81,25 @@ class AddressBlockGroupController
 
     public function getAttachedNodes(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse
     {
-        $nodes = QueryBuilder::for($addressBlockGroup->nodes())
-            ->withCount('servers')
+        $interfaces = QueryBuilder::for($addressBlockGroup->networkInterfaces())
+            ->with(['node' => function ($query) {
+                $query->withCount('servers');
+            }])
             ->defaultSort('-id')
             ->allowedFilters([
-                AllowedFilter::custom('*', new FiltersNodeWildcard),
-                AllowedFilter::exact('id'),
+                AllowedFilter::callback('*', function (Builder $query, $value) {
+                    $query->where('name', 'LIKE', "%$value%")
+                        ->orWhereHas('node', function (Builder $query) use ($value) {
+                            $query->where('fqdn', 'LIKE', "%$value%")
+                                ->orWhere('display_name', 'LIKE', "%$value%");
+                        });
+                }),
+                AllowedFilter::exact('node_id'),
             ])
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($nodes, new NodeTransformer)->respond();
+        return fractal($interfaces, new NetworkInterfaceTransformer)->respond();
     }
 
     public function attachNode(AttachNodeRequest $request, AddressBlockGroup $addressBlockGroup): JsonResponse

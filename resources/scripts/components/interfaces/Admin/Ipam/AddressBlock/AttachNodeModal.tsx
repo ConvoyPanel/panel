@@ -22,7 +22,7 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import NodePicker from '@/components/interfaces/Admin/Server/Create/pickers/NodePicker.tsx'
 import NetworkInterfacePicker from '@/components/interfaces/Admin/Server/Create/pickers/NetworkInterfacePicker.tsx'
-import { PaginatedNodes } from '@/types/node.ts'
+import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 
 const schema = z.object({
     nodeId: z.string().min(1, 'A node is required'),
@@ -30,7 +30,7 @@ const schema = z.object({
 })
 
 interface Props {
-    mutate: KeyedMutator<PaginatedNodes>
+    mutate: KeyedMutator<PaginatedNetworkInterfaces>
 }
 
 const AttachNodeModal = ({ mutate }: Props) => {

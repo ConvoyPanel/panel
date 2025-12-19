@@ -11,13 +11,13 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
+import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import { Node } from '@/types/node.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
 import { KeyedMutator } from 'swr'
-import { PaginatedNodes } from '@/types/node.ts'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedNodes>
+    mutate: KeyedMutator<PaginatedNetworkInterfaces>
     node: Node | null
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -36,7 +36,7 @@ const DetachNodeModal = ({ mutate, node, open, onOpenChange }: Props) => {
 
                 return {
                     ...data,
-                    items: data.items.filter(item => item.id !== node.id),
+                    items: data.items.filter(item => item.nodeId !== node.id),
                 }
             }, false)
             toast.success('Node detached successfully')

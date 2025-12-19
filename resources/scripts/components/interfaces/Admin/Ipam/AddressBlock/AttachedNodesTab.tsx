@@ -5,6 +5,7 @@ import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import usePagination from '@/hooks/use-pagination.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
+import { NetworkInterface } from '@/types/network-interface.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
@@ -29,46 +30,41 @@ const AttachedNodesTab = () => {
 
     const [selectedNode, setSelectedNode] = useState<Node | null>(null)
 
-    const columns: ColumnDef<Node>[] = [
+    const columns: ColumnDef<NetworkInterface>[] = [
         {
-            header: 'Name',
-            accessorKey: 'displayName',
+            header: 'Interface',
+            accessorKey: 'name',
+            meta: {
+                skeletonWidth: '5rem',
+            },
+        },
+        {
+            header: 'Node',
+            accessorKey: 'node.displayName',
             enableHiding: false,
             meta: {
                 skeletonWidth: '5rem',
             },
-            cell: ({ cell }) => (
+            cell: ({ row }) => (
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/nodes/${cell.row.original.id}`}
+                    to={`/admin/nodes/${row.original.node?.id}`}
                 >
-                    {cell.getValue<string>()}
+                    {row.original.node?.displayName}
                 </Link>
             ),
         },
         {
             header: 'FQDN',
-            accessorKey: 'fqdn',
+            accessorKey: 'node.fqdn',
             meta: {
                 skeletonWidth: '7rem',
             },
         },
-        {
-            header: 'Memory',
-            accessorKey: 'memory',
-            meta: {
-                skeletonWidth: '1rem',
-            },
-            cell: ({ cell }) => {
-                const memory = byteSize(cell.getValue<number>(), {
-                    units: 'iec',
-                })
-
-                return `${memory.value} ${memory.unit}`
-            },
-        },
         actionsColumn(({ row }) => (
-            <DropdownMenuItem onClick={() => setSelectedNode(row.original)}>
+            <DropdownMenuItem
+                onClick={() => setSelectedNode(row.original.node || null)}
+            >
                 Detach
             </DropdownMenuItem>
         )),

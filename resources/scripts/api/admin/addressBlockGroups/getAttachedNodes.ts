@@ -1,4 +1,5 @@
-import { PaginatedNodes } from '@/types/node.ts'
+import { rawDataToNetworkInterface } from '@/api/transformers/network-interface.ts'
+import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import {
     QueryBuilderParams,
     getPaginationSet,
@@ -7,14 +8,12 @@ import {
 
 import axios from '@/lib/axios.ts'
 
-import { rawDataToNode } from '@/api/transformers/node.ts'
-
 export type AttachedNodesQueryParams = QueryBuilderParams<'*' | 'id'>
 
 const getAttachedNodes = async (
     addressBlockGroupId: number,
     params: AttachedNodesQueryParams
-): Promise<PaginatedNodes> => {
+): Promise<PaginatedNetworkInterfaces> => {
     const { data } = await axios.get(
         `/api/admin/address-block-groups/${addressBlockGroupId}/nodes`,
         {
@@ -23,7 +22,7 @@ const getAttachedNodes = async (
     )
 
     return {
-        items: data.data.map(rawDataToNode),
+        items: data.data.map(rawDataToNetworkInterface),
         pagination: getPaginationSet(data.meta.pagination),
     }
 }

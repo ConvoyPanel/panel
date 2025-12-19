@@ -1,4 +1,4 @@
-import { PaginatedNodes } from '@/types/node.ts'
+import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import useSWR from 'swr'
 
 import getAttachedNodes, {
@@ -15,7 +15,7 @@ const useAttachedNodesSWR = (
     addressBlockGroupId: number | null | undefined,
     params: AttachedNodesQueryParams
 ) => {
-    return useSWR<PaginatedNodes>(
+    return useSWR<PaginatedNetworkInterfaces>(
         getKey(addressBlockGroupId, params),
         () => getAttachedNodes(addressBlockGroupId!, params)
     )
