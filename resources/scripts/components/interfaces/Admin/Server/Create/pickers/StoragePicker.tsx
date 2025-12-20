@@ -1,3 +1,4 @@
+import { Storage } from '@/types/storage'
 import byteSize from 'byte-size'
 import { useFormContext } from 'react-hook-form'
 
@@ -21,11 +22,17 @@ import {
 
 interface StoragePickerProps {
     nodeId: number | null
+    requiredContentTypes?: (keyof Storage)[]
 }
 
-const StoragePicker = ({ nodeId }: StoragePickerProps) => {
+const StoragePicker = ({ nodeId, requiredContentTypes }: StoragePickerProps) => {
     const { control } = useFormContext()
     const { data: storages, isLoading } = useStoragesSWR(nodeId ?? undefined)
+
+    const filteredStorages = storages?.filter(storage => {
+        if (!requiredContentTypes) return true
+        return requiredContentTypes.every(type => storage[type] === true)
+    })
 
     return (
         <FormField
@@ -45,7 +52,7 @@ const StoragePicker = ({ nodeId }: StoragePickerProps) => {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            {storages?.length === 0 ? (
+                            {filteredStorages?.length === 0 ? (
                                 <div className="p-2">
                                     <SimpleEmptyState
                                         icon={IconDatabase}
@@ -54,7 +61,7 @@ const StoragePicker = ({ nodeId }: StoragePickerProps) => {
                                     />
                                 </div>
                             ) : (
-                                storages?.map(storage => {
+                                filteredStorages?.map(storage => {
                                     const used =
                                         storage.usages.server +
                                         storage.usages.backup +

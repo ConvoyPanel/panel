@@ -6,8 +6,10 @@ use App\Rules\HasSufficientCPU;
 use App\Rules\HasSufficientMemory;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Server;
 use App\Rules\HasSufficientAddresses;
+use App\Rules\StorageAllows;
 use App\Rules\HasSufficientDiskSpace;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\TemplateIsAvailable;
@@ -26,7 +28,10 @@ class StoreServerRequest extends BaseApiRequest
             // Basic server information
             'name'       => $rules['name'],
             'node_id'    => $rules['node_id'],
-            'storage_id' => $rules['storage_id'],
+            'storage_id' => [
+                ...$rules['storage_id'],
+                new StorageAllows(StorageContentType::KVM),
+            ],
             'user_id'    => $rules['user_id'],
             'vmid'       => ['nullable', 'numeric', 'min:100', 'max:999999999', new VMIDIsAvailable($this->input('node_id'))],
             'hostname'   => $rules['hostname'],

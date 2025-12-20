@@ -25,7 +25,10 @@ const GeneralForm = () => {
 
             <UserPicker />
             <NodePicker />
-            <StoragePicker nodeId={nodeId ? Number(nodeId) : null} />
+            <StoragePicker
+                nodeId={nodeId ? Number(nodeId) : null}
+                requiredContentTypes={['storesKvm']}
+            />
         </div>
     )
 }
