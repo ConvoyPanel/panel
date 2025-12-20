@@ -34,7 +34,7 @@ const InputForm = ({
                         <Input
                             {...props}
                             {...field}
-                            disabled={formState.isSubmitting}
+                            disabled={props.disabled || formState.isSubmitting}
                         />
                     </FormControl>
                     {description && (

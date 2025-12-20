@@ -11,9 +11,11 @@ class TemplateTransformer extends TransformerAbstract
     {
         return [
             'uuid' => $template->uuid,
+            'template_group_id' => $template->template_group_id,
             'name' => $template->name,
-            'hidden' => $template->hidden,
-            'order_column' => $template->order_column,
+            'description' => $template->description,
+            'vmid' => $template->vmid,
+            'is_admin_only' => $template->is_admin_only,
         ];
     }
 }

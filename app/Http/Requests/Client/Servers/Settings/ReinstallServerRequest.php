@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Client\Servers\Settings;
 
+use App\Enums\Server\ServerStatus;
 use App\Http\Requests\BaseApiRequest;
+use App\Rules\TemplateIsAvailable;
+use App\Rules\TemplateFitsStorage;
 use App\Models\Server;
 use App\Models\Template;
-use App\Rules\Password;
-use App\Rules\USKeyboardCharacters;
+use Illuminate\Validation\Validator;
 
 class ReinstallServerRequest extends BaseApiRequest
 {
@@ -15,7 +17,9 @@ class ReinstallServerRequest extends BaseApiRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $server = $this->parameter('server', Server::class);
+
+        return $server->isReady() || $server->status === ServerStatus::DEFERRED_OS_SELECTION;
     }
 
     /**
@@ -26,23 +30,48 @@ class ReinstallServerRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'template_uuid' => 'required|string|exists:templates,uuid',
-            'account_password' => ['required', 'string', 'min:8', 'max:191', new Password(
-            ), new USKeyboardCharacters()],
+            'template_uuid' => [
+                'required',
+                'string',
+                'exists:templates,uuid',
+                new TemplateIsAvailable(),
+                new TemplateFitsStorage(),
+            ],
+            'account_password' => ['required', 'string', 'min:8', 'max:191'],
             'start_on_completion' => 'present|boolean',
         ];
     }
 
-    // check if the template belongs to the same node as the server
-    public function withValidator($validator)
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
     {
-        $validator->after(function ($validator) {
-            $template = Template::where('uuid', '=', $this->template_uuid)->firstOrFail();
-            $server = $this->parameter('server', Server::class);
+        parent::prepareForValidation();
 
-            if ($server->node_id !== $template->group->node_id) {
-                $validator->errors()->add('template_uuid', 'The selected template is invalid.');
-            }
-        });
+        $server = $this->parameter('server', Server::class);
+
+        $this->merge([
+            'node_id' => $server->node_id,
+            'limits' => [
+                'disk' => $server->disk,
+            ],
+        ]);
+    }
+
+    /**
+     * Get the validation hooks for the request.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $template = Template::where('uuid', '=', $this->template_uuid)->first();
+
+                if ($template && $template->is_admin_only && ! $this->user()->root_admin) {
+                    $validator->errors()->add('template_uuid', 'You are not authorized to use this template.');
+                }
+            },
+        ];
     }
 }

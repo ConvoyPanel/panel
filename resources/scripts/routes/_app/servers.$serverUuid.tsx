@@ -15,6 +15,7 @@ import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import InstallingServer from '@/components/interfaces/Client/Server/Status/InstallingServer.tsx'
 import SuspendedServer from '@/components/interfaces/Client/Server/Status/SuspendedServer.tsx'
+import DeferredOSSelection from '@/components/interfaces/Client/Server/Status/DeferredOSSelection.tsx'
 import useServerSWR, { preloadServer } from '@/api/servers/use-server-swr.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -88,13 +89,18 @@ function ServerLayout() {
 
     const isInstalling =
         server?.status === 'installing' ||
+        server?.status === 'install_failed' ||
         server?.status === 'restoring_backup' ||
-        server?.status === 'restoring_snapshot'
+        server?.status === 'restoring_snapshot' ||
+        server?.status === 'deleting'
+    const isDeferred = server?.status === 'deferred_os_selection'
     const isSuspended = server?.status === 'suspended'
 
     return (
         <AppLayout routes={routes}>
-            {isInstalling ? (
+            {isDeferred ? (
+                <DeferredOSSelection server={server} />
+            ) : isInstalling ? (
                 <InstallingServer server={server} />
             ) : isSuspended ? (
                 <SuspendedServer />

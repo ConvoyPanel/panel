@@ -13,6 +13,7 @@ use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use App\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class AllocationService
 {
@@ -20,6 +21,24 @@ class AllocationService
         private ProxmoxConfigRepository $configRepository,
         private ProxmoxDiskRepository $diskRepository,
     ) {}
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getDisks(Server $server): Collection
+    {
+        return $this->configRepository->setServer($server)->getConfig()->disks;
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getBootOrder(Server $server): Collection
+    {
+        return $this->configRepository->setServer($server)->getConfig()->bootOrder;
+    }
 
     /**
      * @throws RequestException

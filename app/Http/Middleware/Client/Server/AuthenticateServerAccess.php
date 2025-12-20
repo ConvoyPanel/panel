@@ -12,9 +12,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AuthenticateServerAccess
 {
     /**
-     * Routes that this middleware should not apply to if the user is an admin.
+     * Routes that this middleware should not apply to regardless of the status.
      */
-    protected array $except = [];
+    protected array $except = [
+        'client.servers.show',
+        'client.servers.show.deployment',
+        'client.servers.show.retry-installation',
+        'client.servers.template-groups.index',
+        'client.servers.show.reinstall'
+    ];
 
     /**
      * Handle an incoming request.
@@ -32,7 +38,7 @@ class AuthenticateServerAccess
             throw new NotFoundHttpException('Server not found');
         }
 
-        if (! $server->isReady() && ! $request->routeIs('client.servers.show', 'client.servers.show.deployment')) {
+        if (! $server->isReady() && ! $request->routeIs($this->except)) {
             throw new ServerStatusConflictException($server);
         }
 

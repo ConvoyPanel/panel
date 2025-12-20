@@ -55,6 +55,11 @@ Route::prefix('/servers/{server}')->middleware(
         [Client\Servers\ServerController::class, 'getDeployment'],
     )->name('servers.show.deployment');
 
+    Route::post(
+        '/retry-installation',
+        [Client\Servers\ServerController::class, 'retryInstallation'],
+    )->name('servers.show.retry-installation');
+
     Route::get(
         '/state',
         [Client\Servers\ServerController::class, 'getState'],
@@ -101,11 +106,11 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get(
             '/template-groups',
             [Client\Servers\SettingsController::class, 'getTemplateGroups'],
-        );
+        )->name('servers.template-groups.index');
         Route::post(
             '/reinstall',
             [Client\Servers\SettingsController::class, 'reinstall'],
-        );
+        )->name('servers.show.reinstall');
 
         Route::get(
             '/hardware/boot-order',

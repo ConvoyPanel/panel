@@ -144,6 +144,12 @@ export default function DeploymentStepRow({
                     />
                 </div>
             )}
+            {isFailed && (step.errorCode || step.errorMessage) && (
+                <div className="pl-9 text-xs text-red-500">
+                    {step.errorCode && <span className="font-mono font-bold">{step.errorCode}: </span>}
+                    {step.errorMessage}
+                </div>
+            )}
         </li>
     )
 }

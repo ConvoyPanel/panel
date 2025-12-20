@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Enums\Server\ConsoleType;
 use App\Enums\Server\PowerCommand;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
+use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
@@ -12,6 +13,7 @@ use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\ServerConsoleService;
 use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\ServerStatus;
 use App\Transformers\Client\DeploymentTransformer;
 use App\Transformers\Client\ServerStateTransformer;
 use App\Transformers\Client\ServerTerminalTransformer;
@@ -49,16 +51,30 @@ class ServerController
 
     public function getDeployment(Server $server)
     {
-        $deployment = $server->deployments()
-            ->nonCompleted()
-            ->latest('requested_at')
-            ->first();
+        $query = $server->deployments()->latest('requested_at');
+
+        if ($server->status === ServerStatus::INSTALL_FAILED) {
+            $query->where('status', DeploymentStatus::FAILED);
+        } else {
+            $query->nonCompleted();
+        }
+
+        $deployment = $query->first();
 
         if (! $deployment) {
             return response()->noContent();
         }
 
         return fractal($deployment, new DeploymentTransformer)->respond();
+    }
+
+    public function retryInstallation(RetryInstallationRequest $request, Server $server)
+    {
+        $server->update([
+            'status' => ServerStatus::DEFERRED_OS_SELECTION,
+        ]);
+
+        return response()->noContent();
     }
 
     public function getState(Server $server)

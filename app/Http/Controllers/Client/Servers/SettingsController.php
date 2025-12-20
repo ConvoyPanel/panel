@@ -6,6 +6,8 @@ use App\Data\Server\Deployments\ServerDeploymentData;
 use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\AuthenticationType;
 use App\Enums\Server\ServerStatus;
+use App\Enums\Server\DeploymentType;
+use App\Enums\Server\DeploymentStatus;
 use App\Http\Requests\Client\Servers\Settings\MountMediaRequest;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
@@ -53,29 +55,20 @@ class SettingsController
 
     public function getTemplateGroups(Request $request, Server $server)
     {
+        $isAdmin = $request->user()->root_admin;
+
         $templateGroups = QueryBuilder::for(TemplateGroup::query())
-            ->defaultSort('order_column')
             ->allowedFilters(['name']);
 
-        if (! $request->user()->root_admin) {
-            $templateGroups = $templateGroups->where(
-                [['template_groups.hidden', '=', false], ['template_groups.node_id', '=', $server->node->id]],
-            )
-                ->with(['templates' => function ($query) {
-                    $query->where('hidden', '=', false)->orderBy(
-                        'order_column',
-                    );
-                }])->get();
-        } else {
-            $templateGroups = $templateGroups->where(
-                'template_groups.node_id',
-                '=',
-                $server->node->id,
-            )
-                ->with(['templates' => function ($query) {
-                    $query->orderBy('order_column');
-                }])->get();
+        if (! $isAdmin) {
+            $templateGroups->where('is_admin_only', false);
         }
+
+        $templateGroups = $templateGroups->with(['templates' => function ($query) use ($isAdmin) {
+            if (! $isAdmin) {
+                $query->where('is_admin_only', false);
+            }
+        }])->get();
 
         return fractal($templateGroups, new TemplateGroupTransformer)->respond();
     }
@@ -83,17 +76,17 @@ class SettingsController
     public function reinstall(ReinstallServerRequest $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $server->update(['status' => ServerStatus::INSTALLING->value]);
+            $template = Template::where('uuid', '=', $request->template_uuid)->firstOrFail();
 
-            $deployment = ServerDeploymentData::from([
-                'server' => $server,
-                'template' => Template::where('uuid', '=', $request->template_uuid)->firstOrFail(),
-                'account_password' => $request->account_password,
-                'should_create_server' => true,
+            $deployment = $server->deployments()->create([
+                'template_id' => $template->id,
+                'type' => DeploymentType::REINSTALL,
+                'status' => DeploymentStatus::PENDING,
                 'start_on_completion' => $request->boolean('start_on_completion'),
+                'requested_at' => now(),
             ]);
 
-            $this->rebuildServerAction->execute($deployment);
+            $this->rebuildServerAction->execute($deployment, $request->account_password);
         });
 
         return response()->noContent();

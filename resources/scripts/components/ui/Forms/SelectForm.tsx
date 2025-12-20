@@ -27,6 +27,7 @@ interface Props {
     description?: ReactNode
     placeholder?: string
     items: SelectFormItem[]
+    disabled?: boolean
 }
 
 const SelectForm = ({
@@ -35,6 +36,7 @@ const SelectForm = ({
     description,
     placeholder,
     items,
+    disabled,
 }: Props) => {
     return (
         <FormField
@@ -50,7 +52,7 @@ const SelectForm = ({
                         <Select
                             onValueChange={field.onChange}
                             value={field.value}
-                            disabled={formState.isSubmitting}
+                            disabled={disabled || formState.isSubmitting}
                         >
                             <FormControl>
                                 <SelectTrigger>

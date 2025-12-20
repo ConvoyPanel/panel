@@ -23,8 +23,9 @@ class TemplateGroupTransformer extends TransformerAbstract
         return [
             'uuid' => $group->uuid,
             'name' => $group->name,
-            'hidden' => $group->hidden,
-            'order_column' => $group->order_column,
+            'description' => $group->description,
+            'icon' => $group->icon,
+            'is_admin_only' => $group->is_admin_only,
         ];
     }
 

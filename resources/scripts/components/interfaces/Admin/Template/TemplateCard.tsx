@@ -98,6 +98,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                         <TextareaForm
                             name={'description'}
                             label={'Description'}
+                            description={'This is visible to non-admins too.'}
                         />
                         <InputForm
                             name={'vmid'}

@@ -104,6 +104,7 @@ const EditTemplateGroupModal = () => {
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
+                                description={'This is visible to non-admins too.'}
                             />
                             <TemplateIconSelect />
                             <CheckboxForm
