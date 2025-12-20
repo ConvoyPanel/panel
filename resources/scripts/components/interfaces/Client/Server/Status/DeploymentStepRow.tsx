@@ -1,6 +1,6 @@
 import { DeploymentStep, DeploymentStatus } from '@/types/deployment'
 import { LinearProgressBar } from '@/components/ui/Progress'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistance, formatDistanceToNow } from 'date-fns'
 import { IconCheck, IconLoader, IconX } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
@@ -53,7 +53,7 @@ export default function DeploymentStepRow({ step }: DeploymentStepRowProps) {
                         {step.startedAt && (
                             <span className="text-xs text-muted-foreground">
                                 {isCompleted && step.completedAt
-                                    ? `Completed in ${formatDistanceToNow(step.startedAt, { includeSeconds: true }).replace('less than a minute', '< 1m')}`
+                                    ? `Completed in ${formatDistance(step.startedAt, step.completedAt, { includeSeconds: true }).replace('less than a minute', '< 1m')}`
                                     : `Running for ${formatDistanceToNow(step.startedAt)}`
                                 }
                             </span>
