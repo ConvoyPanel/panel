@@ -67,7 +67,7 @@ class DeleteServerAction
     {
         $steps = $deployment->steps()->createMany([
             [
-                'name' => 'kill-vm',
+                'name' => 'stop-vm',
                 'status' => DeploymentStatus::PENDING,
             ],
             [

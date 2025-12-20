@@ -130,7 +130,7 @@ class BuildServerAction
 
         if ($deployment->start_on_completion) {
             $step = $deployment->steps()->create([
-                'name' => 'start',
+                'name' => 'start-vm',
                 'status' => DeploymentStatus::PENDING,
             ]);
             $jobs[] = new SendPowerCommandJob($step, PowerCommand::START, markComplete: true);

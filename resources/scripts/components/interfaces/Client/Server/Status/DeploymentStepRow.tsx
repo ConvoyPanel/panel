@@ -28,8 +28,9 @@ const STEP_MAPPINGS: Record<
         showProgress: true,
         isBytes: false,
     },
-    'kill-vm': { label: 'Stopping VM', showProgress: false },
+    'stop-vm': { label: 'Stopping VM', showProgress: false },
     'delete-vm': { label: 'Deleting VM', showProgress: false },
+    'start-vm': { label: 'Starting VM', showProgress: false },
 }
 
 export default function DeploymentStepRow({
