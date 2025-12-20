@@ -56,8 +56,9 @@ export default function DeploymentStepRow({
     }, [isRunning])
 
     const formatStepDuration = (start: Date, end: Date) => {
-        const duration = intervalToDuration({ start, end })
-        const ms = differenceInMilliseconds(end, start)
+        const actualEnd = end < start ? start : end
+        const duration = intervalToDuration({ start, end: actualEnd })
+        const ms = differenceInMilliseconds(actualEnd, start)
         const seconds = (ms / 1000) % 60
 
         const parts = []
