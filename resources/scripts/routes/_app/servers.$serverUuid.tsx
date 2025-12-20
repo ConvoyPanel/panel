@@ -1,4 +1,5 @@
 import useTitle from '@/hooks/use-title.ts'
+import { Server } from '@/types/server'
 import { processAxiosError } from '@/utils/http.ts'
 import {
     IconBinaryTree,
@@ -13,6 +14,8 @@ import {
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
+import InstallingServer from '@/components/interfaces/Client/Server/Status/InstallingServer.tsx'
+import SuspendedServer from '@/components/interfaces/Client/Server/Status/SuspendedServer.tsx'
 import useServerSWR, { preloadServer } from '@/api/servers/use-server-swr.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -84,9 +87,21 @@ function ServerLayout() {
         },
     ]
 
+    const isInstalling =
+        server?.status === 'installing' ||
+        server?.status === 'restoring_backup' ||
+        server?.status === 'restoring_snapshot'
+    const isSuspended = server?.status === 'suspended'
+
     return (
         <AppLayout routes={routes}>
-            <Outlet />
+            {isInstalling ? (
+                <InstallingServer server={server} />
+            ) : isSuspended ? (
+                <SuspendedServer />
+            ) : (
+                <Outlet />
+            )}
         </AppLayout>
     )
 }

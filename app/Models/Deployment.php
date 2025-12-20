@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\DeploymentStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -59,6 +60,11 @@ class Deployment extends Model
     public function steps(): HasMany
     {
         return $this->hasMany(DeploymentStep::class);
+    }
+
+    public function scopeNonCompleted(Builder $query): void
+    {
+        $query->whereIn('status', [DeploymentStatus::PENDING, DeploymentStatus::RUNNING]);
     }
 
     public function getRouteKeyName(): string

@@ -1,15 +1,17 @@
 import { Node } from '@/types/node'
 import { PaginatedResult } from '@/utils/http.ts'
 
-export type ServerLifecycleStatus =
-    | 'ready'
-    | 'installing'
-    | 'install_failed'
-    | 'suspended'
-    | 'restoring_backup'
-    | 'restoring_snapshot'
-    | 'deleting'
-    | 'deletion_failed'
+export enum ServerLifecycleStatus {
+    Ready = 'ready',
+    DeferredOsSelection = 'deferred_os_selection',
+    Installing = 'installing',
+    InstallFailed = 'install_failed',
+    Suspended = 'suspended',
+    RestoringBackup = 'restoring_backup',
+    RestoringSnapshot = 'restoring_snapshot',
+    Deleting = 'deleting',
+    DeletionFailed = 'deletion_failed',
+}
 
 export interface Server {
     id: number

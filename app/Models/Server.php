@@ -114,32 +114,21 @@ class Server extends Model
 
     public function isInstalled(): bool
     {
-        return $this->status !== ServerStatus::INSTALLING->value;
+        return $this->status->isInstalled();
     }
 
     public function isInstalling(): bool
     {
-        return $this->status === ServerStatus::INSTALLING->value;
+        return $this->status->isInstalling();
     }
 
     public function isSuspended(): bool
     {
-        return $this->status === ServerStatus::SUSPENDED->value;
+        return $this->status->isSuspended();
     }
 
-    /**
-     * Checks if the server is currently in a user-accessible state. If not, an
-     * exception is raised. This should be called whenever something needs to make
-     * sure the server is not in a weird state that should block user access.
-     *
-     * @throws ServerStatusConflictException
-     */
-    public function validateCurrentState(): void
+    public function isReady(): bool
     {
-        if (
-            ! is_null($this->status)
-        ) {
-            throw new ServerStatusConflictException($this);
-        }
+        return $this->status->isReady();
     }
 }

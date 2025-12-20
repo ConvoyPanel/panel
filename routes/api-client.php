@@ -51,9 +51,14 @@ Route::prefix('/servers/{server}')->middleware(
         ->name('servers.show');
 
     Route::get(
+        '/deployment',
+        [Client\Servers\ServerController::class, 'getDeployment'],
+    )->name('servers.show.deployment');
+
+    Route::get(
         '/state',
         [Client\Servers\ServerController::class, 'getState'],
-    );
+    )->name('servers.show.state');
     Route::patch(
         '/state',
         [Client\Servers\ServerController::class, 'updateState'],

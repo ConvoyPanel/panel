@@ -11,6 +11,8 @@ use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\ServerConsoleService;
+use App\Enums\Server\DeploymentStatus;
+use App\Transformers\Client\DeploymentTransformer;
 use App\Transformers\Client\ServerStateTransformer;
 use App\Transformers\Client\ServerTerminalTransformer;
 use App\Transformers\Client\ServerTransformer;
@@ -43,6 +45,20 @@ class ServerController
     public function show(Server $server)
     {
         return fractal($server, new ServerTransformer)->respond();
+    }
+
+    public function getDeployment(Server $server)
+    {
+        $deployment = $server->deployments()
+            ->nonCompleted()
+            ->latest('requested_at')
+            ->first();
+
+        if (! $deployment) {
+            return response()->noContent();
+        }
+
+        return fractal($deployment, new DeploymentTransformer)->respond();
     }
 
     public function getState(Server $server)

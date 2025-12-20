@@ -32,14 +32,8 @@ class AuthenticateServerAccess
             throw new NotFoundHttpException('Server not found');
         }
 
-        try {
-            $server->validateCurrentState();
-        } catch (ServerStatusConflictException $exception) {
-            if ($request->routeIs('client.servers.show')) {
-                return $next($request);
-            }
-
-            throw $exception;
+        if (! $server->isReady() && ! $request->routeIs('client.servers.show', 'client.servers.show.deployment')) {
+            throw new ServerStatusConflictException($server);
         }
 
         return $next($request);
