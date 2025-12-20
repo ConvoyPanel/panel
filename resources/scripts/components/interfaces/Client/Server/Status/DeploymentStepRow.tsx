@@ -18,7 +18,7 @@ const STEP_MAPPINGS: Record<
 > = {
     'clone': { label: 'Cloning template', showProgress: true, isBytes: true },
     'configure': {
-        label: 'Configuring server',
+        label: 'Configuring VM',
         showProgress: true,
         isBytes: false,
     },
@@ -117,7 +117,7 @@ export default function DeploymentStepRow({
                 </div>
                 <div className='flex flex-col'>
                     {step.startedAt && (
-                        <span className='font-mono text-xs text-muted-foreground text-right'>
+                        <span className='text-right font-mono text-xs text-muted-foreground'>
                             {isRunning &&
                                 formatStepDuration(step.startedAt, now)}
                             {isCompleted &&
@@ -129,7 +129,7 @@ export default function DeploymentStepRow({
                         </span>
                     )}
                     {mapping.showProgress && isRunning && (
-                        <span className='font-mono text-xs text-muted-foreground text-right'>
+                        <span className='text-right font-mono text-xs text-muted-foreground'>
                             {formatProgress()}
                         </span>
                     )}
@@ -145,8 +145,12 @@ export default function DeploymentStepRow({
                 </div>
             )}
             {isFailed && (step.errorCode || step.errorMessage) && (
-                <div className="pl-9 text-xs text-red-500">
-                    {step.errorCode && <span className="font-mono font-bold">{step.errorCode}: </span>}
+                <div className='pl-9 text-xs text-red-500'>
+                    {step.errorCode && (
+                        <span className='font-mono font-bold'>
+                            {step.errorCode}:{' '}
+                        </span>
+                    )}
                     {step.errorMessage}
                 </div>
             )}
