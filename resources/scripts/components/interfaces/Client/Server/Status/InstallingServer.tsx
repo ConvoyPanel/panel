@@ -1,21 +1,21 @@
-import { useEffect } from 'react'
-import { DeploymentStep } from '@/types/deployment'
+import { DeploymentStatus, DeploymentStep } from '@/types/deployment'
 import { Server } from '@/types/server'
 import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import retryInstallation from '@/api/servers/retryInstallation'
 import useServerDeploymentSWR from '@/api/servers/use-server-deployment-swr.ts'
 import useServerSWR from '@/api/servers/use-server-swr.ts'
-import retryInstallation from '@/api/servers/retryInstallation'
 
+import { Button } from '@/components/ui/Button'
 import {
     Card,
     CardContent,
+    CardFooter,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 
 import DeploymentStepRow from './DeploymentStepRow.tsx'
 
@@ -36,35 +36,44 @@ export default function InstallingServer({ server }: InstallingServerProps) {
         if (deployment === null && server?.status !== 'install_failed') {
             mutate()
         }
+
+        if (
+            deployment?.status === DeploymentStatus.Failed &&
+            server?.status !== 'install_failed'
+        ) {
+            mutate()
+        }
     }, [deployment, mutate, server?.status])
 
-    const isFailed = server?.status === 'install_failed';
+    const isFailed = server?.status === 'install_failed'
 
     const getTitle = () => {
-        if (isFailed) return 'Installation Failed';
-        if (server?.status === 'deleting') return 'Deleting Server';
-        if (server?.status === 'restoring_backup') return 'Restoring Backup';
-        if (server?.status === 'restoring_snapshot') return 'Restoring Snapshot';
-        return 'Server Installing';
+        if (isFailed) return 'Installation Failed'
+        if (server?.status === 'deleting') return 'Deleting Server'
+        if (server?.status === 'restoring_backup') return 'Restoring Backup'
+        if (server?.status === 'restoring_snapshot') return 'Restoring Snapshot'
+        return 'Server Installing'
     }
 
     const getLoadingText = () => {
-        if (isFailed) return 'No deployment details available.';
-        if (server?.status === 'deleting') return 'Loading deletion progress...';
-        if (server?.status === 'restoring_backup') return 'Loading restore progress...';
-        if (server?.status === 'restoring_snapshot') return 'Loading snapshot restore progress...';
-        return 'Loading installation progress...';
+        if (isFailed) return 'No deployment details available.'
+        if (server?.status === 'deleting') return 'Loading deletion progress...'
+        if (server?.status === 'restoring_backup')
+            return 'Loading restore progress...'
+        if (server?.status === 'restoring_snapshot')
+            return 'Loading snapshot restore progress...'
+        return 'Loading installation progress...'
     }
 
     const handleRetry = async () => {
-        if (!server?.uuid) return;
+        if (!server?.uuid) return
         try {
-            await retryInstallation(server.uuid);
-            mutate();
+            await retryInstallation(server.uuid)
+            mutate()
         } catch (error) {
-            toast.error('Failed to retry installation.');
+            toast.error('Failed to retry installation.')
         }
-    };
+    }
 
     return (
         <div className='flex h-full min-h-[50vh] flex-col items-center justify-center p-4'>
@@ -73,11 +82,17 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                     <div className={'flex items-center space-x-2'}>
                         {isFailed ? (
                             <div className={'text-red-500'}>
-                                <IconAlertTriangle stroke={1} className={'size-12'} />
+                                <IconAlertTriangle
+                                    stroke={1}
+                                    className={'size-12'}
+                                />
                             </div>
                         ) : (
                             <div className={'animate-spin-ease'}>
-                                <IconRefresh stroke={1} className={'size-12 -scale-x-100'} />
+                                <IconRefresh
+                                    stroke={1}
+                                    className={'size-12 -scale-x-100'}
+                                />
                             </div>
                         )}
                         <div>
@@ -95,14 +110,16 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                             ))}
                         </ul>
                     ) : (
-                         <p className='text-center text-sm text-muted-foreground'>
+                        <p className='text-center text-sm text-muted-foreground'>
                             {getLoadingText()}
                         </p>
                     )}
                 </CardContent>
                 {isFailed && (
-                    <CardFooter className="flex justify-end p-4 pt-0">
-                         <Button onClick={handleRetry} variant="destructive">Retry Installation</Button>
+                    <CardFooter className='flex justify-end px-2 pb-2 pt-0'>
+                        <Button onClick={handleRetry} variant='destructive'>
+                            Retry Installation
+                        </Button>
                     </CardFooter>
                 )}
             </Card>

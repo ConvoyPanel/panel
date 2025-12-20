@@ -1,9 +1,16 @@
-import { useMemo, useEffect } from 'react'
 import { Server } from '@/types/server'
-import { toast } from 'sonner'
-import { useForm } from 'react-hook-form'
+import { handleFormErrors } from '@/utils/http'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
+
+import reinstallServer from '@/api/servers/reinstallServer'
+import useServerSWR from '@/api/servers/use-server-swr'
+import useTemplateGroupsSWR from '@/api/servers/use-template-groups-swr'
+
+import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
 
 import {
     Form,
@@ -14,6 +21,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
+import InputForm from '@/components/ui/Forms/InputForm'
 import {
     Select,
     SelectContent,
@@ -21,11 +29,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/Select'
-import InputForm from '@/components/ui/Forms/InputForm'
-import useServerSWR from '@/api/servers/use-server-swr'
-import reinstallServer from '@/api/servers/reinstallServer'
-import useTemplateGroupsSWR from '@/api/servers/use-template-groups-swr'
-import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
 
 interface OSSelectionFormProps {
     server: Server
@@ -34,7 +37,9 @@ interface OSSelectionFormProps {
 const formSchema = z.object({
     templateGroupUuid: z.string().min(1, 'Please select an OS family'),
     templateUuid: z.string().min(1, 'Please select a version'),
-    accountPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    accountPassword: z
+        .string()
+        .min(8, 'Password must be at least 8 characters'),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -70,10 +75,11 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                 accountPassword: values.accountPassword,
                 startOnCompletion: true,
             })
-            toast.success('Operating system installation started successfully.')
+            toast.success('The installation started successfully.')
             mutate()
         } catch (error) {
-            console.error(error)
+            if (handleFormErrors(error, form.setError)) return
+
             toast.error('Failed to start installation.')
         }
     }
@@ -160,7 +166,9 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                                                     </span>
                                                     {template.description && (
                                                         <span className='block truncate text-xs text-muted-foreground'>
-                                                            {template.description}
+                                                            {
+                                                                template.description
+                                                            }
                                                         </span>
                                                     )}
                                                 </div>
