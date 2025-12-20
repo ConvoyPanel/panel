@@ -77,8 +77,8 @@ export default function DeploymentStepRow({
 
     const formatProgress = () => {
         if (mapping.isBytes && step.progressTotal > 0) {
-            const current = byteSize(step.progressCurrent)
-            const total = byteSize(step.progressTotal)
+            const current = byteSize(step.progressCurrent, { units: 'iec' })
+            const total = byteSize(step.progressTotal, { units: 'iec' })
             return `${current.value}${current.unit} / ${total.value}${total.unit}`
         }
         return `${progressPercent}%`
