@@ -1,14 +1,16 @@
 import axios from '@/lib/axios.ts'
 
-import { rawDataToDeployment } from '@/api/transformers/deployment.ts'
+import { rawDataToDeployment } from '@/api/transformers/deployment'
 
 
 const getServerDeployment = async (uuid: string) => {
-    const {
-        data: { data },
-    } = await axios.get(`/api/client/servers/${uuid}/deployment`)
+    const { data, status } = await axios.get(`/api/client/servers/${uuid}/deployment`)
 
-    return rawDataToDeployment(data)
+    if (status === 204) {
+        return null
+    }
+
+    return rawDataToDeployment(data.data)
 }
 
 export default getServerDeployment

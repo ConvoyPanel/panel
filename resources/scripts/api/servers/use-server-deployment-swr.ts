@@ -5,7 +5,7 @@ import { Deployment } from '@/types/deployment'
 
 export const getKey = (uuid: string) => ['server', uuid, 'deployment']
 
-const useServerDeploymentSWR = (uuid?: string, config?: SWRConfiguration<Deployment>) => {
+const useServerDeploymentSWR = (uuid?: string, config?: SWRConfiguration<Deployment | null>) => {
     const params = useParams({ strict: false }) as { serverUuid: string }
     const serverUuid = uuid ?? params.serverUuid
 

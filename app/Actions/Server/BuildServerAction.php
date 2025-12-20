@@ -53,7 +53,7 @@ class BuildServerAction
      */
     public function getJobs(Deployment $deployment, ?string $accountPassword): array
     {
-        if ($deployment->type === DeploymentType::INSTALL) {
+        if ($deployment->type === DeploymentType::INSTALL || $deployment->type === DeploymentType::REINSTALL) {
             $jobs = $this->createInstallStepsAndJobs($deployment);
         } else {
             $jobs = $this->createConfigureStepsAndJobs($deployment);

@@ -1,5 +1,4 @@
 import useTitle from '@/hooks/use-title.ts'
-import { Server } from '@/types/server'
 import { processAxiosError } from '@/utils/http.ts'
 import {
     IconBinaryTree,
