@@ -33,7 +33,7 @@ const TemplateGroupSidebar = () => {
 
     return (
         <Sheet open={isOpen} onOpenChange={val => !val && closeModal('show')}>
-            <SheetContent className={'w-11/12 sm:max-w-lg'} side={'right'}>
+            <SheetContent className={'w-11/12 overflow-y-auto sm:max-w-lg'} side={'right'}>
                 <SheetHeader>
                     <SheetTitle className={'truncate'}>
                         {modalData?.name}
@@ -73,7 +73,7 @@ const TemplateGroupSidebar = () => {
                 ) : (
                     <div
                         className={
-                            'flex h-full flex-col overflow-y-auto border-t'
+                            'flex flex-col border-t'
                         }
                     >
                         {isCreating && (
