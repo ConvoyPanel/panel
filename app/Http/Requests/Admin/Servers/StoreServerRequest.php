@@ -11,6 +11,7 @@ use App\Rules\HasSufficientAddresses;
 use App\Rules\HasSufficientDiskSpace;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\TemplateIsAvailable;
+use App\Rules\TemplateFitsStorage;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
 use Illuminate\Validation\Rule;
@@ -104,6 +105,7 @@ class StoreServerRequest extends BaseApiRequest
                 'string',
                 'exists:templates,uuid',
                 new TemplateIsAvailable(),
+                new TemplateFitsStorage(),
             ],
             'start_on_completion'   => 'required|boolean',
         ];

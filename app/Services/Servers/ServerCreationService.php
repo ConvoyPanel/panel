@@ -29,6 +29,7 @@ use function now;
 use function substr;
 
 use App\Actions\Server\BuildServerAction;
+use App\Data\Cluster\ServerResourceData;
 
 /**
  * Class ServerCreationService
@@ -122,12 +123,19 @@ class ServerCreationService
      */
     public function isTemplateAvailable(Node $node, string $templateUuid): bool
     {
-        $template = $this->resourceRepository->setNode($node)->getResources()
+        return filled($this->getTemplate($node, $templateUuid));
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getTemplate(Node $node, string $templateUuid): ?ServerResourceData
+    {
+        return $this->resourceRepository->setNode($node)->getResources()
             ->where('vmid', Template::where('uuid', $templateUuid)->value('vmid'))
             ->where('isTemplate', true)
             ->first();
-
-        return filled($template);
     }
 
     /**
