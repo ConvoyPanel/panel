@@ -15,12 +15,13 @@ const BandwidthUsageCard = () => {
         units: 'iec',
         precision: 1,
     })
-    const limit = byteSize(server?.bandwidth.limit ?? 0, {
+    const isUnlimited = server?.bandwidth.limit === -1
+    const limit = byteSize(!isUnlimited ? (server?.bandwidth.limit ?? 0) : 0, {
         units: 'iec',
         precision: 1,
     })
     const bandwidthUsedPercent =
-        server && server.bandwidth.limit
+        server && server.bandwidth.limit > 0
             ? (server.bandwidth.usage / server.bandwidth.limit) * 100
             : 0
 
@@ -30,10 +31,12 @@ const BandwidthUsageCard = () => {
             icon={IconWifi}
             className={'col-span-2 @sm:col-span-1'}
             footer={
-                <LinearProgressBar
-                    value={bandwidthUsedPercent}
-                    aria-label={`${bandwidthUsedPercent}% of your bandwidth allowance is used`}
-                />
+                !isUnlimited && (
+                    <LinearProgressBar
+                        value={bandwidthUsedPercent}
+                        aria-label={`${bandwidthUsedPercent.toFixed(2)}% of your bandwidth allowance is used`}
+                    />
+                )
             }
         >
             <p>
@@ -41,8 +44,14 @@ const BandwidthUsageCard = () => {
                     {used.value} {used.unit} used
                 </span>
                 <span className={'block text-sm text-muted-foreground'}>
-                    out of {limit.value} {limit.unit} &#x2022;{' '}
-                    {bandwidthUsedPercent.toFixed(2)}%
+                    {isUnlimited ? (
+                        'Unlimited'
+                    ) : (
+                        <>
+                            out of {limit.value} {limit.unit} &#x2022;{' '}
+                            {bandwidthUsedPercent.toFixed(2)}%
+                        </>
+                    )}
                 </span>
             </p>
         </StatisticCard>
