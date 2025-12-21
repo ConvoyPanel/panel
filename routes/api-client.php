@@ -77,6 +77,7 @@ Route::prefix('/servers/{server}')->middleware(
     Route::get('/addresses', Client\Servers\AddressController::class);
 
     Route::get('/statistics', Client\Servers\StatisticController::class);
+    Route::get('/resources', Client\Servers\ResourceController::class);
 
     Route::prefix('/snapshots')->group(function () {
         Route::get('/', [Client\Servers\SnapshotController::class, 'index']);

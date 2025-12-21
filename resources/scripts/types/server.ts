@@ -68,3 +68,8 @@ export interface ServerTimepointData {
     }
     timestamp: Date
 }
+
+export interface ServerResources {
+    usedBytes: number
+    totalBytes: number
+}

@@ -13,7 +13,7 @@ import {
 
 
 interface Props {
-    title: string
+    title: ReactNode
     icon: TablerIcon
     children?: ReactNode
     footer?: ReactNode
