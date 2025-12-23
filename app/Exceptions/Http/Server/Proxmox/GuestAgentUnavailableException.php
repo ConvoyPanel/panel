@@ -13,3 +13,4 @@ class GuestAgentUnavailableException extends DisplayException
         parent::__construct($message, $previous, Response::HTTP_CONFLICT);
     }
 }
+

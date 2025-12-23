@@ -5,3 +5,4 @@ const retryInstallation = async (uuid: string) => {
 }
 
 export default retryInstallation
+
