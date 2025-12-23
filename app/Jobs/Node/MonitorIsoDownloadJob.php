@@ -2,8 +2,10 @@
 
 namespace App\Jobs\Node;
 
+use App\Enums\Activity\TaskExitStatus;
+use App\Enums\Activity\TaskStatus;
 use App\Models\ISO;
-use App\Services\Isos\IsoMonitorService;
+use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,10 +32,28 @@ class MonitorIsoDownloadJob implements ShouldQueue
         return [new WithoutOverlapping("node:iso.download#{$this->isoId}")];
     }
 
-    public function handle(IsoMonitorService $service): void
+    public function handle(ProxmoxActivityRepository $repository): void
     {
         $iso = ISO::findOrFail($this->isoId);
 
-        $service->checkDownloadProgress($iso, $this->upid, fn () => $this->release(3));
+        $task = $repository->setNode($iso->node)->getStatus($this->upid);
+
+        if ($task->status === TaskStatus::RUNNING) {
+            $this->release(3);
+
+            return;
+        }
+
+        if ($task->exitStatus === TaskExitStatus::OK) {
+            $iso->update([
+                'is_successful' => true,
+                'completed_at' => Carbon::now(),
+            ]);
+        } else {
+            $iso->update([
+                'is_successful' => false,
+                'completed_at' => Carbon::now(),
+            ]);
+        }
     }
 }

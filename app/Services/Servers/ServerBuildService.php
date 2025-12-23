@@ -13,6 +13,8 @@ use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Traits\HandlesProxmoxErrors;
 use Illuminate\Http\Client\ConnectionException;
 
+use function App\Helpers\convertToBytes;
+
 class ServerBuildService
 {
     use HandlesProxmoxErrors;
@@ -94,8 +96,9 @@ class ServerBuildService
         $progressRegex = '/transferred\s+([\d.]+)\s+([A-Za-z]+)\s+of\s+([\d.]+)\s+([A-Za-z]+)/';
 
         foreach ($logs as $log) {
+            $line = $log->text;
             // Check if a new disk clone operation has started.
-            if (preg_match($diskIdRegex, $log, $matches)) {
+            if (preg_match($diskIdRegex, $line, $matches)) {
                 $currentDiskId = $matches[1];
                 // Initialize progress for this new disk if we haven't seen it before.
                 if (! isset($progressPerDisk[$currentDiskId])) {
@@ -104,7 +107,7 @@ class ServerBuildService
             }
 
             // If we are within the context of a specific disk clone, look for progress lines.
-            if ($currentDiskId && preg_match($progressRegex, $log, $matches)) {
+            if ($currentDiskId && preg_match($progressRegex, $line, $matches)) {
                 $currentValue = (float) $matches[1];
                 $currentUnit = $matches[2];
                 $totalValue = (float) $matches[3];
@@ -113,8 +116,8 @@ class ServerBuildService
                 // Update the latest progress for the current disk.
                 // As we iterate, this will be overwritten until we have the final value for this disk.
                 $progressPerDisk[$currentDiskId] = [
-                    'current' => $this->convertToBytes($currentValue, $currentUnit),
-                    'total' => $this->convertToBytes($totalValue, $totalUnit),
+                    'current' => convertToBytes($currentValue, $currentUnit),
+                    'total' => convertToBytes($totalValue, $totalUnit),
                 ];
             }
         }
@@ -146,32 +149,5 @@ class ServerBuildService
         }
 
         return true;
-    }
-
-    /**
-     * Converts a size value with a unit (e.g., B, MiB, GiB) to bytes.
-     *
-     * @param  float  $value  The numeric value of the size.
-     * @param  string  $unit  The unit of the size.
-     * @return int The calculated size in bytes.
-     */
-    private function convertToBytes(float $value, string $unit): int
-    {
-        $unit = strtoupper(trim($unit));
-        switch ($unit) {
-            case 'B':
-                return (int) $value;
-            case 'KIB':
-                return (int) ($value * 1024);
-            case 'MIB':
-                return (int) ($value * pow(1024, 2));
-            case 'GIB':
-                return (int) ($value * pow(1024, 3));
-            case 'TIB':
-                return (int) ($value * pow(1024, 4));
-            default:
-                // Return 0 if the unit is not recognized to prevent errors.
-                return 0;
-        }
     }
 }

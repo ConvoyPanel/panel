@@ -14,6 +14,12 @@ class Snapshot extends Model
 
     const UPDATED_AT = null;
 
+    protected $guarded = [
+        'id',
+        'uuid',
+        'created_at',
+    ];
+
     protected $casts = [
         'size' => StorageSizeCast::class,
         'completed_at' => 'datetime',
@@ -26,7 +32,7 @@ class Snapshot extends Model
         'description' => 'nullable|string|max:191',
         'errors' => 'nullable|string|max:191',
         'is_locked' => 'sometimes|boolean',
-        'size' => 'nullable|numeric|min:0',
+        'size' => 'required|numeric|min:0',
         'completed_at' => 'nullable|date',
     ];
 
@@ -49,7 +55,7 @@ class Snapshot extends Model
     {
         parent::boot();
 
-        static::creating(function (ISO $user) {
+        static::creating(function (Snapshot $user) {
             $user->uuid = Str::uuid()->toString();
         });
     }

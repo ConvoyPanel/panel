@@ -44,7 +44,8 @@
   },
   "autoload": {
     "files": [
-      "app/Helpers/Network.php"
+      "app/Helpers/Network.php",
+      "app/Helpers/Bytes.php"
     ],
     "psr-4": {
       "App\\": "app/",

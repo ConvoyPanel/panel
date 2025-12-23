@@ -2,14 +2,21 @@
 
 namespace App\Repositories\Proxmox\Server;
 
+use App\Data\Server\Proxmox\Activity\TaskData;
+use App\Data\Server\Proxmox\Activity\TaskLogData;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use function array_pluck;
+use Illuminate\Support\Collection;
 
 class ProxmoxActivityRepository extends ProxmoxRepository
 {
-    public function getTasks(int $startAt = 0, int $limitRows = 500)
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     * @return Collection<int, TaskData>
+     */
+    public function getTasks(int $startAt = 0, int $limitRows = 500): Collection
     {
         $response = $this->getHttpClientWithParams()
             ->get(
@@ -22,14 +29,16 @@ class ProxmoxActivityRepository extends ProxmoxRepository
             )
             ->json();
 
-        return $this->getData($response);
+        return collect($this->getData($response))->map(
+            fn(array $task) => TaskData::fromRaw($task)
+        );
     }
 
     /**
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function getStatus(string $upid)
+    public function getStatus(string $upid): TaskData
     {
         $response = $this->getHttpClientWithParams([
             'task' => $upid,
@@ -37,16 +46,16 @@ class ProxmoxActivityRepository extends ProxmoxRepository
             ->get('/api2/json/nodes/{node}/tasks/{task}/status')
             ->json();
 
-        return $this->getData($response);
+        return TaskData::fromRaw($this->getData($response));
     }
 
     /**
      * @throws RequestException
      * @throws ConnectionException
      *
-     * @return string[]
+     * @return Collection<int, TaskLogData>
      */
-    public function getLogsByTask(string $upid, int $startAt = 0, int $limitLinesTo = 100): array
+    public function getLogsByTask(string $upid, int $startAt = 0, int $limitLinesTo = 100): Collection
     {
         $response = $this->getHttpClientWithParams([
             'task' => $upid,
@@ -57,17 +66,23 @@ class ProxmoxActivityRepository extends ProxmoxRepository
             ])
             ->json();
 
-        return array_pluck($this->getData($response), 't');
+        return collect($this->getData($response))->map(
+            fn(array $log) => TaskLogData::fromRaw($log)
+        );
     }
 
-    public function delete(string $upid)
+    /**
+     * Stops a running task
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function stop(string $upid): void
     {
-        $response = $this->getHttpClientWithParams([
+        $this->getHttpClientWithParams([
             'task' => $upid,
         ])
             ->delete('/api2/json/nodes/{node}/tasks/{task}')
             ->json();
-
-        return $this->getData($response);
     }
 }

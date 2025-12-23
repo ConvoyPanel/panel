@@ -19,7 +19,8 @@ class Server extends Model
 
     protected $guarded = [
         'id',
-        'updated_at',
+        'uuid',
+        'uuid_short',
         'created_at',
     ];
 
