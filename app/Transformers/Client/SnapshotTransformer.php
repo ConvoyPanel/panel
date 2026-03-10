@@ -8,7 +8,7 @@ use League\Fractal\TransformerAbstract;
 
 class SnapshotTransformer extends TransformerAbstract
 {
-    protected array $availableIncludes = [
+    protected array $defaultIncludes = [
         'children',
     ];
 

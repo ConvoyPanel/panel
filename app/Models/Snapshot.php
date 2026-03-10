@@ -20,6 +20,11 @@ class Snapshot extends Model
         'created_at',
     ];
 
+    protected $hidden = [
+        'id',
+        'snapshot_id',
+    ];
+
     protected $casts = [
         'size' => StorageSizeCast::class,
         'completed_at' => 'datetime',

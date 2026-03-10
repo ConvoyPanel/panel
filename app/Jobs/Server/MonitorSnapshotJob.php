@@ -11,6 +11,7 @@ use App\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
@@ -22,7 +23,9 @@ class MonitorSnapshotJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
+        #[WithoutRelations]
         public Server $server,
+        #[WithoutRelations]
         public Snapshot $snapshot,
         public string $upid
     ) {}

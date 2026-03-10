@@ -42,6 +42,18 @@ class SnapshotPolicy
     }
 
     /**
+     * Determine whether the user can update the snapshot.
+     */
+    public function update(User $user, Snapshot $snapshot, Server $server = null): bool
+    {
+        if ($server && $snapshot->server_id !== $server->id) {
+            return false;
+        }
+
+        return $user->root_admin || $user->id === $snapshot->server->user_id;
+    }
+
+    /**
      * Determine whether the user can delete the snapshot.
      */
     public function delete(User $user, Snapshot $snapshot, Server $server = null): bool

@@ -52,6 +52,7 @@ class ProxmoxSnapshotRepository extends ProxmoxRepository
         $response = $this->getHttpClientWithParams([
             'snapshot' => $name,
         ])
+            ->asForm()
             ->post('/api2/json/nodes/{node}/qemu/{server}/snapshot/{snapshot}/rollback')
             ->json();
 

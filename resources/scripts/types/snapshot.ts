@@ -8,6 +8,7 @@ export interface Snapshot {
     isLocked: boolean
     errors: string | null
     size: number
-    createdAt: Date
+    createdAt: string;
+    completedAt: string | null;
     children?: Snapshot[]
 }

@@ -2,49 +2,44 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
-use App\Http\Requests\Client\Servers\CreateSnapshotRequest;
+use App\Http\Requests\Client\Servers\StoreSnapshotRequest;
+use App\Http\Requests\Client\Servers\UpdateSnapshotRequest;
 use App\Http\Requests\Client\Servers\DeleteSnapshotRequest;
 use App\Http\Requests\Client\Servers\RestoreSnapshotRequest;
-use App\Jobs\Server\MonitorSnapshotJob;
 use App\Models\Server;
 use App\Models\Snapshot;
-use App\Repositories\Eloquent\SnapshotRepository;
 use App\Repositories\Proxmox\Server\ProxmoxSnapshotRepository;
+use App\Services\Servers\SnapshotService;
+use App\Transformers\Client\SnapshotTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
 class SnapshotController
 {
     public function __construct(
-        private SnapshotRepository $repository,
+        private SnapshotService $service,
         private ProxmoxSnapshotRepository $proxmoxRepository
     ) {}
 
     public function index(Server $server): JsonResponse
     {
-        return response()->json($this->repository->buildSnapshotTree($server->snapshots));
+        $data = $this->service->getSnapshotTree($server);
+
+        return fractal($data['snapshot'], new SnapshotTransformer)
+            ->addMeta(['current_snapshot_uuid' => $data['current_snapshot_uuid']])
+            ->respond();
     }
 
-    public function store(CreateSnapshotRequest $request, Server $server): Response
+    public function store(StoreSnapshotRequest $request, Server $server): Response
     {
-        DB::transaction(function () use ($request, $server) {
-            $data = $request->validated();
+        $this->service->createSnapshot($server, $request->validated());
 
-            $snapshot = $server->snapshots()->create([
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'size' => 0,
-            ]);
+        return response()->noContent();
+    }
 
-            $task = $this->proxmoxRepository->setServer($server)->create(
-                $data['name'],
-                'Created by Convoy' . PHP_EOL . PHP_EOL . 'UUID: ' . $snapshot->uuid,
-                $data['includes_ram'] ?? false
-            );
-
-            MonitorSnapshotJob::dispatch($server, $snapshot, $task);
-        });
+    public function update(UpdateSnapshotRequest $request, Server $server, Snapshot $snapshot): Response
+    {
+        $this->service->updateSnapshot($server, $snapshot, $request->validated());
 
         return response()->noContent();
     }
@@ -58,9 +53,7 @@ class SnapshotController
 
     public function destroy(DeleteSnapshotRequest $request, Server $server, Snapshot $snapshot): Response
     {
-        $this->proxmoxRepository->setServer($server)->delete($snapshot->name);
-
-        $snapshot->delete();
+        $this->service->deleteSnapshot($server, $snapshot);
 
         return response()->noContent();
     }

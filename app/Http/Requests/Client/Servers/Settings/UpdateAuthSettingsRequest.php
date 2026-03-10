@@ -29,23 +29,25 @@ class UpdateAuthSettingsRequest extends BaseApiRequest
         ];
     }
 
-    public function withValidator(Validator $validator)
+    public function after(): array
     {
-        $validator->after(function ($validator) {
-            $type = $this->request->get('type');
-            $sshKeys = explode(PHP_EOL, $this->request->get('ssh_keys'));
+        return [
+            function (Validator $validator) {
+                $type = $this->request->get('type');
+                $sshKeys = explode(PHP_EOL, $this->request->get('ssh_keys'));
 
-            if ($type === AuthenticationType::KEY->value) {
-                try {
-                    foreach ($sshKeys as $key) {
-                        if (strlen($key) > 0) {
-                            PublicKeyLoader::load($key);
+                if ($type === AuthenticationType::KEY->value) {
+                    try {
+                        foreach ($sshKeys as $key) {
+                            if (strlen($key) > 0) {
+                                PublicKeyLoader::load($key);
+                            }
                         }
+                    } catch (Exception $e) {
+                        $validator->errors()->add('ssh_keys', 'The SSH key(s) are invalid.');
                     }
-                } catch (Exception $e) {
-                    $validator->errors()->add('ssh_keys', 'The SSH key(s) are invalid.');
                 }
-            }
-        });
+            },
+        ];
     }
 }

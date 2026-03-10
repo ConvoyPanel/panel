@@ -15,13 +15,14 @@ class UpdateGroupOrderRequest extends FormRequest
         ];
     }
 
-    public function withValidator(Validator $validator)
+    public function after(): array
     {
-        // validate if each order id is unique in the array
-        $validator->after(function ($validator) {
-            if (count($this->order) !== count(array_unique($this->order))) {
-                $validator->errors()->add('order', 'Duplicate order id');
-            }
-        });
+        return [
+            function (Validator $validator) {
+                if (count($this->order) !== count(array_unique($this->order))) {
+                    $validator->errors()->add('order', 'Duplicate order id');
+                }
+            },
+        ];
     }
 }

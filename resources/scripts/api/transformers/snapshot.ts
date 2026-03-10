@@ -11,9 +11,10 @@ export const rawDataToSnapshot = (data: any): Snapshot => {
         isLocked: data.is_locked,
         errors: data.errors,
         size: data.size,
-        createdAt: new Date(data.created_at),
-        children: data.children
-            ? data.children.map(rawDataToSnapshot)
+        createdAt: data.created_at,
+        completedAt: data.completed_at,
+        children: data.children?.data
+            ? data.children.data.map(rawDataToSnapshot)
             : undefined,
     }
 }
