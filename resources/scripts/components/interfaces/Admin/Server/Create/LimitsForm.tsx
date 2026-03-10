@@ -23,24 +23,6 @@ const LimitsForm = () => {
             </div>
 
             <Heading as={'h4'} className="pt-4">
-                Snapshot Limits
-            </Heading>
-            <div className={'grid grid-cols-2 gap-4'}>
-                <InputForm
-                    name={'snapshotCount'}
-                    label={'Snapshot Count'}
-                    type={'number'}
-                    description={'Use -1 for unlimited.'}
-                />
-                <InputForm
-                    name={'snapshotSize'}
-                    label={'Snapshot Storage Limit (MiB)'}
-                    type={'number'}
-                    description={'Use -1 for unlimited.'}
-                />
-            </div>
-
-            <Heading as={'h4'} className="pt-4">
                 Backup Limits
             </Heading>
             <div className={'grid grid-cols-2 gap-4'}>

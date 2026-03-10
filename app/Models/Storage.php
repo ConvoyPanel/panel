@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
 
 class Storage extends Model
@@ -85,22 +84,6 @@ class Storage extends Model
     }
 
     /**
-     * Get the snapshots associated with servers residing on this storage.
-     * Storage -> Server -> Snapshot
-     */
-    public function snapshots(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Snapshot::class, // Final model we want
-            Server::class,   // Intermediate model
-            'storage_id',    // Foreign key on Server table (connecting Storage to Server)
-            'server_id',     // Foreign key on Snapshot table (connecting Server to Snapshot)
-            'id',            // Local key on Storage table
-            'id'             // Local key on Server table
-        );
-    }
-
-    /**
      * Query Scope to automatically include the sums of related storage usage.
      *
      * Call this like: Storage::withUsageSums()->find(1);
@@ -113,7 +96,7 @@ class Storage extends Model
         $query->withSum('servers as servers_sum_disk', 'disk')
             ->withSum('backups as backups_sum_size', 'size')
             ->withSum('isos as isos_sum_size', 'size')
-            ->withSum('snapshots as snapshots_sum_size', 'size');
+;
     }
 
     /**
@@ -165,14 +148,6 @@ class Storage extends Model
     public function getIsoUsageAttribute(): int
     {
         return $this->getUsageAttributeValue('isos', 'size', 'isos_sum_size');
-    }
-
-    /**
-     * Accessor for snapshot size usage.
-     */
-    public function getSnapshotUsageAttribute(): int
-    {
-        return $this->getUsageAttributeValue('snapshots', 'size', 'snapshots_sum_size');
     }
 
     public function getRouteKeyName(): string

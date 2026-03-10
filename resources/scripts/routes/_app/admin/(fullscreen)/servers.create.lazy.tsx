@@ -39,8 +39,6 @@ function CreateServerPage() {
             memory: 1024,
             disk: 10240,
             bandwidth: 0,
-            snapshotCount: 0,
-            snapshotSize: 0,
             backupCount: 0,
             backupSize: 0,
             networkInterfaceId: '',
@@ -72,7 +70,6 @@ function CreateServerPage() {
                 ...data,
                 memory: data.memory !== -1 ? data.memory * 1024 * 1024 : data.memory,
                 disk: data.disk !== -1 ? data.disk * 1024 * 1024 : data.disk,
-                snapshotSize: data.snapshotSize !== -1 ? data.snapshotSize * 1024 * 1024 : data.snapshotSize,
                 backupSize: data.backupSize !== -1 ? data.backupSize * 1024 * 1024 : data.backupSize,
             }
 
@@ -90,8 +87,6 @@ function CreateServerPage() {
                 'limits.memory': 'memory',
                 'limits.disk': 'disk',
                 'limits.bandwidth': 'bandwidth',
-                'limits.snapshots.count': 'snapshotCount',
-                'limits.snapshots.size': 'snapshotSize',
                 'limits.backups.count': 'backupCount',
                 'limits.backups.size': 'backupSize',
                 'limits.network_interface_id': 'networkInterfaceId',

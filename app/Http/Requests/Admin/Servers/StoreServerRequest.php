@@ -43,11 +43,6 @@ class StoreServerRequest extends BaseApiRequest
             'limits.disk'               => [...$rules['disk'], new HasSufficientDiskSpace()],
             'limits.bandwidth'          => $rules['bandwidth_limit'],
 
-            // Snapshot limits
-            'limits.snapshots'          => 'required|array',
-            'limits.snapshots.count'    => $rules['snapshot_count_limit'],
-            'limits.snapshots.size'     => $rules['snapshot_size_limit'],
-
             // Backup limits
             'limits.backups'            => 'required|array',
             'limits.backups.count'      => $rules['backup_count_limit'],

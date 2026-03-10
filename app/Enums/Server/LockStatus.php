@@ -8,9 +8,6 @@ enum LockStatus: string
     case CLONE = 'clone';
     case CREATE = 'create';
     case MIGRATE = 'migrate';
-    case ROLLBACK = 'rollback';
-    case SNAPSHOT = 'snapshot';
-    case SNAPSHOT_DELETE = 'snapshot-delete';
     case SUSPENDING = 'suspending';
     case SUSPENDED = 'suspended';
 }

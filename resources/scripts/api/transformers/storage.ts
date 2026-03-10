@@ -17,7 +17,6 @@ export const rawDataToStorage = (raw: any): Storage => ({
         server: raw.server_usage,
         backup: raw.backup_usage,
         iso: raw.iso_usage,
-        snapshot: raw.snapshot_usage,
     }
 })
 

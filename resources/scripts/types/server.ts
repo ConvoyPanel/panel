@@ -8,7 +8,6 @@ export enum ServerLifecycleStatus {
     InstallFailed = 'install_failed',
     Suspended = 'suspended',
     RestoringBackup = 'restoring_backup',
-    RestoringSnapshot = 'restoring_snapshot',
     Deleting = 'deleting',
     DeletionFailed = 'deletion_failed',
 }
@@ -28,10 +27,6 @@ export interface Server {
     cpu: number
     memory: number
     disk: number
-    snapshot: {
-        countLimit: number
-        sizeLimit: number
-    }
     backup: {
         countLimit: number
         sizeLimit: number

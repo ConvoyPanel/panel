@@ -40,7 +40,7 @@ class HasSufficientDiskSpace implements DataAwareRule, ValidationRule
             return;
         }
 
-        $used = $storage->server_usage + $storage->backup_usage + $storage->iso_usage + $storage->snapshot_usage;
+        $used = $storage->server_usage + $storage->backup_usage + $storage->iso_usage;
 
         if ($value > ($storage->size - $used)) {
             $fail('The storage location does not have enough disk space available.');

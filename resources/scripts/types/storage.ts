@@ -17,7 +17,6 @@ export interface Storage {
         server: number
         backup: number
         iso: number
-        snapshot: number
     }
 }
 

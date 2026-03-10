@@ -26,7 +26,6 @@ class StorageTransformer extends TransformerAbstract
             'server_usage' => $storage->server_usage,
             'backup_usage' => $storage->backup_usage,
             'iso_usage' => $storage->iso_usage,
-            'snapshot_usage' => $storage->snapshot_usage,
         ];
     }
 }

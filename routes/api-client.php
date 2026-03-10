@@ -79,14 +79,6 @@ Route::prefix('/servers/{server}')->middleware(
     Route::get('/statistics', Client\Servers\StatisticController::class);
     Route::get('/resources', Client\Servers\ResourceController::class);
 
-    Route::prefix('/snapshots')->group(function () {
-        Route::get('/', [Client\Servers\SnapshotController::class, 'index']);
-        Route::post('/', [Client\Servers\SnapshotController::class, 'store']);
-        Route::put('/{snapshot}', [Client\Servers\SnapshotController::class, 'update']);
-        Route::post('/{snapshot}/restore', [Client\Servers\SnapshotController::class, 'restore']);
-        Route::delete('/{snapshot}', [Client\Servers\SnapshotController::class, 'destroy']);
-    });
-
     Route::prefix('/backups')->group(function () {
         Route::get('/', [Client\Servers\BackupController::class, 'index']);
         Route::post(

@@ -88,8 +88,6 @@ class ServerCreationService
                 'disk' => $data['limits']['disk'],
                 'primary_ipv4_address_id' => $addresses->firstWhere('version', 'IPv4')?->id,
                 'primary_ipv6_address_id' => $addresses->firstWhere('version', 'IPv6')?->id,
-                'snapshot_count_limit' => Arr::get($data, 'limits.snapshots.count'),
-                'snapshot_size_limit' => Arr::get($data, 'limits.snapshots.size'),
                 'backup_count_limit' => Arr::get($data, 'limits.backups.count'),
                 'backup_size_limit' => Arr::get($data, 'limits.backups.size'),
                 'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),

@@ -19,10 +19,6 @@ export const serverSchema = z
         disk: z.coerce.number().min(1).max(10485760),
         bandwidth: z.coerce.number().min(0).optional(),
 
-        // snapshot limits
-        snapshotCount: z.coerce.number().min(-1),
-        snapshotSize: z.coerce.number().min(-1),
-
         // backup limits
         backupCount: z.coerce.number().min(-1),
         backupSize: z.coerce.number().min(-1),
@@ -74,8 +70,6 @@ const createServer = async ({
     memory,
     disk,
     bandwidth,
-    snapshotCount,
-    snapshotSize,
     backupCount,
     backupSize,
     networkInterfaceId,
@@ -102,10 +96,6 @@ const createServer = async ({
             memory,
             disk,
             bandwidth,
-            snapshots: {
-                count: snapshotCount,
-                size: snapshotSize,
-            },
             backups: {
                 count: backupCount,
                 size: backupSize,

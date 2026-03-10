@@ -65,8 +65,7 @@ const StoragePicker = ({ nodeId, requiredContentTypes }: StoragePickerProps) => 
                                     const used =
                                         storage.usages.server +
                                         storage.usages.backup +
-                                        storage.usages.iso +
-                                        storage.usages.snapshot
+                                        storage.usages.iso
                                     const free = storage.size - used
 
                                     return (

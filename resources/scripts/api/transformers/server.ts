@@ -16,10 +16,6 @@ export const rawDataToServer = (data: any): Server => ({
     cpu: data.cpu,
     memory: data.memory,
     disk: data.disk,
-    snapshot: {
-        countLimit: data.snapshot_count_limit,
-        sizeLimit: data.snapshot_size_limit,
-    },
     backup: {
         countLimit: data.backup_count_limit,
         sizeLimit: data.backup_size_limit,

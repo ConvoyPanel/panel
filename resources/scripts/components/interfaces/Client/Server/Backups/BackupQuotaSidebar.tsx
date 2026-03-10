@@ -1,7 +1,5 @@
 import useServerSWR from '@/api/servers/use-server-swr.ts'
 
-import styles from '@/components/interfaces/Client/Server/Snapshots/QuotaSidebar.module.css'
-
 import { Button } from '@/components/ui/Button'
 import { LinearProgressBar, RingProgress } from '@/components/ui/Progress'
 import {
@@ -65,12 +63,12 @@ const BackupQuotaSidebar = () => {
                         </SheetHeader>
                         <dl className={'mt-4 flex flex-col gap-10'}>
                             <div>
-                                <dt className={styles.quotaSidebar}>Count</dt>
-                                <dd className={styles.quotaValue}>
-                                    <span className={styles.quotaEmphasized}>
-                                        3 snapshots
+                                <dt className={'text-sm font-medium'}>Count</dt>
+                                <dd className={'mt-2 mb-4'}>
+                                    <span className={'block text-2xl font-bold text-foreground'}>
+                                        3 backups
                                     </span>
-                                    out of 10 snapshots
+                                    out of 10 backups
                                 </dd>
                             </div>
                         </dl>

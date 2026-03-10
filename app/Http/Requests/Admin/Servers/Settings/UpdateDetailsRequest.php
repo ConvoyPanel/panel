@@ -28,7 +28,6 @@ class UpdateDetailsRequest extends BaseApiRequest
             'limits.cpu' => $rules['cpu'],
             'limits.memory' => $rules['memory'],
             'limits.disk' => $rules['disk'],
-            'limits.snapshot_limit' => $rules['snapshot_limit'],
             'limits.backup_limit' => $rules['backup_limit'],
             'limits.bandwidth_limit' => $rules['bandwidth_limit'],
         ];

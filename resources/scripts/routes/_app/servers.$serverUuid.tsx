@@ -1,7 +1,6 @@
 import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
 import {
-    IconBinaryTree,
     IconChartBar,
     IconCopy,
     IconDatabase,
@@ -51,11 +50,6 @@ function ServerLayout() {
             path: `/servers/${serverUuid}/graphs`,
         },
         {
-            icon: IconBinaryTree,
-            label: 'Snapshots',
-            path: `/servers/${serverUuid}/snapshots`,
-        },
-        {
             icon: IconCopy,
             label: 'Backups',
             path: `/servers/${serverUuid}/backups`,
@@ -91,7 +85,6 @@ function ServerLayout() {
         server?.status === 'installing' ||
         server?.status === 'install_failed' ||
         server?.status === 'restoring_backup' ||
-        server?.status === 'restoring_snapshot' ||
         server?.status === 'deleting'
     const isDeferred = server?.status === 'deferred_os_selection'
     const isSuspended = server?.status === 'suspended'

@@ -51,7 +51,6 @@ export default function InstallingServer({ server }: InstallingServerProps) {
         if (isFailed) return 'Installation Failed'
         if (server?.status === 'deleting') return 'Deleting Server'
         if (server?.status === 'restoring_backup') return 'Restoring Backup'
-        if (server?.status === 'restoring_snapshot') return 'Restoring Snapshot'
         return 'Server Installing'
     }
 
@@ -60,8 +59,6 @@ export default function InstallingServer({ server }: InstallingServerProps) {
         if (server?.status === 'deleting') return 'Loading deletion progress...'
         if (server?.status === 'restoring_backup')
             return 'Loading restore progress...'
-        if (server?.status === 'restoring_snapshot')
-            return 'Loading snapshot restore progress...'
         return 'Loading installation progress...'
     }
 

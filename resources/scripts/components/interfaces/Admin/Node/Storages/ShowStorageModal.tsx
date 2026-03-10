@@ -27,7 +27,7 @@ const ShowStorageModal = () => {
         const usages = storage?.usages
 
         return usages
-            ? usages.server + usages.backup + usages.iso + usages.snapshot
+            ? usages.server + usages.backup + usages.iso
             : 0
     }, [storage])
 
@@ -73,14 +73,9 @@ const ShowStorageModal = () => {
                                 color: 'hsl(var(--chart-2))',
                             },
                             {
-                                label: 'Snapshots',
-                                value: storage ? (storage.usages.snapshot / storage.size) * 100 : 0,
-                                color: 'hsl(var(--chart-3))',
-                            },
-                            {
                                 label: 'ISO Images',
                                 value: storage ? (storage.usages.iso / storage.size) * 100 : 0,
-                                color: 'hsl(var(--chart-4))',
+                                color: 'hsl(var(--chart-3))',
                             },
                         ]}
                     />
@@ -110,14 +105,6 @@ const ShowStorageModal = () => {
                                     'mr-1 size-2 rounded-full bg-[hsl(var(--chart-3))]'
                                 }
                             />
-                            Snapshots
-                        </li>
-                        <li className={'flex items-center text-sm'}>
-                            <span
-                                className={
-                                    'mr-1 size-2 rounded-full bg-[hsl(var(--chart-4))]'
-                                }
-                            />
                             ISO Images
                         </li>
                     </ul>
@@ -127,9 +114,6 @@ const ShowStorageModal = () => {
                             <TabsTrigger value={'all'}>All</TabsTrigger>
                             <TabsTrigger value={'kvm'}>KVM</TabsTrigger>
                             <TabsTrigger value={'backups'}>Backups</TabsTrigger>
-                            <TabsTrigger value={'snapshots'}>
-                                Snapshots
-                            </TabsTrigger>
                             <TabsTrigger value={'iso'}>ISO Images</TabsTrigger>
                         </TabsList>
                     </Tabs>

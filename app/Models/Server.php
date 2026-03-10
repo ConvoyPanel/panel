@@ -31,13 +31,11 @@ class Server extends Model
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'status' => ['sometimes', 'nullable', 'string', 'in:ready,deferred_os_selection,installing,install_failed,suspended,restoring_backup,restoring_snapshot,deleting,deletion_failed'],
+        'status' => ['sometimes', 'nullable', 'string', 'in:ready,deferred_os_selection,installing,install_failed,suspended,restoring_backup,deleting,deletion_failed'],
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
         'bandwidth_usage' => 'sometimes|numeric|min:0',
-        'snapshot_count_limit' => 'required|integer|min:-1',
-        'snapshot_size_limit' => 'required|integer|min:-1',
         'backup_count_limit' => 'required|integer|min:-1',
         'backup_size_limit' => 'required|integer|min:-1',
         'bandwidth_limit' => 'present|integer|min:-1',
@@ -83,11 +81,6 @@ class Server extends Model
     public function backups(): HasMany
     {
         return $this->hasMany(Backup::class);
-    }
-
-    public function snapshots(): HasMany
-    {
-        return $this->hasMany(Snapshot::class);
     }
 
     public function deployments(): HasMany
