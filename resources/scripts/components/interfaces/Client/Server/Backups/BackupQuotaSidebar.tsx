@@ -10,32 +10,6 @@ import {
     SheetTrigger,
 } from '@/components/ui/Sheet'
 
-// @ts-ignore
-const quotas = [
-    {
-        label: 'Count',
-        value: (
-            <>
-                <span className={'block text-2xl font-bold'}>3 backups</span>
-                <span className={'text-muted-foreground'}>
-                    out of 10 backups
-                </span>
-            </>
-        ),
-        footer: <LinearProgressBar value={30} />,
-    },
-    {
-        label: 'Storage Usage',
-        value: (
-            <>
-                <span className={'block text-2xl font-bold'}>24 GiB used</span>
-                <span className={'text-muted-foreground'}>out of 24.5 GiB</span>
-            </>
-        ),
-        footer: <LinearProgressBar value={98} />,
-    },
-]
-
 const BackupQuotaSidebar = () => {
     const { data: _server } = useServerSWR()
 
@@ -64,12 +38,33 @@ const BackupQuotaSidebar = () => {
                         <dl className={'mt-4 flex flex-col gap-10'}>
                             <div>
                                 <dt className={'text-sm font-medium'}>Count</dt>
-                                <dd className={'mt-2 mb-4'}>
-                                    <span className={'block text-2xl font-bold text-foreground'}>
+                                <dd className={'mb-4 mt-2'}>
+                                    <span
+                                        className={
+                                            'block text-2xl font-bold text-foreground'
+                                        }
+                                    >
                                         3 backups
                                     </span>
                                     out of 10 backups
                                 </dd>
+                                <LinearProgressBar value={30} />
+                            </div>
+                            <div>
+                                <dt className={'text-sm font-medium'}>
+                                    Storage Usage
+                                </dt>
+                                <dd className={'mb-4 mt-2'}>
+                                    <span
+                                        className={
+                                            'block text-2xl font-bold text-foreground'
+                                        }
+                                    >
+                                        24 GiB used
+                                    </span>
+                                    out of 24.5 GiB
+                                </dd>
+                                <LinearProgressBar value={30} />
                             </div>
                         </dl>
                     </SheetContent>
