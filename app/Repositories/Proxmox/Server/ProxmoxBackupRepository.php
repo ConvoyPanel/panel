@@ -32,7 +32,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
             ->json();
 
         return BackupData::collect(
-            array_map(fn (array $backup) => BackupData::fromRaw($backup), $this->getData($response)),
+            array_map(fn(array $backup) => BackupData::fromRaw($backup), $this->getData($response)),
             Collection::class
         );
     }
@@ -40,8 +40,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      * @throws ConnectionException
+     *
+     * @return string UPID
      */
-    public function backup(BackupMode $mode, BackupCompressionType $compressionType)
+    public function backup(BackupMode $mode, BackupCompressionType $compressionType): string
     {
         $parsedMode = match ($mode) {
             BackupMode::KILL => 'stop',
@@ -63,8 +65,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      * @throws ConnectionException
+     *
+     * @return string UPID
      */
-    public function restore(Backup $backup)
+    public function restore(Backup $backup): string
     {
         $response = $this->getHttpClientWithParams()
             ->post('/api2/json/nodes/{node}/qemu', [
@@ -80,8 +84,10 @@ class ProxmoxBackupRepository extends ProxmoxRepository
     /**
      * @throws RequestException
      * @throws ConnectionException
+     *
+     * @return string UPID
      */
-    public function delete(Backup $backup): mixed
+    public function delete(Backup $backup): string
     {
         $response = $this->getHttpClientWithParams([
             'storage' => $backup->storage->name,
