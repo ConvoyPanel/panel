@@ -16,6 +16,7 @@ use Lcobucci\JWT\Token\UnsupportedHeaderFound;
 use Convoy\Extensions\Lcobucci\JWT\Validation\Clock;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Convoy\Exceptions\Service\Api\InvalidJWTException;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
 
 class JWTService
 {
@@ -110,13 +111,20 @@ class JWTService
 
         try {
             $parsedToken = $config->parser()->parse($token);
-        } catch (CannotDecodeContent|InvalidTokenStructure|UnsupportedHeaderFound $exception) {
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $exception) {
             throw new InvalidJWTException($exception);
         }
 
         assert($parsedToken instanceof UnencryptedToken);
 
-        if (!$config->validator()->validate($parsedToken, new StrictValidAt(new Clock))) {
+        if (!$config->validator()->validate(
+            $parsedToken,
+            new StrictValidAt(new Clock),
+            new SignedWith(
+                $config->signer(),
+                $config->signingKey()
+            )
+        )) {
             throw new InvalidJWTException;
         }
 

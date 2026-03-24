@@ -29,6 +29,7 @@
     "spatie/laravel-data": "^4.15",
     "spatie/laravel-fractal": "^6.0",
     "spatie/laravel-query-builder": "^5.1",
+    "symfony/console": "^7.0.3 <7.4",
     "webmozart/assert": "^1.11"
   },
   "require-dev": {

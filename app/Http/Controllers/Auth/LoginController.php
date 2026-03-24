@@ -15,9 +15,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class LoginController extends Controller
 {
-    public function __construct(private ViewFactory $view, private JWTService $JWTService)
-    {
-    }
+    public function __construct(private ViewFactory $view, private JWTService $JWTService) {}
 
     public function index(): View
     {
@@ -27,7 +25,7 @@ class LoginController extends Controller
     public function authorizeToken(Request $request)
     {
         try {
-            $token = $this->JWTService->decode(config('app.url'), $request->token);
+            $token = $this->JWTService->decode(config('app.key'), $request->token);
         } catch (InvalidJWTException) {
             throw new UnauthorizedHttpException('', 'Invalid JWT token');
         }
