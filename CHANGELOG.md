@@ -4,6 +4,17 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.5.1
+
+### TIME SENSITIVE SECURITY UPDATE
+
+Please update immediately to this version to ensure your Convoy installation is secure.
+
+### Changes
+
+- Updated vulnerable dependencies
+- Additional details are embargoed until a later date
+
 ## v4.5.0
 
 ### TIME SENSITIVE SECURITY UPDATE
@@ -57,7 +68,7 @@ Please update immediately to this version to ensure your Convoy installation is 
 
 ## v4.3.0-rc.1
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > The source between v4 and v10 will begin to diverge starting here. Once v10 is complete, v4's commit history will be
 > abandoned. We will not be introducing any changes to the database structure in v4 to prevent any conflicts with v10's
 > database structure.
