@@ -138,7 +138,7 @@ class NetworkService
 
             $proxmoxMacAddress = null;
             if (preg_match(
-                "/\b[[:xdigit:]]{2}(:[[:xdigit:]]{2}){5}\b/su",
+                "/\b[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\b/su",
                 Arr::get($config, 'net0', ''),
                 $matches,
             )) {
@@ -204,12 +204,8 @@ class NetworkService
 
         $parsedConfig = $this->parseConfig($networkConfig['value']);
 
-        $models = [
-            'e1000', 'e1000-82540em', 'e1000-82544gc', 'e1000-82545em',
-            'e1000e', 'i82551', 'i82557b', 'i82559er',
-            'ne2k_isa', 'ne2k_pci', 'pcnet', 'rtl8139',
-            'virtio', 'vmxnet3',
-        ];
+        // List of possible models
+        $models = ['e1000', 'e1000-82540em', 'e1000-82544gc', 'e1000-82545em', 'e1000e', 'i82551', 'i82557b', 'i82559er', 'ne2k_isa', 'ne2k_pci', 'pcnet', 'rtl8139', 'virtio', 'vmxnet3'];
 
         $modelFound = false;
         foreach ($parsedConfig as $item) {
