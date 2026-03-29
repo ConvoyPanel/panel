@@ -16,9 +16,15 @@ class UpdatePasswordJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 900;
 
-    public int $timeout = 10;
+    public int $timeout = 9000;
+
+
+    public function backoff(): int
+    {
+        return 30; // Not blocking — Horizon waits asynchronously
+    }
 
     public function __construct(protected int $serverId, protected string $password)
     {
