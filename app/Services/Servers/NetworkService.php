@@ -18,6 +18,13 @@ use function is_null;
 
 class NetworkService
 {
+    private const NIC_MODELS = [
+        'e1000', 'e1000-82540em', 'e1000-82544gc', 'e1000-82545em',
+        'e1000e', 'i82551', 'i82557b', 'i82559er',
+        'ne2k_isa', 'ne2k_pci', 'pcnet', 'rtl8139',
+        'virtio', 'vmxnet3',
+    ];
+
     public function __construct(
         private AddressRepository          $repository,
         private ProxmoxFirewallRepository  $firewallRepository,
@@ -67,8 +74,8 @@ class NetworkService
         if ($eloquent) {
             $addresses = $this->getAddresses($server);
 
-            $eloquentMacAddress = $addresses->ipv4->first(
-            )?->mac_address ?? $addresses->ipv6->first()?->mac_address;
+            $eloquentMacAddress = $addresses->ipv4->first()
+                ?->mac_address ?? $addresses->ipv6->first()?->mac_address;
         }
 
         if ($proxmox) {
@@ -125,16 +132,14 @@ class NetworkService
         ]);
 
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
-
-        $this->allocationRepository->setServer($server)->update(
-            ['net0' => "virtio={$macAddress},bridge={$server->node->network},firewall=1"],
-        );
+        $this->ensureNet0BaseConfig($server, $macAddress);
     }
 
     public function updateRateLimit(Server $server, ?int $mebibytes = null): void
     {
         $macAddresses = $this->getMacAddresses($server, true, true);
         $macAddress = $macAddresses->eloquent ?? $macAddresses->proxmox;
+
         $rawConfig = $this->allocationRepository->setServer($server)->getConfig();
         $networkConfig = collect($rawConfig)->where('key', '=', 'net0')->first();
 
@@ -144,96 +149,26 @@ class NetworkService
 
         $parsedConfig = $this->parseConfig($networkConfig['value']);
 
-        // List of possible models
-        $models = ['e1000', 'e1000-82540em', 'e1000-82544gc', 'e1000-82545em', 'e1000e', 'i82551', 'i82557b', 'i82559er', 'ne2k_isa', 'ne2k_pci', 'pcnet', 'rtl8139', 'virtio', 'vmxnet3'];
+        $this->applyBaseNet0Fields($parsedConfig, $server, $macAddress);
 
-        // Update the model with the new MAC address
-        $modelFound = false;
-        foreach ($parsedConfig as $item) {
-            if (in_array($item->key, $models)) {
-                $item->value = $macAddress;
-                $modelFound = true;
-                break;
-            }
-        }
-
-        // If no model key exists, add the default model with the MAC address
-        if (!$modelFound) {
-            $parsedConfig[] = (object) ['key' => 'virtio', 'value' => $macAddress];
-        }
-
-        // Update or create the bridge value
-        $bridgeFound = false;
-        foreach ($parsedConfig as $item) {
-            if ($item->key === 'bridge') {
-                $item->value = $server->node->network;
-                $bridgeFound = true;
-                break;
-            }
-        }
-
-        if (!$bridgeFound) {
-            $parsedConfig[] = (object) ['key' => 'bridge', 'value' => $server->node->network];
-        }
-
-        // Update or create the firewall key
-        $firewallFound = false;
-        foreach ($parsedConfig as $item) {
-            if ($item->key === 'firewall') {
-                $item->value = 1;
-                $firewallFound = true;
-                break;
-            }
-        }
-
-        if (!$firewallFound) {
-            $parsedConfig[] = (object) ['key' => 'firewall', 'value' => 1];
-        }
-
-        // Handle the rate limit
         if (is_null($mebibytes)) {
-            // Remove the 'rate' key if $mebibytes is null
-            $parsedConfig = array_filter($parsedConfig, fn ($item) => $item->key !== 'rate');
+            $parsedConfig = array_values(
+                array_filter($parsedConfig, fn ($item) => $item->key !== 'rate')
+            );
         } else {
-            // Add or update the 'rate' key
-            $rateUpdated = false;
-            foreach ($parsedConfig as $item) {
-                if ($item->key === 'rate') {
-                    $item->value = $mebibytes;
-                    $rateUpdated = true;
-                    break;
-                }
-            }
-
-            if (!$rateUpdated) {
-                $parsedConfig[] = (object) ['key' => 'rate', 'value' => $mebibytes];
-            }
+            $this->setConfigField($parsedConfig, 'rate', $mebibytes, 'rate');
         }
 
-        // Rebuild the configuration string
         $newConfig = implode(',', array_map(fn ($item) => "{$item->key}={$item->value}", $parsedConfig));
 
-        // Update the Proxmox configuration
-        $this->allocationRepository->setServer($server)->update(['net0' => $newConfig]);
-    }
-
-    private function parseConfig(string $config): array
-    {
-        // Split components by commas
-        $components = explode(',', $config);
-
-        // Array to hold the parsed objects
-        $parsedObjects = [];
-
-        foreach ($components as $component) {
-            // Split each component into key and value
-            [$key, $value] = explode('=', $component);
-
-            // Create an associative array (or object) for key-value pairs
-            $parsedObjects[] = (object) ['key' => $key, 'value' => $value];
+        if (
+            $this->normalizeNetConfigForComparison($networkConfig['value']) ===
+            $this->normalizeNetConfigForComparison($newConfig)
+        ) {
+            return;
         }
 
-        return $parsedObjects;
+        $this->allocationRepository->setServer($server)->update(['net0' => $newConfig]);
     }
 
     public function updateAddresses(Server $server, array $addressIds): void
@@ -256,5 +191,77 @@ class NetworkService
                    ->whereIn('id', $addressesToRemove)
                    ->update(['server_id' => null]);
         }
+    }
+
+    private function ensureNet0BaseConfig(Server $server, string $macAddress): void
+    {
+        $rawConfig = $this->allocationRepository->setServer($server)->getConfig();
+        $net0 = collect($rawConfig)->where('key', '=', 'net0')->first();
+        $parsedConfig = $net0 ? $this->parseConfig($net0['value']) : [];
+
+        $this->applyBaseNet0Fields($parsedConfig, $server, $macAddress);
+
+        $newConfig = implode(',', array_map(fn ($item) => "{$item->key}={$item->value}", $parsedConfig));
+
+        if ($net0 && $this->normalizeNetConfigForComparison($net0['value']) === $this->normalizeNetConfigForComparison($newConfig)) {
+            return;
+        }
+
+        $this->allocationRepository->setServer($server)->update(['net0' => $newConfig]);
+    }
+
+    private function applyBaseNet0Fields(array &$parsedConfig, Server $server, string $macAddress): void
+    {
+        $this->setConfigField($parsedConfig, self::NIC_MODELS, $macAddress, 'virtio');
+        $this->setConfigField($parsedConfig, 'bridge', $server->node->network, 'bridge');
+        $this->setConfigField($parsedConfig, 'firewall', 1, 'firewall');
+    }
+
+    private function setConfigField(array &$parsedConfig, string|array $keys, mixed $value, string $defaultKey): void
+    {
+        $keys = (array) $keys;
+        foreach ($parsedConfig as $item) {
+            if (in_array($item->key, $keys, true)) {
+                $item->value = $value;
+                return;
+            }
+        }
+        $parsedConfig[] = (object) ['key' => $defaultKey, 'value' => $value];
+    }
+
+    private function normalizeNetConfigForComparison(string $config): array
+    {
+        $normalized = [];
+        foreach ($this->parseConfig($config) as $item) {
+            $key = strtolower(trim((string) $item->key));
+            $value = trim((string) $item->value);
+
+            if (preg_match('/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/i', $value)) {
+                $value = strtolower($value);
+            }
+
+            $normalized[$key] = $value;
+        }
+
+        ksort($normalized);
+
+        return $normalized;
+    }
+
+    private function parseConfig(string $config): array
+    {
+        $parsedObjects = [];
+
+        foreach (explode(',', $config) as $component) {
+            $component = trim($component);
+            if ($component === '') {
+                continue;
+            }
+
+            [$key, $value] = array_pad(explode('=', $component, 2), 2, '');
+            $parsedObjects[] = (object) ['key' => $key, 'value' => $value];
+        }
+
+        return $parsedObjects;
     }
 }

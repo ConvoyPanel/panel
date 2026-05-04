@@ -16,9 +16,14 @@ class UpdatePasswordJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 15;
 
     public int $timeout = 10;
+
+    public function backoff(): int
+    {
+        return 30;
+    }
 
     public function __construct(protected int $serverId, protected string $password)
     {

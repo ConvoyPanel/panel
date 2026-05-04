@@ -37,11 +37,23 @@ class CloudinitService
      */
     public function updateHostname(Server $server, string $hostname)
     {
-        $this->configRepository->setServer($server)->update([
-            'name' => $hostname,
-        ]);
+        $raw = collect($this->configRepository->setServer($server)->getConfig());
+        $currentName = $raw->where('key', '=', 'name')->first()['value'] ?? null;
+        $currentSearch = $raw->where('key', '=', 'searchdomain')->first()['value'] ?? null;
 
-        $this->configRepository->setServer($server)->update(['searchdomain' => $hostname]);
+        $payload = [];
+        if ($currentName !== $hostname) {
+            $payload['name'] = $hostname;
+        }
+        if ($currentSearch !== $hostname) {
+            $payload['searchdomain'] = $hostname;
+        }
+
+        if (empty($payload)) {
+            return;
+        }
+
+        $this->configRepository->setServer($server)->update($payload);
     }
 
     public function getNameservers(Server $server)
@@ -120,8 +132,18 @@ class CloudinitService
             $payload[] = 'gw6='.$ipv6->gateway;
         }
 
-        return $this->configRepository->setServer($server)->update([
-            'ipconfig0' => Arr::join($payload, ','),
-        ]);
+        $desired = Arr::join($payload, ',');
+        $current = collect($this->configRepository->setServer($server)->getConfig())
+            ->where('key', '=', 'ipconfig0')->first()['value'] ?? '';
+
+        if ($current === $desired) {
+            return;
+        }
+
+        if ($desired === '') {
+            return $this->configRepository->setServer($server)->update(['delete' => 'ipconfig0']);
+        }
+
+        return $this->configRepository->setServer($server)->update(['ipconfig0' => $desired]);
     }
 }

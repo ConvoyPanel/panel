@@ -109,10 +109,23 @@ class AllocationService
 
     public function updateHardware(Server $server, int $cpu, int $memory)
     {
-        $payload = [
-            'cores' => $cpu,
-            'memory' => $memory / 1048576,
-        ];
+        $memMiB = (int) ($memory / 1048576);
+
+        $raw = collect($this->repository->setServer($server)->getConfig());
+        $currentCores = $raw->where('key', '=', 'cores')->first()['value'] ?? null;
+        $currentMem = $raw->where('key', '=', 'memory')->first()['value'] ?? null;
+
+        $payload = [];
+        if ((string) $currentCores !== (string) $cpu) {
+            $payload['cores'] = $cpu;
+        }
+        if ((string) $currentMem !== (string) $memMiB) {
+            $payload['memory'] = $memMiB;
+        }
+
+        if (empty($payload)) {
+            return;
+        }
 
         return $this->repository->setServer($server)->update($payload);
     }
