@@ -23,6 +23,7 @@ RUN if [ $PHP_XDEBUG = "true" ]; then \
 fi;
 
 COPY ./Caddyfile /etc/frankenphp/Caddyfile
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN sudo mkdir -p /etc/apt/keyrings; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
@@ -34,3 +35,6 @@ RUN sudo mkdir -p /etc/apt/keyrings; \
 RUN echo "alias art='php artisan'" >> ~/.bashrc
 
 WORKDIR /app
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["--config", "/etc/frankenphp/Caddyfile", "--adapter", "caddyfile"]
