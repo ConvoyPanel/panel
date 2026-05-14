@@ -144,6 +144,8 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'address_range_order' => 'The ending address must be greater than or equal to the starting address.',
+    'address_range_too_large' => 'The address range contains :count addresses, which exceeds the maximum of :maximum. Use a smaller range.',
 
     /*
     |--------------------------------------------------------------------------

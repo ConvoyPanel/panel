@@ -7,6 +7,7 @@ use Convoy\Http\Requests\BaseApiRequest;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
 use Convoy\Validation\ValidateAddressType;
+use Convoy\Validation\ValidateAddressRangeSize;
 use Convoy\Validation\ValidateAddressUniqueness;
 use Illuminate\Support\Arr;
 
@@ -33,6 +34,9 @@ class StoreAddressRequest extends BaseApiRequest
             $rules[] = new ValidateAddressType(
                 $this->enum('type', AddressType::class),
                 ['starting_address', 'ending_address', 'gateway'],
+            );
+            $rules[] = new ValidateAddressRangeSize(
+                $this->enum('type', AddressType::class),
             );
         }
 
