@@ -83,6 +83,8 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:3306:3306"
     healthcheck:
       test: mysqladmin ping -u$$MYSQL_USER -p$$MYSQL_PASSWORD
       interval: 5s
