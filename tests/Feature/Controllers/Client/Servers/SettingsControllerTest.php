@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Http;
 
 it('can rename servers', function () {
     Http::fake([
+        '*/config' => Http::response(
+            file_get_contents(
+                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
+            ), 200,
+        ),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
 

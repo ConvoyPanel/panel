@@ -3,9 +3,11 @@
   <testsuites>
     <testsuite name="Unit">
       <directory suffix="Test.php">./tests/Unit</directory>
+      <exclude>./vendor</exclude>
     </testsuite>
     <testsuite name="Feature">
       <directory suffix="Test.php">./tests/Feature</directory>
+      <exclude>./vendor</exclude>
     </testsuite>
   </testsuites>
   <coverage/>
