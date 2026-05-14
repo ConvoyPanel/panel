@@ -12,7 +12,7 @@ class ValidateAddressRangeSize
 
     public function __construct(private AddressType $addressType) {}
 
-    public function __invoke(Validator $validator)
+    public function __invoke(Validator $validator): void
     {
         $data = $validator->validated();
 
