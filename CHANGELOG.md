@@ -4,6 +4,15 @@ This file is a running track of new features and fixes to each version of the pa
 
 This project follows [Semantic Versioning](http://semver.org) guidelines.
 
+## v4.6.0
+
+### Changes
+
+- Published the database port to the loopback interface in `docker-compose.yml` so you can access your database locally without exposing it to the network.
+- Convoy will now skip Proxmox configuration tasks when the desired state already matches what's on the node, reducing unnecessary API calls.
+- Increased `UpdatePasswordJob` retry attempts to 15 with a 30 second backoff to better survive slow disk resize operations during VM creation.
+- Improved bulk IP address range validation to show a descriptive error when the ending address is less than the starting address or the range exceeds 65,536 addresses.
+
 ## v4.6.0-beta
 
 ### Changes
