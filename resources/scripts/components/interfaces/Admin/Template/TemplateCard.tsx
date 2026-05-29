@@ -40,7 +40,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
 
     const deleteTemplateMutation = useDeleteTemplateMutation(templateGroup.uuid)
 
-    const form = useForm<z.infer<typeof templateSchema>>({
+    const form = useForm<z.input<typeof templateSchema>>({
         resolver: zodResolver(templateSchema),
     })
 
@@ -53,12 +53,12 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
         })
     }, [template])
 
-    const save = async (data: z.infer<typeof templateSchema>) => {
+    const save = async (data: z.input<typeof templateSchema>) => {
         try {
             const updatedTemplate = await updateTemplate(
                 templateGroup.uuid,
                 template.uuid,
-                data
+                data as z.infer<typeof templateSchema>
             )
 
             await mutate(data => {

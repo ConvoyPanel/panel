@@ -43,7 +43,8 @@ function NodesIndex() {
             cell: ({ cell }) => (
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/nodes/${cell.row.original.id}`}
+                    to='/admin/nodes/$nodeId'
+                    params={{ nodeId: String(cell.row.original.id) }}
                 >
                     {cell.getValue<string>()}
                 </Link>

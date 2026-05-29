@@ -41,7 +41,7 @@ const EditTemplateGroupModal = () => {
         }))
     )
 
-    const form = useForm<z.infer<typeof templateGroupSchema>>({
+    const form = useForm<z.input<typeof templateGroupSchema>>({
         resolver: zodResolver(templateGroupSchema),
     })
 
@@ -87,8 +87,8 @@ const EditTemplateGroupModal = () => {
         }
     )
 
-    const submit = async (data: z.infer<typeof templateGroupSchema>) => {
-        await trigger(data)
+    const submit = async (data: z.input<typeof templateGroupSchema>) => {
+        await trigger(data as z.infer<typeof templateGroupSchema>)
     }
 
     return (

@@ -4,6 +4,7 @@ import {
     IconChevronRight,
     IconSettings,
 } from '@tabler/icons-react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
@@ -17,12 +18,14 @@ interface Props {
 
 const Sidebar = ({ routes }: Props) => {
     const { expanded, setExpanded, keepExpanded, setKeepExpanded } =
-        useSidebarStore(state => ({
-            expanded: state.expanded,
-            setExpanded: state.setExpanded,
-            keepExpanded: state.keepExpanded,
-            setKeepExpanded: state.setKeepExpanded,
-        }))
+        useSidebarStore(
+            useShallow(state => ({
+                expanded: state.expanded,
+                setExpanded: state.setExpanded,
+                keepExpanded: state.keepExpanded,
+                setKeepExpanded: state.setKeepExpanded,
+            }))
+        )
 
     const setExpandedIfNotKeepExpanded = (value: boolean) => {
         if (!keepExpanded) {

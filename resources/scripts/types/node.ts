@@ -1,3 +1,5 @@
+import { Duration } from 'date-fns'
+
 import { PaginatedResult } from '@/utils/http.ts'
 
 export interface Node {

@@ -35,7 +35,7 @@ function ServersIndex() {
             cell: ({ cell }) => (
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/servers/${cell.row.original.id}`}
+                    to={`/admin/servers/${cell.row.original.id}` as string}
                 >
                     {cell.getValue<string>()}
                 </Link>

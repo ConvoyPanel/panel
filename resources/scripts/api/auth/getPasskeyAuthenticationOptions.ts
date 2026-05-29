@@ -1,4 +1,4 @@
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types'
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser'
 
 import axios from '@/lib/axios.ts'
 

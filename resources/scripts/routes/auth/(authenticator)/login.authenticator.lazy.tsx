@@ -53,13 +53,13 @@ const schema = z.discriminatedUnion('type', [otpSchema, recoverySchema])
 function Authenticator() {
     const { redirect } = Route.useSearch()
     const navigate = Route.useNavigate()
-    const form = useForm({
+    const form = useForm<z.input<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues: {
             type: 'code',
             code: '',
             recoveryCode: '',
-        },
+        } as z.input<typeof schema>,
     })
 
     const type = form.watch('type')

@@ -78,7 +78,11 @@ const AddressBlockTab = () => {
                 <>
                     <DropdownMenuItem asChild>
                         <Link
-                            to={`/admin/ipam/${row.original.addressBlockGroupId}/blocks/${row.original.id}`}
+                            to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
+                            params={{
+                                addressBlockGroupId: String(row.original.addressBlockGroupId),
+                                addressBlockId: String(row.original.id),
+                            }}
                         >
                             View
                         </Link>

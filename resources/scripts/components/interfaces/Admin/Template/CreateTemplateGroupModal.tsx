@@ -31,7 +31,7 @@ const CreateTemplateGroupModal = () => {
     const { mutate } = useTemplateGroupsSWR({})
     const [open, setOpen] = useState(false)
 
-    const form = useForm<z.infer<typeof templateGroupSchema>>({
+    const form = useForm<z.input<typeof templateGroupSchema>>({
         resolver: zodResolver(templateGroupSchema),
         defaultValues: {
             name: '',
@@ -41,9 +41,9 @@ const CreateTemplateGroupModal = () => {
         },
     })
 
-    const submit = async (data: z.infer<typeof templateGroupSchema>) => {
+    const submit = async (data: z.input<typeof templateGroupSchema>) => {
         try {
-            const templateGroup = await createTemplateGroup(data)
+            const templateGroup = await createTemplateGroup(data as z.infer<typeof templateGroupSchema>)
 
             await mutate(
                 currentData => {

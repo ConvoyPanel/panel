@@ -25,7 +25,7 @@ export const Route = createLazyFileRoute(
 function CreateNodePage() {
     const navigate = useNavigate()
 
-    const form = useForm({
+    const form = useForm<z.input<typeof nodeSchema>>({
         resolver: zodResolver(nodeSchema),
         defaultValues: {
             displayName: '',
@@ -43,7 +43,7 @@ function CreateNodePage() {
             cpuCount: '',
             memory: '',
             memoryOverallocate: '',
-        },
+        } as unknown as z.input<typeof nodeSchema>,
     })
 
     const submit = async ({ memory, ...data }: z.infer<typeof nodeSchema>) => {

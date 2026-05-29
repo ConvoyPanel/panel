@@ -1,18 +1,17 @@
 import { cn } from '@/utils'
 import * as React from 'react'
-import * as RechartsPrimitive from 'recharts'
-
 import { getPayloadConfigFromPayload } from '@/components/ui/Chart/helpers.ts'
 import useChart from '@/components/ui/Chart/use-chart.ts'
 
 
 const ChartLegendContent = React.forwardRef<
     HTMLDivElement,
-    React.ComponentProps<'div'> &
-        Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
-            hideIcon?: boolean
-            nameKey?: string
-        }
+    React.ComponentProps<'div'> & {
+        payload?: any[]
+        verticalAlign?: 'top' | 'middle' | 'bottom'
+        hideIcon?: boolean
+        nameKey?: string
+    }
 >(
     (
         {
@@ -39,7 +38,7 @@ const ChartLegendContent = React.forwardRef<
                     className
                 )}
             >
-                {payload.map(item => {
+                {payload.map((item: any) => {
                     const key = `${nameKey || item.dataKey || 'value'}`
                     const itemConfig = getPayloadConfigFromPayload(
                         config,

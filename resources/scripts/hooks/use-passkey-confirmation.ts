@@ -2,7 +2,7 @@ import { startAuthentication } from '@simplewebauthn/browser'
 import {
     AuthenticationResponseJSON,
     PublicKeyCredentialRequestOptionsJSON,
-} from '@simplewebauthn/types'
+} from '@simplewebauthn/browser'
 import { useState } from 'react'
 
 import confirmIdentity from '@/api/auth/identity/confirmIdentity.ts'

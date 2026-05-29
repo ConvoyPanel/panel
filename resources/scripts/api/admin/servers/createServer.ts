@@ -8,9 +8,9 @@ export const serverSchema = z
     .object({
         name: z.string().min(1, 'Name is required.').max(191),
         hostname: z.string().min(1, 'Hostname is required.').max(191),
-        nodeId: z.string({ required_error: 'Node is required.' }).min(1),
-        storageId: z.string({ required_error: 'Storage is required.' }).min(1),
-        userId: z.string({ required_error: 'User is required.' }).min(1),
+        nodeId: z.string({ error: 'Node is required.' }).min(1),
+        storageId: z.string({ error: 'Storage is required.' }).min(1),
+        userId: z.string({ error: 'User is required.' }).min(1),
         vmid: z.string().optional(),
 
         // limits
@@ -25,7 +25,7 @@ export const serverSchema = z
 
         // IP addresses
         networkInterfaceId: z
-            .string({ required_error: 'Network Interface is required.' })
+            .string({ error: 'Network Interface is required.' })
             .min(1),
         addressesIpv4Count: z.coerce.number().min(0).max(100).optional(),
         addressesIpv6Count: z.coerce.number().min(0).max(100).optional(),

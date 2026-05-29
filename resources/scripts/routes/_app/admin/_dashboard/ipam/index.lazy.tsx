@@ -49,7 +49,8 @@ function IpamIndex() {
             cell: ({ cell }) => (
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/ipam/${cell.row.original.id}`}
+                    to='/admin/ipam/$addressBlockGroupId'
+                    params={{ addressBlockGroupId: String(cell.row.original.id) }}
                 >
                     {cell.getValue<string>()}
                 </Link>

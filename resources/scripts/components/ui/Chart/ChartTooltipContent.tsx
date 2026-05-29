@@ -18,8 +18,8 @@ const ChartTooltipContent = React.forwardRef<
             styledFormatter?: (payload: any) => React.ReactNode
         }
 >(
-    (
-        {
+    (props, ref) => {
+        const {
             active,
             payload,
             className,
@@ -34,9 +34,7 @@ const ChartTooltipContent = React.forwardRef<
             nameKey,
             labelKey,
             styledFormatter,
-        },
-        ref
-    ) => {
+        } = props as any
         const { config } = useChart()
 
         const tooltipLabel = React.useMemo(() => {
@@ -93,7 +91,7 @@ const ChartTooltipContent = React.forwardRef<
             >
                 {!nestLabel ? tooltipLabel : null}
                 <div className='grid gap-1.5'>
-                    {payload.map((item, index) => {
+                    {payload.map((item: any, index: number) => {
                         const key = `${nameKey || item.name || item.dataKey || 'value'}`
                         const itemConfig = getPayloadConfigFromPayload(
                             config,

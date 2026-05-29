@@ -30,7 +30,7 @@ const LengthAwarePaginator = <T,>({
     onPageChange,
     children,
 }: Props<T>) => {
-    const navigate = useNavigate()
+    const navigate = useNavigate() as any
     const cachedTotalPages = useRef(1)
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const LengthAwarePaginator = <T,>({
                 <PaginationContent>
                     <PaginationPrevious
                         onClick={() =>
-                            navigate({ search: prev => ({ ...prev, page: currentPage - 1 }) })
+                            navigate({ search: (prev: any) => ({ ...prev, page: currentPage - 1 }) })
                         }
                         disabled={currentPage <= 1}
                         role='button'
@@ -67,7 +67,7 @@ const LengthAwarePaginator = <T,>({
                                 <PaginationLink
                                     isActive={currentPage === page}
                                     onClick={() =>
-                                        navigate({ search: prev => ({ ...prev, page }) })
+                                        navigate({ search: (prev: any) => ({ ...prev, page }) })
                                     }
                                 >
                                     {page}
@@ -77,7 +77,7 @@ const LengthAwarePaginator = <T,>({
                     })}
                     <PaginationNext
                         onClick={() =>
-                            navigate({ search: prev => ({ ...prev, page: currentPage + 1 }) })
+                            navigate({ search: (prev: any) => ({ ...prev, page: currentPage + 1 }) })
                         }
                         disabled={currentPage >= cachedTotalPages.current}
                     />

@@ -3,7 +3,7 @@ import { startAuthentication } from '@simplewebauthn/browser'
 import {
     AuthenticationResponseJSON,
     PublicKeyCredentialRequestOptionsJSON,
-} from '@simplewebauthn/types'
+} from '@simplewebauthn/browser'
 import { IconKey } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'

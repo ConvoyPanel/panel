@@ -10,8 +10,6 @@ import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import byteSize from 'byte-size'
-
 import useAttachedNodesSWR from '@/api/admin/addressBlockGroups/use-attached-nodes-swr.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
@@ -48,7 +46,8 @@ const AttachedNodesTab = () => {
             cell: ({ row }) => (
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/nodes/${row.original.node?.id}`}
+                    to='/admin/nodes/$nodeId'
+                    params={{ nodeId: String(row.original.node?.id) }}
                 >
                     {row.original.node?.displayName}
                 </Link>

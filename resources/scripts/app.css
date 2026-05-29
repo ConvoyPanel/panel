@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../../tailwind.config.cjs';
 
 @layer base {
     :root {
@@ -79,8 +79,12 @@
 }
 
 @layer base {
-    * {
-        @apply border-border;
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: hsl(var(--border));
     }
 
     html {

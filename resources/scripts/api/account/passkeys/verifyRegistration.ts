@@ -1,4 +1,4 @@
-import { RegistrationResponseJSON } from '@simplewebauthn/types'
+import { RegistrationResponseJSON } from '@simplewebauthn/browser'
 
 import axios from '@/lib/axios.ts'
 
