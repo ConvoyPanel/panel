@@ -12,7 +12,7 @@ return [
         'canary' => 'Canary build',
         'current' => 'Up to date',
         'outdated' => 'Update available',
-        'unavailable' => 'Unable to check',
+        'unavailable' => 'Check unavailable',
         'unknown' => 'Unknown version',
     ],
     'update_detail' => [
@@ -20,7 +20,7 @@ return [
         'canary' => 'This build reports :current, so update comparison is disabled for this installation.',
         'current' => 'Installed version :current is up to date with the latest release, :latest.',
         'outdated' => 'Installed version :current is behind the latest release, :latest.',
-        'unavailable' => 'Installed version :current was detected, but the latest release could not be fetched.',
+        'unavailable' => 'Installed version :current was detected. The latest release check is temporarily unavailable.',
         'unknown' => 'Installed version :current is not a comparable release version.',
     ],
     'ready_installing_detail' => ':ready ready, :installing installing',

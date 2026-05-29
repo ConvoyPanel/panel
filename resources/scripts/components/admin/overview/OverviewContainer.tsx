@@ -55,6 +55,15 @@ const updateToneClasses = {
     unknown: 'text-accent-600 border-accent-200 bg-accent-100',
 }
 
+const updateBadgeColors = {
+    ahead: 'green',
+    canary: 'gray',
+    current: 'green',
+    outdated: 'yellow',
+    unavailable: 'gray',
+    unknown: 'gray',
+}
+
 const StatCard = ({
     title,
     value,
@@ -184,7 +193,7 @@ const UpdateStatusCard = ({
                         <h2 className='h5'>{t('panel_update')}</h2>
                         <Badge
                             variant='outline'
-                            color='gray'
+                            color={updateBadgeColors[update.status]}
                             className='!normal-case'
                         >
                             {t(`update_status.${update.status}`)}
