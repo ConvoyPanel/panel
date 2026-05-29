@@ -44,6 +44,7 @@ const toneClasses = {
 }
 
 const updateToneClasses = {
+    ahead: 'text-success border-success-light bg-success-lighter',
     canary: 'text-accent-600 border-accent-200 bg-accent-100',
     current: 'text-success border-success-light bg-success-lighter',
     outdated: 'text-warning-dark border-warning bg-warning-lighter',

@@ -48,14 +48,18 @@ class VersionUpdateService
             );
         }
 
-        $isOutdated = version_compare(
+        $comparison = version_compare(
             $normalizedCurrentVersion,
             $normalizedLatestVersion,
-            '<',
         );
+        $isOutdated = $comparison < 0;
 
         return $this->result(
-            $isOutdated ? 'outdated' : 'current',
+            match (true) {
+                $isOutdated => 'outdated',
+                $comparison > 0 => 'ahead',
+                default => 'current',
+            },
             $currentVersion,
             $latestVersion,
             $latestRelease['url'],

@@ -57,6 +57,7 @@ export interface DashboardNode {
 }
 
 export type DashboardUpdateStatus =
+    | 'ahead'
     | 'canary'
     | 'current'
     | 'outdated'

@@ -42,6 +42,22 @@ it('normalizes a leading v before comparing versions', function () {
         ->and($status['is_outdated'])->toBeFalse();
 });
 
+it('reports when the current version is ahead of the latest release', function () {
+    config()->set('app.version', '1.2.0');
+
+    Http::fake([
+        'https://api.github.com/repos/ConvoyPanel/panel/releases/latest' => Http::response([
+            'tag_name' => 'v1.1.0',
+            'html_url' => 'https://github.com/ConvoyPanel/panel/releases/tag/v1.1.0',
+        ]),
+    ]);
+
+    $status = app(VersionUpdateService::class)->status();
+
+    expect($status['status'])->toBe('ahead')
+        ->and($status['is_outdated'])->toBeFalse();
+});
+
 it('does not compare canary builds or fetch the latest release', function () {
     config()->set('app.version', 'canary');
 

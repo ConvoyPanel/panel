@@ -7,6 +7,7 @@ return [
     'view_release' => 'View release',
     'unknown' => 'unknown',
     'update_status' => [
+        'ahead' => 'Ahead of latest',
         'canary' => 'Canary build',
         'current' => 'Up to date',
         'outdated' => 'Update available',
@@ -14,8 +15,9 @@ return [
         'unknown' => 'Unknown version',
     ],
     'update_detail' => [
+        'ahead' => 'Installed version :current is newer than the latest release, :latest.',
         'canary' => 'This build reports :current, so update comparison is disabled for this installation.',
-        'current' => 'Installed version :current matches the latest release, :latest.',
+        'current' => 'Installed version :current is up to date with the latest release, :latest.',
         'outdated' => 'Installed version :current is behind the latest release, :latest.',
         'unavailable' => 'Installed version :current was detected, but the latest release could not be fetched.',
         'unknown' => 'Installed version :current is not a comparable release version.',
