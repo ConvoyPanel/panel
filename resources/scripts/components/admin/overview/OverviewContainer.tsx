@@ -221,10 +221,11 @@ const UpdateStatusCard = ({
                             size='sm'
                             loading={refreshing}
                             onClick={onRefresh}
-                            className='inline-flex items-center gap-2'
                         >
-                            <ArrowPathIcon className='h-4 w-4' />
-                            {t('check_again')}
+                            <span className='inline-flex items-center gap-2'>
+                                <ArrowPathIcon className='h-4 w-4' />
+                                {t('check_again')}
+                            </span>
                         </Button>
                     </div>
                 </div>
