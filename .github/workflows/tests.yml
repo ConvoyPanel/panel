@@ -9,29 +9,70 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: convoy
+          MYSQL_USER: convoy_user
+          MYSQL_PASSWORD: YzLa2BCBwDGWVkpG
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uconvoy_user -pYzLa2BCBwDGWVkpG"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create environment file
-        run: cp .env.ci .env
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gmp, pcntl, redis, pdo_mysql, bcmath, intl
+          coverage: none
+          tools: composer:v2
 
-      - name: Start Docker Containers
-        run: docker compose -f docker-compose.ci.yml up -d
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Create environment file
+        run: |
+          cp .env.ci .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
 
       - name: Install Composer dependencies
-        run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Install NPM dependencies
-        run: docker compose -f docker-compose.ci.yml exec workspace npm install
+        run: npm ci
 
       - name: Build frontend assets
-        run: docker compose -f docker-compose.ci.yml exec workspace npm run build
+        run: npm run build
 
       - name: Run database migrations
-        run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
+        run: php artisan migrate --force
 
       - name: Run feature tests
-        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
+        run: vendor/bin/pest tests/Feature
 
       - name: Run unit tests
-        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Unit
+        run: vendor/bin/pest tests/Unit

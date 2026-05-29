@@ -10,38 +10,34 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: 'npm'
 
       - name: Update Embedded Version String
         env:
-          REF: ${{ github.ref }}
+          VERSION: ${{ github.ref_name }}
         run: |
-          sed -i "s/    'version' => 'canary',/    'version' => '${REF:11}',/" config/app.php
+          sed -i "s/    'version' => 'canary',/    'version' => '${VERSION#v}',/" config/app.php
 
       - name: Build Assets
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: Create Release Archive
         run: |
-          # Array of files and directories to remove
           files_to_remove=(
             "node_modules/"
             "tests/"
             "CODE_OF_CONDUCT.md"
             "CONTRIBUTOR_LICENSE_AGREEMENT"
             "crowdin.yml"
-            "docker-compose.ci.yml"
             "phpstan.neon"
             "phpunit.xml"
             "stats.html"
           )
-          
-          # Loop over the files to remove and delete them
           rm -rf "${files_to_remove[@]}"
-          
-          # Array of specific dot files to include
+
           files_to_include=(
             ".editorconfig"
             ".env.example"
@@ -52,25 +48,24 @@ jobs:
             ".prettierrc.json"
           )
 
-          # Archive files, using * directly outside the array for proper expansion
           tar --exclude=panel.tar.gz -czf panel.tar.gz * "${files_to_include[@]}"
 
       - name: Extract Changelog
         id: extract_changelog
         env:
-          REF: ${{ github.ref }}
+          VERSION: ${{ github.ref_name }}
         run: |
-          sed -n "/^## ${REF:10}/,/^## /{/^## /b;p}" CHANGELOG.md > ./RELEASE_CHANGELOG
-          echo "version_name=${REF:10}" >> $GITHUB_OUTPUT
+          sed -n "/^## ${VERSION}/,/^## /{/^## /b;p}" CHANGELOG.md > ./RELEASE_CHANGELOG
+          echo "version_name=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Create Checksum and Add to Changelog
         run: |
-          SUM=`sha256sum panel.tar.gz`
-          echo -e "\n#### SHA256 Checksum\n\n\`\`\`\n$SUM\n\`\`\`\n" >> ./RELEASE_CHANGELOG
-          echo $SUM > checksum.txt
+          SUM=$(sha256sum panel.tar.gz)
+          printf "\n#### SHA256 Checksum\n\n\`\`\`\n%s\n\`\`\`\n" "$SUM" >> ./RELEASE_CHANGELOG
+          echo "$SUM" > checksum.txt
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.extract_changelog.outputs.version_name }}
           body_path: ./RELEASE_CHANGELOG
