@@ -29,7 +29,7 @@ interface IconProps {
 interface StatCardProps {
     title: string
     value: number | string
-    detail: string
+    detail?: string
     icon: ComponentType<IconProps>
     to?: string
     tone?: 'default' | 'warning' | 'error'
@@ -56,7 +56,7 @@ const StatCard = ({
                 <p className='mt-3 text-3xl font-semibold text-foreground'>
                     {value}
                 </p>
-                <p className='description-small mt-2'>{detail}</p>
+                {detail && <p className='description-small mt-2'>{detail}</p>}
             </div>
             <div className={`rounded-md border p-2 ${toneClasses[tone]}`}>
                 <Icon className='h-5 w-5' />
@@ -210,10 +210,8 @@ const OverviewContainer = () => {
                     <StatCard
                         title={tStrings('node', { count: 2 })}
                         value={data.summary.nodes}
-                        detail={t('memory_allocated_detail', {
-                            memory: bytesToString(
-                                data.capacity.memory.allocated
-                            ),
+                        detail={t('nodes_locations_detail', {
+                            count: data.summary.locations,
                         })}
                         icon={CpuChipIcon}
                         to='/admin/nodes'
@@ -221,9 +219,6 @@ const OverviewContainer = () => {
                     <StatCard
                         title={tStrings('user', { count: 2 })}
                         value={data.summary.users}
-                        detail={t('locations_configured_detail', {
-                            count: data.summary.locations,
-                        })}
                         icon={UsersIcon}
                         to='/admin/users'
                     />
