@@ -1,0 +1,99 @@
+# Proxmox VE API Docs
+
+Static AI-readable documentation generated from local Proxmox VE apidoc.js. This is documentation only; it does not call the API.
+
+## Sections
+- /access: 45 endpoints
+- /cluster: 259 endpoints
+- /nodes: 358 endpoints
+- /pools: 7 endpoints
+- /storage: 5 endpoints
+- /version: 1 endpoints
+
+## Common endpoints
+- GET /cluster/qemu: index
+- GET /cluster/qemu/cpu-flags: index
+- GET /cluster/qemu/custom-cpu-models: config
+- POST /cluster/qemu/custom-cpu-models: create
+- DELETE /cluster/qemu/custom-cpu-models/{cputype}: delete
+- GET /cluster/qemu/custom-cpu-models/{cputype}: info
+- PUT /cluster/qemu/custom-cpu-models/{cputype}: update
+- GET /nodes: index
+- GET /nodes/{node}/capabilities/qemu: qemu_caps_index
+- GET /nodes/{node}/capabilities/qemu/cpu: index
+- GET /nodes/{node}/capabilities/qemu/cpu-flags: index
+- GET /nodes/{node}/capabilities/qemu/machines: types
+- GET /nodes/{node}/capabilities/qemu/migration: capabilities
+- GET /nodes/{node}/lxc: vmlist
+- POST /nodes/{node}/lxc: create_vm
+- DELETE /nodes/{node}/lxc/{vmid}: destroy_vm
+- GET /nodes/{node}/lxc/{vmid}: vmdiridx
+- POST /nodes/{node}/lxc/{vmid}/clone: clone_vm
+- GET /nodes/{node}/lxc/{vmid}/config: vm_config
+- PUT /nodes/{node}/lxc/{vmid}/config: update_vm
+- GET /nodes/{node}/lxc/{vmid}/feature: vm_feature
+- GET /nodes/{node}/lxc/{vmid}/firewall: index
+- GET /nodes/{node}/lxc/{vmid}/firewall/aliases: get_aliases
+- POST /nodes/{node}/lxc/{vmid}/firewall/aliases: create_alias
+- DELETE /nodes/{node}/lxc/{vmid}/firewall/aliases/{name}: remove_alias
+- GET /nodes/{node}/lxc/{vmid}/firewall/aliases/{name}: read_alias
+- PUT /nodes/{node}/lxc/{vmid}/firewall/aliases/{name}: update_alias
+- GET /nodes/{node}/lxc/{vmid}/firewall/ipset: ipset_index
+- POST /nodes/{node}/lxc/{vmid}/firewall/ipset: create_ipset
+- DELETE /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}: delete_ipset
+- GET /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}: get_ipset
+- POST /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}: create_ip
+- DELETE /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}/{cidr}: remove_ip
+- GET /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}/{cidr}: read_ip
+- PUT /nodes/{node}/lxc/{vmid}/firewall/ipset/{name}/{cidr}: update_ip
+- GET /nodes/{node}/lxc/{vmid}/firewall/log: log
+- GET /nodes/{node}/lxc/{vmid}/firewall/options: get_options
+- PUT /nodes/{node}/lxc/{vmid}/firewall/options: set_options
+- GET /nodes/{node}/lxc/{vmid}/firewall/refs: refs
+- GET /nodes/{node}/lxc/{vmid}/firewall/rules: get_rules
+- POST /nodes/{node}/lxc/{vmid}/firewall/rules: create_rule
+- DELETE /nodes/{node}/lxc/{vmid}/firewall/rules/{pos}: delete_rule
+- GET /nodes/{node}/lxc/{vmid}/firewall/rules/{pos}: get_rule
+- PUT /nodes/{node}/lxc/{vmid}/firewall/rules/{pos}: update_rule
+- GET /nodes/{node}/lxc/{vmid}/interfaces: ip
+- GET /nodes/{node}/lxc/{vmid}/migrate: migrate_vm_precondition
+- POST /nodes/{node}/lxc/{vmid}/migrate: migrate_vm
+- POST /nodes/{node}/lxc/{vmid}/move_volume: move_volume
+- POST /nodes/{node}/lxc/{vmid}/mtunnel: mtunnel
+- GET /nodes/{node}/lxc/{vmid}/mtunnelwebsocket: mtunnelwebsocket
+- GET /nodes/{node}/lxc/{vmid}/pending: vm_pending
+- POST /nodes/{node}/lxc/{vmid}/remote_migrate: remote_migrate_vm
+- PUT /nodes/{node}/lxc/{vmid}/resize: resize_vm
+- GET /nodes/{node}/lxc/{vmid}/rrd: rrd
+- GET /nodes/{node}/lxc/{vmid}/rrddata: rrddata
+- GET /nodes/{node}/lxc/{vmid}/snapshot: list
+- POST /nodes/{node}/lxc/{vmid}/snapshot: snapshot
+- DELETE /nodes/{node}/lxc/{vmid}/snapshot/{snapname}: delsnapshot
+- GET /nodes/{node}/lxc/{vmid}/snapshot/{snapname}: snapshot_cmd_idx
+- GET /nodes/{node}/lxc/{vmid}/snapshot/{snapname}/config: get_snapshot_config
+- PUT /nodes/{node}/lxc/{vmid}/snapshot/{snapname}/config: update_snapshot_config
+- POST /nodes/{node}/lxc/{vmid}/snapshot/{snapname}/rollback: rollback
+- POST /nodes/{node}/lxc/{vmid}/spiceproxy: spiceproxy
+- GET /nodes/{node}/lxc/{vmid}/status: vmcmdidx
+- GET /nodes/{node}/lxc/{vmid}/status/current: vm_status
+- POST /nodes/{node}/lxc/{vmid}/status/reboot: vm_reboot
+- POST /nodes/{node}/lxc/{vmid}/status/resume: vm_resume
+- POST /nodes/{node}/lxc/{vmid}/status/shutdown: vm_shutdown
+- POST /nodes/{node}/lxc/{vmid}/status/start: vm_start
+- POST /nodes/{node}/lxc/{vmid}/status/stop: vm_stop
+- POST /nodes/{node}/lxc/{vmid}/status/suspend: vm_suspend
+- POST /nodes/{node}/lxc/{vmid}/template: template
+- POST /nodes/{node}/lxc/{vmid}/termproxy: termproxy
+- POST /nodes/{node}/lxc/{vmid}/vncproxy: vncproxy
+- GET /nodes/{node}/lxc/{vmid}/vncwebsocket: vncwebsocket
+- GET /nodes/{node}/qemu: vmlist
+- POST /nodes/{node}/qemu: create_vm
+- DELETE /nodes/{node}/qemu/{vmid}: destroy_vm
+- GET /nodes/{node}/qemu/{vmid}: vmdiridx
+- GET /nodes/{node}/qemu/{vmid}/agent: index
+
+## Files
+- endpoints.json: normalized endpoint records
+- endpoints.ndjson: one normalized endpoint per line
+- search-index.json: compact search records with semantic aliases
+- markdown/: per-section and per-endpoint Markdown files

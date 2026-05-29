@@ -1,0 +1,205 @@
+# GET /cluster/replication
+
+List replication jobs.
+
+## Path parameters
+
+None.
+
+## Request parameters
+
+None.
+
+## Returns
+
+```json
+{
+  "items": {
+    "properties": {
+      "comment": {
+        "description": "Description.",
+        "maxLength": 4096,
+        "optional": 1,
+        "type": "string"
+      },
+      "disable": {
+        "description": "Flag to disable/deactivate the entry.",
+        "optional": 1,
+        "type": "boolean"
+      },
+      "guest": {
+        "description": "Guest ID.",
+        "type": "integer"
+      },
+      "id": {
+        "description": "Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.",
+        "format": "pve-replication-job-id",
+        "pattern": "[1-9][0-9]{2,8}-\\d{1,9}",
+        "type": "string"
+      },
+      "jobnum": {
+        "description": "Unique, sequential ID assigned to each job.",
+        "type": "integer"
+      },
+      "rate": {
+        "description": "Rate limit in mbps (megabytes per second) as floating point number.",
+        "minimum": 1,
+        "optional": 1,
+        "type": "number"
+      },
+      "remove_job": {
+        "description": "Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.",
+        "enum": [
+          "local",
+          "full"
+        ],
+        "optional": 1,
+        "type": "string"
+      },
+      "schedule": {
+        "default": "*/15",
+        "description": "Storage replication schedule. The format is a subset of `systemd` calendar events.",
+        "format": "pve-calendar-event",
+        "maxLength": 128,
+        "optional": 1,
+        "type": "string"
+      },
+      "source": {
+        "description": "For internal use, to detect if the guest was stolen.",
+        "format": "pve-node",
+        "optional": 1,
+        "type": "string"
+      },
+      "target": {
+        "description": "Target node.",
+        "format": "pve-node",
+        "optional": 0,
+        "type": "string"
+      },
+      "type": {
+        "description": "Section type.",
+        "enum": [
+          "local"
+        ],
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "links": [
+    {
+      "href": "{id}",
+      "rel": "child"
+    }
+  ],
+  "type": "array"
+}
+```
+
+## Permissions
+
+```json
+{
+  "description": "Will only return replication jobs for which the calling user has VM.Audit permission on /vms/<vmid>.",
+  "user": "all"
+}
+```
+
+## Raw schema
+
+```json
+{
+  "allowtoken": 1,
+  "description": "List replication jobs.",
+  "method": "GET",
+  "name": "index",
+  "parameters": {
+    "additionalProperties": 0
+  },
+  "permissions": {
+    "description": "Will only return replication jobs for which the calling user has VM.Audit permission on /vms/<vmid>.",
+    "user": "all"
+  },
+  "returns": {
+    "items": {
+      "properties": {
+        "comment": {
+          "description": "Description.",
+          "maxLength": 4096,
+          "optional": 1,
+          "type": "string"
+        },
+        "disable": {
+          "description": "Flag to disable/deactivate the entry.",
+          "optional": 1,
+          "type": "boolean"
+        },
+        "guest": {
+          "description": "Guest ID.",
+          "type": "integer"
+        },
+        "id": {
+          "description": "Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.",
+          "format": "pve-replication-job-id",
+          "pattern": "[1-9][0-9]{2,8}-\\d{1,9}",
+          "type": "string"
+        },
+        "jobnum": {
+          "description": "Unique, sequential ID assigned to each job.",
+          "type": "integer"
+        },
+        "rate": {
+          "description": "Rate limit in mbps (megabytes per second) as floating point number.",
+          "minimum": 1,
+          "optional": 1,
+          "type": "number"
+        },
+        "remove_job": {
+          "description": "Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.",
+          "enum": [
+            "local",
+            "full"
+          ],
+          "optional": 1,
+          "type": "string"
+        },
+        "schedule": {
+          "default": "*/15",
+          "description": "Storage replication schedule. The format is a subset of `systemd` calendar events.",
+          "format": "pve-calendar-event",
+          "maxLength": 128,
+          "optional": 1,
+          "type": "string"
+        },
+        "source": {
+          "description": "For internal use, to detect if the guest was stolen.",
+          "format": "pve-node",
+          "optional": 1,
+          "type": "string"
+        },
+        "target": {
+          "description": "Target node.",
+          "format": "pve-node",
+          "optional": 0,
+          "type": "string"
+        },
+        "type": {
+          "description": "Section type.",
+          "enum": [
+            "local"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "links": [
+      {
+        "href": "{id}",
+        "rel": "child"
+      }
+    ],
+    "type": "array"
+  }
+}
+```
