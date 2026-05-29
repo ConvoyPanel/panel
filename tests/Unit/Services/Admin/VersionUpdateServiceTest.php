@@ -84,3 +84,27 @@ it('returns unavailable when the latest release cannot be fetched', function () 
     expect($status['status'])->toBe('unavailable')
         ->and($status['is_outdated'])->toBeFalse();
 });
+
+it('can clear the cached latest release check', function () {
+    config()->set('app.version', '1.0.0');
+
+    Http::fakeSequence()
+        ->push([
+            'tag_name' => 'v1.1.0',
+            'html_url' => 'https://github.com/ConvoyPanel/panel/releases/tag/v1.1.0',
+        ])
+        ->push([
+            'tag_name' => 'v1.2.0',
+            'html_url' => 'https://github.com/ConvoyPanel/panel/releases/tag/v1.2.0',
+        ]);
+
+    $service = app(VersionUpdateService::class);
+
+    expect($service->status()['latest_version'])->toBe('v1.1.0');
+
+    $service->clearCache();
+
+    expect($service->status()['latest_version'])->toBe('v1.2.0');
+
+    Http::assertSentCount(2);
+});

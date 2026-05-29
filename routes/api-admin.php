@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::get('/overview', Admin\OverviewController::class);
+Route::post('/overview/update-check', [Admin\OverviewController::class, 'refreshUpdate']);
 
 /*
 |--------------------------------------------------------------------------
@@ -58,7 +59,7 @@ Route::prefix('/nodes')->group(function () {
         |
         */
         Route::resource('/isos', Admin\Nodes\IsoController::class)
-             ->only(['index', 'store', 'update', 'destroy']);
+            ->only(['index', 'store', 'update', 'destroy']);
 
         /*
         |--------------------------------------------------------------------------
@@ -92,7 +93,7 @@ Route::prefix('/nodes')->group(function () {
                 });
 
                 Route::resource('templates', Admin\Nodes\TemplateController::class)
-                     ->only(['index', 'store', 'update', 'destroy']);
+                    ->only(['index', 'store', 'update', 'destroy']);
             });
         });
 
@@ -185,7 +186,7 @@ Route::prefix('/address-pools')->group(function () {
 |
 */
 Route::resource('users', Admin\UserController::class)
-     ->only(['index', 'show', 'store', 'update', 'destroy']);
+    ->only(['index', 'show', 'store', 'update', 'destroy']);
 
 /*
 |--------------------------------------------------------------------------
@@ -219,4 +220,4 @@ Route::prefix('/coterms')->group(function () {
 |
 */
 Route::resource('tokens', Admin\TokenController::class)
-     ->only(['index', 'store', 'destroy']);
+    ->only(['index', 'store', 'destroy']);

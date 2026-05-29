@@ -1,5 +1,6 @@
 import { bytesToString } from '@/util/helpers'
 import {
+    ArrowPathIcon,
     CircleStackIcon,
     CpuChipIcon,
     InformationCircleIcon,
@@ -9,7 +10,7 @@ import {
     UsersIcon,
 } from '@heroicons/react/24/outline'
 import { Badge, Skeleton } from '@mantine/core'
-import { ComponentType } from 'react'
+import { ComponentType, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -18,8 +19,10 @@ import {
     DashboardMetric,
     DashboardNode,
     DashboardUpdate,
+    refreshUpdateCheck,
 } from '@/api/admin/overview/getOverview'
 
+import Button from '@/components/elements/Button'
 import Card from '@/components/elements/Card'
 import MessageBox from '@/components/elements/MessageBox'
 import PageContentBlock from '@/components/elements/PageContentBlock'
@@ -162,7 +165,15 @@ const NodeRow = ({ node }: { node: DashboardNode }) => {
     )
 }
 
-const UpdateStatusCard = ({ update }: { update: DashboardUpdate }) => {
+const UpdateStatusCard = ({
+    update,
+    refreshing,
+    onRefresh,
+}: {
+    update: DashboardUpdate
+    refreshing: boolean
+    onRefresh: () => void
+}) => {
     const { t } = useTranslation('admin.overview')
 
     return (
@@ -185,16 +196,28 @@ const UpdateStatusCard = ({ update }: { update: DashboardUpdate }) => {
                             latest: update.latestVersion ?? t('unknown'),
                         })}
                     </p>
-                    {update.releaseUrl && update.isOutdated && (
-                        <a
-                            href={update.releaseUrl}
-                            target='_blank'
-                            rel='noreferrer'
-                            className='link mt-3 inline-block text-sm font-medium'
+                    <div className='mt-3 flex flex-wrap items-center gap-3'>
+                        {update.releaseUrl && update.isOutdated && (
+                            <a
+                                href={update.releaseUrl}
+                                target='_blank'
+                                rel='noreferrer'
+                                className='link text-sm font-medium'
+                            >
+                                {t('view_release')}
+                            </a>
+                        )}
+                        <Button
+                            type='button'
+                            size='sm'
+                            loading={refreshing}
+                            onClick={onRefresh}
+                            className='inline-flex items-center gap-2'
                         >
-                            {t('view_release')}
-                        </a>
-                    )}
+                            <ArrowPathIcon className='h-4 w-4' />
+                            {t('check_again')}
+                        </Button>
+                    </div>
                 </div>
                 <div
                     className={`rounded-md border p-2 ${
@@ -229,7 +252,23 @@ const OverviewSkeleton = () => (
 const OverviewContainer = () => {
     const { t } = useTranslation('admin.overview')
     const { t: tStrings } = useTranslation('strings')
-    const { data, error } = useOverviewSWR()
+    const { data, error, mutate } = useOverviewSWR()
+    const [refreshingUpdate, setRefreshingUpdate] = useState(false)
+
+    const refreshUpdate = async () => {
+        setRefreshingUpdate(true)
+
+        try {
+            const update = await refreshUpdateCheck()
+
+            mutate(
+                current => (current ? { ...current, update } : current),
+                false
+            )
+        } finally {
+            setRefreshingUpdate(false)
+        }
+    }
 
     return (
         <PageContentBlock title={tStrings('overview') ?? ''}>
@@ -258,7 +297,11 @@ const OverviewContainer = () => {
                 <OverviewSkeleton />
             ) : (
                 <div className='grid grid-cols-12 gap-6'>
-                    <UpdateStatusCard update={data.update} />
+                    <UpdateStatusCard
+                        update={data.update}
+                        refreshing={refreshingUpdate}
+                        onRefresh={refreshUpdate}
+                    />
 
                     <StatCard
                         title={tStrings('server', { count: 2 })}

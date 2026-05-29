@@ -4,6 +4,7 @@ return [
     'description' => 'Live panel health and capacity.',
     'load_error' => 'Failed to load the realtime dashboard.',
     'panel_update' => 'Panel Update',
+    'check_again' => 'Check again',
     'view_release' => 'View release',
     'unknown' => 'unknown',
     'update_status' => [

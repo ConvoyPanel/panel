@@ -87,6 +87,14 @@ export interface DashboardOverview {
     nodes: DashboardNode[]
 }
 
+const rawUpdate = (data: any): DashboardUpdate => ({
+    status: data.status,
+    currentVersion: data.current_version,
+    latestVersion: data.latest_version,
+    isOutdated: data.is_outdated,
+    releaseUrl: data.release_url,
+})
+
 const rawMetric = (data: any): DashboardMetric => ({
     allocated: data.allocated,
     total: data.total,
@@ -95,13 +103,7 @@ const rawMetric = (data: any): DashboardMetric => ({
 
 export const rawDataToOverview = (data: any): DashboardOverview => ({
     generatedAt: data.generated_at,
-    update: {
-        status: data.update.status,
-        currentVersion: data.update.current_version,
-        latestVersion: data.update.latest_version,
-        isOutdated: data.update.is_outdated,
-        releaseUrl: data.update.release_url,
-    },
+    update: rawUpdate(data.update),
     summary: {
         servers: data.summary.servers,
         nodes: data.summary.nodes,
@@ -132,6 +134,12 @@ const getOverview = async (): Promise<DashboardOverview> => {
     const { data } = await http.get('/api/admin/overview')
 
     return rawDataToOverview(data.data)
+}
+
+export const refreshUpdateCheck = async (): Promise<DashboardUpdate> => {
+    const { data } = await http.post('/api/admin/overview/update-check')
+
+    return rawUpdate(data.data)
 }
 
 export default getOverview

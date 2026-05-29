@@ -67,6 +67,11 @@ class VersionUpdateService
         );
     }
 
+    public function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+    }
+
     private function latestRelease(): array
     {
         $cached = Cache::get(self::CACHE_KEY);
