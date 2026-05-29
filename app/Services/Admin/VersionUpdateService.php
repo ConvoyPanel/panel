@@ -12,7 +12,9 @@ class VersionUpdateService
 
     private const CACHE_KEY = 'admin:version-update:github-release';
 
-    private const CACHE_SECONDS = 3600;
+    private const SUCCESS_CACHE_SECONDS = 3600;
+
+    private const FAILURE_CACHE_SECONDS = 300;
 
     private const LATEST_RELEASE_URL = 'https://api.github.com/repos/ConvoyPanel/panel/releases/latest';
 
@@ -63,11 +65,23 @@ class VersionUpdateService
 
     private function latestRelease(): array
     {
-        return Cache::remember(
+        $cached = Cache::get(self::CACHE_KEY);
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $latestRelease = $this->fetchLatestRelease();
+
+        Cache::put(
             self::CACHE_KEY,
-            self::CACHE_SECONDS,
-            fn () => $this->fetchLatestRelease(),
+            $latestRelease,
+            $latestRelease['version']
+                ? self::SUCCESS_CACHE_SECONDS
+                : self::FAILURE_CACHE_SECONDS,
         );
+
+        return $latestRelease;
     }
 
     private function fetchLatestRelease(): array
