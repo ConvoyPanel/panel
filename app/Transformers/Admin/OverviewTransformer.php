@@ -10,6 +10,13 @@ class OverviewTransformer extends TransformerAbstract
     {
         return [
             'generated_at' => $overview['generated_at'],
+            'update' => [
+                'status' => $overview['update']['status'],
+                'current_version' => $overview['update']['current_version'],
+                'latest_version' => $overview['update']['latest_version'],
+                'is_outdated' => $overview['update']['is_outdated'],
+                'release_url' => $overview['update']['release_url'],
+            ],
             'summary' => [
                 'servers' => $overview['summary']['servers'],
                 'nodes' => $overview['summary']['nodes'],

@@ -2,6 +2,7 @@ import { bytesToString } from '@/util/helpers'
 import {
     CircleStackIcon,
     CpuChipIcon,
+    InformationCircleIcon,
     ExclamationTriangleIcon,
     ServerStackIcon,
     SignalIcon,
@@ -16,6 +17,7 @@ import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 import {
     DashboardMetric,
     DashboardNode,
+    DashboardUpdate,
 } from '@/api/admin/overview/getOverview'
 
 import Card from '@/components/elements/Card'
@@ -39,6 +41,14 @@ const toneClasses = {
     default: 'text-accent-600 border-accent-200 bg-accent-100',
     warning: 'text-warning-dark border-warning bg-warning-lighter',
     error: 'text-error border-error-light bg-error-lighter',
+}
+
+const updateToneClasses = {
+    canary: 'text-accent-600 border-accent-200 bg-accent-100',
+    current: 'text-success border-success-light bg-success-lighter',
+    outdated: 'text-warning-dark border-warning bg-warning-lighter',
+    unavailable: 'text-accent-600 border-accent-200 bg-accent-100',
+    unknown: 'text-accent-600 border-accent-200 bg-accent-100',
 }
 
 const StatCard = ({
@@ -151,6 +161,56 @@ const NodeRow = ({ node }: { node: DashboardNode }) => {
     )
 }
 
+const UpdateStatusCard = ({ update }: { update: DashboardUpdate }) => {
+    const { t } = useTranslation('admin.overview')
+
+    return (
+        <Card className='col-span-12'>
+            <div className='flex flex-wrap items-start justify-between gap-4'>
+                <div>
+                    <div className='flex flex-wrap items-center gap-3'>
+                        <h2 className='h5'>{t('panel_update')}</h2>
+                        <Badge
+                            variant='outline'
+                            color='gray'
+                            className='!normal-case'
+                        >
+                            {t(`update_status.${update.status}`)}
+                        </Badge>
+                    </div>
+                    <p className='description-small mt-2'>
+                        {t(`update_detail.${update.status}`, {
+                            current: update.currentVersion,
+                            latest: update.latestVersion ?? t('unknown'),
+                        })}
+                    </p>
+                    {update.releaseUrl && update.isOutdated && (
+                        <a
+                            href={update.releaseUrl}
+                            target='_blank'
+                            rel='noreferrer'
+                            className='link mt-3 inline-block text-sm font-medium'
+                        >
+                            {t('view_release')}
+                        </a>
+                    )}
+                </div>
+                <div
+                    className={`rounded-md border p-2 ${
+                        updateToneClasses[update.status]
+                    }`}
+                >
+                    {update.isOutdated ? (
+                        <ExclamationTriangleIcon className='h-5 w-5' />
+                    ) : (
+                        <InformationCircleIcon className='h-5 w-5' />
+                    )}
+                </div>
+            </div>
+        </Card>
+    )
+}
+
 const OverviewSkeleton = () => (
     <div className='grid grid-cols-12 gap-6'>
         {[1, 2, 3, 4].map(item => (
@@ -197,6 +257,8 @@ const OverviewContainer = () => {
                 <OverviewSkeleton />
             ) : (
                 <div className='grid grid-cols-12 gap-6'>
+                    <UpdateStatusCard update={data.update} />
+
                     <StatCard
                         title={tStrings('server', { count: 2 })}
                         value={data.summary.servers}

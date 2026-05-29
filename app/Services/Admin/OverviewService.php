@@ -20,6 +20,10 @@ class OverviewService
 
     private const BYTES_PER_MEBIBYTE = 1048576;
 
+    public function __construct(
+        private VersionUpdateService $versionUpdateService,
+    ) {}
+
     public function metrics(): array
     {
         return Cache::remember(
@@ -37,6 +41,7 @@ class OverviewService
 
         return [
             'generated_at' => now(),
+            'update' => $this->versionUpdateService->status(),
             'summary' => $this->summary($nodes, $statuses),
             'servers' => $this->servers($statuses),
             'capacity' => $this->capacity($nodes, $allocations),

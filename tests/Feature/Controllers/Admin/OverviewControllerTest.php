@@ -57,6 +57,9 @@ it('returns overview metrics for admins', function () {
     $response = $this->actingAs($admin)->getJson('/api/admin/overview');
 
     $response->assertOk()
+        ->assertJsonPath('data.update.status', 'canary')
+        ->assertJsonPath('data.update.current_version', 'canary')
+        ->assertJsonPath('data.update.is_outdated', false)
         ->assertJsonPath('data.summary.servers', 2)
         ->assertJsonPath('data.summary.nodes', 1)
         ->assertJsonPath('data.summary.failed_servers', 1)

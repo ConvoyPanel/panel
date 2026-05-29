@@ -56,8 +56,24 @@ export interface DashboardNode {
     disk: DashboardMetric
 }
 
+export type DashboardUpdateStatus =
+    | 'canary'
+    | 'current'
+    | 'outdated'
+    | 'unavailable'
+    | 'unknown'
+
+export interface DashboardUpdate {
+    status: DashboardUpdateStatus
+    currentVersion: string
+    latestVersion: string | null
+    isOutdated: boolean
+    releaseUrl: string | null
+}
+
 export interface DashboardOverview {
     generatedAt: string
+    update: DashboardUpdate
     summary: DashboardSummary
     servers: DashboardServers
     capacity: {
@@ -78,6 +94,13 @@ const rawMetric = (data: any): DashboardMetric => ({
 
 export const rawDataToOverview = (data: any): DashboardOverview => ({
     generatedAt: data.generated_at,
+    update: {
+        status: data.update.status,
+        currentVersion: data.update.current_version,
+        latestVersion: data.update.latest_version,
+        isOutdated: data.update.is_outdated,
+        releaseUrl: data.update.release_url,
+    },
     summary: {
         servers: data.summary.servers,
         nodes: data.summary.nodes,

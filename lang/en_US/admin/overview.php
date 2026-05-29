@@ -3,6 +3,23 @@
 return [
     'description' => 'Live panel health and capacity.',
     'load_error' => 'Failed to load the realtime dashboard.',
+    'panel_update' => 'Panel Update',
+    'view_release' => 'View release',
+    'unknown' => 'unknown',
+    'update_status' => [
+        'canary' => 'Canary build',
+        'current' => 'Up to date',
+        'outdated' => 'Update available',
+        'unavailable' => 'Unable to check',
+        'unknown' => 'Unknown version',
+    ],
+    'update_detail' => [
+        'canary' => 'This build reports :current, so update comparison is disabled for this installation.',
+        'current' => 'Installed version :current matches the latest release, :latest.',
+        'outdated' => 'Installed version :current is behind the latest release, :latest.',
+        'unavailable' => 'Installed version :current was detected, but the latest release could not be fetched.',
+        'unknown' => 'Installed version :current is not a comparable release version.',
+    ],
     'ready_installing_detail' => ':ready ready, :installing installing',
     'nodes_locations_detail_one' => 'across :count location',
     'nodes_locations_detail_other' => 'across :count locations',
