@@ -16,9 +16,13 @@ use Illuminate\Support\Facades\Cache;
 
 class OverviewService
 {
-    private const CACHE_SECONDS = 15;
+    private const CACHE_KEY = 'admin:overview:metrics';
+
+    private const CACHE_SECONDS = 5;
 
     private const BYTES_PER_MEBIBYTE = 1048576;
+
+    private const READY_STATUS = 'ready';
 
     public function __construct(
         private VersionUpdateService $versionUpdateService,
@@ -27,10 +31,15 @@ class OverviewService
     public function metrics(): array
     {
         return Cache::remember(
-            'admin:overview:metrics',
+            self::CACHE_KEY,
             self::CACHE_SECONDS,
             fn () => $this->build(),
         );
+    }
+
+    public function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
     }
 
     private function build(): array
@@ -82,7 +91,7 @@ class OverviewService
             ->groupBy('status')
             ->get()
             ->mapWithKeys(fn (Server $row) => [
-                $row->status ?? 'ready' => (int) $row->total,
+                $row->status ?? self::READY_STATUS => (int) $row->total,
             ]);
     }
 
@@ -101,7 +110,7 @@ class OverviewService
     {
         return [
             'total' => (int) $statuses->sum(),
-            'ready' => (int) ($statuses['ready'] ?? 0),
+            'ready' => (int) ($statuses[self::READY_STATUS] ?? 0),
             'installing' => (int) ($statuses[Status::INSTALLING->value] ?? 0),
             'suspended' => (int) ($statuses[Status::SUSPENDED->value] ?? 0),
             'restoring' => (int) (
@@ -141,7 +150,7 @@ class OverviewService
     {
         $stats = Address::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(server_id IS NOT NULL) as assigned')
+            ->selectRaw('COUNT(server_id) as assigned')
             ->first();
 
         $total = (int) $stats->total;
@@ -160,9 +169,9 @@ class OverviewService
     {
         $stats = Backup::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(completed_at IS NOT NULL) as completed')
-            ->selectRaw('SUM(is_successful = 1) as successful')
-            ->selectRaw('SUM(completed_at IS NULL) as pending')
+            ->selectRaw('COUNT(completed_at) as completed')
+            ->selectRaw('SUM(CASE WHEN is_successful = 1 THEN 1 ELSE 0 END) as successful')
+            ->selectRaw('SUM(CASE WHEN completed_at IS NULL THEN 1 ELSE 0 END) as pending')
             ->first();
 
         return [
@@ -177,7 +186,7 @@ class OverviewService
     {
         $stats = ISO::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(is_successful = 1) as successful')
+            ->selectRaw('SUM(CASE WHEN is_successful = 1 THEN 1 ELSE 0 END) as successful')
             ->first();
 
         $total = (int) $stats->total;

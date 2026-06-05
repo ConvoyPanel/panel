@@ -1,10 +1,11 @@
 import { bytesToString } from '@/util/helpers'
+import useNotify from '@/util/useNotify'
 import {
     ArrowPathIcon,
     CircleStackIcon,
     CpuChipIcon,
-    InformationCircleIcon,
     ExclamationTriangleIcon,
+    InformationCircleIcon,
     ServerStackIcon,
     SignalIcon,
     UsersIcon,
@@ -14,13 +15,13 @@ import { ComponentType, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 import {
     DashboardMetric,
     DashboardNode,
     DashboardUpdate,
     refreshUpdateCheck,
 } from '@/api/admin/overview/getOverview'
+import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 
 import Button from '@/components/elements/Button'
 import Card from '@/components/elements/Card'
@@ -64,6 +65,15 @@ const updateBadgeColors = {
     unknown: 'gray',
 }
 
+const updateValueBadgeColors = {
+    ahead: 'green',
+    canary: 'gray',
+    current: 'green',
+    outdated: 'yellow',
+    unavailable: 'gray',
+    unknown: 'gray',
+}
+
 const StatCard = ({
     title,
     value,
@@ -73,15 +83,21 @@ const StatCard = ({
     tone = 'default',
 }: StatCardProps) => {
     const content = (
-        <div className='flex items-start justify-between gap-4'>
-            <div>
+        <div className='flex h-full items-start justify-between gap-3'>
+            <div className='min-w-0'>
                 <p className='dt'>{title}</p>
-                <p className='mt-3 text-3xl font-semibold text-foreground'>
-                    {value}
-                </p>
-                {detail && <p className='description-small mt-2'>{detail}</p>}
+                <div className='mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1'>
+                    <p className='text-2xl font-semibold leading-none text-foreground'>
+                        {value}
+                    </p>
+                    {detail && (
+                        <p className='description-small leading-tight'>
+                            {detail}
+                        </p>
+                    )}
+                </div>
             </div>
-            <div className={`rounded-md border p-2 ${toneClasses[tone]}`}>
+            <div className={`rounded-md border p-1.5 ${toneClasses[tone]}`}>
                 <Icon className='h-5 w-5' />
             </div>
         </div>
@@ -93,7 +109,10 @@ const StatCard = ({
                 to={to}
                 className='col-span-12 block sm:col-span-6 xl:col-span-3'
             >
-                <Card className='h-full transition-shadow hover:shadow-lg'>
+                <Card
+                    overridePadding
+                    className='h-full p-4 transition-shadow hover:shadow-lg'
+                >
                     {content}
                 </Card>
             </Link>
@@ -101,7 +120,10 @@ const StatCard = ({
     }
 
     return (
-        <Card className='col-span-12 sm:col-span-6 xl:col-span-3'>
+        <Card
+            overridePadding
+            className='col-span-12 p-4 sm:col-span-6 xl:col-span-3'
+        >
             {content}
         </Card>
     )
@@ -174,6 +196,23 @@ const NodeRow = ({ node }: { node: DashboardNode }) => {
     )
 }
 
+const UpdateVersionBadge = ({
+    label,
+    value,
+    color = 'gray',
+}: {
+    label: string
+    value: string
+    color?: string
+}) => (
+    <div className='flex items-center gap-2'>
+        <span className='dt whitespace-nowrap'>{label}</span>
+        <Badge variant='outline' color={color} className='!normal-case'>
+            {value}
+        </Badge>
+    </div>
+)
+
 const UpdateStatusCard = ({
     update,
     refreshing,
@@ -186,59 +225,67 @@ const UpdateStatusCard = ({
     const { t } = useTranslation('admin.overview')
 
     return (
-        <Card className='col-span-12'>
-            <div className='flex flex-wrap items-start justify-between gap-4'>
-                <div>
-                    <div className='flex flex-wrap items-center gap-3'>
-                        <h2 className='h5'>{t('panel_update')}</h2>
-                        <Badge
-                            variant='outline'
-                            color={updateBadgeColors[update.status]}
-                            className='!normal-case'
-                        >
-                            {t(`update_status.${update.status}`)}
-                        </Badge>
-                    </div>
-                    <p className='description-small mt-2'>
-                        {t(`update_detail.${update.status}`, {
-                            current: update.currentVersion,
-                            latest: update.latestVersion ?? t('unknown'),
-                        })}
-                    </p>
-                    <div className='mt-3 flex flex-wrap items-center gap-3'>
-                        {update.releaseUrl && update.isOutdated && (
-                            <a
-                                href={update.releaseUrl}
-                                target='_blank'
-                                rel='noreferrer'
-                                className='link text-sm font-medium'
-                            >
-                                {t('view_release')}
-                            </a>
+        <Card overridePadding className='col-span-12 p-4'>
+            <div className='grid gap-3 md:grid-cols-[1fr_auto] md:items-end'>
+                <div className='flex min-w-0 items-start gap-3'>
+                    <div
+                        className={`hidden rounded-md border p-1.5 sm:block ${
+                            updateToneClasses[update.status]
+                        }`}
+                    >
+                        {update.isOutdated ? (
+                            <ExclamationTriangleIcon className='h-5 w-5' />
+                        ) : (
+                            <InformationCircleIcon className='h-5 w-5' />
                         )}
-                        <Button
-                            type='button'
-                            size='sm'
-                            loading={refreshing}
-                            onClick={onRefresh}
-                        >
-                            <span className='inline-flex items-center gap-2'>
-                                <ArrowPathIcon className='h-4 w-4' />
-                                {t('check_again')}
-                            </span>
-                        </Button>
+                    </div>
+                    <div className='min-w-0'>
+                        <div className='flex flex-wrap items-center gap-2'>
+                            <h2 className='h5'>{t('panel_update')}</h2>
+                            <Badge
+                                variant='outline'
+                                color={updateBadgeColors[update.status]}
+                                className='!normal-case'
+                            >
+                                {t(`update_status.${update.status}`)}
+                            </Badge>
+                        </div>
+                        <div className='mt-3 flex flex-wrap items-center gap-x-4 gap-y-2'>
+                            <UpdateVersionBadge
+                                label={t('current_version')}
+                                value={update.currentVersion}
+                                color={updateValueBadgeColors[update.status]}
+                            />
+                            <UpdateVersionBadge
+                                label={t('latest_version')}
+                                value={update.latestVersion ?? t('unknown')}
+                                color={update.latestVersion ? 'gray' : 'red'}
+                            />
+                        </div>
                     </div>
                 </div>
-                <div
-                    className={`rounded-md border p-2 ${
-                        updateToneClasses[update.status]
-                    }`}
-                >
-                    {update.isOutdated ? (
-                        <ExclamationTriangleIcon className='h-5 w-5' />
-                    ) : (
-                        <InformationCircleIcon className='h-5 w-5' />
+                <div className='flex flex-wrap items-center justify-end gap-3'>
+                    {update.releaseUrl && update.isOutdated && (
+                        <a
+                            href={update.releaseUrl}
+                            target='_blank'
+                            rel='noreferrer'
+                            className='link text-sm font-medium'
+                        >
+                            {t('view_release')}
+                        </a>
                     )}
+                    <Button
+                        type='button'
+                        size='sm'
+                        loading={refreshing}
+                        onClick={onRefresh}
+                    >
+                        <span className='inline-flex items-center gap-2'>
+                            <ArrowPathIcon className='h-4 w-4' />
+                            {t('check_again')}
+                        </span>
+                    </Button>
                 </div>
             </div>
         </Card>
@@ -246,16 +293,17 @@ const UpdateStatusCard = ({
 }
 
 const OverviewSkeleton = () => (
-    <div className='grid grid-cols-12 gap-6'>
+    <div className='grid grid-cols-12 gap-4'>
+        <Skeleton className='col-span-12' height={104} />
         {[1, 2, 3, 4].map(item => (
             <Skeleton
                 key={item}
                 className='col-span-12 sm:col-span-6 xl:col-span-3'
-                height={142}
+                height={90}
             />
         ))}
-        <Skeleton className='col-span-12 lg:col-span-7' height={420} />
-        <Skeleton className='col-span-12 lg:col-span-5' height={420} />
+        <Skeleton className='col-span-12 lg:col-span-7' height={360} />
+        <Skeleton className='col-span-12 lg:col-span-5' height={360} />
     </div>
 )
 
@@ -263,6 +311,7 @@ const OverviewContainer = () => {
     const { t } = useTranslation('admin.overview')
     const { t: tStrings } = useTranslation('strings')
     const { data, error, mutate } = useOverviewSWR()
+    const notify = useNotify()
     const [refreshingUpdate, setRefreshingUpdate] = useState(false)
 
     const refreshUpdate = async () => {
@@ -271,32 +320,33 @@ const OverviewContainer = () => {
         try {
             const update = await refreshUpdateCheck()
 
-            mutate(
-                current => (current ? { ...current, update } : current),
-                false
-            )
+            mutate(current => (current ? { ...current, update } : current))
+        } catch {
+            notify({
+                title: tStrings('error'),
+                message: t('refresh_error'),
+                color: 'red',
+            })
         } finally {
             setRefreshingUpdate(false)
         }
     }
 
     return (
-        <PageContentBlock title={tStrings('overview') ?? ''}>
+        <PageContentBlock title={tStrings('overview')}>
             <div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
                 <div>
                     <h1 className='text-2xl font-semibold text-foreground'>
                         {tStrings('overview')}
                     </h1>
-                    <p className='description-small mt-1'>
-                        {t('description')}
-                    </p>
+                    <p className='description-small mt-1'>{t('description')}</p>
                 </div>
             </div>
 
             {error && (
                 <MessageBox
                     type='error'
-                    title={tStrings('error') ?? ''}
+                    title={tStrings('error')}
                     className='mb-6'
                 >
                     {t('load_error')}
@@ -306,7 +356,7 @@ const OverviewContainer = () => {
             {!data ? (
                 <OverviewSkeleton />
             ) : (
-                <div className='grid grid-cols-12 gap-6'>
+                <div className='grid grid-cols-12 gap-4'>
                     <UpdateStatusCard
                         update={data.update}
                         refreshing={refreshingUpdate}
@@ -348,9 +398,7 @@ const OverviewContainer = () => {
                         icon={ExclamationTriangleIcon}
                         to='/admin/servers'
                         tone={
-                            data.summary.failedServers > 0
-                                ? 'error'
-                                : 'default'
+                            data.summary.failedServers > 0 ? 'error' : 'default'
                         }
                     />
 
@@ -384,8 +432,7 @@ const OverviewContainer = () => {
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('addresses_detail', {
-                                        available:
-                                            data.addresses.available,
+                                        available: data.addresses.available,
                                         pools: data.addresses.pools,
                                     })}
                                 </p>
@@ -410,8 +457,7 @@ const OverviewContainer = () => {
                                     {tStrings('iso', { count: 2 })}
                                 </p>
                                 <p className='mt-2 text-xl font-semibold text-foreground'>
-                                    {data.isos.successful} /{' '}
-                                    {data.isos.total}
+                                    {data.isos.successful} / {data.isos.total}
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('iso_status_detail', {
@@ -434,18 +480,39 @@ const OverviewContainer = () => {
                         </div>
                         <div className='mt-6 grid grid-cols-2 gap-3'>
                             {[
-                                [t('ready'), data.servers.ready],
-                                [t('installing'), data.servers.installing],
-                                [
-                                    tStrings('suspended'),
-                                    data.servers.suspended,
-                                ],
-                                [t('restoring'), data.servers.restoring],
-                                [t('deleting'), data.servers.deleting],
-                                [t('failed'), data.servers.failed],
-                            ].map(([label, value]) => (
+                                {
+                                    id: 'ready',
+                                    label: t('ready'),
+                                    value: data.servers.ready,
+                                },
+                                {
+                                    id: 'installing',
+                                    label: t('installing'),
+                                    value: data.servers.installing,
+                                },
+                                {
+                                    id: 'suspended',
+                                    label: tStrings('suspended'),
+                                    value: data.servers.suspended,
+                                },
+                                {
+                                    id: 'restoring',
+                                    label: t('restoring'),
+                                    value: data.servers.restoring,
+                                },
+                                {
+                                    id: 'deleting',
+                                    label: t('deleting'),
+                                    value: data.servers.deleting,
+                                },
+                                {
+                                    id: 'failed',
+                                    label: t('failed'),
+                                    value: data.servers.failed,
+                                },
+                            ].map(({ id, label, value }) => (
                                 <div
-                                    key={label}
+                                    key={id}
                                     className='border-l border-accent-200 py-1 pl-4'
                                 >
                                     <p className='dt'>{label}</p>
@@ -458,9 +525,7 @@ const OverviewContainer = () => {
                     </Card>
 
                     <Card className='col-span-12'>
-                        <h2 className='h5'>
-                            {tStrings('node', { count: 2 })}
-                        </h2>
+                        <h2 className='h5'>{tStrings('node', { count: 2 })}</h2>
                         <p className='description-small mt-1'>
                             {t('nodes_description')}
                         </p>

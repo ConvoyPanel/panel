@@ -85,6 +85,24 @@ it('returns unavailable when the latest release cannot be fetched', function () 
         ->and($status['is_outdated'])->toBeFalse();
 });
 
+it('returns unavailable when the latest tag is not a comparable version', function () {
+    config()->set('app.version', '1.1.0');
+
+    Http::fake([
+        'https://api.github.com/repos/ConvoyPanel/panel/releases/latest' => Http::response([
+            'tag_name' => 'nightly-2024-01-01',
+            'html_url' => 'https://github.com/ConvoyPanel/panel/releases/tag/nightly-2024-01-01',
+        ]),
+    ]);
+
+    $status = app(VersionUpdateService::class)->status();
+
+    expect($status['status'])->toBe('unavailable')
+        ->and($status['is_outdated'])->toBeFalse()
+        ->and($status['latest_version'])->toBe('nightly-2024-01-01')
+        ->and($status['release_url'])->toBe('https://github.com/ConvoyPanel/panel/releases/tag/nightly-2024-01-01');
+});
+
 it('can clear the cached latest release check', function () {
     config()->set('app.version', '1.0.0');
 

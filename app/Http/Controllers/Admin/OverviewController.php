@@ -17,12 +17,15 @@ class OverviewController extends ApiController
             ->respond();
     }
 
-    public function refreshUpdate(VersionUpdateService $versionUpdateService): JsonResponse
-    {
-        $versionUpdateService->clearCache();
+    public function refreshUpdate(
+        OverviewService $overviewService,
+        VersionUpdateService $versionUpdateService,
+    ): JsonResponse {
+        $status = $versionUpdateService->refresh();
+        $overviewService->clearCache();
 
         return new JsonResponse([
-            'data' => $versionUpdateService->status(),
+            'data' => $status,
         ]);
     }
 }

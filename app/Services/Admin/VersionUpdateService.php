@@ -12,6 +12,10 @@ class VersionUpdateService
 
     private const CACHE_KEY = 'admin:version-update:github-release';
 
+    private const REFRESH_LOCK_KEY = 'admin:version-update:refresh-lock';
+
+    private const REFRESH_LOCK_SECONDS = 30;
+
     private const SUCCESS_CACHE_SECONDS = 3600;
 
     private const FAILURE_CACHE_SECONDS = 300;
@@ -33,11 +37,12 @@ class VersionUpdateService
 
         $latestRelease = $this->latestRelease();
         $latestVersion = $latestRelease['version'];
-        $normalizedLatestVersion = $this->normalizeVersion($latestVersion);
 
         if (! $latestVersion) {
             return $this->result('unavailable', $currentVersion);
         }
+
+        $normalizedLatestVersion = $this->normalizeVersion($latestVersion);
 
         if (! $this->isComparableVersion($normalizedLatestVersion)) {
             return $this->result(
@@ -70,6 +75,23 @@ class VersionUpdateService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+    }
+
+    public function refresh(): array
+    {
+        $lock = Cache::lock(self::REFRESH_LOCK_KEY, self::REFRESH_LOCK_SECONDS);
+
+        if (! $lock->get()) {
+            return $this->status();
+        }
+
+        try {
+            $this->clearCache();
+
+            return $this->status();
+        } finally {
+            $lock->release();
+        }
     }
 
     private function latestRelease(): array
