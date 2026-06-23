@@ -10,6 +10,7 @@ use Convoy\Jobs\Server\BuildServerJob;
 use Convoy\Jobs\Server\DeleteServerJob;
 use Convoy\Jobs\Server\MonitorStateJob;
 use Convoy\Jobs\Server\SendPowerCommandJob;
+use Convoy\Jobs\Server\SendServerCredentialsEmailJob;
 use Convoy\Jobs\Server\SyncBuildJob;
 use Convoy\Jobs\Server\UpdatePasswordJob;
 use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
@@ -67,7 +68,9 @@ class ServerBuildDispatchService
                 new SyncBuildJob($deployment->server->id),
             ];
 
-        if (Str::contains(Str::lower($deployment->template->name), 'windows')) {
+        $isWindows = $this->isWindowsTemplate($deployment);
+
+        if ($isWindows) {
             $jobs = [
                 ...$jobs,
                 new SendPowerCommandJob($deployment->server->id, PowerAction::START),
@@ -93,7 +96,23 @@ class ServerBuildDispatchService
             Server::findOrFail($deployment->server->id)->update(['status' => null]);
         };
 
+        if (
+            config('convoy.credentials_mail.servers.enabled') &&
+            ! empty($deployment->account_password)
+        ) {
+            $jobs[] = new SendServerCredentialsEmailJob(
+                $deployment->server->id,
+                $isWindows ? 'Administrator' : 'root',
+                $deployment->account_password,
+            );
+        }
+
         return $jobs;
+    }
+
+    private function isWindowsTemplate(ServerDeploymentData $deployment): bool
+    {
+        return Str::contains(Str::lower($deployment->template?->name ?? ''), 'windows');
     }
 
     public function getChainedDeleteJobs(Server $server): array

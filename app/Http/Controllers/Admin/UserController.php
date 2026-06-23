@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
+use Convoy\Jobs\User\SendUserCredentialsEmailJob;
 use Convoy\Models\Filters\FiltersUserWildcard;
 use Convoy\Models\User;
 use Convoy\Services\Api\JWTService;
@@ -25,8 +26,7 @@ class UserController extends ApiController
     public function __construct(
         private JWTService $JWTService,
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -35,32 +35,38 @@ class UserController extends ApiController
             ->allowedFilters(
                 [AllowedFilter::exact('id'), 'name', AllowedFilter::exact(
                     'email',
-                ), AllowedFilter::custom('*', new FiltersUserWildcard())],
+                ), AllowedFilter::custom('*', new FiltersUserWildcard)],
             )
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
             );
 
-        return fractal($users, new UserTransformer())->respond();
+        return fractal($users, new UserTransformer)->respond();
     }
 
     public function show(User $user)
     {
         $user->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer())->respond();
+        return fractal($user, new UserTransformer)->respond();
     }
 
     public function store(StoreUserRequest $request)
     {
+        $password = $request->string('password')->toString();
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($password),
             'root_admin' => $request->root_admin,
         ])->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer())->respond();
+        if (config('convoy.credentials_mail.users.enabled')) {
+            SendUserCredentialsEmailJob::dispatch($user->id, $password);
+        }
+
+        return fractal($user, new UserTransformer)->respond();
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -81,7 +87,7 @@ class UserController extends ApiController
 
         $user->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer())->respond();
+        return fractal($user, new UserTransformer)->respond();
     }
 
     public function destroy(User $user)
