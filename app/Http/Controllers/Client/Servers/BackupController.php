@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Data\PaginationMeta;
+use App\Data\Server\Backup\BackupEloquentData;
 use App\Enums\Server\BackupCompressionType;
 use App\Enums\Server\BackupMode;
 use App\Http\Requests\Client\Servers\Backups\DeleteBackupRequest;
@@ -13,7 +15,6 @@ use App\Repositories\Eloquent\BackupRepository;
 use App\Services\Backups\BackupCreationService;
 use App\Services\Backups\BackupDeletionService;
 use App\Services\Backups\RestoreFromBackupService;
-use App\Transformers\Client\BackupTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -35,23 +36,24 @@ class BackupController
             ->allowedSorts('created_at', 'completed_at')
             ->paginate(min($request->query('per_page') ?? 20, 50));
 
-        return fractal($backups, new BackupTransformer)->addMeta([
-            'backup_count' => $this->backupRepository->getNonFailedBackups($server)->count(),
-        ])->respond();
+        return [
+            ...PaginationMeta::paginate($backups, BackupEloquentData::class),
+            'backupCount' => $this->backupRepository->getNonFailedBackups($server)->count(),
+        ];
     }
 
     public function store(StoreBackupRequest $request, Server $server)
     {
         $backup = $this->backupCreationService
             ->create(
-                server         : $server,
-                name           : $request->name,
-                mode           : $request->enum('mode', BackupMode::class),
+                server: $server,
+                name: $request->name,
+                mode: $request->enum('mode', BackupMode::class),
                 compressionType: $request->enum('compression_type', BackupCompressionType::class),
-                isLocked       : $request->input('locked', false),
+                isLocked: $request->input('locked', false),
             );
 
-        return fractal($backup, new BackupTransformer)->respond();
+        return BackupEloquentData::from($backup);
     }
 
     public function restore(RestoreBackupRequest $request, Server $server, Backup $backup)

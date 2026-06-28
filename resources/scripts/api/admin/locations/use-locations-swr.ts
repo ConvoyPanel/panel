@@ -1,5 +1,5 @@
 import { PaginatedLocations } from '@/types/location.ts'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getLocations from '@/api/admin/locations/getLocations.ts'
 

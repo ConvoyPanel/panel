@@ -1,9 +1,9 @@
 import { AuthenticatedUser } from '@/types/user.ts'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { Cache, cache as SWRCache } from 'swr/_internal'
 import { z } from 'zod'
 
 import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
+import { queryClient } from '@/lib/query-client.ts'
 
 const searchSchema = z.object({
     query: z.string().optional(),
@@ -14,12 +14,11 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/_app')({
     validateSearch: searchSchema,
     beforeLoad: async ({ location }) => {
-        // I don't like how I'm accessing internal functions here. Rewrite this if this portion ever needs to be edited
-        const cache: Cache<AuthenticatedUser> = SWRCache
-
         await cacheUser().catch(_ => {})
 
-        if (cache.get(getKey())?.data === undefined) {
+        const user = queryClient.getQueryData<AuthenticatedUser>([getKey()])
+
+        if (!user) {
             throw redirect({
                 to: '/auth/login',
                 search: {

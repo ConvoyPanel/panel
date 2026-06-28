@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
-use Spatie\QueryBuilder\AllowedFilter;
+use App\Data\Server\Templates\TemplateData;
 use App\Http\Requests\Admin\Nodes\Templates\TemplateRequest;
 use App\Models\Template;
 use App\Models\TemplateGroup;
-use App\Transformers\Admin\TemplateTransformer;
+use Illuminate\Http\Response;
+use Spatie\LaravelData\DataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TemplateController
 {
-    public function index(TemplateGroup $templateGroup): JsonResponse
+    public function index(TemplateGroup $templateGroup)
     {
         $templates = QueryBuilder::for($templateGroup->templates())
             ->allowedFilters([
@@ -23,32 +23,26 @@ class TemplateController
             ->defaultSort('name')
             ->get();
 
-        return fractal($templates, new TemplateTransformer)->respond();
+        return TemplateData::collect($templates, DataCollection::class);
     }
 
-    public function store(
-        TemplateRequest $request,
-        TemplateGroup $templateGroup
-    ): JsonResponse
+    public function store(TemplateRequest $request, TemplateGroup $templateGroup)
     {
         $template = $templateGroup->templates()->create($request->validated());
 
-        return fractal($template, new TemplateTransformer)->respond();
+        return TemplateData::from($template);
     }
 
-    public function show(TemplateGroup $templateGroup, Template $template): JsonResponse
+    public function show(TemplateGroup $templateGroup, Template $template)
     {
-        return fractal($template, new TemplateTransformer)->respond();
+        return TemplateData::from($template);
     }
 
-    public function update(
-        TemplateRequest $request,
-        TemplateGroup $templateGroup,
-        Template $template,
-    ): JsonResponse {
+    public function update(TemplateRequest $request, TemplateGroup $templateGroup, Template $template)
+    {
         $template->update($request->validated());
 
-        return fractal($template, new TemplateTransformer)->respond();
+        return TemplateData::from($template);
     }
 
     public function destroy(TemplateGroup $templateGroup, Template $template): Response

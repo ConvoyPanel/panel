@@ -1,4 +1,4 @@
-import useSWR, { mutate } from 'swr'
+import useSWR, { mutate } from '@/lib/swr'
 
 import getUser from '@/api/auth/getUser.ts'
 

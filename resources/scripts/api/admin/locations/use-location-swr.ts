@@ -1,5 +1,5 @@
 import { Location } from '@/types/location.ts'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getLocation from '@/api/admin/locations/getLocation.ts'
 

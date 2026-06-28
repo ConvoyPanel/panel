@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
+use App\Data\Node\Storage\StorageData;
+use App\Data\Storage\StorageEloquentData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
@@ -10,14 +12,9 @@ use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
-use App\Transformers\Admin\StorageDataTransformer;
-use App\Transformers\Admin\StorageTransformer;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\JsonResponse;
-use Response;
+use Spatie\LaravelData\DataCollection;
 use Throwable;
-
-use function fractal;
 
 class StorageController extends Controller
 {
@@ -26,25 +23,29 @@ class StorageController extends Controller
         private ConnectionInterface $connection,
     ) {}
 
-    public function index(Node $node): JsonResponse
+    public function index(Node $node)
     {
-        return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
+        return StorageEloquentData::collect(
+            $node->storages()->withUsageSums()->orderBy('id', 'desc')->get(),
+            DataCollection::class,
+        );
     }
 
     /**
      * @throws RequestException
      */
-    public function fetchFromProxmox(Node $node): JsonResponse
+    public function fetchFromProxmox(Node $node)
     {
-        $storages = $this->repository->setNode($node)->getStorages();
-
-        return fractal($storages, new StorageDataTransformer)->respond();
+        return StorageData::collect(
+            $this->repository->setNode($node)->getStorages(),
+            DataCollection::class,
+        );
     }
 
     /**
      * @throws Throwable
      */
-    public function store(StorageRequest $request, Node $node): JsonResponse
+    public function store(StorageRequest $request, Node $node)
     {
         $storage = $this->connection->transaction(function () use ($request, $node) {
             $storage = Storage::create($request->validated());
@@ -57,18 +58,17 @@ class StorageController extends Controller
             return $storage;
         });
 
-        return fractal($storage, new StorageTransformer)->respond();
+        return StorageEloquentData::from($storage);
     }
 
     /**
      * @throws Throwable
      */
-    public function update(StorageRequest $request, Node $node, Storage $storage): JsonResponse
+    public function update(StorageRequest $request, Node $node, Storage $storage)
     {
         $this->connection->transaction(function () use ($request, $storage) {
             $storage->update($request->validated());
 
-            // if the storage now supports backups, we need to update the order
             if ($request->boolean('stores_backups') && $storage->stores_backups !== $request->boolean('stores_backups')) {
                 $storageToNode = StorageToNode::where('storage_id', '=', $storage->id)->firstOrFail();
                 $storageToNode->backup_order = $storageToNode->getHighestOrderNumber() + 1;
@@ -76,23 +76,24 @@ class StorageController extends Controller
             }
         });
 
-        return fractal($storage, new StorageTransformer)->respond();
+        return StorageEloquentData::from($storage);
     }
 
-    public function updateBackupOrder(UpdateBackupOrderRequest $request, Node $node): JsonResponse
+    public function updateBackupOrder(UpdateBackupOrderRequest $request, Node $node)
     {
         StorageToNode::setNewOrder(
             ids: $request->array('ids'),
             primaryKeyColumn: 'storage_id'
         );
 
-        return fractal($node->storages()->withUsageSums()->orderBy('id', 'desc')->get(), new StorageTransformer)->respond();
+        return StorageEloquentData::collect(
+            $node->storages()->withUsageSums()->orderBy('id', 'desc')->get(),
+            DataCollection::class,
+        );
     }
 
-    public function destroy(Node $node, Storage $storage): Response
+    public function destroy(Node $node, Storage $storage)
     {
-        // TODO: implement StorageController destroy method
-
         return response()->noContent();
     }
 }

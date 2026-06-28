@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Data\PaginationMeta;
+use App\Data\Server\Deployments\DeploymentData;
+use App\Data\Server\ServerData;
+use App\Data\Server\ServerTerminalData;
 use App\Enums\Server\ConsoleType;
+use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
+use App\Enums\Server\ServerStatus;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
@@ -12,17 +18,10 @@ use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\ServerConsoleService;
-use App\Enums\Server\DeploymentStatus;
-use App\Enums\Server\ServerStatus;
-use App\Transformers\Client\DeploymentTransformer;
-use App\Transformers\Client\ServerStateTransformer;
-use App\Transformers\Client\ServerTerminalTransformer;
-use App\Transformers\Client\ServerTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
-use function fractal;
 use function min;
 
 class ServerController
@@ -41,12 +40,12 @@ class ServerController
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($servers, new ServerTransformer)->respond();
+        return PaginationMeta::paginate($servers, ServerData::class);
     }
 
     public function show(Server $server)
     {
-        return fractal($server, new ServerTransformer)->respond();
+        return ServerData::from($server);
     }
 
     public function getDeployment(Server $server)
@@ -59,13 +58,13 @@ class ServerController
             $query->nonCompleted();
         }
 
-        $deployment = $query->first();
+        $deployment = $query->with(['template', 'steps'])->first();
 
         if (! $deployment) {
             return response()->noContent();
         }
 
-        return fractal($deployment, new DeploymentTransformer)->respond();
+        return DeploymentData::from($deployment)->include('template', 'steps');
     }
 
     public function retryInstallation(RetryInstallationRequest $request, Server $server)
@@ -79,10 +78,7 @@ class ServerController
 
     public function getState(Server $server)
     {
-        return fractal()->item(
-            $this->serverRepository->setServer($server)->getState(),
-            new ServerStateTransformer,
-        )->respond();
+        return $this->serverRepository->setServer($server)->getState();
     }
 
     public function updateState(Server $server, SendPowerCommandRequest $request)
@@ -99,28 +95,25 @@ class ServerController
 
         if ($coterm = $server->node->coterm) {
             return new JsonResponse([
-                'data' => [
-                    'is_tls_enabled' => $coterm->is_tls_enabled,
-                    'fqdn' => $coterm->fqdn,
-                    'port' => $coterm->port,
-                    'token' => $this->cotermJWTService->handle(
-                        $server,
-                        $request->user(),
-                        $request->enum('type', ConsoleType::class),
-                    )
-                        ->toString(),
-                ],
+                'isTlsEnabled' => $coterm->is_tls_enabled,
+                'fqdn' => $coterm->fqdn,
+                'port' => $coterm->port,
+                'token' => $this->cotermJWTService->handle(
+                    $server,
+                    $request->user(),
+                    $request->enum('type', ConsoleType::class),
+                )->toString(),
             ]);
-        } else {
-            $data = $this->consoleService->createConsoleUserCredentials($server);
-
-            return fractal()->item([
-                'ticket' => $data->ticket,
-                'node' => $server->node->cluster,
-                'vmid' => $server->vmid,
-                'fqdn' => $server->node->fqdn,
-                'port' => $server->node->port,
-            ], new ServerTerminalTransformer)->respond();
         }
+
+        $data = $this->consoleService->createConsoleUserCredentials($server);
+
+        return new ServerTerminalData(
+            ticket: $data->ticket,
+            node: $server->node->cluster,
+            vmid: $server->vmid,
+            fqdn: $server->node->fqdn,
+            port: $server->node->port,
+        );
     }
 }

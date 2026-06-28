@@ -4,9 +4,9 @@ import { Server, ServerStateData, ServerTimepointData } from '@/types/server.ts'
 export const rawDataToServer = (data: any): Server => ({
     id: data.id,
     uuid: data.uuid,
-    uuidShort: data.uuid_short,
+    uuidShort: data.uuidShort,
     nodeId: data.nodeId,
-    node: data.node ? rawDataToNode(data.node.data) : undefined,
+    node: data.node ? rawDataToNode(data.node.data ?? data.node) : undefined,
     userId: data.userId,
     vmid: data.vmid,
     hostname: data.hostname,
@@ -17,29 +17,29 @@ export const rawDataToServer = (data: any): Server => ({
     memory: data.memory,
     disk: data.disk,
     backup: {
-        countLimit: data.backup_count_limit,
-        sizeLimit: data.backup_size_limit,
+        countLimit: data.backupCountLimit,
+        sizeLimit: data.backupSizeLimit,
     },
     bandwidth: {
-        usage: data.bandwidth_usage,
-        limit: data.bandwidth_limit,
+        usage: data.bandwidthUsage,
+        limit: data.bandwidthLimit,
     },
-    createdAt: new Date(data.created_at),
+    createdAt: new Date(data.createdAt),
 })
 
 export const rawDataToServerStateData = (data: any): ServerStateData => ({
     state: data.state,
-    cpuUsed: data.cpu_used,
-    memoryTotal: data.memory_total,
-    memoryUsed: data.memory_used,
+    cpuUsed: data.cpuUsed,
+    memoryTotal: data.memoryTotal,
+    memoryUsed: data.memoryUsed,
     uptime: data.uptime,
 })
 
 export const rawDataToServerTimepointData = (
     data: any
 ): ServerTimepointData => ({
-    cpuUsed: data.cpu_used,
-    memoryUsed: data.memory_used,
+    cpuUsed: data.cpuUsed,
+    memoryUsed: data.memoryUsed,
     network: {
         in: data.network.in,
         out: data.network.out,

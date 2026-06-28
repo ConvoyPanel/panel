@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Client;
 
 use App\Actions\Auth\GeneratePasskeyRegisterOptionsAction;
 use App\Actions\Auth\StorePasskeyAction;
+use App\Data\User\PasskeyData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
 use App\Models\Passkey;
-use App\Transformers\Client\PasskeyTransformer;
 use Illuminate\Http\Request;
-
-use function fractal;
-use function now;
+use Spatie\LaravelData\DataCollection;
 
 class PasskeyController extends Controller
 {
@@ -22,7 +20,7 @@ class PasskeyController extends Controller
 
     public function index(Request $request)
     {
-        return fractal($request->user()->passkeys, new PasskeyTransformer)->respond();
+        return PasskeyData::collect($request->user()->passkeys, DataCollection::class);
     }
 
     public function create(Request $request)
@@ -44,14 +42,14 @@ class PasskeyController extends Controller
             hostName: $request->getHost(),
         );
 
-        return fractal($passkey, new PasskeyTransformer)->respond();
+        return PasskeyData::from($passkey);
     }
 
     public function rename(RenamePasskeyRequest $request, Passkey $passkey)
     {
         $passkey->update($request->validated());
 
-        return fractal($passkey, new PasskeyTransformer)->respond();
+        return PasskeyData::from($passkey);
     }
 
     public function destroy(Passkey $passkey)

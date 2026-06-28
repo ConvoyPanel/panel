@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import isAuthenticatorEnabled from '@/api/account/authenticator/isAuthenticatorEnabled.ts'
 

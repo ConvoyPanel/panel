@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR, { preload, type SWRConfiguration } from 'swr'
+import useSWR, { preload, type SWRConfiguration } from '@/lib/swr'
 
 import getServer from '@/api/servers/getServer.ts'
 import { Server } from '@/types/server'

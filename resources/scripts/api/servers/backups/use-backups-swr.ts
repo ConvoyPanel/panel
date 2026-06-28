@@ -1,6 +1,6 @@
 import { QueryBuilderParams } from '@/utils/http.ts'
 import { useParams } from '@tanstack/react-router'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getBackups from '@/api/servers/backups/getBackups.ts'
 

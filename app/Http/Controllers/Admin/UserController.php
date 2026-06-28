@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\Auth\SSOTokenData;
+use App\Data\PaginationMeta;
+use App\Data\User\UserData;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
 use App\Models\Filters\FiltersUserWildcard;
 use App\Models\User;
 use App\Services\Api\JWTService;
-use App\Transformers\Admin\UserTransformer;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserController
@@ -33,14 +34,14 @@ class UserController
                 $request->query(),
             );
 
-        return fractal($users, new UserTransformer)->respond();
+        return PaginationMeta::paginate($users, UserData::class);
     }
 
     public function show(User $user)
     {
         $user->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer)->respond();
+        return UserData::from($user);
     }
 
     public function store(StoreUserRequest $request)
@@ -52,7 +53,7 @@ class UserController
             'root_admin' => $request->root_admin,
         ])->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer)->respond();
+        return UserData::from($user);
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -66,7 +67,7 @@ class UserController
 
         $user->loadCount(['servers']);
 
-        return fractal($user, new UserTransformer)->respond();
+        return UserData::from($user);
     }
 
     public function destroy(User $user)
@@ -93,11 +94,9 @@ class UserController
             ->setUser($user)
             ->handle(config('app.key'), config('app.url'), $user->uuid);
 
-        return new JsonResponse([
-            'data' => [
-                'user_id' => $user->id,
-                'token' => $token->toString(),
-            ],
-        ]);
+        return new SSOTokenData(
+            userId: $user->id,
+            token: $token->toString(),
+        );
     }
 }

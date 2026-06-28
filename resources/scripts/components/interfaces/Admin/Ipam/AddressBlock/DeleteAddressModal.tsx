@@ -1,8 +1,8 @@
 import { PaginatedAddresses } from '@/types/address.ts'
 import { useParams } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
-import useSWRMutation from 'swr/mutation'
+import { KeyedMutator } from '@/lib/swr'
+import useSWRMutation from '@/lib/swr-mutation'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddress from '@/api/admin/addressBlockGroups/addressBlocks/addresses/deleteAddress.ts'

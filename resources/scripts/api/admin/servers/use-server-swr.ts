@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getServer from '@/api/admin/servers/getServer.ts'
 

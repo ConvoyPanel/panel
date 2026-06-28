@@ -5,7 +5,7 @@ import { useParams } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator } from '@/lib/swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 

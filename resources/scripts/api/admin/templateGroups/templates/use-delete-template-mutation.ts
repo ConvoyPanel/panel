@@ -1,4 +1,4 @@
-import useSWRMutation from 'swr/mutation'
+import useSWRMutation from '@/lib/swr-mutation'
 import { toast } from 'sonner'
 
 import deleteTemplate from '@/api/admin/templateGroups/templates/deleteTemplate.ts'

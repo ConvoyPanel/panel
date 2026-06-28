@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\Location\LocationData;
+use App\Data\Node\NodeData;
+use App\Data\PaginationMeta;
 use App\Http\Requests\Admin\LocationFormRequest;
 use App\Models\Filters\FiltersLocationWildcard;
 use App\Models\Location;
-use App\Transformers\Admin\LocationTransformer;
-use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\DataCollection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -27,14 +29,14 @@ class LocationController
                 $request->query(),
             );
 
-        return fractal($locations, new LocationTransformer)->respond();
+        return PaginationMeta::paginate($locations, LocationData::class);
     }
 
     public function show(Location $location)
     {
         $location->loadCount('nodes', 'servers');
 
-        return fractal($location, new LocationTransformer)->respond();
+        return LocationData::from($location);
     }
 
     public function showAttachedNodes(Location $location)
@@ -44,7 +46,7 @@ class LocationController
             ->orderBy('name')
             ->get();
 
-        return fractal($nodes, new NodeTransformer)->respond();
+        return NodeData::collect($nodes, DataCollection::class);
     }
 
     public function store(LocationFormRequest $request)
@@ -52,7 +54,7 @@ class LocationController
         $location = Location::create($request->validated());
         $location->loadCount('nodes', 'servers');
 
-        return fractal($location, new LocationTransformer)->respond();
+        return LocationData::from($location);
     }
 
     public function update(LocationFormRequest $request, Location $location)
@@ -60,7 +62,7 @@ class LocationController
         $location->update($request->validated());
         $location->loadCount('nodes', 'servers');
 
-        return fractal($location, new LocationTransformer)->respond();
+        return LocationData::from($location);
     }
 
     public function destroy(Location $location)

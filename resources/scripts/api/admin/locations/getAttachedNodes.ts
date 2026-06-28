@@ -1,17 +1,11 @@
-import { FractalResponseList } from '@/utils/http.ts'
-
 import axios from '@/lib/axios.ts'
+import type { Node } from '@/types/node.ts'
 
-import { rawDataToNode } from '@/api/transformers/node.ts'
-
-const getAttachedNodes = async (location: number) => {
-    const {
-        data: { data },
-    } = await axios.get<FractalResponseList>(
+const getAttachedNodes = async (location: number): Promise<Node[]> => {
+    const { data: { data } } = await axios.get(
         `/api/admin/locations/${location}/nodes`
     )
-
-    return data.map(rawDataToNode)
+    return data as Node[]
 }
 
 export default getAttachedNodes

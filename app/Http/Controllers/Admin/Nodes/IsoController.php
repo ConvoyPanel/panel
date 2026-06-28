@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Helpers\ChecksumData;
+use App\Data\Node\Storage\FileMetaData;
+use App\Data\Node\Storage\IsoEloquentData;
+use App\Data\PaginationMeta;
 use App\Enums\Helpers\ChecksumAlgorithm;
 use App\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
 use App\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
@@ -10,8 +13,6 @@ use App\Models\ISO;
 use App\Models\Node;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use App\Services\Isos\IsoService;
-use App\Transformers\Admin\FileMetadataTransformer;
-use App\Transformers\Admin\IsoTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -32,7 +33,7 @@ class IsoController
                 $request->query(),
             );
 
-        return fractal($isos, new IsoTransformer)->respond();
+        return PaginationMeta::paginate($isos, IsoEloquentData::class);
     }
 
     public function store(StoreIsoRequest $request, Node $node)
@@ -66,14 +67,14 @@ class IsoController
             ]);
         }
 
-        return fractal($iso, new IsoTransformer)->respond();
+        return IsoEloquentData::from($iso);
     }
 
     public function update(UpdateIsoRequest $request, Node $node, ISO $iso)
     {
         $iso->update($request->validated());
 
-        return fractal($iso, new IsoTransformer)->respond();
+        return IsoEloquentData::from($iso);
     }
 
     public function destroy(Node $node, ISO $iso)
@@ -93,6 +94,6 @@ class IsoController
 
         $metadata = $this->repository->setNode($node)->getFileMetadata($request->link);
 
-        return fractal($metadata, new FileMetadataTransformer)->respond();
+        return FileMetaData::from($metadata);
     }
 }

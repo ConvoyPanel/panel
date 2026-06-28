@@ -1,9 +1,9 @@
 import { cn } from '@/utils'
 import { PaginatedResult } from '@/utils/http.ts'
 import { useDebouncedValue } from '@mantine/hooks'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { CommandLoading } from 'cmdk'
 import { ReactNode, useState } from 'react'
-import useSWRInfinite from 'swr/infinite'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -40,22 +40,6 @@ export interface ResourceComboBoxFormProps<T> {
     nothingFoundMessage?: ReactNode
 }
 
-const getKey = <T,>(
-    prefix: string,
-    query: string,
-    pageIndex: number,
-    previousPageData: PaginatedResult<T> | null
-) => {
-    // If previous page exists and item count is less than perPage, we've reached the end.
-    if (
-        previousPageData &&
-        previousPageData.items.length < previousPageData.pagination.perPage
-    ) {
-        return null
-    }
-    return [prefix, query, pageIndex]
-}
-
 const CommandSpinner = () => {
     return (
         <CommandLoading className='grid place-items-center py-4'>
@@ -81,24 +65,25 @@ const ResourceComboboxForm = <T,>({
 
     const {
         data,
-        size,
-        setSize,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
         isLoading: isLoadingResults,
-    } = useSWRInfinite(
-        (idx, prev) => getKey<T>(swrKey, debouncedQuery, idx + 1, prev),
-        ([_, query, page]) => fetcher(query as string, page as number)
-    )
+    } = useInfiniteQuery<PaginatedResult<T>>({
+        queryKey: [swrKey, debouncedQuery],
+        queryFn: ({ pageParam = 1 }) =>
+            fetcher(debouncedQuery, pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.items.length < lastPage.pagination.perPage) {
+                return undefined
+            }
+            return allPages.length + 1
+        },
+    })
 
-    const isEmpty = data?.[0]?.items.length === 0
-    const isReachingEnd =
-        isEmpty ||
-        (data &&
-            data[data.length - 1]?.items.length <
-                data[data.length - 1]?.pagination.perPage)
-    const isLoadingMore =
-        isLoadingResults ||
-        (size > 0 && data && typeof data[size - 1] === 'undefined')
-
+    const pages = data?.pages ?? []
+    const isEmpty = pages[0]?.items.length === 0
 
     return (
         <FormField
@@ -129,62 +114,59 @@ const ResourceComboboxForm = <T,>({
                                 />
                                 <CommandList>
                                     <ScrollArea
-                                        onBottomReached={() =>
-                                            setSize(size + 1)
-                                        }
+                                        onBottomReached={() => {
+                                            if (hasNextPage && !isFetchingNextPage) {
+                                                fetchNextPage()
+                                            }
+                                        }}
                                         className='h-[300px]'
                                     >
                                         {isLoadingResults ? (
                                             <CommandSpinner />
                                         ) : (
-                                            <CommandEmpty>
-                                                {nothingFoundMessage ??
-                                                    'No results found'}
-                                            </CommandEmpty>
+                                            isEmpty && (
+                                                <CommandEmpty>
+                                                    {nothingFoundMessage ??
+                                                        'No results found'}
+                                                </CommandEmpty>
+                                            )
                                         )}
                                         <CommandGroup>
-                                            {data &&
-                                                data.map(pageData =>
-                                                    pageData.items.map(item => {
-                                                        const rawVal = (item as any)[
-                                                            accessorKey
-                                                        ]
-                                                        if (
-                                                            rawVal === undefined ||
-                                                            rawVal === null
-                                                        )
-                                                            return null
-                                                        const strVal = String(
-                                                            rawVal
-                                                        )
-                                                        return (
-                                                            <CommandItem
-                                                                key={strVal}
-                                                                value={strVal}
-                                                                onSelect={val => {
-                                                                    field.onChange(
-                                                                        val
+                                            {pages.map(pageData =>
+                                                pageData.items.map((item: T) => {
+                                                    const rawVal = (item as any)[
+                                                        accessorKey
+                                                    ]
+                                                    if (
+                                                        rawVal === undefined ||
+                                                        rawVal === null
+                                                    )
+                                                        return null
+                                                    const strVal = String(rawVal)
+                                                    return (
+                                                        <CommandItem
+                                                            key={strVal}
+                                                            value={strVal}
+                                                            onSelect={val => {
+                                                                field.onChange(val)
+                                                                setOpen(false)
+                                                            }}
+                                                        >
+                                                            {renderItem(
+                                                                item,
+                                                                field.value ===
+                                                                    String(
+                                                                        (item as any)[
+                                                                            accessorKey
+                                                                        ]
                                                                     )
-                                                                    setOpen(false)
-                                                                }}
-                                                            >
-                                                                {renderItem(
-                                                                    item,
-                                                                    field.value ===
-                                                                        String(
-                                                                            (item as any)[
-                                                                                accessorKey
-                                                                            ]
-                                                                        )
-                                                                )}
-                                                            </CommandItem>
-                                                        )
-                                                    })
-                                                )}
+                                                            )}
+                                                        </CommandItem>
+                                                    )
+                                                })
+                                            )}
                                         </CommandGroup>
-                                        {!isReachingEnd && isLoadingMore && (
-                                            <CommandSpinner />
-                                        )}
+                                        {isFetchingNextPage && <CommandSpinner />}
                                     </ScrollArea>
                                 </CommandList>
                             </Command>

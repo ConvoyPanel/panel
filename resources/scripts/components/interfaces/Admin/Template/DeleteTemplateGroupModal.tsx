@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import useSWRMutation from 'swr/mutation'
+import useSWRMutation from '@/lib/swr-mutation'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteTemplateGroup from '@/api/admin/templateGroups/deleteTemplateGroup.ts'

@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getAddresses, {
     AddressInclude,

@@ -1,7 +1,8 @@
 import usePagination from '@/hooks/use-pagination.ts'
+import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useServersSWR from '@/api/servers/use-servers-swr.ts'
+import { serverQueries } from '@/features/servers/api.ts'
 
 import ServerCard from '@/components/interfaces/Client/Dashboard/ServerCard.tsx'
 
@@ -14,8 +15,8 @@ export const Route = createLazyFileRoute('/_app/_dashboard/')({
 
 function Dashboard() {
     const { page, setPage } = usePagination()
-    const { data } = useServersSWR(page)
-    
+    const { data } = useQuery(serverQueries.list({ page }))
+
     return (
         <>
             <Heading>My Servers</Heading>

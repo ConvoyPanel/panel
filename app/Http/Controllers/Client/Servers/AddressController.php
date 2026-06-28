@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Data\Ipam\IpamAddressData;
 use App\Models\Server;
-use App\Transformers\Admin\AddressTransformer;
-
-use function fractal;
+use Spatie\LaravelData\DataCollection;
 
 class AddressController
 {
@@ -13,6 +12,6 @@ class AddressController
     {
         $addresses = $server->addresses()->with('addressBlock')->get();
 
-        return fractal($addresses, new AddressTransformer)->respond();
+        return IpamAddressData::collect($addresses, DataCollection::class);
     }
 }

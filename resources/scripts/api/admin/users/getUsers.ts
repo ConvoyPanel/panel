@@ -1,30 +1,19 @@
-import { PaginatedAdminUsers } from '@/types/admin/user'
-import {
-    FractalPaginatedResponse,
-    QueryBuilderParams,
-    getPaginationSet,
-    withQueryBuilderParams,
-} from '@/utils/http'
+import type { AdminUser, PaginatedAdminUsers } from '@/types/admin/user'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
 
 import axios from '@/lib/axios'
-
-import { rawDataToAdminUser } from '@/api/transformers/admin/user'
+import type { PaginatedResponse } from '@/lib/api'
 
 export type UserQueryParams = QueryBuilderParams<'*' | 'name' | 'email' | 'id'>
 
-const getUsers = async (
-    params: UserQueryParams
-): Promise<PaginatedAdminUsers> => {
-    const { data } = await axios.get<FractalPaginatedResponse>(
-        '/api/admin/users',
-        {
-            params: withQueryBuilderParams(params),
-        }
-    )
+const getUsers = async (params: UserQueryParams): Promise<PaginatedAdminUsers> => {
+    const { data } = await axios.get<PaginatedResponse<AdminUser>>('/api/admin/users', {
+        params: withQueryBuilderParams(params),
+    })
 
     return {
-        items: data.data.map(rawDataToAdminUser),
-        pagination: getPaginationSet(data.meta.pagination),
+        items: data.items,
+        pagination: data.pagination,
     }
 }
 

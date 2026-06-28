@@ -7,13 +7,11 @@ use App\Enums\Server\StatisticTimeRange;
 use App\Http\Requests\Client\Servers\GetStatisticRequest;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
-use App\Transformers\Client\ServerTimepointDataTransformer;
+use Spatie\LaravelData\DataCollection;
 
 class StatisticController
 {
-    public function __construct(private ProxmoxStatisticsRepository $statisticsRepository)
-    {
-    }
+    public function __construct(private ProxmoxStatisticsRepository $statisticsRepository) {}
 
     public function __invoke(GetStatisticRequest $request, Server $server)
     {
@@ -23,11 +21,9 @@ class StatisticController
             StatisticConsolidatorFunction::class,
         ) ?? StatisticConsolidatorFunction::AVERAGE;
 
-        $data = $this->statisticsRepository->setServer($server)->getStatistics(
+        return $this->statisticsRepository->setServer($server)->getStatistics(
             $from,
             $consolidator,
         );
-
-        return fractal($data, new ServerTimepointDataTransformer())->respond();
     }
 }

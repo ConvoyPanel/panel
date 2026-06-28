@@ -2,8 +2,7 @@ import { hostname } from '@/utils/validation.ts'
 import { z } from 'zod'
 
 import axios from '@/lib/axios.ts'
-
-import { rawDataToNode } from '@/api/transformers/node.ts'
+import type { Node } from '@/types/node.ts'
 
 export const nodeSchema = z.object({
     displayName: z
@@ -26,7 +25,7 @@ export const nodeSchema = z.object({
     memoryOverallocate: z.coerce.number().int().min(0, 'Invalid'),
 })
 
-const createNode = async (payload: z.infer<typeof nodeSchema>) => {
+const createNode = async (payload: z.infer<typeof nodeSchema>): Promise<Node> => {
     const {
         displayName,
         locationId,
@@ -43,9 +42,7 @@ const createNode = async (payload: z.infer<typeof nodeSchema>) => {
         memoryOverallocate,
     } = payload
 
-    const {
-        data: { data },
-    } = await axios.post(`/api/admin/nodes`, {
+    const { data: { data } } = await axios.post(`/api/admin/nodes`, {
         display_name: displayName,
         location_id: locationId,
         fqdn,
@@ -61,7 +58,7 @@ const createNode = async (payload: z.infer<typeof nodeSchema>) => {
         memory_overallocate: memoryOverallocate,
     })
 
-    return rawDataToNode(data)
+    return data as Node
 }
 
 export default createNode

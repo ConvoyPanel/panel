@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
+use App\Data\Activity\ActivityLogData;
+use App\Data\PaginationMeta;
 use App\Models\Server;
-use App\Transformers\Client\ActivityLogTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -18,6 +19,6 @@ class ActivityController
             ->paginate(min($request->query('per_page', 25), 100))
             ->appends($request->query());
 
-        return fractal($activity, new ActivityLogTransformer)->respond();
+        return PaginationMeta::paginate($activity, ActivityLogData::class);
     }
 }

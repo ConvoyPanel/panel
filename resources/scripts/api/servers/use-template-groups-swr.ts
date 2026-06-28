@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 import { TemplateGroup } from '@/types/template-group.ts'
 import { rawDataToTemplateGroup } from '@/api/transformers/template-group.ts'
 

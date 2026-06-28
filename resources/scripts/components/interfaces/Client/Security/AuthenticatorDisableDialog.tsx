@@ -1,6 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { toast } from 'sonner'
-import { mutate } from 'swr'
+import { mutate } from '@/lib/swr'
 import { useShallow } from 'zustand/react/shallow'
 
 import disableAuthenticator from '@/api/account/authenticator/disableAuthenticator.ts'

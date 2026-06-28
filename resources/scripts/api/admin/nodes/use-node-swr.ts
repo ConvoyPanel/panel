@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR, { preload } from 'swr'
+import useSWR, { preload } from '@/lib/swr'
 
 import getNode from '@/api/admin/nodes/getNode.ts'
 

@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getPasskeys from '@/api/account/passkeys/getPasskeys.ts'
 

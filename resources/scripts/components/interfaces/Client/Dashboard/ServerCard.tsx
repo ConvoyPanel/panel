@@ -1,5 +1,4 @@
 import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
-import { Server } from '@/types/server.ts'
 import {
     IconAirConditioningDisabled,
     IconCpu,
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/DropdownMenu'
 
 interface Props {
-    server: Server
+    server: App.Data.Server.ServerData
 }
 
 const ServerCard = ({ server }: Props) => {

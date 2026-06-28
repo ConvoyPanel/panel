@@ -1,8 +1,9 @@
 import axios from '@/lib/axios.ts'
+import type { PaginatedResponse } from '@/lib/api.ts'
 
 import { rawDataToServer } from '@/api/transformers/server.ts'
 import { PaginatedServers } from '@/types/server'
-import { getPaginationSet, QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
 
 export type CompatibleServerQueryParams = QueryBuilderParams<'*' | 'node_id' | 'user_id' | 'name'>
 
@@ -13,7 +14,7 @@ const getCompatibleServers = async (
     params: CompatibleServerQueryParams,
     include?: ServerInclude[]
 ): Promise<PaginatedServers> => {
-    const { data } = await axios.get(
+    const { data } = await axios.get<PaginatedResponse<any>>(
         `/api/admin/address-block-groups/${addressBlockGroupId}/compatible-servers`,
         {
             params: {
@@ -24,8 +25,8 @@ const getCompatibleServers = async (
     )
 
     return {
-        items: data.data.map(rawDataToServer),
-        pagination: getPaginationSet(data.meta.pagination),
+        items: data.items.map(rawDataToServer),
+        pagination: data.pagination,
     }
 }
 

@@ -1,11 +1,16 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { QueryClient } from '@tanstack/react-query'
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
 import { Toaster } from 'sonner'
 
 import { ConfirmDialogProvider } from '@/components/ui/AlertDialog'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 
-export const Route = createRootRoute({
+export interface RouterContext {
+    queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
     component: RootComponent,
 })
 

@@ -1,9 +1,3 @@
-import { AddressBlockGroup } from '@/types/address-block-group.ts'
+import type { AddressBlockGroup } from '@/types/address-block-group.ts'
 
-export const rawDataToAddressBlockGroup = (raw: any): AddressBlockGroup => ({
-    id: raw.id,
-    name: raw.name,
-    description: raw.description,
-    addressBlocksCount: raw.address_blocks_count,
-    nodesCount: raw.nodes_count,
-})
+export const rawDataToAddressBlockGroup = (data: any): AddressBlockGroup => data as AddressBlockGroup

@@ -6,7 +6,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator } from '@/lib/swr'
 import { z } from 'zod'
 
 import createAddressBlock, {

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { mutate } from 'swr'
+import { mutate } from '@/lib/swr'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 

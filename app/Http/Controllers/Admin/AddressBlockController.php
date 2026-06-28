@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\Ipam\AddressBlockData;
+use App\Data\PaginationMeta;
 use App\Http\Requests\Admin\AddressBlocks\StoreAddressBlockRequest;
 use App\Http\Requests\Admin\AddressBlocks\UpdateAddressBlockRequest;
 use App\Jobs\Server\BatchSyncNetworkSettingsJob;
 use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockWildcard;
-use App\Transformers\Admin\AddressBlockTransformer;
 use Gate;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Throwable;
-use function dispatch;
 
 class AddressBlockController
 {
     public function __construct(private ConnectionInterface $connection) {}
 
-    public function index(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function index(Request $request, AddressBlockGroup $addressBlockGroup)
     {
         $blocks = QueryBuilder::for($addressBlockGroup->addressBlocks())
             ->defaultSort('-id')
@@ -41,29 +40,29 @@ class AddressBlockController
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($blocks, new AddressBlockTransformer)->respond();
+        return PaginationMeta::paginate($blocks, AddressBlockData::class);
     }
 
-    public function show(
-        AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock,
-    ): JsonResponse {
-        return fractal($addressBlock, new AddressBlockTransformer)->respond();
+    public function show(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock)
+    {
+        return AddressBlockData::from($addressBlock);
     }
 
-    public function store(StoreAddressBlockRequest $request, AddressBlockGroup $addressBlockGroup,
-    ): JsonResponse {
+    public function store(StoreAddressBlockRequest $request, AddressBlockGroup $addressBlockGroup)
+    {
         $block = $addressBlockGroup->addressBlocks()->create($request->validated());
 
-        return fractal($block, new AddressBlockTransformer)->respond();
+        return AddressBlockData::from($block);
     }
 
     /**
      * @throws Throwable
      */
     public function update(
-        UpdateAddressBlockRequest $request, AddressBlockGroup $addressBlockGroup,
+        UpdateAddressBlockRequest $request,
+        AddressBlockGroup $addressBlockGroup,
         AddressBlock $addressBlock,
-    ): JsonResponse {
+    ) {
         $this->connection->transaction(
             function () use ($request, $addressBlock) {
                 if (
@@ -85,9 +84,7 @@ class AddressBlockController
             },
         );
 
-
-
-        return fractal($addressBlock, new AddressBlockTransformer)->respond();
+        return AddressBlockData::from($addressBlock);
     }
 
     public function destroy(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock): Response

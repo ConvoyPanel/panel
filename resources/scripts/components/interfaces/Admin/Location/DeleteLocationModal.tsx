@@ -3,7 +3,7 @@ import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations
 import { Location, PaginatedLocations } from '@/types/location.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator } from '@/lib/swr'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteLocation from '@/api/admin/locations/deleteLocation.ts'

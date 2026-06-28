@@ -1,5 +1,5 @@
 import { PaginatedNodes } from '@/types/node.ts'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getNodes, { NodeQueryParams } from '@/api/admin/nodes/getNodes.ts'
 

@@ -1,13 +1,8 @@
-import { PaginatedAddressBlocks } from '@/types/address-block.ts'
-import {
-    QueryBuilderParams,
-    getPaginationSet,
-    withQueryBuilderParams,
-} from '@/utils/http.ts'
+import type { PaginatedAddressBlocks, AddressBlock } from '@/types/address-block.ts'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
 
 import axios from '@/lib/axios.ts'
-
-import { rawDataToAddressBlock } from '@/api/transformers/address-block.ts'
+import type { PaginatedResponse } from '@/lib/api.ts'
 
 export type AddressBlockQueryParams = QueryBuilderParams<
     | '*'
@@ -25,16 +20,14 @@ const getAddressBlocks = async (
     addressBlockGroupId: number,
     params: AddressBlockQueryParams
 ): Promise<PaginatedAddressBlocks> => {
-    const { data } = await axios.get(
+    const { data } = await axios.get<PaginatedResponse<AddressBlock>>(
         `/api/admin/address-block-groups/${addressBlockGroupId}/address-blocks`,
-        {
-            params: withQueryBuilderParams(params),
-        }
+        { params: withQueryBuilderParams(params) }
     )
 
     return {
-        items: data.data.map(rawDataToAddressBlock),
-        pagination: getPaginationSet(data.meta.pagination),
+        items: data.items,
+        pagination: data.pagination,
     }
 }
 

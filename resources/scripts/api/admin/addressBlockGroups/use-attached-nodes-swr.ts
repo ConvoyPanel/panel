@@ -1,5 +1,5 @@
 import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getAttachedNodes, {
     AttachedNodesQueryParams,

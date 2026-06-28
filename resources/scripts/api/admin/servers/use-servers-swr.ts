@@ -1,5 +1,5 @@
 import { PaginatedServers } from '@/types/server'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getServers, { ServerQueryParams } from '@/api/admin/servers/getServers'
 

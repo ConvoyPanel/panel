@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\Coterm\CotermData;
+use App\Data\Node\NodeData;
+use App\Data\PaginationMeta;
 use App\Http\Requests\Admin\Coterms\DeleteCotermRequest;
 use App\Http\Requests\Admin\Coterms\StoreCotermRequest;
 use App\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
@@ -11,13 +14,9 @@ use App\Models\Filters\FiltersCotermWildcard;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Node;
 use App\Services\Coterm\CotermTokenCreationService;
-use App\Transformers\Admin\CotermTransformer;
-use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
-
-use function response;
 
 class CotermController
 {
@@ -25,7 +24,7 @@ class CotermController
 
     public function index(Request $request)
     {
-        $addressPools = QueryBuilder::for(Coterm::query())
+        $coterms = QueryBuilder::for(Coterm::query())
             ->withCount(['nodes'])
             ->defaultSort('-id')
             ->allowedFilters(
@@ -38,14 +37,14 @@ class CotermController
                 $request->query(),
             );
 
-        return fractal($addressPools, new CotermTransformer)->respond();
+        return PaginationMeta::paginate($coterms, CotermData::class);
     }
 
     public function show(Coterm $coterm)
     {
         $coterm->loadCount(['nodes']);
 
-        return fractal($coterm, new CotermTransformer)->respond();
+        return CotermData::from($coterm);
     }
 
     public function store(StoreCotermRequest $request)
@@ -62,7 +61,7 @@ class CotermController
         }
         $coterm->loadCount(['nodes']);
 
-        return fractal($coterm, new CotermTransformer(includeToken: true))->respond();
+        return CotermData::fromModel($coterm, includeToken: true);
     }
 
     public function update(UpdateCotermRequest $request, Coterm $coterm)
@@ -78,7 +77,7 @@ class CotermController
         }
         $coterm->loadCount(['nodes']);
 
-        return fractal($coterm, new CotermTransformer)->respond();
+        return CotermData::from($coterm);
     }
 
     public function getAttachedNodes(Request $request, Coterm $coterm)
@@ -94,7 +93,7 @@ class CotermController
                 $request->query(),
             );
 
-        return fractal($nodes, new NodeTransformer)->respond();
+        return PaginationMeta::paginate($nodes, NodeData::class);
     }
 
     public function updateAttachedNodes(UpdateAttachedNodesRequest $request, Coterm $coterm)
@@ -107,7 +106,7 @@ class CotermController
         );
         $coterm->loadCount(['nodes']);
 
-        return fractal($coterm, new CotermTransformer)->respond();
+        return CotermData::from($coterm);
     }
 
     public function resetCotermToken(Coterm $coterm)
@@ -118,8 +117,7 @@ class CotermController
             'token' => $creds['token'],
         ]);
 
-        return fractal($coterm, new CotermTransformer(includeToken: true))->parseIncludes('token')
-            ->respond();
+        return CotermData::fromModel($coterm, includeToken: true);
     }
 
     public function destroy(DeleteCotermRequest $request, Coterm $coterm)

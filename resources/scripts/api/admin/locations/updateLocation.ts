@@ -1,22 +1,17 @@
-import { locationSchema } from '@/types/location.ts'
+import { locationSchema, type Location } from '@/types/location.ts'
 import { z } from 'zod'
 
 import axios from '@/lib/axios'
 
-import { rawDataToLocation } from '@/api/transformers/location.ts'
-
 const updateLocation = async (
     location: number,
     { shortCode, description }: z.infer<typeof locationSchema>
-) => {
-    const {
-        data: { data },
-    } = await axios.put(`/api/admin/locations/${location}`, {
+): Promise<Location> => {
+    const { data: { data } } = await axios.put(`/api/admin/locations/${location}`, {
         short_code: shortCode,
         description,
     })
-
-    return rawDataToLocation(data)
+    return data as Location
 }
 
 export default updateLocation

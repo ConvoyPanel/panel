@@ -1,19 +1,13 @@
-import { PaginatedLocations } from '@/types/location.ts'
-import {
-    FractalPaginatedResponse,
-    QueryBuilderParams,
-    getPaginationSet,
-    withQueryBuilderParams,
-} from '@/utils/http.ts'
+import type { Location, PaginatedLocations } from '@/types/location.ts'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
 
 import axios from '@/lib/axios.ts'
-
-import { rawDataToLocation } from '@/api/transformers/location.ts'
+import type { PaginatedResponse } from '@/lib/api.ts'
 
 const getLocations = async (
     params: QueryBuilderParams<'*' | 'short_code'>
 ): Promise<PaginatedLocations> => {
-    const { data } = await axios.get<FractalPaginatedResponse>(
+    const { data } = await axios.get<PaginatedResponse<Location>>(
         '/api/admin/locations',
         {
             params: withQueryBuilderParams(params),
@@ -21,8 +15,8 @@ const getLocations = async (
     )
 
     return {
-        items: data.data.map(rawDataToLocation),
-        pagination: getPaginationSet(data.meta.pagination),
+        items: data.items,
+        pagination: data.pagination,
     }
 }
 

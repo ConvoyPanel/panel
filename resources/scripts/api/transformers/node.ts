@@ -6,23 +6,7 @@ import {
 } from '@/types/node.ts'
 import { intervalToDuration } from 'date-fns'
 
-export const rawDataToNode = (data: any): Node => ({
-    id: data.id,
-    locationId: data.location_id,
-    displayName: data.display_name,
-    name: data.name,
-    verifyTls: data.verify_tls,
-    fqdn: data.fqdn,
-    port: data.port,
-    socketCount: data.socket_count,
-    coreCount: data.core_count,
-    cpuCount: data.cpu_count,
-    memory: data.memory,
-    memoryOverallocate: data.memory_overallocate,
-    memoryAllocated: data.memory_allocated,
-    cotermId: data.coterm_id,
-    serversCount: data.servers_count,
-})
+export const rawDataToNode = (data: any): Node => data as Node
 
 export const mapConnectionErrorType = (
     errorCode: string
@@ -53,9 +37,9 @@ export const rawDataToNodeStatus = (data: any): NodeStatus => ({
         architecture: data.kernel.architecture,
     },
     cpu: {
-        socketCount: data.cpu.socket_count,
-        coreCount: data.cpu.core_count,
-        cpuCount: data.cpu.cpu_count,
+        socketCount: data.cpu.socketCount,
+        coreCount: data.cpu.coreCount,
+        cpuCount: data.cpu.cpuCount,
         model: data.cpu.model,
         flags: data.cpu.flags,
     },
@@ -75,9 +59,9 @@ export const rawDataToNodeStatus = (data: any): NodeStatus => ({
 export const rawDataToConnectionResult = (data: any): ConnectionResult => {
     return {
         success: data.success,
-        errorMessage: data.error_message || null,
-        errorCode: data.error_code
-            ? mapConnectionErrorType(data.error_code)
+        errorMessage: data.errorMessage || null,
+        errorCode: data.errorCode
+            ? mapConnectionErrorType(data.errorCode)
             : null,
         data: data.data ? rawDataToNodeStatus(data.data) : null,
     }

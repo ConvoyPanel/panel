@@ -1,5 +1,26 @@
 # AGENTS.md
 
+## Generated frontend artifacts
+
+These are NOT committed (matches the existing `routeTree.gen.ts` convention):
+
+- `resources/scripts/routeTree.gen.ts` — TanStack Router file-based route tree
+- `resources/scripts/wayfinder/` — Wayfinder typed route helpers
+- `resources/scripts/types/generated.d.ts` — Spatie typescript-transformer output (DTOs + enums)
+- `resources/scripts/types/typescript-transformer-manifest.json`
+
+Regenerate with `npm run types:generate` (also runs automatically via `predev` / `prebuild`). CI should run the generators before typecheck/build; a clean-tree assertion afterwards catches anything that drifted.
+
+## Running PHP, Composer, and Artisan
+
+There is no host-side `php` or `composer`. They live in the `app` Docker Compose service.
+
+- **One-off command (no live containers needed):**
+  `docker compose run --rm --no-deps app <command>`
+  Example: `docker compose run --rm --no-deps app composer install`
+- **Against running stack:** `docker compose exec app <command>`
+- **Composer write commands** (`install`, `require`, `update`): pass `--no-scripts` when Redis/MySQL aren't up, because `post-autoload-dump` runs `php artisan package:discover` which bootstraps the framework and connects to cache. Run `php artisan package:discover` manually once the stack is healthy.
+
 ## Proxmox VE API documentation
 
 Generated Proxmox VE API docs are in:

@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\PaginationMeta;
+use App\Data\Server\ServerData;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
-use App\Models\Filters\FiltersServerByAddressPoolId;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Server;
 use App\Services\Servers\CloudinitService;
-use App\Services\Servers\ServerNetworkService;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
+use App\Services\Servers\ServerNetworkService;
 use App\Services\Servers\ServerSuspensionService;
 use App\Services\Servers\VmSyncService;
-use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -27,13 +27,13 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 class ServerController
 {
     public function __construct(
-        private ConnectionInterface     $connection,
-        private ServerDeletionService   $deletionService,
-        private ServerNetworkService    $networkService,
+        private ConnectionInterface $connection,
+        private ServerDeletionService $deletionService,
+        private ServerNetworkService $networkService,
         private ServerSuspensionService $suspensionService,
-        private ServerCreationService   $creationService,
-        private CloudinitService        $cloudinitService,
-        private VmSyncService           $buildModificationService,
+        private ServerCreationService $creationService,
+        private CloudinitService $cloudinitService,
+        private VmSyncService $buildModificationService,
     ) {}
 
     public function index(Request $request)
@@ -43,10 +43,7 @@ class ServerController
             ->defaultSort('-id')
             ->allowedFilters(
                 [
-                    AllowedFilter::custom(
-                        '*',
-                        new FiltersServerWildcard,
-                    ),
+                    AllowedFilter::custom('*', new FiltersServerWildcard),
                     AllowedFilter::exact('node_id'),
                     AllowedFilter::exact('user_id'),
                     'name',
@@ -57,16 +54,14 @@ class ServerController
                 $request->query(),
             );
 
-        return fractal($servers, new ServerTransformer)->parseIncludes($request->include)
-            ->respond();
+        return PaginationMeta::paginate($servers, ServerData::class);
     }
 
     public function show(Request $request, Server $server)
     {
         $server->load(['node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes($request->include)
-            ->respond();
+        return ServerData::from($server);
     }
 
     public function store(StoreServerRequest $request)
@@ -75,8 +70,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
-            ->respond();
+        return ServerData::from($server);
     }
 
     public function update(UpdateGeneralInfoRequest $request, Server $server)
@@ -97,8 +91,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
-            ->respond();
+        return ServerData::from($server);
     }
 
     public function updateBuild(UpdateBuildRequest $request, Server $server)
@@ -115,8 +108,7 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
-        return fractal($server, new ServerTransformer)->parseIncludes(['user', 'node'])
-            ->respond();
+        return ServerData::from($server);
     }
 
     public function suspend(Server $server)

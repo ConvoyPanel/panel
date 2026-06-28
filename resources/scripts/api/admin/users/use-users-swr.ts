@@ -1,5 +1,5 @@
 import { PaginatedAdminUsers } from '@/types/admin/user.ts'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getUsers, { UserQueryParams } from '@/api/admin/users/getUsers.ts'
 

@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR, { preload } from 'swr'
+import useSWR, { preload } from '@/lib/swr'
 
 import getAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/getAddressBlock.ts'
 

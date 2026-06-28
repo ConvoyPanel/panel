@@ -1,26 +1,22 @@
 import useTitle from '@/hooks/use-title.ts'
 import { AuthenticatedUser } from '@/types/user.ts'
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import { Cache, cache as SWRCache } from 'swr/_internal'
 
 import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
+import { queryClient } from '@/lib/query-client.ts'
 
 import LogoWithName from '@/components/ui/Branding/LogoWithName.tsx'
 import { Card } from '@/components/ui/Card'
 import ThemeToggle from '@/components/ui/ThemeToggle.tsx'
 
-
 export const Route = createFileRoute('/auth')({
     beforeLoad: async () => {
-        // I don't like how I'm accessing internal functions here. Rewrite this if this portion ever needs to be edited
-        const cache: Cache<AuthenticatedUser> = SWRCache
-
         await cacheUser().catch(_ => {})
 
-        if (cache.get(getKey())?.data !== undefined) {
-            throw redirect({
-                to: '/',
-            })
+        const user = queryClient.getQueryData<AuthenticatedUser>([getKey()])
+
+        if (user !== undefined) {
+            throw redirect({ to: '/' })
         }
     },
     component: AuthLayout,

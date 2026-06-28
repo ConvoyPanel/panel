@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
+use App\Data\Node\NodeData;
+use App\Data\PaginationMeta;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Node;
-use App\Transformers\Admin\NodeTransformer;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -30,7 +31,7 @@ class NodeController
                 $request->query(),
             );
 
-        return fractal($nodes, new NodeTransformer)->respond();
+        return PaginationMeta::paginate($nodes, NodeData::class);
     }
 
     public function show(Node $node)
@@ -38,7 +39,7 @@ class NodeController
         $node->append(['memory_allocated'])
             ->loadCount('servers');
 
-        return fractal($node, new NodeTransformer)->respond();
+        return NodeData::from($node);
     }
 
     public function store(StoreNodeRequest $request)
@@ -47,7 +48,7 @@ class NodeController
             ->append(['memory_allocated'])
             ->loadCount('servers');
 
-        return fractal($node, new NodeTransformer)->respond();
+        return NodeData::from($node);
     }
 
     public function update(UpdateNodeRequest $request, Node $node)
@@ -57,7 +58,7 @@ class NodeController
         $node->append(['memory_allocated'])
             ->loadCount('servers');
 
-        return fractal($node, new NodeTransformer)->respond();
+        return NodeData::from($node);
     }
 
     public function destroy(Node $node)

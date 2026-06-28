@@ -1,13 +1,9 @@
 import axios from '@/lib/axios.ts'
+import type { Location } from '@/types/location.ts'
 
-import { rawDataToLocation } from '@/api/transformers/location.ts'
-
-const getLocation = async (id: number) => {
-    const {
-        data: { data },
-    } = await axios.get(`/api/admin/locations/${id}`)
-
-    return rawDataToLocation(data)
+const getLocation = async (id: number): Promise<Location> => {
+    const { data: { data } } = await axios.get(`/api/admin/locations/${id}`)
+    return data as Location
 }
 
 export default getLocation

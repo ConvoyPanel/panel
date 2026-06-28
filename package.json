@@ -2,6 +2,9 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "types:generate": "docker compose exec -T app php artisan typescript:transform && docker compose exec -T app php artisan wayfinder:generate --path=resources/scripts/wayfinder",
+        "predev": "npm run types:generate",
+        "prebuild": "npm run types:generate",
         "build": "vite build",
         "dev": "vite --host 0.0.0.0",
         "tc": "tsc --noEmit --project ./"
@@ -31,6 +34,8 @@
         "@simplewebauthn/browser": "^13.0.0",
         "@tabler/icons-react": "^3.34.0",
         "@tailwindcss/vite": "^4.0.0",
+        "@tanstack/react-query": "^5.100.14",
+        "@tanstack/react-query-devtools": "^5.100.14",
         "@tanstack/react-router": "^1.130.0",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/router-plugin": "^1.130.0",
@@ -49,10 +54,8 @@
         "react-hook-form": "^7.54.0",
         "recharts": "^3.0.0",
         "sonner": "^2.0.3",
-        "swr": "^2.3.0",
         "tailwind-merge": "^3.0.0",
         "tailwindcss": "^4.0.0",
-        "tailwindcss-animate": "^1.0.7",
         "vaul": "^1.1.2",
         "vite": "^7.0.0",
         "zod": "^4.0.0",
@@ -67,6 +70,7 @@
         "prettier": "^3.4.0",
         "prettier-plugin-tailwindcss": "^0.6.10",
         "rollup-plugin-visualizer": "^6.0.0",
+        "tw-animate-css": "^1.4.0",
         "typescript": "^5.7.0"
     }
 }

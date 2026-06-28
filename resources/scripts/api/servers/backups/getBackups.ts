@@ -1,27 +1,24 @@
-import { PaginatedBackups } from '@/types/backup.ts'
-import {
-    QueryBuilderParams,
-    getPaginationSet,
-    withQueryBuilderParams,
-} from '@/utils/http.ts'
+import type { PaginatedBackups, Backup } from '@/types/backup.ts'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
 
 import axios from '@/lib/axios.ts'
+import type { PaginatedResponse } from '@/lib/api.ts'
 
 import { rawDataToBackup } from '@/api/transformers/backup.ts'
-
 
 const getBackups = async (
     uuid: string,
     params?: QueryBuilderParams<'completed_at' | 'created_at'>
 ): Promise<PaginatedBackups> => {
-    const { data } = await axios.get(`/api/client/servers/${uuid}/backups`, {
-        params: withQueryBuilderParams(params),
-    })
+    const { data } = await axios.get<PaginatedResponse<Backup> & { backupCount: number }>(
+        `/api/client/servers/${uuid}/backups`,
+        { params: withQueryBuilderParams(params) }
+    )
 
     return {
-        items: data.data.map(rawDataToBackup),
-        pagination: getPaginationSet(data.meta.pagination),
-        backupCount: data.meta.backup_count,
+        items: data.items.map(rawDataToBackup),
+        pagination: data.pagination,
+        backupCount: data.backupCount,
     }
 }
 

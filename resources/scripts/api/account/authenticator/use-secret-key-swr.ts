@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getSecretKey from '@/api/account/authenticator/getSecretKey.ts'
 

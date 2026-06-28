@@ -1,5 +1,5 @@
 import { Node } from '@/types/node'
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getAttachedNodes from './getAttachedNodes'
 

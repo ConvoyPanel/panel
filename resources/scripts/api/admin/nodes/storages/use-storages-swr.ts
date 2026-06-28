@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getStorages from '@/api/admin/nodes/storages/getStorages.ts'
 import { useParams } from '@tanstack/react-router'

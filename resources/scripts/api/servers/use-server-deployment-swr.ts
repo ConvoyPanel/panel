@@ -1,4 +1,4 @@
-import useSWR, { type SWRConfiguration } from 'swr'
+import useSWR, { type SWRConfiguration } from '@/lib/swr'
 import { useParams } from '@tanstack/react-router'
 import getServerDeployment from '@/api/servers/getServerDeployment.ts'
 import { Deployment } from '@/types/deployment'

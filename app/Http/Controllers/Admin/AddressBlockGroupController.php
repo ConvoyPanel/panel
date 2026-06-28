@@ -2,36 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Data\Ipam\AddressBlockGroupData;
+use App\Data\Node\NetworkInterfaceData;
+use App\Data\PaginationMeta;
+use App\Data\Server\ServerData;
 use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
 use App\Http\Requests\Admin\AddressBlockGroups\AttachNodeRequest;
 use App\Http\Requests\Admin\AddressBlockGroups\DetachNodeRequest;
 use App\Models\AddressBlockGroup;
 use App\Models\Filters\FiltersAddressBlockGroupWildcard;
-use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Node;
 use App\Models\Server;
-use App\Transformers\Admin\AddressBlockGroupTransformer;
-use App\Transformers\Admin\NetworkInterfaceTransformer;
-use App\Transformers\Admin\NodeTransformer;
-use App\Transformers\Client\ServerTransformer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-use function fractal;
-use function min;
-
 class AddressBlockGroupController
 {
     public function __construct() {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $groups = QueryBuilder::for(AddressBlockGroup::query())
             ->withCount('addressBlocks', 'nodes')
@@ -46,28 +41,28 @@ class AddressBlockGroupController
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($groups, new AddressBlockGroupTransformer)->respond();
+        return PaginationMeta::paginate($groups, AddressBlockGroupData::class);
     }
 
-    public function show(AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function show(AddressBlockGroup $addressBlockGroup)
     {
         $addressBlockGroup->loadCount('addressBlocks', 'nodes');
 
-        return fractal($addressBlockGroup, new AddressBlockGroupTransformer)->respond();
+        return AddressBlockGroupData::from($addressBlockGroup);
     }
 
-    public function store(AddressBlockGroupRequest $request): JsonResponse
+    public function store(AddressBlockGroupRequest $request)
     {
         $addressBlockGroup = AddressBlockGroup::create($request->validated());
 
-        return fractal($addressBlockGroup, new AddressBlockGroupTransformer)->respond();
+        return AddressBlockGroupData::from($addressBlockGroup);
     }
 
-    public function update(AddressBlockGroupRequest $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function update(AddressBlockGroupRequest $request, AddressBlockGroup $addressBlockGroup)
     {
         $addressBlockGroup->update($request->validated());
 
-        return fractal($addressBlockGroup, new AddressBlockGroupTransformer)->respond();
+        return AddressBlockGroupData::from($addressBlockGroup);
     }
 
     public function destroy(AddressBlockGroup $addressBlockGroup): Response
@@ -79,7 +74,7 @@ class AddressBlockGroupController
         return response()->noContent();
     }
 
-    public function getAttachedNodes(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function getAttachedNodes(Request $request, AddressBlockGroup $addressBlockGroup)
     {
         $interfaces = QueryBuilder::for($addressBlockGroup->networkInterfaces())
             ->with(['node' => function ($query) {
@@ -99,10 +94,10 @@ class AddressBlockGroupController
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($interfaces, new NetworkInterfaceTransformer)->respond();
+        return PaginationMeta::paginate($interfaces, NetworkInterfaceData::class);
     }
 
-    public function attachNode(AttachNodeRequest $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function attachNode(AttachNodeRequest $request, AddressBlockGroup $addressBlockGroup)
     {
         $addressBlockGroup->networkInterfaces()->syncWithoutDetaching([
             $request->input('network_interface_id')
@@ -119,7 +114,7 @@ class AddressBlockGroupController
         return response()->noContent();
     }
 
-    public function getCompatibleServers(Request $request, AddressBlockGroup $addressBlockGroup): JsonResponse
+    public function getCompatibleServers(Request $request, AddressBlockGroup $addressBlockGroup)
     {
         $servers = QueryBuilder::for(Server::query())
             ->with(['node' => function (BelongsTo $query): void {
@@ -138,6 +133,6 @@ class AddressBlockGroupController
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
-        return fractal($servers, new ServerTransformer)->parseIncludes($request->include)->respond();
+        return PaginationMeta::paginate($servers, ServerData::class);
     }
 }

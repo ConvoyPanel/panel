@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
-use App\Data\Server\Deployments\ServerDeploymentData;
+use App\Actions\Server\RebuildServerAction;
+use App\Data\Server\BootOrderData;
 use App\Data\Server\Proxmox\Config\DiskData;
+use App\Data\Server\RenamedServerData;
+use App\Data\Server\ServerNetworkSettingsData;
+use App\Data\Server\ServerSecuritySettingsData;
+use App\Data\Template\TemplateGroupData;
 use App\Enums\Server\AuthenticationType;
-use App\Enums\Server\ServerStatus;
-use App\Enums\Server\DeploymentType;
 use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
 use App\Http\Requests\Client\Servers\Settings\MountMediaRequest;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
@@ -21,15 +25,9 @@ use App\Models\TemplateGroup;
 use App\Services\Servers\AllocationService;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\ServerAuthService;
-use App\Actions\Server\RebuildServerAction;
-use App\Transformers\Client\MediaTransformer;
-use App\Transformers\Client\RenamedServerTransformer;
-use App\Transformers\Client\ServerBootOrderTransformer;
-use App\Transformers\Client\ServerNetworkTransformer;
-use App\Transformers\Client\ServerSecurityTransformer;
-use App\Transformers\Client\TemplateGroupTransformer;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\DataCollection;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class SettingsController
@@ -50,7 +48,7 @@ class SettingsController
             $server->update($request->validated());
         });
 
-        return fractal($server, new RenamedServerTransformer)->respond();
+        return RenamedServerData::from($server);
     }
 
     public function getTemplateGroups(Request $request, Server $server)
@@ -70,7 +68,8 @@ class SettingsController
             }
         }])->get();
 
-        return fractal($templateGroups, new TemplateGroupTransformer)->respond();
+        return TemplateGroupData::collect($templateGroups, DataCollection::class)
+            ->include('templates');
     }
 
     public function reinstall(ReinstallServerRequest $request, Server $server)
@@ -104,10 +103,10 @@ class SettingsController
             }
         }
 
-        return fractal()->item([
-            'unused_devices' => DiskData::collect($unconfiguredDevices),
-            'boot_order' => $configuredDevices,
-        ], new ServerBootOrderTransformer)->respond();
+        return new BootOrderData(
+            unusedDevices: DiskData::collect($unconfiguredDevices, DataCollection::class),
+            bootOrder: DiskData::collect($configuredDevices, DataCollection::class),
+        );
     }
 
     public function updateBootOrder(UpdateBootOrderRequest $request, Server $server)
@@ -128,21 +127,17 @@ class SettingsController
             )->get()->toArray();
         }
 
-        $media = array_map(function ($iso) use ($disks) {
-            if ($disks->where('media_name', '=', $iso['name'])->first()) {
-                return [
-                    'mounted' => true,
-                    ...$iso,
-                ];
-            } else {
-                return [
-                    'mounted' => false,
-                    ...$iso,
-                ];
-            }
-        }, $media);
+        return array_map(function ($iso) use ($disks) {
+            $isMounted = (bool) $disks->where('media_name', '=', $iso['name'])->first();
 
-        return fractal($media, new MediaTransformer)->respond();
+            return [
+                'uuid' => $iso['uuid'],
+                'name' => $iso['name'],
+                'size' => $iso['size'],
+                'hidden' => $iso['hidden'],
+                'mounted' => $isMounted,
+            ];
+        }, $media);
     }
 
     public function mountMedia(MountMediaRequest $request, Server $server, ISO $iso)
@@ -161,25 +156,25 @@ class SettingsController
 
     public function getNetworkSettings(Server $server)
     {
-        return fractal()->item([
-            'nameservers' => $this->cloudinitService->getNameservers($server),
-        ], new ServerNetworkTransformer)->respond();
+        return new ServerNetworkSettingsData(
+            nameservers: $this->cloudinitService->getNameservers($server),
+        );
     }
 
     public function updateNetworkSettings(UpdateNetworkRequest $request, Server $server)
     {
         $this->cloudinitService->setNameservers($server, $request->nameservers);
 
-        return fractal()->item([
-            'nameservers' => $this->cloudinitService->getNameservers($server),
-        ], new ServerNetworkTransformer)->respond();
+        return new ServerNetworkSettingsData(
+            nameservers: $this->cloudinitService->getNameservers($server),
+        );
     }
 
     public function getAuthSettings(Server $server)
     {
-        return fractal()->item([
-            'ssh_keys' => $this->authService->getSSHKeys($server),
-        ], new ServerSecurityTransformer)->respond();
+        return new ServerSecuritySettingsData(
+            sshKeys: $this->authService->getSSHKeys($server),
+        );
     }
 
     public function updateAuthSettings(UpdateAuthSettingsRequest $request, Server $server)

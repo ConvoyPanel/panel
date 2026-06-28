@@ -2,8 +2,8 @@ import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/
 import { PaginatedAddresses } from '@/types/address.ts'
 import { IconPlus } from '@tabler/icons-react'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
-import useSWRMutation from 'swr/mutation'
+import { KeyedMutator } from '@/lib/swr'
+import useSWRMutation from '@/lib/swr-mutation'
 
 import generateAddresses from '@/api/admin/addressBlockGroups/addressBlocks/addresses/generateAddresses.ts'
 import { getKey } from '@/api/admin/addressBlockGroups/addressBlocks/addresses/use-addresses-swr.ts'

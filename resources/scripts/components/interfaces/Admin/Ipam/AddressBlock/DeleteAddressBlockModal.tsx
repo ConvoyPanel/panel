@@ -1,7 +1,7 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlocks } from '@/types/address-block.ts'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator } from '@/lib/swr'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/deleteAddressBlock.ts'

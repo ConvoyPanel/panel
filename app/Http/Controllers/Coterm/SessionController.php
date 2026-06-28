@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Coterm;
 
+use App\Data\Server\ConsoleCredentialsData;
 use App\Enums\Server\ConsoleType;
 use App\Http\Requests\Coterm\StoreSessionRequest;
 use App\Models\Server;
 use App\Services\Servers\ServerConsoleService;
-use App\Transformers\Coterm\NoVncCredentialsTransformer;
-use App\Transformers\Coterm\XTermCredentialsTransformer;
 
 class SessionController
 {
@@ -19,20 +18,18 @@ class SessionController
 
         if ($consoleType === ConsoleType::NOVNC) {
             $credentials = $this->consoleService->createNoVncCredentials($server);
-
-            return fractal()->item([
-                'server' => $server,
-                'credentials' => $credentials,
-            ], new NoVncCredentialsTransformer)->respond();
         } elseif ($consoleType === ConsoleType::XTERMJS) {
             $credentials = $this->consoleService->createXTermjsCredentials($server);
-
-            return fractal()->item([
-                'server' => $server,
-                'credentials' => $credentials,
-            ], new XTermCredentialsTransformer)->respond();
+        } else {
+            return response()->json(['error' => 'Invalid console type'], 400);
         }
 
-        return response()->json(['error' => 'Invalid console type'], 400);
+        return new ConsoleCredentialsData(
+            nodeFqdn: $server->node->fqdn,
+            nodePort: $server->node->port,
+            nodePveName: $server->node->cluster,
+            vmid: $server->vmid,
+            credentials: $credentials->toArray(),
+        );
     }
 }

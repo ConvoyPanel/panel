@@ -2,7 +2,7 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator } from '@/lib/swr'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddressBlockGroup from '@/api/admin/addressBlockGroups/deleteAddressBlockGroup.ts'

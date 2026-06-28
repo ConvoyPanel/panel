@@ -42,9 +42,9 @@ export function getPaginationSet(data: any): PaginationDataSet {
     return {
         total: data.total,
         count: data.count,
-        perPage: data.per_page,
-        currentPage: data.current_page,
-        totalPages: data.total_pages,
+        perPage: data.perPage,
+        currentPage: data.currentPage,
+        totalPages: data.totalPages,
     }
 }
 

@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR from '@/lib/swr'
 
 import getQrCode from '@/api/account/authenticator/getQrCode.ts'
 

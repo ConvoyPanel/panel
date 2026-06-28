@@ -20,6 +20,9 @@ stats.html
 .fleet
 lang/php_*.json
 /resources/scripts/routeTree.gen.ts
+/resources/scripts/wayfinder
+/resources/scripts/types/generated.d.ts
+/resources/scripts/types/typescript-transformer-manifest.json
 .DS_Store
 ._.DS_Store
 **/.DS_Store
