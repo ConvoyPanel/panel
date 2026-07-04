@@ -3,6 +3,7 @@
 namespace App\Data\Server\Proxmox\Config;
 
 use App\Enums\Server\NetworkDeviceModel;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Data;
@@ -51,6 +52,15 @@ class NetworkDeviceData extends Data
          * List of VLANs that are allowed to pass through this interface.
          */
         public ?string $vlanTrunks,
+
+        /**
+         * @var array<string, string> $extraProperties
+         *
+         * Sub-keys present on the Proxmox net string that we don't explicitly
+         * model. Preserved verbatim so re-emitting the device never drops a
+         * field PVE (or a future version) set that we don't understand.
+         */
+        public array $extraProperties = [],
     ) {}
 
     /**
@@ -84,7 +94,12 @@ class NetworkDeviceData extends Data
                     packetQueueCount: isset($parsedConfig['queues']) ? (int) $parsedConfig['queues'] : null,
                     mtu: isset($parsedConfig['mtu']) ? (int) $parsedConfig['mtu'] : null,
                     isLinkDown: isset($parsedConfig['link_down']) ? (bool) (int) $parsedConfig['link_down'] : null, // Proxmox uses 1/0
-                    vlanTrunks: $parsedConfig['trunks'] ?? null
+                    vlanTrunks: $parsedConfig['trunks'] ?? null,
+                    // Anything we don't explicitly model is kept so it survives a re-emit.
+                    extraProperties: Arr::except($parsedConfig, [
+                        'model', 'macaddr', 'bridge', 'tag', 'firewall',
+                        'rate', 'queues', 'mtu', 'link_down', 'trunks',
+                    ]),
                 ));
             }
         }
@@ -185,7 +200,14 @@ class NetworkDeviceData extends Data
         if ($this->vlanTrunks !== null) {
             $config[] = "trunks={$this->vlanTrunks}";
         }
-        
+
+        // Re-emit any sub-keys we don't model so they aren't dropped.
+        foreach ($this->extraProperties as $key => $value) {
+            if ($value !== null) {
+                $config[] = "{$key}={$value}";
+            }
+        }
+
         // Join all parameters with commas
         $configString = implode(',', $config);
         
