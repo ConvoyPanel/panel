@@ -13,6 +13,25 @@ beforeEach(function () {
     $this->node = Node::factory()->for($this->location)->create();
 });
 
+function nodePayload(array $overrides = []): array
+{
+    return array_merge([
+        'location_id' => test()->location->id,
+        'display_name' => 'Test Node',
+        'name' => 'test-node',
+        'fqdn' => 'example.com',
+        'verify_tls' => true,
+        'token_id' => 'test-token',
+        'token_secret' => 'test-secret',
+        'port' => 8006,
+        'socket_count' => 2,
+        'core_count' => 16,
+        'cpu_count' => 32,
+        'memory' => 64 * 1024 * 1024 * 1024, // 64GB
+        'memory_overallocate' => 0,
+    ], $overrides);
+}
+
 it('can fetch nodes', function () {
     $response = $this->actingAs($this->user)->getJson('/api/admin/nodes');
 
@@ -26,109 +45,50 @@ it('can fetch a node', function () {
 });
 
 it('can create a node', function () {
-    $response = $this->actingAs($this->user)->postJson('/api/admin/nodes', [
-        'location_id' => $this->location->id,
-        'name' => 'Test Node',
-        'cluster' => 'proxmox',
-        'fqdn' => 'example.com',
-        'token_id' => 'test-token',
-        'secret' => 'test-secret',
-        'port' => 8006,
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'memory_overallocate' => 0,
-        'disk' => 512 * 1024 * 1024 * 1024, // 512GB,
-        'disk_overallocate' => 0,
-        'vm_storage' => 'local-lvm',
-        'backup_storage' => 'local-lvm',
-        'iso_storage' => 'local-lvm',
-        'network' => 'vmbr0',
-    ]);
+    $response = $this->actingAs($this->user)->postJson('/api/admin/nodes', nodePayload());
 
-    $response->assertOk();
+    $response->assertCreated();
 });
 
 it('can update a node', function () {
-    $response = $this->actingAs($this->user)->putJson("/api/admin/nodes/{$this->node->id}", [
-        'location_id' => $this->location->id,
-        'name' => 'Test Node',
-        'cluster' => 'proxmox',
-        'fqdn' => 'example.com',
-        'token_id' => 'test-token',
-        'secret' => 'test-secret',
-        'port' => 8006,
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'memory_overallocate' => 0,
-        'disk' => 512 * 1024 * 1024 * 1024, // 512GB,
-        'disk_overallocate' => 0,
-        'vm_storage' => 'local-lvm',
-        'backup_storage' => 'local-lvm',
-        'iso_storage' => 'local-lvm',
-        'network' => 'vmbr0',
-    ]);
+    $response = $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$this->node->id}",
+        nodePayload(),
+    );
 
     $response->assertOk();
 });
 
-it("can't downsize without over-allocating", function () {
+it("can't downsize memory below what's allocated", function () {
     $node = Node::factory()->for($this->location)->create([
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'disk' => 512 * 1024 * 1024 * 1024, // 512GB,
+        'memory' => 64 * 1024 * 1024 * 1024, // 64GB
     ]);
 
     Server::factory()->for($node)->for($this->user)->create([
-        'memory' => 32 * 1024 * 1024 * 1024, // 32GB,
-        'disk' => 256 * 1024 * 1024 * 1024, // 256GB,
+        'memory' => 32 * 1024 * 1024 * 1024, // 32GB
     ]);
 
-    $response = $this->actingAs($this->user)->putJson("/api/admin/nodes/{$node->id}", [
-        'location_id' => $this->location->id,
-        'name' => 'Test Node',
-        'cluster' => 'proxmox',
-        'fqdn' => 'example.com',
-        'token_id' => 'test-token',
-        'secret' => 'test-secret',
-        'port' => 8006,
-        'memory' => 16 * 1024 * 1024 * 1024, // 16GB,
-        'memory_overallocate' => 0,
-        'disk' => 128 * 1024 * 1024 * 1024, // 128GB,
-        'disk_overallocate' => 0,
-        'vm_storage' => 'local-lvm',
-        'backup_storage' => 'local-lvm',
-        'iso_storage' => 'local-lvm',
-        'network' => 'vmbr0',
-    ]);
+    $response = $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$node->id}",
+        nodePayload(['memory' => 16 * 1024 * 1024 * 1024]), // 16GB < 32GB allocated
+    );
 
     $response->assertStatus(422);
 });
 
 it('can update node without false positive overallocation', function () {
     $node = Node::factory()->for($this->location)->create([
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'disk' => 512 * 1024 * 1024 * 1024, // 512GB,
+        'memory' => 64 * 1024 * 1024 * 1024, // 64GB
     ]);
 
     Server::factory()->for($node)->for($this->user)->create([
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'disk' => 256 * 1024 * 1024 * 1024, // 256GB,
+        'memory' => 64 * 1024 * 1024 * 1024, // 64GB
     ]);
 
-    $response = $this->actingAs($this->user)->putJson("/api/admin/nodes/{$node->id}", [
-        'location_id' => $this->location->id,
-        'name' => 'New name',
-        'cluster' => 'proxmox',
-        'fqdn' => 'example.com',
-        'token_id' => 'test-token',
-        'secret' => 'test-secret',
-        'port' => 8006,
-        'memory' => 64 * 1024 * 1024 * 1024, // 64GB,
-        'memory_overallocate' => 0,
-        'disk' => 512 * 1024 * 1024 * 1024, // 512GB,
-        'disk_overallocate' => 0,
-        'vm_storage' => 'local-lvm',
-        'backup_storage' => 'local-lvm',
-        'iso_storage' => 'local-lvm',
-        'network' => 'vmbr0',
-    ]);
+    $response = $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$node->id}",
+        nodePayload(['name' => 'new-name', 'memory' => 64 * 1024 * 1024 * 1024]),
+    );
 
     $response->assertOk();
 });

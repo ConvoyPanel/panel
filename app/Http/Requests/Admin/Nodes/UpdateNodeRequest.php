@@ -14,9 +14,9 @@ class UpdateNodeRequest extends BaseApiRequest
         $rules = Node::getRulesForUpdate($this->parameter('node', Node::class));
 
         return [
-            ...Arr::except($rules, ['token_id', 'secret']),
+            ...Arr::except($rules, ['token_id', 'token_secret']),
             'token_id' => 'sometimes|string|max:191',
-            'secret' => 'sometimes|string|max:191',
+            'token_secret' => 'sometimes|string|max:191',
         ];
     }
 
@@ -29,21 +29,11 @@ class UpdateNodeRequest extends BaseApiRequest
                 $memory = intval($this->input('memory')) * ((intval(
                     $this->input('memory_overallocate'),
                 ) / 100) + 1);
-                $disk = intval($this->input('disk')) * ((intval(
-                    $this->input('disk_overallocate'),
-                ) / 100) + 1);
 
                 if ($memory < $node->memory_allocated) {
                     $validator->errors()->add(
                         'memory',
                         'The memory value is lower than what\'s allocated.',
-                    );
-                }
-
-                if ($disk < $node->disk_allocated) {
-                    $validator->errors()->add(
-                        'disk',
-                        'The disk value is lower than what\'s allocated.',
                     );
                 }
             },
