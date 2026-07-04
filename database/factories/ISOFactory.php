@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\ISO;
+use App\Models\Storage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class ISOFactory extends Factory
     public function definition(): array
     {
         return [
+            'storage_id' => Storage::factory(),
             'uuid' => $this->faker->uuid(),
             'is_successful' => $this->faker->boolean(),
             'name' => $this->faker->name(),

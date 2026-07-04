@@ -18,7 +18,7 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            'short_code' => $this->faker->word(),
+            'short_code' => $this->faker->unique()->lexify('??????'),
             'description' => $this->faker->sentence(),
         ];
     }

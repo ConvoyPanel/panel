@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Backup;
 use App\Models\Server;
+use App\Models\Storage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,8 +20,9 @@ class BackupFactory extends Factory
     public function definition(): array
     {
         return [
+            'server_id' => Server::factory(),
+            'storage_id' => Storage::factory(),
             'uuid' => $this->faker->uuid(),
-            'is_successful' => $this->faker->boolean(),
             'is_locked' => $this->faker->boolean(),
             'name' => $this->faker->word(),
             'file_name' => $this->faker->word(),
