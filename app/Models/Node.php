@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
@@ -82,17 +81,28 @@ class Node extends Model
     }
 
     /**
-     * Gets all the addresses associated with a node from the address pool(s) allocated to a node.
+     * Gets all the addresses allocated to a node, resolved through the node's
+     * network interfaces → address block groups → address blocks.
      */
-    public function addresses(): HasManyThrough
+    public function addresses(): HasManyDeep
     {
-        return $this->hasManyThrough(
+        return $this->hasManyDeep(
             Address::class,
-            AddressBlockGroupToInterface::class,
-            'node_id',
-            'address_pool_id',
-            'id',
-            'address_pool_id',
+            [NetworkInterface::class, 'address_block_group_to_network_interface', AddressBlockGroup::class, AddressBlock::class],
+            [
+                'node_id',                // network_interfaces.node_id  → nodes.id
+                'network_interface_id',   // pivot.network_interface_id  → network_interfaces.id
+                'id',                     // address_block_groups.id      ← pivot.address_block_group_id
+                'address_block_group_id', // address_blocks.address_block_group_id → address_block_groups.id
+                'address_block_id',       // addresses.address_block_id   → address_blocks.id
+            ],
+            [
+                'id',                     // nodes.id
+                'id',                     // network_interfaces.id
+                'address_block_group_id', // pivot.address_block_group_id
+                'id',                     // address_block_groups.id
+                'id',                     // address_blocks.id
+            ],
         );
     }
 
