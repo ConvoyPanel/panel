@@ -3,9 +3,11 @@
 namespace App\Repositories\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Config\ServerConfigData;
+use App\Exceptions\Http\Server\ConfigModifiedException;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Repositories\Proxmox\ProxmoxRepository;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Str;
 
 class ProxmoxConfigRepository extends ProxmoxRepository
 {
@@ -36,10 +38,30 @@ class ProxmoxConfigRepository extends ProxmoxRepository
             $payload['digest'] = $digest;
         }
 
-        $response = $this->getHttpClientWithParams()
-            ->post('/api2/json/nodes/{node}/qemu/{server}/config', $payload)
-            ->json();
+        try {
+            $response = $this->getHttpClientWithParams()
+                ->post('/api2/json/nodes/{node}/qemu/{server}/config', $payload)
+                ->json();
+        } catch (RequestException $e) {
+            if ($digest !== null && $this->isConfigModifiedError($e)) {
+                throw new ConfigModifiedException;
+            }
+
+            throw $e;
+        }
 
         return $this->getData($response);
+    }
+
+    /**
+     * Whether the failure is Proxmox rejecting the write due to a digest
+     * mismatch ("detected modified configuration - file changed by other user").
+     */
+    private function isConfigModifiedError(RequestException $e): bool
+    {
+        return Str::contains(
+            Str::lower($e->getMessage()),
+            ['changed by other user', 'modified configuration'],
+        );
     }
 }
