@@ -42,7 +42,7 @@ function testCreateBackup(
 
         $response->assertCreated()
                  ->assertJsonPath('data.name', 'Test Backup')
-                 ->assertJsonPath('data.is_locked', 0);
+                 ->assertJsonPath('data.isLocked', false);
 
         Queue::assertPushed(MonitorBackupJob::class);
     };

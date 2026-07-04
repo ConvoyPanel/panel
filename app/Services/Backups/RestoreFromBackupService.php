@@ -23,7 +23,7 @@ class RestoreFromBackupService
 
     public function handle(Server $server, Backup $backup)
     {
-        if (! is_null($server->status)) {
+        if (! $server->status->isReady()) {
             throw new BadRequestHttpException(
                 'This server is not currently in a state that allows for a backup to be restored.',
             );
@@ -49,7 +49,7 @@ class RestoreFromBackupService
 
             $upid = $this->proxmoxRepository->setServer($server)->restore($backup);
 
-            MonitorBackupRestorationJob::dispatch($server->id, $upid);
+            MonitorBackupRestorationJob::dispatch($server, $upid);
         });
     }
 }
