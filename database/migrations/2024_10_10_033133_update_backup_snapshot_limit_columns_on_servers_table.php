@@ -22,7 +22,6 @@ return new class extends Migration
         Schema::table('servers', function (Blueprint $table) {
             $table->renameColumn('snapshot_limit', 'snapshot_count_limit');
             $table->renameColumn('backup_limit', 'backup_count_limit');
-            $table->renameColumn('bandwidth_limit', 'bandwidth_limit');
             $table->integer('snapshot_size_limit')->after('snapshot_count_limit');
             $table->integer('backup_size_limit')->after('backup_count_limit');
         });
@@ -51,7 +50,6 @@ return new class extends Migration
             $table->dropColumn('snapshot_size_limit', 'backup_size_limit');
             $table->renameColumn('snapshot_count_limit', 'snapshot_limit');
             $table->renameColumn('backup_count_limit', 'backup_limit');
-            $table->renameColumn('bandwidth_limit', 'bandwidth_limit');
         });
     }
 };
