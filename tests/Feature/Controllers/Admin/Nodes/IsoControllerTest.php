@@ -4,6 +4,7 @@ use App\Jobs\Node\MonitorIsoDownloadJob;
 use App\Models\ISO;
 use App\Models\Location;
 use App\Models\Node;
+use App\Models\Storage;
 use App\Models\User;
 
 beforeEach(function () {
@@ -12,6 +13,8 @@ beforeEach(function () {
     ]);
     $this->location = Location::factory()->create();
     $this->node = Node::factory()->for($this->location)->create();
+    $this->storage = Storage::factory()->create();
+    $this->node->storages()->attach($this->storage);
 });
 
 it('can fetch ISOs', function () {
@@ -54,7 +57,7 @@ it('can create an ISO', function () {
 });
 
 it("can't create an ISO with file_name taken", function () {
-    ISO::factory()->for($this->node)->create([
+    ISO::factory()->for($this->storage)->create([
         'file_name' => 'duplicate.iso',
     ]);
 
@@ -73,7 +76,7 @@ it("can't create an ISO with file_name taken", function () {
 });
 
 it('can update an ISO', function () {
-    $iso = ISO::factory()->for($this->node)->create();
+    $iso = ISO::factory()->for($this->storage)->create();
 
     $response = $this->actingAs($this->user)->putJson(
         "/api/admin/nodes/{$this->node->id}/isos/{$iso->uuid}",
@@ -94,7 +97,7 @@ it('can delete an ISO', function () {
             200,
         ),
     ]);
-    $iso = ISO::factory()->for($this->node)->create();
+    $iso = ISO::factory()->for($this->storage)->create();
 
     $response = $this->actingAs($this->user)->deleteJson(
         "/api/admin/nodes/{$this->node->id}/isos/{$iso->uuid}",

@@ -40,7 +40,7 @@ function testCreateBackup(
             return;
         }
 
-        $response->assertOk()
+        $response->assertCreated()
                  ->assertJsonPath('data.name', 'Test Backup')
                  ->assertJsonPath('data.is_locked', 0);
 

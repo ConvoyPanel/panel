@@ -74,6 +74,10 @@ function createServerModel(): array
         ];
     });
 
+    // Make the server's storage available on its node (backup/iso operations
+    // resolve a capability-matched storage from the node).
+    $node->storages()->attach($server->storage);
+
     return [
         $user,
         $location,
