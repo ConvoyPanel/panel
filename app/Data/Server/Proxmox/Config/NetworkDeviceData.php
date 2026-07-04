@@ -3,13 +3,19 @@
 namespace App\Data\Server\Proxmox\Config;
 
 use App\Enums\Server\NetworkDeviceModel;
-use Illuminate\Support\Arr;
+use App\Extensions\Spatie\Data\Proxmox\Casts\PveBooleanCast;
+use App\Extensions\Spatie\Data\Proxmox\Casts\RateLimitCast;
+use App\Extensions\Spatie\Data\Proxmox\MapsProxmoxProperties;
+use App\Extensions\Spatie\Data\Proxmox\PropertyList;
+use App\Extensions\Spatie\Data\Proxmox\ProxmoxProperty;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Data;
 
 class NetworkDeviceData extends Data
 {
+    use MapsProxmoxProperties;
+
     public function __construct(
         public int $id,
         public NetworkDeviceModel $model,
@@ -20,6 +26,7 @@ class NetworkDeviceData extends Data
          *
          * Bridge to attach the network device to. The Proxmox VE standard bridge is called 'vmbr0'. If not specified, Proxmox creates a KVM user (NATed) network device.
          */
+        #[ProxmoxProperty('bridge')]
         public ?string $bridge,
 
         /**
@@ -27,8 +34,13 @@ class NetworkDeviceData extends Data
          *
          * VLAN tag to apply to packets on this interface (1-4094).
          */
+        #[ProxmoxProperty('tag')]
         public ?int $vlanTag,
+
+        #[ProxmoxProperty('firewall', PveBooleanCast::class)]
         public ?bool $isFirewallEnabled,
+
+        #[ProxmoxProperty('rate', RateLimitCast::class)]
         public ?int $rateLimit,
 
         /**
@@ -36,7 +48,10 @@ class NetworkDeviceData extends Data
          *
          * Number of packet queues to be used on the device.
          */
+        #[ProxmoxProperty('queues')]
         public ?int $packetQueueCount,
+
+        #[ProxmoxProperty('mtu')]
         public ?int $mtu,
 
         /**
@@ -44,6 +59,7 @@ class NetworkDeviceData extends Data
          *
          * Whether this interface should be disconnected (like pulling the plug).
          */
+        #[ProxmoxProperty('link_down', PveBooleanCast::class)]
         public ?bool $isLinkDown,
 
         /**
@@ -51,6 +67,7 @@ class NetworkDeviceData extends Data
          *
          * List of VLANs that are allowed to pass through this interface.
          */
+        #[ProxmoxProperty('trunks')]
         public ?string $vlanTrunks,
 
         /**
@@ -74,75 +91,35 @@ class NetworkDeviceData extends Data
         $networkDevices = collect();
 
         foreach ($raw as $key => $value) {
-            if (Str::startsWith($key, 'net') && is_string($value)) {
-                $id = (int) Str::replace('net', '', $key);
-                $parsedConfig = self::parseNetString($value);
-
-                if ($parsedConfig === null) {
-                    // Log or handle parsing error if necessary
-                    continue;
-                }
-
-                $networkDevices->push(new self(
-                    id: $id,
-                    model: NetworkDeviceModel::from($parsedConfig['model']),
-                    macAddress: $parsedConfig['macaddr'] ?? null,
-                    bridge: $parsedConfig['bridge'] ?? null,
-                    vlanTag: isset($parsedConfig['tag']) ? (int) $parsedConfig['tag'] : null,
-                    isFirewallEnabled: isset($parsedConfig['firewall']) ? (bool) (int) $parsedConfig['firewall'] : null, // Proxmox uses 1/0
-                    rateLimit: isset($parsedConfig['rate']) ? floor($parsedConfig['rate'] * 1024 * 1024) : null,
-                    packetQueueCount: isset($parsedConfig['queues']) ? (int) $parsedConfig['queues'] : null,
-                    mtu: isset($parsedConfig['mtu']) ? (int) $parsedConfig['mtu'] : null,
-                    isLinkDown: isset($parsedConfig['link_down']) ? (bool) (int) $parsedConfig['link_down'] : null, // Proxmox uses 1/0
-                    vlanTrunks: $parsedConfig['trunks'] ?? null,
-                    // Anything we don't explicitly model is kept so it survives a re-emit.
-                    extraProperties: Arr::except($parsedConfig, [
-                        'model', 'macaddr', 'bridge', 'tag', 'firewall',
-                        'rate', 'queues', 'mtu', 'link_down', 'trunks',
-                    ]),
-                ));
+            if (! Str::startsWith($key, 'net') || ! is_string($value)) {
+                continue;
             }
+
+            // The positional head is `model[=macaddr]`; the rest is a key=value tail.
+            [$head, $pairs] = PropertyList::explode($value);
+            [$modelValue, $macAddress] = array_pad(explode('=', $head, 2), 2, null);
+
+            // Typed tail fields come from the attributes; anything left over is
+            // kept verbatim so it survives a re-emit.
+            [$mapped, $extraProperties] = self::mapProxmoxProperties($pairs);
+
+            $networkDevices->push(new self(
+                id: (int) Str::replace('net', '', $key),
+                model: NetworkDeviceModel::from(trim($modelValue)),
+                macAddress: $macAddress !== null ? trim($macAddress) : null,
+                bridge: $mapped['bridge'] ?? null,
+                vlanTag: $mapped['vlanTag'] ?? null,
+                isFirewallEnabled: $mapped['isFirewallEnabled'] ?? null,
+                rateLimit: $mapped['rateLimit'] ?? null,
+                packetQueueCount: $mapped['packetQueueCount'] ?? null,
+                mtu: $mapped['mtu'] ?? null,
+                isLinkDown: $mapped['isLinkDown'] ?? null,
+                vlanTrunks: $mapped['vlanTrunks'] ?? null,
+                extraProperties: $extraProperties,
+            ));
         }
 
         return $networkDevices;
-    }
-
-    /**
-     * Parses the Proxmox net string (e.g., "virtio=MAC,bridge=vmbr0,tag=10")
-     * into an associative array.
-     *
-     * @param  string  $netString  The network configuration string.
-     * @return array<string, string|null>|null Parsed configuration or null on failure.
-     */
-    private static function parseNetString(string $netString): ?array
-    {
-        $config = [];
-        $parts = explode(',', $netString);
-
-        if (count($parts) === 0) {
-            return null; // Invalid string
-        }
-
-        // First part is model[=macaddr]
-        $modelPart = array_shift($parts);
-        $modelMacSplit = explode('=', $modelPart, 2);
-        $config['model'] = trim($modelMacSplit[0]);
-
-        if (count($modelMacSplit) === 2) {
-            $config['macaddr'] = trim($modelMacSplit[1]);
-        } else {
-            $config['macaddr'] = null; // No MAC address explicitly set with model
-        }
-
-        // Parse remaining key=value pairs
-        foreach ($parts as $part) {
-            $kv = explode('=', $part, 2);
-            if (count($kv) === 2) {
-                $config[trim($kv[0])] = trim($kv[1]);
-            }
-        }
-
-        return $config;
     }
 
     /**
@@ -150,68 +127,15 @@ class NetworkDeviceData extends Data
      *
      * @return array{string, string} Returns a KV pair array with the key as the device ID and the value as the configuration string.
      */
-    public function toProxmoxString(): array {
-        $config = [];
-        
-        // Start with model with optional MAC address
-        if ($this->macAddress) {
-            $config[] = "{$this->model->value}={$this->macAddress}";
-        } else {
-            $config[] = $this->model->value;
-        }
-        
-        // Add bridge if set
-        if ($this->bridge) {
-            $config[] = "bridge={$this->bridge}";
-        }
-        
-        // Add firewall setting if set
-        if ($this->isFirewallEnabled !== null) {
-            $config[] = "firewall=" . ($this->isFirewallEnabled ? '1' : '0');
-        }
-        
-        // Add link_down setting if set
-        if ($this->isLinkDown !== null) {
-            $config[] = "link_down=" . ($this->isLinkDown ? '1' : '0');
-        }
-        
-        // Add MTU if set
-        if ($this->mtu !== null) {
-            $config[] = "mtu={$this->mtu}";
-        }
-        
-        // Add queue count if set
-        if ($this->packetQueueCount !== null) {
-            $config[] = "queues={$this->packetQueueCount}";
-        }
-        
-        // Add rate limit if set
-        if ($this->rateLimit !== null) {
-            $convertedRate = $this->rateLimit / (1024 * 1024); // Convert from bytes to MiB
-            $config[] = "rate={$convertedRate}";
-        }
-        
-        // Add VLAN tag if set
-        if ($this->vlanTag !== null) {
-            $config[] = "tag={$this->vlanTag}";
-        }
-        
-        // Add VLAN trunks if set
-        if ($this->vlanTrunks !== null) {
-            $config[] = "trunks={$this->vlanTrunks}";
-        }
+    public function toProxmoxString(): array
+    {
+        $head = $this->macAddress
+            ? "{$this->model->value}={$this->macAddress}"
+            : $this->model->value;
 
-        // Re-emit any sub-keys we don't model so they aren't dropped.
-        foreach ($this->extraProperties as $key => $value) {
-            if ($value !== null) {
-                $config[] = "{$key}={$value}";
-            }
-        }
+        // Modeled keys from the attributes, then any sub-keys we don't model.
+        $pairs = $this->toProxmoxProperties() + $this->extraProperties;
 
-        // Join all parameters with commas
-        $configString = implode(',', $config);
-        
-        // Return key-value pair for Proxmox configuration
-        return ["net{$this->id}", $configString];
+        return ["net{$this->id}", PropertyList::implode($head, $pairs)];
     }
 }

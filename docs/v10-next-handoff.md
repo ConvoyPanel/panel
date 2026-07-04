@@ -72,16 +72,48 @@ Code slugs assigned: `invalid_passkey`, `invalid_passkey_json`, `invalid_passkey
 
 ---
 
-## Next up (Phase 2 remaining, then Phase 3)
+## Proxmox property-list DTO codec (attribute refactor — IN PROGRESS)
 
-- **DTO attribute refactor with laravel-data** (user asked for this; deferred behind exceptions).
-  Replace the `if`-sprawl in `NetworkDeviceData::toProxmoxString()` / `parseNetString()` with
-  property attributes: `MapName` + custom `WithCast`/`WithTransformer` classes. spatie/laravel-data
-  ^4 interfaces:
-  - `Cast::cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed`
-  - `Transformer::transform(DataProperty $property, mixed $value, TransformationContext $context): mixed`
-  Start with `NetworkDeviceData` as the reference, then apply the same `extraProperties` losslessness
-  pattern to the other compound DTOs (`DiskData`, `TpmStateDiskData`).
+Replaces the hand-written `isset(...) ? (int)... : null` parse ladders and
+`if ($x !== null) $config[] = "x=$x"` emit blocks in the config DTOs with an
+attribute-driven codec.
+
+**Key design constraint:** laravel-data's own name mapping (`MapOutputName`) is *already*
+the frontend/TS JSON contract for these DTOs (see `generated.d.ts` — `DiskData` uses
+`is_emulating_ssd`, `bps_max`, etc.). The Proxmox property-list keys (`firewall`, `rate`,
+`tag`, `link_down`) are a **second, unrelated** serialization target, so they get a
+**dedicated attribute** rather than reusing `MapName`.
+
+**Where it lives:** `app/Extensions/Spatie/Data/Proxmox/` (with the other laravel-data
+extensions), namespace `App\Extensions\Spatie\Data\Proxmox`:
+- `PropertyList` — pure codec for PVE's `head[,key=value]*` format (`explode`/`implode`).
+  The positional head (`model=mac` for NICs, `volume` for disks) is DTO-specific and stays
+  explicit in each DTO; the codec handles the `key=value` tail.
+- `ProxmoxProperty` (attribute) — declares a property's PVE key + optional cast. Targets both
+  PARAMETER and PROPERTY (promoted ctor params reflect as both; laravel-data reads the property side).
+- `ProxmoxPropertyCast` (interface) — `parse(string): mixed` / `emit(mixed): ?string`.
+- `Casts/PveBooleanCast` (1/0 ↔ bool), `Casts/RateLimitCast` (MiB ↔ bytes).
+- `ProxmoxPropertySpec` — resolves one attributed property; infers int/string/backed-enum from
+  the declared type, requires an explicit cast for bool (PVE 1/0) and other non-trivial values.
+- `MapsProxmoxProperties` (trait) — reflection-driven; `mapProxmoxProperties($pairs)` →
+  `[typedByPropName, leftoverPairs]`, `toProxmoxProperties()` → emitted pairs. Derives the
+  "known keys" set from the attributes, so `extraProperties` losslessness no longer needs a
+  hand-maintained `Arr::except([...])` exclusion list.
+
+**Done:** `NetworkDeviceData` refactored onto it (reference implementation). Golden-master
+round-trip tests in `tests/Unit/Data/NetworkDeviceDataTest.php` (5 cases: full-field parse,
+full round-trip, PVE bool 1/0 + null omission, unmodeled-key preservation). Suite: 46 passed.
+PHPStan clean on the new files (the full-suite 272 errors are the pre-existing `next` baseline,
+not from this change).
+
+**TODO — apply the same pattern to the other compound DTOs:**
+- `DiskData` — biggest win (huge `data_get(...)` ladder + per-field `filter_var` bools). Note
+  the `mbps`/`bps` dual-unit reads and size-unit suffix parsing need bespoke casts.
+- `TpmStateDiskData` — also give it the `extraProperties` losslessness it currently lacks.
+- Consider `CloudinitConfigData`, `UsbDeviceData`, `VgaConfigData` if they share the format.
+
+## Next up (rest of Phase 2, then Phase 3)
+
 - **Thread digest through the rest of the write paths:** `CloudinitService`, `AllocationService`,
   `ServerAuthService`.
 - **`syncNetworkDeviceConfig`** should filter already-firewalled NICs (avoid redundant writes).
