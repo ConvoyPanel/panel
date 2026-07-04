@@ -1,0 +1,53 @@
+name: convoy
+type: laravel
+docroot: public
+php_version: "8.4"
+webserver_type: nginx-fpm
+
+database:
+  type: postgres
+  version: "17"
+
+nodejs_version: "22"
+corepack_enable: false
+
+# ext-gmp is required by composer.json (prod Dockerfile installs it too).
+webimage_extra_packages:
+  - php8.4-gmp
+
+# Postgres + redis + mail overrides. These are real container env vars, so they
+# take precedence over .env.next (Laravel's Dotenv does not overwrite existing
+# env), letting ddev coexist with the docker-compose/.env flow on `develop`.
+web_environment:
+  - APP_URL=https://convoy.ddev.site
+  - DB_CONNECTION=pgsql
+  - DB_HOST=db
+  - DB_PORT=5432
+  - DB_DATABASE=db
+  - DB_USERNAME=db
+  - DB_PASSWORD=db
+  - REDIS_HOST=redis
+  - REDIS_PORT=6379
+  - REDIS_PASSWORD=
+  - CACHE_STORE=redis
+  - QUEUE_CONNECTION=redis
+  - SESSION_DRIVER=redis
+  - MAIL_MAILER=smtp
+  - MAIL_HOST=localhost
+  - MAIL_PORT=1025
+
+# Replaces the compose `horizon` and `scheduler` services.
+web_extra_daemons:
+  - name: horizon
+    command: "php artisan horizon"
+    directory: /var/www/html
+  - name: scheduler
+    command: "php artisan schedule:work"
+    directory: /var/www/html
+
+# Expose the Vite dev server (was port 3000 in docker-compose).
+web_extra_exposed_ports:
+  - name: vite
+    container_port: 3000
+    http_port: 3011
+    https_port: 3000

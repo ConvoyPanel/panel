@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "types:generate": "docker compose exec -T app php artisan typescript:transform && docker compose exec -T app php artisan wayfinder:generate --path=resources/scripts/wayfinder",
+        "types:generate": "php artisan typescript:transform && php artisan wayfinder:generate --path=resources/scripts/wayfinder",
         "predev": "npm run types:generate",
         "prebuild": "npm run types:generate",
         "build": "vite build",
