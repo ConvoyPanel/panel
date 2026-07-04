@@ -23,11 +23,10 @@ class ServerNetworkBandwidthService
      */
     public function setRateLimit(Server $server, int $rate): void
     {
+        $config = $this->configRepository->setServer($server)->getConfig();
+
         /** @var array<string, string> $networkDevices */
-        $networkDevices = $this->configRepository
-            ->setServer($server)
-            ->getConfig()
-            ->networkDevices
+        $networkDevices = $config->networkDevices
             ->filter(function (NetworkDeviceData $device) use ($rate) {
                 // Skip devices that already have the desired rate limit
                 return $device->rateLimit !== $rate;
@@ -44,7 +43,7 @@ class ServerNetworkBandwidthService
                 return $carry;
             }, []);
 
-        $this->configRepository->update($networkDevices);
+        $this->configRepository->update($networkDevices, $config->digest);
     }
 
     /**
@@ -54,11 +53,10 @@ class ServerNetworkBandwidthService
      */
     public function removeRateLimit(Server $server): void
     {
+        $config = $this->configRepository->setServer($server)->getConfig();
+
         /** @var array<string, string> $networkDevices */
-        $networkDevices = $this->configRepository
-            ->setServer($server)
-            ->getConfig()
-            ->networkDevices
+        $networkDevices = $config->networkDevices
             ->filter(function (NetworkDeviceData $device) {
                 // Skip devices that do not have a rate limit set
                 return ! is_null($device->rateLimit);
@@ -75,6 +73,6 @@ class ServerNetworkBandwidthService
                 return $carry;
             }, []);
 
-        $this->configRepository->update($networkDevices);
+        $this->configRepository->update($networkDevices, $config->digest);
     }
 }

@@ -46,10 +46,9 @@ class ServerNetworkService
         /** @var string|null $bridge */
         $bridge = $primaryAddresses->ipv4?->networkInterfaces()->first()?->name ?? $primaryAddresses->ipv6?->networkInterfaces()->first()?->name;
 
-        $networkDevices = $this->configRepository
-            ->setServer($server)
-            ->getConfig()
-            ->networkDevices
+        $config = $this->configRepository->setServer($server)->getConfig();
+
+        $networkDevices = $config->networkDevices
             ->map(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
                 $device->isFirewallEnabled = true;
                 $device->macAddress = $macAddress ?? $device->macAddress;
@@ -64,7 +63,7 @@ class ServerNetworkService
                 return $carry;
             }, []);
 
-        $this->configRepository->update($networkDevices);
+        $this->configRepository->update($networkDevices, $config->digest);
     }
 
     /**

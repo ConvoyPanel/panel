@@ -36,7 +36,11 @@ it('can rate limit servers if over limit', function () {
 
     app(ServerRateLimitsSyncService::class)->handle($node);
 
+    // The config update must echo the digest read from getConfig so PVE can
+    // reject a stale write (optimistic concurrency).
     Http::assertSent(function (Request $request) {
-        return $request->method() === 'POST';
+        return $request->method() === 'POST'
+            && str_contains($request->url(), '/config')
+            && $request['digest'] === '47fb9b586691ee1d97020370b9e7bfc8382a2db6';
     });
 });

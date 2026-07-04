@@ -241,6 +241,13 @@ class ServerConfigData extends Data
          */
         public Collection $serialDevices,
 
+        /**
+         * SHA1 digest of the config at fetch time. Echo it back on an update so
+         * PVE rejects the write if the config changed underneath us (optimistic
+         * concurrency).
+         */
+        public ?string $digest = null,
+
         // NOTE: not all properties are added
     ) {}
 
@@ -362,6 +369,7 @@ class ServerConfigData extends Data
                 ->filter(fn ($value, $key) => preg_match('/^parallel\d+$/', $key))
                 ->values(),
             serialDevices                     : collect($get('serial', [])),
+            digest                            : $get('digest'),
         );
     }
 }

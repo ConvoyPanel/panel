@@ -23,11 +23,19 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     }
 
     /**
+     * Update the VM config. Pass the digest captured from getConfig() to make
+     * PVE reject the write if the config changed since it was read (optimistic
+     * concurrency); a mismatch surfaces as a RequestException.
+     *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function update(array $payload = [])
+    public function update(array $payload = [], ?string $digest = null)
     {
+        if ($digest !== null) {
+            $payload['digest'] = $digest;
+        }
+
         $response = $this->getHttpClientWithParams()
             ->post('/api2/json/nodes/{node}/qemu/{server}/config', $payload)
             ->json();
