@@ -56,7 +56,8 @@ class IsoController
         } else {
             $isoFromProxmox = $this->isoService->getIso($node, $request->file_name);
 
-            $iso = $node->isos()->create([
+            $iso = ISO::create([
+                'storage_id' => $node->isoStorage()->id,
                 'is_successful' => true,
                 'name' => $request->name,
                 'file_name' => $request->file_name,

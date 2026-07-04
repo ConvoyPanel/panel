@@ -8,6 +8,7 @@ use App\Enums\Node\Storage\StorageContentType;
 use App\Jobs\Node\MonitorIsoDownloadJob;
 use App\Models\ISO;
 use App\Models\Node;
+use App\Models\Storage;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use Illuminate\Database\ConnectionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -27,13 +28,21 @@ class IsoService
         string $link,
         ?ChecksumData $checksumData = null,
         ?bool $hidden = false,
+        ?Storage $storage = null,
     ) {
+        // Default to an ISO-capable storage on the node; the caller may override.
+        $storage ??= $node->isoStorage();
+        if (is_null($storage)) {
+            throw new BadRequestHttpException('No ISO-capable storage is configured for this node.');
+        }
+
         $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(
             function () use (
                 $queriedFileMetadata,
                 $node,
+                $storage,
                 $hidden,
                 $fileName,
                 $link,
@@ -41,7 +50,7 @@ class IsoService
                 $checksumData,
             ) {
                 $iso = ISO::create([
-                    'node_id' => $node->id,
+                    'storage_id' => $storage->id,
                     'name' => $name,
                     'file_name' => $fileName ?? $queriedFileMetadata->fileName,
                     'hidden' => $hidden,
@@ -50,6 +59,7 @@ class IsoService
 
                 $upid = $this->repository->setNode($node)->download(
                     StorageContentType::ISO,
+                    $storage->name,
                     $iso->file_name,
                     $link,
                     true,
@@ -65,7 +75,12 @@ class IsoService
 
     public function getIso(Node $node, string $fileName): ?IsoData
     {
-        $isos = $this->repository->setNode($node)->getIsos();
+        $storage = $node->isoStorage();
+        if (is_null($storage)) {
+            return null;
+        }
+
+        $isos = $this->repository->setNode($node)->getIsos($storage->name);
 
         return $isos->where('file_name', '=', $fileName)->first();
     }
@@ -80,7 +95,7 @@ class IsoService
 
         $this->connection->transaction(function () use ($node, $iso) {
             if ($iso->is_successful) {
-                $this->repository->setNode($node)->deleteFile(StorageContentType::ISO, $iso->file_name);
+                $this->repository->setNode($node)->deleteFile(StorageContentType::ISO, $iso->storage->name, $iso->file_name);
             }
 
             $iso->delete();

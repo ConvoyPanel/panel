@@ -36,9 +36,9 @@ class ISO extends Model
         ];
     }
 
-    public function node(): BelongsTo
+    public function storage(): BelongsTo
     {
-        return $this->belongsTo(Node::class);
+        return $this->belongsTo(Storage::class);
     }
 
     protected static function boot(): void

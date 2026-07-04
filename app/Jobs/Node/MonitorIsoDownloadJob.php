@@ -36,7 +36,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
     {
         $iso = ISO::findOrFail($this->isoId);
 
-        $task = $repository->setNode($iso->node)->getStatus($this->upid);
+        $task = $repository->setNode($iso->storage->nodes()->firstOrFail())->getStatus($this->upid);
 
         if ($task->status === TaskStatus::RUNNING) {
             $this->release(3);

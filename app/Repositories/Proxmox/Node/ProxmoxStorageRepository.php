@@ -54,6 +54,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
 
     public function download(
         StorageContentType $contentType,
+        string             $storage,
         string             $fileName,
         string             $link,
         ?bool              $verifyCertificates = true,
@@ -74,7 +75,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         }
 
         $response = $this->getHttpClientWithParams([
-            'storage' => $this->node->iso_storage,
+            'storage' => $storage,
         ])
             ->post('/api2/json/nodes/{node}/storage/{storage}/download-url', $payload)
             ->json();
@@ -82,11 +83,11 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function deleteFile(StorageContentType $contentType, string $fileName)
+    public function deleteFile(StorageContentType $contentType, string $storage, string $fileName)
     {
         $response = $this->getHttpClientWithParams([
-            'storage' => $this->node->iso_storage,
-            'file' => "{$this->node->iso_storage}:$contentType->value/$fileName",
+            'storage' => $storage,
+            'file' => "{$storage}:$contentType->value/$fileName",
         ])
             ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{file}')
             ->json();
@@ -94,10 +95,10 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         return $this->getData($response);
     }
 
-    public function getIsos(): DataCollection
+    public function getIsos(string $storage): DataCollection
     {
         $response = $this->getHttpClientWithParams([
-            'storage' => $this->node->iso_storage,
+            'storage' => $storage,
         ])
             ->get('/api2/json/nodes/{node}/storage/{storage}/content?content=iso')
             ->json();

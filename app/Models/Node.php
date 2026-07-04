@@ -160,6 +160,23 @@ class Node extends Model
     }
 
     /**
+     * A storage on this node capable of holding ISOs. Used as the default when
+     * uploading a new ISO (the user may override the selection).
+     */
+    public function isoStorage(): ?Storage
+    {
+        return $this->storages()->where('stores_iso', true)->first();
+    }
+
+    /**
+     * A storage on this node capable of holding backups.
+     */
+    public function backupStorage(): ?Storage
+    {
+        return $this->storages()->where('stores_backups', true)->first();
+    }
+
+    /**
      * Gets the total memory used from adding up all the associated servers' allocated memory.
      */
     public function getMemoryAllocatedAttribute(): int

@@ -103,7 +103,7 @@ class AllocationService
         }
 
         $this->configRepository->update([
-            "ide$ideIndex" => "{$server->node->iso_storage}:iso/{$iso->file_name},media=cdrom",
+            "ide$ideIndex" => "{$iso->storage->name}:iso/{$iso->file_name},media=cdrom",
         ]);
     }
 
