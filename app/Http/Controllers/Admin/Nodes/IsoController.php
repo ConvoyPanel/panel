@@ -26,8 +26,7 @@ class IsoController
 
     public function index(Node $node, Request $request)
     {
-        $isos = QueryBuilder::for(ISO::query())
-            ->where('iso_library.node_id', $node->id)
+        $isos = QueryBuilder::for($node->isos())
             ->allowedFilters(['name'])
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
