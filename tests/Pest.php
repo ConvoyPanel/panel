@@ -71,12 +71,6 @@ function createServerModel(): array
             'uuid_short' => substr($uuid, 0, 8),
             'user_id' => $user,
             'node_id' => $node,
-            'cpu' => 2,
-            'memory' => 2048 * 1024 * 1024,
-            'disk' => 20 * 1024 * 1024 * 1024,
-            'backup_limit' => 16,
-            'snapshot_limit' => 16,
-            'bandwidth_limit' => 100 * 1024 * 1024 * 1024,
         ];
     });
 
