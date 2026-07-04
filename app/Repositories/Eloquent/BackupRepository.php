@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BackupRepository
 {
+    public function create(array $data): Backup
+    {
+        return Backup::create($data);
+    }
+
     public function getNonFailedBackups(Server $server): HasMany
     {
         return $server->backups()->where(function (Builder $query) {

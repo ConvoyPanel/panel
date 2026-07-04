@@ -13,6 +13,7 @@ use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class BackupCreationService
@@ -61,21 +62,29 @@ class BackupCreationService
             }
         }
 
+        $storage = $server->node->backupStorage();
+        if (is_null($storage)) {
+            throw new ConflictHttpException('No backup-capable storage is configured for this node.');
+        }
+
         return $this->connection->transaction(
-            function () use ($server, $name, $mode, $compressionType, $isLocked) {
+            function () use ($server, $name, $mode, $compressionType, $isLocked, $storage) {
                 $backup = $this->eloquentRepository->create([
                     'uuid' => Uuid::uuid4()->toString(),
                     'server_id' => $server->id,
+                    'storage_id' => $storage->id,
                     'name' => $name,
                     'is_locked' => $isLocked,
+                    'size' => 0,
                 ]);
 
                 $upid = $this->proxmoxRepository->setServer($server)->backup(
                     $mode,
                     $compressionType,
+                    $storage->name,
                 );
 
-                MonitorBackupJob::dispatch($backup->id, $upid);
+                MonitorBackupJob::dispatch($backup, $upid);
 
                 return $backup;
             },

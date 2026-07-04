@@ -63,7 +63,7 @@ class MonitorBackupJob implements ShouldQueue
             $archives = $backupRepository->setServer($this->backup->server)->getBackups($this->backup->storage);
             $archive = collect($archives)->where(
                 'volid',
-                "{$this->backup->server->node->backup_storage}:backup/{$fileName}",
+                "{$this->backup->storage->name}:backup/{$fileName}",
             )->first();
 
             $this->backup->update([

@@ -43,7 +43,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
      *
      * @return string UPID
      */
-    public function backup(BackupMode $mode, BackupCompressionType $compressionType): string
+    public function backup(BackupMode $mode, BackupCompressionType $compressionType, string $storage): string
     {
         $parsedMode = match ($mode) {
             BackupMode::KILL => 'stop',
@@ -53,7 +53,7 @@ class ProxmoxBackupRepository extends ProxmoxRepository
         $response = $this->getHttpClientWithParams()
             ->post('/api2/json/nodes/{node}/vzdump', [
                 'vmid' => $this->getServer()->vmid,
-                'storage' => $this->getNode()->backup_storage,
+                'storage' => $storage,
                 'mode' => $parsedMode,
                 'compress' => $compressionType === BackupCompressionType::NONE ? (int) false : $compressionType->value,
             ])
