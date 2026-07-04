@@ -72,7 +72,6 @@ function testRestoreBackups(
         }
 
         $backup = Backup::factory()->create([
-            'is_successful' => true,
             'is_locked' => false,
             'server_id' => $server->id,
         ]);
@@ -111,7 +110,6 @@ function testDeleteBackups(
         }
 
         $backup = Backup::factory()->create([
-            'is_successful' => true,
             'is_locked' => false,
             'server_id' => $server->id,
         ]);
