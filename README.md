@@ -19,6 +19,20 @@ Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a
 -   [Panel Documentation](https://docs.convoypanel.com)
 -   [Discord Community](https://discord.convoypanel.com)
 
+## Local Development
+
+Local dev runs on [ddev](https://ddev.com) (Postgres 17):
+
+```bash
+ddev start
+ddev composer install
+ddev artisan migrate
+ddev npm install && ddev npm run build   # or: ddev npm run dev for HMR
+```
+
+The app is served at https://convoy.ddev.site. See [AGENTS.md](AGENTS.md) for details on
+running Artisan/Composer/npm, regenerating typed frontend artifacts, and database snapshots.
+
 ## Acknowledgements
 
 Please [visit this page](https://convoypanel.com/docs/project/about.html#acknowledgements) on our website to view acknowledgements.

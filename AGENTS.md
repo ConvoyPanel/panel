@@ -9,17 +9,43 @@ These are NOT committed (matches the existing `routeTree.gen.ts` convention):
 - `resources/scripts/types/generated.d.ts` — Spatie typescript-transformer output (DTOs + enums)
 - `resources/scripts/types/typescript-transformer-manifest.json`
 
-Regenerate with `npm run types:generate` (also runs automatically via `predev` / `prebuild`). CI should run the generators before typecheck/build; a clean-tree assertion afterwards catches anything that drifted.
+Regenerate with `ddev npm run types:generate` (also runs automatically via `predev` / `prebuild`). CI should run the generators before typecheck/build; a clean-tree assertion afterwards catches anything that drifted.
 
-## Running PHP, Composer, and Artisan
+## Local development (ddev)
 
-There is no host-side `php` or `composer`. They live in the `app` Docker Compose service.
+Local dev runs on [ddev](https://ddev.com) with **Postgres 17**. One-time setup:
 
-- **One-off command (no live containers needed):**
-  `docker compose run --rm --no-deps app <command>`
-  Example: `docker compose run --rm --no-deps app composer install`
-- **Against running stack:** `docker compose exec app <command>`
-- **Composer write commands** (`install`, `require`, `update`): pass `--no-scripts` when Redis/MySQL aren't up, because `post-autoload-dump` runs `php artisan package:discover` which bootstraps the framework and connects to cache. Run `php artisan package:discover` manually once the stack is healthy.
+```bash
+ddev start                        # web + postgres + redis + horizon + scheduler
+ddev composer install
+ddev artisan migrate              # or: ddev artisan migrate:fresh
+ddev npm install && ddev npm run build
+```
+
+The app is served at https://convoy.ddev.site. For frontend HMR, run `ddev npm run dev`
+(Vite is served at https://convoy.ddev.site:3000).
+
+Roll back the database while iterating on migrations (replaces the old Makefile snapshot hack):
+
+```bash
+ddev snapshot --name pre-migration
+ddev snapshot restore pre-migration
+```
+
+## Running PHP, Composer, Artisan, and npm
+
+There is no host-side `php` / `composer` / `node`; they run inside the ddev web container:
+
+- `ddev artisan <command>` — Artisan
+- `ddev composer <command>` — Composer (the stack is up during `ddev start`, so
+  `post-autoload-dump`'s `package:discover` connects to cache/DB fine)
+- `ddev npm <command>` — npm runs in-container (this is why `types:generate` calls
+  `php artisan` directly rather than shelling through docker compose)
+- `ddev ssh` — open a shell in the web container
+
+DB / Redis / mail are configured via `web_environment` in `.ddev/config.yaml`, whose values
+override `.env.next` (Laravel's Dotenv does not overwrite real env vars). `ext-gmp` is added
+via `webimage_extra_packages`.
 
 ## Proxmox VE API documentation
 
