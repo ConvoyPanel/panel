@@ -27,7 +27,7 @@ class NetworkDeviceData extends Data
          * VLAN tag to apply to packets on this interface (1-4094).
          */
         public ?int $vlanTag,
-        public bool $isFirewallEnabled,
+        public ?bool $isFirewallEnabled,
         public ?int $rateLimit,
 
         /**
