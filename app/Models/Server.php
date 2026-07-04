@@ -50,6 +50,7 @@ class Server extends Model
             'disk' => StorageSizeCast::class,
             'bandwidth_usage' => StorageSizeCast::class,
             'bandwidth_limit' => StorageSizeCast::class,
+            'backup_size_limit' => StorageSizeCast::class,
         ];
     }
 
