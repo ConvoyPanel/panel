@@ -24,7 +24,7 @@ it('can create a location', function () {
         'description' => 'This is a test location.',
     ]);
 
-    $response->assertOk();
+    $response->assertCreated();
 });
 
 it('can update a location', function () {

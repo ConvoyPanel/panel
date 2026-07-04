@@ -53,7 +53,7 @@ it('can create an ISO', function () {
     );
 
     Queue::assertPushed(MonitorIsoDownloadJob::class);
-    $response->assertOk();
+    $response->assertCreated();
 });
 
 it("can't create an ISO with file_name taken", function () {

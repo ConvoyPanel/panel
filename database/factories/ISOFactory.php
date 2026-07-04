@@ -21,11 +21,11 @@ class ISOFactory extends Factory
         return [
             'storage_id' => Storage::factory(),
             'uuid' => $this->faker->uuid(),
-            'is_successful' => $this->faker->boolean(),
+            'is_successful' => true,
             'name' => $this->faker->name(),
-            'file_name' => "{$this->faker->name()}.iso",
+            'file_name' => "{$this->faker->unique()->word()}.iso",
             'size' => $this->faker->randomNumber(),
-            'hidden' => $this->faker->boolean(),
+            'hidden' => false,
             'completed_at' => $this->faker->dateTime(),
         ];
     }
