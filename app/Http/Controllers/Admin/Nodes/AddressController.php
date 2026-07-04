@@ -16,7 +16,7 @@ class AddressController
     {
         $addresses = QueryBuilder::for($node->addresses())
             ->with('server')
-            ->defaultSort('-id')
+            ->defaultSort('-addresses.id')
             ->allowedFilters(
                 ['address', AllowedFilter::exact('type'),
                     AllowedFilter::custom('*', new FiltersAddressWildcard),

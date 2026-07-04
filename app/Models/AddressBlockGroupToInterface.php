@@ -19,6 +19,10 @@ class AddressBlockGroupToInterface extends Model
 
     public $timestamps = false;
 
+    // Pivot table has no auto-incrementing id; without this postgres errors on
+    // insert ... returning "id".
+    public $incrementing = false;
+
     public function addressBlockGroup(): BelongsTo
     {
         return $this->belongsTo(AddressBlockGroup::class);
