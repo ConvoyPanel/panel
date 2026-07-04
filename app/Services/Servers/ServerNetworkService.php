@@ -7,7 +7,6 @@ use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Address;
 use App\Models\Server;
-use App\Repositories\Eloquent\AddressRepository;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Illuminate\Support\Arr;
 
@@ -16,7 +15,6 @@ use function array_unique;
 class ServerNetworkService
 {
     public function __construct(
-        private AddressRepository $repository,
         private ServerFirewallService $firewallService,
         private CloudinitService $cloudinitService,
         private ProxmoxConfigRepository $configRepository,
@@ -132,7 +130,7 @@ class ServerNetworkService
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_diff($currentAddresses, $addressIds);
 
-        // Attach new addresses using the repository
+        // Attach new addresses
         if (!empty($addressesToAdd)) {
             Address::query()
                 ->whereNull('server_id')
