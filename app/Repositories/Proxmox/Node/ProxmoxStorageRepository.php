@@ -63,7 +63,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
         Assert::regex($link, '/^(http|https):\/\//', 'Invalid URL provided');
 
         $payload = [
-            'content' => $contentType->value,
+            'content' => $contentType->toProxmoxString(),
             'filename' => $fileName,
             'url' => $link,
             'verify-certificates' => $verifyCertificates,
@@ -87,7 +87,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
     {
         $response = $this->getHttpClientWithParams([
             'storage' => $storage,
-            'file' => "{$storage}:$contentType->value/$fileName",
+            'file' => "{$storage}:{$contentType->toProxmoxString()}/$fileName",
         ])
             ->delete('/api2/json/nodes/{node}/storage/{storage}/content/{file}')
             ->json();
