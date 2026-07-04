@@ -42,8 +42,10 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('server', function (string $value) {
 
             return Server::query()
-                ->where('id', $value)
-                ->orWhere(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
+                ->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
+                // Only match by id for numeric values; postgres errors casting a
+                // uuid string to the bigint id column.
+                ->when(is_numeric($value), fn ($query) => $query->orWhere('id', $value))
                 ->firstOrFail();
         });
     }
