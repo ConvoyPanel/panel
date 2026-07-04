@@ -67,14 +67,13 @@ class MonitorBackupJob implements ShouldQueue
             )->first();
 
             $this->backup->update([
-                'is_successful' => true,
                 'file_name' => $fileName,
                 'size' => Arr::get($archive, 'size', 0),
                 'completed_at' => Carbon::now(),
             ]);
         } else {
             $this->backup->update([
-                'is_successful' => false,
+                'errors' => $task->exitStatus->value,
                 'completed_at' => Carbon::now(),
             ]);
         }
