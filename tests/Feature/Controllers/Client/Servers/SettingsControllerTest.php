@@ -18,7 +18,7 @@ it('can rename servers', function () {
         ],
     );
 
-    $response->assertOk()
+    $response->assertCreated()
              ->assertJsonPath('data.name', 'advinservers is king')
              ->assertJsonPath('data.hostname', 'advinservers.com');
 });
@@ -107,7 +107,7 @@ it('can fetch available ISOs', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     ISO::factory()->count(10)->create([
-        'node_id' => $server->node_id,
+        'storage_id' => $server->storage_id,
         'hidden' => false,
     ]);
 
@@ -132,7 +132,7 @@ it('can mount visible ISOs', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $iso = ISO::factory()->create([
-        'node_id' => $server->node_id,
+        'storage_id' => $server->storage_id,
         'hidden' => false,
     ]);
 
@@ -147,7 +147,7 @@ it('can\'t mount hidden ISOs as non-admin user', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $iso = ISO::factory()->create([
-        'node_id' => $server->node_id,
+        'storage_id' => $server->storage_id,
         'hidden' => true,
     ]);
 

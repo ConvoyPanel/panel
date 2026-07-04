@@ -110,7 +110,7 @@ class ServerController
 
         return new ServerTerminalData(
             ticket: $data->ticket,
-            node: $server->node->cluster,
+            node: $server->node->name,
             vmid: $server->vmid,
             fqdn: $server->node->fqdn,
             port: $server->node->port,

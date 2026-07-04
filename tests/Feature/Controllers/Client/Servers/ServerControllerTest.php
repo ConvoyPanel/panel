@@ -30,5 +30,5 @@ it('can generate noVNC authorization token', function () {
         ],
     );
 
-    $response->assertOk();
+    $response->assertCreated();
 });

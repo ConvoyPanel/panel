@@ -16,11 +16,14 @@ class ServerAuthService
         $this->configRepository->setServer($server)->update(['cipassword' => $password]);
     }
 
-    public function getSSHKeys(Server $server): string
+    public function getSSHKeys(Server $server): array
     {
         $raw = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
 
-        return rawurldecode($raw);
+        return array_values(array_filter(
+            explode("\n", rawurldecode($raw)),
+            fn (string $key) => trim($key) !== '',
+        ));
     }
 
     public function setSSHKeys(Server $server, ?string $keys): void
