@@ -1,10 +1,13 @@
 <?php
 
+use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Coterm\CotermAuthenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders()
@@ -51,5 +54,20 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Surface a stable, machine-readable `code` for exceptions that opt in
+        // via HasErrorCode. Nothing is auto-derived from the class name, so a
+        // fork never leaks an exception it didn't explicitly code.
+        $exceptions->render(function (HasErrorCode $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 400;
+            $headers = $e instanceof HttpExceptionInterface ? $e->getHeaders() : [];
+
+            return response()->json([
+                'message' => $e->getMessage(),
+                'code' => $e->errorCode(),
+            ], $status, $headers);
+        });
     })->create();
