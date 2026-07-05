@@ -117,7 +117,7 @@ extensions), namespace `App\Extensions\Spatie\Data\Proxmox`:
   `tests/Unit/Data/UsbDeviceDataTest.php` (5 cases: bare host, `host=`+usb3, mapping-as-head,
   mapping-in-tail, absent-flag default).
 
-Suite: 56 passed. PHPStan clean on the changed files (the full-suite 272 errors are the pre-existing
+Suite: 65 passed. PHPStan clean on the changed files (the full-suite 272 errors are the pre-existing
 `next` baseline, not from these changes).
 
 **Ruled out (don't fit the property-list codec):**
@@ -127,13 +127,27 @@ Suite: 56 passed. PHPStan clean on the changed files (the full-suite 272 errors 
 - `VgaConfigData` — carries no `fromRaw`/`toProxmoxString` parser at all (plain DTO); nothing to
   refactor here.
 
-**TODO — apply the same pattern to the remaining compound DTOs:**
-- `DiskData` — biggest remaining win (huge `data_get(...)` ladder + per-field `filter_var` bools),
-  but the trickiest: the `mbps`/`bps` dual-unit reads (two PVE keys → one property) don't fit the
-  one-key-per-property attribute model and need to stay partly explicit; size-unit suffix needs a
-  bespoke cast; several fields default to non-null when absent (`backup`→true) so `fromRaw` keeps
-  `?? default`. Also: `DiskData` is currently **parse-only** (no `toProxmoxString`) — don't add emit
-  speculatively; adding disk re-emit is a real VM-write risk that belongs with a tested push path.
+- `DiskData` — **partially** refactored onto the codec (behavior-preserving). The 9 boolean flags
+  (`ssd`, `backup`, `replicate`, `ro`, `iothread`, `snapshot`, `shared`, `detect_zeroes`,
+  `scsiblock`) and the 5 string identity fields (`wwn`, `model`, `product`, `serial`, `vendor`) now
+  map straight off `#[ProxmoxProperty]` — the `filter_var(...)` bool ladder and the ~40-line
+  variable-init block are gone, and the manual tail `foreach` collapsed to `PropertyList::explode`.
+  **Left explicit on purpose** (these don't fit the one-key-per-property model and changing them
+  would alter this parse-only, frontend-facing contract):
+  - `diskMediaType` — `DiskMediaType` is an **unbacked** enum (`case DISK; case CDROM;`) with a
+    non-null default, so it can't go through the codec's `::from()`; stays a `match`.
+  - the other enums (`format`, `cache`, `aio`, `discard`, `rerror`, `werror`, `trans`) use
+    **`tryFrom() ?? default`** so an unfamiliar PVE-version value degrades to null/RAW instead of
+    throwing; the codec's `::from()` would regress that robustness.
+  - `size` unit suffix (`32G` → bytes), dual-unit bandwidth (`mbps` wins over `bps`, scaled to
+    bytes), the `*_max_length`/`*_length` alias fallbacks.
+  - the iops-family + `cyls`/`heads`/`queues`/`secs` ints, which fall back to **0** (not null) when
+    absent — a pre-existing quirk kept via `(int) $get(...)`.
+  Characterization tests locked current behavior first (`tests/Unit/Data/DiskDataTest.php`, 9 cases)
+  and stayed green across the refactor. Still **parse-only** (no `toProxmoxString`) — do NOT add emit
+  speculatively; disk re-emit is a real VM-write risk that belongs with a tested push path. One
+  behavior note: the codec only parses `key=value` (PVE's actual output); the old parser's defensive
+  bare-flag `?? true` path is gone, which is a non-issue for real PVE strings.
 
 ## Next up (rest of Phase 2, then Phase 3)
 

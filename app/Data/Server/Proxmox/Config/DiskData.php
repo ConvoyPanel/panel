@@ -11,12 +11,17 @@ use App\Enums\Server\Disk\DiskReadErrorAction;
 use App\Enums\Server\Disk\DiskTranslationMode;
 use App\Enums\Server\Disk\DiskWriteErrorAction;
 use App\Enums\Server\DiskInterface;
-use Illuminate\Support\Arr;
+use App\Extensions\Spatie\Data\Proxmox\Casts\PveBooleanCast;
+use App\Extensions\Spatie\Data\Proxmox\MapsProxmoxProperties;
+use App\Extensions\Spatie\Data\Proxmox\PropertyList;
+use App\Extensions\Spatie\Data\Proxmox\ProxmoxProperty;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
 
 class DiskData extends Data
 {
+    use MapsProxmoxProperties;
+
     public function __construct(
         public DiskInterface $interface,
         public string $volume,
@@ -27,11 +32,16 @@ class DiskData extends Data
         public ?DiskAioMode $aioMode,
         public ?DiskDiscardMode $discardMode,
         #[MapOutputName('is_emulating_ssd')]
+        #[ProxmoxProperty('ssd', PveBooleanCast::class)]
         public bool $isEmulatingSSD,
+        #[ProxmoxProperty('backup', PveBooleanCast::class)]
         public bool $isIncludedInBackup,
+        #[ProxmoxProperty('replicate', PveBooleanCast::class)]
         public bool $isReplicated,
+        #[ProxmoxProperty('ro', PveBooleanCast::class)]
         public bool $isReadonly,
         #[MapOutputName('is_io_thread_enabled')]
+        #[ProxmoxProperty('iothread', PveBooleanCast::class)]
         public bool $isIOThreadEnabled,
         public ?int $bps,
         #[MapOutputName('bps_max')]
@@ -55,9 +65,12 @@ class DiskData extends Data
         public ?int $iopsWrite,
         #[MapOutputName('iops_write_max')]
         public ?int $iopsWriteMax,
+        #[ProxmoxProperty('snapshot', PveBooleanCast::class)]
         public ?bool $isSnapshot,
+        #[ProxmoxProperty('shared', PveBooleanCast::class)]
         public bool $isShared,
         #[MapOutputName('detect_zeroes')]
+        #[ProxmoxProperty('detect_zeroes', PveBooleanCast::class)]
         public bool $detectZeroes,
         #[MapOutputName('read_error_action')]
         public ?DiskReadErrorAction $readErrorAction,
@@ -65,6 +78,7 @@ class DiskData extends Data
         public ?DiskWriteErrorAction $writeErrorAction,
         #[MapOutputName('translation_mode')]
         public ?DiskTranslationMode $translationMode,
+        #[ProxmoxProperty('wwn')]
         public ?string $wwn,
         #[MapOutputName('bps_max_length')]
         public ?int $bpsMaxLength,
@@ -80,13 +94,18 @@ class DiskData extends Data
         public ?int $iopsReadMaxLength,
         #[MapOutputName('iops_write_max_length')]
         public ?int $iopsWriteMaxLength,
+        #[ProxmoxProperty('model')]
         public ?string $model,
+        #[ProxmoxProperty('product')]
         public ?string $product,
         public ?int $queues,
         #[MapOutputName('is_scsi_block')]
+        #[ProxmoxProperty('scsiblock', PveBooleanCast::class)]
         public bool $isScsiBlock,
         public ?int $sectors,
+        #[ProxmoxProperty('serial')]
         public ?string $serial,
+        #[ProxmoxProperty('vendor')]
         public ?string $vendor,
     ) {}
 
@@ -108,216 +127,88 @@ class DiskData extends Data
 
     public static function fromRaw(string $key, string $rawValue): self
     {
-        // Parse the disk properties string
-        $parts = explode(',', $rawValue);
-        $volume = array_shift($parts);
+        [$head, $pairs] = PropertyList::explode($rawValue);
 
-        // Extract 'file=' prefix if it exists
-        if (str_starts_with($volume, 'file=')) {
-            $volume = substr($volume, 5);
-        }
+        // The head is the backing volume, sometimes written explicitly as `file=<volume>`.
+        $volume = str_starts_with($head, 'file=') ? substr($head, 5) : $head;
 
-        // Initialize default values
-        $diskMediaType = DiskMediaType::DISK;
-        $size = 0;
-        $format = DiskFormat::RAW;
-        $cacheMode = null;
-        $aioMode = null;
-        $discardMode = null;
-        $bps = null;
-        $bpsMax = null;
-        $bpsRead = null;
-        $bpsReadMax = null;
-        $bpsWrite = null;
-        $bpsWriteMax = null;
-        $iops = null;
-        $iopsMax = null;
-        $iopsRead = null;
-        $iopsReadMax = null;
-        $iopsWrite = null;
-        $iopsWriteMax = null;
-        $isSnapshot = null;
-        $isShared = false;
-        $detectZeroes = false;
-        $readErrorAction = null;
-        $writeErrorAction = null;
-        $translationMode = null;
-        $wwn = null;
-        $bpsMaxLength = null;
-        $bpsReadMaxLength = null;
-        $bpsWriteMaxLength = null;
-        $cylinders = null;
-        $heads = null;
-        $iopsMaxLength = null;
-        $iopsReadMaxLength = null;
-        $iopsWriteMaxLength = null;
-        $model = null;
-        $product = null;
-        $queues = null;
-        $isScsiBlock = false;
-        $sectors = null;
-        $serial = null;
-        $vendor = null;
-
-        // Extract interface and ID from the key (e.g., "ide0", "sata1", "scsi2", etc.)
-        $interface = DiskInterface::IDE0; // Default
-
+        // The interface (ide0, scsi1, ...) comes from the config key, not the value.
+        $interface = DiskInterface::IDE0;
         if (preg_match('/^(ide|sata|scsi|virtio|efidisk|tpmstate)(\d+)$/', $key, $matches)) {
-            $interfaceType = $matches[1];
-            $id = (int) $matches[2];
-
-            // Convert to the enum value
-            $interfaceName = strtoupper($interfaceType).$id;
+            $interfaceName = strtoupper($matches[1]).(int) $matches[2];
             if (defined(DiskInterface::class.'::'.$interfaceName)) {
                 $interface = constant(DiskInterface::class.'::'.$interfaceName);
             }
         }
 
-        // Create a parameters array for easier handling
-        $parameters = [];
-        foreach ($parts as $part) {
-            if (blank($part)) {
-                continue;
-            }
+        // The 1/0 boolean flags and string identity fields map straight off the
+        // attributes. Everything below needs bespoke handling the one-key-per-
+        // property attribute model can't express: an unbacked enum, defensive
+        // tryFrom() enums, a unit-suffixed size, dual-unit (mbps|bps) bandwidth,
+        // and integer fields that fall back to 0 rather than null.
+        [$mapped] = self::mapProxmoxProperties($pairs);
 
-            $keyValue = explode('=', $part, 2);
-            $paramKey = $keyValue[0];
-            $value = $keyValue[1] ?? true; // If no value is provided, assume true for boolean flags
-            $parameters[$paramKey] = $value;
-        }
+        $get = fn (string $k, $default = null) => data_get($pairs, $k, $default);
 
-        // Process parameters with match expressions where possible
-        if (filled(data_get($parameters, 'media'))) {
-            $diskMediaType = match (data_get($parameters, 'media')) {
-                'cdrom' => DiskMediaType::CDROM,
-                default => DiskMediaType::DISK,
+        // media is an unbacked enum defaulting to DISK, so it stays a match.
+        $diskMediaType = match ($get('media')) {
+            'cdrom' => DiskMediaType::CDROM,
+            default => DiskMediaType::DISK,
+        };
+
+        // size carries an optional K/M/G/T unit suffix scaling it into bytes.
+        $size = 0;
+        if (filled($get('size')) && preg_match('/^(\d+)([KMGT])?$/', $get('size'), $sizeMatch)) {
+            $sizeValue = (int) $sizeMatch[1];
+            $size = match ($sizeMatch[2] ?? '') {
+                'K' => $sizeValue * 1024,
+                'M' => $sizeValue * 1024 * 1024,
+                'G' => $sizeValue * 1024 * 1024 * 1024,
+                'T' => $sizeValue * 1024 * 1024 * 1024 * 1024,
+                default => $sizeValue,
             };
         }
 
-        if (filled(data_get($parameters, 'size'))) {
-            if (preg_match('/^(\d+)([KMGT])?$/', data_get($parameters, 'size'), $matches)) {
-                $sizeValue = (int) $matches[1];
-                $sizeUnit = $matches[2] ?? '';
+        // These enums use tryFrom() (null/RAW on an unknown value) so an
+        // unfamiliar PVE-version value degrades gracefully rather than throwing.
+        $format = filled($get('format')) ? (DiskFormat::tryFrom($get('format')) ?? DiskFormat::RAW) : DiskFormat::RAW;
+        $cacheMode = filled($get('cache')) ? DiskCacheMode::tryFrom($get('cache')) : null;
+        $aioMode = filled($get('aio')) ? DiskAioMode::tryFrom($get('aio')) : null;
+        $discardMode = filled($get('discard')) ? DiskDiscardMode::tryFrom($get('discard')) : null;
+        $readErrorAction = filled($get('rerror')) ? DiskReadErrorAction::tryFrom($get('rerror')) : null;
+        $writeErrorAction = filled($get('werror')) ? DiskWriteErrorAction::tryFrom($get('werror')) : null;
+        $translationMode = filled($get('trans')) ? DiskTranslationMode::tryFrom($get('trans')) : null;
 
-                $size = match ($sizeUnit) {
-                    'K' => $sizeValue * 1024,
-                    'M' => $sizeValue * 1024 * 1024,
-                    'G' => $sizeValue * 1024 * 1024 * 1024,
-                    'T' => $sizeValue * 1024 * 1024 * 1024 * 1024,
-                    default => $sizeValue,
-                };
-            }
-        }
+        // Bandwidth limits accept either a byte value or an mbps value (which
+        // wins when both are present) that scales up to bytes.
+        $bps = match (true) {
+            filled($get('mbps')) => (int) ($get('mbps') * 1024 * 1024),
+            filled($get('bps')) => (int) $get('bps'),
+            default => null,
+        };
+        $bpsRead = match (true) {
+            filled($get('mbps_rd')) => (int) ($get('mbps_rd') * 1024 * 1024),
+            filled($get('bps_rd')) => (int) $get('bps_rd'),
+            default => null,
+        };
+        $bpsWrite = match (true) {
+            filled($get('mbps_wr')) => (int) ($get('mbps_wr') * 1024 * 1024),
+            filled($get('bps_wr')) => (int) $get('bps_wr'),
+            default => null,
+        };
+        $bpsMax = filled($get('mbps_max')) ? (int) ($get('mbps_max') * 1024 * 1024) : null;
+        $bpsReadMax = filled($get('mbps_rd_max')) ? (int) ($get('mbps_rd_max') * 1024 * 1024) : null;
+        $bpsWriteMax = filled($get('mbps_wr_max')) ? (int) ($get('mbps_wr_max') * 1024 * 1024) : null;
 
-        if (filled(data_get($parameters, 'format'))) {
-            $format = DiskFormat::tryFrom(data_get($parameters, 'format')) ?? DiskFormat::RAW;
-        }
-
-        if (filled(data_get($parameters, 'cache'))) {
-            $cacheMode = DiskCacheMode::tryFrom(data_get($parameters, 'cache'));
-        }
-
-        if (filled(data_get($parameters, 'aio'))) {
-            $aioMode = DiskAioMode::tryFrom(data_get($parameters, 'aio'));
-        }
-
-        if (filled(data_get($parameters, 'discard'))) {
-            $discardMode = DiskDiscardMode::tryFrom(data_get($parameters, 'discard'));
-        }
-
-        if (filled(data_get($parameters, 'rerror'))) {
-            $readErrorAction = DiskReadErrorAction::tryFrom(data_get($parameters, 'rerror'));
-        }
-
-        if (filled(data_get($parameters, 'werror'))) {
-            $writeErrorAction = DiskWriteErrorAction::tryFrom(data_get($parameters, 'werror'));
-        }
-
-        if (filled(data_get($parameters, 'trans'))) {
-            $translationMode = DiskTranslationMode::tryFrom(data_get($parameters, 'trans'));
-        }
-
-        if (filled(data_get($parameters, 'mbps'))) {
-            $bps = (int) (data_get($parameters, 'mbps') * 1024 * 1024);
-        } elseif (filled(data_get($parameters, 'bps'))) {
-            $bps = (int) data_get($parameters, 'bps');
-        }
-
-        if (filled(data_get($parameters, 'mbps_rd'))) {
-            $bpsRead = (int) (data_get($parameters, 'mbps_rd') * 1024 * 1024);
-        } elseif (filled(data_get($parameters, 'bps_rd'))) {
-            $bpsRead = (int) data_get($parameters, 'bps_rd');
-        }
-
-        if (filled(data_get($parameters, 'mbps_wr'))) {
-            $bpsWrite = (int) (data_get($parameters, 'mbps_wr') * 1024 * 1024);
-        } elseif (filled(data_get($parameters, 'bps_wr'))) {
-            $bpsWrite = (int) data_get($parameters, 'bps_wr');
-        }
-
-        // Integer parameters
-        if (filled(data_get($parameters, 'mbps_max'))) {
-            $bpsMax = (int) (data_get($parameters, 'mbps_max') * 1024 * 1024);
-        }
-        if (filled(data_get($parameters, 'mbps_rd_max'))) {
-            $bpsReadMax = (int) (data_get($parameters, 'mbps_rd_max') * 1024 * 1024);
-        }
-        if (filled(data_get($parameters, 'mbps_wr_max'))) {
-            $bpsWriteMax = (int) (data_get($parameters, 'mbps_wr_max') * 1024 * 1024);
-        }
-
-        $iops = (int) data_get($parameters, 'iops');
-        $iopsMax = (int) data_get($parameters, 'iops_max');
-        $iopsRead = (int) data_get($parameters, 'iops_rd');
-        $iopsReadMax = (int) data_get($parameters, 'iops_rd_max');
-        $iopsWrite = (int) data_get($parameters, 'iops_wr');
-        $iopsWriteMax = (int) data_get($parameters, 'iops_wr_max');
-        $bpsMaxLength = (int) data_get($parameters, 'bps_max_length');
-
-        $bpsReadMaxLength = data_get($parameters, 'bps_rd_max_length', data_get($parameters, 'bps_rd_length'));
-        if (filled($bpsReadMaxLength)) {
-            $bpsReadMaxLength = (int) $bpsReadMaxLength;
-        }
-
-        $bpsWriteMaxLength = data_get($parameters, 'bps_wr_max_length', data_get($parameters, 'bps_wr_length'));
-        if (filled($bpsWriteMaxLength)) {
-            $bpsWriteMaxLength = (int) $bpsWriteMaxLength;
-        }
-
-        $cylinders = (int) data_get($parameters, 'cyls');
-        $heads = (int) data_get($parameters, 'heads');
-        $iopsMaxLength = (int) data_get($parameters, 'iops_max_length');
-
-        $iopsReadMaxLength = data_get($parameters, 'iops_rd_max_length', data_get($parameters, 'iops_rd_length'));
-        if (filled($iopsReadMaxLength)) {
-            $iopsReadMaxLength = (int) $iopsReadMaxLength;
-        }
-
-        $iopsWriteMaxLength = data_get($parameters, 'iops_wr_max_length', data_get($parameters, 'iops_wr_length'));
-        if (filled($iopsWriteMaxLength)) {
-            $iopsWriteMaxLength = (int) $iopsWriteMaxLength;
-        }
-
-        $queues = (int) data_get($parameters, 'queues');
-        $sectors = (int) data_get($parameters, 'secs');
-
-        // Boolean parameters
-        $isEmulatingSSD = filter_var(data_get($parameters, 'ssd', false), FILTER_VALIDATE_BOOLEAN);
-        $isIncludedInBackup = filter_var(data_get($parameters, 'backup', true), FILTER_VALIDATE_BOOLEAN);
-        $isReplicated = filter_var(data_get($parameters, 'replicate', true), FILTER_VALIDATE_BOOLEAN);
-        $isReadonly = filter_var(data_get($parameters, 'ro', false), FILTER_VALIDATE_BOOLEAN);
-        $isIOThreadEnabled = filter_var(data_get($parameters, 'iothread', false), FILTER_VALIDATE_BOOLEAN);
-        $isSnapshot = filter_var(data_get($parameters, 'snapshot', false), FILTER_VALIDATE_BOOLEAN);
-        $isShared = filter_var(data_get($parameters, 'shared', false), FILTER_VALIDATE_BOOLEAN);
-        $detectZeroes = filter_var(data_get($parameters, 'detect_zeroes', false), FILTER_VALIDATE_BOOLEAN);
-        $isScsiBlock = filter_var(data_get($parameters, 'scsiblock', false), FILTER_VALIDATE_BOOLEAN);
-
-        // String parameters
-        $wwn = data_get($parameters, 'wwn');
-        $model = data_get($parameters, 'model');
-        $product = data_get($parameters, 'product');
-        $serial = data_get($parameters, 'serial');
-        $vendor = data_get($parameters, 'vendor');
+        // Length limits accept a *_max_length key or an older *_length alias.
+        $bpsReadMaxLength = $get('bps_rd_max_length', $get('bps_rd_length'));
+        $bpsReadMaxLength = filled($bpsReadMaxLength) ? (int) $bpsReadMaxLength : null;
+        $bpsWriteMaxLength = $get('bps_wr_max_length', $get('bps_wr_length'));
+        $bpsWriteMaxLength = filled($bpsWriteMaxLength) ? (int) $bpsWriteMaxLength : null;
+        $iopsReadMaxLength = $get('iops_rd_max_length', $get('iops_rd_length'));
+        $iopsReadMaxLength = filled($iopsReadMaxLength) ? (int) $iopsReadMaxLength : null;
+        $iopsWriteMaxLength = $get('iops_wr_max_length', $get('iops_wr_length'));
+        $iopsWriteMaxLength = filled($iopsWriteMaxLength) ? (int) $iopsWriteMaxLength : null;
 
         return new self(
             interface: $interface,
@@ -328,45 +219,45 @@ class DiskData extends Data
             cacheMode: $cacheMode,
             aioMode: $aioMode,
             discardMode: $discardMode,
-            isEmulatingSSD: $isEmulatingSSD,
-            isIncludedInBackup: $isIncludedInBackup,
-            isReplicated: $isReplicated,
-            isReadonly: $isReadonly,
-            isIOThreadEnabled: $isIOThreadEnabled,
+            isEmulatingSSD: $mapped['isEmulatingSSD'] ?? false,
+            isIncludedInBackup: $mapped['isIncludedInBackup'] ?? true,
+            isReplicated: $mapped['isReplicated'] ?? true,
+            isReadonly: $mapped['isReadonly'] ?? false,
+            isIOThreadEnabled: $mapped['isIOThreadEnabled'] ?? false,
             bps: $bps,
             bpsMax: $bpsMax,
             bpsRead: $bpsRead,
             bpsReadMax: $bpsReadMax,
             bpsWrite: $bpsWrite,
             bpsWriteMax: $bpsWriteMax,
-            iops: $iops,
-            iopsMax: $iopsMax,
-            iopsRead: $iopsRead,
-            iopsReadMax: $iopsReadMax,
-            iopsWrite: $iopsWrite,
-            iopsWriteMax: $iopsWriteMax,
-            isSnapshot: $isSnapshot,
-            isShared: $isShared,
-            detectZeroes: $detectZeroes,
+            iops: (int) $get('iops'),
+            iopsMax: (int) $get('iops_max'),
+            iopsRead: (int) $get('iops_rd'),
+            iopsReadMax: (int) $get('iops_rd_max'),
+            iopsWrite: (int) $get('iops_wr'),
+            iopsWriteMax: (int) $get('iops_wr_max'),
+            isSnapshot: $mapped['isSnapshot'] ?? false,
+            isShared: $mapped['isShared'] ?? false,
+            detectZeroes: $mapped['detectZeroes'] ?? false,
             readErrorAction: $readErrorAction,
             writeErrorAction: $writeErrorAction,
             translationMode: $translationMode,
-            wwn: $wwn,
-            bpsMaxLength: $bpsMaxLength,
+            wwn: $mapped['wwn'] ?? null,
+            bpsMaxLength: (int) $get('bps_max_length'),
             bpsReadMaxLength: $bpsReadMaxLength,
             bpsWriteMaxLength: $bpsWriteMaxLength,
-            cylinders: $cylinders,
-            heads: $heads,
-            iopsMaxLength: $iopsMaxLength,
+            cylinders: (int) $get('cyls'),
+            heads: (int) $get('heads'),
+            iopsMaxLength: (int) $get('iops_max_length'),
             iopsReadMaxLength: $iopsReadMaxLength,
             iopsWriteMaxLength: $iopsWriteMaxLength,
-            model: $model,
-            product: $product,
-            queues: $queues,
-            isScsiBlock: $isScsiBlock,
-            sectors: $sectors,
-            serial: $serial,
-            vendor: $vendor,
+            model: $mapped['model'] ?? null,
+            product: $mapped['product'] ?? null,
+            queues: (int) $get('queues'),
+            isScsiBlock: $mapped['isScsiBlock'] ?? false,
+            sectors: (int) $get('secs'),
+            serial: $mapped['serial'] ?? null,
+            vendor: $mapped['vendor'] ?? null,
         );
     }
 }
