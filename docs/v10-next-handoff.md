@@ -108,9 +108,24 @@ extensions), namespace `App\Extensions\Spatie\Data\Proxmox`:
   dropped unknown keys). Tests in `tests/Unit/Data/TpmStateDiskDataTest.php` (5 cases). Note: `size`
   still truncates the PVE unit (`4M` → `4`) as before — pre-existing, and `size` is informational for
   tpmstate; left as-is to avoid changing the `int` TS contract.
+- `UsbDeviceData` — refactored onto the codec for its `key=value` tail (`mapping`, `usb3` via
+  `PveBooleanCast`); the ~70-line `filter_var`/`isset` parser collapsed to a few lines. Its head is
+  **polymorphic** — bare `host`, `host=`, or (for a cluster-mapped passthrough) `mapping=` — so the
+  head stays explicit and only the tail goes through the codec. Deliberately **no `extraProperties`
+  and no `toProxmoxString`**: it's parse-only, and per the DiskData caution below, emit/losslessness
+  is dead weight (and a write-path risk) without a tested push path. Tests in
+  `tests/Unit/Data/UsbDeviceDataTest.php` (5 cases: bare host, `host=`+usb3, mapping-as-head,
+  mapping-in-tail, absent-flag default).
 
-Suite: 51 passed. PHPStan clean on the changed files (the full-suite 272 errors are the pre-existing
+Suite: 56 passed. PHPStan clean on the changed files (the full-suite 272 errors are the pre-existing
 `next` baseline, not from these changes).
+
+**Ruled out (don't fit the property-list codec):**
+- `CloudinitConfigData` — not a `head[,key=value]*` string; it's assembled from *separate* top-level
+  PVE config keys (`citype`, `ciuser`, `cipassword`, `sshkeys`, ...) via `Arr::get($raw, ...)`. No
+  positional-head property list, so the codec doesn't apply.
+- `VgaConfigData` — carries no `fromRaw`/`toProxmoxString` parser at all (plain DTO); nothing to
+  refactor here.
 
 **TODO — apply the same pattern to the remaining compound DTOs:**
 - `DiskData` — biggest remaining win (huge `data_get(...)` ladder + per-field `filter_var` bools),
@@ -119,7 +134,6 @@ Suite: 51 passed. PHPStan clean on the changed files (the full-suite 272 errors 
   bespoke cast; several fields default to non-null when absent (`backup`→true) so `fromRaw` keeps
   `?? default`. Also: `DiskData` is currently **parse-only** (no `toProxmoxString`) — don't add emit
   speculatively; adding disk re-emit is a real VM-write risk that belongs with a tested push path.
-- Consider `CloudinitConfigData`, `UsbDeviceData`, `VgaConfigData` if they share the format.
 
 ## Next up (rest of Phase 2, then Phase 3)
 
