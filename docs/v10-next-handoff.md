@@ -279,11 +279,18 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
        tsc clean, production build green. **Not yet visually verified in-browser.**
      - Left behind (v4-only cosmetic follow-ups `9f8eec25`/`44279c50` — SWR-revalidation tweak and
        overview card subtext — are develop-UI specific and don't apply to the rewritten next UI).
-     - **Discovered en route (unrelated bug, not fixed):** `database/factories/AddressFactory.php` is
-       stale — it sets the pre-IPAM-revision columns (`type`, `address`, `cidr`, `gateway`, `mac_address`)
-       that no longer exist (the table is now `ip`, `prefix_length`, `address_block_id`, `server_id`), and
-       omits the required `address_block_id`. So `Address::factory()` can't create a valid row; seed via
-       an explicit `AddressBlock` (see `OverviewControllerTest`). Worth fixing the factory separately.
+     - **Discovered en route — FIXED.** `database/factories/AddressFactory.php` was stale: it set the
+       pre-IPAM-revision columns (`type`, `address`, `cidr`, `gateway`, `mac_address`) that no longer
+       exist (the table is now `ip`, `prefix_length`, `address_block_id`, `server_id`, with `version`/
+       `gateway`/`mac_address` as accessors reading the block), and omitted the required
+       `address_block_id`, so `Address::factory()` could not create a valid row. Rewritten onto the real
+       schema and paired with a **new `AddressBlockFactory`** (there was none) so `Address::factory()` is
+       self-sufficient — it spins up a valid `AddressBlock` → `AddressBlockGroup` chain. Both have an
+       `ipv6()` state. `OverviewControllerTest`'s hand-rolled `AddressBlock::create` + `Address::create`
+       seeding now goes through the factories (exercising them in CI so they can't silently rot again),
+       preserving the exact IPs/counts its assertions depend on. Verified via tinker (v4/v6/batch create)
+       and the full suite (100 passed). PHPStan `app/` gate still zero (the factories add no errors; test
+       files are out of PHPStan scope by config — `paths: app/`).
   2. **`ac13cefc` skip no-op Proxmox Configure tasks — DONE.** Verified `next` lacked the no-op skip in
      `AllocationService::syncSettings` (cores/memory), `CloudinitService::setHostname` (name/searchdomain),
      and `CloudinitService::setIpConfig` (ipconfig{n}) — all POSTed unconditionally, enqueuing a redundant

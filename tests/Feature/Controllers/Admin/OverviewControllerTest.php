@@ -3,7 +3,6 @@
 use App\Enums\Server\ServerStatus;
 use App\Models\Address;
 use App\Models\AddressBlock;
-use App\Models\AddressBlockGroup;
 use App\Models\Backup;
 use App\Models\ISO;
 use App\Models\Location;
@@ -45,18 +44,14 @@ it('returns overview metrics for admins', function () {
         'disk' => 16 * 1024 * 1024 * 1024,
     ]);
 
-    $group = AddressBlockGroup::factory()->create();
-    $block = AddressBlock::create([
-        'address_block_group_id' => $group->id,
-        'name' => 'block',
-        'version' => 'ipv4',
+    $block = AddressBlock::factory()->create([
         'base_ip' => '10.0.0.0',
         'gateway' => '10.0.0.1',
         'prefix_length_from' => 24,
         'prefix_length_to' => 24,
     ]);
-    Address::create(['ip' => '10.0.0.5', 'prefix_length' => 24, 'address_block_id' => $block->id, 'server_id' => $ready->id]);
-    Address::create(['ip' => '10.0.0.6', 'prefix_length' => 24, 'address_block_id' => $block->id, 'server_id' => null]);
+    Address::factory()->for($block)->create(['ip' => '10.0.0.5', 'prefix_length' => 24, 'server_id' => $ready->id]);
+    Address::factory()->for($block)->create(['ip' => '10.0.0.6', 'prefix_length' => 24]);
 
     Backup::factory()->for($ready)->create(['completed_at' => now(), 'errors' => null]);
     Backup::factory()->for($ready)->create(['completed_at' => now(), 'errors' => 'boom']);

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\AddressBlock;
 use App\Models\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,14 +18,20 @@ class AddressFactory extends Factory
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['ipv4', 'ipv6']);
-
         return [
-            'type' => $type,
-            'address' => $type === 'ipv4' ? $this->faker->ipv4() : $this->faker->ipv6(),
-            'cidr' => $this->faker->numberBetween(0, 128),
-            'gateway' => $type === 'ipv4' ? $this->faker->ipv4() : $this->faker->ipv6(),
-            'mac_address' => $this->faker->randomElement([null, $this->faker->macAddress()]),
+            'address_block_id' => AddressBlock::factory(),
+            'server_id' => null,
+            'ip' => $this->faker->unique()->ipv4(),
+            'prefix_length' => 32,
         ];
+    }
+
+    public function ipv6(): self
+    {
+        return $this->state(fn () => [
+            'address_block_id' => AddressBlock::factory()->ipv6(),
+            'ip' => $this->faker->unique()->ipv6(),
+            'prefix_length' => 128,
+        ]);
     }
 }
