@@ -12,7 +12,7 @@ use App\Data\Template\TemplateGroupData;
 use App\Enums\Server\AuthenticationType;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
-use App\Http\Requests\Client\Servers\Settings\MountMediaRequest;
+use App\Http\Requests\Client\Servers\Settings\MediaRequest;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use App\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
@@ -140,14 +140,14 @@ class SettingsController
         }, $media);
     }
 
-    public function mountMedia(MountMediaRequest $request, Server $server, ISO $iso)
+    public function mountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
         $this->allocationService->mountIso($server, $iso);
 
         return response()->noContent();
     }
 
-    public function unmountMedia(Server $server, ISO $iso)
+    public function unmountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
         $this->allocationService->unmountIso($server, $iso);
 

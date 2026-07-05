@@ -54,6 +54,9 @@ class Server extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Node, $this>
+     */
     public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);

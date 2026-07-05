@@ -157,3 +157,33 @@ it('can\'t mount hidden ISOs as non-admin user', function () {
 
     $response->assertStatus(403);
 });
+
+it('can\'t mount an ISO from a node the user\'s server is not on', function () {
+    Http::fake(['*' => Http::response(['data' => 'dummy-upid'], 200)]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    // Default factory ISO lives on its own storage, which is NOT attached to
+    // the server's node — so it is outside what getMedia would ever list.
+    $foreignIso = ISO::factory()->create(['hidden' => false]);
+
+    $response = $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$foreignIso->uuid}/mount",
+    );
+
+    $response->assertStatus(403);
+});
+
+it('can\'t unmount an ISO from a node the user\'s server is not on', function () {
+    Http::fake(['*' => Http::response(['data' => 'dummy-upid'], 200)]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $foreignIso = ISO::factory()->create(['hidden' => false]);
+
+    $response = $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$foreignIso->uuid}/unmount",
+    );
+
+    $response->assertStatus(403);
+});
