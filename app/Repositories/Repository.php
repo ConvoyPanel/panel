@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Contracts\Repository\RepositoryInterface;
-use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
@@ -31,9 +30,9 @@ abstract class Repository implements RepositoryInterface
     /**
      * Return the model backing this repository.
      *
-     * @return string|Closure|object
+     * @return class-string<Model>
      */
-    abstract public function model();
+    abstract public function model(): string;
 
     /**
      * Return the model being used for this repository.
@@ -47,9 +46,9 @@ abstract class Repository implements RepositoryInterface
      * Setup column selection functionality.
      *
      * @param  array|string  $columns
-     * @return $this
+     * @return static
      */
-    public function setColumns($columns = ['*']): self|static
+    public function setColumns($columns = ['*']): static
     {
         $clone = clone $this;
         $clone->columns = is_array($columns) ? $columns : func_get_args();
@@ -69,9 +68,9 @@ abstract class Repository implements RepositoryInterface
      * Stop repository update functions from returning a fresh
      * model when changes are committed.
      *
-     * @return $this
+     * @return static
      */
-    public function withoutFreshModel(): self|static
+    public function withoutFreshModel(): static
     {
         return $this->setFreshModel(false);
     }
@@ -79,9 +78,9 @@ abstract class Repository implements RepositoryInterface
     /**
      * Return a fresh model with a repository updates a model.
      *
-     * @return $this
+     * @return static
      */
-    public function withFreshModel()
+    public function withFreshModel(): static
     {
         return $this->setFreshModel(true);
     }
@@ -90,9 +89,9 @@ abstract class Repository implements RepositoryInterface
      * Set whether or not the repository should return a fresh model
      * when changes are committed.
      *
-     * @return $this
+     * @return static
      */
-    public function setFreshModel(bool $fresh = true)
+    public function setFreshModel(bool $fresh = true): static
     {
         $clone = clone $this;
         $clone->withFresh = $fresh;
@@ -103,9 +102,9 @@ abstract class Repository implements RepositoryInterface
     /**
      * Take the provided model and make it accessible to the rest of the repository.
      *
-     * @param  array  $model
+     * @param  class-string<Model>  ...$model
      */
-    protected function initializeModel(...$model): mixed
+    protected function initializeModel(string ...$model): mixed
     {
         switch (count($model)) {
             case 1:
