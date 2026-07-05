@@ -287,7 +287,22 @@ proves the 24 run clean on an *empty* Postgres DB (the RefreshDatabase test runs
 
 ### `develop` → `next` reconciliation ledger (39 commits, DONE analyzing)
 Backport audit of the 39 `develop`-only commits since merge-base `bdc9c413`. The same solo dev
-applied most fixes to *both* branches, so nearly all are already reconciled on `next`. Verified:
+applied most fixes to *both* branches, so nearly all are already reconciled on `next`.
+
+> **Re-audit 2026-07-05:** `develop` has **not advanced** since this ledger was written — still
+> exactly 39 commits off the same merge-base (`bdc9c413`), identical hashes, nothing new to
+> backport. The re-audit did close a *coverage* gap in the ledger (not a code gap): four
+> security-labeled commits `8bdecd12`/`2181f63b`/`8329e4e7`/`c01ca604` (**fix: unauth user access**
+> — IPAM settings / IPAM / nodes / users) were never explicitly bucketed. They are **frontend-only
+> and moot on `next`**: each wraps an old v4 route loader in `resources/scripts/routers/Admin*Router.tsx`
+> in a `try/catch`, and that entire router tree was deleted in the frontend rewrite. The real
+> authorization boundary is server-side — `bootstrap/app.php` gates both `/api/admin` and
+> `/api/application` with `AdminAuthenticate` (→ `root_admin`) — so the client-side loader guard was
+> never the actual protection. The remaining previously-unlisted commits (`c5ff6f79` merge,
+> `55e2b313`/`c0ea4f13`/`059a6557` test-only, `19b4c8d4` return-type) fall in the "v4-only noise"
+> bucket below.
+
+Verified:
 - **Already in `next` (security-critical):** JWT signature validation (`4cf7c953` → `next`'s
   `JWTService::decode` has `SignedWith` **and** the `app.url`→`app.key` decode-key fix, both with
   explanatory comments); revoke API tokens on admin demotion (`dc09e2df` → `UserController::update`
@@ -365,6 +380,52 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
   lock; run `composer audit` independently instead of cherry-picking).
 
 ## Product follow-ups to add to the roadmap
+
+- **IPAM allocator rewrite + reserve-IP feature (user request 2026-07-05).** The current free-IP
+  allocation is the most fragile part of IPAM and doesn't scale. Two parallel, disagreeing mechanisms
+  exist today: `GenerateAddressesAction` **pre-materializes** every allocatable slot as an `Address`
+  row (`server_id = null`, batched 300), but `AddressAllocationService::handle()` **ignores those free
+  rows** — it loads only *assigned* IPs into memory (`whereNotNull('server_id')`) and does a linear
+  `for ($i = 0; $i < $range->getSize(); ++$i)` walk of the whole address space by offset, `firstOrCreate`-ing
+  the first gap. Problems:
+  - **O(address-space) scan.** `getSize()` is over `prefix_length_from` — a /16 is 65k iterations per
+    allocation and an **IPv6 block is 2⁶⁴+, so the loop is effectively unbounded**. This is the "detect
+    unused IPs between used ones without scanning everything" concern the user raised.
+  - **IPs stored as `string`** (`addresses.ip`, per `2025_05_07_194624_ipam_revision.php`) → lexical
+    ordering is wrong (`10.0.0.2` > `10.0.0.10`) and no range predicates, which is *why* the code falls
+    back to an in-memory arithmetic walk instead of an indexed query. **Root blocker.**
+  - **No `server_id` index** (unique is only `(address_block_id, ip)`); **race condition** — two
+    concurrent allocations compute the same first-free offset and the unique index silently hands the
+    loser the now-assigned row (double-assignment); network/broadcast/gateway aren't excluded from the
+    generated slots.
+
+  **Direction (research-backed — this is a classic pooled-allocation problem, don't hand-roll):**
+  - **Select free slots with one indexed query, not an in-memory walk.** Over pre-materialized rows:
+    `WHERE address_block_id = ? AND server_id IS NULL ORDER BY ip LIMIT :n FOR UPDATE SKIP LOCKED`.
+    O(log n), gaps-between-used handled inherently (a freed IP flips `server_id` back to null and
+    re-enters the pool), and `SKIP LOCKED` makes concurrent allocations grab *different* rows with no
+    double-assign. This is exactly **FreeRADIUS `sqlippool`**'s `alloc_find` pattern (pre-populated pool
+    table + `status`/`owner`/`expiry` + `FOR UPDATE SKIP LOCKED` on Postgres) — the battle-tested
+    reference. Deletes the entire range walk.
+  - **Avoid NetBox's model.** `get_first_available_ip()` computes availability in application code (set
+    difference) and has a documented race because it doesn't enforce DB-level uniqueness — that's
+    essentially Convoy's current in-memory approach. Cautionary, not a template.
+  - **Store IPs queryably** — Postgres native `inet`/`cidr` (correct ordering, arithmetic `ip + 1`,
+    subnet containment `<<`, gap detection via `LEAD()`/`LAG()` window functions or `generate_series`
+    minus the used set). This is the keystone and is **cheapest to do *as part of* the Phase 3
+    MySQL→Postgres cutover**, not as a separate migration afterward.
+  - **Materialization policy for huge blocks.** Can't pre-generate 2⁶⁴ IPv6 rows — pre-materialize
+    small blocks (indexed-select above); for large/v6 blocks, sparse-store with a per-block
+    cursor/high-water-mark + unique constraint + retry-on-conflict, reclaiming gaps via a free-list or a
+    `lead()`-over-`inet` window query.
+  - **Reserve-IP feature.** Today "assigned vs free" is just `server_id IS NULL` (binary). Add an
+    address **state** (`available` / `assigned` / `reserved`, plus auto-excluded `network` / `broadcast`
+    / `gateway`) with optional `reserved_by` + note; auto-allocation selects only `available`, reserved
+    IPs are held out of the pool but still explicitly assignable. Small enum + migration; the
+    query-based allocator already filters on it.
+  - Cross-links: pairs with **VLAN #150** (both touch address blocks / network interfaces) and depends
+    on **Phase 3** for the `inet` storage change. Sources: FreeRADIUS sqlippool docs; NetBox
+    `get_first_available_ip` (race caveat); PostgreSQL network-address types / `inet` operators.
 
 - **API tokens v2 — scoped abilities + two distinct token kinds (user request 2026-07-05).** The
   current token feature is a quick repurposing of Sanctum PATs (`Admin\TokenController`, one flat
