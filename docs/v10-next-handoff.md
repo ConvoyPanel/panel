@@ -4,7 +4,7 @@ Living notes for the effort to ship `next` (v10) as the new trunk. Update as pha
 Roadmap of record: `~/.claude/plans/help-me-plan-a-cryptic-peacock.md` (5 phases). This file
 tracks *what's actually done* and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-04
+Last updated: 2026-07-05
 
 ---
 
@@ -47,7 +47,7 @@ Last updated: 2026-07-04
   array that preserves unknown `key=val` sub-keys across parse→mutate→re-emit, so a field we
   don't model isn't silently dropped on write. Commit: `d9576ba2`.
 
-### Exception refactor (JUST COMPLETED — commit pending in this session)
+### Exception refactor (DONE)
 Replaced the legacy `DisplayException` base with native Symfony `HttpException`s + a curated
 error-code contract. **Design constraints (from the user, preserve these):**
 1. Client must get a real HTTP status, never a generic 500 — hence Symfony HttpExceptions.
@@ -225,6 +225,24 @@ covered instead by their characterization tests. Suite: 74 passed.
   MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
   against a restored prod snapshot; reconcile `develop`'s newer commits.
 
+## Product follow-ups to add to the roadmap
+
+- **Power-action locking.** User-initiated server power actions need an app-level lock so the user
+  cannot spam start/stop/reboot buttons and enqueue conflicting Proxmox tasks. Laravel's cache lock
+  only stores ownership/expiry, not an arbitrary payload describing the requested action, so model the
+  action state separately from the mutex. Suggested shape: acquire a per-server power lock, persist a
+  small pending-action record/state (`server_id`, user, requested action, requested_at, Proxmox UPID if
+  available), dispatch the command, poll/read server status, and clear or mark failed only after the
+  observed VM state confirms the action completed or timed out. UI should render the locked action/status
+  and reject duplicate/conflicting requests while the pending action is active.
+- **Logged-in session tracking with Redis sessions.** Laravel's database session listing is not available
+  when Redis is the session driver, so add first-party session metadata tracking. On login/request,
+  upsert a user-session record keyed by session ID/hash with `user_id`, last-used timestamp, IP-derived
+  location, user-agent/device/browser/OS summary, and current-session marker. On logout/session revoke,
+  delete both the metadata row and the Redis session key for that individual session. Expose an account
+  page/API so users can see last used date, basic device info, approximate location, and revoke sessions
+  one at a time.
+
 ## Test database isolation (RefreshDatabase + dedicated `db_test`)
 
 Tests previously ran with `DatabaseTransactions` against the **dev** database (`db`).
@@ -254,6 +272,15 @@ Verified: after a run, `db_test.locations_id_seq` advances (tests wrote there) w
 > snapshot (`ddev snapshot restore postgres-baseline`) or reseed. Sequence-reset behavior means
 > this can't recur now that the redirect is in place.
 
-## Known flakiness
-- `LocationFactory` auto-generated `short_code` can clash → intermittent test failures. Make it
-  collision-proof (e.g. sequence/unique faker) when convenient.
+## Resolved flakiness
+
+- `LocationFactory` now emits deterministic sequential `short_code` values instead of relying on
+  Faker's random unique pool, avoiding intermittent unique-index clashes during repeated test runs.
+  Verified with `ddev artisan test tests/Feature/Controllers/Admin/LocationControllerTest.php --compact`.
+
+## Static analysis status
+
+- `ddev composer analyze` was run on 2026-07-05. It still fails with 247 existing PHPStan findings
+  across the app; the `LocationFactory` change is not among them.
+- `ddev exec ./vendor/bin/phpstan analyse database/factories/LocationFactory.php --memory-limit=4G`
+  passes with no errors.

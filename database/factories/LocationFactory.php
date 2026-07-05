@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LocationFactory extends Factory
 {
+    private static int $shortCodeSequence = 0;
+
     /**
      * Define the model's default state.
      *
@@ -18,7 +20,7 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            'short_code' => $this->faker->unique()->lexify('??????'),
+            'short_code' => sprintf('loc-%06d', ++self::$shortCodeSequence),
             'description' => $this->faker->sentence(),
         ];
     }
