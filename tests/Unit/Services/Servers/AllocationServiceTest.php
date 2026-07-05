@@ -8,18 +8,6 @@ use App\Models\Storage;
 use App\Services\Servers\AllocationService;
 use Illuminate\Support\Facades\Http;
 
-/** Config fixture as a decoded array, optionally with extra disk lines merged in. */
-function serverConfig(array $extra = []): array
-{
-    $config = json_decode(
-        file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')),
-        true,
-    );
-    $config['data'] = array_merge($config['data'], $extra);
-
-    return $config;
-}
-
 /** An ISO whose mounted volume is a deterministic "local:iso/test.iso". */
 function testIso(): ISO
 {
@@ -31,7 +19,7 @@ function testIso(): ISO
 it('threads the config digest through mountIso and surfaces a mismatch as a 409', function () {
     Http::fake([
         '*/qemu/*/config' => Http::sequence()
-            ->push(serverConfig(), 200)                     // getConfig()
+            ->push(serverConfigFixture(), 200)                     // getConfig()
             ->push(['data' => null, 'errors' => ['detected modified configuration - file changed by other user? Try again.']], 500),
         '*' => Http::response(['data' => 'ok'], 200),
     ]);
@@ -45,7 +33,7 @@ it('threads the config digest through mountIso and surfaces a mismatch as a 409'
 it('rejects mounting an ISO that is already mounted', function () {
     // The ISO is present as a cdrom disk on ide3.
     Http::fake([
-        '*/qemu/*/config' => Http::response(serverConfig(['ide3' => 'local:iso/test.iso,media=cdrom']), 200),
+        '*/qemu/*/config' => Http::response(serverConfigFixture(['ide3' => 'local:iso/test.iso,media=cdrom']), 200),
         '*' => Http::response(['data' => 'ok'], 200),
     ]);
 
@@ -57,7 +45,7 @@ it('rejects mounting an ISO that is already mounted', function () {
 
 it('unmounts a mounted ISO by deleting its interface, with the digest', function () {
     Http::fake([
-        '*/qemu/*/config' => Http::response(serverConfig(['ide3' => 'local:iso/test.iso,media=cdrom']), 200),
+        '*/qemu/*/config' => Http::response(serverConfigFixture(['ide3' => 'local:iso/test.iso,media=cdrom']), 200),
         '*' => Http::response(['data' => 'ok'], 200),
     ]);
 
@@ -75,7 +63,7 @@ it('unmounts a mounted ISO by deleting its interface, with the digest', function
 
 it('rejects unmounting an ISO that is not mounted', function () {
     Http::fake([
-        '*/qemu/*/config' => Http::response(serverConfig(), 200),
+        '*/qemu/*/config' => Http::response(serverConfigFixture(), 200),
         '*' => Http::response(['data' => 'ok'], 200),
     ]);
 

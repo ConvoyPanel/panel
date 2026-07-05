@@ -8,10 +8,7 @@ it('surfaces a proxmox digest mismatch as a ConfigModifiedException', function (
     Http::fake([
         '*/qemu/*/config' => Http::sequence()
             // getConfig() — carries the digest we will echo back
-            ->push(
-                file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')),
-                200,
-            )
+            ->push(serverConfigFixture(), 200)
             // update() — Proxmox rejects the write because the config changed
             ->push(
                 ['data' => null, 'errors' => ['detected modified configuration - file changed by other user? Try again.']],

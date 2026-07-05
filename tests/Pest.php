@@ -84,3 +84,37 @@ function createServerModel(): array
         $server,
     ];
 }
+
+/**
+ * The Proxmox VM config fixture as a decoded array, optionally merged with extra
+ * top-level keys (e.g. an `ide3` line to simulate a mounted ISO).
+ *
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function serverConfigFixture(array $extra = []): array
+{
+    $config = json_decode(
+        file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')),
+        true,
+    );
+    $config['data'] = array_merge($config['data'], $extra);
+
+    return $config;
+}
+
+/**
+ * Fake the Proxmox HTTP API: every `.../config` read returns the config fixture,
+ * everything else returns a dummy task upid. Pass $overrides to add or replace
+ * specific URL patterns; they are matched first (Http::fake is first-match-wins)
+ * and win over the defaults on a key collision.
+ *
+ * @param  array<string, mixed>  $overrides
+ */
+function fakeProxmox(array $overrides = []): void
+{
+    Http::fake($overrides + [
+        '*/config' => Http::response(serverConfigFixture(), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+}

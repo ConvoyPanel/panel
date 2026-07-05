@@ -7,15 +7,11 @@ it('does not rewrite NICs that are already in the desired state', function () {
     // A config with one already-firewalled NIC (net0) and one that still needs
     // it (net1). The server has no primary address, so mac/bridge are left
     // alone and the firewall flag is the only thing that can differ.
-    $config = json_decode(
-        file_get_contents(base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json')),
-        true,
-    );
-    $config['data']['net0'] = 'virtio=66:87:C3:0D:86:13,bridge=vmbr1,firewall=1';
-    $config['data']['net1'] = 'virtio=66:87:C3:0D:86:14,bridge=vmbr1';
-
     Http::fake([
-        '*/qemu/*/config' => Http::response($config, 200),
+        '*/qemu/*/config' => Http::response(serverConfigFixture([
+            'net0' => 'virtio=66:87:C3:0D:86:13,bridge=vmbr1,firewall=1',
+            'net1' => 'virtio=66:87:C3:0D:86:14,bridge=vmbr1',
+        ]), 200),
         '*/firewall/ipset*' => Http::response(['data' => []], 200),
         '*' => Http::response(['data' => 'ok'], 200),
     ]);

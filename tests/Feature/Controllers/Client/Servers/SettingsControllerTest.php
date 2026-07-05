@@ -1,12 +1,9 @@
 <?php
 
 use App\Models\ISO;
-use Illuminate\Support\Facades\Http;
 
 it('can rename servers', function () {
-    Http::fake([
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -24,25 +21,14 @@ it('can rename servers', function () {
 });
 
 it('can change nameservers', function () {
-    Http::fake([
-        '*/config' => Http::response(
-            file_get_contents(
-                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ),
-            200,
-        ),
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->putJson(
         "/api/client/servers/{$server->uuid}/settings/network",
         [
-            'nameservers' => [
-                '1.1.1.1',
-                '1.0.0.1',
-            ],
+            'nameservers' => ['1.1.1.1', '1.0.0.1'],
         ],
     );
 
@@ -50,15 +36,7 @@ it('can change nameservers', function () {
 });
 
 it('can fetch sshkeys', function () {
-    Http::fake([
-        '*/config' => Http::response(
-            file_get_contents(
-                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ),
-            200,
-        ),
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -70,15 +48,7 @@ it('can fetch sshkeys', function () {
 });
 
 it('can change server passwords', function () {
-    Http::fake([
-        '*/config' => Http::response(
-            file_get_contents(
-                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ),
-            200,
-        ),
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -94,15 +64,7 @@ it('can change server passwords', function () {
 });
 
 it('can fetch available ISOs', function () {
-    Http::fake([
-        '*/config' => Http::response(
-            file_get_contents(
-                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ),
-            200,
-        ),
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -119,15 +81,7 @@ it('can fetch available ISOs', function () {
 });
 
 it('can mount visible ISOs', function () {
-    Http::fake([
-        '*/config' => Http::response(
-            file_get_contents(
-                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
-            ),
-            200,
-        ),
-        '*' => Http::response(['data' => 'dummy-upid'], 200),
-    ]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -159,7 +113,7 @@ it('can\'t mount hidden ISOs as non-admin user', function () {
 });
 
 it('can\'t mount an ISO from a node the user\'s server is not on', function () {
-    Http::fake(['*' => Http::response(['data' => 'dummy-upid'], 200)]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
@@ -175,7 +129,7 @@ it('can\'t mount an ISO from a node the user\'s server is not on', function () {
 });
 
 it('can\'t unmount an ISO from a node the user\'s server is not on', function () {
-    Http::fake(['*' => Http::response(['data' => 'dummy-upid'], 200)]);
+    fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
