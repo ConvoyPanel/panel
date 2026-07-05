@@ -34,7 +34,6 @@ abstract class Activity
 
     public function isSystem()
     {
-        // @phpstan-ignore-next-line
         return is_null($this->model->actor_id);
     }
 }

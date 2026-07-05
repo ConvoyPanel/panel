@@ -4,7 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
+/**
+ * @property int $id
+ * @property int $node_id
+ * @property string $name
+ * @property ?string $description
+ * @property Collection<int, AddressBlockGroup> $addressBlockGroups
+ */
 class NetworkInterface extends Model
 {
     public $timestamps = false;
@@ -24,6 +32,9 @@ class NetworkInterface extends Model
         return $this->belongsTo(Node::class);
     }
 
+    /**
+     * @return BelongsToMany<AddressBlockGroup, $this>
+     */
     public function addressBlockGroups(): BelongsToMany
     {
         return $this->belongsToMany(

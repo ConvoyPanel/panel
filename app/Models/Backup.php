@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ?string $file_name
  * @property ?int $size
  * @property ?string $errors
+ * @property ?CarbonImmutable $completed_at
+ * @property CarbonImmutable $created_at
  * @property Server $server
  * @property Storage $storage
  */

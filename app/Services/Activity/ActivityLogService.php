@@ -135,7 +135,7 @@ class ActivityLogService
      * performing this action it will be logged to the disk but will not interrupt
      * the code flow.
      */
-    public function log(string $description = null): ActivityLog
+    public function log(?string $description = null): ActivityLog
     {
         $activity = $this->getActivity();
 
@@ -145,7 +145,7 @@ class ActivityLogService
 
         try {
             return $this->save();
-        } catch (Throwable|Exception $exception) {
+        } catch (Throwable $exception) {
             if (config('app.env') !== 'production') {
                 /* @noinspection PhpUnhandledExceptionInspection */
                 throw $exception;
@@ -219,9 +219,7 @@ class ActivityLogService
         if ($actor = $this->targetable->actor()) {
             $this->actor($actor);
         } elseif ($user = $this->manager->guard()->user()) {
-            if ($user instanceof Model) {
-                $this->actor($user);
-            }
+            $this->actor($user);
         }
 
         return $this->activity;

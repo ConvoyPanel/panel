@@ -38,7 +38,7 @@ class BackupCreationService
             $previous = $this->eloquentRepository->getBackupsGeneratedDuringTimespan(
                 $server->id,
                 $period,
-            );
+            )->latest('created_at')->get();
             if ($previous->count() >= $limit) {
                 $message = sprintf(
                     'Only %d backups may be generated within a %d second span of time.',
@@ -47,7 +47,7 @@ class BackupCreationService
                 );
 
                 throw new TooManyRequestsHttpException(
-                    CarbonImmutable::now()->diffInSeconds(
+                    (int) CarbonImmutable::now()->diffInSeconds(
                         $previous->last()->created_at->addSeconds($period),
                     ),
                     $message,
@@ -56,10 +56,8 @@ class BackupCreationService
         }
 
         $successful = $this->eloquentRepository->getNonFailedBackups($server);
-        if (! $server->backup_limit || $successful->count() >= $server->backup_limit) {
-            if (isset($server->backup_limit)) {
-                throw new TooManyBackupsException((int) $server->backup_limit);
-            }
+        if ($server->backup_count_limit >= 0 && $successful->count() >= $server->backup_count_limit) {
+            throw new TooManyBackupsException($server->backup_count_limit);
         }
 
         $storage = $server->node->backupStorage();

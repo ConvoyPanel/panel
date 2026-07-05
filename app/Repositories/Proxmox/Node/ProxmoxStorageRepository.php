@@ -115,7 +115,7 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             );
         }
 
-        return IsoData::collect($isos);
+        return IsoData::collect($isos, DataCollection::class);
     }
 
     /**
@@ -137,6 +137,8 @@ class ProxmoxStorageRepository extends ProxmoxRepository
             if (str_contains($e->getMessage(), "Can't connect to")) {
                 throw new InvalidIsoLinkException;
             }
+
+            throw $e;
         }
 
         if (Arr::get($response, 'success', 1) !== 1) {

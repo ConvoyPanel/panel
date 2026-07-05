@@ -32,13 +32,15 @@ class ProxmoxServerRepository extends ProxmoxRepository
      */
     public function create(Template $template): string
     {
+        $server = $this->getServer();
+
         $response = $this->getHttpClientWithParams([
             'template' => $template->vmid,
         ])
             ->post('/api2/json/nodes/{node}/qemu/{template}/clone', [
-                'storage' => $this->server->storage->name,
+                'storage' => $server->storage->name,
                 'target' => $this->node->name,
-                'newid' => $this->server->vmid,
+                'newid' => $server->vmid,
                 'full' => true,
             ])
             ->json();

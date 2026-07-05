@@ -31,7 +31,7 @@ class VMIDIsAvailable implements ValidationRule
             return;
         }
 
-        $repository = new ProxmoxAllocationRepository($node);
+        $repository = app(ProxmoxAllocationRepository::class)->setNode($node);
         if (!$repository->isVMIDAvailable((int) $value)) {
             $fail('The specified VMID is not available for use on Proxmox.');
         }

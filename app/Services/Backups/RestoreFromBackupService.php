@@ -36,7 +36,7 @@ class RestoreFromBackupService
             );
         }
 
-        if (! $backup->successful && is_null($backup->completed_at)) {
+        if ($backup->errors !== null || $backup->completed_at === null) {
             throw new BadRequestHttpException(
                 'This backup cannot be restored at this time: not completed or failed.',
             );

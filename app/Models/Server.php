@@ -30,6 +30,9 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $backup_size_limit
  * @property int $bandwidth_limit
  * @property Node $node
+ * @property Storage $storage
+ * @property ?Address $primaryIPv4Address
+ * @property ?Address $primaryIPv6Address
  */
 class Server extends Model
 {
@@ -82,6 +85,9 @@ class Server extends Model
         return $this->belongsTo(Node::class);
     }
 
+    /**
+     * @return BelongsTo<Storage, $this>
+     */
     public function storage(): BelongsTo
     {
         return $this->belongsTo(Storage::class);
@@ -92,6 +98,9 @@ class Server extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return HasMany<Address, $this>
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);

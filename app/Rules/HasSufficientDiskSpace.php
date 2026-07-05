@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Models\Node;
+use App\Models\Storage;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -29,14 +30,18 @@ class HasSufficientDiskSpace implements DataAwareRule, ValidationRule
         if (is_null($storageId)) {
             return;
         }
+        $storageId = (int) $storageId;
 
         $node = Node::find($nodeId);
         if (! $node) {
             return;
         }
 
-        $storage = $node->storages()->find($storageId);
-        if (! $storage) {
+        $storage = Storage::query()
+            ->whereKey($storageId)
+            ->whereHas('nodes', fn ($query) => $query->whereKey($node->id))
+            ->first();
+        if (! $storage instanceof Storage) {
             return;
         }
 

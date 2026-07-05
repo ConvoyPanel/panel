@@ -22,7 +22,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
 
         $users = array_map(fn ($user) => UserData::fromRaw($user), $this->getData($response));
 
-        return UserData::collect($users);
+        return UserData::collect($users, DataCollection::class);
     }
 
     public function createUser(CreateUserData $data): CreateUserData
@@ -31,7 +31,7 @@ class ProxmoxAccessRepository extends ProxmoxRepository
             'enable' => $data->enabled,
             'userid' => ($data->username ?? 'convoy-'.Str::random(53)).'@'.$data->realmType->value,
             'password' => $data->password ?? Str::random(64),
-            'expire' => $data->expiresAt?->timestamp ?? false,
+            'expire' => $data->expiresAt->timestamp ?? false,
         ];
 
         $this->getHttpClient()

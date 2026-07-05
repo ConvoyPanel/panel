@@ -14,6 +14,9 @@ class BackupRepository
         return Backup::create($data);
     }
 
+    /**
+     * @return HasMany<Backup, Server>
+     */
     public function getNonFailedBackups(Server $server): HasMany
     {
         return $server->backups()->where(function (Builder $query) {
@@ -24,6 +27,9 @@ class BackupRepository
 
     /**
      * Backups created for a server within the last $period seconds (throttling).
+     */
+    /**
+     * @return Builder<Backup>
      */
     public function getBackupsGeneratedDuringTimespan(int $serverId, int $period): Builder
     {

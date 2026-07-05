@@ -6,9 +6,9 @@ use App\Data\Server\Eloquent\PrimaryAddressesData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Address;
+use App\Models\NetworkInterface;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Illuminate\Support\Arr;
 
 use function array_unique;
 
@@ -41,10 +41,14 @@ class ServerNetworkService
     {
         $primaryAddresses = $this->getPrimaryAddresses($server);
 
-        /** @var string|null $macAddress */
-        $macAddress = $primaryAddresses->ipv4?->mac_address ?? $primaryAddresses->ipv6?->mac_address;
-        /** @var string|null $bridge */
-        $bridge = $primaryAddresses->ipv4?->networkInterfaces()->first()?->name ?? $primaryAddresses->ipv6?->networkInterfaces()->first()?->name;
+        $ipv4 = $primaryAddresses->ipv4;
+        $ipv6 = $primaryAddresses->ipv6;
+        $macAddress = ($ipv4 instanceof Address ? $ipv4->mac_address : null)
+            ?? ($ipv6 instanceof Address ? $ipv6->mac_address : null);
+        $ipv4Interface = $ipv4?->networkInterfaces()->first();
+        $ipv6Interface = $ipv6?->networkInterfaces()->first();
+        $bridge = ($ipv4Interface instanceof NetworkInterface ? $ipv4Interface->name : null)
+            ?? ($ipv6Interface instanceof NetworkInterface ? $ipv6Interface->name : null);
 
         $config = $this->configRepository->setServer($server)->getConfig();
 
@@ -100,7 +104,7 @@ class ServerNetworkService
      */
     private function lockServerAddresses(Server $server): void
     {
-        $addresses = array_unique(Arr::flatten($server->addresses()->get('ip')->toArray()));
+        $addresses = array_unique($server->addresses()->pluck('ip')->all());
 
         $this->configRepository
             ->setServer($server)
@@ -123,8 +127,12 @@ class ServerNetworkService
     public function getPrimaryAddresses(Server $server): PrimaryAddressesData
     {
         return new PrimaryAddressesData(
-            ipv4: $server->primaryIPv4Address ?? $server->addresses()->withIPv4()->first(),
-            ipv6: $server->primaryIPv6Address ?? $server->addresses()->withIPv6()->first(),
+            ipv4: $server->primaryIPv4Address ?? $server->addresses()
+                ->whereHas('addressBlock', fn ($query) => $query->where('version', 'ipv4'))
+                ->first(),
+            ipv6: $server->primaryIPv6Address ?? $server->addresses()
+                ->whereHas('addressBlock', fn ($query) => $query->where('version', 'ipv6'))
+                ->first(),
         );
     }
 

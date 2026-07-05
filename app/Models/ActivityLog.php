@@ -13,6 +13,8 @@ use LogicException;
 
 /**
  * @property int $id
+ * @property ?int $actor_id
+ * @property ?string $actor_type
  * @property ?string $batch
  * @property string $event
  * @property ?string $ip

@@ -3,10 +3,23 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property string $uuid
+ * @property int $storage_id
+ * @property bool $is_successful
+ * @property string $name
+ * @property ?string $file_name
+ * @property ?int $size
+ * @property bool $hidden
+ * @property ?CarbonImmutable $completed_at
+ * @property Storage $storage
+ */
 class ISO extends Model
 {
     use HasFactory;
@@ -36,6 +49,9 @@ class ISO extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Storage, $this>
+     */
     public function storage(): BelongsTo
     {
         return $this->belongsTo(Storage::class);

@@ -91,7 +91,9 @@ class AllocationService
         }
 
         $ideIndex = 0; // max IDE index is '3'
-        $usedKeys = Arr::pluck($config, 'key');
+        $usedKeys = $config->disks
+            ->map(fn (DiskData $disk) => $disk->interface->value)
+            ->all();
         for ($i = 0; $i <= 4; $i++) {
             if ($i === 4) {
                 throw new NoAvailableDiskInterfaceException;

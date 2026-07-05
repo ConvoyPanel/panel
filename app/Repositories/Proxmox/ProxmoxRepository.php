@@ -44,11 +44,9 @@ abstract class ProxmoxRepository
 
     protected function getNode(): Node
     {
-        Assert::isInstanceOf(
-            $this->node,
-            Node::class,
-            'Node is not set or invalid.'
-        );
+        if (! isset($this->node)) {
+            throw new \LogicException('Node is not set.');
+        }
 
         return $this->node;
     }

@@ -24,7 +24,7 @@ class JWTService
 
     private ?User $user = null;
 
-    private ?\DateTimeImmutable $expiresAt;
+    private ?\DateTimeImmutable $expiresAt = null;
 
     private ?string $subject = null;
 
@@ -100,9 +100,15 @@ class JWTService
                 ->withClaim('user_uuid', $this->user->uuid);
         }
 
-        return $builder
+        $token = $builder
             ->withClaim('unique_id', Str::random())
             ->getToken($config->signer(), $config->signingKey());
+
+        if (! $token instanceof Plain) {
+            throw new \LogicException('Expected JWT builder to return a plain token.');
+        }
+
+        return $token;
     }
 
     public function decode(string $key, string $token): UnencryptedToken

@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use Symfony\Component\Serializer\Serializer as SymfonySerializer;
+use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
 
@@ -19,7 +19,7 @@ class PasskeySerializer
     }
 
     public function __construct(
-        protected SymfonySerializer $serializer,
+        protected SerializerInterface $serializer,
     ) {}
 
     public function toJson(mixed $value): string
@@ -28,7 +28,7 @@ class PasskeySerializer
     }
 
     /**
-     * @param  string<class-string>  $desiredClass
+     * @param  class-string  $desiredClass
      */
     public function fromJson(string $value, string $desiredClass): mixed
     {

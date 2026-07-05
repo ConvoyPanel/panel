@@ -37,7 +37,7 @@ class ProxmoxFirewallRepository extends ProxmoxRepository
             ->json();
 
         return IpsetData::collect(Arr::map($this->getData($response), function (array $item) {
-            /** @var array{ name: string, digest: string} $item */
+            /** @var array{name: string, digest: string, comment?: string|null} $item */
 
             return [
                 'name' => $item['name'],

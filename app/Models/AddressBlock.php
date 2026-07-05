@@ -7,6 +7,7 @@ use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * @property int $id
@@ -19,7 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?string $mac_address
  * @property int $prefix_length_from
  * @property int $prefix_length_to
+ * @property int $addresses_count
  * @property AddressBlockGroup $addressBlockGroup
+ * @property Collection<int, Address> $addresses
  */
 class AddressBlock extends Model
 {
@@ -54,6 +57,9 @@ class AddressBlock extends Model
         return $this->belongsTo(AddressBlockGroup::class);
     }
 
+    /**
+     * @return HasMany<Address, $this>
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);

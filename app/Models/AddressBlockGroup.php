@@ -5,9 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property ?string $description
+ * @property Collection<int, AddressBlock> $addressBlocks
+ */
 class AddressBlockGroup extends Model
 {
     use HasFactory, HasRelationships;
@@ -42,6 +49,9 @@ class AddressBlockGroup extends Model
         );
     }
 
+    /**
+     * @return HasMany<AddressBlock, $this>
+     */
     public function addressBlocks(): HasMany
     {
         return $this->hasMany(AddressBlock::class);
