@@ -259,10 +259,31 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
   session, then reverted per that call; `next`'s `ProxmoxGuestAgentRepository::{getOsInfo,setUserPassword}`
   remain available for other uses.)
 - **Genuine gaps still open (logged, not blockers):**
-  1. **Admin overview dashboard + metrics endpoint (`8e1729ec`, ~949 LOC).** `next` has no
-     `OverviewController`/`OverviewService`. A net-new v4 feature (2026); Phase 4/5 material, not a
-     cutover blocker. Port backend (`OverviewController`/`Service`/`Transformer`) + frontend
-     (`OverviewContainer`) if wanted at launch.
+  1. **Admin overview dashboard + metrics endpoint (`8e1729ec`) — DONE.** Ported to next and
+     re-architected for its schema/stack:
+     - Backend: `GET /api/admin/overview` (admin-gated by the `api-admin` route group's
+       `AdminAuthenticate` middleware — no controller/policy needed), `OverviewService` returning a
+       typed `App\Data\Admin\Overview\OverviewData` tree (laravel-data, not Fractal), cached 15s.
+     - Adaptations: memory/disk are MiB in the DB (`StorageSizeCast`) so aggregates convert to bytes;
+       `node.disk` is gone (moved to the storages model) so disk capacity is a **fleet `storage`
+       section** = committed VM disk vs. node-attached `stores_kvm` capacity, and per-node breakdown is
+       memory-only; no `RESTORING_SNAPSHOT`; backups use `errors`/`completed_at`; `AddressBlockGroup`
+       replaces `AddressPool`; all aggregates Postgres+MySQL portable (no `SUM(bool)`).
+     - Clean DTO names (`ResourceAllocationData`, `FleetSummaryData`, `NodeSummaryData`, …); `nodes`
+       emitted as a plain array via `->withoutWrapping()` so the contract isn't a nested `{data:[]}`.
+     - Frontend: `features/overview/api.ts` (TanStack Query + `apiFetch` + Wayfinder route, unwrapping
+       the `data` envelope) and `Admin/Dashboard/OverviewContainer.tsx` replacing the stub dashboard
+       index — summary tiles, memory/storage capacity bars, server-status breakdown, address/backup/ISO
+       cards, per-node memory table (shadcn components).
+     - Feature test (metrics + restoring bucket + admin guard), full suite 94 passed, PHPStan zero,
+       tsc clean, production build green. **Not yet visually verified in-browser.**
+     - Left behind (v4-only cosmetic follow-ups `9f8eec25`/`44279c50` — SWR-revalidation tweak and
+       overview card subtext — are develop-UI specific and don't apply to the rewritten next UI).
+     - **Discovered en route (unrelated bug, not fixed):** `database/factories/AddressFactory.php` is
+       stale — it sets the pre-IPAM-revision columns (`type`, `address`, `cidr`, `gateway`, `mac_address`)
+       that no longer exist (the table is now `ip`, `prefix_length`, `address_block_id`, `server_id`), and
+       omits the required `address_block_id`. So `Address::factory()` can't create a valid row; seed via
+       an explicit `AddressBlock` (see `OverviewControllerTest`). Worth fixing the factory separately.
   2. **`ac13cefc` skip no-op Proxmox Configure tasks — DONE.** Verified `next` lacked the no-op skip in
      `AllocationService::syncSettings` (cores/memory), `CloudinitService::setHostname` (name/searchdomain),
      and `CloudinitService::setIpConfig` (ipconfig{n}) — all POSTed unconditionally, enqueuing a redundant
