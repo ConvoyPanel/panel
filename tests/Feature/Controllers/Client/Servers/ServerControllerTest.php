@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 
 it('only lists servers the authenticated user owns', function () {
     [$owner, $_, $_, $server] = createServerModel();
@@ -30,6 +31,31 @@ it('does not list other users servers for root admins', function () {
         ->getJson('/api/client/servers')
         ->assertOk()
         ->assertJsonCount(0, 'items');
+});
+
+it('lets a server owner send a power command', function () {
+    fakeProxmox();
+
+    [$owner, $_, $_, $server] = createServerModel();
+
+    $this->actingAs($owner)
+        ->patchJson("/api/client/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->assertNoContent();
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), '/status/shutdown'));
+});
+
+it('does not let a non-owner send a power command', function () {
+    fakeProxmox();
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $other = User::factory()->create();
+
+    $this->actingAs($other)
+        ->patchJson("/api/client/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->assertNotFound();
+
+    Http::assertNothingSent();
 });
 
 it('can generate noVNC authorization token', function () {

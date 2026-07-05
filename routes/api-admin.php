@@ -123,6 +123,9 @@ Route::prefix('/servers')->group(function () {
                 );
             Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
+            Route::get('/state', [Admin\ServerController::class, 'getState']);
+            Route::patch('/state', [Admin\ServerController::class, 'updateState']);
+
             Route::prefix('/settings')->group(function () {
                 Route::patch(
                     '/build',

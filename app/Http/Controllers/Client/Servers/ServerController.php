@@ -12,11 +12,11 @@ use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
-use App\Http\Requests\Client\Servers\SendPowerCommandRequest;
+use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
+use App\Services\Servers\SendServerPowerCommand;
 use App\Services\Servers\ServerConsoleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class ServerController
         private CotermJWTService $cotermJWTService,
         private ServerConsoleService $consoleService,
         private ProxmoxServerRepository $serverRepository,
-        private ProxmoxPowerRepository $powerRepository,
+        private SendServerPowerCommand $powerCommand,
     ) {}
 
     public function index(Request $request)
@@ -83,8 +83,7 @@ class ServerController
 
     public function updateState(Server $server, SendPowerCommandRequest $request)
     {
-        $this->powerRepository->setServer($server)
-            ->send($request->enum('state', PowerCommand::class));
+        $this->powerCommand->handle($server, $request->enum('state', PowerCommand::class));
 
         return response()->noContent();
     }

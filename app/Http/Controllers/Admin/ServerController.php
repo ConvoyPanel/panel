@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Data\PaginationMeta;
 use App\Data\Server\ServerData;
+use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
+use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Server;
+use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Servers\CloudinitService;
+use App\Services\Servers\SendServerPowerCommand;
 use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
 use App\Services\Servers\ServerNetworkService;
@@ -34,6 +38,8 @@ class ServerController
         private ServerCreationService $creationService,
         private CloudinitService $cloudinitService,
         private VmSyncService $buildModificationService,
+        private ProxmoxServerRepository $serverRepository,
+        private SendServerPowerCommand $powerCommand,
     ) {}
 
     public function index(Request $request)
@@ -121,6 +127,18 @@ class ServerController
     public function unsuspend(Server $server)
     {
         $this->suspensionService->toggle($server, SuspensionAction::UNSUSPEND);
+
+        return response()->noContent();
+    }
+
+    public function getState(Server $server)
+    {
+        return $this->serverRepository->setServer($server)->getState();
+    }
+
+    public function updateState(SendPowerCommandRequest $request, Server $server)
+    {
+        $this->powerCommand->handle($server, $request->enum('state', PowerCommand::class));
 
         return response()->noContent();
     }

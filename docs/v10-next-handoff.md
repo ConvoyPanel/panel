@@ -447,16 +447,32 @@ Verified:
   ability vocabulary once. This also supersedes the `getSSOToken` app-key-JWT stopgap (see the SSO item
   below) — a properly-scoped token is the real answer for plugin/programmatic access.
 
-- **Basic VM control (power actions) on both admin and client sides — DRY (user request 2026-07-05).**
-  Today only the **client** side has power control: `POST /api/client/servers/{server}/state`
-  (`Client\Servers\ServerController::updateState`), backed by `PowerCommand` (enum), `SendPowerCommandJob`,
-  `ProxmoxPowerRepository`, `SendPowerCommandRequest`. Admins have **no** power endpoint. Add admin-side
-  power control **without duplicating the endpoint/logic**: the power pipeline (enum + job + repository +
-  request) is already reusable, so extract a thin shared action/service (e.g. `SendServerPowerCommand`)
-  that both a client and an admin controller method delegate to, sharing one request-validation class and
-  one `PowerCommand` vocabulary. The difference between the two is **authorization/scoping only** (client
-  = owner-scoped to their own server; admin = any server), not the action. Pairs naturally with
-  **Power-action locking** below — build the lock into the shared action so both surfaces get it for free.
+- **Basic VM control (power actions) on both admin and client sides — DRY — DONE (backend, 2026-07-05).**
+  Admin now has power control at parity with the client, from one shared path:
+  - **Shared action `App\Services\Servers\SendServerPowerCommand`** — thin wrapper over
+    `ProxmoxPowerRepository->setServer($server)->send($command)`. Both controllers delegate here so
+    there's one `PowerCommand` vocabulary and one path to Proxmox. (This is the *interactive* power
+    path; the deployment-orchestration `SendPowerCommandJob` — which takes a `DeploymentStep` and
+    marks build steps — is unchanged and separate.)
+  - **Shared request moved** `Http/Requests/Client/Servers/SendPowerCommandRequest` →
+    `Http/Requests/Servers/SendPowerCommandRequest`. Its policy authorize (`can('sendPowerCommand',
+    $server)`) already serves **both** surfaces because `ServerPolicy::before()` returns true for a
+    root admin **or** the server owner — so one request class, authorization differs only by who passes.
+  - **Client** `updateState` now delegates to the action (constructor dep swapped
+    `ProxmoxPowerRepository` → `SendServerPowerCommand`); behavior identical.
+  - **Admin** `ServerController` gained `getState` (GET) + `updateState` (PATCH), routes
+    `GET|PATCH /api/admin/servers/{server}/state` (and, via the API unification, the same under
+    `/api/application/...`). Admin scoping is the route group's `AdminAuthenticate` (root_admin, any
+    server); no per-server policy needed. Both sit inside the `{server}` group's
+    `ValidateServerStatusMiddleware` (power/state on a DELETING server is nonsensical → 409).
+  - Tests: `tests/Feature/Controllers/Admin/ServerControllerTest.php` (admin powers any server; admin
+    reads state; **owner rejected on the admin surface** — proves it's root-admin-scoped, not
+    ownership; invalid command → 422) + new client `updateState` coverage in the existing client test
+    (owner happy path; non-owner → 404) locking the shared-action refactor. Full suite **110 passed**,
+    PHPStan gate **zero**.
+  - **Not yet done:** frontend wiring — the admin UI has no power buttons calling these endpoints yet
+    (a `features/*` api + UI follow-up). And **power-action locking** (below) is still open; when built,
+    put the lock *inside* `SendServerPowerCommand` so both surfaces inherit it for free.
 
 - **VLAN support (GitHub #150) — assessment: mechanism sound, node-global default is too coarse.**
   Request: set a Proxmox VLAN tag on a VM's NIC, with a node-level default + per-VM override.
