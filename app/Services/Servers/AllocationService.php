@@ -49,10 +49,23 @@ class AllocationService
     {
         $config = $this->configRepository->setServer($server)->getConfig();
 
-        $this->configRepository->setServer($server)->update([
-            'cores' => $server->cpu,
-            'memory' => $server->memory / 1024 / 1024, // convert from bytes to MiB,
-        ]);
+        // Only push cores/memory that actually differ, so an unchanged sync doesn't
+        // enqueue a redundant Proxmox "Configure" task. $config->memory is in bytes;
+        // PVE's payload wants integer MiB.
+        $desiredMemoryMib = (int) ($server->memory / 1024 / 1024);
+        $currentMemoryMib = (int) ($config->memory / 1024 / 1024);
+
+        $payload = [];
+        if ($config->cpu->coreCount !== $server->cpu) {
+            $payload['cores'] = $server->cpu;
+        }
+        if ($currentMemoryMib !== $desiredMemoryMib) {
+            $payload['memory'] = $desiredMemoryMib;
+        }
+
+        if ($payload !== []) {
+            $this->configRepository->setServer($server)->update($payload);
+        }
 
         // We're assuming the largest disk is the disk to be resized.
         /** @var ?DiskData $disk */

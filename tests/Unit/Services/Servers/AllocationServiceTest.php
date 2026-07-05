@@ -72,3 +72,42 @@ it('rejects unmounting an ISO that is not mounted', function () {
     expect(fn () => app(AllocationService::class)->unmountIso($server, testIso()))
         ->toThrow(IsoAlreadyUnmountedException::class);
 });
+
+it('skips the hardware write when cores and memory already match the config', function () {
+    // Fixture is cores=2, memory=2000 (MiB).
+    Http::fake([
+        '*/qemu/*/config' => Http::response(serverConfigFixture(), 200),
+        '*' => Http::response(['data' => 'ok'], 200),
+    ]);
+
+    [, , , $server] = createServerModel();
+    $server->cpu = 2;
+    $server->memory = 2000 * 1024 * 1024;  // 2000 MiB in bytes — matches the config
+    $server->disk = 1024 * 1024 * 1024;    // below the fixture disk, so no resize fires
+
+    app(AllocationService::class)->syncSettings($server);
+
+    // No redundant Configure task: nothing carrying cores/memory is POSTed.
+    Http::assertNotSent(fn ($request) => $request->method() === 'POST'
+        && str_contains($request->url(), '/config')
+        && (isset($request['cores']) || isset($request['memory'])));
+});
+
+it('writes only the hardware fields that changed', function () {
+    Http::fake([
+        '*/qemu/*/config' => Http::response(serverConfigFixture(), 200),
+        '*' => Http::response(['data' => 'ok'], 200),
+    ]);
+
+    [, , , $server] = createServerModel();
+    $server->cpu = 4;                      // changed from the fixture's 2
+    $server->memory = 2000 * 1024 * 1024;  // unchanged
+    $server->disk = 1024 * 1024 * 1024;
+
+    app(AllocationService::class)->syncSettings($server);
+
+    Http::assertSent(fn ($request) => $request->method() === 'POST'
+        && str_contains($request->url(), '/config')
+        && (int) ($request['cores'] ?? null) === 4
+        && ! isset($request['memory']));
+});

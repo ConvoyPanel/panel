@@ -263,10 +263,20 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
      `OverviewController`/`OverviewService`. A net-new v4 feature (2026); Phase 4/5 material, not a
      cutover blocker. Port backend (`OverviewController`/`Service`/`Transformer`) + frontend
      (`OverviewContainer`) if wanted at launch.
-  2. **`ac13cefc` skip no-op Proxmox Configure tasks.** Partially covered by Phase 2's redundant-write
-     filter (`syncNetworkDeviceConfig`); the `CloudinitService`/`AllocationService` no-op skips in that
-     commit aren't all confirmed present — compare if pursuing. Password-job retries already present
-     (`tries = 3`).
+  2. **`ac13cefc` skip no-op Proxmox Configure tasks — PARTIALLY DONE.** Verified `next` lacked the
+     no-op skip in `AllocationService::syncSettings` (cores/memory), `CloudinitService::setHostname`
+     (name/searchdomain), and `CloudinitService::setIpConfig` (ipconfig{n}) — all POSTed
+     unconditionally, enqueuing a redundant PVE "Configure" task on every sync (same class as Phase 2's
+     `syncNetworkDeviceConfig` filter).
+     - **DONE this session:** `syncSettings` now diffs cores/memory against the config it already reads
+       and writes only changed keys (zero extra round trip; `$config->cpu->coreCount` + `$config->memory`
+       bytes→MiB). Tests in `AllocationServiceTest` (no-op skip; changed-only write). Suite 85 passed.
+     - **Follow-ups (left intentionally):** `setHostname` and `setIpConfig` no-op skips need current
+       `searchdomain` / per-NIC `ipconfig{n}` values, which `ServerConfigData` doesn't model yet
+       (`name` is modelled, `searchdomain`/`ipconfig{n}` aren't). Model those before adding the skip —
+       don't rush a half-comparison on the VM write path.
+     - Password-job retries: `next` has `tries = 3`; `ac13cefc` raised v4 to 15 (30 s backoff) to survive
+       slow disk-resize during creation. Left as a tuning decision, not blind-ported.
   3. **`22c4693e` locale validation.** `next` has no `LocaleController` (only `Base/IndexController`) —
      likely the whole locale-switch endpoint is gone/moot on `next`; confirm before porting the
      `LocaleRequest`.
