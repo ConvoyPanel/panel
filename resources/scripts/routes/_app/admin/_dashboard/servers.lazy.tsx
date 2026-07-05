@@ -7,8 +7,10 @@ import { ColumnDef } from '@tanstack/react-table'
 
 import useServersSWR from '@/api/admin/servers/use-servers-swr.ts'
 
+import ServerPowerActions from '@/components/interfaces/Admin/Server/ServerPowerActions.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
+import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/servers')({
@@ -48,6 +50,9 @@ function ServersIndex() {
                 skeletonWidth: '4rem',
             },
         },
+        actionsColumn<Server>(({ row }) => (
+            <ServerPowerActions server={row.original} />
+        )),
     ]
 
     return (

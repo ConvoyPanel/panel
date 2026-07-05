@@ -470,9 +470,25 @@ Verified:
     ownership; invalid command → 422) + new client `updateState` coverage in the existing client test
     (owner happy path; non-owner → 404) locking the shared-action refactor. Full suite **110 passed**,
     PHPStan gate **zero**.
-  - **Not yet done:** frontend wiring — the admin UI has no power buttons calling these endpoints yet
-    (a `features/*` api + UI follow-up). And **power-action locking** (below) is still open; when built,
-    put the lock *inside* `SendServerPowerCommand` so both surfaces inherit it for free.
+  - **Frontend wiring — DONE (2026-07-05).** `features/servers/state/api.ts` is the TanStack Query
+    module: `serverStateQueries.detail(uuid)` (GET state, unwrapping the `{data}` envelope) +
+    `useUpdateServerState(uuid)` (PATCH mutation, invalidates the state key on success). Both reference
+    the **admin** URI off the Wayfinder dictionary (`ServerController.getState['/api/admin/servers/
+    {server}/state']`, likewise `updateState`) since the API-unification twin makes these URI-keyed, not
+    callable (same caveat as `features/overview`). UI: `components/interfaces/Admin/Server/
+    ServerPowerActions.tsx` renders Start/Restart/Shutdown/Kill as a per-row dropdown in the admin
+    servers list (`routes/_app/admin/_dashboard/servers.lazy.tsx`) via the shared `actionsColumn`
+    helper. Because Radix only mounts `DropdownMenuContent` while open, the per-row state query fires
+    **on menu-open**, not as a table-wide poll — buttons gate on the fetched state (start↔stopped,
+    others↔running; loading/transitional disables all). Confirm dialog + sonner toasts mirror the client
+    `PowerActionsDropdown`. tsc clean, production build green. **Not verified against a live Proxmox
+    node** — both endpoints proxy to Proxmox, so real power actions need a node the dev env doesn't have;
+    the compile-time contract (Wayfinder route + DTO envelope + generated types) is fully exercised and
+    the backend endpoints are covered by feature tests.
+  - **Still not done:** an admin server **detail** page (the list's `/admin/servers/{id}` link is still
+    dead) — power actions currently live only as the row dropdown. And **power-action locking** (below)
+    is still open; when built, put the lock *inside* `SendServerPowerCommand` so both surfaces inherit
+    it for free.
 
 - **VLAN support (GitHub #150) — assessment: mechanism sound, node-global default is too coarse.**
   Request: set a Proxmox VLAN tag on a VM's NIC, with a node-level default + per-VM override.
