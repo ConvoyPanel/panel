@@ -65,6 +65,13 @@ DB / Redis / mail are configured via `web_environment` in `.ddev/config.yaml`, w
 override `.env.next` (Laravel's Dotenv does not overwrite real env vars). `ext-gmp` is added
 via `webimage_extra_packages`.
 
+## Laravel style
+
+Prefer current, namespaced support APIs over legacy Laravel 5 helper aliases: use `Arr::get`
+/ `Str::slug`, not `array_get` / `str_slug`. Current framework helpers such as `auth()`,
+`config()`, `now()`, `filled()`, and `data_get()` are fine; use `$request->user()` when a
+request is already available.
+
 ## Proxmox VE API documentation
 
 Generated Proxmox VE API docs are in:

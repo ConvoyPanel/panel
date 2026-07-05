@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Webmozart\Assert\Assert;
 
@@ -116,7 +117,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
         try {
             return $this->getBuilder()->findOrFail($id, $this->getColumns());
         } catch (ModelNotFoundException $exception) {
-            throw new RecordNotFoundException();
+            throw new RecordNotFoundException;
         }
     }
 
@@ -140,7 +141,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
         try {
             return $this->getBuilder()->where($fields)->firstOrFail($this->getColumns());
         } catch (ModelNotFoundException $exception) {
-            throw new RecordNotFoundException();
+            throw new RecordNotFoundException;
         }
     }
 
@@ -184,7 +185,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
         try {
             $instance = $this->getBuilder()->where('id', $id)->firstOrFail();
         } catch (ModelNotFoundException $exception) {
-            throw new RecordNotFoundException();
+            throw new RecordNotFoundException;
         }
 
         ($force) ? $instance->forceFill($fields) : $instance->fill($fields);
@@ -286,7 +287,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
             $values[$key] = $value;
         }
 
-        $bindings = array_values(array_filter(array_flatten($values, 1), function ($binding) {
+        $bindings = array_values(array_filter(Arr::flatten($values, 1), function ($binding) {
             return ! $binding instanceof Expression;
         }));
 

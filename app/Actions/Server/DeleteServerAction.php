@@ -2,7 +2,6 @@
 
 namespace App\Actions\Server;
 
-use Throwable;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
@@ -15,9 +14,9 @@ use App\Jobs\Server\WaitUntilVmIsDeletedJob;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Bus\Batch;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
-
-use function array_flatten;
+use Throwable;
 
 class DeleteServerAction
 {
@@ -34,7 +33,7 @@ class DeleteServerAction
                 ->count() * 2, // 2 jobs for each backup: purge and monitor
         ]);
 
-        $jobs = array_flatten([
+        $jobs = Arr::flatten([
             Bus::batch(new BatchPurgeServerBackupsJob($deployment->server))
                 ->before(function () use ($step) {
                     $step->start();
@@ -45,13 +44,13 @@ class DeleteServerAction
                 ->then(function () use ($step) {
                     $step->complete();
                 })
-            ->catch(function (Batch $_, Throwable $e) use ($step) {
-                $step->update([
-                    'status' => DeploymentStatus::FAILED,
-                    'completed_at' => now(),
-                    'error_message' => $e->getMessage(),
-                ]);
-            }),
+                ->catch(function (Batch $_, Throwable $e) use ($step) {
+                    $step->update([
+                        'status' => DeploymentStatus::FAILED,
+                        'completed_at' => now(),
+                        'error_message' => $e->getMessage(),
+                    ]);
+                }),
             $this->getJobs($deployment),
             function () use ($deployment) {
                 $deployment->server->delete();

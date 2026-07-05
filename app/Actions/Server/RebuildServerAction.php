@@ -7,9 +7,8 @@ use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
-
-use function array_flatten;
 
 class RebuildServerAction
 {
@@ -26,7 +25,7 @@ class RebuildServerAction
      */
     public function execute(Deployment $deployment, ?string $accountPassword): void
     {
-        $jobs = array_flatten([
+        $jobs = Arr::flatten([
             $this->onStart($deployment),
             $this->deleteServerAction->getJobs($deployment),
             $this->buildServerAction->getJobs($deployment, $accountPassword),
