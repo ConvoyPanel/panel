@@ -90,6 +90,12 @@ the frontend/TS JSON contract for these DTOs (see `generated.d.ts` — `DiskData
 `tag`, `link_down`) are a **second, unrelated** serialization target, so they get a
 **dedicated attribute** rather than reusing `MapName`.
 
+**Shared byte-unit scaling:** `App\Support\ByteUnit` (a 1024-based enum, `K/M/G/T`) replaces the
+`* 1024 * 1024` scaling that was copy-pasted across `DiskData` (size suffix + mbps family),
+`RateLimitCast`, `ServerConfigData` (memory/balloon/migrate_speed), and the `Storage` model. Parse a
+Proxmox suffixed size with `ByteUnit::parseSize('32G')`; convert MiB with
+`ByteUnit::Mebibytes->toBytes(...)` / `->fromBytes(...)`.
+
 **Where it lives:** `app/Extensions/Spatie/Data/Proxmox/` (with the other laravel-data
 extensions), namespace `App\Extensions\Spatie\Data\Proxmox`:
 - `PropertyList` — pure codec for PVE's `head[,key=value]*` format (`explode`/`implode`).

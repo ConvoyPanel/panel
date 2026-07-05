@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use App\Support\ByteUnit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -111,7 +112,7 @@ class Storage extends Model
         // Check if a sum was loaded via withSum() using the expected attribute name
         if (array_key_exists($preloadedSumAttribute, $this->attributes)) {
             // Return the preloaded value, defaulting to 0 if null
-            return (int) ($this->attributes[$preloadedSumAttribute] ?? 0) * 1024 * 1024; // convert from MiB to bytes
+            return ByteUnit::Mebibytes->toBytes((int) ($this->attributes[$preloadedSumAttribute] ?? 0)); // convert from MiB to bytes
         }
 
         // Fallback: Calculate on the fly using the relationship method
@@ -119,7 +120,7 @@ class Storage extends Model
         // Use Str::camel to call the relationship method dynamically (e.g., 'servers' -> $this->servers())
         $relationshipMethod = Str::camel($relationshipName);
         if (method_exists($this, $relationshipMethod)) {
-            return (int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0) * 1024 * 1024; // convert from MiB to bytes
+            return ByteUnit::Mebibytes->toBytes((int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0)); // convert from MiB to bytes
         }
 
         // Return 0 if the relationship method doesn't exist (should not happen with the correct usage)

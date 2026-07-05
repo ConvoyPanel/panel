@@ -5,6 +5,7 @@ namespace App\Data\Server\Proxmox\Config;
 use App\Enums\Server\BiosType;
 use App\Enums\Server\HugePagesSetting;
 use App\Enums\Server\LockStatus;
+use App\Support\ByteUnit;
 use App\Enums\Server\OperatingSystemType;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
@@ -311,14 +312,14 @@ class ServerConfigData extends Data
             autoStartAfterCrash               : $get('autostart', false),
             memoryBalloonSize                 : $exists(
                 'balloon',
-            ) ? (int) $raw['balloon'] * 1024 * 1024 : null,
+            ) ? ByteUnit::Mebibytes->toBytes((int) $raw['balloon']) : null,
             memorySharesForAutoBallooning     : $get('shares', 1000),
             biosType                          : BiosType::from($get('bios', 'seabios')),
             bootOrder                         : $bootOrder,
             cdromImage                        : $get('cdrom'),
             cloudinit                         : CloudinitConfigData::fromRaw($raw),
             cpu                               : CpuConfigData::fromRaw($raw),
-            memory                            : $get('memory') * 1024 * 1024,
+            memory                            : ByteUnit::Mebibytes->toBytes((float) $get('memory')),
             hookScriptVolumeId                : $get('hookscript'),
             hotplugFeatures                   : ServerHotplugFeaturesData::fromRaw($raw),
             hugePagesSetting                  : HugePagesSetting::tryFrom(
@@ -338,7 +339,7 @@ class ServerConfigData extends Data
             migrationMaxDowntime              : $get('migrate_downtime', 0.1),
             migrationMaxSpeed                 : ! $exists('migrate_speed') || $get('migrate_speed', 0) === 0
                 ? null
-                : $get('migrate_speed') * 1024 * 1024, // Convert from MiB/s to B/s
+                : ByteUnit::Mebibytes->toBytes((float) $get('migrate_speed')), // Convert from MiB/s to B/s
             name                              : $get('name'),
             nameservers                       : collect($get('nameserver', []))
                 ->map(fn (string $ns) => Factory::parseAddressString($ns)),

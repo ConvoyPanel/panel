@@ -15,6 +15,7 @@ use App\Extensions\Spatie\Data\Proxmox\Casts\PveBooleanCast;
 use App\Extensions\Spatie\Data\Proxmox\MapsProxmoxProperties;
 use App\Extensions\Spatie\Data\Proxmox\PropertyList;
 use App\Extensions\Spatie\Data\Proxmox\ProxmoxProperty;
+use App\Support\ByteUnit;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
 
@@ -157,17 +158,7 @@ class DiskData extends Data
         };
 
         // size carries an optional K/M/G/T unit suffix scaling it into bytes.
-        $size = 0;
-        if (filled($get('size')) && preg_match('/^(\d+)([KMGT])?$/', $get('size'), $sizeMatch)) {
-            $sizeValue = (int) $sizeMatch[1];
-            $size = match ($sizeMatch[2] ?? '') {
-                'K' => $sizeValue * 1024,
-                'M' => $sizeValue * 1024 * 1024,
-                'G' => $sizeValue * 1024 * 1024 * 1024,
-                'T' => $sizeValue * 1024 * 1024 * 1024 * 1024,
-                default => $sizeValue,
-            };
-        }
+        $size = filled($get('size')) ? (ByteUnit::parseSize($get('size')) ?? 0) : 0;
 
         // These enums use tryFrom() (null/RAW on an unknown value) so an
         // unfamiliar PVE-version value degrades gracefully rather than throwing.
@@ -181,24 +172,25 @@ class DiskData extends Data
 
         // Bandwidth limits accept either a byte value or an mbps value (which
         // wins when both are present) that scales up to bytes.
+        $mbps = fn (string $key) => ByteUnit::Mebibytes->toBytes((float) $get($key));
         $bps = match (true) {
-            filled($get('mbps')) => (int) ($get('mbps') * 1024 * 1024),
+            filled($get('mbps')) => $mbps('mbps'),
             filled($get('bps')) => (int) $get('bps'),
             default => null,
         };
         $bpsRead = match (true) {
-            filled($get('mbps_rd')) => (int) ($get('mbps_rd') * 1024 * 1024),
+            filled($get('mbps_rd')) => $mbps('mbps_rd'),
             filled($get('bps_rd')) => (int) $get('bps_rd'),
             default => null,
         };
         $bpsWrite = match (true) {
-            filled($get('mbps_wr')) => (int) ($get('mbps_wr') * 1024 * 1024),
+            filled($get('mbps_wr')) => $mbps('mbps_wr'),
             filled($get('bps_wr')) => (int) $get('bps_wr'),
             default => null,
         };
-        $bpsMax = filled($get('mbps_max')) ? (int) ($get('mbps_max') * 1024 * 1024) : null;
-        $bpsReadMax = filled($get('mbps_rd_max')) ? (int) ($get('mbps_rd_max') * 1024 * 1024) : null;
-        $bpsWriteMax = filled($get('mbps_wr_max')) ? (int) ($get('mbps_wr_max') * 1024 * 1024) : null;
+        $bpsMax = filled($get('mbps_max')) ? $mbps('mbps_max') : null;
+        $bpsReadMax = filled($get('mbps_rd_max')) ? $mbps('mbps_rd_max') : null;
+        $bpsWriteMax = filled($get('mbps_wr_max')) ? $mbps('mbps_wr_max') : null;
 
         // Length limits accept a *_max_length key or an older *_length alias.
         $bpsReadMaxLength = $get('bps_rd_max_length', $get('bps_rd_length'));
