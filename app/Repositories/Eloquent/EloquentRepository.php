@@ -5,11 +5,11 @@ namespace App\Repositories\Eloquent;
 use App\Contracts\Repository\RepositoryInterface;
 use App\Exceptions\Model\DataValidationException;
 use App\Exceptions\Repository\RecordNotFoundException;
+use App\Models\Model;
 use App\Repositories\Repository;
 use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
@@ -74,7 +74,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
     /**
      * Return an instance of the builder to use for this repository.
      *
-     * @return Builder
+     * @return Builder<Model>
      */
     public function getBuilder()
     {
@@ -86,7 +86,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      *
      * @return Model|bool
      *
-     * @throws \Pterodactyl\Exceptions\Model\DataValidationException
+     * @throws DataValidationException
      */
     public function create(array $fields, bool $validate = true, bool $force = false)
     {
@@ -109,7 +109,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      *
      * @return Model
      *
-     * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function find(int $id)
     {
@@ -133,7 +133,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      *
      * @return Model
      *
-     * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
+     * @throws RecordNotFoundException
      */
     public function findFirstWhere(array $fields)
     {
@@ -149,7 +149,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      */
     public function findCountWhere(array $fields): int
     {
-        return $this->getBuilder()->where($fields)->count($this->getColumns());
+        return $this->getBuilder()->where($fields)->count();
     }
 
     /**
@@ -176,8 +176,8 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      * @param  int  $id
      * @return Model|bool
      *
-     * @throws \Pterodactyl\Exceptions\Model\DataValidationException
-     * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
+     * @throws DataValidationException
+     * @throws RecordNotFoundException
      */
     public function update($id, array $fields, bool $validate = true, bool $force = false)
     {
@@ -227,8 +227,8 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
      *
      * @return Model
      *
-     * @throws \Pterodactyl\Exceptions\Model\DataValidationException
-     * @throws \Pterodactyl\Exceptions\Repository\RecordNotFoundException
+     * @throws DataValidationException
+     * @throws RecordNotFoundException
      */
     public function updateOrCreate(array $where, array $fields, bool $validate = true, bool $force = false)
     {
@@ -242,7 +242,7 @@ abstract class EloquentRepository extends Repository implements RepositoryInterf
             return $this->create(array_merge($where, $fields), $validate, $force);
         }
 
-        return $this->update($instance->id, $fields, $validate, $force);
+        return $this->update($instance->getKey(), $fields, $validate, $force);
     }
 
     /**
