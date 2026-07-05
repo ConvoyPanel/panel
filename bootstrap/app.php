@@ -36,11 +36,16 @@ return Application::configure(basePath: dirname(__DIR__))
             });
 
             Route::middleware(['api'])->group(function () {
-                Route::middleware(['auth:sanctum'])
+                // The Application API (external Bearer-token clients) shares the
+                // exact same route definitions as the admin panel — one source
+                // of truth. Session vs. token access is differentiated at the
+                // guard (auth:sanctum here vs. web session on /api/admin), and
+                // token-forbidden routes opt out via DenyApiTokenAccess.
+                Route::middleware(['auth:sanctum', AdminAuthenticate::class])
                     ->prefix('/api/application')
                     ->as('application.')
                     ->scopeBindings()
-                    ->group(base_path('routes/api-application.php'));
+                    ->group(base_path('routes/api-admin.php'));
 
                 Route::middleware([CotermAuthenticate::class])
                     ->prefix('/api/coterm')

@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin;
-use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
+use App\Http\Middleware\DenyApiTokenAccess;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -194,6 +194,10 @@ Route::prefix('/template-groups')->group(function () {
 */
 Route::resource('users', Admin\UserController::class)
     ->only(['index', 'show', 'store', 'update', 'destroy']);
+Route::post(
+    '/users/{user}/generate-sso-token',
+    [Admin\UserController::class, 'getSSOToken'],
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -234,6 +238,11 @@ Route::prefix('/coterms')->group(function () {
 |
 | Endpoint: /api/admin/tokens
 |
+| Session-only: managing the panel-wide API tokens must never be possible
+| with an API token itself, so this is gated behind DenyApiTokenAccess even
+| though the rest of this file is also served to the token API.
+|
 */
 Route::resource('tokens', Admin\TokenController::class)
-    ->only(['index', 'store', 'destroy']);
+    ->only(['index', 'store', 'destroy'])
+    ->middleware(DenyApiTokenAccess::class);
