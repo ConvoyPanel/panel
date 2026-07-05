@@ -225,6 +225,56 @@ covered instead by their characterization tests. Suite: 74 passed.
   MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
   against a restored prod snapshot; reconcile `develop`'s newer commits.
 
+### Cutover migration audit (DONE — no prod data needed)
+The only migrations that actually *execute* at cutover are the **24 on `next` but not on
+`develop`/prod** (pgloader copies the `migrations` table, so prod's already-run migrations are
+skipped). Diffed the two branches to isolate that set and audited it for cross-engine hazards:
+- **No-op `renameColumn('x','x')`** (MySQL tolerates, Postgres rejects): only the one already
+  fixed in `2024_10_10_033133_...`; every other rename targets a genuinely different name. Clean.
+- **`tinyint(1)`→bool / `datetime`→`timestamptz`**: handled by the pgloader CAST rules.
+- **`->change()` calls** in the executing set (`update_vmid_column_type`, `make_server_status_nonnullable`,
+  `change_backups_completed_at_to_errors_column`, `update_size_column_on_backups_snapshots_tables`)
+  are numeric/string/boolean type-preserving changes Postgres accepts without a `USING` clause.
+- **`->after()`** appears widely but Postgres' Laravel grammar silently ignores it — not a failure.
+Residual risk is schema-drift between pgloader's MySQL-derived tables and Laravel's expectations,
+which only the **real-data dry run** (RUNBOOK "Dry run" section) can close. `migrate:fresh` already
+proves the 24 run clean on an *empty* Postgres DB (the RefreshDatabase test runs).
+
+### `develop` → `next` reconciliation ledger (39 commits, DONE analyzing)
+Backport audit of the 39 `develop`-only commits since merge-base `bdc9c413`. The same solo dev
+applied most fixes to *both* branches, so nearly all are already reconciled on `next`. Verified:
+- **Already in `next` (security-critical):** JWT signature validation (`4cf7c953` → `next`'s
+  `JWTService::decode` has `SignedWith` **and** the `app.url`→`app.key` decode-key fix, both with
+  explanatory comments); revoke API tokens on admin demotion (`dc09e2df` → `UserController::update`
+  has it, cleaner condition); realmtypes (`ea798dd7` → `RealmType` enum used throughout).
+- **Already in `next` / superseded:** Laravel 11 upgrade (`adfd703e` → `next` is on Laravel 12);
+  nameserver parse fix (`92c11ecf` → `ServerConfigData` uses `$get('nameserver', [])`);
+  too_many_ips message (`b3ec26c7` → `InsufficientAddressesException`, curated code).
+- **Deliberately NOT backported: guest-agent live password (`c431a7b6`/`bc9aada5`).** v4 live-set
+  the password over the QEMU guest agent (Windows→`Administrator`, Linux→`root`) on top of the
+  `cipassword` write. That path is now redundant: **cloudinit applies passwords on every supported OS,
+  Windows included**, so `ServerAuthService::setPassword` stays a single `cipassword` write. The
+  guest-agent route needs the agent running + OS-specific usernames — strictly more fragile for no
+  behavioral gain — so it's intentionally dropped, not carried onto next. (Explored a backport this
+  session, then reverted per that call; `next`'s `ProxmoxGuestAgentRepository::{getOsInfo,setUserPassword}`
+  remain available for other uses.)
+- **Genuine gaps still open (logged, not blockers):**
+  1. **Admin overview dashboard + metrics endpoint (`8e1729ec`, ~949 LOC).** `next` has no
+     `OverviewController`/`OverviewService`. A net-new v4 feature (2026); Phase 4/5 material, not a
+     cutover blocker. Port backend (`OverviewController`/`Service`/`Transformer`) + frontend
+     (`OverviewContainer`) if wanted at launch.
+  2. **`ac13cefc` skip no-op Proxmox Configure tasks.** Partially covered by Phase 2's redundant-write
+     filter (`syncNetworkDeviceConfig`); the `CloudinitService`/`AllocationService` no-op skips in that
+     commit aren't all confirmed present — compare if pursuing. Password-job retries already present
+     (`tries = 3`).
+  3. **`22c4693e` locale validation.** `next` has no `LocaleController` (only `Base/IndexController`) —
+     likely the whole locale-switch endpoint is gone/moot on `next`; confirm before porting the
+     `LocaleRequest`.
+- **Skipped (v4-only noise):** all CHANGELOG/docs commits, FOSSA removal, compose db/redis port
+  exposure (`844b96a5`/`83279f01` — moot on ddev), IP pagination `999999` hack (`3c6200ca` — a v4
+  workaround, don't carry blindly), composer security bumps (`e3416c77` — `next` has its own Laravel-12
+  lock; run `composer audit` independently instead of cherry-picking).
+
 ## Product follow-ups to add to the roadmap
 
 - **Power-action locking.** User-initiated server power actions need an app-level lock so the user

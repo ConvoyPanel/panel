@@ -13,6 +13,10 @@ class ServerAuthService
 
     public function setPassword(Server $server, string $password): void
     {
+        // Cloudinit now applies passwords on every supported OS (Windows included), so it's the
+        // single source of truth here. The old QEMU-guest-agent live-set path (v4) was a more
+        // fragile duplicate — it needed the agent running and OS-specific usernames — and is
+        // deliberately not carried onto next.
         $this->configRepository->setServer($server)->update(['cipassword' => $password]);
     }
 
