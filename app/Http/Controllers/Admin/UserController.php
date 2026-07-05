@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\Api\JWTService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -58,12 +59,20 @@ class UserController
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'root_admin' => $request->root_admin,
-            ...(is_null($request->password) ? [] : ['password' => Hash::make($request->password)]),
-        ]);
+        DB::transaction(function () use ($request, $user) {
+            // Demoting an admin: revoke their API tokens so elevated access
+            // doesn't linger on tokens issued while they were an admin.
+            if ($user->root_admin && ! $request->boolean('root_admin')) {
+                $user->tokens()->delete();
+            }
+
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'root_admin' => $request->root_admin,
+                ...(is_null($request->password) ? [] : ['password' => Hash::make($request->password)]),
+            ]);
+        });
 
         $user->loadCount(['servers']);
 
