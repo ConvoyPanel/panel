@@ -27,35 +27,78 @@ namespace App\Console\Commands\User;
 
 use App\Exceptions\Model\DataValidationException;
 use App\Models\User;
-use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\text;
 
 class MakeUserCommand extends Command
 {
     protected $description = 'Creates a user on the system via the CLI.';
 
-    protected $signature = 'c:user:make {--email=} {--name=} {--password=} {--admin=}';
+    protected $signature = 'c:user:make
+        {--email= : Email address}
+        {--name= : Name}
+        {--password= : Password}
+        {--admin= : Whether the user is an administrator (true/false)}';
 
     /**
      * Handle command request to create a new user.
-     *
-     * @throws Exception
-     * @throws DataValidationException
      */
-    public function handle(): void
+    public function handle(): int
     {
-        $root_admin = $this->option('admin') ?? $this->confirm('Is this user an administrator?');
-        $email = $this->option('email') ?? $this->ask('Email Address');
-        $name = $this->option('name') ?? $this->ask('Name');
-        $password = $this->option('password') ?? $this->secret('Password');
+        $rootAdmin = $this->rootAdmin();
 
-        $user = User::create([
-            'name' => $name,
-            'email' => $email,
-            'root_admin' => (bool) $root_admin,
-            'password' => Hash::make($password),
-        ]);
+        if ($rootAdmin === null) {
+            $this->components->error('The --admin option must be a boolean value: true, false, 1, or 0.');
+
+            return self::FAILURE;
+        }
+
+        $data = [
+            'email' => $this->option('email') ?? text(
+                label: 'Email Address',
+                required: true,
+                validate: fn (string $value) => $this->validationError('email', $value),
+            ),
+            'name' => $this->option('name') ?? text(
+                label: 'Name',
+                required: true,
+                validate: fn (string $value) => $this->validationError('name', $value),
+            ),
+            'password' => $this->option('password') ?? password(
+                label: 'Password',
+                required: true,
+            ),
+            'root_admin' => $rootAdmin,
+        ];
+
+        $validator = Validator::make($data, $this->rules());
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
+                $this->components->error($error);
+            }
+
+            return self::FAILURE;
+        }
+
+        try {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'root_admin' => $data['root_admin'],
+                'password' => $data['password'],
+            ]);
+        } catch (DataValidationException $exception) {
+            foreach ($exception->getMessageBag()->all() as $error) {
+                $this->components->error($error);
+            }
+
+            return self::FAILURE;
+        }
 
         $this->table(['Field', 'Value'], [
             ['Internal ID', $user->id],
@@ -63,5 +106,44 @@ class MakeUserCommand extends Command
             ['Name', $user->name],
             ['Admin', $user->root_admin ? 'Yes' : 'No'],
         ]);
+
+        return self::SUCCESS;
+    }
+
+    private function rootAdmin(): ?bool
+    {
+        $admin = $this->option('admin');
+
+        if ($admin === null) {
+            return confirm('Is this user an administrator?');
+        }
+
+        if ($admin === '') {
+            return null;
+        }
+
+        return filter_var($admin, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function rules(): array
+    {
+        $rules = User::getRules();
+
+        return [
+            'email' => $rules['email'],
+            'name' => $rules['name'],
+            'password' => ['required', 'string'],
+            'root_admin' => $rules['root_admin'],
+        ];
+    }
+
+    private function validationError(string $field, string $value): ?string
+    {
+        $validator = Validator::make([$field => $value], [$field => $this->rules()[$field]]);
+
+        return $validator->errors()->first($field) ?: null;
     }
 }

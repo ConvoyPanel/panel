@@ -13,7 +13,6 @@ use App\Services\Api\JWTService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -50,7 +49,7 @@ class UserController
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
             'root_admin' => $request->root_admin,
         ])->loadCount(['servers']);
 
@@ -70,7 +69,7 @@ class UserController
                 'name' => $request->name,
                 'email' => $request->email,
                 'root_admin' => $request->root_admin,
-                ...(is_null($request->password) ? [] : ['password' => Hash::make($request->password)]),
+                ...(is_null($request->password) ? [] : ['password' => $request->password]),
             ]);
         });
 

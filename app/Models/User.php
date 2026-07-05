@@ -22,6 +22,7 @@ use Laravel\Sanctum\NewAccessToken;
  * @property string $name
  * @property string $email
  * @property bool $root_admin
+ *
  * @mixin Eloquent
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
@@ -73,6 +74,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return [
             'email_verified_at' => 'datetime',
+            'password' => 'hashed',
             'root_admin' => 'boolean',
         ];
     }
