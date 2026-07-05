@@ -4,7 +4,10 @@ namespace App\Data\Server\Proxmox\Config;
 
 use App\Enums\Server\CloudinitType;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
+use function collect;
+use function preg_match;
 use function rawurldecode;
 
 class CloudinitConfigData extends Data
@@ -47,6 +50,13 @@ class CloudinitConfigData extends Data
         public ?string $searchDomain,
 
         public ?string $sshKeys,
+
+        /**
+         * @var Collection<int, IpConfigData> $ipConfigs
+         *
+         * Per-NIC cloud-init IP config, keyed by NIC index (`ipconfig{n}`).
+         */
+        public Collection $ipConfigs,
     ) {}
 
     public static function fromRaw(array $raw): self
@@ -62,6 +72,11 @@ class CloudinitConfigData extends Data
             isAutoUpgradeEnabled: $get('ciupgrade', false),
             searchDomain: $get('searchdomain'),
             sshKeys: $exists('sshkeys') ? rawurldecode($get('sshkeys')) : null,
+            ipConfigs: collect($raw)
+                ->filter(fn ($value, $key) => preg_match('/^ipconfig\d+$/', $key))
+                ->mapWithKeys(fn ($value, $key) => [
+                    (int) substr($key, strlen('ipconfig')) => IpConfigData::fromString($value),
+                ]),
         );
     }
 }

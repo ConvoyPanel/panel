@@ -2,6 +2,7 @@
 
 namespace App\Services\Servers;
 
+use App\Data\Server\Proxmox\Config\IpConfigData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Address;
@@ -28,10 +29,23 @@ class CloudinitService
      */
     public function setHostname(Server $server, string $hostname): void
     {
-        $this->configRepository->setServer($server)->update([
-            'name' => $hostname,
-            'searchdomain' => $hostname,
-        ]);
+        $config = $this->configRepository->setServer($server)->getConfig();
+
+        // Write only what differs, so an unchanged hostname doesn't enqueue a
+        // redundant Proxmox "Configure" task.
+        $payload = [];
+        if ($config->name !== $hostname) {
+            $payload['name'] = $hostname;
+        }
+        if ($config->cloudinit->searchDomain !== $hostname) {
+            $payload['searchdomain'] = $hostname;
+        }
+
+        if ($payload === []) {
+            return;
+        }
+
+        $this->configRepository->setServer($server)->update($payload);
     }
 
     /**
@@ -82,15 +96,24 @@ class CloudinitService
         // guard the write with that read's digest (optimistic concurrency).
         $config = $this->configRepository->setServer($server)->getConfig();
 
+        // Parse our own desired string through the same codec as the stored config,
+        // so the comparison is order/format-insensitive, and skip NICs that are
+        // already at the target ipconfig (avoids a redundant Configure task).
+        $desired = IpConfigData::fromString($payload);
+
         /** @var array<string, string> $networkDevices */
         $networkDevices = $config->networkDevices
-            ->map(fn (NetworkDeviceData $device) => ["ipconfig$device->id", $payload])
-            ->reduce(function (array $carry, array $item) {
-                [$id, $config] = $item;
-                $carry[$id] = $config;
+            ->filter(function (NetworkDeviceData $device) use ($config, $desired) {
+                $current = $config->cloudinit->ipConfigs->get($device->id);
 
-                return $carry;
-            }, []);
+                return $current === null || $current->toArray() !== $desired->toArray();
+            })
+            ->mapWithKeys(fn (NetworkDeviceData $device) => ["ipconfig$device->id" => $payload])
+            ->all();
+
+        if ($networkDevices === []) {
+            return;
+        }
 
         $this->configRepository->update($networkDevices, $config->digest);
     }

@@ -263,18 +263,23 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
      `OverviewController`/`OverviewService`. A net-new v4 feature (2026); Phase 4/5 material, not a
      cutover blocker. Port backend (`OverviewController`/`Service`/`Transformer`) + frontend
      (`OverviewContainer`) if wanted at launch.
-  2. **`ac13cefc` skip no-op Proxmox Configure tasks — PARTIALLY DONE.** Verified `next` lacked the
-     no-op skip in `AllocationService::syncSettings` (cores/memory), `CloudinitService::setHostname`
-     (name/searchdomain), and `CloudinitService::setIpConfig` (ipconfig{n}) — all POSTed
-     unconditionally, enqueuing a redundant PVE "Configure" task on every sync (same class as Phase 2's
-     `syncNetworkDeviceConfig` filter).
-     - **DONE this session:** `syncSettings` now diffs cores/memory against the config it already reads
-       and writes only changed keys (zero extra round trip; `$config->cpu->coreCount` + `$config->memory`
-       bytes→MiB). Tests in `AllocationServiceTest` (no-op skip; changed-only write). Suite 85 passed.
-     - **Follow-ups (left intentionally):** `setHostname` and `setIpConfig` no-op skips need current
-       `searchdomain` / per-NIC `ipconfig{n}` values, which `ServerConfigData` doesn't model yet
-       (`name` is modelled, `searchdomain`/`ipconfig{n}` aren't). Model those before adding the skip —
-       don't rush a half-comparison on the VM write path.
+  2. **`ac13cefc` skip no-op Proxmox Configure tasks — DONE.** Verified `next` lacked the no-op skip in
+     `AllocationService::syncSettings` (cores/memory), `CloudinitService::setHostname` (name/searchdomain),
+     and `CloudinitService::setIpConfig` (ipconfig{n}) — all POSTed unconditionally, enqueuing a redundant
+     PVE "Configure" task on every sync (same class as Phase 2's `syncNetworkDeviceConfig` filter).
+     - `syncSettings` now diffs cores/memory against the config it already reads and writes only changed
+       keys (zero extra round trip; `$config->cpu->coreCount` + `$config->memory` bytes→MiB).
+     - `setHostname` diffs against `$config->name` + `$config->cloudinit->searchDomain` (searchDomain was
+       already modelled on `CloudinitConfigData`) and writes only what differs.
+     - `setIpConfig` needed modelling: added `App\Data\Server\Proxmox\Config\IpConfigData` (parses a PVE
+       `ipconfig{n}` property string) and `CloudinitConfigData::$ipConfigs` (`Collection<int, IpConfigData>`
+       keyed by NIC index, parsed in `fromRaw`). The desired string is parsed through the same codec so the
+       compare is order/format-insensitive; NICs already at the target are skipped and an all-match sync
+       returns before writing (no empty digest-only POST). The emitted write payload is byte-for-byte
+       unchanged — only *which* NICs get written narrowed.
+     - Tests: `AllocationServiceTest` (hardware no-op/changed), `CloudinitServiceTest` (ipconfig parse +
+       order-insensitivity, per-NIC modelling, hostname skip/write, ipconfig skip/write). Full suite 91
+       passed; PHPStan zero; `IpConfigData`/`ipConfigs` flow into `generated.d.ts` on codegen.
      - Password-job retries: `next` has `tries = 3`; `ac13cefc` raised v4 to 15 (30 s backoff) to survive
        slow disk-resize during creation. Left as a tuning decision, not blind-ported.
   3. **`22c4693e` locale validation — RESOLVED (moot).** Confirmed `next` has no i18n feature at all:
