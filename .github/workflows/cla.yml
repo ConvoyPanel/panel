@@ -1,0 +1,357 @@
+name: CLA
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  statuses: write
+
+env:
+  CLA_DOCUMENT_PATH: CONTRIBUTOR_LICENSE_AGREEMENT
+  # Required: set repository variable CLA_SIGNATURE_REPOSITORY to owner/private-repo
+  # and repository secret CLA_SIGNATURE_TOKEN to a token with contents:write access.
+  CLA_SIGNATURE_REPOSITORY: ${{ vars.CLA_SIGNATURE_REPOSITORY }}
+  CLA_SIGNATURE_TOKEN: ${{ secrets.CLA_SIGNATURE_TOKEN }}
+  CLA_SIGNATURE_BRANCH: main
+  CLA_SIGNATURE_PATH: .github/cla-signatures.json
+  CLA_STATUS_CONTEXT: CLA
+  CLA_SIGNING_STATEMENT: I am at least 18 years old, I have read the Performave Individual Contributor License Agreement, and I electronically sign and agree to it.
+  CLA_ALLOWLIST: dependabot[bot],renovate[bot],github-actions[bot]
+
+jobs:
+  cla:
+    name: Verify contributor license agreement
+    if: github.event_name == 'pull_request_target' || (github.event_name == 'issue_comment' && github.event.issue.pull_request)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CLA signatures
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- performave-cla-bot -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const documentPath = process.env.CLA_DOCUMENT_PATH;
+            const configuredSignatureRepository = (process.env.CLA_SIGNATURE_REPOSITORY || '').trim();
+            const signatureToken = (process.env.CLA_SIGNATURE_TOKEN || '').trim();
+            const signatureBranch = process.env.CLA_SIGNATURE_BRANCH;
+            const signaturePath = process.env.CLA_SIGNATURE_PATH;
+            const statusContext = process.env.CLA_STATUS_CONTEXT;
+            const signingStatement = process.env.CLA_SIGNING_STATEMENT;
+            const allowlist = new Set(
+              process.env.CLA_ALLOWLIST.split(',')
+                .map((value) => value.trim().toLowerCase())
+                .filter(Boolean),
+            );
+
+            const [signatureOwner, signatureRepo, extraSignatureRepoPart] = configuredSignatureRepository.split('/');
+
+            if (!signatureOwner || !signatureRepo || extraSignatureRepoPart) {
+              throw new Error('CLA_SIGNATURE_REPOSITORY must be set and formatted as owner/repo');
+            }
+
+            if (!signatureToken) {
+              throw new Error('CLA_SIGNATURE_TOKEN is required');
+            }
+
+            const signatureRequest = (route, parameters) => {
+              const headers = signatureToken
+                ? { ...(parameters.headers || {}), authorization: `Bearer ${signatureToken}` }
+                : parameters.headers;
+
+              return github.request(route, { ...parameters, headers });
+            };
+
+            const isIssueComment = context.eventName === 'issue_comment';
+            const commentBody = isIssueComment ? context.payload.comment.body.trim() : '';
+            const isSigningComment = commentBody === signingStatement;
+            const isRecheckComment = ['recheck cla', '/recheck-cla'].includes(commentBody.toLowerCase());
+
+            if (isIssueComment && !isSigningComment && !isRecheckComment) {
+              return;
+            }
+
+            const prNumber = isIssueComment ? context.payload.issue.number : context.payload.pull_request.number;
+            const { data: pullRequest } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const headSha = pullRequest.head.sha;
+            const baseRef = pullRequest.base.ref;
+            const baseSha = pullRequest.base.sha;
+
+            const isBot = (user) => {
+              if (!user) return false;
+              return user.type === 'Bot' || user.login.endsWith('[bot]') || allowlist.has(user.login.toLowerCase());
+            };
+
+            const userKey = (user) => String(user.id);
+
+            const ensureSignatureBranch = async () => {
+              try {
+                await signatureRequest('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+                  owner: signatureOwner,
+                  repo: signatureRepo,
+                  ref: `heads/${signatureBranch}`,
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+
+                const { data: signatureRepository } = await signatureRequest('GET /repos/{owner}/{repo}', {
+                  owner: signatureOwner,
+                  repo: signatureRepo,
+                });
+
+                const { data: defaultRef } = await signatureRequest('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+                  owner: signatureOwner,
+                  repo: signatureRepo,
+                  ref: `heads/${signatureRepository.default_branch}`,
+                });
+
+                await signatureRequest('POST /repos/{owner}/{repo}/git/refs', {
+                  owner: signatureOwner,
+                  repo: signatureRepo,
+                  ref: `refs/heads/${signatureBranch}`,
+                  sha: defaultRef.object.sha,
+                });
+              }
+            };
+
+            const getAgreement = async () => {
+              const { data } = await github.rest.repos.getContent({ owner, repo, path: documentPath, ref: baseRef });
+              if (Array.isArray(data) || data.type !== 'file') {
+                throw new Error(`${documentPath} must be a file`);
+              }
+
+              return {
+                blobSha: data.sha,
+                url: `${context.serverUrl}/${owner}/${repo}/blob/${baseSha}/${documentPath}`,
+              };
+            };
+
+            const getSignatureFile = async () => {
+              await ensureSignatureBranch();
+
+              try {
+                const { data } = await signatureRequest('GET /repos/{owner}/{repo}/contents/{path}', {
+                  owner: signatureOwner,
+                  repo: signatureRepo,
+                  path: signaturePath,
+                  ref: signatureBranch,
+                });
+
+                if (Array.isArray(data) || data.type !== 'file') {
+                  throw new Error(`${signaturePath} must be a file`);
+                }
+
+                const records = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+                if (!Array.isArray(records.signatures)) {
+                  throw new Error(`${signaturePath} must contain a signatures array`);
+                }
+
+                return {
+                  sha: data.sha,
+                  records,
+                };
+              } catch (error) {
+                if (error.status !== 404) throw error;
+
+                return {
+                  sha: undefined,
+                  records: {
+                    version: 1,
+                    agreementPath: documentPath,
+                    signatures: [],
+                  },
+                };
+              }
+            };
+
+            const saveSignatureFile = async (file, message) => {
+              await signatureRequest('PUT /repos/{owner}/{repo}/contents/{path}', {
+                owner: signatureOwner,
+                repo: signatureRepo,
+                path: signaturePath,
+                branch: signatureBranch,
+                sha: file.sha,
+                message,
+                content: Buffer.from(`${JSON.stringify(file.records, null, 2)}\n`, 'utf8').toString('base64'),
+              });
+            };
+
+            const listPullRequestContributors = async () => {
+              const contributors = new Map();
+              const unknownCommits = [];
+
+              if (!isBot(pullRequest.user)) {
+                contributors.set(userKey(pullRequest.user), pullRequest.user);
+              }
+
+              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+              });
+
+              for (const commit of commits) {
+                if (commit.author && !isBot(commit.author)) {
+                  contributors.set(userKey(commit.author), commit.author);
+                  continue;
+                }
+
+                if (!commit.author) {
+                  unknownCommits.push({
+                    sha: commit.sha.slice(0, 12),
+                    name: commit.commit.author.name,
+                    email: commit.commit.author.email,
+                  });
+                }
+              }
+
+              return { contributors: [...contributors.values()], unknownCommits };
+            };
+
+            const createCommitStatus = async (state, description) => {
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: headSha,
+                state,
+                context: statusContext,
+                description: description.slice(0, 140),
+                target_url: pullRequest.html_url,
+              });
+            };
+
+            const upsertStatusComment = async (body) => {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number: prNumber,
+                per_page: 100,
+              });
+
+              const existing = comments.find((comment) => comment.body.includes(marker));
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body,
+                });
+              }
+            };
+
+            const agreement = await getAgreement();
+            const signatureFile = await getSignatureFile();
+
+            if (isSigningComment) {
+              const signer = context.payload.comment.user;
+
+              if (isBot(signer)) {
+                await github.rest.reactions.createForIssueComment({
+                  owner,
+                  repo,
+                  comment_id: context.payload.comment.id,
+                  content: '-1',
+                });
+                throw new Error('Bot users cannot sign the CLA. Add trusted bots to CLA_ALLOWLIST instead.');
+              }
+
+              const alreadySigned = signatureFile.records.signatures.some((signature) => {
+                return signature.githubUserId === signer.id && signature.agreementBlobSha === agreement.blobSha;
+              });
+
+              if (!alreadySigned) {
+                signatureFile.records.signatures.push({
+                  githubLogin: signer.login,
+                  githubUserId: signer.id,
+                  signedAt: context.payload.comment.created_at,
+                  repository: `${owner}/${repo}`,
+                  pullRequest: prNumber,
+                  commentId: context.payload.comment.id,
+                  commentUrl: context.payload.comment.html_url,
+                  agreementPath: documentPath,
+                  agreementBlobSha: agreement.blobSha,
+                  agreementUrl: agreement.url,
+                  signingStatement,
+                });
+
+                await saveSignatureFile(
+                  signatureFile,
+                  `Record CLA signature for ${signer.login} on ${owner}/${repo}#${prNumber}`,
+                );
+              }
+
+              await github.rest.reactions.createForIssueComment({
+                owner,
+                repo,
+                comment_id: context.payload.comment.id,
+                content: '+1',
+              });
+            }
+
+            const { contributors, unknownCommits } = await listPullRequestContributors();
+            const signedUsers = new Set(
+              signatureFile.records.signatures
+                .filter((signature) => signature.agreementBlobSha === agreement.blobSha)
+                .map((signature) => String(signature.githubUserId)),
+            );
+            const missing = contributors.filter((contributor) => !signedUsers.has(userKey(contributor)));
+            const hasUnknownCommits = unknownCommits.length > 0;
+            const hasPassed = missing.length === 0 && !hasUnknownCommits;
+
+            const missingList = missing.length > 0
+              ? missing.map((contributor) => `- @${contributor.login}`).join('\n')
+              : '- None';
+
+            const unknownList = hasUnknownCommits
+              ? unknownCommits.map((commit) => `- ${commit.sha} by ${commit.name} <${commit.email}>`).join('\n')
+              : '- None';
+
+            const body = `${marker}
+            ## Contributor License Agreement
+
+            ${hasPassed ? 'All identified human contributors have signed the current CLA.' : 'This pull request cannot be merged until the CLA check passes.'}
+
+            Current CLA: ${agreement.url}
+
+            To sign, comment exactly:
+
+            \`\`\`text
+            ${signingStatement}
+            \`\`\`
+
+            This signature is only for individual contributors who are at least 18 years old. Do not use this workflow for contributions owned by a company, employer, client, school, or other legal entity; those require separate written permission or a separate contributor agreement.
+
+            Missing signatures:
+            ${missingList}
+
+            Commits without a linked GitHub author, requiring maintainer review:
+            ${unknownList}
+
+            If you already signed, comment \`recheck cla\`.
+            `.replace(/^ {12}/gm, '').trim();
+
+            await upsertStatusComment(body);
+
+            if (hasPassed) {
+              await createCommitStatus('success', 'All identified contributors signed the CLA');
+              return;
+            }
+
+            await createCommitStatus('failure', 'Missing CLA signatures or unlinked commit authors');
+            core.setFailed('Missing CLA signatures or unlinked commit authors.');
