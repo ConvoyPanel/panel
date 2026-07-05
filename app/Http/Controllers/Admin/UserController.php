@@ -98,10 +98,13 @@ class UserController
 
     public function getSSOToken(User $user)
     {
-        $token = $this->JWTService
-            ->setExpiresAt(CarbonImmutable::now()->addSeconds(15))
-            ->setUser($user)
-            ->handle(config('app.key'), config('app.url'), $user->uuid);
+        $token = $this->JWTService->issue(
+            signingKey: config('app.key'),
+            audience: config('app.url'),
+            identifier: $user->uuid,
+            claims: ['user_uuid' => $user->uuid],
+            expiresAt: CarbonImmutable::now()->addSeconds(15),
+        );
 
         return new SSOTokenData(
             userId: $user->id,

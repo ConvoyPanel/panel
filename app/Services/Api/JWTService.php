@@ -4,8 +4,8 @@ namespace App\Services\Api;
 
 use App\Exceptions\Service\Api\InvalidJWTException;
 use App\Extensions\Lcobucci\JWT\Validation\Clock;
-use App\Models\User;
 use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use Illuminate\Support\Str;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
@@ -20,89 +20,43 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 
 class JWTService
 {
-    private array $claims = [];
-
-    private ?User $user = null;
-
-    private ?\DateTimeImmutable $expiresAt = null;
-
-    private ?string $subject = null;
-
     /**
-     * Set the claims to include in this JWT.
+     * Mint a signed JWT.
+     *
+     * @param  string  $signingKey  HMAC-SHA256 signing key.
+     * @param  string  $audience  Who the token is permitted for (a connection address).
+     * @param  string  $identifier  Seed hashed into the token's unique id (jti).
+     * @param  array<string, mixed>  $claims  Additional claims to embed.
      */
-    public function setClaims(array $claims): self
-    {
-        $this->claims = $claims;
-
-        return $this;
-    }
-
-    /**
-     * Attaches a user to the JWT being created and will automatically inject the
-     * "user_uuid" key into the final claims array with the user's UUID.
-     */
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function setExpiresAt(\DateTimeImmutable $date): self
-    {
-        $this->expiresAt = $date;
-
-        return $this;
-    }
-
-    public function setSubject(string $subject): self
-    {
-        $this->subject = $subject;
-
-        return $this;
-    }
-
-    /**
-     * @param string $key
-     * @param string $permittedFor A connection address
-     * @param string|null $identifiedBy
-     * @param string $algorithm
-     * @return Plain
-     */
-    public function handle(string $key, string $permittedFor, ?string $identifiedBy, string $algorithm = 'sha256'): Plain
-    {
-        $identifier = hash($algorithm, $identifiedBy);
-        $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($key));
+    public function issue(
+        string $signingKey,
+        string $audience,
+        string $identifier,
+        array $claims = [],
+        ?DateTimeImmutable $expiresAt = null,
+    ): Plain {
+        $config = $this->configFor($signingKey);
+        $now = CarbonImmutable::now();
+        $jti = hash('sha256', $identifier);
 
         $builder = $config->builder()
             ->issuedBy(config('app.url'))
-            ->permittedFor($permittedFor)
-            ->identifiedBy($identifier)
-            ->withHeader('jti', $identifier)
-            ->issuedAt(CarbonImmutable::now())
-            ->canOnlyBeUsedAfter(CarbonImmutable::now()->subMinutes(5));
+            ->permittedFor($audience)
+            ->identifiedBy($jti)
+            ->withHeader('jti', $jti)
+            ->issuedAt($now)
+            ->canOnlyBeUsedAfter($now->subMinutes(5))
+            ->withClaim('unique_id', Str::random());
 
-        if ($this->expiresAt) {
-            $builder = $builder->expiresAt($this->expiresAt);
+        if ($expiresAt !== null) {
+            $builder = $builder->expiresAt($expiresAt);
         }
 
-        if (! empty($this->subject)) {
-            $builder = $builder->relatedTo($this->subject)->withHeader('sub', $this->subject);
+        foreach ($claims as $name => $value) {
+            $builder = $builder->withClaim($name, $value);
         }
 
-        foreach ($this->claims as $key => $value) {
-            $builder = $builder->withClaim($key, $value);
-        }
-
-        if (! is_null($this->user)) {
-            $builder = $builder
-                ->withClaim('user_uuid', $this->user->uuid);
-        }
-
-        $token = $builder
-            ->withClaim('unique_id', Str::random())
-            ->getToken($config->signer(), $config->signingKey());
+        $token = $builder->getToken($config->signer(), $config->signingKey());
 
         if (! $token instanceof Plain) {
             throw new \LogicException('Expected JWT builder to return a plain token.');
@@ -111,9 +65,9 @@ class JWTService
         return $token;
     }
 
-    public function decode(string $key, string $token): UnencryptedToken
+    public function decode(string $signingKey, string $token): UnencryptedToken
     {
-        $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($key));
+        $config = $this->configFor($signingKey);
 
         try {
             $parsedToken = $config->parser()->parse($token);
@@ -123,9 +77,8 @@ class JWTService
 
         assert($parsedToken instanceof UnencryptedToken);
 
-        // Verify the signature too — StrictValidAt alone only checks the token
-        // is well-formed and unexpired, which would accept a forged token with
-        // arbitrary claims. SignedWith confirms it was signed with our key.
+        // StrictValidAt alone only checks the token is well-formed and unexpired, which would
+        // accept a forged token with arbitrary claims. SignedWith confirms it was signed with our key.
         if (! $config->validator()->validate(
             $parsedToken,
             new StrictValidAt(new Clock),
@@ -135,5 +88,10 @@ class JWTService
         }
 
         return $parsedToken;
+    }
+
+    private function configFor(string $signingKey): Configuration
+    {
+        return Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($signingKey));
     }
 }

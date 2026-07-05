@@ -7,9 +7,13 @@ use App\Services\Api\JWTService;
 function consumeToken(User $user, string $signingKey): string
 {
     return app(JWTService::class)
-        ->setExpiresAt(new DateTimeImmutable('+5 minutes'))
-        ->setClaims(['user_uuid' => $user->uuid])
-        ->handle($signingKey, config('app.url'), 'test')
+        ->issue(
+            signingKey: $signingKey,
+            audience: config('app.url'),
+            identifier: 'test',
+            claims: ['user_uuid' => $user->uuid],
+            expiresAt: new DateTimeImmutable('+5 minutes'),
+        )
         ->toString();
 }
 

@@ -25,19 +25,16 @@ class CotermJWTService
             'The server\'s node does not have a Coterm instance.',
         );
 
-        $token = $this->JWTService
-            ->setExpiresAt(CarbonImmutable::now()->addMinute())
-            ->setUser($user)
-            ->setClaims([
+        return $this->JWTService->issue(
+            signingKey: $server->node->coterm->token,
+            audience: $server->node->getCotermConnectionAddress(),
+            identifier: $user->uuid.$server->uuid,
+            claims: [
+                'user_uuid' => $user->uuid,
                 'server_uuid' => $server->uuid,
                 'console_type' => $consoleType->value,
-            ])
-            ->handle(
-                $server->node->coterm->token,
-                $server->node->getCotermConnectionAddress(),
-                $user->uuid.$server->uuid,
-            );
-
-        return $token;
+            ],
+            expiresAt: CarbonImmutable::now()->addMinute(),
+        );
     }
 }
