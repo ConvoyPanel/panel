@@ -4,7 +4,7 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
@@ -21,8 +21,7 @@ use Illuminate\Support\Facades\Queue;
 
 uses(
     Tests\TestCase::class,
-    DatabaseTransactions::class,
-    // Illuminate\Foundation\Testing\RefreshDatabase::class,
+    RefreshDatabase::class,
 )->beforeEach(function () {
     Http::preventStrayRequests();
     Queue::fake();

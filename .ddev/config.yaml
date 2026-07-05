@@ -24,6 +24,7 @@ web_environment:
   - DB_HOST=db
   - DB_PORT=5432
   - DB_DATABASE=db
+  - DB_TEST_DATABASE=db_test
   - DB_USERNAME=db
   - DB_PASSWORD=db
   - REDIS_HOST=redis
@@ -35,6 +36,13 @@ web_environment:
   - MAIL_MAILER=smtp
   - MAIL_HOST=localhost
   - MAIL_PORT=1025
+
+# The test suite (RefreshDatabase) runs against a separate `db_test` database so
+# its migrate:fresh / sequence churn never touches dev data. Postgres has no
+# CREATE DATABASE IF NOT EXISTS, so createdb is guarded to stay idempotent.
+hooks:
+  post-start:
+    - exec: "PGPASSWORD=db createdb -h db -U db db_test 2>/dev/null || true"
 
 # Replaces the compose `horizon` and `scheduler` services.
 web_extra_daemons:
