@@ -1,0 +1,36 @@
+<?php
+
+namespace Spatie\QueryBuilder;
+
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+
+/**
+ * Spatie QueryBuilder forwards calls to the wrapped Eloquent builder and
+ * returns itself for fluent builder methods. The package does this at runtime
+ * through __call(), so PHPStan needs these analysis-only method declarations.
+ *
+ * @template TModel of Model
+ * @method static<TModel> with(mixed ...$relations)
+ * @method static<TModel> withCount(mixed ...$relations)
+ * @method static<TModel> orderBy(mixed $column, string $direction = 'asc')
+ * @method static<TModel> where(mixed $column, mixed $operator = null, mixed $value = null, string $boolean = 'and')
+ * @method static<TModel> whereHas(mixed $relation, ?\Closure $callback = null, string $operator = '>=', int $count = 1)
+ * @method static<TModel> allowedFilters(mixed ...$filters)
+ * @method static<TModel> allowedSorts(mixed ...$sorts)
+ * @method static<TModel> defaultSort(mixed ...$sorts)
+ * @method EloquentCollection<int, TModel> get(mixed $columns = ['*'])
+ * @method LengthAwarePaginator<int, TModel> paginate(mixed $perPage = null, array<int, string> $columns = ['*'], string $pageName = 'page', mixed $page = null, mixed $total = null)
+ */
+class QueryBuilder
+{
+    /**
+     * @template T of Model
+     * @param  EloquentBuilder<T>|Relation<T, *, *>|class-string<T>  $subject
+     * @return static<T>
+     */
+    public static function for(EloquentBuilder|Relation|string $subject, mixed $request = null): static {}
+}

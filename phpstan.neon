@@ -4,6 +4,11 @@ includes:
 
 parameters:
 
+    stubFiles:
+        # Spatie QueryBuilder forwards Eloquent builder calls through __call();
+        # PHPStan cannot infer those fluent methods from the package itself.
+        - stubs/spatie-query-builder.stub
+
     paths:
         - app/
 

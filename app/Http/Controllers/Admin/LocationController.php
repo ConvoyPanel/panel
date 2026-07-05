@@ -20,7 +20,6 @@ class LocationController
     {
         $locations = QueryBuilder::for(Location::query())
             ->withCount(['nodes', 'servers'])
-            // @phpstan-ignore-next-line QueryBuilder macro typing is handled separately.
             ->defaultSort('short_code')
             ->allowedFilters(
                 ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard)],
