@@ -28,7 +28,10 @@ class DeleteServerAction
         $step = $deployment->steps()->create([
             'name' => 'delete-backups',
             'status' => DeploymentStatus::PENDING,
-            'progress_total' => $deployment->server->backups()->successful()->count() * 2, // 2 jobs for each backup: purge and monitor
+            'progress_total' => $deployment->server->backups()
+                ->whereNull('errors')
+                ->whereNotNull('completed_at')
+                ->count() * 2, // 2 jobs for each backup: purge and monitor
         ]);
 
         $jobs = array_flatten([

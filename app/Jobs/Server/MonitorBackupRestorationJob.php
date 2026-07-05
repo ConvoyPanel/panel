@@ -33,7 +33,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new WithoutOverlapping($this->server->id)];
+        return [new WithoutOverlapping((string) $this->server->id)];
     }
 
     public function handle(ProxmoxActivityRepository $repository): void

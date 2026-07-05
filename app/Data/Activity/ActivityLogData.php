@@ -58,7 +58,7 @@ class ActivityLogData extends Data
 
     private static function normalizeProperties(ActivityLog $model, Request $request): array
     {
-        if (! $model->properties || $model->properties->isEmpty()) {
+        if ($model->properties->isEmpty()) {
             return [];
         }
 

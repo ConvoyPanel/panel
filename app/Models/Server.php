@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $backup_count_limit
  * @property int $backup_size_limit
  * @property int $bandwidth_limit
+ * @property Node $node
  */
 class Server extends Model
 {
@@ -101,11 +102,17 @@ class Server extends Model
         return $this->hasOne(Template::class);
     }
 
+    /**
+     * @return HasMany<Backup, $this>
+     */
     public function backups(): HasMany
     {
         return $this->hasMany(Backup::class);
     }
 
+    /**
+     * @return HasMany<Deployment, $this>
+     */
     public function deployments(): HasMany
     {
         return $this->hasMany(Deployment::class);

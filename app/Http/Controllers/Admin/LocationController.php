@@ -20,8 +20,8 @@ class LocationController
     {
         $locations = QueryBuilder::for(Location::query())
             ->withCount(['nodes', 'servers'])
+            // @phpstan-ignore-next-line QueryBuilder macro typing is handled separately.
             ->defaultSort('short_code')
-            // @phpstan-ignore-next-line
             ->allowedFilters(
                 ['short_code', AllowedFilter::custom('*', new FiltersLocationWildcard)],
             )
@@ -69,7 +69,6 @@ class LocationController
     {
         $location->loadCount('nodes');
 
-        // @phpstan-ignore-next-line
         if ($location->nodes_count > 0) {
             throw new BadRequestHttpException(
                 'The location cannot be deleted with nodes still associated.',

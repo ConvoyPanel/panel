@@ -7,6 +7,7 @@ use App\Actions\Auth\GeneratePasskeyAuthenticationOptionsAction;
 use App\Exceptions\Http\Auth\InvalidAuthenticationMethodException;
 use App\Exceptions\Http\Auth\InvalidPasskeyException;
 use App\Http\Requests\Auth\ConfirmIdentityRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Http\Responses\FailedPasswordConfirmationResponse;
 
@@ -33,6 +34,11 @@ class ConfirmableIdentityController
 
     public function store(ConfirmIdentityRequest $request)
     {
+        $user = $request->user();
+        if (! $user instanceof User) {
+            throw new InvalidAuthenticationMethodException;
+        }
+
         if ($request->filled('passkey')) {
             // Handle passkey authentication
             $passkey = $this->findPasskeyAction->execute(
@@ -40,13 +46,13 @@ class ConfirmableIdentityController
                 $request->session()->get('passkeys.authentication-options')
             );
 
-            if (! $passkey || ! $passkey->user || $passkey->user->id !== $request->user()->id) {
+            if (! $passkey || $passkey->user->id !== $user->id) {
                 throw new InvalidPasskeyException;
             }
         } elseif ($request->filled('password')) {
             // Handle password confirmation
             $confirmed = auth()->validate([
-                'email' => $request->user()->email,
+                'email' => $user->email,
                 'password' => $request->input('password'),
             ]);
 

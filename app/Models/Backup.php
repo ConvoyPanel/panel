@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $uuid
+ * @property int $server_id
+ * @property int $storage_id
+ * @property bool $is_locked
+ * @property string $name
+ * @property ?string $file_name
+ * @property ?int $size
+ * @property ?string $errors
+ * @property Server $server
+ * @property Storage $storage
+ */
 class Backup extends Model
 {
     use HasFactory;
@@ -34,11 +47,17 @@ class Backup extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Server, $this>
+     */
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
     }
 
+    /**
+     * @return BelongsTo<Storage, $this>
+     */
     public function storage(): BelongsTo
     {
         return $this->belongsTo(Storage::class);

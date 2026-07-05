@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+/**
+ * @property int $id
+ * @property string $short_code
+ * @property ?string $description
+ * @property int $nodes_count
+ * @property int $servers_count
+ */
 class Location extends Model
 {
     use HasFactory;
@@ -15,7 +22,7 @@ class Location extends Model
     /**
      * Fields that are not mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $guarded = ['id', 'created_at', 'updated_at'];
 

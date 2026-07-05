@@ -30,7 +30,7 @@ class SyncNetworkSettingsJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping($this->server->id),
+            new WithoutOverlapping((string) $this->server->id),
         ];
     }
 

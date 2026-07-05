@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Base;
 
 use Illuminate\View\Factory as ViewFactory;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class IndexController
 {

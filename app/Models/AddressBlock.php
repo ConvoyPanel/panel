@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?string $mac_address
  * @property int $prefix_length_from
  * @property int $prefix_length_to
+ * @property AddressBlockGroup $addressBlockGroup
  */
 class AddressBlock extends Model
 {
@@ -45,6 +46,9 @@ class AddressBlock extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<AddressBlockGroup, $this>
+     */
     public function addressBlockGroup(): BelongsTo
     {
         return $this->belongsTo(AddressBlockGroup::class);

@@ -10,6 +10,30 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @property int $id
+ * @property int $location_id
+ * @property string $display_name
+ * @property string $name
+ * @property bool $verify_tls
+ * @property string $fqdn
+ * @property string $cluster
+ * @property int $port
+ * @property int $socket_count
+ * @property int $core_count
+ * @property int $cpu_count
+ * @property int $memory
+ * @property int $memory_allocated
+ * @property int $memory_overallocate
+ * @property int $disk
+ * @property int $disk_allocated
+ * @property int $disk_overallocate
+ * @property bool $coterm_enabled
+ * @property bool $coterm_tls_enabled
+ * @property string $coterm_fqdn
+ * @property int $coterm_port
+ * @property ?Coterm $coterm
+ */
 class Node extends Model
 {
     use HasFactory, HasRelationships;
@@ -75,6 +99,9 @@ class Node extends Model
     /**
      * Gets the servers associated with a node.
      */
+    /**
+     * @return HasMany<Server, $this>
+     */
     public function servers(): HasMany
     {
         return $this->hasMany(Server::class);
@@ -130,11 +157,17 @@ class Node extends Model
     /**
      * Gets the location associated with a node.
      */
+    /**
+     * @return BelongsTo<Location, $this>
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * @return HasMany<NetworkInterface, $this>
+     */
     public function networkInterfaces(): HasMany
     {
         return $this->hasMany(NetworkInterface::class);
@@ -143,11 +176,17 @@ class Node extends Model
     /**
      * Gets the instance of Coterm that's connected with this node.
      */
+    /**
+     * @return BelongsTo<Coterm, $this>
+     */
     public function coterm(): BelongsTo
     {
         return $this->belongsTo(Coterm::class);
     }
 
+    /**
+     * @return BelongsToMany<Storage, $this>
+     */
     public function storages(): BelongsToMany
     {
         return $this->belongsToMany(

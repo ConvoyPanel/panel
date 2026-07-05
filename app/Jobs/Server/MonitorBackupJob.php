@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Server;
 
+use App\Data\Server\Proxmox\Backup\BackupData;
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Models\Backup;
@@ -14,7 +15,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 class MonitorBackupJob implements ShouldQueue
@@ -36,7 +36,7 @@ class MonitorBackupJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new WithoutOverlapping($this->backup->id)];
+        return [new WithoutOverlapping((string) $this->backup->id)];
     }
 
     public function handle(ProxmoxActivityRepository $repository, ProxmoxBackupRepository $backupRepository): void
@@ -55,20 +55,21 @@ class MonitorBackupJob implements ShouldQueue
         $fileName = null;
         foreach ($logs as $log) {
             if (preg_match("/INFO: creating vzdump archive '(.+)'/s", $log->text, $matches)) {
-                $fileName = Arr::last(explode('/', $matches[1]));
+                $fileName = basename($matches[1]);
             }
         }
 
         if ($task->exitStatus === TaskExitStatus::OK) {
             $archives = $backupRepository->setServer($this->backup->server)->getBackups($this->backup->storage);
-            $archive = collect($archives)->where(
-                'volid',
+            $archive = collect($archives)->firstWhere(
+                'volumeId',
                 "{$this->backup->storage->name}:backup/{$fileName}",
-            )->first();
+            );
+            $archiveSize = $archive instanceof BackupData ? $archive->size : 0;
 
             $this->backup->update([
                 'file_name' => $fileName,
-                'size' => Arr::get($archive, 'size', 0),
+                'size' => $archiveSize,
                 'completed_at' => Carbon::now(),
             ]);
         } else {

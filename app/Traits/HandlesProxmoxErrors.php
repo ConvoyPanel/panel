@@ -17,7 +17,7 @@ trait HandlesProxmoxErrors
      */
     protected function isNonexistentVMError(RequestException $e, string $message = 'does not exist'): bool
     {
-        if ($e->response && Str::contains(Arr::get($e->response->json(), 'message', ''), $message)) {
+        if (Str::contains(Arr::get($e->response->json(), 'message', ''), $message)) {
             return true;
         }
 

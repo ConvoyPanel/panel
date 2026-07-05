@@ -10,6 +10,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property ?string $display_name
+ * @property ?string $description
+ * @property string $name
+ * @property int $size
+ * @property bool $is_shareable
+ * @property bool $stores_kvm
+ * @property bool $stores_lxc
+ * @property bool $stores_lxc_templates
+ * @property bool $stores_backups
+ * @property bool $stores_iso
+ * @property bool $stores_snippets
+ * @property int $server_usage
+ * @property int $backup_usage
+ * @property int $iso_usage
+ * @property object{backup_order?: int|null}|null $pivot
+ */
 class Storage extends Model
 {
     use HasFactory;
@@ -90,7 +108,6 @@ class Storage extends Model
      * Call this like: Storage::withUsageSums()->find(1);
      *
      * @param  Builder  $query  The Eloquent query builder.
-     * @return Builder The modified query builder.
      */
     public function scopeWithUsageSums(Builder $query): void
     {

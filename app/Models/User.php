@@ -17,6 +17,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\NewAccessToken;
 
 /**
+ * @property int $id
+ * @property string $uuid
+ * @property string $name
+ * @property string $email
+ * @property bool $root_admin
  * @mixin Eloquent
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
@@ -26,7 +31,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -48,7 +53,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -87,11 +92,17 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 
+    /**
+     * @return HasMany<Server, $this>
+     */
     public function servers(): HasMany
     {
         return $this->hasMany(Server::class);
     }
 
+    /**
+     * @return HasMany<Passkey, $this>
+     */
     public function passkeys(): HasMany
     {
         return $this->hasMany(Passkey::class);

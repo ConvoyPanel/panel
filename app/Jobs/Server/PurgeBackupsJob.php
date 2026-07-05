@@ -33,7 +33,7 @@ class PurgeBackupsJob implements ShouldQueue
     public function middleware(): array
     {
         return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            $this->server->id,
+            (string) $this->server->id,
         )];
     }
 

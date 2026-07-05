@@ -24,10 +24,9 @@ class LoginController
             throw new UnauthorizedHttpException('', 'Invalid JWT token');
         }
 
-        /** @var User $user */
         $user = User::where('uuid', '=', $token->claims()->get('user_uuid'))->first();
 
-        if (! $user) {
+        if (! $user instanceof User) {
             throw new UnauthorizedHttpException('', 'Invalid JWT claims');
         }
 

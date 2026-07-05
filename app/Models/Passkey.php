@@ -9,6 +9,13 @@ use ParagonIE\ConstantTime\Base64UrlSafe;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialSource;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property string $credential_id
+ * @property User $user
+ */
 class Passkey extends Model
 {
     const UPDATED_AT = null;
@@ -52,6 +59,9 @@ class Passkey extends Model
         );
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

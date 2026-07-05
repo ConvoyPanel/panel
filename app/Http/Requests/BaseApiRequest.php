@@ -100,7 +100,6 @@ abstract class BaseApiRequest extends FormRequest
         $value = $this->route()->parameter($key);
 
         Assert::isInstanceOf($value, $expect);
-        Assert::isInstanceOf($value, Model::class);
         Assert::true($value->exists);
 
         return $value;

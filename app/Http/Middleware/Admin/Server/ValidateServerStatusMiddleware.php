@@ -20,7 +20,7 @@ class ValidateServerStatusMiddleware
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($server->status === ServerStatus::DELETING->value || $server->status === ServerStatus::DELETION_FAILED->value) {
+        if ($server->status === ServerStatus::DELETING || $server->status === ServerStatus::DELETION_FAILED) {
             throw new ServerStatusConflictException($server);
         }
 
