@@ -21,9 +21,15 @@ Last updated: 2026-07-04
   on Postgres, backup semantics, storage refactor, ISO storage, node update,
   `StorageContentType` `->toProxmoxString()`, `AddressBlockGroupToInterface` `$incrementing=false`).
   Suite green.
-- **Phase 2 (Proxmox config-push safety)** — IN PROGRESS. See below.
+- **Phase 2 (Proxmox config-push safety)** — effectively DONE. Config digest optimistic concurrency
+  threaded through every read-modify-write path; the property-list DTO codec refactor landed for
+  every DTO that fits it (NIC, tpmstate, USB, disk-partial); redundant NIC writes filtered; and the
+  golden-master round-trip safety net is in place. See the per-topic sections below. Remaining
+  polish is minor (the pre-existing `unmountIso` `media_name` lookup bug noted below; the
+  `LocationFactory` flakiness under "Known flakiness"). Next hard requirement is **Phase 3** (prod
+  migration).
 
-**Test suite:** `ddev artisan test --compact` → 43 passed (68 assertions) as of this writing.
+**Test suite:** `ddev artisan test --compact` → 74 passed (182 assertions) as of this writing.
 
 ---
 
@@ -190,10 +196,23 @@ rather than POSTing an empty (digest-only) update. Test:
 firewalled NIC and one not, and asserts the write carries the stale NIC but never the already-correct
 one (fails without the filter, which would write both). Suite: 68 passed; no new PHPStan errors.
 
-## Next up (rest of Phase 2, then Phase 3)
+## Golden-master round-trip tests (DONE)
 
-- **Golden-master round-trip tests** on real PVE config fixtures: assert
-  `fromRaw(x) → toProxmoxString → fromRaw` drops nothing. This is the Phase-2 safety net.
+`tests/Unit/Data/ProxmoxConfigRoundTripTest.php` — the Phase-2 safety net. Data-driven over a corpus
+of real PVE strings for the two DTOs that emit (`NetworkDeviceData`, `TpmStateDiskData`), asserting:
+1. **Idempotent re-emission** — `emit(parse(emit(parse(x)))) === emit(parse(x))`, i.e. the round-trip
+   drops nothing.
+2. **No field loss** — for net, the full tail key=value map (and the positional head) survive the
+   first cycle unchanged; for tpmstate, every tail key survives *except* `size`, whose unit suffix
+   (`4M → 4`) is the one documented, intentional normalization.
+3. **Unmodeled keys preserved** — corpus includes strings with keys we don't model (`mystery=42`,
+   `future_opt=xyz`), proving `extraProperties` losslessness end-to-end.
+
+`DiskData` and `UsbDeviceData` are parse-only (no `toProxmoxString`), so they're out of scope here —
+covered instead by their characterization tests. Suite: 74 passed.
+
+## Next up (Phase 3)
+
 - **Phase 3 (prod migration)** is the hard requirement after Phase 2: cross-engine
   MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
   against a restored prod snapshot; reconcile `develop`'s newer commits.
