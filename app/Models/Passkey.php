@@ -14,6 +14,7 @@ use Webauthn\PublicKeyCredentialSource;
  * @property int $user_id
  * @property string $name
  * @property string $credential_id
+ * @property PublicKeyCredentialSource $data
  * @property User $user
  */
 class Passkey extends Model

@@ -60,7 +60,7 @@ class StorePasskeyAction
         $creationCsm = $csmFactory->creationCeremony();
 
         try {
-            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
+            $credentialRecord = AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
                 authenticatorAttestationResponse: $publicKeyCredential->response,
                 publicKeyCredentialCreationOptions: $passkeyOptions,
                 host: $hostName,
@@ -69,7 +69,7 @@ class StorePasskeyAction
             throw new InvalidAuthenticatorAttestationResponse($exception);
         }
 
-        return $publicKeyCredentialSource;
+        return PublicKeyCredentialSource::fromCredentialRecord($credentialRecord);
     }
 
     protected function getPasskeyOptions(string $passkeyOptionsJson): PublicKeyCredentialCreationOptions

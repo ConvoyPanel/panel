@@ -82,6 +82,10 @@ class FindPasskeyToAuthenticateAction
         PublicKeyCredentialRequestOptions $passkeyOptions,
         Passkey $passkey,
     ): ?PublicKeyCredentialSource {
+        if (! $publicKeyCredential->response instanceof AuthenticatorAssertionResponse) {
+            return null;
+        }
+
         $csmFactory = new CeremonyStepManagerFactory;
         if (app()->environment('local') && config('app.version') === 'canary') {
             $csmFactory->setAllowedOrigins(['localhost']);
@@ -91,8 +95,8 @@ class FindPasskeyToAuthenticateAction
         try {
             $validator = AuthenticatorAssertionResponseValidator::create($requestCsm);
 
-            $publicKeyCredentialSource = $validator->check(
-                publicKeyCredentialSource: $passkey->data,
+            $credentialRecord = $validator->check(
+                credentialRecord: $passkey->data,
                 authenticatorAssertionResponse: $publicKeyCredential->response,
                 publicKeyCredentialRequestOptions: $passkeyOptions,
                 host: parse_url(config('app.url'), PHP_URL_HOST),
@@ -102,7 +106,7 @@ class FindPasskeyToAuthenticateAction
             return null;
         }
 
-        return $publicKeyCredentialSource;
+        return PublicKeyCredentialSource::fromCredentialRecord($credentialRecord);
     }
 
     protected function updatePasskey(
