@@ -11,6 +11,24 @@ These are NOT committed (matches the existing `routeTree.gen.ts` convention):
 
 Regenerate with `ddev npm run types:generate` (also runs automatically via `predev` / `prebuild`). CI should run the generators before typecheck/build; a clean-tree assertion afterwards catches anything that drifted.
 
+## Frontend design consistency
+
+The UI must read as **one app**, not a patchwork of per-page styles. Before building any
+screen, find the closest existing one and reuse its structure, spacing, and components —
+do not invent new paddings, gaps, type scales, or bespoke card layouts.
+
+- **Reuse components, not one-offs.** Build on `components/ui/*` (`Card`, `Table`,
+  `Progress`, `Typography`, …). Match the established grid rhythm (`gap-2` / `gap-4`) and the
+  standard `Card` padding — don't hand-roll different padding per section.
+- **Favor data density.** No large card wrapping a single small number. Pack related stats
+  into one card as a definition list (`<dl>` with `<dt className='text-xs text-muted-foreground'>`
+  / `<dd>`), the way `Client/Server/Overview/SpecificationsCard.tsx` does. A screen full of
+  near-empty cards is a smell.
+- **Format consistently.** Bytes go through `byte-size` (`byteSize(n, { units: 'iec' })`), the
+  same as the rest of the app — not an ad-hoc formatter.
+
+When in doubt, mirror an existing page verbatim rather than introducing a new pattern.
+
 ## Local development (ddev)
 
 Local dev runs on [ddev](https://ddev.com) with **Postgres 17**. One-time setup:
