@@ -15,6 +15,10 @@ class ActivityRepository extends EloquentRepository implements ActivityRepositor
 
     public function getServer(ActivityLog $activity): ?Server
     {
-        return $activity->subjects()->firstWhere('subject_type', (new Server)->getMorphClass())?->subject()->first();
+        /** @var \App\Models\ActivityLogSubject|null $activitySubject */
+        $activitySubject = $activity->subjects()->firstWhere('subject_type', (new Server)->getMorphClass());
+        $subject = $activitySubject?->subject()->first();
+
+        return $subject instanceof Server ? $subject : null;
     }
 }

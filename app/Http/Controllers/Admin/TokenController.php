@@ -8,6 +8,7 @@ use App\Enums\Api\ApiKeyType;
 use App\Http\Requests\Admin\Tokens\StoreTokenRequest;
 use App\Models\PersonalAccessToken;
 use Illuminate\Http\Request;
+use LogicException;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TokenController
@@ -28,6 +29,10 @@ class TokenController
     public function store(StoreTokenRequest $request)
     {
         $newToken = $request->user()->createToken($request->name, ApiKeyType::APPLICATION);
+
+        if (! $newToken->accessToken instanceof PersonalAccessToken) {
+            throw new LogicException('Sanctum is not using the application personal access token model.');
+        }
 
         $newToken->accessToken->loadMissing('tokenable');
 

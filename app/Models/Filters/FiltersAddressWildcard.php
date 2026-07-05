@@ -27,7 +27,8 @@ class FiltersAddressWildcard implements Filter
                     $values = $convertCase 
                         ? Arr::map($value, fn($v) => strtolower($v)) 
                         : $value;
-                    $subQuery->$method . 'In'($field, $values);
+                    $whereInMethod = "{$method}In";
+                    $subQuery->{$whereInMethod}($field, $values);
                 } else {
                     $fieldValue = $convertCase ? strtolower($value) : $value;
                     $subQuery->$method($field, $fieldValue);

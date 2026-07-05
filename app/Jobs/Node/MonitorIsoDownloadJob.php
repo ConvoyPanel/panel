@@ -35,8 +35,10 @@ class MonitorIsoDownloadJob implements ShouldQueue
     public function handle(ProxmoxActivityRepository $repository): void
     {
         $iso = ISO::findOrFail($this->isoId);
+        /** @var \App\Models\Node $node */
+        $node = $iso->storage->nodes()->firstOrFail();
 
-        $task = $repository->setNode($iso->storage->nodes()->firstOrFail())->getStatus($this->upid);
+        $task = $repository->setNode($node)->getStatus($this->upid);
 
         if ($task->status === TaskStatus::RUNNING) {
             $this->release(3);
