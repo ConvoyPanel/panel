@@ -2,12 +2,12 @@
 
 namespace App\Services\Servers;
 
+use App\Actions\Server\DeleteServerAction;
+use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
 use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
-use App\Jobs\Server\PurgeBackupsJob;
 use App\Models\Server;
-use App\Actions\Server\DeleteServerAction;
-use Illuminate\Support\Facades\Bus;
 
 class ServerDeletionService
 {
@@ -15,34 +15,29 @@ class ServerDeletionService
     {
     }
 
-    public function handle(Server $server, bool $noPurge = false)
+    public function handle(Server $server, bool $noPurge = false): void
     {
         $this->validateStatus($server);
 
-        $server->update(['status' => ServerStatus::DELETING->value]);
-
-        if (! $noPurge) {
-            Bus::chain([
-                new PurgeBackupsJob($server->id),
-                ...$this->deleteServerAction->execute($server),
-                function () use ($server) {
-                    Server::findOrFail($server->id)->delete();
-                },
-            ])
-                ->catch(fn () => $server->update(['status' => ServerStatus::DELETION_FAILED->value]))
-                ->dispatch();
+        if ($noPurge) {
+            $server->delete();
 
             return;
         }
 
-        $server->delete();
+        $deployment = $server->deployments()->create([
+            'type' => DeploymentType::DELETE,
+            'status' => DeploymentStatus::PENDING,
+            'start_on_completion' => false,
+            'requested_at' => now(),
+        ]);
+
+        $this->deleteServerAction->execute($deployment);
     }
 
-    public function validateStatus(Server $server, bool $verifyStatusOnly = false)
+    public function validateStatus(Server $server, bool $verifyStatusOnly = false): void
     {
-        if (
-            ! is_null($server->status) && $server->status !== ServerStatus::DELETING->value
-        ) {
+        if ($server->status !== ServerStatus::DELETING) {
             throw new ServerStatusConflictException($server);
         }
 
