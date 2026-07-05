@@ -54,4 +54,20 @@ enum ByteUnit: string
 
         return self::from($matches[2])->toBytes((int) $matches[1]);
     }
+
+    /**
+     * Resolve an IEC unit name ("B", "KiB", "MiB", "GiB", "TiB") to its unit,
+     * or null when unrecognised. Proxmox task logs report progress this way.
+     */
+    public static function fromIec(string $unit): ?self
+    {
+        return match (strtoupper(trim($unit))) {
+            'B' => self::Bytes,
+            'KIB' => self::Kibibytes,
+            'MIB' => self::Mebibytes,
+            'GIB' => self::Gibibytes,
+            'TIB' => self::Tebibytes,
+            default => null,
+        };
+    }
 }

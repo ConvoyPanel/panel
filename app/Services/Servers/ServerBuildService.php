@@ -10,10 +10,9 @@ use App\Models\Template;
 use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
 use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Support\ByteUnit;
 use App\Traits\HandlesProxmoxErrors;
 use Illuminate\Http\Client\ConnectionException;
-
-use function App\Helpers\convertToBytes;
 
 class ServerBuildService
 {
@@ -116,8 +115,8 @@ class ServerBuildService
                 // Update the latest progress for the current disk.
                 // As we iterate, this will be overwritten until we have the final value for this disk.
                 $progressPerDisk[$currentDiskId] = [
-                    'current' => convertToBytes($currentValue, $currentUnit),
-                    'total' => convertToBytes($totalValue, $totalUnit),
+                    'current' => ByteUnit::fromIec($currentUnit)?->toBytes($currentValue) ?? 0,
+                    'total' => ByteUnit::fromIec($totalUnit)?->toBytes($totalValue) ?? 0,
                 ];
             }
         }
