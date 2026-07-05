@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $server_id
+ * @property ?int $template_id
+ * @property DeploymentType $type
+ * @property DeploymentStatus $status
+ * @property bool $start_on_completion
+ * @property Server $server
+ * @property ?Template $template
+ */
 class Deployment extends Model
 {
     const UPDATED_AT = null;
@@ -16,7 +26,7 @@ class Deployment extends Model
     /**
      * Fields that are not mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $guarded = [
         'id',
@@ -47,16 +57,25 @@ class Deployment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Server, $this>
+     */
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
     }
 
+    /**
+     * @return BelongsTo<Template, $this>
+     */
     public function template(): BelongsTo
     {
         return $this->belongsTo(Template::class);
     }
 
+    /**
+     * @return HasMany<DeploymentStep, $this>
+     */
     public function steps(): HasMany
     {
         return $this->hasMany(DeploymentStep::class);

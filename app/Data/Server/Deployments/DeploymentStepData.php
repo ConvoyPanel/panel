@@ -27,7 +27,7 @@ class DeploymentStepData extends Data
 
     public static function fromModel(DeploymentStep $step): self
     {
-        $isAdmin = Auth::user()?->root_admin ?? false;
+        $isAdmin = Auth::id() !== null && (bool) Auth::user()->root_admin;
 
         return new self(
             id: $step->id,

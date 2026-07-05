@@ -74,7 +74,7 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
                 'completed_at' => now(),
             ]);
         } else {
-            $this->release(0.250);
+            $this->release(now()->addMilliseconds(250));
         }
     }
 }

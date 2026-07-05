@@ -11,6 +11,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $node_id
+ * @property int $vmid
+ * @property string $uuid
+ * @property string $uuid_short
+ * @property string $hostname
+ * @property string $name
+ * @property ?string $description
+ * @property ServerStatus $status
+ * @property int $cpu
+ * @property int $memory
+ * @property int $disk
+ * @property int $bandwidth_usage
+ * @property int $backup_count_limit
+ * @property int $backup_size_limit
+ * @property int $bandwidth_limit
+ */
 class Server extends Model
 {
     use HasFactory;

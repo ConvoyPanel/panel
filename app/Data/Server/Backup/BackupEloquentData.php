@@ -38,7 +38,7 @@ class BackupEloquentData extends Data
             isLocked: (bool) $backup->is_locked,
             errors: $backup->errors,
             fileName: $backup->file_name,
-            size: $backup->size !== null ? (int) $backup->size : null,
+            size: $backup->getRawOriginal('size') !== null ? (int) $backup->size : null,
             completedAt: $backup->completed_at
                 ? CarbonImmutable::parse($backup->completed_at)
                 : null,

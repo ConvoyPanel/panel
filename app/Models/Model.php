@@ -89,7 +89,13 @@ abstract class Model extends IlluminateModel
     {
         $rules = $this->exists ? static::getRulesForUpdate($this) : static::getRules();
 
-        return static::$validatorFactory->make([], $rules);
+        $validator = static::$validatorFactory->make([], $rules);
+
+        if (! $validator instanceof Validator) {
+            throw new \LogicException('Expected Laravel validation factory to return a concrete validator.');
+        }
+
+        return $validator;
     }
 
     /**

@@ -20,7 +20,7 @@ class PaginationMeta extends Data
     {
         return new self(
             total: $paginator->total(),
-            count: $paginator->count(),
+            count: count($paginator->items()),
             perPage: $paginator->perPage(),
             currentPage: $paginator->currentPage(),
             totalPages: $paginator->lastPage(),

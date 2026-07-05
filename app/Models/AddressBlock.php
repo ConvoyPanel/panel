@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $address_block_group_id
+ * @property ?string $name
+ * @property ?string $description
+ * @property AddressVersion $version
+ * @property string $base_ip
+ * @property ?string $gateway
+ * @property ?string $mac_address
+ * @property int $prefix_length_from
+ * @property int $prefix_length_to
+ */
 class AddressBlock extends Model
 {
     public $timestamps = false;

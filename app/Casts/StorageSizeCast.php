@@ -12,6 +12,10 @@ class StorageSizeCast implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?int
     {
+        if ($value === null) {
+            return null;
+        }
+
         return $value >= 0 ? $value * 1048576 : -1; // Convert from megabytes to bytes
     }
 
@@ -20,6 +24,10 @@ class StorageSizeCast implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): ?int
     {
+        if ($value === null) {
+            return null;
+        }
+
         return $value >= 0 ? intval(
             floor($value / 1048576),
         ) : -1; // Convert from bytes to megabytes to prevent overflow

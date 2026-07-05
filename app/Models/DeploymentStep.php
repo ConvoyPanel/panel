@@ -6,6 +6,17 @@ use App\Enums\Server\DeploymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $deployment_id
+ * @property string $name
+ * @property DeploymentStatus $status
+ * @property ?int $progress_current
+ * @property ?int $progress_total
+ * @property ?string $error_code
+ * @property ?string $error_message
+ * @property Deployment $deployment
+ */
 class DeploymentStep extends Model
 {
     const UPDATED_AT = null;
@@ -15,7 +26,7 @@ class DeploymentStep extends Model
     /**
      * Fields that are not mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $guarded = [
         'id',
@@ -61,6 +72,9 @@ class DeploymentStep extends Model
         ]);
     }
 
+    /**
+     * @return BelongsTo<Deployment, $this>
+     */
     public function deployment(): BelongsTo
     {
         return $this->belongsTo(Deployment::class);

@@ -12,7 +12,7 @@ class ServerStatusConflictException extends ConflictHttpException
      * Exception thrown when the server is in an unsupported state for API access or
      * certain operations within the codebase.
      */
-    public function __construct(Server $server, Throwable $previous = null)
+    public function __construct(Server $server, ?Throwable $previous = null)
     {
         $message = 'This server is currently in an unsupported status, please try again later.';
         if ($server->isSuspended()) {

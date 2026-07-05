@@ -29,7 +29,7 @@ class IsoEloquentData extends Data
             isSuccessful: (bool) $iso->is_successful,
             name: $iso->name,
             fileName: $iso->file_name,
-            size: $iso->size !== null ? (int) $iso->size : null,
+            size: $iso->getRawOriginal('size') !== null ? (int) $iso->size : null,
             hidden: (bool) $iso->hidden,
             completedAt: $iso->completed_at
                 ? CarbonImmutable::parse($iso->completed_at)

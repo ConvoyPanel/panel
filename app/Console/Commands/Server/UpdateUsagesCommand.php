@@ -31,6 +31,8 @@ class UpdateUsagesCommand extends Command
         $nodes->each(function (Node $node) {
             (new Task($this->output))->render("Node {$node->fqdn}", function () use ($node) {
                 SyncServerUsagesJob::dispatch($node->id);
+
+                return true;
             });
         });
 

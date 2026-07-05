@@ -10,6 +10,18 @@ use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasOneDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @property int $id
+ * @property int $address_block_id
+ * @property ?int $server_id
+ * @property AddressVersion $version
+ * @property string $ip
+ * @property int $prefix_length
+ * @property ?string $gateway
+ * @property ?string $mac_address
+ * @property AddressBlock $addressBlock
+ * @property ?Server $server
+ */
 class Address extends Model
 {
     use HasFactory, HasRelationships;
@@ -25,6 +37,9 @@ class Address extends Model
         'prefix_length' => ['numeric', 'min:0', 'max:128', 'required'],
     ];
 
+    /**
+     * @return BelongsTo<AddressBlock, $this>
+     */
     public function addressBlock(): BelongsTo
     {
         return $this->belongsTo(AddressBlock::class);
@@ -65,6 +80,9 @@ class Address extends Model
         );
     }
 
+    /**
+     * @return BelongsTo<Server, $this>
+     */
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);

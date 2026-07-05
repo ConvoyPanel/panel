@@ -35,7 +35,7 @@ class BuildServerJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping($this->step->deployment->server_id),
+            new WithoutOverlapping((string) $this->step->deployment->server_id),
         ];
     }
 

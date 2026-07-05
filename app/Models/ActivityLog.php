@@ -3,12 +3,24 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
 use LogicException;
 
+/**
+ * @property int $id
+ * @property ?string $batch
+ * @property string $event
+ * @property ?string $ip
+ * @property ?string $description
+ * @property Collection $properties
+ * @property ?CarbonImmutable $created_at
+ * @property ?CarbonImmutable $updated_at
+ */
 class ActivityLog extends Model
 {
     public $timestamps = false;
@@ -38,12 +50,7 @@ class ActivityLog extends Model
 
     public function actor(): MorphTo
     {
-        $morph = $this->morphTo();
-        if (method_exists($morph, 'withTrashed')) {
-            return $morph->withTrashed();
-        }
-
-        return $morph;
+        return $this->morphTo()->withTrashed();
     }
 
     public function subjects(): HasMany
@@ -69,7 +76,7 @@ class ActivityLog extends Model
      *
      * @see https://laravel.com/docs/9.x/eloquent#pruning-models
      */
-    public function prunable(): self
+    public function prunable(): Builder
     {
         if (is_null(config('activity.prune_days'))) {
             throw new LogicException(

@@ -15,11 +15,6 @@ class ActivityLogSubject extends Model
 
     public function subject(): MorphTo
     {
-        $morph = $this->morphTo();
-        if (method_exists($morph, 'withTrashed')) {
-            return $morph->withTrashed();
-        }
-
-        return $morph;
+        return $this->morphTo()->withTrashed();
     }
 }

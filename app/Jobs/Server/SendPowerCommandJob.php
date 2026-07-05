@@ -38,7 +38,7 @@ class SendPowerCommandJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping($this->step->deployment->server->id),
+            new WithoutOverlapping((string) $this->step->deployment->server->id),
         ];
     }
 

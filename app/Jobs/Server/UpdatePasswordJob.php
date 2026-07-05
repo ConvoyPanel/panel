@@ -35,7 +35,7 @@ class UpdatePasswordJob implements ShouldQueue
         return [
             new SkipIfBatchCancelled,
             new WithoutOverlapping(
-                $this->step->deployment->server->id
+                (string) $this->step->deployment->server->id
             ),
         ];
     }
