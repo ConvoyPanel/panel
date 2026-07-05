@@ -23,17 +23,17 @@ So the order is always: **pgloader (engine) → `artisan migrate` (schema)**.
 
 ## Confidence: the engine step is validated
 
-`database/migration/verify.sh` proves the pgloader conversion is lossless on the
+`database/cutover/verify.sh` proves the pgloader conversion is lossless on the
 real application schema: it seeds a MySQL copy, runs the pgloader recipe into a
 scratch Postgres DB, and asserts exact per-table `COUNT(*)` equality plus
 per-row content checks of the conversion-risky types (tinyint→boolean, bigint,
 JSON). Run it any time — it is fully self-contained and never touches dev data:
 
 ```bash
-bash database/migration/verify.sh   # → RESULT: PASS
+bash database/cutover/verify.sh   # → RESULT: PASS
 ```
 
-The pgloader recipe itself is `database/migration/v4-to-v10.load` (credential-
+The pgloader recipe itself is `database/cutover/v4-to-v10.load` (credential-
 free template; connection URLs are injected at run time).
 
 ## Cutover procedure
@@ -51,16 +51,20 @@ free template; connection URLs are injected at run time).
    ```bash
    sed -e "s|\${MYSQL_URL}|mysql://USER:PASS@MYSQLHOST/DB|" \
        -e "s|\${PG_URL}|postgresql://USER:PASS@PGHOST/DB|" \
-       database/migration/v4-to-v10.load > /tmp/cutover.load
+       database/cutover/v4-to-v10.load > /tmp/cutover.load
    pgloader /tmp/cutover.load
    ```
    pgloader recreates the v4 tables in Postgres, converts types, copies rows,
    and rebuilds indexes/PKs/FKs/sequences. It also copies the `migrations`
    table, so Laravel knows exactly which migrations prod had already applied.
 5. **Point v10 at Postgres** (`.env`: `DB_CONNECTION=pgsql`, host/db/creds).
-6. **Apply the rename migrations:** `php artisan migrate --force`. Only the
-   migrations prod hadn't run yet (the v10 renames) execute, on the converted
-   data.
+6. **Apply the rename migrations.** First preview exactly what will run
+   (`php artisan migrate:status` — everything prod already ran should show
+   *Ran*, only the v10 renames *Pending*), then `php artisan migrate --force`.
+   `--force` only skips the interactive "you're in production" confirmation so
+   the command runs unattended — it does **not** change what the migrations do.
+   The real safety here is step 2's backup and the dry run, not that prompt.
+   Only the pending migrations (the v10 renames) execute, on the converted data.
 7. **Smoke test** — run the Phase-1 feature suite / manual happy-path against
    the migrated DB (IPAM, nodes, templates, servers, backups). Spot-check row
    counts against the pre-cutover backup.

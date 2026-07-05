@@ -4,7 +4,7 @@
 -- `php artisan migrate` applies the v10 rename migrations on the converted data.
 --
 -- Connection strings are templated (${...}) and filled in by the runbook /
--- harness (database/migration/verify.sh) so no credentials live in the repo.
+-- harness (database/cutover/verify.sh) so no credentials live in the repo.
 --
 -- Cast rules exist to reproduce the types Laravel's Postgres schema expects,
 -- which pgloader would not infer from MySQL's storage types alone:

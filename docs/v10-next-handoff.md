@@ -27,7 +27,7 @@ Last updated: 2026-07-04
   golden-master round-trip safety net is in place. See the per-topic sections below. Remaining
   polish is minor (the `LocationFactory` flakiness under "Known flakiness"). Next hard requirement is
   **Phase 3** (prod migration) — pgloader cross-engine tooling + a validated no-data-loss harness now
-  landed under `database/migration/`.
+  landed under `database/cutover/`.
 
 **Test suite:** `ddev artisan test --compact` → 74 passed (182 assertions) as of this writing.
 

@@ -6,14 +6,14 @@
 # What it does (all self-contained, nothing touches your dev database):
 #   1. Boots a throwaway MySQL 8.0 container on ddev's docker network.
 #   2. Runs the full migration suite + a representative seed into it.
-#   3. Renders the pgloader recipe (database/migration/v4-to-v10.load) and runs
+#   3. Renders the pgloader recipe (database/cutover/v4-to-v10.load) and runs
 #      it, copying MySQL -> a scratch Postgres database.
 #   4. Verifies NO DATA LOSS: exact COUNT(*) per table on both sides, plus
 #      per-row content checks of the type-risky columns (bool, bigint, json).
 #   5. Tears the throwaway resources down.
 #
 # Requires: docker, a running ddev project (for `ddev exec artisan` + the
-# Postgres container). Run from the repo root:  bash database/migration/verify.sh
+# Postgres container). Run from the repo root:  bash database/cutover/verify.sh
 #
 set -euo pipefail
 
@@ -31,7 +31,7 @@ MYSQL_PASS="root"
 PG_TARGET="pgloader_target"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-LOAD_TEMPLATE="$REPO_ROOT/database/migration/v4-to-v10.load"
+LOAD_TEMPLATE="$REPO_ROOT/database/cutover/v4-to-v10.load"
 RENDERED="$(mktemp -t pgloader.load.XXXXXX)"
 
 MYSQL_ENV="DB_CONNECTION=mysql DB_HOST=$MYSQL_CONTAINER DB_PORT=3306 DB_DATABASE=$MYSQL_DB DB_USERNAME=$MYSQL_USER DB_PASSWORD=$MYSQL_PASS"
@@ -52,10 +52,16 @@ docker rm -f "$MYSQL_CONTAINER" >/dev/null 2>&1 || true
 docker run -d --name "$MYSQL_CONTAINER" --network "$NETWORK" \
     -e MYSQL_ROOT_PASSWORD="$MYSQL_PASS" -e MYSQL_DATABASE="$MYSQL_DB" \
     mysql:8.0 --default-authentication-plugin=mysql_native_password >/dev/null
-for i in $(seq 1 90); do
-    docker exec "$MYSQL_CONTAINER" mysqladmin ping -u"$MYSQL_USER" -p"$MYSQL_PASS" --silent >/dev/null 2>&1 && break
+# `mysqladmin ping` answers OK during MySQL 8's two-phase startup, before the
+# server actually accepts DDL — so gate on a real query against the target DB.
+ready=0
+for i in $(seq 1 120); do
+    if docker exec "$MYSQL_CONTAINER" mysql -u"$MYSQL_USER" -p"$MYSQL_PASS" -D "$MYSQL_DB" -e "SELECT 1;" >/dev/null 2>&1; then
+        ready=1; break
+    fi
     sleep 1
 done
+[ "$ready" = "1" ] || { echo "MySQL did not become ready in time." >&2; exit 1; }
 echo "MySQL ready."
 
 echo "=== 2. migrate + seed the real schema into MySQL ==="
