@@ -277,9 +277,10 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
        don't rush a half-comparison on the VM write path.
      - Password-job retries: `next` has `tries = 3`; `ac13cefc` raised v4 to 15 (30 s backoff) to survive
        slow disk-resize during creation. Left as a tuning decision, not blind-ported.
-  3. **`22c4693e` locale validation.** `next` has no `LocaleController` (only `Base/IndexController`) —
-     likely the whole locale-switch endpoint is gone/moot on `next`; confirm before porting the
-     `LocaleRequest`.
+  3. **`22c4693e` locale validation — RESOLVED (moot).** Confirmed `next` has no i18n feature at all:
+     no locale route, no `LocaleController`, no `users.locale` column, no frontend i18n (the JS
+     `toLocaleString`/`localeCompare` hits are unrelated number/string formatting). The translation
+     endpoint `22c4693e` validated was dropped in the rewrite — nothing to port.
 - **Skipped (v4-only noise):** all CHANGELOG/docs commits, FOSSA removal, compose db/redis port
   exposure (`844b96a5`/`83279f01` — moot on ddev), IP pagination `999999` hack (`3c6200ca` — a v4
   workaround, don't carry blindly), composer security bumps (`e3416c77` — `next` has its own Laravel-12
