@@ -3,6 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Config\DiskData;
+use App\Enums\Server\Disk\DiskMediaType;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
@@ -80,31 +81,30 @@ class AllocationService
 
     public function mountIso(Server $server, ISO $iso): void
     {
-        // we'll be using IDE by default for now
-        $ideIndex = 0; // max IDE index is '3'
-        $disks = $this->getDisks($server);
-        if ($disks->where('media_name', '=', $iso->name)->first()) {
+        // One read tells us everything: whether the ISO is already mounted,
+        // which IDE slot is free, and the digest to guard the write with (a
+        // concurrent mount could otherwise claim the same slot).
+        $config = $this->configRepository->setServer($server)->getConfig();
+
+        if ($this->findMountedIsoDisk($config->disks, $iso)) {
             throw new IsoAlreadyMountedException;
         }
 
-        // We pick the free IDE slot from the config we read here, so guard the
-        // mount against that config changing underneath us (a concurrent mount
-        // could otherwise claim the same slot).
-        $config = $this->configRepository->setServer($server)->getConfig();
-        $arrayToCheckForAvailableIdeIndex = Arr::pluck($config, 'key');
+        $ideIndex = 0; // max IDE index is '3'
+        $usedKeys = Arr::pluck($config, 'key');
         for ($i = 0; $i <= 4; $i++) {
             if ($i === 4) {
                 throw new NoAvailableDiskInterfaceException;
             }
 
-            if (! in_array("ide$i", $arrayToCheckForAvailableIdeIndex)) {
+            if (! in_array("ide$i", $usedKeys)) {
                 $ideIndex = $i;
                 break;
             }
         }
 
         $this->configRepository->update([
-            "ide$ideIndex" => "{$iso->storage->name}:iso/{$iso->file_name},media=cdrom",
+            "ide$ideIndex" => $this->isoVolume($iso).',media=cdrom',
         ], $config->digest);
     }
 
@@ -113,10 +113,37 @@ class AllocationService
         // Read the full config (not just the disks) so we can guard the delete
         // with its digest — the interface we delete is derived from this read.
         $config = $this->configRepository->setServer($server)->getConfig();
-        if ($disk = $config->disks->where('media_name', '=', $iso->name)->first()) {
-            $this->configRepository->update(['delete' => $disk->interface->value], $config->digest);
-        } else {
+
+        $disk = $this->findMountedIsoDisk($config->disks, $iso);
+
+        if ($disk === null) {
             throw new IsoAlreadyUnmountedException;
         }
+
+        $this->configRepository->update(['delete' => $disk->interface->value], $config->digest);
+    }
+
+    /**
+     * The Proxmox volume string a mounted copy of this ISO takes, e.g.
+     * "local:iso/debian-12.iso" — the same value {@see mountIso} writes.
+     */
+    private function isoVolume(ISO $iso): string
+    {
+        return "{$iso->storage->name}:iso/{$iso->file_name}";
+    }
+
+    /**
+     * Find the cdrom disk this ISO is mounted on, if any. Matches on the
+     * backing volume (not a non-existent "media_name"), so it correctly
+     * identifies the mount instead of never matching.
+     *
+     * @param  \Illuminate\Support\Collection<int, DiskData>  $disks
+     */
+    private function findMountedIsoDisk(Collection $disks, ISO $iso): ?DiskData
+    {
+        $volume = $this->isoVolume($iso);
+
+        return $disks->first(fn (DiskData $disk) => $disk->diskMediaType === DiskMediaType::CDROM
+            && $disk->volume === $volume);
     }
 }

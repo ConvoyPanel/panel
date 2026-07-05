@@ -25,9 +25,9 @@ Last updated: 2026-07-04
   threaded through every read-modify-write path; the property-list DTO codec refactor landed for
   every DTO that fits it (NIC, tpmstate, USB, disk-partial); redundant NIC writes filtered; and the
   golden-master round-trip safety net is in place. See the per-topic sections below. Remaining
-  polish is minor (the pre-existing `unmountIso` `media_name` lookup bug noted below; the
-  `LocationFactory` flakiness under "Known flakiness"). Next hard requirement is **Phase 3** (prod
-  migration).
+  polish is minor (the `LocationFactory` flakiness under "Known flakiness"). Next hard requirement is
+  **Phase 3** (prod migration) — pgloader cross-engine tooling + a validated no-data-loss harness now
+  landed under `database/migration/`.
 
 **Test suite:** `ddev artisan test --compact` → 74 passed (182 assertions) as of this writing.
 
@@ -180,10 +180,12 @@ mismatch surfaces as `ConfigModifiedException` (which only fires when a digest w
 Suite: 67 passed. No new PHPStan errors (AllocationService's 2 findings are the pre-existing baseline:
 `Arr::pluck` over `ServerConfigData`, `$iso->storage->name` on the base Model).
 
-> Note: `unmountIso`'s disk lookup uses `->where('media_name', ...)` on a `Collection<DiskData>`, but
-> `DiskData` has no `media_name` property — a **pre-existing** bug that makes the found-branch
-> unreachable (so it currently always throws `IsoAlreadyUnmountedException`). Left as-is; worth a
-> separate fix. The digest change is correct for when the disk *is* found.
+> Note: `unmountIso`/`mountIso` matched a mounted ISO via `->where('media_name', ...)`, but
+> `DiskData` has no `media_name` property — the found-branch was unreachable (unmount always threw
+> `IsoAlreadyUnmountedException`; mount never detected an already-mounted ISO). **FIXED**: matching is
+> now `findMountedIsoDisk()` on the cdrom disk whose `volume` equals `{storage}:iso/{file_name}` (the
+> exact string `mountIso` writes). Covered by `AllocationServiceTest` (mount/unmount happy + reject
+> paths). `mountIso` also consolidated from two config reads to one.
 
 ## `syncNetworkDeviceConfig` redundant-write filter (DONE)
 
