@@ -235,6 +235,27 @@ covered instead by their characterization tests. Suite: 74 passed.
   available), dispatch the command, poll/read server status, and clear or mark failed only after the
   observed VM state confirms the action completed or timed out. UI should render the locked action/status
   and reject duplicate/conflicting requests while the pending action is active.
+- **Replace the SSO-token hack: polished URL signing + real OIDC/OAuth SSO.** The current
+  `getSSOToken` flow (`UserController::getSSOToken` → `SSOTokenData`, a short-lived app-key-signed JWT
+  minted for plugins so an external app like WHMCS can deep-link a user straight into Convoy) is a
+  quick-and-dirty stopgap. `SSOTokenData::fromModel()` and the dropped `sso_tokens` table are already
+  gone; the JWT mint path still exists. Two distinct deliverables, don't conflate them:
+  1. **A first-class signed-URL option** for the lightweight plugin case (WHMCS → Convoy auto-login
+     links). Prefer Laravel's built-in signed routes (`URL::temporarySignedRoute`, `signed` middleware)
+     over a bespoke JWT: expiring, tamper-evident, no custom crypto. Wrap it in a clean, documented,
+     scoped API (per-integration signing key, explicit expiry, single-use/nonce, audit log) so plugins
+     stop hand-rolling app-key JWTs.
+  2. **Full OIDC/OAuth SSO** for external-app integration — the polished long-term path. Decide the
+     role explicitly (they differ): Convoy as an **OIDC Relying Party** (users log in via an external
+     IdP / "Login with WHMCS/Keycloak/Google") vs. Convoy as an **OAuth2/OIDC Provider** (external apps
+     offer "Login with Convoy" and/or call Convoy's API with issued tokens). The WHMCS→Convoy direction
+     maps to the RP role; API-token issuance maps to the provider role — may want both.
+  **Package guidance (user requirement: high-reputation only, no low-star packages):** for the provider
+  role use **Laravel Passport** (official first-party OAuth2 server); for the RP/client role use
+  **Laravel Socialite** (official) with a vetted OIDC provider. Passport does not ship full OIDC
+  (discovery/`id_token`/userinfo) out of the box, so if strict OIDC provider conformance is required,
+  vet the OIDC-on-Passport bridge for maintenance/reputation before adopting — do NOT pull a low-star
+  package. Confirm the exact integration surface WHMCS (and other plugins) expect before picking.
 - **Logged-in session tracking with Redis sessions.** Laravel's database session listing is not available
   when Redis is the session driver, so add first-party session metadata tracking. On login/request,
   upsert a user-session record keyed by session ID/hash with `user_id`, last-used timestamp, IP-derived
@@ -280,7 +301,30 @@ Verified: after a run, `db_test.locations_id_seq` advances (tests wrote there) w
 
 ## Static analysis status
 
-- `ddev composer analyze` was run on 2026-07-05. It still fails with 247 existing PHPStan findings
-  across the app; the `LocationFactory` change is not among them.
-- `ddev exec ./vendor/bin/phpstan analyse database/factories/LocationFactory.php --memory-limit=4G`
-  passes with no errors.
+- **PHPStan is at ZERO errors** (level 5, `app/`) as of 2026-07-05 — down from the 247-error baseline.
+  `ddev exec ./vendor/bin/phpstan analyse --memory-limit=4G` is green. Keep it green.
+- Getting the last 18 to zero surfaced (and fixed) several real runtime bugs, not just annotations:
+  - **`EloquentRepository`** — model type is now the project base `App\Models\Model` (not Illuminate's),
+    and `getBuilder(): Builder<Model>` is generic, so larastan resolves `skipValidation()`/`getValidator()`
+    and `newModelInstance()`/`firstOrFail()` return the project model. `count()` no longer passes columns;
+    `updateOrCreate` uses `getKey()` not `->id`.
+  - **`ServerDeletionService`** — was BROKEN at runtime. `validateStatus()` compared the `ServerStatus`
+    enum to a string (`ServerStatus::DELETING->value`), so `!== 'deleting'` was always true → every admin
+    server deletion threw `ServerStatusConflictException`. Also its non-`noPurge` branch was a broken
+    duplicate of `DeleteServerAction::execute()` (spread of a `void`, passed `$server->id`/`$server` where
+    a `Deployment` is expected). Rewritten to create a `DeploymentType::DELETE` deployment and delegate to
+    `DeleteServerAction::execute($deployment)`; the `noPurge` fast-path (`$server->delete()`) is preserved.
+    Enum comparison fixed to the case. `verifyStatusOnly` is still dead (only caller passes default).
+  - **Passkey actions** — were BROKEN at runtime under `web-auth/webauthn-lib ^5` (5.3+). The validators'
+    `check()` renamed the arg to `credentialRecord` and now return a base `CredentialRecord`, but
+    `Passkey::data`'s setter requires a `PublicKeyCredentialSource` → registration/auth would TypeError.
+    Both `StorePasskeyAction` and `FindPasskeyToAuthenticateAction` now wrap the result with
+    `PublicKeyCredentialSource::fromCredentialRecord(...)` (the lib's sanctioned bridge). Added
+    `@property PublicKeyCredentialSource $data` to the `Passkey` model. NOTE: `PublicKeyCredentialSource`
+    is `@deprecated` since 5.3 and removed in webauthn-lib 6.0 — a pre-6.0 follow-up is to migrate the
+    `Passkey` model + `PasskeySerializer` to store the base `CredentialRecord` type.
+  - **Dead code removed:** `App\Data\Auth\SSOTokenData::fromModel()` (referenced `App\Models\SSOToken`,
+    whose table was dropped in 2023; the only live use constructs the DTO directly) and
+    `App\Extensions\Spatie\Fractal\RecursiveSerializer` (extended `league/fractal`, which isn't installed —
+    a leftover from the pre-laravel-data transformer stack; referenced nowhere).
+- `ddev artisan test --compact` → 83 passed (198 assertions) after these changes.
