@@ -63,4 +63,15 @@ When answering Proxmox VE API questions:
 2. Use `search-index.json` or `endpoints.json` to find relevant endpoints.
 3. Open the specific endpoint Markdown file for details.
 4. Do not guess endpoint names from memory.
+
+## Proxmox data DTOs
+
+Model Proxmox data to *our* domain, not Proxmox's wire format. Don't mirror
+their property-list layout or their terse/unclear key names (`ssd`, `secret`,
+`ro`, `di`) 1:1 — rename to clear domain properties (`isEmulatingSSD`,
+`tokenSecret`, `isReadonly`) and lean on PHP features JSON lacks, especially
+**backed enums** for closed value sets instead of raw strings/ints. The mapping
+back to Proxmox's keys/format is the codec's job (`App\Extensions\Spatie\Data\
+Proxmox` — `#[ProxmoxProperty]`, casts, `PropertyList`), so keep conversion
+logic there and reusable, not re-implemented per DTO (e.g. byte-unit scaling).
 5. Do not call the Proxmox API; these docs are reference-only.

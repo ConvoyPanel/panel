@@ -1,0 +1,39 @@
+--
+-- pgloader recipe: cross-engine copy of a live v4 database from MySQL 8.0 into
+-- Postgres 17, as the first step of the v10 cutover. After this runs,
+-- `php artisan migrate` applies the v10 rename migrations on the converted data.
+--
+-- Connection strings are templated (${...}) and filled in by the runbook /
+-- harness (database/migration/verify.sh) so no credentials live in the repo.
+--
+-- Cast rules exist to reproduce the types Laravel's Postgres schema expects,
+-- which pgloader would not infer from MySQL's storage types alone:
+--   * tinyint(1)  -> boolean      (Laravel booleans; MySQL has no bool type)
+--   * datetime/timestamp -> timestamptz  (Laravel stores UTC timestamps)
+--   * json        -> json         (match Laravel's ->json(); pgloader would
+--                                   otherwise pick jsonb)
+--
+LOAD DATABASE
+     FROM      ${MYSQL_URL}
+     INTO      ${PG_URL}
+
+ WITH include drop,
+      create tables,
+      create indexes,
+      reset sequences,
+      foreign keys,
+      workers = 4,
+      concurrency = 1
+
+  SET PostgreSQL PARAMETERS
+      maintenance_work_mem to '128MB',
+      work_mem to '12MB'
+
+ CAST type tinyint when (= 1 precision) to boolean drop typemod using tinyint-to-boolean,
+      type datetime  to timestamptz drop default drop not null,
+      type timestamp to timestamptz drop default drop not null,
+      type json to json
+
+  BEFORE LOAD DO
+      $$ CREATE SCHEMA IF NOT EXISTS public; $$
+;
