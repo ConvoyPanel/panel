@@ -14,7 +14,7 @@ class PruneUsersCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'c:maintenance:prune-users';
+    protected $signature = 'maintenance:prune-users';
 
     /**
      * The console command description.

@@ -15,7 +15,7 @@ class ResetUsagesCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'c:server:reset-usages';
+    protected $signature = 'servers:reset-usages';
 
     /**
      * Handle command execution.

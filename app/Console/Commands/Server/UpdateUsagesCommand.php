@@ -17,7 +17,7 @@ class UpdateUsagesCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'c:servers:sync-usages';
+    protected $signature = 'servers:sync-usages';
 
     /**
      * Handle command execution.

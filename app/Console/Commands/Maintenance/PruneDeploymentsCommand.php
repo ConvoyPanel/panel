@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 
 class PruneDeploymentsCommand extends Command
 {
-    protected $signature = 'c:maintenance:prune-deployments {--retention-period=} {--stuck-age=}';
+    protected $signature = 'maintenance:prune-deployments {--retention-period=} {--stuck-age=}';
 
     protected $description = 'Mark stuck deployments as failed and prune old deployments.';
 

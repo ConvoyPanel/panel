@@ -4,7 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 it('creates a non-admin user when the admin option is false', function () {
-    $this->artisan('c:user:make', [
+    $this->artisan('users:create', [
         '--email' => 'cli@example.com',
         '--name' => 'CLI User',
         '--password' => 'Password1!',
@@ -18,7 +18,7 @@ it('creates a non-admin user when the admin option is false', function () {
 });
 
 it('rejects invalid admin option values', function () {
-    $this->artisan('c:user:make', [
+    $this->artisan('users:create', [
         '--email' => 'invalid-admin@example.com',
         '--name' => 'Invalid Admin',
         '--password' => 'Password1!',

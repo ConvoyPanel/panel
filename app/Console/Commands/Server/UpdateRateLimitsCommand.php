@@ -17,7 +17,7 @@ class UpdateRateLimitsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'c:servers:sync-rate-limits';
+    protected $signature = 'servers:sync-rate-limits';
 
     /**
      * Handle command execution.

@@ -38,7 +38,7 @@ class MakeUserCommand extends Command
 {
     protected $description = 'Creates a user on the system via the CLI.';
 
-    protected $signature = 'c:user:make
+    protected $signature = 'users:create
         {--email= : Email address}
         {--name= : Name}
         {--password= : Password}
