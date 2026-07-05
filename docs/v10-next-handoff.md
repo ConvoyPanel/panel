@@ -237,18 +237,32 @@ no big-bang rewrite. ~53 shim consumers remain.
   preserving 1:1 swap: same Wayfinder-resolved URL, same transform, same response shape. tsc clean,
   production build green.
 
-> ⚠️ **Wayfinder gotcha for admin controllers (discovered here, corrects a Phase-1 claim).**
-> `routes/api-application.php` was **NOT** removed by Phase 1 as the earlier notes implied — it is a
-> **live `auth:sanctum` machine-to-machine Application API** (Pterodactyl-style) that reuses the
-> `Admin\*` controllers under `/api/application/*` (registered at `bootstrap/app.php:40`). Because
-> those routes duplicate the admin web routes onto the same controller methods, **Wayfinder emits
-> URI-keyed dictionaries instead of callables** for the affected actions (e.g. `LocationController.index`
-> is `{ '/api/admin/locations': fn, '/api/application/locations': fn }`, not `LocationController.index()`).
-> So admin features whose controllers have an app-API twin (locations, nodes, admin servers, users)
-> can't use the clean `Controller.action()` call — reference the admin URI explicitly
-> (`LocationController.index['/api/admin/locations']()`). **Client** controllers (`/api/client/*`,
-> `/api/auth/*`) have no such twin and stay clean — prefer migrating those first. Do **not** delete
-> `api-application.php` to "fix" this; it's a real API surface.
+### Application API unified onto the admin route file (DONE)
+`routes/api-application.php` was **not** removed by Phase 1 as earlier notes implied — it was a live
+`auth:sanctum` machine-to-machine Application API reusing the `Admin\*` controllers, but it had
+**drifted into a stale partial duplicate** of `api-admin.php` (missing IPAM / overview / storages /
+network-interfaces; referencing template-reorder controller methods that no longer exist). Rather than
+keep two files in sync, it's now **deleted**, and the single `routes/api-admin.php` is served under
+**both** guards (per the user's "one file, two entry points" decision):
+- `/api/admin` — the panel's web session (unchanged: `['auth', AdminAuthenticate]`).
+- `/api/application` — Sanctum Bearer tokens (`['auth:sanctum', AdminAuthenticate]`). Added
+  `AdminAuthenticate` here deliberately — the old application group had **no** admin check, so any
+  token could hit admin endpoints; now the token's user must be `root_admin`.
+
+So the Application API now has **full parity** with the panel from one source of truth. Session-vs-token
+differences are enforced per-route: `app/Http/Middleware/DenyApiTokenAccess` gates `/tokens` (an API
+token must never mint/revoke other tokens — the only session-only surface, per the user's "just token
+CRUD" call). The still-live `users/{user}/generate-sso-token` route was ported into `api-admin.php`.
+`tests/Feature/ApplicationApiTest.php` locks the four guarantees (token reaches shared endpoints; token
+denied on `/tokens`; session admin still manages tokens; non-admin token rejected). Suite 104, PHPStan 0.
+
+> ⚠️ **Wayfinder still emits URI-keyed dictionaries for admin controllers** — unifying didn't remove
+> that. As long as `api-admin.php` is served under **two prefixes**, every admin action has two routes,
+> so Wayfinder emits `{ '/api/admin/…': fn, '/api/application/…': fn }` rather than a callable. Reference
+> the admin URI explicitly (e.g. `OverviewController['/api/admin/overview']()` — see `features/overview/
+> api.ts`). **Client** controllers (`/api/client/*`, `/api/auth/*`) have no app-API twin and stay clean —
+> prefer migrating those first. The only way to get clean admin callables would be collapsing to a single
+> prefix (the deferred Option A); not worth it now.
 
 ## Next up (Phase 3)
 
@@ -351,6 +365,57 @@ applied most fixes to *both* branches, so nearly all are already reconciled on `
   lock; run `composer audit` independently instead of cherry-picking).
 
 ## Product follow-ups to add to the roadmap
+
+- **API tokens v2 — scoped abilities + two distinct token kinds (user request 2026-07-05).** The
+  current token feature is a quick repurposing of Sanctum PATs (`Admin\TokenController`, one flat
+  `ApiKeyType::APPLICATION` kind, `abilities` stored but effectively `['*']`, `tokenable` = the creating
+  admin so the token dies if that user is deleted). Flesh it out into two clearly-separated kinds, both
+  **permission-scoped**:
+  1. **Panel-wide (application) tokens** — admin-minted, **user-independent**: they must survive
+     deletion of the admin who created them (don't cascade with `tokenable`). Likely means giving these
+     tokens a non-user owner (a system/organization tokenable, or a nullable owner + an explicit
+     `created_by` audit field) so they represent the *panel*, not a person. Scope via Sanctum abilities
+     (e.g. `servers:read`, `nodes:write`, …) enforced with the `abilities`/`token_can` middleware.
+     ⚠️ Interaction with the unification just landed: the token group is gated by `AdminAuthenticate`,
+     which requires `$request->user()->root_admin` — a user-independent token has no user, so that guard
+     (and anything reading `$request->user()`) must be revisited when the owner model changes.
+  2. **User PATs** — end-users mint their own tokens (`ApiKeyType::ACCOUNT` already exists) scoped to
+     **their own** resources (their servers), not the admin surface. These stay `tokenable` = the user
+     and are managed from the account/security area, not the admin panel.
+  Both kinds share one scoping mechanism (Sanctum abilities + a middleware/policy layer); design the
+  ability vocabulary once. This also supersedes the `getSSOToken` app-key-JWT stopgap (see the SSO item
+  below) — a properly-scoped token is the real answer for plugin/programmatic access.
+
+- **Basic VM control (power actions) on both admin and client sides — DRY (user request 2026-07-05).**
+  Today only the **client** side has power control: `POST /api/client/servers/{server}/state`
+  (`Client\Servers\ServerController::updateState`), backed by `PowerCommand` (enum), `SendPowerCommandJob`,
+  `ProxmoxPowerRepository`, `SendPowerCommandRequest`. Admins have **no** power endpoint. Add admin-side
+  power control **without duplicating the endpoint/logic**: the power pipeline (enum + job + repository +
+  request) is already reusable, so extract a thin shared action/service (e.g. `SendServerPowerCommand`)
+  that both a client and an admin controller method delegate to, sharing one request-validation class and
+  one `PowerCommand` vocabulary. The difference between the two is **authorization/scoping only** (client
+  = owner-scoped to their own server; admin = any server), not the action. Pairs naturally with
+  **Power-action locking** below — build the lock into the shared action so both surfaces get it for free.
+
+- **VLAN support (GitHub #150) — assessment: mechanism sound, node-global default is too coarse.**
+  Request: set a Proxmox VLAN tag on a VM's NIC, with a node-level default + per-VM override.
+  - **The core mechanism is correct and *already half-built*.** The right Proxmox primitive is a `tag=`
+    on the VM's `netX` line against a **VLAN-aware bridge** (e.g. `net0: virtio=…,bridge=vmbr0,tag=100`) —
+    *not* per-VLAN `vmbr0.100` sub-interfaces (the reporter's own "Linux VLAN" tangent). `NetworkDeviceData`
+    **already models this**: `#[ProxmoxProperty('tag')] public ?int $vlanTag` (1–4094) and `vlanTrunks`
+    from the Phase-2 codec work, and it round-trips through `ServerNetworkService::syncNetworkDeviceConfig`.
+    So there's no new push mechanism to build — just a place to *store the desired VLAN* and code to
+    populate `$vlanTag` on NIC create/sync, plus UI.
+  - **Reconsider "default at the node level."** A node commonly serves **multiple** VLANs (the reporter's
+    own use case is per-customer/segment isolation), so one global default per node is too coarse. Convoy's
+    real L2-segment boundary is the **`network_interfaces`** row (a bridge on a node) — and IPAM already
+    binds address blocks → interfaces → nodes. Put the **default VLAN on the network interface** (or
+    address block), with a **per-server override** on the NIC config. That satisfies the reporter's "just a
+    default" ask *and* generalizes cleanly, versus a node-wide value they'd immediately outgrow.
+  - **Also:** requires the bridge to be VLAN-aware in Proxmox (surface/validate this); validate tag ∈
+    [1,4094] or null (untagged); apply on create **and** on NIC edit/rebuild (the sync path already carries
+    `tag`, so this is mostly free). Net: adequate *pattern* (default + override), wrong *default location* —
+    move it off the node onto the interface/block.
 
 - **Power-action locking.** User-initiated server power actions need an app-level lock so the user
   cannot spam start/stop/reboot buttons and enqueue conflicting Proxmox tasks. Laravel's cache lock
