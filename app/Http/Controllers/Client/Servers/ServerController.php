@@ -35,7 +35,7 @@ class ServerController
 
     public function index(Request $request)
     {
-        $servers = QueryBuilder::for(Server::query()->accessibleBy($request->user()))
+        $servers = QueryBuilder::for(Server::query()->ownedBy($request->user()))
             ->allowedFilters(['name'])
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());

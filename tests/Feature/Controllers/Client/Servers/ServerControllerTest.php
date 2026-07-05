@@ -19,16 +19,17 @@ it('only lists servers the authenticated user owns', function () {
         ->assertJsonPath('items.0.uuid', $server->uuid);
 });
 
-it('lists every server for root admins', function () {
-    [$_owner, $_, $_, $server] = createServerModel();
+it('does not list other users servers for root admins', function () {
+    // The client area is owner-scoped even for admins; they must not see
+    // servers they do not own here (the admin area is for that).
+    [$_owner, $_, $_, $_server] = createServerModel();
 
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
         ->getJson('/api/client/servers')
         ->assertOk()
-        ->assertJsonCount(1, 'items')
-        ->assertJsonPath('items.0.uuid', $server->uuid);
+        ->assertJsonCount(0, 'items');
 });
 
 it('can generate noVNC authorization token', function () {

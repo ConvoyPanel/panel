@@ -100,21 +100,19 @@ class Server extends Model
     }
 
     /**
-     * Scope the query to servers the given user is allowed to see.
+     * Scope the query to servers the given user owns.
      *
-     * Root admins see every server; everyone else is limited to the servers
-     * they own. This is the single source of truth for server visibility —
-     * when subuser support is added, extend the ownership check here (e.g. an
-     * orWhereHas on a subusers relation) and every listing inherits it.
+     * This is the single source of truth for client-facing server visibility.
+     * Ownership is deliberate for everyone, including root admins — the client
+     * area shows a user their own servers, not every server on the panel (use
+     * the admin area for that). When subuser support is added, extend the
+     * ownership check here (e.g. an orWhereHas on a subusers relation) and
+     * every listing inherits it.
      *
      * @param  Builder<Server>  $query
      */
-    public function scopeAccessibleBy(Builder $query, User $user): void
+    public function scopeOwnedBy(Builder $query, User $user): void
     {
-        if ($user->root_admin) {
-            return;
-        }
-
         $query->where('user_id', $user->id);
     }
 
