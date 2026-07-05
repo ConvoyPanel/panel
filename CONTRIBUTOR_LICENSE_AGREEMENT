@@ -1,66 +1,41 @@
 ### Performave Individual Contributor License Agreement
 
-Thank you for your interest in contributing to open source software projects (“Projects”) made available by Performave or its affiliates (“Performave”). This Individual Contributor License Agreement (“Agreement”) sets out the terms governing any source code, object code, bug fixes, configuration changes, tools, specifications, documentation, data, materials, feedback, information or other works of authorship that you submit or have submitted, in any form and in any manner, to Performave in respect of any of the Projects (collectively “Contributions”). If you have any questions respecting this Agreement, please contact eric@performave.com.
+Thank you for your interest in contributing to open source or source-available software projects made available under the Performave name (the "Projects"). This Individual Contributor License Agreement (the "Agreement") sets out the terms governing any source code, object code, bug fixes, configuration changes, tools, specifications, documentation, data, materials, feedback, information, or other works of authorship that you submit or have submitted to Eric Wang in respect of any of the Projects (collectively, "Contributions").
 
+Performave is a project or trade name and is not currently a separate legal entity. For purposes of this Agreement, "Eric Wang," "we," "us," and "our" mean Eric Wang, the individual project steward. If you have questions about this Agreement, please contact eric [at] performave [dot] com.
 
-You agree that the following terms apply to all of your past, present and future Contributions. Except for the licenses granted in this Agreement, you retain all of your right, title and interest in and to your Contributions.
+By submitting a Contribution, or by otherwise accepting this Agreement through an approved contribution workflow, you agree that the following terms apply to all of your past, present, and future Contributions. Except for the licenses granted in this Agreement, you retain all right, title, and interest in and to your Contributions.
 
+**Definitions.** "You" and "your" mean the individual who submits a Contribution and accepts this Agreement. "Submit" means any form of electronic, written, or verbal communication sent to us or our representatives for the purpose of discussing, improving, or contributing to a Project, including through source code control systems, issue trackers, pull requests, email, chat, or other project communication channels. A submission is not a Contribution if you clearly mark it in writing as "Not a Contribution."
 
-**Copyright License.** You hereby grant, and agree to grant, to Performave a non-exclusive, perpetual, irrevocable, worldwide, fully-paid, royalty-free, transferable copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, and distribute your Contributions and such derivative works, with the right to sublicense the foregoing rights through multiple tiers of sublicensees.
+**Eligibility.** You represent that you are at least 18 years old and have the legal capacity to enter into this Agreement. We do not accept Contributions from minors under this Agreement. This Agreement is for individual contributors; Contributions owned by a company, employer, client, school, or other legal entity require separate written permission or a separate contributor agreement signed by an authorized representative of that entity.
 
+**Copyright License.** You hereby grant, and agree to grant, to Eric Wang a non-exclusive, perpetual, irrevocable, worldwide, fully paid, royalty-free, transferable copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, distribute, and otherwise use your Contributions and derivative works of your Contributions, with the right to sublicense the foregoing rights through multiple tiers of sublicensees. This license permits us to license Contributions as part of the Projects under any terms we choose.
 
-**Patent License.** You hereby grant, and agree to grant, to Performave a non-exclusive, perpetual, irrevocable,
-worldwide, fully-paid, royalty-free, transferable patent license to make, have made, use, offer to sell, sell,
-import, and otherwise transfer your Contributions, where such license applies only to those patent claims
-licensable by you that are necessarily infringed by your Contributions alone or by combination of your
-Contributions with the Project to which such Contributions were submitted, with the right to sublicense the
-foregoing rights through multiple tiers of sublicensees.
+**Patent License.** You hereby grant, and agree to grant, to Eric Wang a non-exclusive, perpetual, irrevocable, worldwide, fully paid, royalty-free, transferable patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer your Contributions, where such license applies only to those patent claims licensable by you that are necessarily infringed by your Contributions alone or by combination of your Contributions with the Project to which such Contributions were submitted, with the right to sublicense the foregoing rights through multiple tiers of sublicensees.
 
+**Moral Rights.** To the fullest extent permitted under applicable law, you hereby waive, and agree not to assert, all of your moral rights, rights of attribution, rights of integrity, and similar non-economic rights in or relating to your Contributions for the benefit of Eric Wang, his successors and assigns, and their respective direct and indirect sublicensees. If any such rights cannot be waived, you agree not to enforce them against those parties.
 
-**Moral Rights.** To the fullest extent permitted under applicable law, you hereby waive, and agree not to
-assert, all of your “moral rights” in or relating to your Contributions for the benefit of Performave, its assigns, and
-their respective direct and indirect sublicensees.
+**Third-Party Content and Rights.** If your Contribution includes or is based on any material that was not authored by you ("Third-Party Content"), or if you are aware of any third-party intellectual property, proprietary, confidentiality, license, or contractual rights associated with your Contribution ("Third-Party Rights"), you agree to include complete details with your submission. Those details should identify the relevant part of the Contribution, the owner or author of the Third-Party Content or Third-Party Rights, where you obtained it, and any applicable license terms or restrictions. This disclosure obligation does not apply to portions of a Project that are incorporated into your Contribution to that same Project.
 
+**AI-Assisted Contributions.** If you use generative artificial intelligence, code completion, or similar automated tools to create a material part of a Contribution, you represent that you reviewed the Contribution, understand it, and have the right to submit it under this Agreement. You agree to disclose any material use of such tools if required by the Project's contribution guidelines or if the tool output may be subject to third-party rights, license restrictions, confidentiality obligations, or other restrictions.
 
-**Third Party Content/Rights.** If your Contribution includes or is based on any source code, object code, bug
-fixes, configuration changes, tools, specifications, documentation, data, materials, feedback, information or
-other works of authorship that were not authored by you (“Third Party Content”) or if you are aware of any
-third party intellectual property or proprietary rights associated with your Contribution (“Third Party Rights”),
-then you agree to include with the submission of your Contribution full details respecting such Third Party
-Content and Third Party Rights, including, without limitation, identification of which aspects of your
-Contribution contain Third Party Content or are associated with Third Party Rights, the owner/author of the
-Third Party Content and Third Party Rights, where you obtained the Third Party Content, and any applicable
-third party license terms or restrictions respecting the Third Party Content and Third Party Rights. For greater
-certainty, the foregoing obligations respecting the identification of Third Party Content and Third Party Rights
-do not apply to any portion of a Project that is incorporated into your Contribution to that same Project.
+**Representations.** You represent that, other than any Third-Party Content and Third-Party Rights disclosed by you in accordance with this Agreement: (a) you are the sole author of your Contributions; (b) you are legally entitled to grant the licenses and waivers in this Agreement; (c) your Contributions do not violate any agreement, policy, law, or third-party right known to you; and (d) your Contributions do not include confidential information that you are not authorized to submit.
 
+**Employment and Other Obligations.** If your Contributions were created in the course of your employment, using your employer's resources, or under circumstances where an employer, client, school, or other third party may have rights in them, you represent that you have received permission to submit the Contributions, that the relevant third party has waived any rights that would conflict with this Agreement, or that the relevant third party has no such rights. If you are unsure, do not submit the Contribution until you have obtained appropriate permission.
 
-**Representations.** You represent that, other than the Third Party Content and Third Party Rights identified by
-you in accordance with this Agreement, you are the sole author of your Contributions and are legally entitled
-to grant the foregoing licenses and waivers in respect of your Contributions. If your Contributions were
-created in the course of your employment with your past or present employer(s), you represent that such
-employer(s) has authorized you to make your Contributions on behalf of such employer(s) or such employer
-(s) has waived all of their right, title or interest in or to your Contributions.
+**No Support Obligation; Disclaimer.** You are not required to provide support for your Contributions, except to the extent you choose to do so. To the fullest extent permitted under applicable law, your Contributions are provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of title, non-infringement, merchantability, or fitness for a particular purpose.
 
+**No Obligation to Use Contributions.** You acknowledge that we are under no obligation to use, review, accept, or incorporate your Contributions into any Project. The decision to use or incorporate your Contributions will be made at our sole discretion or by our authorized delegates.
 
-**Disclaimer.** To the fullest extent permitted under applicable law, your Contributions are provided on an "asis"
-basis, without any warranties or conditions, express or implied, including, without limitation, any implied
-warranties or conditions of non-infringement, merchantability or fitness for a particular purpose. You are not
-required to provide support for your Contributions, except to the extent you desire to provide support.
+**Notice of Changed Circumstances.** You agree to notify us if you become aware of facts or circumstances that would make any representation in this Agreement inaccurate in any material respect.
 
+**Acceptance and Records.** You may accept this Agreement by signing it, by electronically agreeing to it through an approved contribution workflow, or by submitting a Contribution after being presented with notice that Contributions are governed by this Agreement. You agree that electronic records and electronic signatures may be used to form and evidence this Agreement. We may maintain records of your acceptance, including your name, username, email address, timestamp, repository, pull request, commit information, and the version of this Agreement that you accepted.
 
-**No Obligation.** You acknowledge that Performave is under no obligation to use or incorporate your Contributions
-into any of the Projects. The decision to use or incorporate your Contributions into any of the Projects will be
-made at the sole discretion of Performave or its authorized delegates.
+**Governing Law and Venue.** This Agreement shall be governed by and construed in accordance with the laws of the State of Oklahoma, United States of America, without giving effect to its conflict-of-laws rules, other than rules that direct application of Oklahoma law. The parties consent to venue and personal jurisdiction in the state courts located in Oklahoma County, Oklahoma, and, where federal jurisdiction exists, the United States District Court for the Western District of Oklahoma, for disputes relating to this Agreement.
 
+**Severability.** If any provision of this Agreement is held by a court or other tribunal of competent jurisdiction to be unenforceable, the remaining provisions will remain in full force and effect.
 
-**Disputes.** This Agreement shall be governed by and construed in accordance with the laws of the State of
-Oklahoma, United States of America, without giving effect to its principles or rules regarding conflicts of laws,
-other than such principles directing application of Oklahoma law. The parties hereby submit to venue in, and
-jurisdiction of the courts located in Oklahoma, Oklahoma for purposes relating to this Agreement. In the event
-that any of the provisions of this Agreement shall be held by a court or other tribunal of competent jurisdiction
-to be unenforceable, the remaining portions hereof shall remain in full force and effect.
+**Assignment.** You agree that Eric Wang may assign this Agreement, and all rights, obligations, and licenses under it, to any successor, assignee, or entity that owns, operates, or manages the Projects, provided that the assignee agrees to be bound by this Agreement.
 
-
-**Assignment.** You agree that Performave may assign this Agreement, and all of its rights, obligations and licenses
-hereunder.
+**Entire Agreement.** This Agreement is the entire agreement between you and Eric Wang concerning your Contributions and supersedes any prior or contemporaneous understandings on that subject, except for any separate written agreement signed by you and Eric Wang.
