@@ -1,7 +1,9 @@
 import usePagination from '@/hooks/use-pagination.ts'
+import { useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
 import { IconCopy } from '@tabler/icons-react'
 
-import useBackupsSWR from '@/api/servers/backups/use-backups-swr.ts'
+import { backupQueries } from '@/features/servers/backups/api.ts'
 
 import BackupCard from '@/components/interfaces/Client/Server/Backups/BackupCard.tsx'
 
@@ -14,7 +16,8 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const BackupView = () => {
     const { page, setPage } = usePagination()
-    const { data, isLoading } = useBackupsSWR(undefined, { page })
+    const { serverUuid } = useParams({ strict: false }) as { serverUuid: string }
+    const { data, isLoading } = useQuery(backupQueries.list(serverUuid, { page }))
 
     if (isLoading) {
         return <Skeleton className={'h-96 w-full'} />

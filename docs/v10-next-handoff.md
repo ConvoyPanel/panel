@@ -219,6 +219,37 @@ of real PVE strings for the two DTOs that emit (`NetworkDeviceData`, `TpmStateDi
 `DiskData` and `UsbDeviceData` are parse-only (no `toProxmoxString`), so they're out of scope here —
 covered instead by their characterization tests. Suite: 74 passed.
 
+## Phase 4 — data-layer migration to TanStack Query (IN PROGRESS)
+
+Phase 4 polish: migrate hooks off the hand-written SWR-compat shim (`resources/scripts/lib/swr.ts`,
+which is itself a thin wrapper over TanStack Query) onto **TanStack Query used directly** via the
+`features/*` reference pattern (`queryOptions` + `apiFetch` + Wayfinder route objects). Reference
+implementations: `features/servers/api.ts` and `features/overview/api.ts`. "Convert as you touch" —
+no big-bang rewrite. ~53 shim consumers remain.
+
+**Landed:**
+- **Client server backups → `features/servers/backups/api.ts`.** `backupQueries.list(serverUuid,
+  params)` returns a `queryOptions` with `keepPreviousData`; preserves the two things the old
+  `getBackups` did — the `rawDataToBackup` date/enum normalization and the extra `backupCount` field
+  on the paginated envelope. `BackupView.tsx` now uses `useQuery(backupQueries.list(...))`, reading
+  `serverUuid` from `useParams({ strict: false })` exactly as the old hook did internally. Deleted
+  `api/servers/backups/{use-backups-swr,getBackups}.ts` (both were single-consumer). Behavior-
+  preserving 1:1 swap: same Wayfinder-resolved URL, same transform, same response shape. tsc clean,
+  production build green.
+
+> ⚠️ **Wayfinder gotcha for admin controllers (discovered here, corrects a Phase-1 claim).**
+> `routes/api-application.php` was **NOT** removed by Phase 1 as the earlier notes implied — it is a
+> **live `auth:sanctum` machine-to-machine Application API** (Pterodactyl-style) that reuses the
+> `Admin\*` controllers under `/api/application/*` (registered at `bootstrap/app.php:40`). Because
+> those routes duplicate the admin web routes onto the same controller methods, **Wayfinder emits
+> URI-keyed dictionaries instead of callables** for the affected actions (e.g. `LocationController.index`
+> is `{ '/api/admin/locations': fn, '/api/application/locations': fn }`, not `LocationController.index()`).
+> So admin features whose controllers have an app-API twin (locations, nodes, admin servers, users)
+> can't use the clean `Controller.action()` call — reference the admin URI explicitly
+> (`LocationController.index['/api/admin/locations']()`). **Client** controllers (`/api/client/*`,
+> `/api/auth/*`) have no such twin and stay clean — prefer migrating those first. Do **not** delete
+> `api-application.php` to "fix" this; it's a real API surface.
+
 ## Next up (Phase 3)
 
 - **Phase 3 (prod migration)** is the hard requirement after Phase 2: cross-engine
