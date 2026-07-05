@@ -179,9 +179,19 @@ Suite: 67 passed. No new PHPStan errors (AllocationService's 2 findings are the 
 > unreachable (so it currently always throws `IsoAlreadyUnmountedException`). Left as-is; worth a
 > separate fix. The digest change is correct for when the disk *is* found.
 
+## `syncNetworkDeviceConfig` redundant-write filter (DONE)
+
+`ServerNetworkService::syncNetworkDeviceConfig` now skips NICs already in the desired state instead
+of rewriting every device. Subtlety: this method sets firewall **and** mac/bridge, so a NIC that's
+already firewalled might still need a mac/bridge correction — the predicate keeps a device only when
+`firewall`, `mac`, or `bridge` would actually change. If nothing needs changing it returns early
+rather than POSTing an empty (digest-only) update. Test:
+`tests/Unit/Services/Servers/ServerNetworkServiceTest.php` drives `syncSettings` with one already-
+firewalled NIC and one not, and asserts the write carries the stale NIC but never the already-correct
+one (fails without the filter, which would write both). Suite: 68 passed; no new PHPStan errors.
+
 ## Next up (rest of Phase 2, then Phase 3)
 
-- **`syncNetworkDeviceConfig`** should filter already-firewalled NICs (avoid redundant writes).
 - **Golden-master round-trip tests** on real PVE config fixtures: assert
   `fromRaw(x) → toProxmoxString → fromRaw` drops nothing. This is the Phase-2 safety net.
 - **Phase 3 (prod migration)** is the hard requirement after Phase 2: cross-engine

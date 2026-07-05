@@ -48,7 +48,26 @@ class ServerNetworkService
 
         $config = $this->configRepository->setServer($server)->getConfig();
 
-        $networkDevices = $config->networkDevices
+        // Skip NICs already in the desired state so we don't rewrite them.
+        // Firewall isn't the only field we set here — a NIC could be firewalled
+        // but still need its mac/bridge corrected — so a device is only
+        // redundant when all three would be unchanged.
+        $devicesToUpdate = $config->networkDevices
+            ->filter(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
+                $needsFirewall = $device->isFirewallEnabled !== true;
+                $needsMac = $macAddress !== null && $macAddress !== $device->macAddress;
+                $needsBridge = $bridge !== null && $bridge !== $device->bridge;
+
+                return $needsFirewall || $needsMac || $needsBridge;
+            });
+
+        // Nothing to change — skip the write entirely rather than POST an
+        // empty (digest-only) config update.
+        if ($devicesToUpdate->isEmpty()) {
+            return;
+        }
+
+        $networkDevices = $devicesToUpdate
             ->map(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
                 $device->isFirewallEnabled = true;
                 $device->macAddress = $macAddress ?? $device->macAddress;
