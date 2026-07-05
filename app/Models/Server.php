@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\StorageSizeCast;
 use App\Enums\Server\ServerStatus;
 use App\Exceptions\Http\Server\ServerStatusConflictException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -96,6 +97,25 @@ class Server extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Scope the query to servers the given user is allowed to see.
+     *
+     * Root admins see every server; everyone else is limited to the servers
+     * they own. This is the single source of truth for server visibility —
+     * when subuser support is added, extend the ownership check here (e.g. an
+     * orWhereHas on a subusers relation) and every listing inherits it.
+     *
+     * @param  Builder<Server>  $query
+     */
+    public function scopeAccessibleBy(Builder $query, User $user): void
+    {
+        if ($user->root_admin) {
+            return;
+        }
+
+        $query->where('user_id', $user->id);
     }
 
     /**

@@ -1,5 +1,36 @@
 <?php
 
+use App\Models\User;
+
+it('only lists servers the authenticated user owns', function () {
+    [$owner, $_, $_, $server] = createServerModel();
+
+    $otherUser = User::factory()->create();
+
+    $this->actingAs($otherUser)
+        ->getJson('/api/client/servers')
+        ->assertOk()
+        ->assertJsonCount(0, 'items');
+
+    $this->actingAs($owner)
+        ->getJson('/api/client/servers')
+        ->assertOk()
+        ->assertJsonCount(1, 'items')
+        ->assertJsonPath('items.0.uuid', $server->uuid);
+});
+
+it('lists every server for root admins', function () {
+    [$_owner, $_, $_, $server] = createServerModel();
+
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->getJson('/api/client/servers')
+        ->assertOk()
+        ->assertJsonCount(1, 'items')
+        ->assertJsonPath('items.0.uuid', $server->uuid);
+});
+
 it('can generate noVNC authorization token', function () {
     Http::fake([
         '*/api2/json/access/users' => Http::response(
