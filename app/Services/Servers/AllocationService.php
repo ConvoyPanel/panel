@@ -87,10 +87,11 @@ class AllocationService
             throw new IsoAlreadyMountedException;
         }
 
-        $arrayToCheckForAvailableIdeIndex = Arr::pluck(
-            $this->configRepository->setServer($server)->getConfig(),
-            'key',
-        );
+        // We pick the free IDE slot from the config we read here, so guard the
+        // mount against that config changing underneath us (a concurrent mount
+        // could otherwise claim the same slot).
+        $config = $this->configRepository->setServer($server)->getConfig();
+        $arrayToCheckForAvailableIdeIndex = Arr::pluck($config, 'key');
         for ($i = 0; $i <= 4; $i++) {
             if ($i === 4) {
                 throw new NoAvailableDiskInterfaceException;
@@ -104,14 +105,16 @@ class AllocationService
 
         $this->configRepository->update([
             "ide$ideIndex" => "{$iso->storage->name}:iso/{$iso->file_name},media=cdrom",
-        ]);
+        ], $config->digest);
     }
 
     public function unmountIso(Server $server, ISO $iso): void
     {
-        $disks = $this->getDisks($server);
-        if ($disk = $disks->where('media_name', '=', $iso->name)->first()) {
-            $this->configRepository->update(['delete' => $disk->interface->value]);
+        // Read the full config (not just the disks) so we can guard the delete
+        // with its digest — the interface we delete is derived from this read.
+        $config = $this->configRepository->setServer($server)->getConfig();
+        if ($disk = $config->disks->where('media_name', '=', $iso->name)->first()) {
+            $this->configRepository->update(['delete' => $disk->interface->value], $config->digest);
         } else {
             throw new IsoAlreadyUnmountedException;
         }

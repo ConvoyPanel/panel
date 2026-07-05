@@ -78,11 +78,12 @@ class CloudinitService
 
         $payload = Arr::join($payload, ',');
 
+        // The set of ipconfig keys is derived from the NICs we just read, so
+        // guard the write with that read's digest (optimistic concurrency).
+        $config = $this->configRepository->setServer($server)->getConfig();
+
         /** @var array<string, string> $networkDevices */
-        $networkDevices = $this->configRepository
-            ->setServer($server)
-            ->getConfig()
-            ->networkDevices
+        $networkDevices = $config->networkDevices
             ->map(fn (NetworkDeviceData $device) => ["ipconfig$device->id", $payload])
             ->reduce(function (array $carry, array $item) {
                 [$id, $config] = $item;
@@ -91,6 +92,6 @@ class CloudinitService
                 return $carry;
             }, []);
 
-        $this->configRepository->setServer($server)->update($networkDevices);
+        $this->configRepository->update($networkDevices, $config->digest);
     }
 }

@@ -149,10 +149,38 @@ Suite: 65 passed. PHPStan clean on the changed files (the full-suite 272 errors 
   behavior note: the codec only parses `key=value` (PVE's actual output); the old parser's defensive
   bare-flag `?? true` path is gone, which is a non-issue for real PVE strings.
 
+## Digest threading — rest of the write paths (DONE)
+
+Threaded `$config->digest` through the remaining **read-modify-write** config writes, matching the
+`ServerNetworkService` / `ServerNetworkBandwidthService` pattern. The key insight: digest optimistic
+concurrency only helps a *read-modify-write* (where the payload or its key set is derived from a
+config we just read). Blind writes whose values come from args, not from the read config, were
+**deliberately left without a digest** — threading one there would force an extra `getConfig()` round
+trip and raise spurious 409s on unrelated concurrent changes.
+
+- `CloudinitService::setIpConfig` — RMW (the `ipconfig{id}` key set comes from the NICs it reads).
+  Digest threaded; also dropped a redundant second `setServer()`.
+- `AllocationService::mountIso` — RMW (picks the free `ide{n}` slot from the read config). Digest
+  threaded from that read.
+- `AllocationService::unmountIso` — RMW (deletes the interface of the disk it found). Now reads the
+  full config (was `getDisks()`) so it can pass the digest.
+- **Left blind (no digest, on purpose):** `CloudinitService::setHostname` / `setNameservers`,
+  `ServerAuthService::setPassword` / `setSSHKeys`, `AllocationService::setBootOrder`, and the
+  `cores`/`memory` write in `AllocationService::syncSettings` (values come from the `$server` model,
+  not the read config).
+
+Tests: `tests/Unit/Services/Servers/{CloudinitService,AllocationService}Test.php` assert a PVE digest
+mismatch surfaces as `ConfigModifiedException` (which only fires when a digest was actually passed).
+Suite: 67 passed. No new PHPStan errors (AllocationService's 2 findings are the pre-existing baseline:
+`Arr::pluck` over `ServerConfigData`, `$iso->storage->name` on the base Model).
+
+> Note: `unmountIso`'s disk lookup uses `->where('media_name', ...)` on a `Collection<DiskData>`, but
+> `DiskData` has no `media_name` property — a **pre-existing** bug that makes the found-branch
+> unreachable (so it currently always throws `IsoAlreadyUnmountedException`). Left as-is; worth a
+> separate fix. The digest change is correct for when the disk *is* found.
+
 ## Next up (rest of Phase 2, then Phase 3)
 
-- **Thread digest through the rest of the write paths:** `CloudinitService`, `AllocationService`,
-  `ServerAuthService`.
 - **`syncNetworkDeviceConfig`** should filter already-firewalled NICs (avoid redundant writes).
 - **Golden-master round-trip tests** on real PVE config fixtures: assert
   `fromRaw(x) → toProxmoxString → fromRaw` drops nothing. This is the Phase-2 safety net.
