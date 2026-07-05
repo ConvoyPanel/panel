@@ -15,6 +15,7 @@ use Lcobucci\JWT\Token\InvalidTokenStructure;
 use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
 use Lcobucci\JWT\UnencryptedToken;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 
 class JWTService
@@ -116,7 +117,14 @@ class JWTService
 
         assert($parsedToken instanceof UnencryptedToken);
 
-        if (! $config->validator()->validate($parsedToken, new StrictValidAt(new Clock))) {
+        // Verify the signature too — StrictValidAt alone only checks the token
+        // is well-formed and unexpired, which would accept a forged token with
+        // arbitrary claims. SignedWith confirms it was signed with our key.
+        if (! $config->validator()->validate(
+            $parsedToken,
+            new StrictValidAt(new Clock),
+            new SignedWith($config->signer(), $config->signingKey()),
+        )) {
             throw new InvalidJWTException;
         }
 

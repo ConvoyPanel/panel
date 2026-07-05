@@ -16,7 +16,10 @@ class LoginController
     public function authorizeToken(Request $request)
     {
         try {
-            $token = $this->JWTService->decode(config('app.url'), $request->token);
+            // Verify with app.key — the same key getSSOToken() signs with. (It
+            // was config('app.url'), which only ever passed because the
+            // signature was not being checked.)
+            $token = $this->JWTService->decode(config('app.key'), $request->token);
         } catch (InvalidJWTException) {
             throw new UnauthorizedHttpException('', 'Invalid JWT token');
         }
