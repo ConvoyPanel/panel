@@ -100,16 +100,25 @@ extensions), namespace `App\Extensions\Spatie\Data\Proxmox`:
   "known keys" set from the attributes, so `extraProperties` losslessness no longer needs a
   hand-maintained `Arr::except([...])` exclusion list.
 
-**Done:** `NetworkDeviceData` refactored onto it (reference implementation). Golden-master
-round-trip tests in `tests/Unit/Data/NetworkDeviceDataTest.php` (5 cases: full-field parse,
-full round-trip, PVE bool 1/0 + null omission, unmodeled-key preservation). Suite: 46 passed.
-PHPStan clean on the new files (the full-suite 272 errors are the pre-existing `next` baseline,
-not from this change).
+**Done:**
+- `NetworkDeviceData` — reference implementation. Tests in `tests/Unit/Data/NetworkDeviceDataTest.php`
+  (5 cases: full-field parse, full round-trip, PVE bool 1/0 + null omission, unmodeled-key preservation).
+- `TpmStateDiskData` — refactored onto the codec; its ~40-line convoluted volume parser collapsed to
+  a few lines, and it **gained `extraProperties` losslessness** it previously lacked (it silently
+  dropped unknown keys). Tests in `tests/Unit/Data/TpmStateDiskDataTest.php` (5 cases). Note: `size`
+  still truncates the PVE unit (`4M` → `4`) as before — pre-existing, and `size` is informational for
+  tpmstate; left as-is to avoid changing the `int` TS contract.
 
-**TODO — apply the same pattern to the other compound DTOs:**
-- `DiskData` — biggest win (huge `data_get(...)` ladder + per-field `filter_var` bools). Note
-  the `mbps`/`bps` dual-unit reads and size-unit suffix parsing need bespoke casts.
-- `TpmStateDiskData` — also give it the `extraProperties` losslessness it currently lacks.
+Suite: 51 passed. PHPStan clean on the changed files (the full-suite 272 errors are the pre-existing
+`next` baseline, not from these changes).
+
+**TODO — apply the same pattern to the remaining compound DTOs:**
+- `DiskData` — biggest remaining win (huge `data_get(...)` ladder + per-field `filter_var` bools),
+  but the trickiest: the `mbps`/`bps` dual-unit reads (two PVE keys → one property) don't fit the
+  one-key-per-property attribute model and need to stay partly explicit; size-unit suffix needs a
+  bespoke cast; several fields default to non-null when absent (`backup`→true) so `fromRaw` keeps
+  `?? default`. Also: `DiskData` is currently **parse-only** (no `toProxmoxString`) — don't add emit
+  speculatively; adding disk re-emit is a real VM-write risk that belongs with a tested push path.
 - Consider `CloudinitConfigData`, `UsbDeviceData`, `VgaConfigData` if they share the format.
 
 ## Next up (rest of Phase 2, then Phase 3)
@@ -122,6 +131,35 @@ not from this change).
 - **Phase 3 (prod migration)** is the hard requirement after Phase 2: cross-engine
   MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
   against a restored prod snapshot; reconcile `develop`'s newer commits.
+
+## Test database isolation (RefreshDatabase + dedicated `db_test`)
+
+Tests previously ran with `DatabaseTransactions` against the **dev** database (`db`).
+Two problems: Postgres sequences are non-transactional, so every rolled-back factory
+insert still burned an autoincrement value permanently — and since the dev DB is never
+reset, those climbed forever. Fixed by:
+
+- **`RefreshDatabase`** (see `tests/Pest.php`) — `migrate:fresh` at the start of each run
+  resets all sequences, so IDs stay small and deterministic per run.
+- **A dedicated `db_test` database** so `migrate:fresh` never touches dev data. Created by a
+  ddev `post-start` hook (`.ddev/config.yaml`, idempotent `createdb`), owned by `db`.
+- **`tests/bootstrap.php`** redirects the suite onto `db_test` when `DB_TEST_DATABASE` is set
+  (ddev exports it via `web_environment`). This is done in a bootstrap file, *not* phpunit
+  `<env>`, for a specific reason: ddev exports `DB_DATABASE` into the container env, which PHP
+  mirrors into **`$_SERVER`**, and Laravel's `Env` reads `$_SERVER` *before* `$_ENV`/`getenv`.
+  PHPUnit's `<env force="true">` only rewrites `$_ENV`+`putenv`, so it silently loses — the
+  bootstrap overwrites `$_SERVER` too, before the framework boots.
+- **CI is untouched**: it doesn't set `DB_TEST_DATABASE`, so the redirect no-ops and tests run
+  against CI's throwaway MySQL `convoy` DB (`.github/workflows/tests.yml`). Note CI is still on
+  MySQL 8.0 — a Postgres CI service is a Phase 0/3 follow-up.
+
+Verified: after a run, `db_test.locations_id_seq` advances (tests wrote there) while
+`db.locations_id_seq` stays at 1 (dev DB untouched).
+
+> ⚠️ During setup, before `db_test` redirection was wired, one `RefreshDatabase` run did a
+> `migrate:fresh` against dev `db` and wiped it. Recover from the `postgres-baseline` ddev
+> snapshot (`ddev snapshot restore postgres-baseline`) or reseed. Sequence-reset behavior means
+> this can't recur now that the redirect is in place.
 
 ## Known flakiness
 - `LocationFactory` auto-generated `short_code` can clash → intermittent test failures. Make it
