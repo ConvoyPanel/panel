@@ -2,7 +2,7 @@
 
 namespace App\Services\Nodes;
 
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
 use App\Services\Servers\ServerNetworkBandwidthService;
@@ -24,7 +24,7 @@ class ServerRateLimitsSyncService
                 } else {
                     $this->service->removeRateLimit($server);
                 }
-            } catch (ProxmoxConnectionException $e) {
+            } catch (RequestException $e) {
                 // do nothing
             }
         });

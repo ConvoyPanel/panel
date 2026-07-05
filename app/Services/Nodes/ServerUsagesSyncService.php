@@ -4,7 +4,7 @@ namespace App\Services\Nodes;
 
 use App\Data\Server\Proxmox\Usages\ServerTimepointData;
 use App\Enums\Server\StatisticTimeRange;
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
@@ -47,7 +47,7 @@ class ServerUsagesSyncService
                         'hydrated_at' => now(),
                     ]);
                 }
-            } catch (ProxmoxConnectionException $e) {
+            } catch (RequestException $e) {
                 // do nothing
             }
         });

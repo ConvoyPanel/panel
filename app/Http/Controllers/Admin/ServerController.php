@@ -6,7 +6,7 @@ use App\Data\PaginationMeta;
 use App\Data\Server\ServerData;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
-use App\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
@@ -79,7 +79,7 @@ class ServerController
             if ($request->hostname !== $server->hostname && ! empty($request->hostname)) {
                 try {
                     $this->cloudinitService->setHostname($server, $request->hostname);
-                } catch (ProxmoxConnectionException) {
+                } catch (RequestException) {
                     throw new ServiceUnavailableHttpException(
                         message: "Server {$server->uuid} failed to sync hostname.",
                     );
@@ -98,11 +98,11 @@ class ServerController
     {
         $server->update($request->safe()->except('address_ids'));
 
-        $this->networkService->updateAddresses($server, $request->address_ids ?? []);
+        $this->networkService->syncAddresses($server, $request->address_ids ?? []);
 
         try {
             $this->buildModificationService->handle($server);
-        } catch (ProxmoxConnectionException $e) {
+        } catch (RequestException $e) {
             // do nothing
         }
 
