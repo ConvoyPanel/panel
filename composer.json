@@ -45,9 +45,6 @@
     "phpstan/phpstan": "^2.1"
   },
   "autoload": {
-    "files": [
-      "app/Helpers/Network.php"
-    ],
     "psr-4": {
       "App\\": "app/",
       "Database\\Factories\\": "database/factories/",
