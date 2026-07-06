@@ -4,7 +4,7 @@ Living notes for the effort to ship `next` (v10) as the new trunk. Update as pha
 Roadmap of record: `~/.claude/plans/help-me-plan-a-cryptic-peacock.md` (5 phases). This file
 tracks *what's actually done* and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-05
+Last updated: 2026-07-06
 
 ---
 
@@ -221,13 +221,30 @@ covered instead by their characterization tests. Suite: 74 passed.
 
 ## Phase 4 — data-layer migration to TanStack Query (IN PROGRESS)
 
-Phase 4 polish: migrate hooks off the hand-written SWR-compat shim (`resources/scripts/lib/swr.ts`,
-which is itself a thin wrapper over TanStack Query) onto **TanStack Query used directly** via the
-`features/*` reference pattern (`queryOptions` + `apiFetch` + Wayfinder route objects). Reference
-implementations: `features/servers/api.ts` and `features/overview/api.ts`. "Convert as you touch" —
-no big-bang rewrite. ~53 shim consumers remain.
+Phase 4 polish: converge the whole data layer on the **`features/*` reference pattern**
+(`queryOptions` + `apiFetch` + Wayfinder route objects). Reference implementations:
+`features/servers/api.ts` and `features/overview/api.ts`. "Convert as you touch" — no big-bang rewrite.
+
+> **Status update (2026-07-06):** the old hand-written SWR-compat shim (`lib/swr.ts`) is **already
+> gone** — earlier commits `eb8922c8` (native TanStack Query migration) and `f6680ad4` (queryOptions
+> factory objects) removed it. The remaining `api/**/use-*.ts` + `get*.ts` hooks *already* use
+> TanStack `queryOptions` directly; the residual delta is purely (a) raw `axios.get('/url')` → `apiFetch`
+> + Wayfinder route objects, and (b) relocating each domain from `api/` into `features/<domain>/api.ts`.
+> ~30 old-style `use-*` hooks remain across nodes, users, servers (admin), templateGroups, addressBlockGroups,
+> account/authenticator, account/passkeys. **Admin caveat:** admin controllers are served under two
+> prefixes, so Wayfinder emits URI-keyed dictionaries — reference the `/api/admin` route explicitly
+> (`Controller.method['/api/admin/…']`), see `features/locations/api.ts` / `features/overview/api.ts`.
+> The `swrKey` prop on `ResourceComboboxForm` is a leftover name (now used as a TanStack queryKey), not
+> the old shim — harmless, rename opportunistically.
 
 **Landed:**
+- **Admin locations → `features/locations/api.ts`.** Consolidated the whole domain (list/detail/nodes
+  queries + `getLocations` callable fetcher for the combobox + create/update/delete mutations + the
+  `useLocations`/`useLocation`/`useAttachedNodes` convenience hooks) into one feature module on
+  `apiFetch` + Wayfinder routes. Deleted the nine `api/admin/locations/{get*,use-*,create/update/delete}.ts`
+  files. Repointed 7 consumers (LocationList, LocationPicker, AttachedNodesList, Create/Edit/Delete
+  modals, `locations.lazy.tsx`); component logic and the consumer-side optimistic `useQueryMutator`
+  updates are untouched. Behavior-preserving. tsc clean, production build green. Commit `fb34b712`.
 - **Client server backups → `features/servers/backups/api.ts`.** `backupQueries.list(serverUuid,
   params)` returns a `queryOptions` with `keepPreviousData`; preserves the two things the old
   `getBackups` did — the `rawDataToBackup` date/enum normalization and the extra `backupCount` field
