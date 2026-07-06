@@ -8,7 +8,7 @@ import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import updateLocation from '@/api/admin/locations/updateLocation.ts'
+import { updateLocation } from '@/features/locations/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

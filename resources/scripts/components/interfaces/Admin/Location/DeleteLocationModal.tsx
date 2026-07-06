@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
-import deleteLocation from '@/api/admin/locations/deleteLocation.ts'
+import { deleteLocation } from '@/features/locations/api.ts'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'

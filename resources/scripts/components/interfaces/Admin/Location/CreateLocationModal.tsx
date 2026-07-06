@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
-import createLocation from '@/api/admin/locations/createLocation.ts'
+import { createLocation } from '@/features/locations/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

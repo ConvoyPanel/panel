@@ -2,7 +2,7 @@ import { Location } from '@/types/location.ts'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 
-import useLocations from '@/api/admin/locations/use-locations.ts'
+import { useLocations } from '@/features/locations/api.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'

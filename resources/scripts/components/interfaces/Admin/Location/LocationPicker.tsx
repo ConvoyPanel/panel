@@ -3,8 +3,7 @@ import { cn } from '@/utils'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
-import getLocations from '@/api/admin/locations/getLocations.ts'
-import useLocation from '@/api/admin/locations/use-location.ts'
+import { getLocations, useLocation } from '@/features/locations/api.ts'
 
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'

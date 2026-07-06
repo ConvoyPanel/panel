@@ -9,9 +9,7 @@ import { useShallow } from 'zustand/react/shallow'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { PaginatedLocations } from '@/types/location.ts'
 
-import useLocations, {
-    locationQueries,
-} from '@/api/admin/locations/use-locations.ts'
+import { locationQueries, useLocations } from '@/features/locations/api.ts'
 
 import CreateLocationModal from '@/components/interfaces/Admin/Location/CreateLocationModal.tsx'
 import DeleteLocationModal from '@/components/interfaces/Admin/Location/DeleteLocationModal.tsx'

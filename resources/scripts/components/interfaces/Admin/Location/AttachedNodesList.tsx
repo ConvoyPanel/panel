@@ -1,7 +1,7 @@
 import { Location } from '@/types/location.ts'
 import { IconServer } from '@tabler/icons-react'
 
-import useAttachedNodes from '@/api/admin/locations/use-attached-nodes.ts'
+import { useAttachedNodes } from '@/features/locations/api.ts'
 
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { Entity, EntityGroup } from '@/components/ui/Entity'
