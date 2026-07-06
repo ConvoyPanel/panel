@@ -6,7 +6,7 @@ import {
 import { z } from 'zod'
 
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import type { Location, PaginatedLocations, locationSchema } from '@/types/location.ts'
+import type { Location, PaginatedLocations, locationSchema } from '@/features/locations/types.ts'
 import type { Node } from '@/types/node.ts'
 import {
     type QueryBuilderParams,

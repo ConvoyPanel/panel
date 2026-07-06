@@ -1,4 +1,4 @@
-import { PaginatedLocations, locationSchema } from '@/types/location.ts'
+import { PaginatedLocations, locationSchema } from '@/features/locations/types.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'

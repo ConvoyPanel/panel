@@ -1,4 +1,4 @@
-import { Location } from '@/types/location.ts'
+import { Location } from '@/features/locations/types.ts'
 import { IconServer } from '@tabler/icons-react'
 
 import { useAttachedNodes } from '@/features/locations/api.ts'

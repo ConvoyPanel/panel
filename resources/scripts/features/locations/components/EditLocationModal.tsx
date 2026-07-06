@@ -1,5 +1,5 @@
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
-import { PaginatedLocations, locationSchema } from '@/types/location.ts'
+import { PaginatedLocations, locationSchema } from '@/features/locations/types.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'

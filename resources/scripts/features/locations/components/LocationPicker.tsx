@@ -1,4 +1,4 @@
-import { Location } from '@/types/location.ts'
+import { Location } from '@/features/locations/types.ts'
 import { cn } from '@/utils'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'

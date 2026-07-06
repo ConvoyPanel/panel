@@ -1,4 +1,4 @@
-import { Location } from '@/types/location.ts'
+import { Location } from '@/features/locations/types.ts'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 

@@ -1,20 +1,20 @@
 import createModalStore from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
-import { Location } from '@/types/location.ts'
+import { Location } from '@/features/locations/types.ts'
 import { cn } from '@/utils'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
 
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { PaginatedLocations } from '@/types/location.ts'
+import { PaginatedLocations } from '@/features/locations/types.ts'
 
 import { locationQueries, useLocations } from '@/features/locations/api.ts'
 
-import CreateLocationModal from '@/components/interfaces/Admin/Location/CreateLocationModal.tsx'
-import DeleteLocationModal from '@/components/interfaces/Admin/Location/DeleteLocationModal.tsx'
-import EditLocationModal from '@/components/interfaces/Admin/Location/EditLocationModal.tsx'
-import ShowLocationModal from '@/components/interfaces/Admin/Location/ShowLocationModal.tsx'
+import CreateLocationModal from '@/features/locations/components/CreateLocationModal.tsx'
+import DeleteLocationModal from '@/features/locations/components/DeleteLocationModal.tsx'
+import EditLocationModal from '@/features/locations/components/EditLocationModal.tsx'
+import ShowLocationModal from '@/features/locations/components/ShowLocationModal.tsx'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
