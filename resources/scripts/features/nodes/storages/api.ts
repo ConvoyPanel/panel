@@ -5,9 +5,9 @@ import { z } from 'zod'
 import {
     rawDataToNodeStorage,
     rawDataToStorageProxmox,
-} from '@/lib/transformers/storage.ts'
+} from '@/features/nodes/transforms.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'
 
 export const storageSchema = z

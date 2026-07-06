@@ -1,6 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -8,7 +8,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import { storageQueries } from '@/features/nodes/storages/api.ts'
 
-import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
+import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

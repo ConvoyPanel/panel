@@ -1,9 +1,9 @@
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 import { cn } from '@/utils'
 import { IconDots } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
+import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
 import { Badge, badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'

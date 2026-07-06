@@ -1,4 +1,4 @@
-import { Storage } from '@/types/storage'
+import { Storage } from '@/features/nodes/types'
 import byteSize from 'byte-size'
 import { useFormContext } from 'react-hook-form'
 

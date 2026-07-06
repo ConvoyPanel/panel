@@ -2,7 +2,7 @@ import byteSize from 'byte-size'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
+import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
 import {
     Credenza,

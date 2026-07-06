@@ -1,22 +1,20 @@
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { IconPlus } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
 
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 
 import {
+    createStorage,
     storageSchema,
-    updateStorage,
     storageQueries,
 } from '@/features/nodes/storages/api.ts'
-
-import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -27,23 +25,18 @@ import {
     CredenzaFooter,
     CredenzaHeader,
     CredenzaTitle,
+    CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 
-const EditStorageModal = () => {
+const CreateStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
         storageQueries.all(Number(nodeId))
     )
-    const [storage, open, close] = useStoragesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const [open, setOpen] = useState(false)
 
     const form = useForm({
         resolver: zodResolver(storageSchema),
@@ -62,27 +55,9 @@ const EditStorageModal = () => {
         },
     })
 
-    useEffect(() => {
-        if (!storage) return
-
-        form.reset({
-            displayName: storage.displayName ?? '',
-            description: storage.description ?? '',
-            name: storage.name,
-            size: (storage.size / 1024 / 1024).toString(),
-            isShareable: storage.isShareable,
-            storesKvm: storage.storesKvm,
-            storesLxc: storage.storesLxc,
-            storesLxcTemplates: storage.storesLxcTemplates,
-            storesBackups: storage.storesBackups,
-            storesIso: storage.storesIso,
-            storesSnippets: storage.storesSnippets,
-        })
-    }, [storage])
-
     const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
         try {
-            const updatedStorage = await updateStorage(Number(nodeId), storage!.id, {
+            const storage = await createStorage(Number(nodeId), {
                 size: size * 1024 * 1024,
                 ...data,
             })
@@ -90,17 +65,12 @@ const EditStorageModal = () => {
             await mutate(data => {
                 if (!data) return
 
-                return data.map(item => {
-                    if (item.id === updatedStorage.id) {
-                        return updatedStorage
-                    }
-                    return item
-                })
+                return data.concat(storage)
             }, false)
 
-            close('edit')
-
-            toast.success('Storage updated')
+            form.reset()
+            setOpen(false)
+            toast.success('Storage created')
         } catch (e) {
             handleFormErrors(e, form.setError)
             toast.error('Failed to save changes')
@@ -109,12 +79,15 @@ const EditStorageModal = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('edit')}>
+        <Credenza open={open} onOpenChange={setOpen}>
+            <CredenzaTrigger asChild>
+                <Button className={'flex'} size={'sm'}>
+                    <IconPlus className={'mr-2 size-4'} /> Add storage
+                </Button>
+            </CredenzaTrigger>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>
-                        Editing {storage?.displayName ?? storage?.name}
-                    </CredenzaTitle>
+                    <CredenzaTitle>New Storage</CredenzaTitle>
                 </CredenzaHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
@@ -187,7 +160,7 @@ const EditStorageModal = () => {
                                     Cancel
                                 </Button>
                             </CredenzaClose>
-                            <FormButton>Save</FormButton>
+                            <FormButton>Add storage</FormButton>
                         </CredenzaFooter>
                     </form>
                 </Form>
@@ -196,4 +169,4 @@ const EditStorageModal = () => {
     )
 }
 
-export default EditStorageModal
+export default CreateStorageModal

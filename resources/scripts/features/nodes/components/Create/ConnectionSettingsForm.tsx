@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover
 import { Button } from '@/components/ui/Button'
 
 import ProxmoxNodeName from '@/assets/images/proxmox-node-name.png'
-import TestConnectionButton from '@/components/interfaces/Admin/Node/Create/TestConnectionButton.tsx'
+import TestConnectionButton from '@/features/nodes/components/Create/TestConnectionButton.tsx'
 
 const ConnectionSettingsForm = () => {
     return <div className={'flex flex-col space-y-4'}>

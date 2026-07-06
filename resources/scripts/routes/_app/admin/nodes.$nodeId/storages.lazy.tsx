@@ -3,12 +3,12 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { useStorages } from '@/features/nodes/storages/api.ts'
 
-import CreateStorageModal from '@/components/interfaces/Admin/Node/Storages/CreateStorageModal.tsx'
-import DeleteStorageModal from '@/components/interfaces/Admin/Node/Storages/DeleteStorageModal.tsx'
-import EditStorageModal from '@/components/interfaces/Admin/Node/Storages/EditStorageModal.tsx'
-import LoadBalancerSidebar from '@/components/interfaces/Admin/Node/Storages/LoadBalancerSidebar.tsx'
-import ShowStorageModal from '@/components/interfaces/Admin/Node/Storages/ShowStorageModal.tsx'
-import StorageCard from '@/components/interfaces/Admin/Node/Storages/StorageCard.tsx'
+import CreateStorageModal from '@/features/nodes/components/Storages/CreateStorageModal.tsx'
+import DeleteStorageModal from '@/features/nodes/components/Storages/DeleteStorageModal.tsx'
+import EditStorageModal from '@/features/nodes/components/Storages/EditStorageModal.tsx'
+import LoadBalancerSidebar from '@/features/nodes/components/Storages/LoadBalancerSidebar.tsx'
+import ShowStorageModal from '@/features/nodes/components/Storages/ShowStorageModal.tsx'
+import StorageCard from '@/features/nodes/components/Storages/StorageCard.tsx'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'

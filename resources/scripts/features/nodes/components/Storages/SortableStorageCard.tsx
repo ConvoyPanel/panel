@@ -1,4 +1,4 @@
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 import { cn } from '@/utils'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'

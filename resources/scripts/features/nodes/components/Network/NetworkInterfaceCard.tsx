@@ -2,7 +2,7 @@ import { NetworkInterface } from '@/types/network-interface.ts'
 
 import { Card } from '@/components/ui/Card'
 import useNetworkInterfacesModalStore
-    from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
+    from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
 import { useShallow } from 'zustand/react/shallow'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'

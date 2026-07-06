@@ -12,7 +12,7 @@ import {
     networkInterfaceQueries,
 } from '@/features/nodes/network-interfaces/api.ts'
 
-import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
+import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

@@ -1,6 +1,6 @@
 import { IconInfoCircleFilled } from '@tabler/icons-react'
 
-import MemoryPreviewAccordion from '@/components/interfaces/Admin/Node/Create/MemoryPreviewAccordion.tsx'
+import MemoryPreviewAccordion from '@/features/nodes/components/Create/MemoryPreviewAccordion.tsx'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert'
 import { InputForm } from '@/components/ui/Forms'

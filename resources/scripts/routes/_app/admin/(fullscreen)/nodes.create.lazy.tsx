@@ -10,9 +10,9 @@ import { createNode, nodeSchema } from '@/features/nodes/api.ts'
 
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 
-import ConnectionSettingsForm from '@/components/interfaces/Admin/Node/Create/ConnectionSettingsForm.tsx'
-import GeneralSettingsForm from '@/components/interfaces/Admin/Node/Create/GeneralSettingsForm.tsx'
-import SpecificationsSettingsForm from '@/components/interfaces/Admin/Node/Create/SpecificationsSettingsForm.tsx'
+import ConnectionSettingsForm from '@/features/nodes/components/Create/ConnectionSettingsForm.tsx'
+import GeneralSettingsForm from '@/features/nodes/components/Create/GeneralSettingsForm.tsx'
+import SpecificationsSettingsForm from '@/features/nodes/components/Create/SpecificationsSettingsForm.tsx'
 
 import { Form, FormButton } from '@/components/ui/Form'
 

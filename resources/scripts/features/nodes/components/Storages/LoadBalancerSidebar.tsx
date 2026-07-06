@@ -1,5 +1,5 @@
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/types/storage.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
 import {
     DndContext,
     DragEndEvent,
@@ -24,7 +24,7 @@ import {
     storageQueries,
 } from '@/features/nodes/storages/api.ts'
 
-import SortableStorageCard from '@/components/interfaces/Admin/Node/Storages/SortableStorageCard.tsx'
+import SortableStorageCard from '@/features/nodes/components/Storages/SortableStorageCard.tsx'
 
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'

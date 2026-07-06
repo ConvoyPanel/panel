@@ -1,4 +1,4 @@
-import { NodeStorage, Storage, StorageProxmox } from '@/types/storage'
+import { NodeStorage, Storage, StorageProxmox } from '@/features/nodes/types'
 
 export const rawDataToStorage = (raw: any): Storage => ({
     id: raw.id,

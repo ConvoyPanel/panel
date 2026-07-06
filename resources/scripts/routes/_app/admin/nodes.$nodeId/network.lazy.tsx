@@ -3,15 +3,15 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
 
-import CreateNetworkModal from '@/components/interfaces/Admin/Node/Network/CreateNetworkModal.tsx'
-import NetworkInterfaceCard from '@/components/interfaces/Admin/Node/Network/NetworkInterfaceCard.tsx'
+import CreateNetworkModal from '@/features/nodes/components/Network/CreateNetworkModal.tsx'
+import NetworkInterfaceCard from '@/features/nodes/components/Network/NetworkInterfaceCard.tsx'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
-import EditNetworkInterfaceModal from '@/components/interfaces/Admin/Node/Network/EditNetworkInterfaceModal.tsx'
-import DeleteNetworkInterfaceModal from '@/components/interfaces/Admin/Node/Network/DeleteNetworkInterfaceModal.tsx'
+import EditNetworkInterfaceModal from '@/features/nodes/components/Network/EditNetworkInterfaceModal.tsx'
+import DeleteNetworkInterfaceModal from '@/features/nodes/components/Network/DeleteNetworkInterfaceModal.tsx'
 
 export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/network')({
     component: NodeNetwork,
