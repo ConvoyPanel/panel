@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import logout from '@/api/auth/logout.ts'
-import useUser, { currentUserQueries } from '@/api/auth/use-user.ts'
+import { useUser, currentUserQueries } from '@/features/auth/api.ts'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'

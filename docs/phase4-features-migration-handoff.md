@@ -85,17 +85,21 @@ clean.
    same behavior for the real 200-with-data / 204-empty cases. `features/servers/state/api.ts` (admin
    state) left untouched — distinct from client state.
 
-`api/auth/use-user.ts` is the current-user/session hook (used by `_app.tsx`, `auth.tsx`, Avatar) —
-migrate last / carefully; it has `cacheUser`/`currentUserQueries` helpers.
+✅ **`api/auth/use-user.ts`** — DONE (`features/auth/api.ts`). Current-user/session hook migrated onto
+`apiFetch` + `Client/SessionController` (clean callable, GET `/api/client/user`). `getUser`,
+`currentUserQueries` (key `['user']`), `cacheUser`, and `useUser` preserved; consumers `_app.tsx`,
+`admin.tsx`, `auth.tsx`, `Avatar.tsx` repointed. The rest of `api/auth/**` (login, logout, passkey
+auth, identity, verify*) is NOT part of this domain and stays in the old tree.
 
 ## Session progress (2026-07-06, second sitting)
 
 Committed on `next` this session, each verified with tsc + `vite build` (build output is gitignored,
 nothing to restore): IPAM (`9b459101`), admin servers (`3c7c0b40`), node storages + network
 interfaces (`bc9a5f2b`), account authenticator (`4a9bf058`), account passkeys (`66f0e264`), client
-servers (`features/servers/detail/api.ts`). **Only remaining listed domain: `api/auth/use-user.ts`**
-(current-user/session hook — `cacheUser`/`currentUserQueries`, used by `_app.tsx`, `auth.tsx`,
-Avatar). Also still in the old tree but out of the listed domains: `api/account/updatePassword.ts`.
+servers (`2b522ebb`), auth/use-user (`features/auth/api.ts`). **All listed Phase-4 domains are now
+migrated.** Still in the old tree but out of the listed domains (candidates for convert-as-you-touch):
+`api/account/updatePassword.ts` and the rest of `api/auth/**` (login, logout, passkey auth, identity,
+verify*).
 
 ## Open reconsideration (from user's side agent, 2026-07-06)
 

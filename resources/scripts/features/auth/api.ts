@@ -1,8 +1,15 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
+import { rawDataToAuthenticatedUser } from '@/api/transformers/user.ts'
+import { apiFetch, type DataResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
+import SessionController from '@/wayfinder/actions/App/Http/Controllers/Client/SessionController'
 
-import getUser from '@/api/auth/getUser.ts'
+export const getUser = async () => {
+    const { data } = await apiFetch<DataResponse<any>>(SessionController())
+
+    return rawDataToAuthenticatedUser(data)
+}
 
 export const currentUserQueries = {
     all: () => ['user'] as const,
@@ -19,6 +26,4 @@ export const cacheUser = async () => {
     queryClient.setQueryData(currentUserQueries.all(), user)
 }
 
-const useUser = () => useQuery(currentUserQueries.detail())
-
-export default useUser
+export const useUser = () => useQuery(currentUserQueries.detail())
