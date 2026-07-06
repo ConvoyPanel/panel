@@ -4,7 +4,7 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { serverQueries } from '@/features/servers/api.ts'
 
-import ServerCard from '@/components/interfaces/Client/Dashboard/ServerCard.tsx'
+import ServerCard from '@/features/overview/components/client/ServerCard.tsx'
 
 import LengthAwarePaginator from '@/components/ui/Pagination/LengthAwarePaginator.tsx'
 import { Heading } from '@/components/ui/Typography'
