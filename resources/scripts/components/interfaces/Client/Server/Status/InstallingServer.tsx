@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import retryInstallation from '@/api/servers/retryInstallation'
 import useServerDeployment from '@/api/servers/use-server-deployment.ts'
-import { getKey as getServerKey } from '@/api/servers/use-server.ts'
+import { serverQueries } from '@/api/servers/use-server.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -33,7 +33,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
 
     const refetchServer = () => {
         if (server?.uuid) {
-            queryClient.invalidateQueries({ queryKey: getServerKey(server.uuid) })
+            queryClient.invalidateQueries({ queryKey: serverQueries.detail(server.uuid).queryKey })
         }
     }
 

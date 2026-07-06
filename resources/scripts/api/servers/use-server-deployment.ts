@@ -1,10 +1,8 @@
 import { useParams } from '@tanstack/react-router'
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
-import getServerDeployment from '@/api/servers/getServerDeployment.ts'
+import { serverQueries } from '@/api/servers/use-server.ts'
 import { Deployment } from '@/types/deployment'
-
-export const getKey = (uuid: string) => ['server', uuid, 'deployment']
 
 const useServerDeployment = (
     uuid?: string,
@@ -14,10 +12,9 @@ const useServerDeployment = (
     const serverUuid = uuid ?? params.serverUuid
 
     return useQuery({
-        queryKey: getKey(serverUuid),
-        queryFn: () => getServerDeployment(serverUuid),
+        ...serverQueries.deployment(serverUuid),
         ...options,
-    })
+    } as UseQueryOptions<Deployment | null>)
 }
 
 export default useServerDeployment

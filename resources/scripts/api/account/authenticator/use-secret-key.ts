@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import getSecretKey from '@/api/account/authenticator/getSecretKey.ts'
+import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
-
-export const getKey = () => ['account.authenticator.secret-key']
-
-const useSecretKey = () => {
-    return useQuery({ queryKey: getKey(), queryFn: getSecretKey })
-}
+const useSecretKey = () => useQuery(authenticatorQueries.secretKey())
 
 export default useSecretKey

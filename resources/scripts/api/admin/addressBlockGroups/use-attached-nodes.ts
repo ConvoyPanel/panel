@@ -1,25 +1,11 @@
-import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
-import getAttachedNodes, {
-    AttachedNodesQueryParams,
-} from '@/api/admin/addressBlockGroups/getAttachedNodes.ts'
-
-export const getKey = (
-    addressBlockGroupId: number | null | undefined,
-    params: AttachedNodesQueryParams
-) => ['address-block-groups.nodes', addressBlockGroupId, params]
+import { AttachedNodesQueryParams } from '@/api/admin/addressBlockGroups/getAttachedNodes.ts'
+import { addressBlockGroupQueries } from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
 
 const useAttachedNodes = (
     addressBlockGroupId: number | null | undefined,
     params: AttachedNodesQueryParams
-) => {
-    return useQuery<PaginatedNetworkInterfaces>({
-        queryKey: getKey(addressBlockGroupId, params),
-        queryFn: () => getAttachedNodes(addressBlockGroupId!, params),
-        enabled: !!addressBlockGroupId,
-        placeholderData: keepPreviousData,
-    })
-}
+) => useQuery(addressBlockGroupQueries.nodes(addressBlockGroupId, params))
 
 export default useAttachedNodes

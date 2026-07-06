@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import deleteTemplate from '@/api/admin/templateGroups/templates/deleteTemplate.ts'
-import { getKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
+import { templateQueries } from '@/api/admin/templateGroups/templates/use-templates.ts'
 import { Template } from '@/types/template.ts'
 
 const useDeleteTemplateMutation = (templateGroupUuid: string) => {
@@ -15,7 +15,7 @@ const useDeleteTemplateMutation = (templateGroupUuid: string) => {
         },
         onSuccess: templateUuid => {
             queryClient.setQueryData<Template[]>(
-                getKey(templateGroupUuid, {}),
+                templateQueries.list(templateGroupUuid, {}).queryKey,
                 current =>
                     current
                         ? current.filter(t => t.uuid !== templateUuid)

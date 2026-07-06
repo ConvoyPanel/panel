@@ -3,12 +3,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import enableAuthenticator from '@/api/account/authenticator/enableAuthenticator.ts'
-import useQrCode, {
-    getKey as getQrCodeKey,
-} from '@/api/account/authenticator/use-qr-code.ts'
-import useSecretKey, {
-    getKey as getSecretKeyKey,
-} from '@/api/account/authenticator/use-secret-key.ts'
+import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
+import useQrCode from '@/api/account/authenticator/use-qr-code.ts'
+import useSecretKey from '@/api/account/authenticator/use-secret-key.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -41,9 +38,11 @@ const AuthenticatorEnableDialog = () => {
         const main = async () => {
             if (open) {
                 await enableAuthenticator()
-                await queryClient.invalidateQueries({ queryKey: getQrCodeKey() })
                 await queryClient.invalidateQueries({
-                    queryKey: getSecretKeyKey(),
+                    queryKey: authenticatorQueries.qrCode().queryKey,
+                })
+                await queryClient.invalidateQueries({
+                    queryKey: authenticatorQueries.secretKey().queryKey,
                 })
             }
         }

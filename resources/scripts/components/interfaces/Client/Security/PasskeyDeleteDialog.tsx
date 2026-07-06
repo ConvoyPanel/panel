@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import deletePasskey from '@/api/account/passkeys/deletePasskey.ts'
-import { getKey as getPasskeysKey } from '@/api/account/passkeys/use-passkeys.ts'
+import { passkeyQueries } from '@/api/account/passkeys/use-passkeys.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 
@@ -38,7 +38,7 @@ const PasskeyDeleteDialog = () => {
                 toast.success('Passkey deleted')
 
                 await queryClient.invalidateQueries({
-                    queryKey: getPasskeysKey(),
+                    queryKey: passkeyQueries.all(),
                 })
 
                 closeModal('delete')

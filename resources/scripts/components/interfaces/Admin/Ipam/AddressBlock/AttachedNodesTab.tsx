@@ -14,9 +14,8 @@ import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import useAttachedNodes, {
-    getKey,
-} from '@/api/admin/addressBlockGroups/use-attached-nodes.ts'
+import useAttachedNodes from '@/api/admin/addressBlockGroups/use-attached-nodes.ts'
+import { addressBlockGroupQueries } from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
@@ -30,7 +29,8 @@ const AttachedNodesTab = () => {
         queryParams
     )
     const mutate = useQueryMutator<PaginatedNetworkInterfaces>(
-        getKey(Number(addressBlockGroupId), queryParams)
+        addressBlockGroupQueries.nodes(Number(addressBlockGroupId), queryParams)
+            .queryKey
     )
 
     const [selectedNode, setSelectedNode] = useState<Node | null>(null)

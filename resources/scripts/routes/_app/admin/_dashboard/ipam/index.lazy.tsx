@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
 
 import useAddressBlockGroups, {
-    getKey,
+    addressBlockGroupQueries,
 } from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
 
 import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
@@ -36,7 +36,7 @@ function IpamIndex() {
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData } = useAddressBlockGroups(queryParams)
     const mutate = useQueryMutator<PaginatedAddressBlockGroups>(
-        getKey(queryParams)
+        addressBlockGroupQueries.list(queryParams).queryKey
     )
     const openModal = useBlockGroupModalStore(
         useShallow(state => state.openModal)

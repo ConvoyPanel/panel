@@ -9,7 +9,7 @@ import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
 
 import reinstallServer from '@/api/servers/reinstallServer'
-import { getKey as getServerKey } from '@/api/servers/use-server'
+import { serverQueries } from '@/api/servers/use-server'
 import useTemplateGroups from '@/api/servers/use-template-groups'
 
 import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
@@ -78,7 +78,7 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                 startOnCompletion: true,
             })
             toast.success('The installation started successfully.')
-            queryClient.invalidateQueries({ queryKey: getServerKey(server.uuid) })
+            queryClient.invalidateQueries({ queryKey: serverQueries.detail(server.uuid).queryKey })
         } catch (error) {
             if (handleFormErrors(error, form.setError)) return
 

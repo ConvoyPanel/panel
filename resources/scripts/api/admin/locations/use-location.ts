@@ -1,16 +1,7 @@
-import { Location } from '@/types/location.ts'
 import { useQuery } from '@tanstack/react-query'
 
-import getLocation from '@/api/admin/locations/getLocation.ts'
+import { locationQueries } from '@/api/admin/locations/use-locations.ts'
 
-export const getKey = (id: number | null | undefined) => ['location', id]
-
-const useLocation = (id?: number | null) => {
-    return useQuery<Location>({
-        queryKey: getKey(id),
-        queryFn: () => getLocation(id!),
-        enabled: id != null,
-    })
-}
+const useLocation = (id?: number | null) => useQuery(locationQueries.detail(id))
 
 export default useLocation

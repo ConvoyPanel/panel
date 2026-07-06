@@ -13,7 +13,7 @@ import { NodeStorage } from '@/types/storage.ts'
 import createStorage, {
     storageSchema,
 } from '@/api/admin/nodes/storages/createStorage.ts'
-import { getKey as getStoragesKey } from '@/api/admin/nodes/storages/use-storages.ts'
+import { storageQueries } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -33,7 +33,7 @@ import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 const CreateStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
-        getStoragesKey(Number(nodeId))
+        storageQueries.all(Number(nodeId))
     )
     const [open, setOpen] = useState(false)
 

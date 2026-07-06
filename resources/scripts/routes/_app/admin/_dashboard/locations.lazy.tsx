@@ -10,7 +10,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { PaginatedLocations } from '@/types/location.ts'
 
 import useLocations, {
-    getKey as getLocationsKey,
+    locationQueries,
 } from '@/api/admin/locations/use-locations.ts'
 
 import CreateLocationModal from '@/components/interfaces/Admin/Location/CreateLocationModal.tsx'
@@ -44,7 +44,7 @@ function LocationsIndex() {
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData } = useLocations(queryParams)
     const mutate = useQueryMutator<PaginatedLocations>(
-        getLocationsKey(queryParams)
+        locationQueries.list(queryParams).queryKey
     )
 
     const columns: ColumnDef<Location>[] = [

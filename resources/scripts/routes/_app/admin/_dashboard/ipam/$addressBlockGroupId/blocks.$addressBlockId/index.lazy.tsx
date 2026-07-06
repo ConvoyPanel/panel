@@ -6,7 +6,7 @@ import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
 import useAddresses, {
-    getKey,
+    addressQueries,
 } from '@/api/admin/addressBlockGroups/addressBlocks/addresses/use-addresses.ts'
 import useAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/use-address-block.ts'
 
@@ -30,12 +30,20 @@ export const Route = createLazyFileRoute(
 function BlockIndex() {
     const { data: block } = useAddressBlock()
     const { queryParams, tableProps } = useDataTable({ searchKey: 'ip' })
-    const { addressBlockId } = useParams({ strict: false }) as {
+    const { addressBlockGroupId, addressBlockId } = useParams({
+        strict: false,
+    }) as {
+        addressBlockGroupId: number
         addressBlockId: number
     }
     const { data, isPlaceholderData } = useAddresses(queryParams, ['server'])
     const mutate = useQueryMutator<PaginatedAddresses>(
-        getKey(Number(addressBlockId), queryParams, ['server'])
+        addressQueries.list(
+            Number(addressBlockGroupId),
+            Number(addressBlockId),
+            queryParams,
+            ['server']
+        ).queryKey
     )
     const openModal = useAddressModal(state => state.openModal)
 

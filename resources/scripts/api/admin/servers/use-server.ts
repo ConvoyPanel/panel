@@ -1,15 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import getServer from '@/api/admin/servers/getServer.ts'
+import { serverQueries } from '@/api/admin/servers/use-servers.ts'
 
-export const getKey = (id: number | null | undefined) => ['server', id]
-
-const useServer = (id: number | null) => {
-    return useQuery({
-        queryKey: getKey(id),
-        queryFn: () => getServer(id!),
-        enabled: id != null,
-    })
-}
+const useServer = (id: number | null) => useQuery(serverQueries.detail(id))
 
 export default useServer

@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteTemplateGroup from '@/api/admin/templateGroups/deleteTemplateGroup.ts'
-import { getKey } from '@/api/admin/templateGroups/use-template-groups.ts'
+import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/Credenza'
 
 const DeleteTemplateGroupModal = () => {
-    const mutate = useQueryMutator<TemplateGroup[]>(getKey({}))
+    const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
     const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
         useShallow(state => ({
             isOpen: state.activeModal === 'delete',

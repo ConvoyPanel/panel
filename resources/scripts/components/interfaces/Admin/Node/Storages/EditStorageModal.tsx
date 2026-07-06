@@ -12,7 +12,7 @@ import { NodeStorage } from '@/types/storage.ts'
 
 import { storageSchema } from '@/api/admin/nodes/storages/createStorage.ts'
 import updateStorage from '@/api/admin/nodes/storages/updateStorage.ts'
-import { getKey as getStoragesKey } from '@/api/admin/nodes/storages/use-storages.ts'
+import { storageQueries } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
@@ -33,7 +33,7 @@ import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 const EditStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
-        getStoragesKey(Number(nodeId))
+        storageQueries.all(Number(nodeId))
     )
     const [storage, open, close] = useStoragesModalStore(
         useShallow(state => [

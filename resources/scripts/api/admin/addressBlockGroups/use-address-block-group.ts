@@ -3,25 +3,17 @@ import { useQuery } from '@tanstack/react-query'
 
 import { queryClient } from '@/lib/query-client.ts'
 
-import getAddressBlockGroup from '@/api/admin/addressBlockGroups/getAddressBlockGroup.ts'
-
-export const getKey = (id: number) => ['address-block-group', id]
+import { addressBlockGroupQueries } from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
 
 export const preloadAddressBlockGroup = (id: number) =>
-    queryClient.prefetchQuery({
-        queryKey: getKey(id),
-        queryFn: () => getAddressBlockGroup(id),
-    })
+    queryClient.prefetchQuery(addressBlockGroupQueries.detail(id))
 
 const useAddressBlockGroup = () => {
     const params = useParams({ strict: false }) as {
         addressBlockGroupId: number
     }
 
-    return useQuery({
-        queryKey: getKey(params.addressBlockGroupId),
-        queryFn: () => getAddressBlockGroup(params.addressBlockGroupId),
-    })
+    return useQuery(addressBlockGroupQueries.detail(params.addressBlockGroupId))
 }
 
 export default useAddressBlockGroup

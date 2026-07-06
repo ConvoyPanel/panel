@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import getRecoveryCodes from '@/api/account/authenticator/getRecoveryCodes.ts'
+import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
-
-export const getKey = () => ['account.authenticator.recovery-codes']
-
-const useRecoveryCodes = () => {
-    return useQuery({ queryKey: getKey(), queryFn: getRecoveryCodes })
-}
+const useRecoveryCodes = () => useQuery(authenticatorQueries.recoveryCodes())
 
 export default useRecoveryCodes

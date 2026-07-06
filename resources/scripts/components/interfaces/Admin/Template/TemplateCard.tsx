@@ -13,7 +13,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import updateTemplate from '@/api/admin/templateGroups/templates/updateTemplate.ts'
 import useDeleteTemplateMutation from '@/api/admin/templateGroups/templates/use-delete-template-mutation.ts'
-import { getKey as getTemplatesKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
+import { templateQueries } from '@/api/admin/templateGroups/templates/use-templates.ts'
 
 import { badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
@@ -39,7 +39,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
     const [isEditing, setIsEditing] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const mutate = useQueryMutator<Template[]>(
-        getTemplatesKey(templateGroup.uuid, {})
+        templateQueries.list(templateGroup.uuid, {}).queryKey
     )
 
     const deleteTemplateMutation = useDeleteTemplateMutation(templateGroup.uuid)

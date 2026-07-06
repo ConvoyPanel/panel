@@ -1,11 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import getQrCode from '@/api/account/authenticator/getQrCode.ts'
+import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
-export const getKey = () => ['account.authenticator.qr-code']
-
-const useQrCode = () => {
-    return useQuery({ queryKey: getKey(), queryFn: getQrCode })
-}
+const useQrCode = () => useQuery(authenticatorQueries.qrCode())
 
 export default useQrCode

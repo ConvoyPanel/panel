@@ -13,7 +13,7 @@ import { NetworkInterface } from '@/types/network-interface.ts'
 import createNetworkInterface, {
     networkInterfaceSchema,
 } from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
-import { getKey as getNetworkInterfacesKey } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
+import { networkInterfaceQueries } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -32,7 +32,7 @@ import { InputForm, TextareaForm } from '@/components/ui/Forms'
 const CreateNetworkModal = () => {
     const { nodeId } = NetworkRoute.useParams()
     const mutate = useQueryMutator<NetworkInterface[]>(
-        getNetworkInterfacesKey(Number(nodeId))
+        networkInterfaceQueries.all(Number(nodeId))
     )
     const [open, setOpen] = useState(false)
 

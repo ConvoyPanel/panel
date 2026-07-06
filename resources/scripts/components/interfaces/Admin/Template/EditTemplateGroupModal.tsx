@@ -10,7 +10,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { templateGroupSchema } from '@/api/admin/templateGroups/createTemplateGroup.ts'
 import updateTemplateGroup from '@/api/admin/templateGroups/updateTemplateGroup.ts'
-import { getKey } from '@/api/admin/templateGroups/use-template-groups.ts'
+import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
@@ -30,7 +30,7 @@ import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
 
 const EditTemplateGroupModal = () => {
-    const mutate = useQueryMutator<TemplateGroup[]>(getKey({}))
+    const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
 
     const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
         useShallow(state => ({

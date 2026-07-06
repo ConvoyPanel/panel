@@ -2,7 +2,7 @@ import { AuthenticatedUser } from '@/types/user.ts'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import { cacheUser, getKey } from '@/api/auth/use-user.ts'
+import { cacheUser, currentUserQueries } from '@/api/auth/use-user.ts'
 import { queryClient } from '@/lib/query-client.ts'
 
 const searchSchema = z.object({
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_app')({
     beforeLoad: async ({ location }) => {
         await cacheUser().catch(_ => {})
 
-        const user = queryClient.getQueryData<AuthenticatedUser>([getKey()])
+        const user = queryClient.getQueryData<AuthenticatedUser>(currentUserQueries.all())
 
         if (!user) {
             throw redirect({

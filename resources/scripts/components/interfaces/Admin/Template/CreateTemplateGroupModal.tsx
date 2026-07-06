@@ -9,7 +9,7 @@ import { z } from 'zod'
 import createTemplateGroup, {
     templateGroupSchema,
 } from '@/api/admin/templateGroups/createTemplateGroup.ts'
-import { getKey } from '@/api/admin/templateGroups/use-template-groups.ts'
+import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
@@ -30,7 +30,7 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const CreateTemplateGroupModal = () => {
-    const mutate = useQueryMutator<TemplateGroup[]>(getKey({}))
+    const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
     const [open, setOpen] = useState(false)
 
     const form = useForm<z.input<typeof templateGroupSchema>>({

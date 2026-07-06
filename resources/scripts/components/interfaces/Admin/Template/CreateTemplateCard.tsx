@@ -11,7 +11,7 @@ import { Template } from '@/types/template.ts'
 import createTemplate, {
     templateSchema,
 } from '@/api/admin/templateGroups/templates/createTemplate.ts'
-import { getKey as getTemplatesKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
+import { templateQueries } from '@/api/admin/templateGroups/templates/use-templates.ts'
 
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
@@ -28,7 +28,7 @@ interface Props {
 
 const CreateTemplateCard = ({ templateGroup, onClose }: Props) => {
     const mutate = useQueryMutator<Template[]>(
-        getTemplatesKey(templateGroup.uuid, {})
+        templateQueries.list(templateGroup.uuid, {}).queryKey
     )
 
     const form = useForm({

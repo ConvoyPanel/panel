@@ -10,7 +10,7 @@ import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
 import useAddressBlocks, {
-    getKey,
+    addressBlockQueries,
 } from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks.ts'
 
 import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
@@ -33,7 +33,7 @@ const AddressBlockTab = () => {
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData } = useAddressBlocks(queryParams)
     const mutate = useQueryMutator<PaginatedAddressBlocks>(
-        getKey(groupId, queryParams)
+        addressBlockQueries.list(groupId, queryParams).queryKey
     )
 
     const columns: ColumnDef<AddressBlock>[] = [

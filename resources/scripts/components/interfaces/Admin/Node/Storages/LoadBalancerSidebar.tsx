@@ -20,7 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import updateBackupOrder from '@/api/admin/nodes/storages/updateBackupOrder.ts'
 import useStorages, {
-    getKey as getStoragesKey,
+    storageQueries,
 } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import SortableStorageCard from '@/components/interfaces/Admin/Node/Storages/SortableStorageCard.tsx'
@@ -119,7 +119,7 @@ const LoadBalancerSidebar = () => {
             const toastId = toast.loading('Saving backup order...') // Show loading toast immediately
 
             // 4. --- Optimistically update the cache, then roll back on error ---
-            const key = getStoragesKey(Number(nodeId))
+            const key = storageQueries.all(Number(nodeId))
             const previous = allStorages
             queryClient.setQueryData(key, optimisticData)
 

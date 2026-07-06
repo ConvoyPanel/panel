@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import disableAuthenticator from '@/api/account/authenticator/disableAuthenticator.ts'
-import { getKey as getAuthStatusKey } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
+import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -29,7 +29,9 @@ const AuthenticatorDisableDialog = () => {
         try {
             await disableAuthenticator()
 
-            await queryClient.invalidateQueries({ queryKey: getAuthStatusKey() })
+            await queryClient.invalidateQueries({
+                queryKey: authenticatorQueries.enabled().queryKey,
+            })
 
             toast.success('Authenticator disabled')
 

@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import logout from '@/api/auth/logout.ts'
-import useUser, { getKey as getUserKey } from '@/api/auth/use-user.ts'
+import useUser, { currentUserQueries } from '@/api/auth/use-user.ts'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
@@ -37,7 +37,7 @@ const Avatar = () => {
     const signout = async () => {
         await logout()
         reset()
-        queryClient.removeQueries({ queryKey: getUserKey() })
+        queryClient.removeQueries({ queryKey: currentUserQueries.all() })
         await navigate({ to: '/auth/login' })
     }
 

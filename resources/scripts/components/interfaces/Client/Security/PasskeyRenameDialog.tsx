@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
 import renamePasskey from '@/api/account/passkeys/renamePasskey.ts'
-import { getKey as getPasskeysKey } from '@/api/account/passkeys/use-passkeys.ts'
+import { passkeyQueries } from '@/api/account/passkeys/use-passkeys.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 
@@ -55,7 +55,7 @@ const PasskeyRenameDialog = () => {
 
         toast.success('Passkey renamed')
 
-        await queryClient.invalidateQueries({ queryKey: getPasskeysKey() })
+        await queryClient.invalidateQueries({ queryKey: passkeyQueries.all() })
 
         closeModal('rename')
     }

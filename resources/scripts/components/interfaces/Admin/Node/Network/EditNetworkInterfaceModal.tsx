@@ -12,7 +12,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import { networkInterfaceSchema } from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
 import updateNetworkInterface from '@/api/admin/nodes/networkInterfaces/updateNetworkInterface.ts'
-import { getKey as getNetworkInterfacesKey } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
+import { networkInterfaceQueries } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
 
@@ -32,7 +32,7 @@ import { InputForm, TextareaForm } from '@/components/ui/Forms'
 const EditNetworkInterfaceModal = () => {
     const { nodeId } = NetworkRoute.useParams()
     const mutate = useQueryMutator<NetworkInterface[]>(
-        getNetworkInterfacesKey(Number(nodeId))
+        networkInterfaceQueries.all(Number(nodeId))
     )
     const [networkInterface, open, close] = useNetworkInterfacesModalStore(
         useShallow(state => [
