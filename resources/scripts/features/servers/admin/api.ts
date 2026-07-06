@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { rawDataToServer } from '@/lib/transformers/server.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
+import { queryClient } from '@/lib/query-client.ts'
 import type { PaginatedServers, Server } from '@/types/server'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
 import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
@@ -114,6 +115,9 @@ export const useServers = (params: ServerQueryParams) =>
 
 export const useServer = (id: number | null) =>
     useQuery(serverQueries.detail(id))
+
+export const preloadServer = (id: number) =>
+    queryClient.prefetchQuery(serverQueries.detail(id))
 
 export const createServer = async ({
     name,

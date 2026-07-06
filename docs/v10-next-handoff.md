@@ -502,8 +502,18 @@ Verified:
     node** — both endpoints proxy to Proxmox, so real power actions need a node the dev env doesn't have;
     the compile-time contract (Wayfinder route + DTO envelope + generated types) is fully exercised and
     the backend endpoints are covered by feature tests.
-  - **Still not done:** an admin server **detail** page (the list's `/admin/servers/{id}` link is still
-    dead) — power actions currently live only as the row dropdown.
+  - **Admin server detail page — DONE (2026-07-06).** The list's `/admin/servers/{id}` link is now live.
+    Route mirrors the `nodes.$nodeId` pattern: `routes/_app/admin/servers.$serverId.tsx` (AppLayout +
+    loader `preloadServer` + title, single **Overview** nav tab for now — room to add Settings/Backups
+    later) with `servers.$serverId/index.{tsx,lazy.tsx}`. The Overview
+    (`features/servers/components/admin/detail/ServerDetailOverview.tsx`) shows a **Live state** card
+    (power/uptime/CPU/memory from the admin `serverStateQueries.detail(uuid)`), a **Specifications** card
+    (vCPU/memory/disk/bandwidth), and a **Details** card (node → link to node detail, owner user id, vmid,
+    uuid, created, description) off the admin `useServer(id)` query. Header carries a **Power** dropdown
+    that reuses the lock-aware `ServerPowerActions`. Added `preloadServer` to `features/servers/admin/api.ts`.
+    tsc + vite build green. **Live-state card needs a real Proxmox node to populate** (getState proxies to
+    Proxmox) — the dev env has none, so it renders its skeleton there; page structure + DB-backed cards +
+    routing + power dropdown are exercised by the build/type contract. Not yet visually verified in-browser.
   - **Power-action locking — DONE (2026-07-06).** Built as designed below, with the lock *inside*
     `SendServerPowerCommand` so admin + client inherit it for free. See the "Power-action locking" item
     further down (marked DONE) for the shape that landed.
