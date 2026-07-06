@@ -4,8 +4,9 @@
 
 - For components that declare the general structure and layout of a page:
     - `/components/layouts/xxx`
-- For components that are tightly coupled to a specific interface:
-    - `/components/interfaces/xxx`
+- For components that are tightly coupled to a specific domain/feature:
+    - `/features/<domain>/components/xxx` (co-located with that domain's
+      `api.ts`, `types.ts`, `transforms.ts`, and `hooks/`)
 - For components that are meant to be reusable across multiple pages:
     - `/components/ui/xxx`
 

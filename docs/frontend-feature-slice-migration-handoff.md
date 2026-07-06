@@ -1,5 +1,48 @@
 # Frontend feature-slice migration — handoff
 
+## STATUS: COMPLETE (2026-07-06)
+
+All domain screens are sliced. `components/interfaces/` is gone. Decisions taken
+(the "Open questions" below, resolved):
+
+- **Routes:** left in `routes/` as thin adapters (option a). Not moved.
+- **Shared home:** kept `lib/transformers/` + `types/` for cross-domain shared
+  code; only **domain-private** types/transforms moved into slices. No
+  `features/_shared/` was created — nothing needed a new home.
+- **Barrels:** none. Components import deep paths; `api.ts` stays the data entry.
+- **Admin/Client split:** one slice, subfoldered `components/{admin,client}/`
+  (servers, overview). Other domains preserved their existing subfolders
+  (ipam `AddressBlock/`, nodes `Create/Network/Storages`, servers `Create/pickers`).
+
+Commits (one per domain; servers split into 2): account/security, auth,
+locations, template-groups, ipam, nodes, servers (components; then types+xforms),
+overview/dashboard.
+
+What stayed shared (consumed by ≥2 domains, left in `types/` + `lib/transformers/`):
+`server` (+ `ServerResources`), `address` / `address-block` / `address-block-group`
+(mutually coupled, address pair used by servers/detail), `node`,
+`network-interface`, `template` / `template-group`, `user`, `admin/user`.
+
+What moved in-slice: `passkey`+`keychain`→account; `user` transform→auth;
+`location`→locations; `storage` type+transform→nodes; `deployment`+`backup`
+types and `server-resources`+`backup` transforms→servers; all domain components +
+colocated modal-store/time-range hooks.
+
+**users** has no component screens of its own (the only user component,
+`UserPicker`, belongs to servers), and `types/admin/user` is shared, so users
+remains data-layer only — nothing to slice.
+
+Cross-slice component reuse that is intentional (imported via public slice
+paths, not a boundary smell): nodes→`locations/LocationPicker`,
+servers-rebuild→`template-groups` template components, ipam→a `servers` picker,
+overview/dashboard→a `servers` card.
+
+Every commit is green (`npm run tc` + `npx vite build`). Original migration plan
+below, for reference.
+
+---
+
+
 Goal: evolve `resources/scripts/` from **layer-first** folders (`components/`, `types/`, `routes/`,
 `lib/transformers/`) toward **feature-first slices** under `features/<domain>/`, so that everything
 belonging to one domain lives in one folder. This is the "extend slices past `api.ts`" bet that the
