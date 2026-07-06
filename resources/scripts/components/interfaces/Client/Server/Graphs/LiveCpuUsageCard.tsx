@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, YAxis } from 'recharts'
 
-import useServerState from '@/api/servers/use-server-state.ts'
+import { useServerState } from '@/features/servers/detail/api.ts'
 
 import LiveIndicator from '@/components/interfaces/Client/Server/Graphs/LiveIndicator.tsx'
 

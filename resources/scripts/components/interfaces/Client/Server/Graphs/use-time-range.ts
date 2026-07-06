@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { TimeRange } from '@/api/servers/getStatistics.ts'
+import type { TimeRange } from '@/features/servers/detail/api.ts'
 
 
 const useTimeRange = (initial: TimeRange = 'hour') => {

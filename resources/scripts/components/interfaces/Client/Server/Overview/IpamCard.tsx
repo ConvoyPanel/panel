@@ -3,7 +3,7 @@ import { IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
 import { toast } from 'sonner'
 
-import useAddresses from '@/api/servers/use-addresses.ts'
+import { useAddresses } from '@/features/servers/detail/api.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'

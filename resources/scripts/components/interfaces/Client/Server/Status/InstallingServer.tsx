@@ -6,9 +6,11 @@ import { toast } from 'sonner'
 
 import { useQueryClient } from '@tanstack/react-query'
 
-import retryInstallation from '@/api/servers/retryInstallation'
-import useServerDeployment from '@/api/servers/use-server-deployment.ts'
-import { serverQueries } from '@/api/servers/use-server.ts'
+import {
+    retryInstallation,
+    useServerDeployment,
+    serverQueries,
+} from '@/features/servers/detail/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

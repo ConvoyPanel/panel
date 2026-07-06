@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 
-import useServer from '@/api/servers/use-server.ts'
+import { useServer } from '@/features/servers/detail/api.ts'
 
 import Toolbar from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 

@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { Heading } from '@/components/ui/Typography'
-import useServer from '@/api/servers/use-server'
+import { useServer } from '@/features/servers/detail/api.ts'
 import OSSelectionForm from '@/components/interfaces/Client/Server/Rebuild/OSSelectionForm'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'

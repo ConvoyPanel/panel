@@ -2,8 +2,10 @@ import byteSize from 'byte-size'
 import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import useServerStatistics from '@/api/servers/use-server-statistics.ts'
-import useServer from '@/api/servers/use-server.ts'
+import {
+    useServerStatistics,
+    useServer,
+} from '@/features/servers/detail/api.ts'
 
 import TimeRangeSelector from '@/components/interfaces/Client/Server/Graphs/TimeRangeSelector.tsx'
 import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'

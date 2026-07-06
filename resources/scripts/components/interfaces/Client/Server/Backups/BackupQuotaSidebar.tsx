@@ -1,4 +1,4 @@
-import useServer from '@/api/servers/use-server.ts'
+import { useServer } from '@/features/servers/detail/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import { LinearProgressBar, RingProgress } from '@/components/ui/Progress'

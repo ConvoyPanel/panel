@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import useServerStatistics from '@/api/servers/use-server-statistics.ts'
+import { useServerStatistics } from '@/features/servers/detail/api.ts'
 
 import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
 

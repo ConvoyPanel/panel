@@ -8,9 +8,11 @@ import { z } from 'zod'
 
 import { useQueryClient } from '@tanstack/react-query'
 
-import reinstallServer from '@/api/servers/reinstallServer'
-import { serverQueries } from '@/api/servers/use-server'
-import useTemplateGroups from '@/api/servers/use-template-groups'
+import {
+    reinstallServer,
+    serverQueries,
+    useTemplateGroups,
+} from '@/features/servers/detail/api.ts'
 
 import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
 

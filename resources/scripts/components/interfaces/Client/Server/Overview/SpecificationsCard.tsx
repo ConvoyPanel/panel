@@ -1,6 +1,6 @@
 import byteSize from 'byte-size'
 
-import useServer from '@/api/servers/use-server.ts'
+import { useServer } from '@/features/servers/detail/api.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 

@@ -1,8 +1,10 @@
 import { IconAlertTriangle, IconDatabase } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import useServerResources from '@/api/servers/use-server-resources.ts'
-import useServer from '@/api/servers/use-server.ts'
+import {
+    useServerResources,
+    useServer,
+} from '@/features/servers/detail/api.ts'
 
 import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 import {

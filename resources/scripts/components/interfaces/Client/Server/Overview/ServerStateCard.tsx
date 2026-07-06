@@ -1,7 +1,7 @@
 import { cn } from '@/utils'
 import { IconPlaystationCircle } from '@tabler/icons-react'
 
-import useServerState from '@/api/servers/use-server-state.ts'
+import { useServerState } from '@/features/servers/detail/api.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 

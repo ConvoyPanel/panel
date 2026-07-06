@@ -15,7 +15,7 @@ import { Outlet, createFileRoute } from '@tanstack/react-router'
 import InstallingServer from '@/components/interfaces/Client/Server/Status/InstallingServer.tsx'
 import SuspendedServer from '@/components/interfaces/Client/Server/Status/SuspendedServer.tsx'
 import DeferredOSSelection from '@/components/interfaces/Client/Server/Status/DeferredOSSelection.tsx'
-import useServer, { preloadServer } from '@/api/servers/use-server.ts'
+import { useServer, preloadServer } from '@/features/servers/detail/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 

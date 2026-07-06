@@ -1,8 +1,11 @@
 import { toast } from 'sonner'
 
-import updateState, { PowerAction } from '@/api/servers/updateState.ts'
-import useServerState from '@/api/servers/use-server-state.ts'
-import useServer from '@/api/servers/use-server.ts'
+import {
+    updateState,
+    type PowerAction,
+    useServerState,
+    useServer,
+} from '@/features/servers/detail/api.ts'
 
 import { actions } from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 

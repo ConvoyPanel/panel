@@ -1,6 +1,6 @@
 import { IconCpu } from '@tabler/icons-react'
 
-import useServerState from '@/api/servers/use-server-state.ts'
+import { useServerState } from '@/features/servers/detail/api.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 

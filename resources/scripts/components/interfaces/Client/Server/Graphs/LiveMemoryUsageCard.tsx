@@ -2,8 +2,10 @@ import byteSize from 'byte-size'
 import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, YAxis } from 'recharts'
 
-import useServerState from '@/api/servers/use-server-state.ts'
-import useServer from '@/api/servers/use-server.ts'
+import {
+    useServerState,
+    useServer,
+} from '@/features/servers/detail/api.ts'
 
 import LiveIndicator from '@/components/interfaces/Client/Server/Graphs/LiveIndicator.tsx'
 

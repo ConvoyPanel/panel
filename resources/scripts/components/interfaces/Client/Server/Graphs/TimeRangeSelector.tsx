@@ -1,4 +1,4 @@
-import { TimeRange } from '@/api/servers/getStatistics.ts'
+import type { TimeRange } from '@/features/servers/detail/api.ts'
 
 import {
     Select,

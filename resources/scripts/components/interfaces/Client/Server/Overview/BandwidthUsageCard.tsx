@@ -1,7 +1,7 @@
 import { IconWifi } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import useServer from '@/api/servers/use-server.ts'
+import { useServer } from '@/features/servers/detail/api.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 

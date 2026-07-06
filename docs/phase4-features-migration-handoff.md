@@ -71,30 +71,19 @@ clean.
    clean callables (no dual-prefix dict): `index`/`create`(registration-options)/`store`
    (verify-registration)/`rename`/`destroy`. Transformer `rawDataToPasskey` preserved. Note
    `api/account/updatePassword.ts` still lives in the old tree (not part of this domain).
-5. **client `api/servers/**`** — ⏳ NOT STARTED. THE MESSY ONE — needs a design decision before
-   porting, not a rote import-swap. Files: `use-server`, `use-server-{state,deployment,resources,
-   statistics}`, `use-addresses`, `use-template-groups`, `reinstallServer`, `retryInstallation`,
-   `updateState`, and their `get*`.
-   - **Name/namespace collision:** old `api/servers/use-server.ts` exports its own `serverQueries`
-     keyed `['server', uuid]` over the legacy `Server`/`ServerStateData` types (hand-rolled inline
-     transforms in `getServer.ts`/`getState.ts`), plus `preloadServer`. The already-migrated
-     **`features/servers/api.ts` also exports `serverQueries`** but keyed `['servers']` over
-     `App.Data.Server.ServerData` for the list/detail. These are two different query namespaces with
-     the same name — decide whether to (a) keep the client per-server domain in a distinct module
-     (e.g. `features/servers/detail/api.ts`) to avoid clobbering, or (b) unify onto `ServerData` and
-     the new keys (bigger behavior change; touches many consumers). Recommend (a) to stay
-     behavior-preserving.
-   - `serverQueries.state` uses `refetchInterval: 50` (ms) and `resources` uses `60000`; preserve.
-   - `templateGroups` does a **dynamic `import('@/lib/axios')`** and hits
-     `/api/client/servers/{uuid}/settings/template-groups` → `rawDataToTemplateGroup`. Find the
-     matching Client controller route object.
-   - `features/servers/state/api.ts` already exists but points at the **admin** ServerController
-     (`['admin','servers',uuid,'state']`); the old client `getState`/`updateState` hit
-     `/api/client/servers/{uuid}/state` with key `['server',uuid,'state']` — these are distinct, do
-     not conflate.
-   - Map each endpoint to its Client controller under `wayfinder/.../Client/Servers/`. Client
-     controllers are mostly clean callables (no URI-keyed dict), per the existing
-     `features/servers/api.ts`.
+5. ✅ **client `api/servers/**`** — DONE (`features/servers/detail/api.ts`). Resolved the
+   `serverQueries` name collision via approach (a): the client per-server domain lives in its own
+   `detail/` module (keyed `['server', uuid]`, legacy `Server`/`ServerStateData` types, inline
+   transforms preserved verbatim) and does NOT touch the list-oriented `features/servers/api.ts`
+   (keyed `['servers']`, `ServerData`). Endpoints mapped to `wayfinder/.../Client/Servers/`:
+   `ServerController.{show,getState,updateState,getDeployment,retryInstallation}` (clean callables),
+   `ResourceController`/`StatisticController`/`AddressController` (single-`__invoke` default
+   callables), `SettingsController.{getTemplateGroups,reinstall}`. `refetchInterval` values (50 /
+   60000) preserved; `templateGroups` dynamic-axios import replaced with `apiFetch` +
+   `SettingsController.getTemplateGroups`. The deployment **204→null** case: `apiFetch` doesn't expose
+   status, so `getServerDeployment` guards on a falsy/empty body instead (axios yields `''` for 204) —
+   same behavior for the real 200-with-data / 204-empty cases. `features/servers/state/api.ts` (admin
+   state) left untouched — distinct from client state.
 
 `api/auth/use-user.ts` is the current-user/session hook (used by `_app.tsx`, `auth.tsx`, Avatar) —
 migrate last / carefully; it has `cacheUser`/`currentUserQueries` helpers.
@@ -103,9 +92,10 @@ migrate last / carefully; it has `cacheUser`/`currentUserQueries` helpers.
 
 Committed on `next` this session, each verified with tsc + `vite build` (build output is gitignored,
 nothing to restore): IPAM (`9b459101`), admin servers (`3c7c0b40`), node storages + network
-interfaces (`bc9a5f2b`), account authenticator (`4a9bf058`), account passkeys (`66f0e264`). Remaining:
-client `api/servers/**` (item 5 above — needs the design decision) and `api/auth/use-user.ts`. Also
-still in the old tree but out of the listed domains: `api/account/updatePassword.ts`.
+interfaces (`bc9a5f2b`), account authenticator (`4a9bf058`), account passkeys (`66f0e264`), client
+servers (`features/servers/detail/api.ts`). **Only remaining listed domain: `api/auth/use-user.ts`**
+(current-user/session hook — `cacheUser`/`currentUserQueries`, used by `_app.tsx`, `auth.tsx`,
+Avatar). Also still in the old tree but out of the listed domains: `api/account/updatePassword.ts`.
 
 ## Open reconsideration (from user's side agent, 2026-07-06)
 
