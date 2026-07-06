@@ -2,7 +2,7 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import regenerateRecoveryCodes from '@/api/account/authenticator/regenerateRecoveryCodes.ts'
+import { regenerateRecoveryCodes } from '@/features/account/authenticator/api.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 

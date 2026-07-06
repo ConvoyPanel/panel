@@ -1,7 +1,7 @@
 import { IconAsteriskSimple } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useIsAuthenticatorEnabled from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
+import { useIsAuthenticatorEnabled } from '@/features/account/authenticator/api.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 

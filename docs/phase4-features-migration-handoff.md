@@ -61,7 +61,12 @@ clean.
    `wayfinder/.../Admin/Nodes/`. Storage `update`/`updateBackupOrder` are PUT; the whole old
    `api/admin/nodes/` dir is now gone. `LoadBalancerSidebar.tsx` (optimistic backup-order) repointed
    and still builds.
-3. **account/authenticator** — `use-{is-authenticator-enabled,qr-code,recovery-codes,secret-key}.ts` (+ their get* / mutations).
+3. ✅ **account/authenticator** — DONE (`features/account/authenticator/api.ts`). The endpoints are
+   spread across Fortify controllers (`AuthenticatorStatusController` + `Laravel/Fortify/.../
+   {TwoFactorQrCodeController,TwoFactorSecretKeyController,RecoveryCodeController,
+   TwoFactorAuthenticationController}`), all URI-keyed dicts sharing the stock `/user/*` routes — the
+   `/api/client/account/authenticator/*` keys are POST for enable/disable/regenerate (note disable is
+   the `destroy` export but POST for this URI).
 4. **account/passkeys** — `use-passkeys.ts` (+ passkey register/delete; transformer `api/transformers/passkey.ts`).
 5. **client `api/servers/**`** — `use-server`, `use-server-{state,deployment,resources,statistics}`, `use-addresses`, `use-template-groups` and their `get*` (Client controllers — mostly clean callables, no URI-keyed dict complication). Some already partly under `features/servers/`.
 

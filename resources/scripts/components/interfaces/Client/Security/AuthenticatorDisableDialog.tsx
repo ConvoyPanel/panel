@@ -3,8 +3,10 @@ import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
-import disableAuthenticator from '@/api/account/authenticator/disableAuthenticator.ts'
-import { authenticatorQueries } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
+import {
+    disableAuthenticator,
+    authenticatorQueries,
+} from '@/features/account/authenticator/api.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
