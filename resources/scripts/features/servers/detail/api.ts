@@ -6,13 +6,13 @@ import {
 } from '@tanstack/react-query'
 
 import { rawDataToAddress } from '@/lib/transformers/address.ts'
-import { rawDataToServerResources } from '@/lib/transformers/server-resources'
+import { rawDataToServerResources } from '@/features/servers/transforms'
 import { rawDataToServerTimepointData } from '@/lib/transformers/server.ts'
 import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import { Address } from '@/types/address.ts'
-import type { Deployment, DeploymentStep } from '@/types/deployment'
+import type { Deployment, DeploymentStep } from '@/features/servers/types'
 import type {
     Server,
     ServerResources,

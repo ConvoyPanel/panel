@@ -1,4 +1,4 @@
-import { DeploymentStatus, DeploymentStep } from '@/types/deployment'
+import { DeploymentStatus, DeploymentStep } from '@/features/servers/types'
 import { Server } from '@/types/server'
 import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react'
 import { useEffect } from 'react'

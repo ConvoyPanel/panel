@@ -1,4 +1,5 @@
 import { Template } from '@/types/template'
+import { PaginatedResult } from '@/utils/http.ts'
 
 export enum DeploymentStatus {
     Pending = 'pending',
@@ -38,3 +39,24 @@ export interface Deployment {
     template?: Template
     steps: DeploymentStep[]
 }
+
+export interface Backup {
+    id: number
+    uuid: string
+    serverId: number
+    storageId: number
+    name: string
+    description: string | null
+    isLocked: boolean
+    errors: BackupError | null
+    fileName: string
+    size: number
+    completedAt: Date | null
+    createdAt: Date
+}
+
+export enum BackupError {
+    StorageExceeded,
+}
+
+export type PaginatedBackups = PaginatedResult<Backup> & { backupCount: number }

@@ -1,4 +1,4 @@
-import { Backup } from '@/types/backup.ts'
+import { Backup } from '@/features/servers/types.ts'
 
 import { Card } from '@/components/ui/Card'
 

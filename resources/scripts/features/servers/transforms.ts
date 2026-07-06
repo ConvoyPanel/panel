@@ -1,4 +1,10 @@
-import { Backup, BackupError } from '@/types/backup.ts'
+import { ServerResources } from '@/types/server'
+import { Backup, BackupError } from '@/features/servers/types.ts'
+
+export const rawDataToServerResources = (data: any): ServerResources => ({
+    usedBytes: data.usedBytes,
+    totalBytes: data.totalBytes,
+})
 
 export const rawDataToBackup = (data: any): Backup => ({
     id: data.id,

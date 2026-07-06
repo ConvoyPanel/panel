@@ -1,4 +1,4 @@
-import { DeploymentStatus, DeploymentStep } from '@/types/deployment'
+import { DeploymentStatus, DeploymentStep } from '@/features/servers/types'
 import { cn } from '@/utils'
 import { IconCheck, IconLoader, IconX } from '@tabler/icons-react'
 import byteSize from 'byte-size'
