@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Maintenance;
 
+use App\Enums\Server\Backup\BackupErrorCode;
 use App\Models\Backup;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
@@ -43,8 +44,10 @@ class PruneOrphanedBackupsCommand extends Command
 
         $this->warn("Marking {$count} backups that have not been marked as completed in the last {$since} minutes as failed.");
 
+        // Bulk update bypasses model casts, so store the enum's raw value.
         $query->update([
-            'errors' => 'Backup did not complete in time and was marked as failed.',
+            'error_code' => BackupErrorCode::TIMEOUT->value,
+            'error_message' => 'Backup did not complete in time and was marked as failed.',
             'completed_at' => now(),
         ]);
     }

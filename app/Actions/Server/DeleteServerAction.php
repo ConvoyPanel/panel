@@ -28,7 +28,7 @@ class DeleteServerAction
             'name' => 'delete-backups',
             'status' => DeploymentStatus::PENDING,
             'progress_total' => $deployment->server->backups()
-                ->whereNull('errors')
+                ->whereNull('error_code')
                 ->whereNotNull('completed_at')
                 ->count() * 2, // 2 jobs for each backup: purge and monitor
         ]);

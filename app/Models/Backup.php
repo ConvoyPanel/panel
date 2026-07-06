@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use App\Enums\Server\Backup\BackupErrorCode;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $name
  * @property ?string $file_name
  * @property ?int $size
- * @property ?string $errors
+ * @property ?BackupErrorCode $error_code
+ * @property ?string $error_message
  * @property ?CarbonImmutable $completed_at
  * @property CarbonImmutable $created_at
  * @property Server $server
@@ -47,6 +49,7 @@ class Backup extends Model
         return [
             'completed_at' => 'datetime',
             'size' => StorageSizeCast::class,
+            'error_code' => BackupErrorCode::class,
         ];
     }
 
@@ -68,7 +71,7 @@ class Backup extends Model
 
     public function scopeSuccessful(Builder $query): void
     {
-        $query->whereNull('errors')
+        $query->whereNull('error_code')
             ->whereNotNull('completed_at');
     }
 

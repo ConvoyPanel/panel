@@ -5,6 +5,7 @@ namespace App\Jobs\Server;
 use App\Data\Server\Proxmox\Backup\BackupData;
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
+use App\Enums\Server\Backup\BackupErrorCode;
 use App\Models\Backup;
 use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
 use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
@@ -73,10 +74,30 @@ class MonitorBackupJob implements ShouldQueue
                 'completed_at' => Carbon::now(),
             ]);
         } else {
+            $errorMessage = $this->extractErrorMessage($logs) ?? $task->exitStatus->value;
+
             $this->backup->update([
-                'errors' => $task->exitStatus->value,
+                'error_code' => BackupErrorCode::classify($errorMessage),
+                'error_message' => $errorMessage,
                 'completed_at' => Carbon::now(),
             ]);
         }
+    }
+
+    /**
+     * Pull the first `ERROR:` line out of the vzdump task log, which carries the
+     * human-readable failure reason (e.g. "no space left on device").
+     *
+     * @param  iterable<object{text: string}>  $logs
+     */
+    private function extractErrorMessage(iterable $logs): ?string
+    {
+        foreach ($logs as $log) {
+            if (preg_match('/ERROR:\s*(.+)/', $log->text, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+
+        return null;
     }
 }

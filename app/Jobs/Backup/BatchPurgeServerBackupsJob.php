@@ -34,7 +34,7 @@ class BatchPurgeServerBackupsJob implements ShouldQueue
     public function handle(): void
     {
         $this->server->backups()
-            ->whereNull('errors')
+            ->whereNull('error_code')
             ->whereNotNull('completed_at')
             ->chunkById(100, function (Collection $backups) {
                 $this->batch()->add($backups->map(fn (Backup $backup) => new DeleteBackupJob($backup)));

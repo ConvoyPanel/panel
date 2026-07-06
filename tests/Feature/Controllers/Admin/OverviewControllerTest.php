@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Server\Backup\BackupErrorCode;
 use App\Enums\Server\ServerStatus;
 use App\Models\Address;
 use App\Models\AddressBlock;
@@ -53,8 +54,8 @@ it('returns overview metrics for admins', function () {
     Address::factory()->for($block)->create(['ip' => '10.0.0.5', 'prefix_length' => 24, 'server_id' => $ready->id]);
     Address::factory()->for($block)->create(['ip' => '10.0.0.6', 'prefix_length' => 24]);
 
-    Backup::factory()->for($ready)->create(['completed_at' => now(), 'errors' => null]);
-    Backup::factory()->for($ready)->create(['completed_at' => now(), 'errors' => 'boom']);
+    Backup::factory()->for($ready)->create(['completed_at' => now(), 'error_code' => null]);
+    Backup::factory()->for($ready)->create(['completed_at' => now(), 'error_code' => BackupErrorCode::OTHER, 'error_message' => 'boom']);
 
     // An ISO on a non-VM-disk storage, so it doesn't skew the storage total.
     ISO::factory()->create([

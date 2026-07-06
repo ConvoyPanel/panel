@@ -21,7 +21,7 @@ class BackupRepository
     {
         return $server->backups()->where(function (Builder $query) {
             $query->whereNull('completed_at')
-                  ->orWhereNull('errors');
+                  ->orWhereNull('error_code');
         });
     }
 

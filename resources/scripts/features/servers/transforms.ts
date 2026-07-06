@@ -1,5 +1,5 @@
 import { ServerResources } from '@/types/server'
-import { Backup, BackupError } from '@/features/servers/types.ts'
+import { Backup, BackupErrorCode } from '@/features/servers/types.ts'
 
 export const rawDataToServerResources = (data: any): ServerResources => ({
     usedBytes: data.usedBytes,
@@ -14,9 +14,8 @@ export const rawDataToBackup = (data: any): Backup => ({
     name: data.name,
     description: data.description,
     isLocked: data.isLocked,
-    errors: data.errors
-        ? BackupError[data.errors as keyof typeof BackupError]
-        : null,
+    errorCode: (data.errorCode as BackupErrorCode) ?? null,
+    errorMessage: data.errorMessage ?? null,
     fileName: data.fileName,
     size: data.size,
     completedAt: data.completedAt ? new Date(data.completedAt) : null,

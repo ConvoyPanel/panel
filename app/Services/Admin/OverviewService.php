@@ -178,7 +178,7 @@ class OverviewService
             total: Backup::query()->count(),
             successful: Backup::query()->successful()->count(),
             pending: Backup::query()->whereNull('completed_at')->count(),
-            failed: Backup::query()->whereNotNull('completed_at')->whereNotNull('errors')->count(),
+            failed: Backup::query()->whereNotNull('completed_at')->whereNotNull('error_code')->count(),
         );
     }
 

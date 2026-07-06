@@ -48,15 +48,22 @@ export interface Backup {
     name: string
     description: string | null
     isLocked: boolean
-    errors: BackupError | null
+    errorCode: BackupErrorCode | null
+    // Raw failure detail from Proxmox; only present for admins (may leak node
+    // internals), so treat it as optional even on a failed backup.
+    errorMessage: string | null
     fileName: string
     size: number
     completedAt: Date | null
     createdAt: Date
 }
 
-export enum BackupError {
-    StorageExceeded,
+// Mirrors App\Enums\Server\Backup\BackupErrorCode. A stable, client-safe code
+// the backend classifies raw failures into; unknown reasons fall through to Other.
+export enum BackupErrorCode {
+    StorageExceeded = 'storage_exceeded',
+    Timeout = 'timeout',
+    Other = 'other',
 }
 
 export type PaginatedBackups = PaginatedResult<Backup> & { backupCount: number }

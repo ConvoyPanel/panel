@@ -17,7 +17,7 @@ class BackupDeletionService
 
     public function handle(Backup $backup)
     {
-        if ($backup->is_locked && is_null($backup->errors) && ! is_null($backup->completed_at)) {
+        if ($backup->is_locked && is_null($backup->error_code) && ! is_null($backup->completed_at)) {
             throw new BackupLockedException();
         }
 
