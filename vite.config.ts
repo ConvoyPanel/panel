@@ -44,4 +44,28 @@ export default defineConfig({
             '@': '/resources/scripts',
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                // Peel stable, always-eager vendors out of the entry chunk into
+                // long-cached chunks so routine app edits don't bust their cache
+                // and the initial load can fetch them in parallel. Deliberately
+                // narrow: lazy-only deps (react-table, recharts, dnd-kit, …) fall
+                // through so they stay in their route/feature chunks.
+                manualChunks(id) {
+                    if (!id.includes('/node_modules/')) return
+                    if (/\/node_modules\/(react|react-dom|scheduler)\//.test(id))
+                        return 'react-vendor'
+                    if (
+                        /\/node_modules\/@tanstack\/(react-router|router-core|history|react-query|query-core)\//.test(
+                            id
+                        )
+                    )
+                        return 'tanstack'
+                    if (/\/node_modules\/zod\//.test(id)) return 'validation'
+                    if (/\/node_modules\/axios\//.test(id)) return 'http'
+                },
+            },
+        },
+    },
 })

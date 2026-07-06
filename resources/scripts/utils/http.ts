@@ -1,6 +1,6 @@
 import { notFound } from '@tanstack/react-router'
 import { AxiosError } from 'axios'
-import { FieldValues, UseFormSetError } from 'react-hook-form'
+import type { FieldValues, UseFormSetError } from 'react-hook-form'
 
 
 export interface FractalResponseData {
