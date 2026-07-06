@@ -3,8 +3,10 @@ import { startRegistration } from '@simplewebauthn/browser'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import getRegistrationOptions from '@/api/account/passkeys/getRegistrationOptions.ts'
-import verifyRegistration from '@/api/account/passkeys/verifyRegistration.ts'
+import {
+    getRegistrationOptions,
+    verifyRegistration,
+} from '@/features/account/passkeys/api.ts'
 
 import AuthSetting from '@/components/interfaces/Client/Security/AuthSetting.tsx'
 import PasskeyList from '@/components/interfaces/Client/Security/PasskeyList.tsx'

@@ -4,8 +4,10 @@ import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
-import deletePasskey from '@/api/account/passkeys/deletePasskey.ts'
-import { passkeyQueries } from '@/api/account/passkeys/use-passkeys.ts'
+import {
+    deletePasskey,
+    passkeyQueries,
+} from '@/features/account/passkeys/api.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 

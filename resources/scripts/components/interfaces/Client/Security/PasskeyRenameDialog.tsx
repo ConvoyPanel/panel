@@ -6,8 +6,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import renamePasskey from '@/api/account/passkeys/renamePasskey.ts'
-import { passkeyQueries } from '@/api/account/passkeys/use-passkeys.ts'
+import {
+    renamePasskey,
+    passkeyQueries,
+} from '@/features/account/passkeys/api.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 

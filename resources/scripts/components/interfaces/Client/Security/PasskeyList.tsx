@@ -1,6 +1,6 @@
 import { IconKey } from '@tabler/icons-react'
 
-import usePasskeys from '@/api/account/passkeys/use-passkeys.ts'
+import { usePasskeys } from '@/features/account/passkeys/api.ts'
 
 import Passkey from '@/components/interfaces/Client/Security/Passkey.tsx'
 

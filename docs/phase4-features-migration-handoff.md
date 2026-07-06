@@ -67,7 +67,10 @@ clean.
    TwoFactorAuthenticationController}`), all URI-keyed dicts sharing the stock `/user/*` routes — the
    `/api/client/account/authenticator/*` keys are POST for enable/disable/regenerate (note disable is
    the `destroy` export but POST for this URI).
-4. **account/passkeys** — `use-passkeys.ts` (+ passkey register/delete; transformer `api/transformers/passkey.ts`).
+4. ✅ **account/passkeys** — DONE (`features/account/passkeys/api.ts`). Client `PasskeyController` is
+   clean callables (no dual-prefix dict): `index`/`create`(registration-options)/`store`
+   (verify-registration)/`rename`/`destroy`. Transformer `rawDataToPasskey` preserved. Note
+   `api/account/updatePassword.ts` still lives in the old tree (not part of this domain).
 5. **client `api/servers/**`** — `use-server`, `use-server-{state,deployment,resources,statistics}`, `use-addresses`, `use-template-groups` and their `get*` (Client controllers — mostly clean callables, no URI-keyed dict complication). Some already partly under `features/servers/`.
 
 `api/auth/use-user.ts` is the current-user/session hook (used by `_app.tsx`, `auth.tsx`, Avatar) — migrate last / carefully; it has `cacheUser`/`currentUserQueries` helpers.
