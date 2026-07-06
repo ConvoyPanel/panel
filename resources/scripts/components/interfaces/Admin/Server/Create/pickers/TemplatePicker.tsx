@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import useTemplates from '@/api/admin/templateGroups/templates/use-templates'
+import { useTemplates } from '@/features/template-groups/templates/api.ts'
 import {
     Select,
     SelectContent,

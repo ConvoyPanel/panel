@@ -5,8 +5,10 @@ import { useController } from 'react-hook-form'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton'
 import { useQuery } from '@tanstack/react-query'
-import getTemplateGroup from '@/api/admin/templateGroups/getTemplateGroup'
-import getTemplateGroups from '@/api/admin/templateGroups/getTemplateGroups'
+import {
+    getTemplateGroup,
+    getTemplateGroups,
+} from '@/features/template-groups/api.ts'
 
 const TemplateGroupPicker = () => {
     const { field } = useController<{

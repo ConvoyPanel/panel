@@ -8,9 +8,11 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import { templateGroupSchema } from '@/api/admin/templateGroups/createTemplateGroup.ts'
-import updateTemplateGroup from '@/api/admin/templateGroups/updateTemplateGroup.ts'
-import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
+import {
+    templateGroupQueries,
+    templateGroupSchema,
+    updateTemplateGroup,
+} from '@/features/template-groups/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'

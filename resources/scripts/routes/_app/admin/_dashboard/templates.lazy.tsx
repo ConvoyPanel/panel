@@ -1,7 +1,7 @@
 import { IconTemplate } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useTemplateGroups from '@/api/admin/templateGroups/use-template-groups.ts'
+import { useTemplateGroups } from '@/features/template-groups/api.ts'
 
 import CreateTemplateGroupModal from '@/components/interfaces/Admin/Template/CreateTemplateGroupModal.tsx'
 import DeleteTemplateGroupModal from '@/components/interfaces/Admin/Template/DeleteTemplateGroupModal.tsx'

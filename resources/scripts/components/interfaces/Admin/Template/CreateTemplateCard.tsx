@@ -8,10 +8,11 @@ import { z } from 'zod'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Template } from '@/types/template.ts'
 
-import createTemplate, {
+import {
+    createTemplate,
+    templateQueries,
     templateSchema,
-} from '@/api/admin/templateGroups/templates/createTemplate.ts'
-import { templateQueries } from '@/api/admin/templateGroups/templates/use-templates.ts'
+} from '@/features/template-groups/templates/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'

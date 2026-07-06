@@ -8,12 +8,14 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { templateSchema } from '@/api/admin/templateGroups/templates/createTemplate.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
-import updateTemplate from '@/api/admin/templateGroups/templates/updateTemplate.ts'
-import useDeleteTemplateMutation from '@/api/admin/templateGroups/templates/use-delete-template-mutation.ts'
-import { templateQueries } from '@/api/admin/templateGroups/templates/use-templates.ts'
+import {
+    templateQueries,
+    templateSchema,
+    updateTemplate,
+    useDeleteTemplateMutation,
+} from '@/features/template-groups/templates/api.ts'
 
 import { badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'

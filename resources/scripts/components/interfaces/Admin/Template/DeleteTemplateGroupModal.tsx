@@ -2,8 +2,10 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import deleteTemplateGroup from '@/api/admin/templateGroups/deleteTemplateGroup.ts'
-import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
+import {
+    deleteTemplateGroup,
+    templateGroupQueries,
+} from '@/features/template-groups/api.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 

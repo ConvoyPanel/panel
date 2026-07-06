@@ -6,10 +6,11 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import createTemplateGroup, {
+import {
+    createTemplateGroup,
+    templateGroupQueries,
     templateGroupSchema,
-} from '@/api/admin/templateGroups/createTemplateGroup.ts'
-import { templateGroupQueries } from '@/api/admin/templateGroups/use-template-groups.ts'
+} from '@/features/template-groups/api.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 

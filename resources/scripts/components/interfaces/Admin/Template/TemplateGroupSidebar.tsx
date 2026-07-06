@@ -2,7 +2,7 @@ import { IconPlus, IconTemplate } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useTemplates from '@/api/admin/templateGroups/templates/use-templates.ts'
+import { useTemplates } from '@/features/template-groups/templates/api.ts'
 
 import CreateTemplateCard from '@/components/interfaces/Admin/Template/CreateTemplateCard.tsx'
 import TemplateCard from '@/components/interfaces/Admin/Template/TemplateCard.tsx'
