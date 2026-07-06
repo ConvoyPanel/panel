@@ -14,10 +14,10 @@ import {
     addressBlockGroupQueries,
 } from '@/features/ipam/api.ts'
 
-import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
-import DeleteBlockGroupModal from '@/components/interfaces/Admin/Ipam/DeleteBlockGroupModal.tsx'
-import EditBlockGroupModal from '@/components/interfaces/Admin/Ipam/EditBlockGroupModal.tsx'
-import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
+import CreateBlockGroupModal from '@/features/ipam/components/CreateBlockGroupModal.tsx'
+import DeleteBlockGroupModal from '@/features/ipam/components/DeleteBlockGroupModal.tsx'
+import EditBlockGroupModal from '@/features/ipam/components/EditBlockGroupModal.tsx'
+import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'

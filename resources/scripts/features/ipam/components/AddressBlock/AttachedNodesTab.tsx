@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import AttachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/AttachNodeModal.tsx'
-import DetachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DetachNodeModal.tsx'
+import AttachNodeModal from '@/features/ipam/components/AddressBlock/AttachNodeModal.tsx'
+import DetachNodeModal from '@/features/ipam/components/AddressBlock/DetachNodeModal.tsx'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'

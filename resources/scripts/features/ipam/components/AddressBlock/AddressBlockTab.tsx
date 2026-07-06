@@ -14,10 +14,10 @@ import {
     addressBlockQueries,
 } from '@/features/ipam/blocks/api.ts'
 
-import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
-import DeleteAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressBlockModal.tsx'
-import EditAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/EditAddressBlockModal.tsx'
-import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
+import CreateAddressBlockModal from '@/features/ipam/components/AddressBlock/CreateAddressBlockModal.tsx'
+import DeleteAddressBlockModal from '@/features/ipam/components/AddressBlock/DeleteAddressBlockModal.tsx'
+import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
+import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'

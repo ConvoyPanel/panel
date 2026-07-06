@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { deleteAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
-import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

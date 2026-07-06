@@ -1,13 +1,12 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
-import { AxiosError } from 'axios'
+import { PaginatedAddressBlocks } from '@/types/address-block.ts'
 import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
-import { deleteAddressBlockGroup } from '@/features/ipam/api.ts'
+import { deleteAddressBlock } from '@/features/ipam/blocks/api.ts'
 
-import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
+import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -21,11 +20,12 @@ import {
 } from '@/components/ui/Credenza'
 
 interface Props {
-    mutate: Mutator<PaginatedAddressBlockGroups>
+    addressBlockGroupId: number
+    mutate: Mutator<PaginatedAddressBlocks>
 }
 
-const DeleteBlockGroupModal = ({ mutate }: Props) => {
-    const [blockGroup, open, close] = useBlockGroupModalStore(
+const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
+    const [addressBlock, open, close] = useAddressBlockModal(
         useShallow(state => [
             state.modalData,
             state.activeModal === 'delete',
@@ -35,37 +35,23 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
 
     const [state, submit] = useAsyncFunction(async () => {
         try {
-            if (!blockGroup) return
+            if (!addressBlock) return
 
-            await deleteAddressBlockGroup(blockGroup.id)
+            await deleteAddressBlock(addressBlockGroupId, addressBlock.id)
 
             await mutate(data => {
                 if (!data) return
 
                 return {
                     ...data,
-                    items: data.items.filter(item => item.id !== blockGroup.id),
+                    items: data.items.filter(item => item.id !== addressBlock.id),
                 }
             }, false)
 
-            toast.success('Block group deleted')
+            toast.success('Address block deleted')
             close('delete')
         } catch (e) {
-            // Check if it's an Axios error with a response
-            if (e instanceof AxiosError && e.response) {
-                // For authorization failures (403 Forbidden)
-                if (e.response.status === 403) {
-                    // If there's a specific message about servers being attached
-                    const message =
-                        e.response.data.message || 'Deletion not authorized'
-                    toast.error(message)
-                } else {
-                    toast.error('Deletion failed')
-                }
-            } else {
-                toast.error('Deletion failed')
-            }
-            
+            toast.error('Deletion failed')
             throw e
         }
     })
@@ -74,9 +60,9 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
         <Credenza open={open} onOpenChange={open => !open && close('delete')}>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>Delete {blockGroup?.name}</CredenzaTitle>
+                    <CredenzaTitle>Delete {addressBlock?.name || 'Address Block'}</CredenzaTitle>
                     <CredenzaDescription>
-                        Are you sure you want to delete this block group? This
+                        Are you sure you want to delete this address block? This
                         action cannot be undone.
                     </CredenzaDescription>
                 </CredenzaHeader>
@@ -98,4 +84,4 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
     )
 }
 
-export default DeleteBlockGroupModal
+export default DeleteAddressBlockModal

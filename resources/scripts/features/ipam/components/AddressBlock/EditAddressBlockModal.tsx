@@ -13,7 +13,7 @@ import {
     updateAddressBlock,
 } from '@/features/ipam/blocks/api.ts'
 
-import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
+import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

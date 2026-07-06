@@ -11,16 +11,16 @@ import {
 } from '@/features/ipam/blocks/addresses/api.ts'
 import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
 
-import GenerateAddressesButton from '@/components/interfaces/Admin/Ipam/AddressBlock/GenerateAddressesButton.tsx'
+import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/GenerateAddressesButton.tsx'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
 import DropdownMenuItem from '@/components/ui/DropdownMenu/DropdownMenuItem.tsx'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
-import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
-import EditAddressModal from '@/components/interfaces/Admin/Ipam/AddressBlock/EditAddressModal'
-import DeleteAddressModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressModal.tsx'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
+import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
+import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAddressModal.tsx'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'

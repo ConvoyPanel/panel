@@ -11,8 +11,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { updateAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
-import ServerPicker from '@/components/interfaces/Admin/Ipam/AddressBlock/ServerPicker.tsx'
-import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
+import ServerPicker from '@/features/ipam/components/AddressBlock/ServerPicker.tsx'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

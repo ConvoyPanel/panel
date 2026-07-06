@@ -4,8 +4,8 @@ import { useAddressBlockGroup } from '@/features/ipam/api.ts'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Heading } from '@/components/ui/Typography'
-import AddressBlockTab from '@/components/interfaces/Admin/Ipam/AddressBlock/AddressBlockTab.tsx'
-import AttachedNodesTab from '@/components/interfaces/Admin/Ipam/AddressBlock/AttachedNodesTab.tsx'
+import AddressBlockTab from '@/features/ipam/components/AddressBlock/AddressBlockTab.tsx'
+import AttachedNodesTab from '@/features/ipam/components/AddressBlock/AttachedNodesTab.tsx'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/'

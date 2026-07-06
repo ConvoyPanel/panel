@@ -13,7 +13,7 @@ import {
     updateAddressBlockGroup,
 } from '@/features/ipam/api.ts'
 
-import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
+import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
