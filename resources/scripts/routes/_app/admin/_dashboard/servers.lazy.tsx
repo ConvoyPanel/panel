@@ -5,7 +5,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useServers from '@/api/admin/servers/use-servers.ts'
+import { useServers } from '@/features/servers/admin/api.ts'
 
 import ServerBulkPowerActions from '@/components/interfaces/Admin/Server/ServerBulkPowerActions.tsx'
 import ServerPowerActions from '@/components/interfaces/Admin/Server/ServerPowerActions.tsx'

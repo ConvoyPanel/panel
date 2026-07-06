@@ -51,7 +51,11 @@ clean.
 
 ## Remaining domains after IPAM (order)
 
-1. **admin/servers** — `api/admin/servers/{getServer,getServers,use-server,use-servers,updateState,getState,...}.ts` (ServerController admin). Note there is BOTH a client `features/servers/api.ts` (done) and this admin one — keep them distinct.
+1. ✅ **admin/servers** — DONE (`features/servers/admin/api.ts`). Kept distinct from the client
+   `features/servers/api.ts`. Note: `updateState`/`getState` were NOT in the old `api/admin/servers/`
+   dir (only `{createServer,getServer,getServers,use-server,use-servers}`) — state already lives in
+   `features/servers/state/api.ts`. The admin `show` route param is typed `{server: uuid}` by
+   Wayfinder but binds by id, so `getServer(id)` calls `showRoute(String(id))` to preserve the URL.
 2. **node sub-resources** — `api/admin/nodes/storages/**` (StorageController) and
    `api/admin/nodes/networkInterfaces/**` (NetworkInterfaceController). Separate controllers from the
    nodes core already migrated. See `LoadBalancerSidebar.tsx` (storages) for an optimistic-update consumer.

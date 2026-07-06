@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import createServer, {
+import {
+    createServer,
     serverSchema,
-} from '@/api/admin/servers/createServer.ts'
+} from '@/features/servers/admin/api.ts'
 import GeneralForm from '@/components/interfaces/Admin/Server/Create/GeneralForm'
 import LimitsForm from '@/components/interfaces/Admin/Server/Create/LimitsForm'
 import NetworkForm from '@/components/interfaces/Admin/Server/Create/NetworkForm'

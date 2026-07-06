@@ -4,7 +4,7 @@ import { IconCheck, IconServer } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
 import { getCompatibleServers } from '@/features/ipam/api.ts'
-import useServer from '@/api/admin/servers/use-server.ts'
+import { useServer } from '@/features/servers/admin/api.ts'
 
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
