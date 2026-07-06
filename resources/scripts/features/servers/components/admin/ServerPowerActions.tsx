@@ -59,12 +59,14 @@ const ServerPowerActions = ({ server }: Props) => {
 
     const isRunning = state?.state === 'running'
     const isStopped = state?.state === 'stopped'
-    // Undefined (still loading) or a transitional state disables everything.
+    const pending = state?.pendingPowerAction ?? null
+    // Undefined (still loading), a transitional state, or a power action already
+    // in flight disables everything.
     const enabled: Record<PowerAction, boolean> = {
-        start: isStopped,
-        restart: isRunning,
-        shutdown: isRunning,
-        kill: isRunning,
+        start: isStopped && !pending,
+        restart: isRunning && !pending,
+        shutdown: isRunning && !pending,
+        kill: isRunning && !pending,
     }
 
     const handlePowerAction = async (action: PowerAction) => {
@@ -90,6 +92,12 @@ const ServerPowerActions = ({ server }: Props) => {
 
     return (
         <>
+            {pending && (
+                <DropdownMenuItem disabled>
+                    {actions[pending.command as PowerAction]?.label ?? 'Power action'}{' '}
+                    in progress…
+                </DropdownMenuItem>
+            )}
             {(Object.keys(actions) as PowerAction[]).map(action => (
                 <DropdownMenuItem
                     key={action}

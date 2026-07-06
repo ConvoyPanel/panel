@@ -80,6 +80,7 @@ export const getState = async (uuid: string): Promise<ServerStateData> => {
         memoryTotal: data.memoryTotal,
         memoryUsed: data.memoryUsed,
         uptime: data.uptime,
+        pendingPowerAction: data.pendingPowerAction ?? null,
     }
 }
 

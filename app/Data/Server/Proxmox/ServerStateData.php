@@ -2,6 +2,7 @@
 
 namespace App\Data\Server\Proxmox;
 
+use App\Data\Server\Power\PendingPowerActionData;
 use App\Enums\Server\State;
 use Spatie\LaravelData\Data;
 
@@ -13,6 +14,9 @@ class ServerStateData extends Data
         public int   $memoryTotal,
         public int   $memoryUsed,
         public int   $uptime,
+        // Populated by the controller from ServerPowerLockService — not part of
+        // the raw Proxmox status, so fromRaw() leaves it null.
+        public ?PendingPowerActionData $pendingPowerAction = null,
     ) {
     }
 

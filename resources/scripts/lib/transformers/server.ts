@@ -33,6 +33,7 @@ export const rawDataToServerStateData = (data: any): ServerStateData => ({
     memoryTotal: data.memoryTotal,
     memoryUsed: data.memoryUsed,
     uptime: data.uptime,
+    pendingPowerAction: data.pendingPowerAction ?? null,
 })
 
 export const rawDataToServerTimepointData = (

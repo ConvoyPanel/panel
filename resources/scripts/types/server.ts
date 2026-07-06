@@ -42,12 +42,18 @@ export type PaginatedServers = PaginatedResult<Server>
 
 export type ServerState = 'running' | 'stopped'
 
+export interface PendingPowerAction {
+    command: 'start' | 'restart' | 'shutdown' | 'kill' | 'reset' | 'resume' | 'suspend'
+    requestedAt: string
+}
+
 export interface ServerStateData {
     state: ServerState
     cpuUsed: number
     memoryTotal: number
     memoryUsed: number
     uptime: number
+    pendingPowerAction: PendingPowerAction | null
 }
 
 export interface ServerTimepointData {

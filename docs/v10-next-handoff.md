@@ -503,9 +503,10 @@ Verified:
     the compile-time contract (Wayfinder route + DTO envelope + generated types) is fully exercised and
     the backend endpoints are covered by feature tests.
   - **Still not done:** an admin server **detail** page (the list's `/admin/servers/{id}` link is still
-    dead) — power actions currently live only as the row dropdown. And **power-action locking** (below)
-    is still open; when built, put the lock *inside* `SendServerPowerCommand` so both surfaces inherit
-    it for free.
+    dead) — power actions currently live only as the row dropdown.
+  - **Power-action locking — DONE (2026-07-06).** Built as designed below, with the lock *inside*
+    `SendServerPowerCommand` so admin + client inherit it for free. See the "Power-action locking" item
+    further down (marked DONE) for the shape that landed.
 
 - **VLAN support (GitHub #150) — assessment: mechanism sound, node-global default is too coarse.**
   Request: set a Proxmox VLAN tag on a VM's NIC, with a node-level default + per-VM override.
@@ -527,14 +528,32 @@ Verified:
     `tag`, so this is mostly free). Net: adequate *pattern* (default + override), wrong *default location* —
     move it off the node onto the interface/block.
 
-- **Power-action locking.** User-initiated server power actions need an app-level lock so the user
-  cannot spam start/stop/reboot buttons and enqueue conflicting Proxmox tasks. Laravel's cache lock
-  only stores ownership/expiry, not an arbitrary payload describing the requested action, so model the
-  action state separately from the mutex. Suggested shape: acquire a per-server power lock, persist a
-  small pending-action record/state (`server_id`, user, requested action, requested_at, Proxmox UPID if
-  available), dispatch the command, poll/read server status, and clear or mark failed only after the
-  observed VM state confirms the action completed or timed out. UI should render the locked action/status
-  and reject duplicate/conflicting requests while the pending action is active.
+- **Power-action locking — DONE (2026-07-06).** User-initiated power actions are now guarded by a
+  per-server lock so a user can't spam start/stop/reboot and enqueue conflicting Proxmox tasks.
+  - **Lock = pending-record, one atomic cache entry.** `App\Services\Servers\Power\ServerPowerLockService`
+    uses `Cache::add` (SETNX-with-TTL, so atomic) keyed `server:{id}:power-action`, whose *value* is the
+    pending action (`PendingPowerActionData`: `command` + `requestedAt`). Laravel's cache **lock** only
+    tracks owner/expiry with no payload — hence storing the record in the value, per the note below. A
+    60s TTL is the safety net that auto-clears a lock if a request dies before releasing.
+  - **Lives inside `SendServerPowerCommand`** (the shared action), so both the client and admin
+    `updateState` inherit it. `acquire()` runs before the Proxmox call and throws
+    `PowerActionInProgressException` (409, code `power_action_in_progress`, `HasErrorCode`) if held; on a
+    Proxmox failure the lock is **released** so the user can retry immediately instead of waiting out the
+    TTL. On success the lock stays until the TTL expires (the transition window).
+  - **Surfaced to the UI.** `getState` on both controllers composes `pendingPowerAction` onto
+    `ServerStateData` (nullable field, populated by the controller from the lock — the raw Proxmox status
+    doesn't carry it). Admin `ServerPowerActions` + client `PowerActionsDropdown`/`PowerActionsExpanded`
+    disable all power buttons while an action is pending (admin also shows a "… in progress" row); the
+    409 is the backstop for the race where the UI hasn't yet polled the pending state.
+  - Tests: `tests/Unit/Services/Servers/ServerPowerLockServiceTest.php` (acquire/pending/release,
+    double-acquire → 409, release-on-failure retriable) + `tests/Feature/Servers/PowerActionLockTest.php`
+    (double command → 409 through the admin endpoint, pending surfaced on state, per-server isolation).
+    Suite 117 passed; PHPStan 0; tsc + vite build green.
+  - **Deferred (not built, on purpose — YAGNI):** the fuller "poll the Proxmox UPID task and clear only
+    once the observed VM state confirms completion" loop. v1 relies on the TTL as the lock window, which
+    is a correct spam-guard; UPID-based completion tracking is a background-job follow-up (the UPID from
+    `send()` is available to anchor it) and observed-state early-clear is racy during the transition
+    (a just-issued `start` still reads `stopped`), so it was left out rather than added speculatively.
 - **Replace the SSO-token hack: polished URL signing + real OIDC/OAuth SSO.** The current
   `getSSOToken` flow (`UserController::getSSOToken` → `SSOTokenData`, a short-lived app-key-signed JWT
   minted for plugins so an external app like WHMCS can deep-link a user straight into Convoy) is a

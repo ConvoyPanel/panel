@@ -16,6 +16,7 @@ use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Server;
 use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use App\Services\Coterm\CotermJWTService;
+use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
 use App\Services\Servers\ServerConsoleService;
 use Illuminate\Http\JsonResponse;
@@ -31,6 +32,7 @@ class ServerController
         private ServerConsoleService $consoleService,
         private ProxmoxServerRepository $serverRepository,
         private SendServerPowerCommand $powerCommand,
+        private ServerPowerLockService $powerLock,
     ) {}
 
     public function index(Request $request)
@@ -78,7 +80,10 @@ class ServerController
 
     public function getState(Server $server)
     {
-        return $this->serverRepository->setServer($server)->getState();
+        $state = $this->serverRepository->setServer($server)->getState();
+        $state->pendingPowerAction = $this->powerLock->pending($server);
+
+        return $state;
     }
 
     public function updateState(Server $server, SendPowerCommandRequest $request)

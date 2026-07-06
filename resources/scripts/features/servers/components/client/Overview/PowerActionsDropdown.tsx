@@ -23,6 +23,9 @@ const PowerActionsDropdown = () => {
     const { data: server } = useServer()
     const { data } = useServerState()
 
+    // A power action already in flight disables all controls until it clears.
+    const pending = !!data?.pendingPowerAction
+
     const handlePowerAction = async (action: PowerAction) => {
         try {
             const confirmed = await confirm({
@@ -49,25 +52,25 @@ const PowerActionsDropdown = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem
-                    disabled={!data || data?.state === 'running'}
+                    disabled={!data || pending || data?.state === 'running'}
                     onClick={() => handlePowerAction('start')}
                 >
                     Start
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('restart')}
                 >
                     Restart
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('kill')}
                 >
                     Kill
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('shutdown')}
                 >
                     Shutdown

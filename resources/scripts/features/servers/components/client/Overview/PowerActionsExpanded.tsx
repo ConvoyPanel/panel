@@ -17,6 +17,9 @@ const PowerActionsExpanded = () => {
     const { data: server } = useServer()
     const { data } = useServerState()
 
+    // A power action already in flight disables all controls until it clears.
+    const pending = !!data?.pendingPowerAction
+
     const handlePowerAction = async (action: PowerAction) => {
         try {
             const confirmed = await confirm({
@@ -38,28 +41,28 @@ const PowerActionsExpanded = () => {
             <div className={'hidden items-center gap-2 @sm:flex'}>
                 <Button
                     variant={'outline'}
-                    disabled={!data || data?.state === 'running'}
+                    disabled={!data || pending || data?.state === 'running'}
                     onClick={() => handlePowerAction('start')}
                 >
                     Start
                 </Button>
                 <Button
                     variant={'outline'}
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('restart')}
                 >
                     Restart
                 </Button>
                 <Button
                     variant={'destructiveOutline'}
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('kill')}
                 >
                     Kill
                 </Button>
                 <Button
                     variant={'destructive'}
-                    disabled={!data || data?.state === 'stopped'}
+                    disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('shutdown')}
                 >
                     Shutdown
