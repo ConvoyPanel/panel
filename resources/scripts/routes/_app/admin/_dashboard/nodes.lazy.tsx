@@ -7,7 +7,7 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
 
-import useNodes from '@/api/admin/nodes/use-nodes.ts'
+import { useNodes } from '@/features/nodes/api.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'

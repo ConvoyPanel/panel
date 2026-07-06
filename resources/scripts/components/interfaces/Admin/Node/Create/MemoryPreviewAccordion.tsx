@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { z } from 'zod'
 
-import { nodeSchema } from '@/api/admin/nodes/createNode.ts'
+import { nodeSchema } from '@/features/nodes/api.ts'
 
 import {
     Accordion,

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import testConnection from '@/api/admin/nodes/testConnection.ts'
+import { testConnection } from '@/features/nodes/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

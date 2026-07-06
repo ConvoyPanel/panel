@@ -4,8 +4,7 @@ import { IconCheck, IconServer } from '@tabler/icons-react'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { useController } from 'react-hook-form'
 
-import getNodes from '@/api/admin/nodes/getNodes.ts'
-import useNode from '@/api/admin/nodes/use-node'
+import { getNodes, useNode } from '@/features/nodes/api.ts'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 

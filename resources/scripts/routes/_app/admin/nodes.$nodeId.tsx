@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-import useNode, { preloadNode } from '@/api/admin/nodes/use-node.ts'
+import { preloadNode, useNode } from '@/features/nodes/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 

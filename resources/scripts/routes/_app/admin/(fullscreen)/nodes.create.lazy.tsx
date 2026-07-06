@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import createNode, { nodeSchema } from '@/api/admin/nodes/createNode.ts'
+import { createNode, nodeSchema } from '@/features/nodes/api.ts'
 
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 
