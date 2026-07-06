@@ -4,7 +4,7 @@ import type {
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { rawDataToAuthenticatedUser } from '@/lib/transformers/user.ts'
+import { rawDataToAuthenticatedUser } from '@/features/auth/transforms.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import AuthenticatedSessionController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController'

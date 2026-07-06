@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 import { login } from '@/features/auth/api.ts'
 
-import LoginWithPasskeyButton from '@/components/interfaces/Auth/LoginWithPasskeyButton.tsx'
+import LoginWithPasskeyButton from '@/features/auth/components/LoginWithPasskeyButton.tsx'
 
 import {
     CardContent,
