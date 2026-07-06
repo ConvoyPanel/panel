@@ -8,8 +8,10 @@ import { IconKey } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
-import getPasskeyAuthenticationOptions from '@/api/auth/getPasskeyAuthenticationOptions.ts'
-import verifyPasskeyAuthentication from '@/api/auth/verifyPasskeyAuthentication.ts'
+import {
+    getPasskeyAuthenticationOptions,
+    verifyPasskeyAuthentication,
+} from '@/features/auth/api.ts'
 
 import { Button } from '@/components/ui/Button'
 

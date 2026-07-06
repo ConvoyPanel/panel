@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import updatePassword from '@/api/account/updatePassword.ts'
+import { updatePassword } from '@/features/account/password/api.ts'
 
 import AuthSetting from '@/components/interfaces/Client/Security/AuthSetting.tsx'
 

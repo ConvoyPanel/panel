@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import confirmIdentity from '@/api/auth/identity/confirmIdentity.ts'
+import { confirmIdentity } from '@/features/auth/identity/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

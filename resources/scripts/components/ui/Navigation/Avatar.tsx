@@ -4,7 +4,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
-import logout from '@/api/auth/logout.ts'
+import { logout } from '@/features/auth/api.ts'
 import { useUser, currentUserQueries } from '@/features/auth/api.ts'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'

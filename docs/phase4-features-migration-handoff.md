@@ -96,10 +96,22 @@ auth, identity, verify*) is NOT part of this domain and stays in the old tree.
 Committed on `next` this session, each verified with tsc + `vite build` (build output is gitignored,
 nothing to restore): IPAM (`9b459101`), admin servers (`3c7c0b40`), node storages + network
 interfaces (`bc9a5f2b`), account authenticator (`4a9bf058`), account passkeys (`66f0e264`), client
-servers (`2b522ebb`), auth/use-user (`features/auth/api.ts`). **All listed Phase-4 domains are now
-migrated.** Still in the old tree but out of the listed domains (candidates for convert-as-you-touch):
-`api/account/updatePassword.ts` and the rest of `api/auth/**` (login, logout, passkey auth, identity,
-verify*).
+servers (`2b522ebb`), auth/use-user (`978cc296`), and the stragglers below.
+
+**All listed Phase-4 domains AND the remaining old `api/**` call-sites are now migrated.** The
+stragglers (originally out of the listed domains) were folded in too:
+- `api/account/updatePassword.ts` → `features/account/password/api.ts` (Client `PasswordController`).
+- `api/auth/{login,logout,getPasskeyAuthenticationOptions,verifyAuthenticatorChallenge,
+  verifyPasskeyAuthentication}` → **extended** `features/auth/api.ts` (Fortify
+  `AuthenticatedSessionController` + `TwoFactorAuthenticatedSessionController` URI-keyed `/api/auth/*`
+  keys; `Auth/PasskeyLoginController` clean callables).
+- `api/auth/identity/*` → `features/auth/identity/api.ts` (`Auth/ConfirmableIdentityController`). Kept
+  separate from `features/auth/api.ts` because both had a `getPasskeyAuthenticationOptions` on
+  different URLs.
+
+`resources/scripts/api/` now contains **only `transformers/`** (shared, imported by the feature
+modules by design — not part of the api-layer move). The whole `api/**/{get*,use-*,create/update/
+delete}` call-layer is gone.
 
 ## Open reconsideration (from user's side agent, 2026-07-06)
 

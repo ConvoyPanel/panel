@@ -3,7 +3,7 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import login from '@/api/auth/login.ts'
+import { login } from '@/features/auth/api.ts'
 
 import LoginWithPasskeyButton from '@/components/interfaces/Auth/LoginWithPasskeyButton.tsx'
 

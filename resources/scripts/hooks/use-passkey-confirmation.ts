@@ -5,8 +5,10 @@ import {
 } from '@simplewebauthn/browser'
 import { useState } from 'react'
 
-import confirmIdentity from '@/api/auth/identity/confirmIdentity.ts'
-import getPasskeyAuthenticationOptions from '@/api/auth/identity/getPasskeyAuthenticationOptions.ts'
+import {
+    confirmIdentity,
+    getPasskeyAuthenticationOptions,
+} from '@/features/auth/identity/api.ts'
 
 
 const usePasskeyConfirmation = () => {

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import verifyAuthenticatorChallenge from '@/api/auth/verifyAuthenticatorChallenge.ts'
+import { verifyAuthenticatorChallenge } from '@/features/auth/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
