@@ -14,7 +14,7 @@ import {
     useTemplateGroups,
 } from '@/features/servers/detail/api.ts'
 
-import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
+import TemplateIconDisplay from '@/features/template-groups/components/TemplateIconDisplay'
 
 import {
     Form,

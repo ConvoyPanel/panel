@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 import { TemplateIcon } from '@/types/template-group.ts';
 import SelectForm, { SelectFormItem } from '@/components/ui/Forms/SelectForm.tsx';
-import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay.tsx';
+import TemplateIconDisplay from '@/features/template-groups/components/TemplateIconDisplay.tsx';
 import { Button } from '@/components/ui/Button';
 
 export const formatIconLabel = (icon: string) => {

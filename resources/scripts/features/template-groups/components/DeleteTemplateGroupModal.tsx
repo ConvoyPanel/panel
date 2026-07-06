@@ -9,7 +9,7 @@ import {
 import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
-import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
+import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

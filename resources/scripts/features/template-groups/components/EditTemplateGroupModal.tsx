@@ -1,20 +1,21 @@
+import { TemplateGroup, TemplateIcon } from '@/types/template-group.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconPlus } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { useShallow } from 'zustand/react/shallow'
 
 import {
-    createTemplateGroup,
     templateGroupQueries,
     templateGroupSchema,
+    updateTemplateGroup,
 } from '@/features/template-groups/api.ts'
-import { TemplateGroup } from '@/types/template-group.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
-import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
+import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -25,56 +26,66 @@ import {
     CredenzaFooter,
     CredenzaHeader,
     CredenzaTitle,
-    CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
+import TemplateIconSelect from '@/features/template-groups/components/TemplateIconSelect.tsx'
 
-const CreateTemplateGroupModal = () => {
+const EditTemplateGroupModal = () => {
     const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
-    const [open, setOpen] = useState(false)
+
+    const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
+        useShallow(state => ({
+            isOpen: state.activeModal === 'edit',
+            modalData: state.modalData,
+            closeModal: state.closeModal,
+        }))
+    )
 
     const form = useForm<z.input<typeof templateGroupSchema>>({
         resolver: zodResolver(templateGroupSchema),
-        defaultValues: {
-            name: '',
-            description: '',
-            icon: null,
-            isAdminOnly: false,
-        },
     })
 
-    const submit = async (data: z.input<typeof templateGroupSchema>) => {
-        try {
-            const templateGroup = await createTemplateGroup(data as z.infer<typeof templateGroupSchema>)
+    useEffect(() => {
+        if (modalData) {
+            form.reset({
+                name: modalData.name,
+                description: modalData.description ?? '',
+                icon: modalData.icon as TemplateIcon,
+                isAdminOnly: modalData.isAdminOnly,
+            })
+        }
+    }, [modalData])
 
-            await mutate(currentData => {
+    const { mutate: trigger } = useMutation({
+        mutationFn: (arg: z.infer<typeof templateGroupSchema>) =>
+            updateTemplateGroup(modalData!.uuid, arg),
+        onSuccess: updatedGroup => {
+            mutate((currentData: TemplateGroup[] | undefined) => {
                 if (!currentData) return
-                return [...currentData, templateGroup].sort((a, b) =>
-                    a.name.localeCompare(b.name)
+                return currentData.map(group =>
+                    group.uuid === updatedGroup.uuid ? updatedGroup : group
                 )
             }, false)
 
-            form.reset()
-            setOpen(false)
-            toast.success('Template group created')
-        } catch (e) {
+            closeModal('edit')
+            toast.success('Template group updated')
+        },
+        onError: e => {
             handleFormErrors(e, form.setError)
             toast.error('Failed to save changes')
-            throw e
-        }
+        },
+    })
+
+    const submit = (data: z.input<typeof templateGroupSchema>) => {
+        trigger(data as z.infer<typeof templateGroupSchema>)
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button size={'sm'} className={'self-end'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add template group
-                </Button>
-            </CredenzaTrigger>
+        <Credenza open={isOpen} onOpenChange={() => closeModal('edit')}>
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>New Template Group</CredenzaTitle>
+                    <CredenzaTitle>Edit Template Group</CredenzaTitle>
                 </CredenzaHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
@@ -100,7 +111,7 @@ const CreateTemplateGroupModal = () => {
                                     Cancel
                                 </Button>
                             </CredenzaClose>
-                            <FormButton>Add template group</FormButton>
+                            <FormButton>Save changes</FormButton>
                         </CredenzaFooter>
                     </form>
                 </Form>
@@ -109,4 +120,4 @@ const CreateTemplateGroupModal = () => {
     )
 }
 
-export default CreateTemplateGroupModal
+export default EditTemplateGroupModal

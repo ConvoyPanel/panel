@@ -2,8 +2,8 @@ import { TemplateGroup } from '@/types/template-group.ts'
 import { IconCopy, IconDots } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay.tsx'
-import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
+import TemplateIconDisplay from '@/features/template-groups/components/TemplateIconDisplay.tsx'
+import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'

@@ -4,9 +4,9 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { useTemplates } from '@/features/template-groups/templates/api.ts'
 
-import CreateTemplateCard from '@/components/interfaces/Admin/Template/CreateTemplateCard.tsx'
-import TemplateCard from '@/components/interfaces/Admin/Template/TemplateCard.tsx'
-import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
+import CreateTemplateCard from '@/features/template-groups/components/CreateTemplateCard.tsx'
+import TemplateCard from '@/features/template-groups/components/TemplateCard.tsx'
+import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'

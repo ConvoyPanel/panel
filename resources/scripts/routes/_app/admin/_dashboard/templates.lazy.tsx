@@ -3,11 +3,11 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { useTemplateGroups } from '@/features/template-groups/api.ts'
 
-import CreateTemplateGroupModal from '@/components/interfaces/Admin/Template/CreateTemplateGroupModal.tsx'
-import DeleteTemplateGroupModal from '@/components/interfaces/Admin/Template/DeleteTemplateGroupModal.tsx'
-import EditTemplateGroupModal from '@/components/interfaces/Admin/Template/EditTemplateGroupModal.tsx'
-import TemplateGroupCard from '@/components/interfaces/Admin/Template/TemplateGroupCard.tsx'
-import TemplateGroupSidebar from '@/components/interfaces/Admin/Template/TemplateGroupSidebar.tsx'
+import CreateTemplateGroupModal from '@/features/template-groups/components/CreateTemplateGroupModal.tsx'
+import DeleteTemplateGroupModal from '@/features/template-groups/components/DeleteTemplateGroupModal.tsx'
+import EditTemplateGroupModal from '@/features/template-groups/components/EditTemplateGroupModal.tsx'
+import TemplateGroupCard from '@/features/template-groups/components/TemplateGroupCard.tsx'
+import TemplateGroupSidebar from '@/features/template-groups/components/TemplateGroupSidebar.tsx'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
