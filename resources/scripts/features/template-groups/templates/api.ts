@@ -8,7 +8,7 @@ import {
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { rawDataToTemplate } from '@/api/transformers/template.ts'
+import { rawDataToTemplate } from '@/lib/transformers/template.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { Template } from '@/types/template.ts'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'

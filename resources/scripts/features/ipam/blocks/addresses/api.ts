@@ -8,7 +8,7 @@ import {
 import {
     rawDataToAddress,
     rawDataToGeneratedAddressesResult,
-} from '@/api/transformers/address.ts'
+} from '@/lib/transformers/address.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import type { Address, PaginatedAddresses } from '@/types/address.ts'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'

@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToAddressBlock } from '@/api/transformers/address-block.ts'
+import { rawDataToAddressBlock } from '@/lib/transformers/address-block.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import type { AddressBlock, PaginatedAddressBlocks } from '@/types/address-block.ts'

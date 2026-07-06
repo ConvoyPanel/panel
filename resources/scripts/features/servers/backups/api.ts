@@ -6,7 +6,7 @@ import {
     withQueryBuilderParams,
 } from '@/utils/http.ts'
 
-import { rawDataToBackup } from '@/api/transformers/backup.ts'
+import { rawDataToBackup } from '@/lib/transformers/backup.ts'
 import type { PaginatedBackups } from '@/types/backup.ts'
 import BackupController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/BackupController'
 

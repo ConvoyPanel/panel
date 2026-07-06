@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToTemplateGroup } from '@/api/transformers/template-group.ts'
+import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { TemplateGroup, TemplateIcon } from '@/types/template-group.ts'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'

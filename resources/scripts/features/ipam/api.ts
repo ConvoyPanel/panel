@@ -6,8 +6,8 @@ import {
 } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToAddressBlockGroup } from '@/api/transformers/address-block-group.ts'
-import { rawDataToServer } from '@/api/transformers/server.ts'
+import { rawDataToAddressBlockGroup } from '@/lib/transformers/address-block-group.ts'
+import { rawDataToServer } from '@/lib/transformers/server.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import type {

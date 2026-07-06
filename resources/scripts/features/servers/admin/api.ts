@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToServer } from '@/api/transformers/server.ts'
+import { rawDataToServer } from '@/lib/transformers/server.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import type { PaginatedServers, Server } from '@/types/server'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'

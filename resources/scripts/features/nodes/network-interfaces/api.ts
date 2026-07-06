@@ -2,7 +2,7 @@ import { useParams } from '@tanstack/react-router'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToNetworkInterface } from '@/api/transformers/network-interface.ts'
+import { rawDataToNetworkInterface } from '@/lib/transformers/network-interface.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { NetworkInterface } from '@/types/network-interface.ts'
 import NetworkInterfaceController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NetworkInterfaceController'

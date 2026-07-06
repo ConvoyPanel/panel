@@ -4,7 +4,7 @@ import type {
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { rawDataToPasskey } from '@/api/transformers/passkey.ts'
+import { rawDataToPasskey } from '@/lib/transformers/passkey.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { Passkey } from '@/types/passkey.ts'
 import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'

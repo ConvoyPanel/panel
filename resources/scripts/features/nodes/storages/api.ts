@@ -5,7 +5,7 @@ import { z } from 'zod'
 import {
     rawDataToNodeStorage,
     rawDataToStorageProxmox,
-} from '@/api/transformers/storage.ts'
+} from '@/lib/transformers/storage.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { NodeStorage } from '@/types/storage.ts'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'

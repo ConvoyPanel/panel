@@ -4,7 +4,7 @@ import {
     useQuery,
 } from '@tanstack/react-query'
 
-import { rawDataToAdminUser } from '@/api/transformers/admin/user.ts'
+import { rawDataToAdminUser } from '@/lib/transformers/admin/user.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import type { AdminUser, PaginatedAdminUsers } from '@/types/admin/user'
 import {

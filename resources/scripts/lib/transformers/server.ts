@@ -1,4 +1,4 @@
-import { rawDataToNode } from '@/api/transformers/node'
+import { rawDataToNode } from '@/lib/transformers/node'
 import { Server, ServerStateData, ServerTimepointData } from '@/types/server.ts'
 
 export const rawDataToServer = (data: any): Server => ({

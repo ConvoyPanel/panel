@@ -5,10 +5,10 @@ import {
     type UseQueryOptions,
 } from '@tanstack/react-query'
 
-import { rawDataToAddress } from '@/api/transformers/address.ts'
-import { rawDataToServerResources } from '@/api/transformers/server-resources'
-import { rawDataToServerTimepointData } from '@/api/transformers/server.ts'
-import { rawDataToTemplateGroup } from '@/api/transformers/template-group.ts'
+import { rawDataToAddress } from '@/lib/transformers/address.ts'
+import { rawDataToServerResources } from '@/lib/transformers/server-resources'
+import { rawDataToServerTimepointData } from '@/lib/transformers/server.ts'
+import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import { Address } from '@/types/address.ts'

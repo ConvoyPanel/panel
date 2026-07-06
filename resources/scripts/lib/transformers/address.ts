@@ -4,7 +4,7 @@ import {
     GeneratedAddressesResult,
 } from '@/types/address.ts'
 
-import { rawDataToAddressBlock } from '@/api/transformers/address-block.ts'
+import { rawDataToAddressBlock } from '@/lib/transformers/address-block.ts'
 
 export const rawDataToAddress = (data: any): Address => ({
     id: data.id,

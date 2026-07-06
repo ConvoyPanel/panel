@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { rawDataToConnectionResult } from '@/api/transformers/node.ts'
+import { rawDataToConnectionResult } from '@/lib/transformers/node.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import type { Node, PaginatedNodes } from '@/types/node.ts'
