@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
-import deleteAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/deleteAddressBlock.ts'
+import { deleteAddressBlock } from '@/features/ipam/blocks/api.ts'
 
 import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
 

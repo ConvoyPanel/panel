@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
-import deleteAddressBlockGroup from '@/api/admin/addressBlockGroups/deleteAddressBlockGroup.ts'
+import { deleteAddressBlockGroup } from '@/features/ipam/api.ts'
 
 import useBlockGroupModalStore from '@/components/interfaces/Admin/Ipam/use-block-group-modal-store.ts'
 

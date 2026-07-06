@@ -3,7 +3,7 @@ import { cn } from '@/utils'
 import { IconCheck, IconServer } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
-import getCompatibleServers from '@/api/admin/addressBlockGroups/addressBlocks/addresses/getCompatibleServers.ts'
+import { getCompatibleServers } from '@/features/ipam/api.ts'
 import useServer from '@/api/admin/servers/use-server.ts'
 
 import { ResourceComboboxForm } from '@/components/ui/Forms'

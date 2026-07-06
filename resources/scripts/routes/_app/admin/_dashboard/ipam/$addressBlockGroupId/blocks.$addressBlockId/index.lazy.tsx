@@ -5,10 +5,11 @@ import { Server } from '@/types/server.ts'
 import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useAddresses, {
+import {
+    useAddresses,
     addressQueries,
-} from '@/api/admin/addressBlockGroups/addressBlocks/addresses/use-addresses.ts'
-import useAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/use-address-block.ts'
+} from '@/features/ipam/blocks/addresses/api.ts'
+import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
 
 import GenerateAddressesButton from '@/components/interfaces/Admin/Ipam/AddressBlock/GenerateAddressesButton.tsx'
 

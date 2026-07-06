@@ -9,9 +9,10 @@ import { AddressVersion } from '@/types/address.ts'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useAddressBlocks, {
+import {
+    useAddressBlocks,
     addressBlockQueries,
-} from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks.ts'
+} from '@/features/ipam/blocks/api.ts'
 
 import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
 import DeleteAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressBlockModal.tsx'

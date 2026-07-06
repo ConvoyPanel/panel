@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useAddressBlockGroup from '@/api/admin/addressBlockGroups/use-address-block-group.ts'
+import { useAddressBlockGroup } from '@/features/ipam/api.ts'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Heading } from '@/components/ui/Typography'

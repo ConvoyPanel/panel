@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 
-import generateAddresses from '@/api/admin/addressBlockGroups/addressBlocks/addresses/generateAddresses.ts'
+import { generateAddresses } from '@/features/ipam/blocks/addresses/api.ts'
 
 import { Button } from '@/components/ui/Button'
 

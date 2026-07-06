@@ -1,6 +1,6 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { toast } from 'sonner'
-import detachNode from '@/api/admin/addressBlockGroups/detachNode.ts'
+import { detachNode } from '@/features/ipam/api.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Credenza,

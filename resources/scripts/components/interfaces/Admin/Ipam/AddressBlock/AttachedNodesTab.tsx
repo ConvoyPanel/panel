@@ -14,8 +14,10 @@ import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import useAttachedNodes from '@/api/admin/addressBlockGroups/use-attached-nodes.ts'
-import { addressBlockGroupQueries } from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
+import {
+    useAttachedNodes,
+    addressBlockGroupQueries,
+} from '@/features/ipam/api.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'

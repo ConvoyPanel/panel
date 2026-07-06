@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { IconPlus } from '@tabler/icons-react'
 import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
-import attachNode from '@/api/admin/addressBlockGroups/attachNode.ts'
+import { attachNode } from '@/features/ipam/api.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
 import { Button } from '@/components/ui/Button'
 import {

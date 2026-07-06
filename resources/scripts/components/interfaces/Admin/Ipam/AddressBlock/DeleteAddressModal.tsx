@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
-import deleteAddress from '@/api/admin/addressBlockGroups/addressBlocks/addresses/deleteAddress.ts'
+import { deleteAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
 import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
 

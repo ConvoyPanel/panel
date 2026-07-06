@@ -2,9 +2,10 @@ import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-import useAddressBlockGroup, {
+import {
+    useAddressBlockGroup,
     preloadAddressBlockGroup,
-} from '@/api/admin/addressBlockGroups/use-address-block-group.ts'
+} from '@/features/ipam/api.ts'
 
 export const Route = createFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId'

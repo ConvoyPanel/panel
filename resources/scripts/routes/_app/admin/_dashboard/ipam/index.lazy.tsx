@@ -9,9 +9,10 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
 
-import useAddressBlockGroups, {
+import {
+    useAddressBlockGroups,
     addressBlockGroupQueries,
-} from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
+} from '@/features/ipam/api.ts'
 
 import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
 import DeleteBlockGroupModal from '@/components/interfaces/Admin/Ipam/DeleteBlockGroupModal.tsx'

@@ -8,9 +8,10 @@ import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
-import createAddressBlockGroup, {
+import {
+    createAddressBlockGroup,
     addressBlockGroupSchema,
-} from '@/api/admin/addressBlockGroups/createAddressBlockGroup.ts'
+} from '@/features/ipam/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

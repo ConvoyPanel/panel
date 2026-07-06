@@ -8,8 +8,10 @@ import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import { addressBlockSchema } from '@/api/admin/addressBlockGroups/addressBlocks/createAddressBlock.ts'
-import updateAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/updateAddressBlock.ts'
+import {
+    addressBlockSchema,
+    updateAddressBlock,
+} from '@/features/ipam/blocks/api.ts'
 
 import { useAddressBlockModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-block-modal.ts'
 

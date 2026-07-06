@@ -9,7 +9,7 @@ import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import updateAddress from '@/api/admin/addressBlockGroups/addressBlocks/addresses/updateAddress.ts'
+import { updateAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
 import ServerPicker from '@/components/interfaces/Admin/Ipam/AddressBlock/ServerPicker.tsx'
 import { useAddressModal } from '@/components/interfaces/Admin/Ipam/AddressBlock/use-address-modal.ts'
