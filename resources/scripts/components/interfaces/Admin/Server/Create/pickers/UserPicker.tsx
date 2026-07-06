@@ -3,8 +3,7 @@ import { cn } from '@/utils'
 import { IconCheck, IconUser } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
-import getUsers from '@/api/admin/users/getUsers.ts'
-import useUser from '@/api/admin/users/use-user.ts'
+import { getUsers, useUser } from '@/features/users/api.ts'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
