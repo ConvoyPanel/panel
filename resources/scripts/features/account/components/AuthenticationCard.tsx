@@ -1,6 +1,6 @@
-import AuthenticatorContainer from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
-import PasskeysContainer from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
-import PasswordChangeDialog from '@/components/interfaces/Client/Security/PasswordChangeDialog.tsx'
+import AuthenticatorContainer from '@/features/account/components/AuthenticatorContainer.tsx'
+import PasskeysContainer from '@/features/account/components/PasskeysContainer.tsx'
+import PasswordChangeDialog from '@/features/account/components/PasswordChangeDialog.tsx'
 
 import {
     Card,

@@ -1,4 +1,4 @@
-import { SSHKey as Key } from '@/types/keychain.ts'
+import { SSHKey as Key } from '@/features/account/types.ts'
 import { IconKeyFilled } from '@tabler/icons-react'
 import { format } from 'date-fns'
 import { useMemo } from 'react'

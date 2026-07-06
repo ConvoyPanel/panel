@@ -1,8 +1,8 @@
-import { SSHKey as Key } from '@/types/keychain.ts'
+import { SSHKey as Key } from '@/features/account/types.ts'
 import { cn } from '@/utils'
 import { IconKey } from '@tabler/icons-react'
 
-import SSHKey from '@/components/interfaces/Client/Security/SSHKey.tsx'
+import SSHKey from '@/features/account/components/SSHKey.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {

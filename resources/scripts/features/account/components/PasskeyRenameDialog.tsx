@@ -11,7 +11,7 @@ import {
     passkeyQueries,
 } from '@/features/account/passkeys/api.ts'
 
-import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {

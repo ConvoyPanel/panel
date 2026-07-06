@@ -1,8 +1,8 @@
 import { useShallow } from 'zustand/react/shallow'
 
-import AuthSetting from '@/components/interfaces/Client/Security/AuthSetting.tsx'
-import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
-import AuthenticatorStatus from '@/components/interfaces/Client/Security/AuthenticatorStatus.tsx'
+import AuthSetting from '@/features/account/components/AuthSetting.tsx'
+import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import AuthenticatorStatus from '@/features/account/components/AuthenticatorStatus.tsx'
 
 import {
     Credenza,

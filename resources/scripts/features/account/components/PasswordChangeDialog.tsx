@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 import { updatePassword } from '@/features/account/password/api.ts'
 
-import AuthSetting from '@/components/interfaces/Client/Security/AuthSetting.tsx'
+import AuthSetting from '@/features/account/components/AuthSetting.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {

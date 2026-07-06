@@ -8,9 +8,9 @@ import {
     verifyRegistration,
 } from '@/features/account/passkeys/api.ts'
 
-import AuthSetting from '@/components/interfaces/Client/Security/AuthSetting.tsx'
-import PasskeyList from '@/components/interfaces/Client/Security/PasskeyList.tsx'
-import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
+import AuthSetting from '@/features/account/components/AuthSetting.tsx'
+import PasskeyList from '@/features/account/components/PasskeyList.tsx'
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'

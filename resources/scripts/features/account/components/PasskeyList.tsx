@@ -2,11 +2,11 @@ import { IconKey } from '@tabler/icons-react'
 
 import { usePasskeys } from '@/features/account/passkeys/api.ts'
 
-import Passkey from '@/components/interfaces/Client/Security/Passkey.tsx'
+import Passkey from '@/features/account/components/Passkey.tsx'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-import SimpleEmptyState from '../../../ui/EmptyStates/SimpleEmptyState.tsx'
+import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState.tsx'
 
 const PasskeyList = () => {
     const { data, isLoading } = usePasskeys()

@@ -4,7 +4,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { regenerateRecoveryCodes } from '@/features/account/authenticator/api.ts'
 
-import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
+import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {

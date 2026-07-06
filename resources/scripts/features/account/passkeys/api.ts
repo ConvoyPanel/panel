@@ -4,9 +4,9 @@ import type {
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { rawDataToPasskey } from '@/lib/transformers/passkey.ts'
+import { rawDataToPasskey } from '@/features/account/transforms.ts'
 import { apiFetch, type DataResponse } from '@/lib/api'
-import { Passkey } from '@/types/passkey.ts'
+import { Passkey } from '@/features/account/types.ts'
 import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'
 
 export const getPasskeys = async (): Promise<Passkey[]> => {

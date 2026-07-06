@@ -1,10 +1,10 @@
 import createModalStore from '@/hooks/create-modal-store.ts'
 
-import AuthenticatorDisableDialog from '@/components/interfaces/Client/Security/AuthenticatorDisableDialog.tsx'
-import AuthenticatorEnableDialog from '@/components/interfaces/Client/Security/AuthenticatorEnableDialog.tsx'
-import AuthenticatorMainDialog from '@/components/interfaces/Client/Security/AuthenticatorMainDialog.tsx'
-import AuthenticatorRecoveryCodesDialog from '@/components/interfaces/Client/Security/AuthenticatorRecoveryCodesDialog.tsx'
-import AuthenticatorResetRecoveryCodesDialog from '@/components/interfaces/Client/Security/AuthenticatorResetRecoveryCodesDialog.tsx'
+import AuthenticatorDisableDialog from '@/features/account/components/AuthenticatorDisableDialog.tsx'
+import AuthenticatorEnableDialog from '@/features/account/components/AuthenticatorEnableDialog.tsx'
+import AuthenticatorMainDialog from '@/features/account/components/AuthenticatorMainDialog.tsx'
+import AuthenticatorRecoveryCodesDialog from '@/features/account/components/AuthenticatorRecoveryCodesDialog.tsx'
+import AuthenticatorResetRecoveryCodesDialog from '@/features/account/components/AuthenticatorResetRecoveryCodesDialog.tsx'
 
 import AuthDialog, {
     createAuthMiddleware,

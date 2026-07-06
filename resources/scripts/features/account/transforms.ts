@@ -1,4 +1,4 @@
-import { Passkey } from '@/types/passkey.ts'
+import { Passkey } from '@/features/account/types.ts'
 
 export const rawDataToPasskey = (data: any): Passkey => ({
     id: data.id,

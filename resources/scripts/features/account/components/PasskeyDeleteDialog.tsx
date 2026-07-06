@@ -1,5 +1,5 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { Passkey } from '@/types/passkey.ts'
+import { Passkey } from '@/features/account/types.ts'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
@@ -9,7 +9,7 @@ import {
     passkeyQueries,
 } from '@/features/account/passkeys/api.ts'
 
-import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {

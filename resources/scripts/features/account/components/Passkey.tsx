@@ -1,10 +1,10 @@
-import { Passkey as PasskeyType } from '@/types/passkey.ts'
+import { Passkey as PasskeyType } from '@/features/account/types.ts'
 import { IconKeyFilled, IconPencil, IconTrash } from '@tabler/icons-react'
 import { format } from 'date-fns'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
 

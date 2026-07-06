@@ -1,8 +1,8 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import AuthenticationCard from '@/components/interfaces/Client/Security/AuthenticationCard.tsx'
-import KeychainCard from '@/components/interfaces/Client/Security/KeychainCard.tsx'
-import SessionListCard from '@/components/interfaces/Client/Security/SessionListCard.tsx'
+import AuthenticationCard from '@/features/account/components/AuthenticationCard.tsx'
+import KeychainCard from '@/features/account/components/KeychainCard.tsx'
+import SessionListCard from '@/features/account/components/SessionListCard.tsx'
 
 import { Heading } from '@/components/ui/Typography'
 

@@ -1,9 +1,9 @@
 import createModalStore from '@/hooks/create-modal-store.ts'
-import { Passkey } from '@/types/passkey.ts'
+import { Passkey } from '@/features/account/types.ts'
 
-import PasskeyDeleteDialog from '@/components/interfaces/Client/Security/PasskeyDeleteDialog.tsx'
-import PasskeyRenameDialog from '@/components/interfaces/Client/Security/PasskeyRenameDialog.tsx'
-import PasskeysMainDialog from '@/components/interfaces/Client/Security/PasskeysMainDialog.tsx'
+import PasskeyDeleteDialog from '@/features/account/components/PasskeyDeleteDialog.tsx'
+import PasskeyRenameDialog from '@/features/account/components/PasskeyRenameDialog.tsx'
+import PasskeysMainDialog from '@/features/account/components/PasskeysMainDialog.tsx'
 
 import AuthDialog, {
     createAuthMiddleware,
