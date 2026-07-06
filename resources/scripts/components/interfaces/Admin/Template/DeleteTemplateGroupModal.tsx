@@ -1,9 +1,11 @@
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import useSWRMutation from '@/lib/swr-mutation'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteTemplateGroup from '@/api/admin/templateGroups/deleteTemplateGroup.ts'
-import useTemplateGroupsSWR from '@/api/admin/templateGroups/use-template-groups-swr.ts'
+import { getKey } from '@/api/admin/templateGroups/use-template-groups.ts'
+import { TemplateGroup } from '@/types/template-group.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
 
@@ -19,7 +21,7 @@ import {
 } from '@/components/ui/Credenza'
 
 const DeleteTemplateGroupModal = () => {
-    const { mutate } = useTemplateGroupsSWR({})
+    const mutate = useQueryMutator<TemplateGroup[]>(getKey({}))
     const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
         useShallow(state => ({
             isOpen: state.activeModal === 'delete',
@@ -28,35 +30,26 @@ const DeleteTemplateGroupModal = () => {
         }))
     )
 
-    const { trigger, isMutating } = useSWRMutation(
-        ['delete-template-group', modalData?.uuid],
-        async (_, { arg: uuid }: { arg: string }) => {
-            return deleteTemplateGroup(uuid)
-        },
-        {
-            onSuccess: () => {
-                mutate(
-                    currentData => {
-                        if (!currentData || !modalData) return currentData
-                        return currentData.filter(
-                            group => group.uuid !== modalData.uuid
-                        )
-                    },
-                    { revalidate: false }
+    const { mutate: trigger, isPending: isMutating } = useMutation({
+        mutationFn: (uuid: string) => deleteTemplateGroup(uuid),
+        onSuccess: () => {
+            mutate(currentData => {
+                if (!currentData || !modalData) return currentData
+                return currentData.filter(
+                    group => group.uuid !== modalData.uuid
                 )
-                closeModal('delete')
-                toast.success('Template group deleted')
-            },
-            onError: e => {
-                toast.error('Failed to delete template group')
-                throw e
-            },
-        }
-    )
+            }, false)
+            closeModal('delete')
+            toast.success('Template group deleted')
+        },
+        onError: () => {
+            toast.error('Failed to delete template group')
+        },
+    })
 
-    const submit = async () => {
+    const submit = () => {
         if (!modalData) return
-        await trigger(modalData.uuid)
+        trigger(modalData.uuid)
     }
 
     return (

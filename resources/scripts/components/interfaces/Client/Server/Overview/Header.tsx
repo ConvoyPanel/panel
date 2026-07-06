@@ -1,13 +1,13 @@
 import { toast } from 'sonner'
 
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import Toolbar from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 
 import { Heading } from '@/components/ui/Typography'
 
 const Header = () => {
-    const { data: server } = useServerSWR()
+    const { data: server } = useServer()
 
     const copyHostname = async () => {
         try {

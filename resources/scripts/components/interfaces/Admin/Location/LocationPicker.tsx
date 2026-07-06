@@ -4,7 +4,7 @@ import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
 import getLocations from '@/api/admin/locations/getLocations.ts'
-import useLocationSWR from '@/api/admin/locations/use-location-swr.ts'
+import useLocation from '@/api/admin/locations/use-location.ts'
 
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -16,7 +16,7 @@ const LocationPicker = () => {
         name: 'locationId',
     })
     const { data: selectedLocation, isLoading: isLoadingSelection } =
-        useLocationSWR(field.value ? Number(field.value) : null)
+        useLocation(field.value ? Number(field.value) : null)
 
     return (
         <ResourceComboboxForm<Location>

@@ -1,7 +1,7 @@
 import { IconWifi } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
@@ -9,7 +9,7 @@ import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 
 
 const BandwidthUsageCard = () => {
-    const { data: server } = useServerSWR()
+    const { data: server } = useServer()
 
     const used = byteSize(server?.bandwidth.usage ?? 0, {
         units: 'iec',

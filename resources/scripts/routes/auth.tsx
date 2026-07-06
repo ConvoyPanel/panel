@@ -2,7 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import { AuthenticatedUser } from '@/types/user.ts'
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 
-import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
+import { cacheUser, getKey } from '@/api/auth/use-user.ts'
 import { queryClient } from '@/lib/query-client.ts'
 
 import LogoWithName from '@/components/ui/Branding/LogoWithName.tsx'

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { IconPlus } from '@tabler/icons-react'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import attachNode from '@/api/admin/addressBlockGroups/attachNode.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
@@ -30,7 +30,7 @@ const schema = z.object({
 })
 
 interface Props {
-    mutate: KeyedMutator<PaginatedNetworkInterfaces>
+    mutate: Mutator<PaginatedNetworkInterfaces>
 }
 
 const AttachNodeModal = ({ mutate }: Props) => {

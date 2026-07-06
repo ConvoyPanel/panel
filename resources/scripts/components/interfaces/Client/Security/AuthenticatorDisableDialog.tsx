@@ -1,10 +1,10 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { toast } from 'sonner'
-import { mutate } from '@/lib/swr'
+import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import disableAuthenticator from '@/api/account/authenticator/disableAuthenticator.ts'
-import { getKey as getAuthStatusKey } from '@/api/account/authenticator/use-is-authenticator-enabled-swr.ts'
+import { getKey as getAuthStatusKey } from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/Credenza'
 
 const AuthenticatorDisableDialog = () => {
+    const queryClient = useQueryClient()
     const [open, closeModal] = useAuthenticatorModalStore(
         useShallow(state => [state.activeModal === 'disable', state.closeModal])
     )
@@ -28,7 +29,7 @@ const AuthenticatorDisableDialog = () => {
         try {
             await disableAuthenticator()
 
-            await mutate(getAuthStatusKey())
+            await queryClient.invalidateQueries({ queryKey: getAuthStatusKey() })
 
             toast.success('Authenticator disabled')
 

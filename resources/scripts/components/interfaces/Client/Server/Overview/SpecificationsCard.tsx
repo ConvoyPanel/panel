@@ -1,12 +1,12 @@
 import byteSize from 'byte-size'
 
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 
 
 const SpecificationsCard = () => {
-    const { data: server } = useServerSWR()
+    const { data: server } = useServer()
 
     const memory = byteSize(server?.memory ?? 0, {
         units: 'iec',

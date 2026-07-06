@@ -2,7 +2,7 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddressBlockGroup from '@/api/admin/addressBlockGroups/deleteAddressBlockGroup.ts'
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/Credenza'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedAddressBlockGroups>
+    mutate: Mutator<PaginatedAddressBlockGroups>
 }
 
 const DeleteBlockGroupModal = ({ mutate }: Props) => {

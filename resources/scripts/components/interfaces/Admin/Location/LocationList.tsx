@@ -2,7 +2,7 @@ import { Location } from '@/types/location.ts'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 
-import useLocationsSWR from '@/api/admin/locations/use-locations-swr.ts'
+import useLocations from '@/api/admin/locations/use-locations.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -17,7 +17,10 @@ interface Props {
 }
 
 const LocationList = ({ query, page, value, onSelect }: Props) => {
-    const { data, isLoading } = useLocationsSWR(query, page)
+    const { data, isLoading } = useLocations({
+        page,
+        filters: { '*': query },
+    })
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />

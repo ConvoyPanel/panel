@@ -5,8 +5,10 @@ import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+
 import deleteNetworkInterface from '@/api/admin/nodes/networkInterfaces/deleteNetworkInterface.ts'
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
+import { getKey as getNetworkInterfacesKey } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
 
@@ -23,7 +25,9 @@ import {
 
 const DeleteNetworkInterfaceModal = () => {
     const { nodeId } = Route.useParams()
-    const { mutate } = useNetworkInterfacesSWR()
+    const mutate = useQueryMutator<NetworkInterface[]>(
+        getNetworkInterfacesKey(Number(nodeId))
+    )
     const [networkInterface, open, close] = useNetworkInterfacesModalStore(
         useShallow(state => [
             state.modalData,

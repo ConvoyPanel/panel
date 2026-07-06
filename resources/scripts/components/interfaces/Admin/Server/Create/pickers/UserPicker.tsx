@@ -4,7 +4,7 @@ import { IconCheck, IconUser } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
 import getUsers from '@/api/admin/users/getUsers.ts'
-import useUserSWR from '@/api/admin/users/use-user-swr.ts'
+import useUser from '@/api/admin/users/use-user.ts'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -14,7 +14,7 @@ const UserPicker = () => {
     }>({
         name: 'userId',
     })
-    const { data: selected, isLoading: isLoadingSelection } = useUserSWR(
+    const { data: selected, isLoading: isLoadingSelection } = useUser(
         field.value ? Number(field.value) : null
     )
 

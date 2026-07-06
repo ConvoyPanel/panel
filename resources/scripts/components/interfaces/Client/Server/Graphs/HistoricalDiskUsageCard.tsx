@@ -2,7 +2,7 @@ import byteSize from 'byte-size'
 import { useMemo } from 'react'
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
-import useServerStatisticsSWR from '@/api/servers/use-server-statistics.ts'
+import useServerStatistics from '@/api/servers/use-server-statistics.ts'
 
 import TimeRangeSelector from '@/components/interfaces/Client/Server/Graphs/TimeRangeSelector.tsx'
 import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
@@ -37,7 +37,7 @@ const config = {
 
 const HistoricalDiskUsageCard = () => {
     const { from, setFrom, XTickFormatter } = useTimeRange()
-    const { data } = useServerStatisticsSWR({
+    const { data } = useServerStatistics({
         from,
     })
 

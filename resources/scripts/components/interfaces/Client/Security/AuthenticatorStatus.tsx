@@ -1,7 +1,7 @@
 import { IconAsteriskSimple } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useIsAuthenticatorEnabledSWR from '@/api/account/authenticator/use-is-authenticator-enabled-swr.ts'
+import useIsAuthenticatorEnabled from '@/api/account/authenticator/use-is-authenticator-enabled.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -10,7 +10,7 @@ import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const AuthenticatorStatus = () => {
-    const { data: isEnabled, isLoading } = useIsAuthenticatorEnabledSWR()
+    const { data: isEnabled, isLoading } = useIsAuthenticatorEnabled()
     const openModal = useAuthenticatorModalStore(
         useShallow(state => state.openModal)
     )

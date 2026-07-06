@@ -1,8 +1,8 @@
 import { PaginatedAddresses } from '@/types/address.ts'
 import { useParams } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
-import useSWRMutation from '@/lib/swr-mutation'
+import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddress from '@/api/admin/addressBlockGroups/addressBlocks/addresses/deleteAddress.ts'
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/Credenza'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedAddresses>
+    mutate: Mutator<PaginatedAddresses>
 }
 
 const DeleteAddressModal = ({ mutate }: Props) => {
@@ -37,29 +37,30 @@ const DeleteAddressModal = ({ mutate }: Props) => {
         ])
     )
 
-    const { trigger: deleteAddressTrigger, isMutating } = useSWRMutation(
-        ['delete-address', addressBlockGroupId, addressBlockId, address?.id],
-        async () => {
-            if (!address) return
-
-            await deleteAddress(
-                Number(addressBlockGroupId),
-                Number(addressBlockId),
-                address.id
-            )
-
-            await mutate(data => {
-                if (!data) return
-                return {
-                    ...data,
-                    items: data.items.filter(item => item.id !== address.id),
-                }
-            }, false)
-
-            closeModal('delete')
-            toast.success('Address deleted')
-        },
+    const { mutate: deleteAddressTrigger, isPending: isMutating } = useMutation(
         {
+            mutationFn: async () => {
+                if (!address) return
+
+                await deleteAddress(
+                    Number(addressBlockGroupId),
+                    Number(addressBlockId),
+                    address.id
+                )
+
+                await mutate(data => {
+                    if (!data) return
+                    return {
+                        ...data,
+                        items: data.items.filter(
+                            item => item.id !== address.id
+                        ),
+                    }
+                }, false)
+
+                closeModal('delete')
+                toast.success('Address deleted')
+            },
             onError: () => {
                 toast.error('Failed to delete address')
             },

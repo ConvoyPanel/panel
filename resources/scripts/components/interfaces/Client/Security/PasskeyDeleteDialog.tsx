@@ -1,11 +1,11 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { Passkey } from '@/types/passkey.ts'
 import { toast } from 'sonner'
-import { mutate } from '@/lib/swr'
+import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import deletePasskey from '@/api/account/passkeys/deletePasskey.ts'
-import { getKey as getPasskeysSWRKey } from '@/api/account/passkeys/use-passkeys-swr.ts'
+import { getKey as getPasskeysKey } from '@/api/account/passkeys/use-passkeys.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/Credenza'
 
 const PasskeyDeleteDialog = () => {
+    const queryClient = useQueryClient()
     const [passkey, isDeleteDialogOpen, closeModal] = usePasskeysModalStore(
         useShallow(state => [
             state.modalData,
@@ -36,7 +37,9 @@ const PasskeyDeleteDialog = () => {
 
                 toast.success('Passkey deleted')
 
-                await mutate(getPasskeysSWRKey())
+                await queryClient.invalidateQueries({
+                    queryKey: getPasskeysKey(),
+                })
 
                 closeModal('delete')
             } catch (e) {

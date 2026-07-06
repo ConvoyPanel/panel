@@ -2,7 +2,7 @@ import { Storage } from '@/types/storage'
 import byteSize from 'byte-size'
 import { useFormContext } from 'react-hook-form'
 
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr'
+import useStorages from '@/api/admin/nodes/storages/use-storages'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { IconDatabase } from '@tabler/icons-react'
 import {
@@ -27,7 +27,7 @@ interface StoragePickerProps {
 
 const StoragePicker = ({ nodeId, requiredContentTypes }: StoragePickerProps) => {
     const { control } = useFormContext()
-    const { data: storages, isLoading } = useStoragesSWR(nodeId ?? undefined)
+    const { data: storages, isLoading } = useStorages(nodeId ?? undefined)
 
     const filteredStorages = storages?.filter(storage => {
         if (!requiredContentTypes) return true

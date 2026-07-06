@@ -1,11 +1,17 @@
-import usePagination from '@/hooks/use-pagination.ts'
-import { AddressBlockGroup } from '@/types/address-block-group.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import {
+    AddressBlockGroup,
+    PaginatedAddressBlockGroups,
+} from '@/types/address-block-group.ts'
 import { cn } from '@/utils'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
 
-import useAddressBlockGroupsSWR from '@/api/admin/addressBlockGroups/use-address-block-groups-swr.ts'
+import useAddressBlockGroups, {
+    getKey,
+} from '@/api/admin/addressBlockGroups/use-address-block-groups.ts'
 
 import CreateBlockGroupModal from '@/components/interfaces/Admin/Ipam/CreateBlockGroupModal.tsx'
 import DeleteBlockGroupModal from '@/components/interfaces/Admin/Ipam/DeleteBlockGroupModal.tsx'
@@ -27,13 +33,11 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/ipam/')({
 })
 
 function IpamIndex() {
-    const pagination = usePagination()
-    const { data, mutate } = useAddressBlockGroupsSWR({
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
+    const { queryParams, tableProps } = useDataTable()
+    const { data, isPlaceholderData } = useAddressBlockGroups(queryParams)
+    const mutate = useQueryMutator<PaginatedAddressBlockGroups>(
+        getKey(queryParams)
+    )
     const openModal = useBlockGroupModalStore(
         useShallow(state => state.openModal)
     )
@@ -104,8 +108,9 @@ function IpamIndex() {
                 paginated
                 searchable
                 toolbar
+                isPlaceholderData={isPlaceholderData}
                 rightActions={<CreateBlockGroupModal mutate={mutate} />}
-                {...pagination}
+                {...tableProps}
             />
             <EditBlockGroupModal mutate={mutate} />
             <DeleteBlockGroupModal mutate={mutate} />

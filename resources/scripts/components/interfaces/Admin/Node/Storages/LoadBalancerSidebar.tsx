@@ -16,8 +16,12 @@ import { IconDatabase } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import updateBackupOrder from '@/api/admin/nodes/storages/updateBackupOrder.ts'
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import useStorages, {
+    getKey as getStoragesKey,
+} from '@/api/admin/nodes/storages/use-storages.ts'
 
 import SortableStorageCard from '@/components/interfaces/Admin/Node/Storages/SortableStorageCard.tsx'
 
@@ -36,8 +40,8 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const LoadBalancerSidebar = () => {
     const { nodeId } = StorageRoute.useParams()
-    // Ensure useStoragesSWR returns the mutate function correctly
-    const { data: allStorages, mutate, isLoading } = useStoragesSWR()
+    const { data: allStorages, isLoading } = useStorages()
+    const queryClient = useQueryClient()
     const [draggingStorage, setDraggingStorage] = useState<NodeStorage | null>(
         null
     )
@@ -114,37 +118,25 @@ const LoadBalancerSidebar = () => {
             // --- Manually handle loading toast ---
             const toastId = toast.loading('Saving backup order...') // Show loading toast immediately
 
-            // 4. --- Perform the optimistic update using SWR mutate ---
+            // 4. --- Optimistically update the cache, then roll back on error ---
+            const key = getStoragesKey(Number(nodeId))
+            const previous = allStorages
+            queryClient.setQueryData(key, optimisticData)
+
             try {
-                // Apply optimistic update immediately
-                await mutate(
-                    async () => {
-                        // This function is called to perform the actual API request
-                        await updateBackupOrder(Number(nodeId), idsToSend)
-                        // Return the data that should be in the cache after successful update.
-                        // This should match optimisticData if the backend assigns orders correctly.
-                        // If the backend returns the updated list, you could return that instead.
-                        return optimisticData
-                    },
-                    {
-                        // Configuration for optimistic update:
-                        optimisticData: optimisticData, // The data to show immediately
-                        rollbackOnError: true, // Revert UI if updateBackupOrder throws an error
-                        populateCache: true, // Update the cache with the result of the async function
-                        revalidate: false, // Don't revalidate immediately after mutation (API call handles it)
-                    }
-                )
+                await updateBackupOrder(Number(nodeId), idsToSend)
                 // Update the toast to success
                 toast.success('Saved changes', {
                     id: toastId,
                 })
             } catch (error) {
+                // Roll the cache back to its previous state
+                queryClient.setQueryData(key, previous)
                 console.error('Failed to update backup order:', error)
                 // Update the toast to error
                 toast.error('Failed to save changes', {
                     id: toastId,
                 })
-                // SWR handles the UI rollback automatically due to rollbackOnError: true
             }
         }
     }

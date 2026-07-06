@@ -1,9 +1,14 @@
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useShallow } from 'zustand/react/shallow'
 
 import enableAuthenticator from '@/api/account/authenticator/enableAuthenticator.ts'
-import useQrCodeSWR from '@/api/account/authenticator/use-qr-code-swr.ts'
-import useSecretKeySWR from '@/api/account/authenticator/use-secret-key-swr.ts'
+import useQrCode, {
+    getKey as getQrCodeKey,
+} from '@/api/account/authenticator/use-qr-code.ts'
+import useSecretKey, {
+    getKey as getSecretKeyKey,
+} from '@/api/account/authenticator/use-secret-key.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -28,20 +33,18 @@ const AuthenticatorEnableDialog = () => {
             state.pushToQueue,
         ])
     )
-    const {
-        data: qrCode,
-        isLoading,
-        error,
-        mutate: mutateQrCode,
-    } = useQrCodeSWR()
-    const { data: secretKey, mutate: mutateSecretKey } = useSecretKeySWR()
+    const queryClient = useQueryClient()
+    const { data: qrCode, isLoading, error } = useQrCode()
+    const { data: secretKey } = useSecretKey()
 
     useEffect(() => {
         const main = async () => {
             if (open) {
                 await enableAuthenticator()
-                await mutateQrCode()
-                await mutateSecretKey()
+                await queryClient.invalidateQueries({ queryKey: getQrCodeKey() })
+                await queryClient.invalidateQueries({
+                    queryKey: getSecretKeyKey(),
+                })
             }
         }
 

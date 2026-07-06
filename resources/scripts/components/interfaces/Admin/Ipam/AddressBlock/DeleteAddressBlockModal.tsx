@@ -1,7 +1,7 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlocks } from '@/types/address-block.ts'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/deleteAddressBlock.ts'
@@ -21,7 +21,7 @@ import {
 
 interface Props {
     addressBlockGroupId: number
-    mutate: KeyedMutator<PaginatedAddressBlocks>
+    mutate: Mutator<PaginatedAddressBlocks>
 }
 
 const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {

@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-import useNodeSWR, { preloadNode } from '@/api/admin/nodes/use-node-swr.ts'
+import useNode, { preloadNode } from '@/api/admin/nodes/use-node.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/_app/admin/nodes/$nodeId')({
 
 function NodeLayout() {
     const { nodeId } = Route.useParams()
-    const { data: node } = useNodeSWR(Number(nodeId))
+    const { data: node } = useNode(Number(nodeId))
     useTitle(node?.displayName)
 
     const routes: RouteDef[] = [

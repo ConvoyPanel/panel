@@ -3,7 +3,7 @@ import { IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
 import { toast } from 'sonner'
 
-import useAddressesSWR from '@/api/servers/use-addresses-swr.ts'
+import useAddresses from '@/api/servers/use-addresses.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -96,7 +96,7 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
 }
 
 const IpamCard = () => {
-    const { data: addresses } = useAddressesSWR()
+    const { data: addresses } = useAddresses()
 
     return (
         <Card className={'col-span-2 min-h-[15rem] @md:col-span-4'}>

@@ -1,7 +1,7 @@
 import { IconTemplate } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useTemplateGroupsSWR from '@/api/admin/templateGroups/use-template-groups-swr.ts'
+import useTemplateGroups from '@/api/admin/templateGroups/use-template-groups.ts'
 
 import CreateTemplateGroupModal from '@/components/interfaces/Admin/Template/CreateTemplateGroupModal.tsx'
 import DeleteTemplateGroupModal from '@/components/interfaces/Admin/Template/DeleteTemplateGroupModal.tsx'
@@ -19,7 +19,7 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/templates')({
 })
 
 function TemplatesIndex() {
-    const { data: groups, isLoading } = useTemplateGroupsSWR({})
+    const { data: groups, isLoading } = useTemplateGroups({})
 
     return (
         <>

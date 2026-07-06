@@ -6,9 +6,11 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import reinstallServer from '@/api/servers/reinstallServer'
-import useServerSWR from '@/api/servers/use-server-swr'
-import useTemplateGroupsSWR from '@/api/servers/use-template-groups-swr'
+import { getKey as getServerKey } from '@/api/servers/use-server'
+import useTemplateGroups from '@/api/servers/use-template-groups'
 
 import TemplateIconDisplay from '@/components/interfaces/Admin/Template/TemplateIconDisplay'
 
@@ -45,8 +47,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 export default function OSSelectionForm({ server }: OSSelectionFormProps) {
-    const { mutate } = useServerSWR()
-    const { data: templateGroups } = useTemplateGroupsSWR(server.uuid)
+    const queryClient = useQueryClient()
+    const { data: templateGroups } = useTemplateGroups(server.uuid)
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -76,7 +78,7 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                 startOnCompletion: true,
             })
             toast.success('The installation started successfully.')
-            mutate()
+            queryClient.invalidateQueries({ queryKey: getServerKey(server.uuid) })
         } catch (error) {
             if (handleFormErrors(error, form.setError)) return
 

@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import useTemplatesSWR from '@/api/admin/templateGroups/templates/use-templates-swr'
+import useTemplates from '@/api/admin/templateGroups/templates/use-templates'
 import {
     Select,
     SelectContent,
@@ -22,7 +22,7 @@ interface TemplatePickerProps {
 
 const TemplatePicker = ({ templateGroupId }: TemplatePickerProps) => {
     const { control } = useFormContext()
-    const { data, isLoading } = useTemplatesSWR(templateGroupId, {})
+    const { data, isLoading } = useTemplates(templateGroupId, {})
 
     return (
         <FormField

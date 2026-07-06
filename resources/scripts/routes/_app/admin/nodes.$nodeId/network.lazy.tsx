@@ -1,7 +1,7 @@
 import { IconWifiOff } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
+import useNetworkInterfaces from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import CreateNetworkModal from '@/components/interfaces/Admin/Node/Network/CreateNetworkModal.tsx'
 import NetworkInterfaceCard from '@/components/interfaces/Admin/Node/Network/NetworkInterfaceCard.tsx'
@@ -18,7 +18,7 @@ export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/network')({
 })
 
 function NodeNetwork() {
-    const { data: interfaces, isLoading } = useNetworkInterfacesSWR()
+    const { data: interfaces, isLoading } = useNetworkInterfaces()
 
     return (
         <>

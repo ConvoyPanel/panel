@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, YAxis } from 'recharts'
 
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
 
 import LiveIndicator from '@/components/interfaces/Client/Server/Graphs/LiveIndicator.tsx'
 
@@ -10,7 +10,7 @@ import { ChartContainer } from '@/components/ui/Chart'
 
 
 const LiveCpuUsageCard = () => {
-    const { data: state } = useServerStateSWR()
+    const { data: state } = useServerState()
     const [data, setData] = useState(
         Array.from({ length: 10 }, () => ({ value: 0 }))
     )

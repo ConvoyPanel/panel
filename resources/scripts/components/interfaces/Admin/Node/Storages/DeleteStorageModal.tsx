@@ -4,7 +4,9 @@ import { NodeStorage } from '@/types/storage.ts'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+
+import { getKey as getStoragesKey } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
@@ -21,8 +23,10 @@ import {
 import deleteStorage from '@/api/admin/nodes/storages/deleteStorage.ts'
 
 const DeleteStorageModal = () => {
-    const { mutate } = useStoragesSWR()
     const { nodeId } = StorageRoute.useParams()
+    const mutate = useQueryMutator<NodeStorage[]>(
+        getStoragesKey(Number(nodeId))
+    )
     const [storage, open, close] = useStoragesModalStore(
         useShallow(state => [
             state.modalData,

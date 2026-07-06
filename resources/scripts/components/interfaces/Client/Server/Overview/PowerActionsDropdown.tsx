@@ -1,8 +1,8 @@
 import { toast } from 'sonner'
 
 import updateState, { PowerAction } from '@/api/servers/updateState.ts'
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import { actions } from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
 
@@ -17,8 +17,8 @@ import {
 
 const PowerActionsDropdown = () => {
     const confirm = useConfirmationStore(state => state.confirm)
-    const { data: server } = useServerSWR()
-    const { data } = useServerStateSWR()
+    const { data: server } = useServer()
+    const { data } = useServerState()
 
     const handlePowerAction = async (action: PowerAction) => {
         try {

@@ -2,7 +2,7 @@ import { IconAlertTriangle, IconDatabase } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
 import useServerResources from '@/api/servers/use-server-resources.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 import {
@@ -15,7 +15,7 @@ import {
 import StatisticCard from './StatisticCard'
 
 const StorageUsageCard = () => {
-    const { data: server } = useServerSWR()
+    const { data: server } = useServer()
     const { data: resources, error, isLoading } = useServerResources()
 
     // If there's an error (e.g. 409 conflict from guest agent unavailable), we consider it unavailable.

@@ -4,7 +4,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
 import createLocation from '@/api/admin/locations/createLocation.ts'
@@ -24,7 +24,7 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedLocations>
+    mutate: Mutator<PaginatedLocations>
 }
 
 const CreateLocationModal = ({ mutate }: Props) => {

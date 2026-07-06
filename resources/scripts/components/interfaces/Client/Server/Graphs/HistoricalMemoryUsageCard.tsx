@@ -2,8 +2,8 @@ import byteSize from 'byte-size'
 import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import useServerStatisticsSWR from '@/api/servers/use-server-statistics.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServerStatistics from '@/api/servers/use-server-statistics.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import TimeRangeSelector from '@/components/interfaces/Client/Server/Graphs/TimeRangeSelector.tsx'
 import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
@@ -18,10 +18,10 @@ const YTickFormatter = (bytes: number) => {
 
 const HistoricalMemoryUsageCard = () => {
     const { from, setFrom, XTickFormatter } = useTimeRange()
-    const { data } = useServerStatisticsSWR({
+    const { data } = useServerStatistics({
         from,
     })
-    const { data: server } = useServerSWR()
+    const { data: server } = useServer()
 
     const usages = useMemo(() => {
         if (!data) return []

@@ -2,9 +2,9 @@ import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-import useAddressBlockGroupSWR, {
+import useAddressBlockGroup, {
     preloadAddressBlockGroup,
-} from '@/api/admin/addressBlockGroups/use-address-block-group-swr.ts'
+} from '@/api/admin/addressBlockGroups/use-address-block-group.ts'
 
 export const Route = createFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId'
@@ -20,7 +20,7 @@ export const Route = createFileRoute(
 })
 
 function BlockGroupsLayout() {
-    const { data: group } = useAddressBlockGroupSWR()
+    const { data: group } = useAddressBlockGroup()
 
     useTitle(group?.name)
 

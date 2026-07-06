@@ -1,11 +1,17 @@
-import usePagination from '@/hooks/use-pagination.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/index.lazy.tsx'
-import { AddressBlock } from '@/types/address-block.ts'
+import {
+    AddressBlock,
+    PaginatedAddressBlocks,
+} from '@/types/address-block.ts'
 import { AddressVersion } from '@/types/address.ts'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useAddressBlocksSWR from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks-swr.ts'
+import useAddressBlocks, {
+    getKey,
+} from '@/api/admin/addressBlockGroups/addressBlocks/use-address-blocks.ts'
 
 import CreateAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/CreateAddressBlockModal.tsx'
 import DeleteAddressBlockModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DeleteAddressBlockModal.tsx'
@@ -22,13 +28,13 @@ import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { TabsContent } from '@/components/ui/Tabs'
 
 const AddressBlockTab = () => {
-    const pagination = usePagination()
-    const { data, mutate } = useAddressBlocksSWR({
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
+    const { addressBlockGroupId } = Route.useParams()
+    const groupId = parseInt(addressBlockGroupId)
+    const { queryParams, tableProps } = useDataTable()
+    const { data, isPlaceholderData } = useAddressBlocks(queryParams)
+    const mutate = useQueryMutator<PaginatedAddressBlocks>(
+        getKey(groupId, queryParams)
+    )
 
     const columns: ColumnDef<AddressBlock>[] = [
         {
@@ -103,9 +109,6 @@ const AddressBlockTab = () => {
         }),
     ]
 
-    const { addressBlockGroupId } = Route.useParams()
-    const groupId = parseInt(addressBlockGroupId)
-
     return (
         <TabsContent value={'addressBlocks'}>
             <DataTable
@@ -114,13 +117,14 @@ const AddressBlockTab = () => {
                 paginated
                 searchable
                 toolbar
+                isPlaceholderData={isPlaceholderData}
                 rightActions={
                     <CreateAddressBlockModal
                         addressBlockGroupId={groupId}
                         mutate={mutate}
                     />
                 }
-                {...pagination}
+                {...tableProps}
             />
             <EditAddressBlockModal
                 addressBlockGroupId={groupId}

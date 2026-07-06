@@ -5,7 +5,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
 import createAddressBlockGroup, {
@@ -27,7 +27,7 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedAddressBlockGroups>
+    mutate: Mutator<PaginatedAddressBlockGroups>
 }
 
 const CreateBlockGroupModal = ({ mutate }: Props) => {

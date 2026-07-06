@@ -1,7 +1,7 @@
 import { cn } from '@/utils'
 import { IconPlaystationCircle } from '@tabler/icons-react'
 
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
@@ -9,7 +9,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 
 const ServerStateCard = () => {
-    const { data: state } = useServerStateSWR()
+    const { data: state } = useServerState()
 
     return (
         <StatisticCard title={'Server State'} icon={IconPlaystationCircle}>

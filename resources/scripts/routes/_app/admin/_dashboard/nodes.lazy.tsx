@@ -1,5 +1,5 @@
 import useClipboard from '@/hooks/use-clipboard.ts'
-import usePagination from '@/hooks/use-pagination.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { IconPlus } from '@tabler/icons-react'
@@ -7,7 +7,7 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
 
-import useNodesSWR from '@/api/admin/nodes/use-nodes-swr.ts'
+import useNodes from '@/api/admin/nodes/use-nodes.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
@@ -24,13 +24,8 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes')({
 
 function NodesIndex() {
     const { copy } = useClipboard()
-    const pagination = usePagination()
-    const { data } = useNodesSWR({
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
+    const { queryParams, tableProps } = useDataTable()
+    const { data, isPlaceholderData } = useNodes(queryParams)
 
     const columns: ColumnDef<Node>[] = [
         {
@@ -94,6 +89,7 @@ function NodesIndex() {
                 toolbar
                 data={data}
                 columns={columns}
+                isPlaceholderData={isPlaceholderData}
                 rightActions={
                     <Link
                         className={cn(buttonVariants({ size: 'sm' }), 'flex')}
@@ -103,7 +99,7 @@ function NodesIndex() {
                         Add node
                     </Link>
                 }
-                {...pagination}
+                {...tableProps}
             />
         </>
     )

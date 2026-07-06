@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR from '@/lib/swr'
+import { useQuery } from '@tanstack/react-query'
 
 import getStatistics, {
     ConsolidatorFn,
@@ -13,7 +13,7 @@ export const getKey = (
     consolidator: ConsolidatorFn = 'AVERAGE'
 ) => ['server.statistics', uuid, from, consolidator]
 
-const useServerStatisticsSWR = (args: {
+const useServerStatistics = (args: {
     uuid?: string
     from: TimeRange
     consolidator?: ConsolidatorFn
@@ -21,9 +21,10 @@ const useServerStatisticsSWR = (args: {
     const params = useParams({ strict: false }) as { serverUuid: string }
     const serverUuid = args.uuid ?? params.serverUuid
 
-    return useSWR(getKey(serverUuid, args.from, args.consolidator), () =>
-        getStatistics(serverUuid, args.from, args.consolidator)
-    )
+    return useQuery({
+        queryKey: getKey(serverUuid, args.from, args.consolidator),
+        queryFn: () => getStatistics(serverUuid, args.from, args.consolidator),
+    })
 }
 
-export default useServerStatisticsSWR
+export default useServerStatistics

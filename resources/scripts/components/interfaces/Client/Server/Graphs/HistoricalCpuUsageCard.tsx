@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import useServerStatisticsSWR from '@/api/servers/use-server-statistics.ts'
+import useServerStatistics from '@/api/servers/use-server-statistics.ts'
 
 import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
 
@@ -13,7 +13,7 @@ import TimeRangeSelector from './TimeRangeSelector'
 
 const HistoricalCpuUsageCard = () => {
     const { from, setFrom, XTickFormatter } = useTimeRange()
-    const { data } = useServerStatisticsSWR({
+    const { data } = useServerStatistics({
         from,
     })
 

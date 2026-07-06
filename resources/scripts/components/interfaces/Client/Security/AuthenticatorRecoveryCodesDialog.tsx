@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import useRecoveryCodesSWR from '@/api/account/authenticator/use-recovery-codes-swr.ts'
+import useRecoveryCodes, {
+    getKey as getRecoveryCodesKey,
+} from '@/api/account/authenticator/use-recovery-codes.ts'
 
 import { useAuthenticatorModalStore } from '@/components/interfaces/Client/Security/AuthenticatorContainer.tsx'
 
@@ -27,11 +30,12 @@ const AuthenticatorRecoveryCodesDialog = () => {
         ])
     )
 
-    const { data: codes, mutate } = useRecoveryCodesSWR()
+    const queryClient = useQueryClient()
+    const { data: codes } = useRecoveryCodes()
 
     useEffect(() => {
         if (open) {
-            mutate()
+            queryClient.invalidateQueries({ queryKey: getRecoveryCodesKey() })
         }
     }, [open])
 

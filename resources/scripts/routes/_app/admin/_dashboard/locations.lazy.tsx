@@ -1,12 +1,17 @@
 import createModalStore from '@/hooks/create-modal-store.ts'
-import usePagination from '@/hooks/use-pagination.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
 import { Location } from '@/types/location.ts'
 import { cn } from '@/utils'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
 
-import useLocationsSWR from '@/api/admin/locations/use-locations-swr.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { PaginatedLocations } from '@/types/location.ts'
+
+import useLocations, {
+    getKey as getLocationsKey,
+} from '@/api/admin/locations/use-locations.ts'
 
 import CreateLocationModal from '@/components/interfaces/Admin/Location/CreateLocationModal.tsx'
 import DeleteLocationModal from '@/components/interfaces/Admin/Location/DeleteLocationModal.tsx'
@@ -36,10 +41,10 @@ function LocationsIndex() {
     const openModal = useLocationsModalStore(
         useShallow(state => state.openModal)
     )
-    const pagination = usePagination()
-    const { data, mutate } = useLocationsSWR(
-        pagination.debouncedQuery,
-        pagination.page
+    const { queryParams, tableProps } = useDataTable()
+    const { data, isPlaceholderData } = useLocations(queryParams)
+    const mutate = useQueryMutator<PaginatedLocations>(
+        getLocationsKey(queryParams)
     )
 
     const columns: ColumnDef<Location>[] = [
@@ -120,8 +125,9 @@ function LocationsIndex() {
                 paginated
                 searchable
                 toolbar
+                isPlaceholderData={isPlaceholderData}
                 rightActions={<CreateLocationModal mutate={mutate} />}
-                {...pagination}
+                {...tableProps}
             />
             <ShowLocationModal />
             <EditLocationModal mutate={mutate} />

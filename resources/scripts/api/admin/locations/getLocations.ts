@@ -4,8 +4,10 @@ import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts
 import axios from '@/lib/axios.ts'
 import type { PaginatedResponse } from '@/lib/api.ts'
 
+export type LocationQueryParams = QueryBuilderParams<'*' | 'short_code'>
+
 const getLocations = async (
-    params: QueryBuilderParams<'*' | 'short_code'>
+    params: LocationQueryParams
 ): Promise<PaginatedLocations> => {
     const { data } = await axios.get<PaginatedResponse<Location>>(
         '/api/admin/locations',

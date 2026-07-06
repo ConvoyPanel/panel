@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { Heading } from '@/components/ui/Typography'
-import useServerSWR from '@/api/servers/use-server-swr'
+import useServer from '@/api/servers/use-server'
 import OSSelectionForm from '@/components/interfaces/Client/Server/Rebuild/OSSelectionForm'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
@@ -12,7 +12,7 @@ export const Route = createLazyFileRoute('/_app/servers/$serverUuid/rebuild')({
 
 function RebuildServerPage() {
     const { serverUuid } = Route.useParams()
-    const { data: server } = useServerSWR(serverUuid)
+    const { data: server } = useServer(serverUuid)
 
     return (
         <div className='flex flex-col gap-y-6'>

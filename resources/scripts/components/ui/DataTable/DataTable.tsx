@@ -1,23 +1,81 @@
-import { useControllableState } from '@/hooks/use-controllable-state.ts';
-import useTransientValue from '@/hooks/use-transient-value.ts';
-import { DataTableProps } from '@/types/data-table.ts';
-import { getCommonPinningStyles } from '@/utils/data-table.ts';
-import { ColumnFiltersState, PaginationState, SortingState, Updater, VisibilityState, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react'
+import { useControllableState } from '@/hooks/use-controllable-state.ts'
+import { DataTableProps } from '@/types/data-table.ts'
+import { cn } from '@/utils'
+import { getCommonPinningStyles } from '@/utils/data-table.ts'
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    OnChangeFn,
+    PaginationState,
+    RowSelectionState,
+    SortingState,
+    Updater,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { useMemo } from 'react'
 
+import { Button } from '@/components/ui/Button'
+import { Checkbox } from '@/components/ui/Checkbox'
+import Skeleton from '@/components/ui/Skeleton.tsx'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/Table'
 
+import DataTablePagination from './DataTablePagination'
+import DataTableToolbar from './DataTableToolbar.tsx'
 
-import Skeleton from '@/components/ui/Skeleton.tsx';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+/**
+ * Adapts a plain `(value: T) => void` setter into react-table's `OnChangeFn<T>`,
+ * resolving the incoming updater against the current value.
+ */
+const asChangeFn =
+    <T,>(current: T, set: (value: T) => void): OnChangeFn<T> =>
+    updater =>
+        set(
+            typeof updater === 'function'
+                ? (updater as (old: T) => T)(current)
+                : updater
+        )
 
-
-
-import DataTablePagination from './DataTablePagination';
-import DataTableToolbar from './DataTableToolbar.tsx';
-
+const selectionColumn = <TData,>(): ColumnDef<TData> => ({
+    id: 'select',
+    header: ({ table }) => (
+        <Checkbox
+            checked={
+                table.getIsAllPageRowsSelected() ||
+                (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={value =>
+                table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label='Select all'
+            className='translate-y-[2px]'
+        />
+    ),
+    cell: ({ row }) => (
+        <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={value => row.toggleSelected(!!value)}
+            aria-label='Select row'
+            className='translate-y-[2px]'
+        />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 32,
+})
 
 const DataTable = <TData,>({
     data,
+    columns,
     initialState,
     filterFields,
     skeletonRows = 10,
@@ -32,6 +90,17 @@ const DataTable = <TData,>({
     setPage: _setPage,
     perPage: _perPage,
     setPerPage: _setPerPage,
+    sorting: _sorting,
+    setSorting: _setSorting,
+    columnFilters: _columnFilters,
+    setColumnFilters: _setColumnFilters,
+    rowSelection: _rowSelection,
+    setRowSelection: _setRowSelection,
+    columnVisibility: _columnVisibility,
+    setColumnVisibility: _setColumnVisibility,
+    enableRowSelection = false,
+    bulkActions,
+    isPlaceholderData,
     rightActions,
     ...props
 }: DataTableProps<TData>) => {
@@ -53,18 +122,51 @@ const DataTable = <TData,>({
         onChange: _setPerPage,
     })
 
-    const [sorting, setSorting] = useState<SortingState>([])
-    const [rowSelection, setRowSelection] = useState({})
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {}
+    const [sorting, setSorting] = useControllableState<SortingState>({
+        prop: _sorting,
+        defaultProp: [],
+        onChange: _setSorting as ((state: SortingState) => void) | undefined,
+    })
+
+    const [rowSelection, setRowSelection] =
+        useControllableState<RowSelectionState>({
+            prop: _rowSelection,
+            defaultProp: {},
+            onChange: _setRowSelection as
+                | ((state: RowSelectionState) => void)
+                | undefined,
+        })
+
+    const [columnVisibility, setColumnVisibility] =
+        useControllableState<VisibilityState>({
+            prop: _columnVisibility,
+            defaultProp: {},
+            onChange: _setColumnVisibility as
+                | ((state: VisibilityState) => void)
+                | undefined,
+        })
+
+    const [columnFilters, setColumnFilters] =
+        useControllableState<ColumnFiltersState>({
+            prop: _columnFilters,
+            defaultProp: [],
+            onChange: _setColumnFilters as
+                | ((state: ColumnFiltersState) => void)
+                | undefined,
+        })
+
+    const resolvedColumns = useMemo(
+        () =>
+            enableRowSelection
+                ? [selectionColumn<TData>(), ...columns]
+                : columns,
+        [enableRowSelection, columns]
     )
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
     const resolvedData = !data ? [] : Array.isArray(data) ? data : data.items
-    const pageCount =
-        useTransientValue(
-            !Array.isArray(data) ? data?.pagination.totalPages : null
-        ) ?? -1
+    const pageCount = !Array.isArray(data)
+        ? data?.pagination.totalPages ?? -1
+        : -1
 
     const pagination: PaginationState = {
         pageIndex: page! - 1,
@@ -83,8 +185,12 @@ const DataTable = <TData,>({
 
     const table = useReactTable({
         ...props,
+        columns: resolvedColumns,
         data: resolvedData,
         pageCount,
+        getRowId: enableRowSelection
+            ? row => String((row as { id?: string | number }).id)
+            : undefined,
         initialState: {
             columnPinning: { right: ['actions'] },
             ...initialState,
@@ -98,12 +204,17 @@ const DataTable = <TData,>({
             pagination,
         },
         getCoreRowModel: getCoreRowModel(),
-        //getPaginationRowModel: getPaginationRowModel(),
-        enableRowSelection: true,
-        onRowSelectionChange: setRowSelection,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
+        enableRowSelection,
+        onRowSelectionChange: asChangeFn(rowSelection ?? {}, setRowSelection),
+        onSortingChange: asChangeFn(sorting ?? [], setSorting),
+        onColumnFiltersChange: asChangeFn(
+            columnFilters ?? [],
+            setColumnFilters
+        ),
+        onColumnVisibilityChange: asChangeFn(
+            columnVisibility ?? {},
+            setColumnVisibility
+        ),
         onGlobalFilterChange: setQuery,
         onPaginationChange,
         manualPagination: true,
@@ -111,16 +222,9 @@ const DataTable = <TData,>({
         manualFiltering: true,
     })
 
-    const prevQueryRef = useRef(query);
-    const prevPerPageRef = useRef(perPage);
-    useEffect(() => {
-        if (prevQueryRef.current !== query || prevPerPageRef.current !== perPage) {
-            setPage(1);
-        }
-        // Update previous values
-        prevQueryRef.current = query;
-        prevPerPageRef.current = perPage;
-    }, [query, perPage])
+    const selectedRows = table.getSelectedRowModel().rows
+    const showBulkBar =
+        enableRowSelection && !!bulkActions && selectedRows.length > 0
 
     return (
         <div className='space-y-4'>
@@ -131,6 +235,24 @@ const DataTable = <TData,>({
                     rightActions={rightActions}
                     table={table}
                 />
+            )}
+            {showBulkBar && (
+                <div className='flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2'>
+                    <span className='text-sm text-muted-foreground'>
+                        {selectedRows.length} selected
+                    </span>
+                    <div className='flex items-center gap-2'>
+                        {bulkActions(selectedRows.map(row => row.original))}
+                    </div>
+                    <Button
+                        variant='ghost'
+                        size='sm'
+                        className='ml-auto h-8'
+                        onClick={() => table.resetRowSelection()}
+                    >
+                        Clear
+                    </Button>
+                </div>
             )}
             <div className='rounded-md border bg-background'>
                 <Table>
@@ -164,7 +286,12 @@ const DataTable = <TData,>({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
+                    <TableBody
+                        className={cn(
+                            isPlaceholderData &&
+                                'opacity-60 transition-opacity'
+                        )}
+                    >
                         {data ? (
                             <>
                                 {table.getRowModel().rows?.length ? (
@@ -204,9 +331,7 @@ const DataTable = <TData,>({
                                 ) : (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={
-                                                table._getColumnDefs().length
-                                            }
+                                            colSpan={resolvedColumns.length}
                                             className='h-24 text-center'
                                         >
                                             No results.
@@ -236,9 +361,6 @@ const DataTable = <TData,>({
                                                                     .meta
                                                                     ?.skeletonWidth ??
                                                                 'auto',
-                                                            // minWidth: shrinkZero
-                                                            //     ? cellWidths[j]
-                                                            //     : 'auto',
                                                         }}
                                                     >
                                                         <Skeleton className='h-6 w-full' />

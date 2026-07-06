@@ -6,7 +6,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
 import createAddressBlock, {
@@ -31,7 +31,7 @@ import { TabsTrigger } from '@/components/ui/Tabs'
 
 interface Props {
     addressBlockGroupId: number
-    mutate: KeyedMutator<PaginatedAddressBlocks>
+    mutate: Mutator<PaginatedAddressBlocks>
 }
 
 const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {

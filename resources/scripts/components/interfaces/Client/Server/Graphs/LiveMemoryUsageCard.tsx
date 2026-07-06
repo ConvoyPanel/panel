@@ -2,8 +2,8 @@ import byteSize from 'byte-size'
 import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, YAxis } from 'recharts'
 
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import LiveIndicator from '@/components/interfaces/Client/Server/Graphs/LiveIndicator.tsx'
 
@@ -16,8 +16,8 @@ const YTickFormatter = (bytes: number) => {
 }
 
 const LiveMemoryUsageCard = () => {
-    const { data: server } = useServerSWR()
-    const { data: state } = useServerStateSWR()
+    const { data: server } = useServer()
+    const { data: state } = useServerState()
     const [data, setData] = useState(
         Array.from({ length: 10 }, () => ({ value: 0 }))
     )

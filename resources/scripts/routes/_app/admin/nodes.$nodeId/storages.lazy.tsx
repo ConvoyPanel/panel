@@ -1,7 +1,7 @@
 import { IconDatabase } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import useStorages from '@/api/admin/nodes/storages/use-storages.ts'
 
 import CreateStorageModal from '@/components/interfaces/Admin/Node/Storages/CreateStorageModal.tsx'
 import DeleteStorageModal from '@/components/interfaces/Admin/Node/Storages/DeleteStorageModal.tsx'
@@ -20,7 +20,7 @@ export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/storages')({
 })
 
 function NodeStorages() {
-    const { data: storages, isLoading } = useStoragesSWR()
+    const { data: storages, isLoading } = useStorages()
 
     return (
         <>

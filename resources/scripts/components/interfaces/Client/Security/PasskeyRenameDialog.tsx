@@ -2,12 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { mutate } from '@/lib/swr'
+import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
 import renamePasskey from '@/api/account/passkeys/renamePasskey.ts'
-import { getKey as getPasskeysSWRKey } from '@/api/account/passkeys/use-passkeys-swr.ts'
+import { getKey as getPasskeysKey } from '@/api/account/passkeys/use-passkeys.ts'
 
 import { usePasskeysModalStore } from '@/components/interfaces/Client/Security/PasskeysContainer.tsx'
 
@@ -30,6 +30,7 @@ const schema = z.object({
 })
 
 const PasskeyRenameDialog = () => {
+    const queryClient = useQueryClient()
     const [passkey, isRenameDialogOpen, closeModal] = usePasskeysModalStore(
         useShallow(state => [
             state.modalData,
@@ -54,7 +55,7 @@ const PasskeyRenameDialog = () => {
 
         toast.success('Passkey renamed')
 
-        await mutate(getPasskeysSWRKey())
+        await queryClient.invalidateQueries({ queryKey: getPasskeysKey() })
 
         closeModal('rename')
     }

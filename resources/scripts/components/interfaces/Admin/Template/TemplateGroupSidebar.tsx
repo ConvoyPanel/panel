@@ -2,7 +2,7 @@ import { IconPlus, IconTemplate } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import useTemplatesSWR from '@/api/admin/templateGroups/templates/use-templates-swr.ts'
+import useTemplates from '@/api/admin/templateGroups/templates/use-templates.ts'
 
 import CreateTemplateCard from '@/components/interfaces/Admin/Template/CreateTemplateCard.tsx'
 import TemplateCard from '@/components/interfaces/Admin/Template/TemplateCard.tsx'
@@ -29,7 +29,7 @@ const TemplateGroupSidebar = () => {
     )
     const [isCreating, setIsCreating] = useState(false)
 
-    const { data: templates, isLoading } = useTemplatesSWR(modalData?.uuid, {})
+    const { data: templates, isLoading } = useTemplates(modalData?.uuid, {})
 
     return (
         <Sheet open={isOpen} onOpenChange={val => !val && closeModal('show')}>

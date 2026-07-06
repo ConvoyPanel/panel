@@ -55,6 +55,7 @@ export interface QueryBuilderParams<
     SortKeys extends string = string,
 > {
     page?: number
+    perPage?: number
     filters?: {
         [K in FilterKeys]?:
         | QueryBuilderFilterValue
@@ -99,6 +100,8 @@ export const withQueryBuilderParams = (
         ...filters,
         sort: !sorts.length ? undefined : sorts.join(','),
         page: data.page,
+        /* eslint-disable-next-line camelcase */
+        per_page: data.perPage,
     }
 }
 

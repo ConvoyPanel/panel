@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useAddressBlockGroupSWR from '@/api/admin/addressBlockGroups/use-address-block-group-swr.ts'
+import useAddressBlockGroup from '@/api/admin/addressBlockGroups/use-address-block-group.ts'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Heading } from '@/components/ui/Typography'
@@ -14,7 +14,7 @@ export const Route = createLazyFileRoute(
 })
 
 function GroupBlocks() {
-    const { data: group } = useAddressBlockGroupSWR()
+    const { data: group } = useAddressBlockGroup()
 
     return (
         <>

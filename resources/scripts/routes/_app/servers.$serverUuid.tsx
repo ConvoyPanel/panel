@@ -15,7 +15,7 @@ import { Outlet, createFileRoute } from '@tanstack/react-router'
 import InstallingServer from '@/components/interfaces/Client/Server/Status/InstallingServer.tsx'
 import SuspendedServer from '@/components/interfaces/Client/Server/Status/SuspendedServer.tsx'
 import DeferredOSSelection from '@/components/interfaces/Client/Server/Status/DeferredOSSelection.tsx'
-import useServerSWR, { preloadServer } from '@/api/servers/use-server-swr.ts'
+import useServer, { preloadServer } from '@/api/servers/use-server.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/_app/servers/$serverUuid')({
 
 function ServerLayout() {
     const { serverUuid } = Route.useParams()
-    const { data: server } = useServerSWR(serverUuid)
+    const { data: server } = useServer(serverUuid)
     useTitle(server?.name)
 
     const routes: RouteDef[] = [

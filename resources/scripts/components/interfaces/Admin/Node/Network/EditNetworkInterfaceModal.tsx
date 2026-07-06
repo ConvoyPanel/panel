@@ -1,4 +1,5 @@
 import { Route as NetworkRoute } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
+import { NetworkInterface } from '@/types/network-interface.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
@@ -7,9 +8,11 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+
 import { networkInterfaceSchema } from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
 import updateNetworkInterface from '@/api/admin/nodes/networkInterfaces/updateNetworkInterface.ts'
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
+import { getKey as getNetworkInterfacesKey } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
 
@@ -28,7 +31,9 @@ import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const EditNetworkInterfaceModal = () => {
     const { nodeId } = NetworkRoute.useParams()
-    const { mutate } = useNetworkInterfacesSWR()
+    const mutate = useQueryMutator<NetworkInterface[]>(
+        getNetworkInterfacesKey(Number(nodeId))
+    )
     const [networkInterface, open, close] = useNetworkInterfacesModalStore(
         useShallow(state => [
             state.modalData,

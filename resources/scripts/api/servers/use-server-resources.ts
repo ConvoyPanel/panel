@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import useSWR from '@/lib/swr'
+import { useQuery } from '@tanstack/react-query'
 
 import getServerResources from '@/api/servers/getServerResources'
 
@@ -9,8 +9,10 @@ const useServerResources = (uuid?: string) => {
     const params = useParams({ strict: false }) as { serverUuid: string }
     const serverUuid = uuid ?? params.serverUuid
 
-    return useSWR(getKey(serverUuid), () => getServerResources(serverUuid), {
-        refreshInterval: 60000, // Refresh every minute
+    return useQuery({
+        queryKey: getKey(serverUuid),
+        queryFn: () => getServerResources(serverUuid),
+        refetchInterval: 60000, // Refresh every minute
     })
 }
 

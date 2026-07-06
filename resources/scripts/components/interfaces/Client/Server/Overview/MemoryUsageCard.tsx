@@ -1,7 +1,7 @@
 import { IconAirConditioningDisabled } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
@@ -9,7 +9,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 
 const MemoryUsageCard = () => {
-    const { data: state } = useServerStateSWR()
+    const { data: state } = useServerState()
 
     const used = byteSize(state?.memoryUsed ?? 0, {
         units: 'iec',

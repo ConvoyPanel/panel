@@ -7,10 +7,13 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { NetworkInterface } from '@/types/network-interface.ts'
+
 import createNetworkInterface, {
     networkInterfaceSchema,
 } from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr.ts'
+import { getKey as getNetworkInterfacesKey } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -28,7 +31,9 @@ import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const CreateNetworkModal = () => {
     const { nodeId } = NetworkRoute.useParams()
-    const { mutate } = useNetworkInterfacesSWR()
+    const mutate = useQueryMutator<NetworkInterface[]>(
+        getNetworkInterfacesKey(Number(nodeId))
+    )
     const [open, setOpen] = useState(false)
 
     const form = useForm({

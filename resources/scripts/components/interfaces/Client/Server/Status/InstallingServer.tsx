@@ -4,9 +4,11 @@ import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import retryInstallation from '@/api/servers/retryInstallation'
-import useServerDeploymentSWR from '@/api/servers/use-server-deployment-swr.ts'
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServerDeployment from '@/api/servers/use-server-deployment.ts'
+import { getKey as getServerKey } from '@/api/servers/use-server.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -24,26 +26,31 @@ interface InstallingServerProps {
 }
 
 export default function InstallingServer({ server }: InstallingServerProps) {
-    const { data: deployment } = useServerDeploymentSWR(server?.uuid, {
-        refreshInterval: server?.status === 'install_failed' ? 0 : 250,
-        dedupingInterval: 0,
+    const { data: deployment } = useServerDeployment(server?.uuid, {
+        refetchInterval: server?.status === 'install_failed' ? false : 250,
     })
-    const { mutate } = useServerSWR()
+    const queryClient = useQueryClient()
+
+    const refetchServer = () => {
+        if (server?.uuid) {
+            queryClient.invalidateQueries({ queryKey: getServerKey(server.uuid) })
+        }
+    }
 
     useEffect(() => {
         // If deployment is null and we are not failed, maybe it finished?
         // But if failed, we should still have deployment data (from backend change).
         if (deployment === null && server?.status !== 'install_failed') {
-            mutate()
+            refetchServer()
         }
 
         if (
             deployment?.status === DeploymentStatus.Failed &&
             server?.status !== 'install_failed'
         ) {
-            mutate()
+            refetchServer()
         }
-    }, [deployment, mutate, server?.status])
+    }, [deployment, server?.status])
 
     const isFailed = server?.status === 'install_failed'
 
@@ -66,7 +73,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
         if (!server?.uuid) return
         try {
             await retryInstallation(server.uuid)
-            mutate()
+            refetchServer()
         } catch (error) {
             toast.error('Failed to retry installation.')
         }

@@ -2,7 +2,7 @@ import { AuthenticatedUser } from '@/types/user.ts'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import { cacheUser, getKey } from '@/api/auth/use-user-swr.ts'
+import { cacheUser, getKey } from '@/api/auth/use-user.ts'
 import { queryClient } from '@/lib/query-client.ts'
 
 const searchSchema = z.object({

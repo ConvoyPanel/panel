@@ -1,15 +1,17 @@
-import usePagination from '@/hooks/use-pagination.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
 import { IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useServersSWR from '@/api/admin/servers/use-servers-swr.ts'
+import useServers from '@/api/admin/servers/use-servers.ts'
 
+import ServerBulkPowerActions from '@/components/interfaces/Admin/Server/ServerBulkPowerActions.tsx'
 import ServerPowerActions from '@/components/interfaces/Admin/Server/ServerPowerActions.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
+import DataTableColumnHeader from '@/components/ui/DataTable/DataTableColumnHeader.tsx'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -18,19 +20,17 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/servers')({
 })
 
 function ServersIndex() {
-    const pagination = usePagination()
-    const { data } = useServersSWR({
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
+    const { queryParams, tableProps } = useDataTable()
+    const { data, isPlaceholderData } = useServers(queryParams)
 
     const columns: ColumnDef<Server>[] = [
         {
-            header: 'Name',
             accessorKey: 'name',
             enableHiding: false,
+            enableSorting: true,
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title='Name' />
+            ),
             meta: {
                 skeletonWidth: '5rem',
             },
@@ -62,8 +62,13 @@ function ServersIndex() {
                 paginated
                 searchable
                 toolbar
+                enableRowSelection
                 data={data}
                 columns={columns}
+                isPlaceholderData={isPlaceholderData}
+                bulkActions={servers => (
+                    <ServerBulkPowerActions servers={servers} />
+                )}
                 rightActions={
                     <Link
                         className={cn(buttonVariants({ size: 'sm' }), 'flex')}
@@ -73,7 +78,7 @@ function ServersIndex() {
                         Add server
                     </Link>
                 }
-                {...pagination}
+                {...tableProps}
             />
         </>
     )

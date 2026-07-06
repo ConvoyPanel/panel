@@ -1,7 +1,7 @@
 import { Location } from '@/types/location.ts'
 import { IconServer } from '@tabler/icons-react'
 
-import useAttachedNodesSWR from '@/api/admin/locations/use-attached-nodes-swr.ts'
+import useAttachedNodes from '@/api/admin/locations/use-attached-nodes.ts'
 
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { Entity, EntityGroup } from '@/components/ui/Entity'
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const AttachedNodesList = ({ location }: Props) => {
-    const { data, isLoading } = useAttachedNodesSWR(location?.id)
+    const { data, isLoading } = useAttachedNodes(location?.id)
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />

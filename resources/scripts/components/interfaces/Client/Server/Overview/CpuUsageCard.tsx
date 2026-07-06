@@ -1,6 +1,6 @@
 import { IconCpu } from '@tabler/icons-react'
 
-import useServerStateSWR from '@/api/servers/use-server-state-swr.ts'
+import useServerState from '@/api/servers/use-server-state.ts'
 
 import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
 
@@ -8,7 +8,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 
 const CpuUsageCard = () => {
-    const { data: state } = useServerStateSWR()
+    const { data: state } = useServerState()
 
     return (
         <StatisticCard title={'CPU Usage'} icon={IconCpu}>

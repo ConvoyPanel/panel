@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -27,7 +27,7 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedAddressBlockGroups>
+    mutate: Mutator<PaginatedAddressBlockGroups>
 }
 
 const EditBlockGroupModal = ({ mutate }: Props) => {

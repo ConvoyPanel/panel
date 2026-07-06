@@ -4,7 +4,7 @@ import { IconCheck, IconServer } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
 import getCompatibleServers from '@/api/admin/addressBlockGroups/addressBlocks/addresses/getCompatibleServers.ts'
-import useServerSWR from '@/api/admin/servers/use-server-swr.ts'
+import useServer from '@/api/admin/servers/use-server.ts'
 
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -20,7 +20,7 @@ const ServerPicker = ({ addressBlockGroupId }: Props) => {
         name: 'serverId',
     })
     const { data: selectedServer, isLoading: isLoadingSelection } =
-        useServerSWR(field.value ? Number(field.value) : null)
+        useServer(field.value ? Number(field.value) : null)
 
     return (
         <ResourceComboboxForm<Server>

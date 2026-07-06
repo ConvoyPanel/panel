@@ -3,28 +3,35 @@ import AttachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/Att
 import DetachNodeModal from '@/components/interfaces/Admin/Ipam/AddressBlock/DetachNodeModal.tsx'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
-import usePagination from '@/hooks/use-pagination.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
-import { NetworkInterface } from '@/types/network-interface.ts'
+import {
+    NetworkInterface,
+    PaginatedNetworkInterfaces,
+} from '@/types/network-interface.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import useAttachedNodesSWR from '@/api/admin/addressBlockGroups/use-attached-nodes-swr.ts'
+import useAttachedNodes, {
+    getKey,
+} from '@/api/admin/addressBlockGroups/use-attached-nodes.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import { TabsContent } from '@/components/ui/Tabs'
 
 const AttachedNodesTab = () => {
-    const pagination = usePagination()
+    const { queryParams, tableProps } = useDataTable()
     const { addressBlockGroupId } = Route.useParams()
-    const { data, mutate } = useAttachedNodesSWR(Number(addressBlockGroupId), {
-        page: pagination.page,
-        filters: {
-            '*': pagination.debouncedQuery,
-        },
-    })
+    const { data, isPlaceholderData } = useAttachedNodes(
+        Number(addressBlockGroupId),
+        queryParams
+    )
+    const mutate = useQueryMutator<PaginatedNetworkInterfaces>(
+        getKey(Number(addressBlockGroupId), queryParams)
+    )
 
     const [selectedNode, setSelectedNode] = useState<Node | null>(null)
 
@@ -77,8 +84,9 @@ const AttachedNodesTab = () => {
                 toolbar
                 data={data}
                 columns={columns}
+                isPlaceholderData={isPlaceholderData}
                 rightActions={<AttachNodeModal mutate={mutate} />}
-                {...pagination}
+                {...tableProps}
             />
             <DetachNodeModal
                 mutate={mutate}

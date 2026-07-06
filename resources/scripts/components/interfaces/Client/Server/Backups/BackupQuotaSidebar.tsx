@@ -1,4 +1,4 @@
-import useServerSWR from '@/api/servers/use-server-swr.ts'
+import useServer from '@/api/servers/use-server.ts'
 
 import { Button } from '@/components/ui/Button'
 import { LinearProgressBar, RingProgress } from '@/components/ui/Progress'
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/Sheet'
 
 const BackupQuotaSidebar = () => {
-    const { data: _server } = useServerSWR()
+    const { data: _server } = useServer()
 
     return (
         <>

@@ -1,7 +1,7 @@
 import { AuthenticatedUser } from '@/types/user.ts'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-import { getKey } from '@/api/auth/use-user-swr.ts'
+import { getKey } from '@/api/auth/use-user.ts'
 import { queryClient } from '@/lib/query-client.ts'
 
 export const Route = createFileRoute('/_app/admin')({

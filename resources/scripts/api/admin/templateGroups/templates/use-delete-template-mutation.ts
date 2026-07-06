@@ -1,31 +1,37 @@
-import useSWRMutation from '@/lib/swr-mutation'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import deleteTemplate from '@/api/admin/templateGroups/templates/deleteTemplate.ts'
-import { getKey } from '@/api/admin/templateGroups/templates/use-templates-swr.ts'
+import { getKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
 import { Template } from '@/types/template.ts'
 
 const useDeleteTemplateMutation = (templateGroupUuid: string) => {
-    return useSWRMutation(
-        getKey(templateGroupUuid, {}),
-        async (_, { arg: templateUuid }: { arg: string }) => {
+    const queryClient = useQueryClient()
+
+    const mutation = useMutation({
+        mutationFn: async (templateUuid: string) => {
             await deleteTemplate(templateGroupUuid, templateUuid)
             return templateUuid
         },
-        {
-            onSuccess: () => {
-                toast.success('Template deleted successfully')
-            },
-            onError: () => {
-                toast.error('Failed to delete template')
-            },
-            populateCache: (templateUuid: string, currentData: Template[] | undefined) => {
-                if (!currentData) return []
-                return currentData.filter(t => t.uuid !== templateUuid)
-            },
-            revalidate: false, // Don't revalidate since we're using populateCache
-        }
-    )
+        onSuccess: templateUuid => {
+            queryClient.setQueryData<Template[]>(
+                getKey(templateGroupUuid, {}),
+                current =>
+                    current
+                        ? current.filter(t => t.uuid !== templateUuid)
+                        : []
+            )
+            toast.success('Template deleted successfully')
+        },
+        onError: () => {
+            toast.error('Failed to delete template')
+        },
+    })
+
+    return {
+        trigger: (templateUuid: string) => mutation.mutateAsync(templateUuid),
+        isMutating: mutation.isPending,
+    }
 }
 
 export default useDeleteTemplateMutation

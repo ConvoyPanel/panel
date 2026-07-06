@@ -7,9 +7,12 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { NodeStorage } from '@/types/storage.ts'
+
 import { storageSchema } from '@/api/admin/nodes/storages/createStorage.ts'
 import updateStorage from '@/api/admin/nodes/storages/updateStorage.ts'
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import { getKey as getStoragesKey } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
@@ -28,9 +31,10 @@ import { InputForm } from '@/components/ui/Forms'
 import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 
 const EditStorageModal = () => {
-    const { mutate } = useStoragesSWR()
-
     const { nodeId } = StorageRoute.useParams()
+    const mutate = useQueryMutator<NodeStorage[]>(
+        getStoragesKey(Number(nodeId))
+    )
     const [storage, open, close] = useStoragesModalStore(
         useShallow(state => [
             state.modalData,

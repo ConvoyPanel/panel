@@ -1,5 +1,12 @@
 import { PaginatedResult } from '@/utils/http.ts'
-import { TableOptions } from '@tanstack/react-table'
+import {
+    ColumnFiltersState,
+    OnChangeFn,
+    RowSelectionState,
+    SortingState,
+    TableOptions,
+    VisibilityState,
+} from '@tanstack/react-table'
 import { ReactNode } from 'react'
 
 export interface DataTableProps<TData>
@@ -58,6 +65,45 @@ export interface DataTableProps<TData>
     showPerPageOptions?: boolean
 
     rightActions?: ReactNode
+
+    /**
+     * Opt-in per-column sorting state. When provided (e.g. from `useDataTable`),
+     * sorting is controlled and — under `manualSorting` — flows to the server.
+     */
+    sorting?: SortingState
+    setSorting?: OnChangeFn<SortingState>
+
+    /** Controlled per-column filter state (faceted filters). */
+    columnFilters?: ColumnFiltersState
+    setColumnFilters?: OnChangeFn<ColumnFiltersState>
+
+    /** Controlled row-selection state, used together with `enableRowSelection`. */
+    rowSelection?: RowSelectionState
+    setRowSelection?: OnChangeFn<RowSelectionState>
+
+    /** Controlled column-visibility state (view options). */
+    columnVisibility?: VisibilityState
+    setColumnVisibility?: OnChangeFn<VisibilityState>
+
+    /**
+     * Opt-in row selection. When true, a checkbox column is prepended and rows
+     * become selectable. Selection does not persist across pages.
+     * @default false
+     */
+    enableRowSelection?: boolean
+
+    /**
+     * Render prop for bulk actions. Receives the currently-selected rows and is
+     * rendered in a bulk action bar above the table while rows are selected.
+     * Requires `enableRowSelection`.
+     */
+    bulkActions?: (rows: TData[]) => ReactNode
+
+    /**
+     * Dim the table body during background refetches (e.g. page transitions with
+     * `keepPreviousData`). Pass `isPlaceholderData` from the query result.
+     */
+    isPlaceholderData?: boolean
 }
 
 export interface DataTableFilterField<TData> {

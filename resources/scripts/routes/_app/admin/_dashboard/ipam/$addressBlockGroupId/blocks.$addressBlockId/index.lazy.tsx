@@ -1,11 +1,14 @@
-import usePagination from '@/hooks/use-pagination.ts'
-import { Address } from '@/types/address.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { Address, PaginatedAddresses } from '@/types/address.ts'
 import { Server } from '@/types/server.ts'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import useAddressesSWR from '@/api/admin/addressBlockGroups/addressBlocks/addresses/use-addresses-swr.ts'
-import useAddressBlockSWR from '@/api/admin/addressBlockGroups/addressBlocks/use-address-block-swr.ts'
+import useAddresses, {
+    getKey,
+} from '@/api/admin/addressBlockGroups/addressBlocks/addresses/use-addresses.ts'
+import useAddressBlock from '@/api/admin/addressBlockGroups/addressBlocks/use-address-block.ts'
 
 import GenerateAddressesButton from '@/components/interfaces/Admin/Ipam/AddressBlock/GenerateAddressesButton.tsx'
 
@@ -25,16 +28,14 @@ export const Route = createLazyFileRoute(
 })
 
 function BlockIndex() {
-    const { data: block } = useAddressBlockSWR()
-    const pagination = usePagination()
-    const { data, mutate } = useAddressesSWR(
-        {
-            page: pagination.page,
-            filters: {
-                ip: pagination.debouncedQuery,
-            },
-        },
-        ['server']
+    const { data: block } = useAddressBlock()
+    const { queryParams, tableProps } = useDataTable({ searchKey: 'ip' })
+    const { addressBlockId } = useParams({ strict: false }) as {
+        addressBlockId: number
+    }
+    const { data, isPlaceholderData } = useAddresses(queryParams, ['server'])
+    const mutate = useQueryMutator<PaginatedAddresses>(
+        getKey(Number(addressBlockId), queryParams, ['server'])
     )
     const openModal = useAddressModal(state => state.openModal)
 
@@ -112,8 +113,9 @@ function BlockIndex() {
                 paginated
                 searchable
                 toolbar
+                isPlaceholderData={isPlaceholderData}
                 rightActions={<GenerateAddressesButton mutate={mutate} />}
-                {...pagination}
+                {...tableProps}
             />
             <EditAddressModal mutate={mutate} />
             <DeleteAddressModal mutate={mutate} />

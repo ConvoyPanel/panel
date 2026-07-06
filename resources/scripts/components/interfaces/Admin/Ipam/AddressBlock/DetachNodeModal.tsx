@@ -14,10 +14,10 @@ import {
 import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import { Node } from '@/types/node.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedNetworkInterfaces>
+    mutate: Mutator<PaginatedNetworkInterfaces>
     node: Node | null
     open: boolean
     onOpenChange: (open: boolean) => void

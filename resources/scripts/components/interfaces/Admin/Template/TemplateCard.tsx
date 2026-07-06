@@ -9,9 +9,11 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { templateSchema } from '@/api/admin/templateGroups/templates/createTemplate.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+
 import updateTemplate from '@/api/admin/templateGroups/templates/updateTemplate.ts'
 import useDeleteTemplateMutation from '@/api/admin/templateGroups/templates/use-delete-template-mutation.ts'
-import useTemplatesSWR from '@/api/admin/templateGroups/templates/use-templates-swr.ts'
+import { getKey as getTemplatesKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
 
 import { badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
@@ -36,7 +38,9 @@ interface Props {
 const TemplateCard = ({ templateGroup, template }: Props) => {
     const [isEditing, setIsEditing] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
-    const { mutate } = useTemplatesSWR(templateGroup.uuid, {})
+    const mutate = useQueryMutator<Template[]>(
+        getTemplatesKey(templateGroup.uuid, {})
+    )
 
     const deleteTemplateMutation = useDeleteTemplateMutation(templateGroup.uuid)
 

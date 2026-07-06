@@ -5,7 +5,7 @@ import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { useController } from 'react-hook-form'
 
 import getNodes from '@/api/admin/nodes/getNodes.ts'
-import useNodeSWR from '@/api/admin/nodes/use-node-swr'
+import useNode from '@/api/admin/nodes/use-node'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -15,7 +15,7 @@ const NodePicker = () => {
     }>({
         name: 'nodeId',
     })
-    const { data: selected, isLoading: isLoadingSelection } = useNodeSWR(
+    const { data: selected, isLoading: isLoadingSelection } = useNode(
         field.value ? Number(field.value) : undefined
     )
 

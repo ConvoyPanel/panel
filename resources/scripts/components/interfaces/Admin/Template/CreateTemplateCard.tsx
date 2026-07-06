@@ -5,10 +5,13 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { Template } from '@/types/template.ts'
+
 import createTemplate, {
     templateSchema,
 } from '@/api/admin/templateGroups/templates/createTemplate.ts'
-import useTemplatesSWR from '@/api/admin/templateGroups/templates/use-templates-swr.ts'
+import { getKey as getTemplatesKey } from '@/api/admin/templateGroups/templates/use-templates.ts'
 
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
@@ -24,7 +27,9 @@ interface Props {
 }
 
 const CreateTemplateCard = ({ templateGroup, onClose }: Props) => {
-    const { mutate } = useTemplatesSWR(templateGroup.uuid, {})
+    const mutate = useQueryMutator<Template[]>(
+        getTemplatesKey(templateGroup.uuid, {})
+    )
 
     const form = useForm({
         resolver: zodResolver(templateSchema),

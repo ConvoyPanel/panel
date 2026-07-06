@@ -1,6 +1,6 @@
 import { IconKey } from '@tabler/icons-react'
 
-import usePasskeysSWR from '@/api/account/passkeys/use-passkeys-swr.ts'
+import usePasskeys from '@/api/account/passkeys/use-passkeys.ts'
 
 import Passkey from '@/components/interfaces/Client/Security/Passkey.tsx'
 
@@ -9,7 +9,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 import SimpleEmptyState from '../../../ui/EmptyStates/SimpleEmptyState.tsx'
 
 const PasskeyList = () => {
-    const { data, isLoading } = usePasskeysSWR()
+    const { data, isLoading } = usePasskeys()
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />

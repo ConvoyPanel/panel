@@ -7,10 +7,13 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { NodeStorage } from '@/types/storage.ts'
+
 import createStorage, {
     storageSchema,
 } from '@/api/admin/nodes/storages/createStorage.ts'
-import useStoragesSWR from '@/api/admin/nodes/storages/use-storages-swr.ts'
+import { getKey as getStoragesKey } from '@/api/admin/nodes/storages/use-storages.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -28,9 +31,10 @@ import { InputForm } from '@/components/ui/Forms'
 import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 
 const CreateStorageModal = () => {
-    const { mutate } = useStoragesSWR()
-
     const { nodeId } = StorageRoute.useParams()
+    const mutate = useQueryMutator<NodeStorage[]>(
+        getStoragesKey(Number(nodeId))
+    )
     const [open, setOpen] = useState(false)
 
     const form = useForm({

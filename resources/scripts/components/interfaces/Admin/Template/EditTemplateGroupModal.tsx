@@ -3,16 +3,15 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import useSWRMutation from '@/lib/swr-mutation'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
 import { templateGroupSchema } from '@/api/admin/templateGroups/createTemplateGroup.ts'
 import updateTemplateGroup from '@/api/admin/templateGroups/updateTemplateGroup.ts'
-import useTemplateGroupsSWR, {
-    getKey,
-} from '@/api/admin/templateGroups/use-template-groups-swr.ts'
+import { getKey } from '@/api/admin/templateGroups/use-template-groups.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import useTemplateGroupsModalStore from '@/components/interfaces/Admin/Template/use-template-groups-modal-store.ts'
 
@@ -31,7 +30,7 @@ import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 import TemplateIconSelect from '@/components/interfaces/Admin/Template/TemplateIconSelect.tsx'
 
 const EditTemplateGroupModal = () => {
-    const { mutate } = useTemplateGroupsSWR({})
+    const mutate = useQueryMutator<TemplateGroup[]>(getKey({}))
 
     const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
         useShallow(state => ({
@@ -56,39 +55,28 @@ const EditTemplateGroupModal = () => {
         }
     }, [modalData])
 
-    const { trigger } = useSWRMutation(
-        getKey({}),
-        async (
-            _key,
-            { arg }: { arg: z.infer<typeof templateGroupSchema> }
-        ) => {
-            return await updateTemplateGroup(modalData!.uuid, arg)
-        },
-        {
-            onSuccess: updatedGroup => {
-                mutate(
-                    (currentData: TemplateGroup[] | undefined) => {
-                        if (!currentData) return
-                        return currentData.map(group =>
-                            group.uuid === updatedGroup.uuid ? updatedGroup : group
-                        )
-                    },
-                    { revalidate: false }
+    const { mutate: trigger } = useMutation({
+        mutationFn: (arg: z.infer<typeof templateGroupSchema>) =>
+            updateTemplateGroup(modalData!.uuid, arg),
+        onSuccess: updatedGroup => {
+            mutate((currentData: TemplateGroup[] | undefined) => {
+                if (!currentData) return
+                return currentData.map(group =>
+                    group.uuid === updatedGroup.uuid ? updatedGroup : group
                 )
+            }, false)
 
-                closeModal('edit')
-                toast.success('Template group updated')
-            },
-            onError: e => {
-                handleFormErrors(e, form.setError)
-                toast.error('Failed to save changes')
-                throw e
-            },
-        }
-    )
+            closeModal('edit')
+            toast.success('Template group updated')
+        },
+        onError: e => {
+            handleFormErrors(e, form.setError)
+            toast.error('Failed to save changes')
+        },
+    })
 
-    const submit = async (data: z.input<typeof templateGroupSchema>) => {
-        await trigger(data as z.infer<typeof templateGroupSchema>)
+    const submit = (data: z.input<typeof templateGroupSchema>) => {
+        trigger(data as z.infer<typeof templateGroupSchema>)
     }
 
     return (

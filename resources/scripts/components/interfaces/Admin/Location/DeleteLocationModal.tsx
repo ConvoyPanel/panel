@@ -3,7 +3,7 @@ import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations
 import { Location, PaginatedLocations } from '@/types/location.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
 import { toast } from 'sonner'
-import { KeyedMutator } from '@/lib/swr'
+import { Mutator } from '@/types/query.ts'
 import { useShallow } from 'zustand/react/shallow'
 
 import deleteLocation from '@/api/admin/locations/deleteLocation.ts'
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/Credenza'
 
 interface Props {
-    mutate: KeyedMutator<PaginatedLocations>
+    mutate: Mutator<PaginatedLocations>
 }
 
 const DeleteLocationModal = ({ mutate }: Props) => {

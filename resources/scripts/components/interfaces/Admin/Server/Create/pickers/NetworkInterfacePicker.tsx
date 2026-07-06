@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import useNetworkInterfacesSWR from '@/api/admin/nodes/networkInterfaces/use-network-interfaces-swr'
+import useNetworkInterfaces from '@/api/admin/nodes/networkInterfaces/use-network-interfaces'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { IconNetwork } from '@tabler/icons-react'
 import {
@@ -24,7 +24,7 @@ interface NetworkInterfacePickerProps {
 
 const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
     const { control } = useFormContext()
-    const { data, isLoading } = useNetworkInterfacesSWR(nodeId)
+    const { data, isLoading } = useNetworkInterfaces(nodeId)
 
     return (
         <FormField
