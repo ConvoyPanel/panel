@@ -3,7 +3,7 @@ import byteSize from 'byte-size'
 
 import { useServer } from '@/features/servers/detail/api.ts'
 
-import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 
 import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
 

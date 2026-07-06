@@ -7,7 +7,7 @@ import {
     useServer,
 } from '@/features/servers/detail/api.ts'
 
-import { actions } from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
+import { actions } from '@/features/servers/components/client/Overview/Toolbar.tsx'
 
 import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Button } from '@/components/ui/Button'

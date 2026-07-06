@@ -1,13 +1,13 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import HistoricalCpuUsageCard from '@/components/interfaces/Client/Server/Graphs/HistoricalCpuUsageCard.tsx'
-import HistoricalDiskUsageCard from '@/components/interfaces/Client/Server/Graphs/HistoricalDiskUsageCard.tsx'
-import HistoricalMemoryUsageCard from '@/components/interfaces/Client/Server/Graphs/HistoricalMemoryUsageCard.tsx'
-import HistoricalNetworkUsageCard from '@/components/interfaces/Client/Server/Graphs/HistoricalNetworkUsageCard.tsx'
-import LiveCpuUsageCard from '@/components/interfaces/Client/Server/Graphs/LiveCpuUsageCard.tsx'
-import LiveMemoryUsageCard from '@/components/interfaces/Client/Server/Graphs/LiveMemoryUsageCard.tsx'
-import Header from '@/components/interfaces/Client/Server/Overview/Header.tsx'
-import Statistics from '@/components/interfaces/Client/Server/Overview/Statistics.tsx'
+import HistoricalCpuUsageCard from '@/features/servers/components/client/Graphs/HistoricalCpuUsageCard.tsx'
+import HistoricalDiskUsageCard from '@/features/servers/components/client/Graphs/HistoricalDiskUsageCard.tsx'
+import HistoricalMemoryUsageCard from '@/features/servers/components/client/Graphs/HistoricalMemoryUsageCard.tsx'
+import HistoricalNetworkUsageCard from '@/features/servers/components/client/Graphs/HistoricalNetworkUsageCard.tsx'
+import LiveCpuUsageCard from '@/features/servers/components/client/Graphs/LiveCpuUsageCard.tsx'
+import LiveMemoryUsageCard from '@/features/servers/components/client/Graphs/LiveMemoryUsageCard.tsx'
+import Header from '@/features/servers/components/client/Overview/Header.tsx'
+import Statistics from '@/features/servers/components/client/Overview/Statistics.tsx'
 
 
 export const Route = createLazyFileRoute('/_app/servers/$serverUuid/graphs')({

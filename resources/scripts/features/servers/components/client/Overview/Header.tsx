@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 
 import { useServer } from '@/features/servers/detail/api.ts'
 
-import Toolbar from '@/components/interfaces/Client/Server/Overview/Toolbar.tsx'
+import Toolbar from '@/features/servers/components/client/Overview/Toolbar.tsx'
 
 import { Heading } from '@/components/ui/Typography'
 

@@ -1,8 +1,8 @@
 import { useFormContext } from 'react-hook-form'
 
-import NodePicker from '@/components/interfaces/Admin/Server/Create/pickers/NodePicker'
-import StoragePicker from '@/components/interfaces/Admin/Server/Create/pickers/StoragePicker'
-import UserPicker from '@/components/interfaces/Admin/Server/Create/pickers/UserPicker'
+import NodePicker from '@/features/servers/components/admin/Create/pickers/NodePicker'
+import StoragePicker from '@/features/servers/components/admin/Create/pickers/StoragePicker'
+import UserPicker from '@/features/servers/components/admin/Create/pickers/UserPicker'
 import { InputForm } from '@/components/ui/Forms'
 import { Heading } from '@/components/ui/Typography'
 

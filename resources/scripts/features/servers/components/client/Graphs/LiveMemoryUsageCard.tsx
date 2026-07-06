@@ -7,7 +7,7 @@ import {
     useServer,
 } from '@/features/servers/detail/api.ts'
 
-import LiveIndicator from '@/components/interfaces/Client/Server/Graphs/LiveIndicator.tsx'
+import LiveIndicator from '@/features/servers/components/client/Graphs/LiveIndicator.tsx'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { ChartContainer } from '@/components/ui/Chart'

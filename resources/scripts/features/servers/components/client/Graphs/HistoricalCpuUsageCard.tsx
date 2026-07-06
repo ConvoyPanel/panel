@@ -3,7 +3,7 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
 import { useServerStatistics } from '@/features/servers/detail/api.ts'
 
-import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
+import useTimeRange from '@/features/servers/hooks/use-time-range.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { ChartContainer } from '@/components/ui/Chart'

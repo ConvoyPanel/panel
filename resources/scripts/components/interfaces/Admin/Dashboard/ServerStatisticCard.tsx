@@ -1,6 +1,6 @@
 import { IconServer } from '@tabler/icons-react'
 
-import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 
 
 const ServerStatisticCard = () => {

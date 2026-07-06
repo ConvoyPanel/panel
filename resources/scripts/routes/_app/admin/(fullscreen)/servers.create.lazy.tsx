@@ -10,10 +10,10 @@ import {
     createServer,
     serverSchema,
 } from '@/features/servers/admin/api.ts'
-import GeneralForm from '@/components/interfaces/Admin/Server/Create/GeneralForm'
-import LimitsForm from '@/components/interfaces/Admin/Server/Create/LimitsForm'
-import NetworkForm from '@/components/interfaces/Admin/Server/Create/NetworkForm'
-import VmOptionsForm from '@/components/interfaces/Admin/Server/Create/VmOptionsForm'
+import GeneralForm from '@/features/servers/components/admin/Create/GeneralForm'
+import LimitsForm from '@/features/servers/components/admin/Create/LimitsForm'
+import NetworkForm from '@/features/servers/components/admin/Create/NetworkForm'
+import VmOptionsForm from '@/features/servers/components/admin/Create/VmOptionsForm'
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
 import { Form, FormButton } from '@/components/ui/Form'
 import { useEffect } from 'react'

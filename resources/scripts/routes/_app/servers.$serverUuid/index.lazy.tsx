@@ -1,11 +1,11 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import BandwidthUsageCard from '@/components/interfaces/Client/Server/Overview/BandwidthUsageCard.tsx'
-import Header from '@/components/interfaces/Client/Server/Overview/Header.tsx'
-import IpamCard from '@/components/interfaces/Client/Server/Overview/IpamCard.tsx'
-import SpecificationsCard from '@/components/interfaces/Client/Server/Overview/SpecificationsCard.tsx'
-import Statistics from '@/components/interfaces/Client/Server/Overview/Statistics.tsx'
-import StorageUsageCard from '@/components/interfaces/Client/Server/Overview/StorageUsageCard.tsx'
+import BandwidthUsageCard from '@/features/servers/components/client/Overview/BandwidthUsageCard.tsx'
+import Header from '@/features/servers/components/client/Overview/Header.tsx'
+import IpamCard from '@/features/servers/components/client/Overview/IpamCard.tsx'
+import SpecificationsCard from '@/features/servers/components/client/Overview/SpecificationsCard.tsx'
+import Statistics from '@/features/servers/components/client/Overview/Statistics.tsx'
+import StorageUsageCard from '@/features/servers/components/client/Overview/StorageUsageCard.tsx'
 
 
 export const Route = createLazyFileRoute('/_app/servers/$serverUuid/')({

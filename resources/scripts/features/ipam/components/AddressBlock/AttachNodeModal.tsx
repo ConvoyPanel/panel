@@ -20,8 +20,8 @@ import {
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
-import NodePicker from '@/components/interfaces/Admin/Server/Create/pickers/NodePicker.tsx'
-import NetworkInterfacePicker from '@/components/interfaces/Admin/Server/Create/pickers/NetworkInterfacePicker.tsx'
+import NodePicker from '@/features/servers/components/admin/Create/pickers/NodePicker.tsx'
+import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker.tsx'
 import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 
 const schema = z.object({

@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form'
 
-import TemplateGroupPicker from '@/components/interfaces/Admin/Server/Create/pickers/TemplateGroupPicker'
-import TemplatePicker from '@/components/interfaces/Admin/Server/Create/pickers/TemplatePicker'
+import TemplateGroupPicker from '@/features/servers/components/admin/Create/pickers/TemplateGroupPicker'
+import TemplatePicker from '@/features/servers/components/admin/Create/pickers/TemplatePicker'
 import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import { Heading } from '@/components/ui/Typography'
 

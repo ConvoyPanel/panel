@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import BackupQuotaSidebar from '@/components/interfaces/Client/Server/Backups/BackupQuotaSidebar.tsx'
-import BackupView from '@/components/interfaces/Client/Server/Backups/BackupView.tsx'
+import BackupQuotaSidebar from '@/features/servers/components/client/Backups/BackupQuotaSidebar.tsx'
+import BackupView from '@/features/servers/components/client/Backups/BackupView.tsx'
 
 import Heading from '@/components/ui/Typography/Heading.tsx'
 

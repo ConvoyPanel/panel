@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import NetworkInterfacePicker from '@/components/interfaces/Admin/Server/Create/pickers/NetworkInterfacePicker'
+import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker'
 import { InputForm } from '@/components/ui/Forms'
 import { Heading } from '@/components/ui/Typography'
 

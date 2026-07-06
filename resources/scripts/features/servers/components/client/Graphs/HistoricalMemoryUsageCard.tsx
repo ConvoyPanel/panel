@@ -7,8 +7,8 @@ import {
     useServer,
 } from '@/features/servers/detail/api.ts'
 
-import TimeRangeSelector from '@/components/interfaces/Client/Server/Graphs/TimeRangeSelector.tsx'
-import useTimeRange from '@/components/interfaces/Client/Server/Graphs/use-time-range.ts'
+import TimeRangeSelector from '@/features/servers/components/client/Graphs/TimeRangeSelector.tsx'
+import useTimeRange from '@/features/servers/hooks/use-time-range.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { ChartContainer } from '@/components/ui/Chart'

@@ -1,8 +1,8 @@
 import { cn } from '@/utils'
 
-import ConsoleButton from '@/components/interfaces/Client/Server/Overview/ConsoleButton.tsx'
-import PowerActionsDropdown from '@/components/interfaces/Client/Server/Overview/PowerActionsDropdown.tsx'
-import PowerActionsExpanded from '@/components/interfaces/Client/Server/Overview/PowerActionsExpanded.tsx'
+import ConsoleButton from '@/features/servers/components/client/Overview/ConsoleButton.tsx'
+import PowerActionsDropdown from '@/features/servers/components/client/Overview/PowerActionsDropdown.tsx'
+import PowerActionsExpanded from '@/features/servers/components/client/Overview/PowerActionsExpanded.tsx'
 
 
 export const actions = {

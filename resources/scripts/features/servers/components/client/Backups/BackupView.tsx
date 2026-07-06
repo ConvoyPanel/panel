@@ -5,7 +5,7 @@ import { IconCopy } from '@tabler/icons-react'
 
 import { backupQueries } from '@/features/servers/backups/api.ts'
 
-import BackupCard from '@/components/interfaces/Client/Server/Backups/BackupCard.tsx'
+import BackupCard from '@/features/servers/components/client/Backups/BackupCard.tsx'
 
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'

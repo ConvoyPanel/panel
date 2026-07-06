@@ -2,7 +2,7 @@ import { IconCpu } from '@tabler/icons-react'
 
 import { useServerState } from '@/features/servers/detail/api.ts'
 
-import StatisticCard from '@/components/interfaces/Client/Server/Overview/StatisticCard.tsx'
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 

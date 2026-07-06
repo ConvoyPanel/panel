@@ -7,7 +7,7 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/Card'
-import OSSelectionForm from '@/components/interfaces/Client/Server/Rebuild/OSSelectionForm'
+import OSSelectionForm from '@/features/servers/components/client/Rebuild/OSSelectionForm'
 
 interface DeferredOSSelectionProps {
     server?: Server

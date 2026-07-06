@@ -7,8 +7,8 @@ import { ColumnDef } from '@tanstack/react-table'
 
 import { useServers } from '@/features/servers/admin/api.ts'
 
-import ServerBulkPowerActions from '@/components/interfaces/Admin/Server/ServerBulkPowerActions.tsx'
-import ServerPowerActions from '@/components/interfaces/Admin/Server/ServerPowerActions.tsx'
+import ServerBulkPowerActions from '@/features/servers/components/admin/ServerBulkPowerActions.tsx'
+import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import DataTableColumnHeader from '@/components/ui/DataTable/DataTableColumnHeader.tsx'
