@@ -1,7 +1,7 @@
 import { IconDatabase } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useStorages from '@/api/admin/nodes/storages/use-storages.ts'
+import { useStorages } from '@/features/nodes/storages/api.ts'
 
 import CreateStorageModal from '@/components/interfaces/Admin/Node/Storages/CreateStorageModal.tsx'
 import DeleteStorageModal from '@/components/interfaces/Admin/Node/Storages/DeleteStorageModal.tsx'

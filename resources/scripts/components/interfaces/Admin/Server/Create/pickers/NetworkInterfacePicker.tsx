@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import useNetworkInterfaces from '@/api/admin/nodes/networkInterfaces/use-network-interfaces'
+import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { IconNetwork } from '@tabler/icons-react'
 import {

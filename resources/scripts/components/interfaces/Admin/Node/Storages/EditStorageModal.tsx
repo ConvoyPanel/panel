@@ -10,9 +10,11 @@ import { useShallow } from 'zustand/react/shallow'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { NodeStorage } from '@/types/storage.ts'
 
-import { storageSchema } from '@/api/admin/nodes/storages/createStorage.ts'
-import updateStorage from '@/api/admin/nodes/storages/updateStorage.ts'
-import { storageQueries } from '@/api/admin/nodes/storages/use-storages.ts'
+import {
+    storageSchema,
+    updateStorage,
+    storageQueries,
+} from '@/features/nodes/storages/api.ts'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 

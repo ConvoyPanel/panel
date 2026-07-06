@@ -7,8 +7,10 @@ import { useShallow } from 'zustand/react/shallow'
 
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
-import deleteNetworkInterface from '@/api/admin/nodes/networkInterfaces/deleteNetworkInterface.ts'
-import { networkInterfaceQueries } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
+import {
+    deleteNetworkInterface,
+    networkInterfaceQueries,
+} from '@/features/nodes/network-interfaces/api.ts'
 
 import useNetworkInterfacesModalStore from '@/components/interfaces/Admin/Node/Network/use-network-interfaces-modal-store.ts'
 

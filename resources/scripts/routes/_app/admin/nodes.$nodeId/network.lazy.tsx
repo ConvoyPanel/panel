@@ -1,7 +1,7 @@
 import { IconWifiOff } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import useNetworkInterfaces from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
+import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
 
 import CreateNetworkModal from '@/components/interfaces/Admin/Node/Network/CreateNetworkModal.tsx'
 import NetworkInterfaceCard from '@/components/interfaces/Admin/Node/Network/NetworkInterfaceCard.tsx'

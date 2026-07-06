@@ -56,9 +56,11 @@ clean.
    dir (only `{createServer,getServer,getServers,use-server,use-servers}`) — state already lives in
    `features/servers/state/api.ts`. The admin `show` route param is typed `{server: uuid}` by
    Wayfinder but binds by id, so `getServer(id)` calls `showRoute(String(id))` to preserve the URL.
-2. **node sub-resources** — `api/admin/nodes/storages/**` (StorageController) and
-   `api/admin/nodes/networkInterfaces/**` (NetworkInterfaceController). Separate controllers from the
-   nodes core already migrated. See `LoadBalancerSidebar.tsx` (storages) for an optimistic-update consumer.
+2. ✅ **node sub-resources** — DONE. `features/nodes/storages/api.ts` (StorageController) and
+   `features/nodes/network-interfaces/api.ts` (NetworkInterfaceController). Controllers live under
+   `wayfinder/.../Admin/Nodes/`. Storage `update`/`updateBackupOrder` are PUT; the whole old
+   `api/admin/nodes/` dir is now gone. `LoadBalancerSidebar.tsx` (optimistic backup-order) repointed
+   and still builds.
 3. **account/authenticator** — `use-{is-authenticator-enabled,qr-code,recovery-codes,secret-key}.ts` (+ their get* / mutations).
 4. **account/passkeys** — `use-passkeys.ts` (+ passkey register/delete; transformer `api/transformers/passkey.ts`).
 5. **client `api/servers/**`** — `use-server`, `use-server-{state,deployment,resources,statistics}`, `use-addresses`, `use-template-groups` and their `get*` (Client controllers — mostly clean callables, no URI-keyed dict complication). Some already partly under `features/servers/`.

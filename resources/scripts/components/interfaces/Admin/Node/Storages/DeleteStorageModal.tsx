@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
-import { storageQueries } from '@/api/admin/nodes/storages/use-storages.ts'
+import { storageQueries } from '@/features/nodes/storages/api.ts'
 
 import useStoragesModalStore from '@/components/interfaces/Admin/Node/Storages/use-storages-modal-store.ts'
 
@@ -20,7 +20,7 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
-import deleteStorage from '@/api/admin/nodes/storages/deleteStorage.ts'
+import { deleteStorage } from '@/features/nodes/storages/api.ts'
 
 const DeleteStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()

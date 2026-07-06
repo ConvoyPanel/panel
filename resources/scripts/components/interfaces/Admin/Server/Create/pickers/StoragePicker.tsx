@@ -2,7 +2,7 @@ import { Storage } from '@/types/storage'
 import byteSize from 'byte-size'
 import { useFormContext } from 'react-hook-form'
 
-import useStorages from '@/api/admin/nodes/storages/use-storages'
+import { useStorages } from '@/features/nodes/storages/api.ts'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { IconDatabase } from '@tabler/icons-react'
 import {

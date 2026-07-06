@@ -18,10 +18,11 @@ import { toast } from 'sonner'
 
 import { useQueryClient } from '@tanstack/react-query'
 
-import updateBackupOrder from '@/api/admin/nodes/storages/updateBackupOrder.ts'
-import useStorages, {
+import {
+    updateBackupOrder,
+    useStorages,
     storageQueries,
-} from '@/api/admin/nodes/storages/use-storages.ts'
+} from '@/features/nodes/storages/api.ts'
 
 import SortableStorageCard from '@/components/interfaces/Admin/Node/Storages/SortableStorageCard.tsx'
 

@@ -10,10 +10,11 @@ import { z } from 'zod'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { NetworkInterface } from '@/types/network-interface.ts'
 
-import createNetworkInterface, {
+import {
+    createNetworkInterface,
     networkInterfaceSchema,
-} from '@/api/admin/nodes/networkInterfaces/createNetworkInterface.ts'
-import { networkInterfaceQueries } from '@/api/admin/nodes/networkInterfaces/use-network-interfaces.ts'
+    networkInterfaceQueries,
+} from '@/features/nodes/network-interfaces/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

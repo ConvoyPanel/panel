@@ -10,10 +10,11 @@ import { z } from 'zod'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { NodeStorage } from '@/types/storage.ts'
 
-import createStorage, {
+import {
+    createStorage,
     storageSchema,
-} from '@/api/admin/nodes/storages/createStorage.ts'
-import { storageQueries } from '@/api/admin/nodes/storages/use-storages.ts'
+    storageQueries,
+} from '@/features/nodes/storages/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
