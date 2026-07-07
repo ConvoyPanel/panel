@@ -6,7 +6,7 @@ originated as `~/.claude/plans/help-me-plan-a-cryptic-peacock.md`, which isn't r
 every environment). This file tracks *what's actually done* and *what to pick up next*, so a
 cold start doesn't re-derive it.
 
-Last updated: 2026-07-06
+Last updated: 2026-07-07
 
 ---
 
@@ -703,6 +703,80 @@ Verified:
   delete both the metadata row and the Redis session key for that individual session. Expose an account
   page/API so users can see last used date, basic device info, approximate location, and revoke sessions
   one at a time.
+
+- **Storage accounting polish — PVE truth + reserve buffer (user request 2026-07-07) — NOT STARTED.**
+  Today a storage's capacity is the operator-entered `Storage.size`, and "usage" is Convoy's *own
+  bookkeeping* — `Storage::scopeWithUsageSums()` sums `servers.disk` + `backups.size` + `isos.size`
+  (MiB→bytes). That's **what Convoy allocated**, not what the disk actually holds. The base Proxmox
+  system, non-Convoy VMs, and filesystem/thin metadata are invisible — they're the gap between PVE's
+  real `used` and Convoy's summed `used` — so "X of Y used" undercounts consumption and overpromises
+  free space, causing oversubscription / allocation failures. (This is the exact concern the user
+  raised: the operator types a total that ignores base-system overhead.)
+
+  **The ground truth already exists but is disconnected:** `ProxmoxStorageRepository::getStorages()` /
+  `getStorage($name)` return live `used`/`avail`/`total` per storage as `StorageData` (surfaced by the
+  `fetchFromProxmox` endpoint), which *does* include the base system. Nothing reconciles it against
+  the `Storage` model's manual `size` + Convoy-committed sum.
+
+  **Design decision (user-approved 2026-07-07): PVE live status is the source of truth for
+  total/used/free; add a per-storage _reserve buffer_ (headroom) on top. NO soft cap** — Convoy is the
+  only writer to these storages, so a "carve Convoy's slice of a shared storage" cap isn't needed.
+  - **Capacity/usage** come from live PVE (`StorageData.total/used/free`), not from `Storage.size`.
+    The operator-entered `size` is demoted to advisory (or dropped) — it is no longer the denominator.
+  - **Reserve buffer:** new nullable `reserved_bytes` (stored via `StorageSizeCast`, MiB like the
+    others) on `storages`. Meaning: never let Convoy allocate into the last N bytes of *free* space.
+  - **Fit / allocation check** (drives `TemplateFitsStorage`, server-create disk validation, and the
+    admin storage UI's "free to allocate"):
+    ```
+    free_for_convoy = PVE.avail − reserved_bytes
+    ```
+    A new disk is allowed only if its size ≤ `free_for_convoy`. Today `TemplateFitsStorage` only checks
+    template-vs-server-disk-limit, never against remaining storage capacity — this adds the real check.
+  - **Present three distinct figures** in the admin storage view so overhead is *visible*, not
+    silently netted out:
+    1. **Physical (PVE):** total / used / avail — real, includes base system.
+    2. **Allocated by Convoy:** the existing `withUsageSums` figure (server disks + backups + isos).
+    3. **Untracked = PVE.used − Convoy-committed** — the base-system + non-Convoy slice, made explicit.
+  - **Caching + offline fallback:** live PVE status is a per-node network call — cache with a short TTL
+    (mirror `OverviewService`'s 15s) and degrade gracefully when the node is offline: fall back to the
+    last-known/`size` figure and flag it stale rather than erroring the whole storage list.
+  - **Thin-provisioning note (don't try to reconcile the two to one number):** on thin LVM / ZFS /
+    qcow2 the Convoy-committed sum *overcounts* (disks aren't fully written) while PVE `used`
+    *undercounts* the commitment — the two legitimately differ. Show both; the point is transparency,
+    not forcing them equal.
+  - **Coupling with multi-disk (below):** once a server has N disks across storages, the
+    "Allocated by Convoy" per-storage sum must aggregate `server_disks`, not `servers.disk`. Build the
+    aggregation disk-oriented from the start (or land multi-disk first) so it doesn't need reworking.
+  - Touch points: `storages` migration (`reserved_bytes`), `Storage` model + `StorageEloquentData`
+    (expose reserve + the live/committed/untracked figures), `StorageController::index` (merge live
+    `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
+    `features/nodes/storages` UI (three-figure display + reserve field).
+
+- **Multiple storages (disks) per VM (user request 2026-07-07) — NOT STARTED.**
+  A `Server` today has a **single** `storage_id` + single `disk` (see `Server::storage()` and the
+  `disk`/`storage_id` columns) — it models exactly one disk. Proxmox VMs support **many** disks
+  (`scsi0..N`, `virtio0..N`, …), each potentially on a **different** storage. The config layer already
+  parses this (`DiskData`, whose `volume` = `{storage}:...`), so the Proxmox side supports it — it's
+  the *panel data model* that flattens to one.
+
+  **Direction:**
+  - **New `server_disks` child table** (one row per disk): `server_id`, `storage_id`, `size`
+    (MiB via `StorageSizeCast`), `interface` (e.g. `scsi0`/`virtio0`), `is_primary`/boot flag, and a
+    `disk_index` for ordering. `Server hasMany disks`; `Storage hasMany serverDisks`.
+  - **Migration + backfill:** create `server_disks`, copy each server's existing `(storage_id, disk)`
+    into a primary disk row. Then either drop `servers.disk`/`storage_id` or keep them as a
+    denormalized "primary disk" pointer for compatibility (decide when building — leaning drop, with a
+    `primaryDisk()` accessor, to avoid two sources of truth).
+  - **Storage usage aggregation moves to disks:** `Storage::scopeWithUsageSums()`'s
+    `withSum('servers','disk')` becomes a sum over `server_disks.size` grouped by `storage_id`. This is
+    the aggregation the storage-accounting item above must read from.
+  - **Server creation / allocation:** accept an **array of disks**; validate each against *its own*
+    storage (`StorageAllows(images)` + the new capacity fit check per disk). Generalize
+    `TemplateFitsStorage` to per-disk. Push each disk to Proxmox as its own `scsiN`/`virtioN` volume.
+  - **Frontend:** server create/edit gains a disk list (add/remove disk, per-disk storage + size +
+    interface). This is the larger lift; the backend model + allocation is the foundation.
+  - **Sequencing:** land the `server_disks` model first (it's the foundation), then point the storage
+    accounting item's "Allocated by Convoy" sum at it. The two are the same data pipeline.
 
 ## Test database isolation (RefreshDatabase + dedicated `db_test`)
 
