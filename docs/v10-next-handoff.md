@@ -443,13 +443,18 @@ Verified:
   > stamps `server_id`. Tests: `tests/Unit/Services/Addresses/AddressAllocationServiceTest.php` (6).
   > Suite 123 passed; PHPStan `app/` zero.
   >
+  > **Slice 2 (Postgres `inet` + index) — DONE (2026-07-07), commit `46d9b398`.** Postgres-only was
+  > approved ([[v10-postgres-only]]; CI moved to Postgres 17 in `0a1ea758`). Migration
+  > `2026_07_07_000000_convert_ip_columns_to_inet` converts `addresses.ip`, `address_blocks.base_ip`
+  > and `.gateway` from varchar to native `inet` (`ALTER … USING …::inet`), and adds the partial index
+  > `addresses_free_by_block_ip_idx ON addresses (address_block_id, ip) WHERE server_id IS NULL`. The
+  > allocator now `ORDER BY ip` (numeric, no lexical `10.0.0.10 < 10.0.0.2` bug), served by the index
+  > with no sort. **Verified with `EXPLAIN ANALYZE` on 50k rows: Index Scan on the partial index, 2
+  > rows read, 7 buffer hits, no Sort, 0.03 ms** — the O(log N + n) seek, not a table scan. The `ip`
+  > column still returns as a string in PHP (inet renders bare host addresses), so the TS contract
+  > (`ip: string`) is unchanged. Suite 124; PHPStan zero.
+  >
   > **Remaining slices (not yet started):**
-  > - **Slice 2 — store IPs as Postgres `inet`.** The keystone; correct ordering (`10.0.0.2` <
-  >   `10.0.0.10`), arithmetic (`ip + 1`), subnet containment (`<<`), gap detection via `LEAD()`/
-  >   `LAG()`. **⚠️ DECISION NEEDED (see below): `inet` is Postgres-only, so this commits v10 to
-  >   Postgres and forces CI off MySQL 8.0.** Until decided, Slice 1 orders by `id` (rows are inserted
-  >   in ascending-IP order by the generator, so `id` order ≈ IP order — good enough for *correctness*;
-  >   `inet` makes lowest-IP-first exact).
   > - **Slice 3 — address state (`available`/`assigned`/`reserved`) + reserve-IP feature.** Replace the
   >   binary `server_id IS NULL` with an enum; auto-exclude network/broadcast/gateway; allocator
   >   filters `state = 'available'`. Small enum + migration; the query already filters, so it slots in.
@@ -457,12 +462,10 @@ Verified:
   >   admin never fully generated can under-allocate. Small blocks: keep pre-materializing. Large/v6:
   >   sparse-store with a per-block cursor/high-water-mark + unique constraint + retry-on-conflict.
   >
-  > **⚠️ Postgres-only decision (blocks Slice 2).** Runtime is already Postgres (ddev + operator
-  > target); but `.env.example` still defaults `DB_CONNECTION=mysql` and **CI runs MySQL 8.0**.
-  > Committing to `inet` means moving CI to a Postgres service and dropping MySQL-runtime support for
-  > v10. Given Phase 3 moves every operator onto Postgres and fresh installs are Postgres-native, this
-  > is the intended direction — but it's a support-matrix commitment the maintainer should make
-  > explicitly before Slice 2 lands.
+  > **✅ Postgres-only decision — MADE (2026-07-07).** v10 is Postgres-only; MySQL runtime support is
+  > dropped. CI moved from MySQL 8.0 → Postgres 17 (`0a1ea758`), `.env.ci`/`.env.example` default to
+  > `pgsql`, and the `next` branch is now in the CI push triggers. See [[v10-postgres-only]]. This
+  > unblocked Slice 2 (done, above).
 
   ---
   Original problem analysis (kept for reference):
