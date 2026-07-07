@@ -429,8 +429,44 @@ Verified:
 
 ## Product follow-ups to add to the roadmap
 
-- **IPAM allocator rewrite + reserve-IP feature (user request 2026-07-05).** The current free-IP
-  allocation is the most fragile part of IPAM and doesn't scale. Two parallel, disagreeing mechanisms
+- **IPAM allocator rewrite + reserve-IP feature (user request 2026-07-05) — IN PROGRESS.**
+
+  > **Slice 1 (DB-agnostic allocator) — DONE (2026-07-07), commit `20c6de73`.** Rewrote
+  > `AddressAllocationService::handle` from the O(address-space) offset walk into one indexed query
+  > per version over the pre-materialized free rows: `WHERE address_block_id IN (…) AND server_id IS
+  > NULL ORDER BY id LIMIT n FOR UPDATE SKIP LOCKED`. Kills the unbounded loop, the double-assign
+  > race (SKIP LOCKED hands concurrent allocations different rows), and the two-disagreeing-mechanisms
+  > problem (now consumes `GenerateAddressesAction`'s rows instead of `firstOrCreate`-ing new ones).
+  > `FOR UPDATE SKIP LOCKED` works on **both** Postgres and MySQL 8.0 → no schema change, CI stays
+  > green. Contract: must run inside the caller's transaction (ServerCreationService already wraps
+  > create in `DB::transaction`) so the locks reserve the still-unassigned rows until `syncAddresses`
+  > stamps `server_id`. Tests: `tests/Unit/Services/Addresses/AddressAllocationServiceTest.php` (6).
+  > Suite 123 passed; PHPStan `app/` zero.
+  >
+  > **Remaining slices (not yet started):**
+  > - **Slice 2 — store IPs as Postgres `inet`.** The keystone; correct ordering (`10.0.0.2` <
+  >   `10.0.0.10`), arithmetic (`ip + 1`), subnet containment (`<<`), gap detection via `LEAD()`/
+  >   `LAG()`. **⚠️ DECISION NEEDED (see below): `inet` is Postgres-only, so this commits v10 to
+  >   Postgres and forces CI off MySQL 8.0.** Until decided, Slice 1 orders by `id` (rows are inserted
+  >   in ascending-IP order by the generator, so `id` order ≈ IP order — good enough for *correctness*;
+  >   `inet` makes lowest-IP-first exact).
+  > - **Slice 3 — address state (`available`/`assigned`/`reserved`) + reserve-IP feature.** Replace the
+  >   binary `server_id IS NULL` with an enum; auto-exclude network/broadcast/gateway; allocator
+  >   filters `state = 'available'`. Small enum + migration; the query already filters, so it slots in.
+  > - **Slice 4 — materialization policy for huge/v6 blocks.** Slice 1 is pure-consume, so a block the
+  >   admin never fully generated can under-allocate. Small blocks: keep pre-materializing. Large/v6:
+  >   sparse-store with a per-block cursor/high-water-mark + unique constraint + retry-on-conflict.
+  >
+  > **⚠️ Postgres-only decision (blocks Slice 2).** Runtime is already Postgres (ddev + operator
+  > target); but `.env.example` still defaults `DB_CONNECTION=mysql` and **CI runs MySQL 8.0**.
+  > Committing to `inet` means moving CI to a Postgres service and dropping MySQL-runtime support for
+  > v10. Given Phase 3 moves every operator onto Postgres and fresh installs are Postgres-native, this
+  > is the intended direction — but it's a support-matrix commitment the maintainer should make
+  > explicitly before Slice 2 lands.
+
+  ---
+  Original problem analysis (kept for reference):
+  Two parallel, disagreeing mechanisms
   exist today: `GenerateAddressesAction` **pre-materializes** every allocatable slot as an `Address`
   row (`server_id = null`, batched 300), but `AddressAllocationService::handle()` **ignores those free
   rows** — it loads only *assigned* IPs into memory (`whereNotNull('server_id')`) and does a linear
