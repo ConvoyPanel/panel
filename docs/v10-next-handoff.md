@@ -794,13 +794,12 @@ Verified:
   > `tests/Unit/Models/StorageUsageAggregationTest.php` (per-storage + cross-storage sums; relations).
   > Suite 151; PHPStan zero.
   >
-  > **⚠️ Discovered (pre-existing, NOT fixed — out of Slice 1 scope):** `ServerCreationService::handle`
-  > calls `Server::create(['uuid' => …, 'uuid_short' => …])`, but both are in the model's `$guarded`, so
-  > mass-assignment silently drops them → `null value in column "uuid"`. Server creation through this
-  > service is currently **broken on `next`** independent of this work. The intended pattern is the
-  > repository force-create (`ServerRepository::create($fields, force: true)` → `forceFill`); this looks
-  > like a regression. No creation test exercised it, which is why it went unnoticed. Fix separately
-  > (route the create through the repository, or narrow `$guarded`), then add a creation feature test.
+  > **Discovered + FIXED (commit `c9714682`):** `ServerCreationService::handle` called
+  > `Server::create(['uuid' => …, 'uuid_short' => …])`, but both are `$guarded`, so mass-assignment
+  > silently dropped them → `null value in column "uuid"`; server creation via the service was **broken
+  > on `next`**. Switched to `Server::forceCreate` (assigns while unguarded; save-time validation
+  > unchanged). No creation test had exercised it — now `tests/Feature/Servers/ServerCreationDiskTest.php`
+  > locks uuid population + the primary `server_disks` mirror.
 
 
   A `Server` today has a **single** `storage_id` + single `disk` (see `Server::storage()` and the
