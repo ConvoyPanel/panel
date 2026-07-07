@@ -20,24 +20,27 @@ class ApiKeyData extends Data
         public string $name,
         public ?CarbonImmutable $lastUsedAt,
         public Optional|string $plainTextToken,
+        // The admin who minted the token (audit). Null once that admin is deleted — the token lives on.
         #[LoadRelation]
-        public Lazy|UserData $user,
+        public Lazy|UserData|null $createdBy,
     ) {}
 
     public static function fromModel(PersonalAccessToken $token, ?string $plainTextToken = null): self
     {
         return new self(
             id: $token->id,
-            type: $token->type,
+            type: $token->type->value,
             name: $token->name,
             lastUsedAt: $token->last_used_at
                 ? CarbonImmutable::parse($token->last_used_at)
                 : null,
             plainTextToken: $plainTextToken ?? Optional::create(),
-            user: Lazy::whenLoaded(
-                'tokenable',
+            createdBy: Lazy::whenLoaded(
+                'createdBy',
                 $token,
-                fn () => UserData::from($token->tokenable),
+                fn () => $token->createdBy
+                    ? UserData::from($token->createdBy)
+                    : null,
             ),
         );
     }
