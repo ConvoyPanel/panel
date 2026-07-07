@@ -289,6 +289,16 @@ denied on `/tokens`; session admin still manages tokens; non-admin token rejecte
   MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
   against a restored prod snapshot; reconcile `develop`'s newer commits.
 
+> **`verify.sh` host-arch caveat (2026-07-07).** The engine-conversion harness
+> (`database/cutover/verify.sh`) is green *where pgloader can run amd64* — x86_64 hosts or
+> **macOS Docker Desktop (Rosetta)**. It cannot self-verify inside an **arm64 Linux** sandbox:
+> `dimitri/pgloader` is amd64-only and its SBCL/Lisp runtime segfaults under Linux qemu-user
+> emulation (Rosetta handles it; qemu-user doesn't). Debian's native-arm64 pgloader is too old
+> (3.6.7~devel) and dies on MySQL 8.0 collation IDs ("N fell through ECASE"). The harness now
+> takes a `PGLOADER_IMAGE` override (default unchanged) and prints a targeted diagnostic instead
+> of a raw crash. **Net: run `verify.sh` (and the real cutover) on the Mac / an x86_64 box, not
+> in an arm64 sandbox.** Steps 1–2 (boot MySQL, migrate+seed the full v10 schema) pass everywhere.
+
 ### Cutover migration audit (DONE — no prod data needed)
 The only migrations that actually *execute* at cutover are the **24 on `next` but not on
 `develop`/prod** (pgloader copies the `migrations` table, so prod's already-run migrations are
