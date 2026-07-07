@@ -1,8 +1,10 @@
 # v10 (`next`) rewrite — working handoff
 
 Living notes for the effort to ship `next` (v10) as the new trunk. Update as phases land.
-Roadmap of record: `~/.claude/plans/help-me-plan-a-cryptic-peacock.md` (5 phases). This file
-tracks *what's actually done* and *what to pick up next*, so a cold start doesn't re-derive it.
+Roadmap of record: [v10-roadmap.md](v10-roadmap.md) (5 phases) — checked into the repo (it
+originated as `~/.claude/plans/help-me-plan-a-cryptic-peacock.md`, which isn't reachable from
+every environment). This file tracks *what's actually done* and *what to pick up next*, so a
+cold start doesn't re-derive it.
 
 Last updated: 2026-07-06
 
