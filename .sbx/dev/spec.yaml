@@ -1,0 +1,46 @@
+schemaVersion: "1"
+kind: mixin
+name: convoy-dev
+displayName: Convoy dev sandbox
+description: Provision ddev inside a Docker Sandbox for working on Convoy.
+
+# Appended to the agent's memory at sandbox creation — tells the agent how to
+# finish provisioning and run common tasks. (ddev itself is installed/started by
+# the commands below; these are the project-state steps that shouldn't run
+# automatically.)
+agentContext: |
+  # Convoy dev sandbox
+
+  ddev is installed and started for you (Laravel + Postgres), isolated from your
+  host ddev — its database is this sandbox's own.
+
+  Finish provisioning once:
+
+      ddev composer install
+      ddev exec php artisan migrate
+      ddev exec php artisan db:seed --class=DevNodeSeeder   # a Proxmox node from PROXMOX_* in .env
+
+  Everyday:
+
+      ddev exec php artisan test        # test suite
+      ddev exec php artisan <cmd>        # artisan
+      ddev describe                      # status / URLs
+
+  Note: vendor/ and node_modules/ are shared with your host repo via the mounted
+  workspace, so composer/npm installs here also land in your host checkout.
+
+commands:
+  # Runs ONCE at creation (as root). Slow the first time (installs ddev). Bake it
+  # into a template so it isn't repeated:  sbx template save convoy-dev
+  install:
+    # ddev's installer refuses to run as root and uses sudo itself, so run it as
+    # the agent user (uid 1000, which is in the sudo group).
+    - command: "command -v ddev >/dev/null 2>&1 || curl -fsSL https://ddev.com/install.sh | bash"
+      user: "1000"
+      description: install ddev
+
+  # Runs on EVERY start (as the agent user). Fast once ddev's images are baked
+  # into a template.
+  startup:
+    - command: ["bash", "-lc", "cd \"${WORKSPACE_DIR:-.}\" && ddev start -y"]
+      description: boot the ddev stack
