@@ -704,7 +704,31 @@ Verified:
   page/API so users can see last used date, basic device info, approximate location, and revoke sessions
   one at a time.
 
-- **Storage accounting polish — PVE truth + reserve buffer (user request 2026-07-07) — NOT STARTED.**
+- **Storage accounting polish — PVE truth + reserve buffer (user request 2026-07-07) — DISPLAY +
+  RESERVE DONE (2026-07-07); allocation-time enforcement still open.**
+
+  > **Done (commits `1ffcdc8b` backend + `a82f70cf` UI):** capacity/usage now read from **live
+  > Proxmox status** merged into the storage list, cached 15s per node with graceful offline fallback
+  > (`online:false`, null physical figures, list still renders). Added `storages.reserved_bytes`
+  > (MiB via `StorageSizeCast`) — the reserve-buffer headroom knob. `StorageEloquentData` exposes
+  > `physicalTotal/Used/Free`, `committedByConvoy` (server+backup+iso), `untracked`
+  > (`physicalUsed − committed`, the base-system slice made explicit), and `freeForConvoy`
+  > (`physicalFree − reserved`). `ShowStorageModal` renders the breakdown against physical capacity
+  > with distinct "Untracked" + "Reserved headroom" segments; create/edit forms gained the reserve
+  > field. Tests: `tests/Feature/Controllers/Admin/Nodes/StorageControllerTest.php` (live merge +
+  > derivations; offline fallback). Suite 146; PHPStan zero; tsc + vite build green. **Not visually
+  > verified in-browser** — the live/online path needs a real Proxmox node the dev env lacks (offline
+  > path + data contract are covered).
+  >
+  > **Still open — the reserve is currently informational, not enforced.** `TemplateFitsStorage` only
+  > checks template-disk vs the server's disk limit; it does **not** yet reject an allocation that
+  > exceeds `freeForConvoy`. Next slice: enforce `newDiskSize ≤ freeForConvoy` at server-create /
+  > disk-resize time (uses the same cached live lookup). **Fail-open when the node is offline** (don't
+  > block creation on a transient outage — mirror the list's degradation). This is what makes the
+  > reserve buffer actually bind. Depends on the multi-disk item below for per-disk sizing once that
+  > lands — until then it checks the single `disk`.
+
+  Original problem (kept for reference):
   Today a storage's capacity is the operator-entered `Storage.size`, and "usage" is Convoy's *own
   bookkeeping* — `Storage::scopeWithUsageSums()` sums `servers.disk` + `backups.size` + `isos.size`
   (MiB→bytes). That's **what Convoy allocated**, not what the disk actually holds. The base Proxmox
@@ -752,7 +776,21 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — NOT STARTED.**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DEFERRED pending Proxmox push-path
+  design (sequencing decided 2026-07-07).**
+
+  > **Why deferred / sequencing note:** the Proxmox *push path* for multi-disk doesn't exist yet.
+  > Today a server is built by **cloning a template onto one target storage** (`server->storage->name`
+  > in `ProxmoxServerRepository::create`) and resizing only the **largest** disk to `server->disk`
+  > (`AllocationService::syncSettings`). There is no Convoy plumbing to add a disk, or to place disks
+  > on *different* storages — only clone-to-one-storage + resize-largest. So building the `server_disks`
+  > data model now would be **scaffolding with no end-to-end consumer** (the thing this codebase
+  > repeatedly warns against — cf. the DiskData "don't add emit speculatively" notes). The storage
+  > accounting item above was built **first** because it's fully realizable today; its "Allocated by
+  > Convoy" sum currently reads `servers.disk` and is designed to repoint at `server_disks` when this
+  > lands. **Before starting: design the Proxmox multi-disk push path** (add-disk / per-disk target
+  > storage / boot order) so the model has a tested consumer.
+
   A `Server` today has a **single** `storage_id` + single `disk` (see `Server::storage()` and the
   `disk`/`storage_id` columns) — it models exactly one disk. Proxmox VMs support **many** disks
   (`scsi0..N`, `virtio0..N`, …), each potentially on a **different** storage. The config layer already
