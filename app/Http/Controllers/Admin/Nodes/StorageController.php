@@ -12,10 +12,9 @@ use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Services\Nodes\LiveStorageService;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -23,6 +22,7 @@ class StorageController extends Controller
 {
     public function __construct(
         private ProxmoxStorageRepository $repository,
+        private LiveStorageService $liveStorage,
         private ConnectionInterface $connection,
     ) {}
 
@@ -63,7 +63,7 @@ class StorageController extends Controller
 
         return StorageEloquentData::fromModel(
             $storage,
-            $this->liveStorages($node)->get($storage->name),
+            $this->liveStorage->get($node, $storage->name),
         );
     }
 
@@ -84,7 +84,7 @@ class StorageController extends Controller
 
         return StorageEloquentData::fromModel(
             $storage,
-            $this->liveStorages($node)->get($storage->name),
+            $this->liveStorage->get($node, $storage->name),
         );
     }
 
@@ -117,7 +117,7 @@ class StorageController extends Controller
      */
     private function mapWithLiveData(Node $node, Collection $storages): DataCollection
     {
-        $live = $this->liveStorages($node);
+        $live = $this->liveStorage->forNode($node);
 
         return StorageEloquentData::collect(
             $storages->map(fn (Storage $storage) => StorageEloquentData::fromModel(
@@ -126,24 +126,5 @@ class StorageController extends Controller
             ))->all(),
             DataCollection::class,
         );
-    }
-
-    /**
-     * Live Proxmox storage status keyed by storage name, cached briefly (the
-     * figures move slowly and this is a per-request network call). Returns an
-     * empty collection when the node is unreachable so callers can fall back.
-     *
-     * @return Collection<string, StorageData>
-     */
-    private function liveStorages(Node $node): Collection
-    {
-        return Cache::remember("node:{$node->id}:live-storages", now()->addSeconds(15), function () use ($node) {
-            try {
-                return collect($this->repository->setNode($node)->getStorages()->all())
-                    ->keyBy(fn (StorageData $storage) => $storage->name);
-            } catch (RequestException|ConnectionException) {
-                return collect();
-            }
-        });
     }
 }
