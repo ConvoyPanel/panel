@@ -3,6 +3,7 @@
 use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Coterm\CotermAuthenticate;
+use App\Http\Middleware\EnforceTokenAbilities;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -41,7 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 // of truth. Session vs. token access is differentiated at the
                 // guard (auth:sanctum here vs. web session on /api/admin), and
                 // token-forbidden routes opt out via DenyApiTokenAccess.
-                Route::middleware(['auth:sanctum', AdminAuthenticate::class])
+                Route::middleware(['auth:sanctum', AdminAuthenticate::class, EnforceTokenAbilities::class])
                     ->prefix('/api/application')
                     ->as('application.')
                     ->scopeBindings()

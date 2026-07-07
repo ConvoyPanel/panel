@@ -33,7 +33,7 @@ class TokenController
 
     public function store(StoreTokenRequest $request)
     {
-        $newToken = $this->createApplicationToken->handle($request->user(), $request->name);
+        $newToken = $this->createApplicationToken->handle($request->user(), $request->name, $request->abilities());
 
         if (! $newToken->accessToken instanceof PersonalAccessToken) {
             throw new LogicException('Sanctum is not using the application personal access token model.');
