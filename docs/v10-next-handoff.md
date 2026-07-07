@@ -779,45 +779,72 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DEFERRED pending Proxmox push-path
-  design (sequencing decided 2026-07-07).**
-
-  > **Why deferred / sequencing note:** the Proxmox *push path* for multi-disk doesn't exist yet.
-  > Today a server is built by **cloning a template onto one target storage** (`server->storage->name`
-  > in `ProxmoxServerRepository::create`) and resizing only the **largest** disk to `server->disk`
-  > (`AllocationService::syncSettings`). There is no Convoy plumbing to add a disk, or to place disks
-  > on *different* storages — only clone-to-one-storage + resize-largest. So building the `server_disks`
-  > data model now would be **scaffolding with no end-to-end consumer** (the thing this codebase
-  > repeatedly warns against — cf. the DiskData "don't add emit speculatively" notes). The storage
-  > accounting item above was built **first** because it's fully realizable today; its "Allocated by
-  > Convoy" sum currently reads `servers.disk` and is designed to repoint at `server_disks` when this
-  > lands. **Before starting: design the Proxmox multi-disk push path** (add-disk / per-disk target
-  > storage / boot order) so the model has a tested consumer.
-
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED 2026-07-07, NOT YET
+  BUILT.**
   A `Server` today has a **single** `storage_id` + single `disk` (see `Server::storage()` and the
-  `disk`/`storage_id` columns) — it models exactly one disk. Proxmox VMs support **many** disks
-  (`scsi0..N`, `virtio0..N`, …), each potentially on a **different** storage. The config layer already
-  parses this (`DiskData`, whose `volume` = `{storage}:...`), so the Proxmox side supports it — it's
-  the *panel data model* that flattens to one.
+  `disk`/`storage_id` columns). Proxmox VMs support **many** disks (`scsi0..N`, `virtio0..N`, …), each
+  potentially on a **different** storage. `DiskData` already parses this (`volume` = `{storage}:...`);
+  it's the *panel data model* that flattens to one.
 
-  **Direction:**
-  - **New `server_disks` child table** (one row per disk): `server_id`, `storage_id`, `size`
-    (MiB via `StorageSizeCast`), `interface` (e.g. `scsi0`/`virtio0`), `is_primary`/boot flag, and a
-    `disk_index` for ordering. `Server hasMany disks`; `Storage hasMany serverDisks`.
-  - **Migration + backfill:** create `server_disks`, copy each server's existing `(storage_id, disk)`
-    into a primary disk row. Then either drop `servers.disk`/`storage_id` or keep them as a
-    denormalized "primary disk" pointer for compatibility (decide when building — leaning drop, with a
-    `primaryDisk()` accessor, to avoid two sources of truth).
-  - **Storage usage aggregation moves to disks:** `Storage::scopeWithUsageSums()`'s
-    `withSum('servers','disk')` becomes a sum over `server_disks.size` grouped by `storage_id`. This is
-    the aggregation the storage-accounting item above must read from.
-  - **Server creation / allocation:** accept an **array of disks**; validate each against *its own*
-    storage (`StorageAllows(images)` + the new capacity fit check per disk). Generalize
-    `TemplateFitsStorage` to per-disk. Push each disk to Proxmox as its own `scsiN`/`virtioN` volume.
-  - **Frontend:** server create/edit gains a disk list (add/remove disk, per-disk storage + size +
-    interface). This is the larger lift; the backend model + allocation is the foundation.
-  - **Sequencing:** land the `server_disks` model first (it's the foundation), then point the storage
-    accounting item's "Allocated by Convoy" sum at it. The two are the same data pipeline.
+  **Proxmox primitives (verified against `docs/pve-api/`):**
+  - **Allocate a fresh empty disk:** config set `scsiN=STORAGE:SIZE_GiB[,opts]` (the special
+    `STORAGE_ID:SIZE_IN_GiB` syntax makes PVE allocate a new volume). Fast — metadata only, no copy —
+    so it's a **synchronous** `ProxmoxConfigRepository::update` write, no async task tracking.
+  - **Resize (grow only):** `PUT …/resize` — already wrapped by `ProxmoxDiskRepository::setDiskSize`.
+  - **Move to another storage:** `POST …/move_disk` — **async** (UPID), slow (data copy). Only needed
+    to split a *template's own* disks across storages → **deferred (YAGNI)**.
+  - Delete: config `delete=scsiN` (already used by `unmountIso`). Boot order: `setBootOrder` (exists).
+
+  **Core insight — two kinds of disk.** The build **clones a template**, so the clone's disks are the
+  template's, on the clone's single target storage. Therefore:
+  1. **Primary/OS disk** — from the clone, then resized. Storage = clone target (`server->storage->name`,
+     already operator-chosen). This *is* today's single `(storage_id, disk)`.
+  2. **Secondary/data disks** — not in the template; **allocated fresh** post-clone via
+     `scsiN=STORAGE:SIZE`, each on its own target storage.
+  ⇒ **v1 never needs `move_disk`.** Primary goes where the clone puts it; secondaries are allocated
+  directly on their target.
+
+  **Build sequence (extends the existing job chain, no new async machinery):**
+  `BuildServerJob` (clone → primary storage, unchanged) → `WaitUntilVmIsCreatedJob` (unchanged) →
+  `ConfigureVmJob`: resize primary (unchanged) → **for each secondary: `config.update({scsiN:
+  "storage:SIZE,opts"}, digest)` (NEW)** → set boot order (primary first).
+
+  **Data model — `server_disks`** (one row per disk): `server_id` (FK cascade), `storage_id` (FK),
+  `size` (MiB, `StorageSizeCast`), `interface` (nullable string e.g. `scsi1`, assigned at build),
+  `is_primary` (bool), `disk_index` (int). `interface` is populated **post-build** (the primary's
+  interface isn't known until the cloned config is read; secondaries get the slot we allocate) — makes
+  retries deterministic + enables edit/boot-order. Slot assignment reuses the **already-present**
+  `DiskInterface::getNextAvailableSlot('scsi', $usedSlots)` (same pattern `mountIso` uses for `ide`).
+
+  **Idempotency/safety (existing Phase-2 patterns):** digest optimistic concurrency on every allocate
+  write; **skip-if-present** (read config; if `scsiN` already holds the expected volume, skip — so a
+  `ConfigureVmJob` retry, `tries=3`, can't double-allocate); persist the assigned `interface` back to
+  the row. Allocation syntax is integer GiB → keep secondary sizes GiB-aligned, allocate exactly.
+
+  **Ties to item 1:** generalize `HasSufficientDiskSpace` from the single `limits.disk` to **per-disk
+  against each disk's own storage** (sum disks targeting the same storage) vs `freeForConvoy`. And
+  `Storage::scopeWithUsageSums`' server-disk sum moves from `servers.disk` to `server_disks.size` →
+  item 1's `committedByConvoy` follows automatically.
+
+  **Decisions (user-approved 2026-07-07):**
+  - **Migration shape: expand-first, contract-later.** v1 **keeps** `servers.storage_id`/`disk` as the
+    primary-disk pointer (the clone still reads `server->storage->name`); `server_disks` is additive
+    with a primary row + secondary rows. A **later** slice turns the columns into `primaryDisk()`
+    accessors and drops them. Lower blast radius per slice.
+  - **v1 scope INCLUDES post-creation add/remove disks** (not creation-only): add a disk (config
+    allocate), remove a disk (config `delete=scsiN` + purge unused), resize a secondary, on an existing
+    server — with the server-status/lock guards the other mutation paths use.
+
+  **Slicing:**
+  1. **`server_disks` model + backfill** (expand-only). Repoint `scopeWithUsageSums` at `server_disks`;
+     item 1's `committedByConvoy` follows. Foundation.
+  2. **Secondary-disk allocation** — `ProxmoxDiskRepository::createDisk(interface, storage, sizeGiB,
+     opts)` + `ConfigureVmJob`/`AllocationService`, digest + skip-if-present; persist `interface`.
+  3. **Creation accepts `limits.disks[]`** + per-disk capacity validation (generalize
+     `HasSufficientDiskSpace`, `StorageAllows(KVM)` per disk).
+  4. **Post-creation add/remove/resize** endpoints + status/lock guards.
+  5. **Frontend** disk list (create form + a server-settings Disks panel).
+  6. *(Deferred, YAGNI)* `move_disk`-based splitting of a template's own multiple disks.
 
 ## Test database isolation (RefreshDatabase + dedicated `db_test`)
 
