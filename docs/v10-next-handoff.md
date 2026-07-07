@@ -779,8 +779,8 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–2 DONE
-  (2026-07-07). Next: slice 3 (creation accepts `limits.disks[]`).**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–3 DONE
+  (2026-07-07). Next: slice 4 (post-creation add/remove/resize).**
 
   > **Slice 1 (server_disks model + backfill + disk-oriented usage) — DONE.** `server_disks` table
   > (`server_id` cascade, `storage_id`, `size` MiB, `interface` nullable, `is_primary`, `disk_index`;
@@ -866,8 +866,15 @@ Verified:
      the slot; skip-if-present; one digest-guarded batched write; no-op when nothing pending). Tests in
      `tests/Unit/Services/Servers/AllocationDiskSyncTest.php`. **No producer of secondary rows yet —
      that's slice 3.** Suite 157; PHPStan zero.
-  3. **Creation accepts `limits.disks[]`** + per-disk capacity validation (generalize
-     `HasSufficientDiskSpace`, `StorageAllows(KVM)` per disk).
+  3. ~~**Creation accepts `limits.disks[]`** + per-disk capacity validation.~~ **DONE** (commit
+     `f4c7266c`). `StoreServerRequest.limits.disks[]` ({storage_id, size} + `StorageAllows(KVM)`);
+     `ServerCreationService` writes a secondary row per entry. `HasSufficientDiskSpace` rewritten as an
+     **aggregate** — sums primary + all secondaries per storage vs `freeForConvoy` (so two disks on one
+     storage count together), fail-open per storage offline; `freeForConvoy` centralized on
+     `LiveStorageService`. Closes the loop with slice 2 (creation now produces the rows the build
+     allocates). Tests: `HasSufficientDiskSpaceTest` (aggregate/same+cross-storage/offline),
+     `ServerCreationDiskTest` (secondary rows). Suite 160; PHPStan zero. **Frontend still sends no
+     `disks[]` until slice 5**, so no secondary disks are created in practice yet.
   4. **Post-creation add/remove/resize** endpoints + status/lock guards.
   5. **Frontend** disk list (create form + a server-settings Disks panel).
   6. *(Deferred, YAGNI)* `move_disk`-based splitting of a template's own multiple disks.
