@@ -36,6 +36,16 @@ bash database/cutover/verify.sh   # → RESULT: PASS
 The pgloader recipe itself is `database/cutover/v4-to-v10.load` (credential-
 free template; connection URLs are injected at run time).
 
+> **Host-arch caveat.** pgloader ships as an amd64-only image (`dimitri/pgloader`)
+> and is an SBCL/Lisp binary, so it runs on x86_64 hosts or under macOS Docker
+> Desktop's Rosetta 2 — but **not** under Linux qemu-user emulation, where SBCL
+> segfaults. On an arm64 Linux host (some CI/sandbox environments) `verify.sh`
+> detects this and tells you to run on an x86_64 / macOS host or set
+> `PGLOADER_IMAGE` to a native-arch pgloader. Use a current pgloader (>= 3.6.9):
+> Debian's older package trips MySQL 8.0's collation IDs
+> ("N fell through ECASE expression"). The real cutover has the same requirement —
+> run pgloader where amd64 executes (your Mac works) or with a native build.
+
 ## Cutover procedure
 
 > Rehearse the whole thing against a **restored copy of prod** first (see "Dry

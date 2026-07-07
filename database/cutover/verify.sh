@@ -34,6 +34,17 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOAD_TEMPLATE="$REPO_ROOT/database/cutover/v4-to-v10.load"
 RENDERED="$(mktemp -t pgloader.load.XXXXXX)"
 
+# pgloader image. The official `dimitri/pgloader` is published amd64-only, and
+# pgloader is an SBCL (Lisp) binary, so it only runs where amd64 can be executed:
+# natively on x86_64 hosts, or under a *complete* emulator like macOS Docker
+# Desktop's Rosetta 2. Under Linux qemu-user emulation (e.g. an arm64 CI/sandbox
+# host) SBCL segfaults, so the official image is unusable there. Override with
+#   PGLOADER_IMAGE=<image>   to point at a native-arch pgloader for such hosts.
+# NOTE: Debian's packaged pgloader (3.6.7~devel) predates MySQL 8.0's collation
+# IDs and dies with "N fell through ECASE expression" on an 8.0 source DB — so a
+# self-built Debian image is NOT a drop-in substitute; use a current pgloader.
+PGLOADER_IMAGE="${PGLOADER_IMAGE:-dimitri/pgloader:latest}"
+
 MYSQL_ENV="DB_CONNECTION=mysql DB_HOST=$MYSQL_CONTAINER DB_PORT=3306 DB_DATABASE=$MYSQL_DB DB_USERNAME=$MYSQL_USER DB_PASSWORD=$MYSQL_PASS"
 
 pg()    { docker exec "$PG_CONTAINER" env PGPASSWORD="$PG_PASS" psql -U "$PG_USER" "$@"; }
@@ -75,8 +86,24 @@ pg -d postgres -c "CREATE DATABASE $PG_TARGET OWNER $PG_USER;" >/dev/null
 sed -e "s|\${MYSQL_URL}|mysql://$MYSQL_USER:$MYSQL_PASS@$MYSQL_CONTAINER/$MYSQL_DB|" \
     -e "s|\${PG_URL}|postgresql://$PG_USER:$PG_PASS@db/$PG_TARGET|" \
     "$LOAD_TEMPLATE" > "$RENDERED"
-docker run --rm --network "$NETWORK" -v "$RENDERED:/load/rendered.load:ro" \
-    dimitri/pgloader:latest pgloader /load/rendered.load 2>&1 | tail -3
+echo "using pgloader image: $PGLOADER_IMAGE"
+PGLOADER_LOG="$(mktemp -t pgloader.run.XXXXXX)"
+if ! docker run --rm --network "$NETWORK" -v "$RENDERED:/load/rendered.load:ro" \
+        "$PGLOADER_IMAGE" pgloader /load/rendered.load >"$PGLOADER_LOG" 2>&1; then
+    tail -5 "$PGLOADER_LOG"
+    echo ""
+    if grep -qiE "exec format error|CORRUPTION WARNING in SBCL|Memory fault|maximum interrupt nesting|ldb>" "$PGLOADER_LOG"; then
+        echo "pgloader could not execute: '$PGLOADER_IMAGE' is amd64-only and this" >&2
+        echo "Docker host cannot run amd64 (no Rosetta-grade emulation). Run this on" >&2
+        echo "an x86_64 host / macOS Docker Desktop, or set PGLOADER_IMAGE to a" >&2
+        echo "native-arch pgloader (>= 3.6.9 for MySQL 8.0 collation support)." >&2
+    elif grep -qiE "fell through ECASE" "$PGLOADER_LOG"; then
+        echo "This pgloader is too old for a MySQL 8.0 source (unknown collation ID)." >&2
+        echo "Set PGLOADER_IMAGE to a pgloader >= 3.6.9." >&2
+    fi
+    rm -f "$PGLOADER_LOG"; exit 1
+fi
+tail -3 "$PGLOADER_LOG"; rm -f "$PGLOADER_LOG"
 
 echo ""
 echo "=== 4. verify no data loss ==="
