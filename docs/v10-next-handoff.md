@@ -544,25 +544,36 @@ Verified:
     on **Phase 3** for the `inet` storage change. Sources: FreeRADIUS sqlippool docs; NetBox
     `get_first_available_ip` (race caveat); PostgreSQL network-address types / `inet` operators.
 
-- **API tokens v2 — scoped abilities + two distinct token kinds (user request 2026-07-05).** The
-  current token feature is a quick repurposing of Sanctum PATs (`Admin\TokenController`, one flat
-  `ApiKeyType::APPLICATION` kind, `abilities` stored but effectively `['*']`, `tokenable` = the creating
-  admin so the token dies if that user is deleted). Flesh it out into two clearly-separated kinds, both
-  **permission-scoped**:
-  1. **Panel-wide (application) tokens** — admin-minted, **user-independent**: they must survive
-     deletion of the admin who created them (don't cascade with `tokenable`). Likely means giving these
-     tokens a non-user owner (a system/organization tokenable, or a nullable owner + an explicit
-     `created_by` audit field) so they represent the *panel*, not a person. Scope via Sanctum abilities
-     (e.g. `servers:read`, `nodes:write`, …) enforced with the `abilities`/`token_can` middleware.
-     ⚠️ Interaction with the unification just landed: the token group is gated by `AdminAuthenticate`,
-     which requires `$request->user()->root_admin` — a user-independent token has no user, so that guard
-     (and anything reading `$request->user()`) must be revisited when the owner model changes.
-  2. **User PATs** — end-users mint their own tokens (`ApiKeyType::ACCOUNT` already exists) scoped to
-     **their own** resources (their servers), not the admin surface. These stay `tokenable` = the user
-     and are managed from the account/security area, not the admin panel.
-  Both kinds share one scoping mechanism (Sanctum abilities + a middleware/policy layer); design the
-  ability vocabulary once. This also supersedes the `getSSOToken` app-key-JWT stopgap (see the SSO item
-  below) — a properly-scoped token is the real answer for plugin/programmatic access.
+- **API tokens v2 — scoped abilities + two distinct token kinds (user request 2026-07-05) — PARTLY
+  DONE.**
+
+  > **Application tokens + abilities — DONE (2026-07-07), commits `446708fc` (ownership) + `1cfff1b5`
+  > (abilities).** Design decisions (user-approved): **system-actor singleton** ownership, and do
+  > **application tokens + abilities first** (user PATs deferred).
+  > - **Ownership:** panel-wide tokens now belong to a single user-independent `SystemActor`
+  >   (`system_actors` table, one seeded row; `HasApiTokens` so Sanctum attaches the access token), so
+  >   they survive deletion of the minting admin. `personal_access_tokens.created_by` (nullable FK,
+  >   nullOnDelete) records the minter for audit. `CreateApplicationTokenService` mints them.
+  >   `AdminAuthenticate` authorizes a SystemActor-owned token (being the panel *is* the authorization).
+  >   Key finding that de-risked this: **only `TokenController` read `$request->user()`**, so nothing
+  >   else on the shared admin surface needed touching. `ApiKeyData` exposes `createdBy` instead of the
+  >   tokenable-as-user (also fixed a latent enum→string DTO bug — store was never test-covered).
+  > - **Abilities:** `App\Support\Api\TokenAbilities` — resource-scoped read/write vocabulary
+  >   (`servers:read`, `nodes:write`, …) over the top-level application resources, plus `*` and
+  >   `{resource}:*`; write implies read; unknown resources require `*`. `EnforceTokenAbilities`
+  >   middleware on the `/api/application` group 403s a token missing the required ability (sessions
+  >   carry no token, so unaffected). Minting accepts an optional validated `abilities[]` (defaults to
+  >   `['*']`). Tests: `tests/Feature/Api/{ApplicationTokenTest,TokenAbilitiesTest}.php`. Suite 144;
+  >   PHPStan zero; tsc clean.
+  >
+  > **Still TODO (deferred):**
+  > - **User PATs (`ApiKeyType::ACCOUNT`)** — end-users mint tokens scoped to **their own** resources
+  >   (their servers), `tokenable` = the user, managed from the account/security area (a client-side
+  >   controller + `/api/client` routes + client UI). Not started.
+  > - **Frontend token UI** — there is **no** admin token-management screen yet (nothing consumes
+  >   `ApiKeyData` in TS). An ability-picker belongs there when it's built.
+  > - This supersedes the `getSSOToken` app-key-JWT stopgap (see the SSO item) — a properly-scoped
+  >   token is the real answer for plugin/programmatic access.
 
 - **Basic VM control (power actions) on both admin and client sides — DRY — DONE (backend, 2026-07-05).**
   Admin now has power control at parity with the client, from one shared path:
