@@ -136,10 +136,70 @@ it('hands out the numerically-lowest free IP first (inet ordering, not lexical)'
     expect($allocated->first()->ip)->toBe('10.0.0.2');
 });
 
-it('never materializes new rows (pure consume)', function () {
+it('never materializes new rows for a dense block (pure consume)', function () {
     ['interface' => $interface, 'block' => $block] = interfaceWithBlock(AddressVersion::IPv4, free: 4);
 
     allocate($interface->id, 2, 0);
 
     expect(Address::where('address_block_id', $block->id)->count())->toBe(4);
+});
+
+/**
+ * Build an interface wired to a single sparse block (too large to pre-materialize).
+ *
+ * @return array{interface: NetworkInterface, block: AddressBlock, node: Node}
+ */
+function interfaceWithSparseBlock(AddressVersion $version, string $baseIp, int $from): array
+{
+    $node = Node::factory()->for(Location::factory())->create();
+    $group = AddressBlockGroup::factory()->create();
+    $interface = NetworkInterface::create(['node_id' => $node->id, 'name' => 'vmbr0']);
+    AddressBlockGroupToInterface::create([
+        'address_block_group_id' => $group->id,
+        'network_interface_id' => $interface->id,
+    ]);
+    $block = AddressBlock::factory()->for($group)->create([
+        'version' => $version->value,
+        'base_ip' => $baseIp,
+        'prefix_length_from' => $from,
+        'prefix_length_to' => $version === AddressVersion::IPv6 ? 128 : 32,
+    ]);
+
+    return ['interface' => $interface, 'block' => $block, 'node' => $node];
+}
+
+it('mints fresh addresses from a sparse IPv4 block instead of pre-materializing it', function () {
+    ['interface' => $interface, 'block' => $block] = interfaceWithSparseBlock(AddressVersion::IPv4, '10.0.0.0', 8);
+    expect($block->isSparse())->toBeTrue();
+
+    $allocated = allocate($interface->id, 3, 0);
+
+    // Minted at the low end of the range, on demand — not 2^24 rows.
+    expect($allocated->pluck('ip')->all())->toBe(['10.0.0.0', '10.0.0.1', '10.0.0.2']);
+    expect(Address::where('address_block_id', $block->id)->count())->toBe(3);
+});
+
+it('mints from a sparse IPv6 block without materializing the address space', function () {
+    ['interface' => $interface, 'block' => $block] = interfaceWithSparseBlock(AddressVersion::IPv6, '2001:db8::', 48);
+    expect($block->isSparse())->toBeTrue();
+
+    $allocated = allocate($interface->id, 0, 2);
+
+    expect($allocated->pluck('ip')->all())->toBe(['2001:db8::', '2001:db8::1']);
+    expect(Address::where('address_block_id', $block->id)->count())->toBe(2);
+});
+
+it('reclaims a freed row before minting new ones in a sparse block', function () {
+    ['interface' => $interface, 'block' => $block, 'node' => $node] =
+        interfaceWithSparseBlock(AddressVersion::IPv4, '10.0.0.0', 8);
+
+    // Prior history: .5 is assigned (the current high-water mark), .1 was freed and is reclaimable.
+    $server = Server::factory()->for($node)->create();
+    Address::factory()->for($block)->create(['ip' => '10.0.0.5', 'server_id' => $server->id]);
+    Address::factory()->for($block)->create(['ip' => '10.0.0.1', 'server_id' => null]);
+
+    $allocated = allocate($interface->id, 2, 0);
+
+    // Reclaim grabs the freed .1; minting appends .6 (MAX .5 + 1), never re-minting below the cursor.
+    expect($allocated->pluck('ip')->sort()->values()->all())->toBe(['10.0.0.1', '10.0.0.6']);
 });

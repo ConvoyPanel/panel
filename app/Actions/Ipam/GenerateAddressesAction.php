@@ -11,6 +11,17 @@ class GenerateAddressesAction {
 
     public function execute(AddressBlock $addressBlock): GeneratedAddressesData
     {
+        // Sparse blocks (large v4 / any v6) are not pre-materialized — the allocator mints their
+        // addresses on demand — so there is nothing to generate here.
+        if ($addressBlock->isSparse()) {
+            return new GeneratedAddressesData(
+                createdCount: 0,
+                remaining: 0,
+                isComplete: true,
+                sparse: true,
+            );
+        }
+
         $fromPrefix = $addressBlock->prefix_length_from;
         $toPrefix = $addressBlock->prefix_length_to;
         $baseIp = $addressBlock->base_ip;
@@ -73,10 +84,9 @@ class GenerateAddressesAction {
         }
         $binaryIp = $this->applyIpv6Mask($binaryIp, $fromPrefix);
         $bitDiff = $toPrefix - $fromPrefix;
+        // Dense v6 blocks are bounded by AddressBlock::DENSE_MAX_HOST_BITS (isSparse() already
+        // returned early for anything larger), so this loop is capped at 2^16 iterations.
         $numSubnets = 1 << $bitDiff;
-        if ($numSubnets > 10000) {
-            throw new \InvalidArgumentException('Too many subnets to calculate at once.');
-        }
         $addresses = [];
         for ($i = 0; $i < $numSubnets; $i++) {
             $newBinaryIp = $binaryIp;

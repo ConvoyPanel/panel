@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use IPLib\Factory as IPFactory;
 
 /**
  * @property int $id
@@ -68,6 +69,52 @@ class AddressBlock extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Blocks with more allocatable units than this are stored *sparsely* — their addresses are
+     * minted on demand by the allocator instead of being pre-materialized, since a large v4 block
+     * (or any v6 block) would be billions of rows. See AddressAllocationService / GenerateAddressesAction.
+     */
+    public const DENSE_MAX_HOST_BITS = 16; // 2^16 = 65,536 units materialized at most
+
+    public function maxPrefixLength(): int
+    {
+        return $this->version === AddressVersion::IPv4 ? 32 : 128;
+    }
+
+    /** Number of allocatable units = 2^(prefix_to - prefix_from). */
+    public function allocatableHostBits(): int
+    {
+        return $this->prefix_length_to - $this->prefix_length_from;
+    }
+
+    public function isSparse(): bool
+    {
+        return $this->allocatableHostBits() > self::DENSE_MAX_HOST_BITS;
+    }
+
+    /**
+     * The address distance between consecutive allocatable units (1 for individual addresses,
+     * 2^(maxbits - prefix_to) for sub-blocks). Kept within bigint so Postgres inet arithmetic works.
+     */
+    public function unitStride(): int
+    {
+        $exponent = $this->maxPrefixLength() - $this->prefix_length_to;
+
+        if ($exponent < 0 || $exponent > 62) {
+            throw new \RuntimeException("Address block {$this->id} has an unsupported unit stride (2^{$exponent}).");
+        }
+
+        return 1 << $exponent;
+    }
+
+    /** The last address of the block's overall range (its broadcast for v4), the ceiling for minting. */
+    public function lastAllocatableAddress(): string
+    {
+        return IPFactory::parseRangeString($this->base_ip . '/' . $this->prefix_length_from)
+            ->getEndAddress()
+            ->toString();
     }
 
     protected function macAddress(): Attribute
