@@ -6,6 +6,7 @@ export interface Storage {
     description: string | null
     name: string
     size: number
+    reservedBytes: number | null
     isShareable: boolean
     storesKvm: boolean
     storesLxc: boolean
@@ -18,6 +19,17 @@ export interface Storage {
         backup: number
         iso: number
     }
+    // Sum of the usages above — "Allocated by Convoy".
+    committedByConvoy: number
+    // Live Proxmox truth. `online` false ⇒ physical figures are null (offline).
+    online: boolean
+    physicalTotal: number | null
+    physicalUsed: number | null
+    physicalFree: number | null
+    // physicalUsed − committedByConvoy: base-system + non-Convoy usage.
+    untracked: number | null
+    // physicalFree − reservedBytes: what a new disk may actually consume.
+    freeForConvoy: number | null
 }
 
 export interface NodeStorage extends Storage {

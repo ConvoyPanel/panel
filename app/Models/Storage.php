@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
  * @property ?string $description
  * @property string $name
  * @property int $size
+ * @property ?int $reserved_bytes
  * @property bool $is_shareable
  * @property bool $stores_kvm
  * @property bool $stores_lxc
@@ -43,6 +44,7 @@ class Storage extends Model
         'description' => 'nullable|string|max:191',
         'name' => 'required|string|max:191',
         'size' => 'required|numeric|min:1',
+        'reserved_bytes' => 'nullable|numeric|min:0',
         'is_shareable' => 'required|boolean',
         'stores_kvm' => 'required|boolean',
         'stores_lxc' => 'required|boolean',
@@ -56,6 +58,7 @@ class Storage extends Model
     {
         return [
             'size' => StorageSizeCast::class,
+            'reserved_bytes' => StorageSizeCast::class,
             'is_shareable' => 'boolean',
             'stores_kvm' => 'boolean',
             'stores_lxc' => 'boolean',

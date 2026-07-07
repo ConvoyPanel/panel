@@ -6,6 +6,7 @@ export const rawDataToStorage = (raw: any): Storage => ({
     description: raw.description,
     name: raw.name,
     size: raw.size,
+    reservedBytes: raw.reservedBytes ?? null,
     isShareable: raw.isShareable,
     storesKvm: raw.storesKvm,
     storesLxc: raw.storesLxc,
@@ -17,7 +18,16 @@ export const rawDataToStorage = (raw: any): Storage => ({
         server: raw.serverUsage ?? raw.usages?.server,
         backup: raw.backupUsage ?? raw.usages?.backup,
         iso: raw.isoUsage ?? raw.usages?.iso,
-    }
+    },
+    committedByConvoy:
+        raw.committedByConvoy ??
+        (raw.serverUsage ?? 0) + (raw.backupUsage ?? 0) + (raw.isoUsage ?? 0),
+    online: raw.online ?? false,
+    physicalTotal: raw.physicalTotal ?? null,
+    physicalUsed: raw.physicalUsed ?? null,
+    physicalFree: raw.physicalFree ?? null,
+    untracked: raw.untracked ?? null,
+    freeForConvoy: raw.freeForConvoy ?? null,
 })
 
 export const rawDataToNodeStorage = (raw: any): NodeStorage => ({
