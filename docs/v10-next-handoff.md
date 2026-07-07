@@ -779,8 +779,8 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICE 1 DONE
-  (2026-07-07, commit `4e9eee97`).**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–2 DONE
+  (2026-07-07). Next: slice 3 (creation accepts `limits.disks[]`).**
 
   > **Slice 1 (server_disks model + backfill + disk-oriented usage) — DONE.** `server_disks` table
   > (`server_id` cascade, `storage_id`, `size` MiB, `interface` nullable, `is_primary`, `disk_index`;
@@ -859,8 +859,13 @@ Verified:
   **Slicing:**
   1. ~~**`server_disks` model + backfill** (expand-only). Repoint `scopeWithUsageSums`.~~ **DONE**
      (commit `4e9eee97`, see the Slice-1 note above).
-  2. **Secondary-disk allocation** — `ProxmoxDiskRepository::createDisk(interface, storage, sizeGiB,
-     opts)` + `ConfigureVmJob`/`AllocationService`, digest + skip-if-present; persist `interface`.
+  2. ~~**Secondary-disk allocation**~~ **DONE** (commit `b7a72c03`). `AllocationService::syncDisks`
+     allocates each non-primary `server_disks` row as a fresh volume via the `STORAGE:SIZE_GiB` config
+     syntax on the next free scsi slot; wired into `VmSyncService` (runs in `ConfigureVmJob` after the
+     primary resize). Idempotent/retry-safe (interface persisted *before* the write so a retry reuses
+     the slot; skip-if-present; one digest-guarded batched write; no-op when nothing pending). Tests in
+     `tests/Unit/Services/Servers/AllocationDiskSyncTest.php`. **No producer of secondary rows yet —
+     that's slice 3.** Suite 157; PHPStan zero.
   3. **Creation accepts `limits.disks[]`** + per-disk capacity validation (generalize
      `HasSufficientDiskSpace`, `StorageAllows(KVM)` per disk).
   4. **Post-creation add/remove/resize** endpoints + status/lock guards.
