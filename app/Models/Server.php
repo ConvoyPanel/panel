@@ -32,6 +32,8 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $bandwidth_limit
  * @property Node $node
  * @property Storage $storage
+ * @property \Illuminate\Database\Eloquent\Collection<int, ServerDisk> $disks
+ * @property ?ServerDisk $primaryDisk
  * @property ?Address $primaryIPv4Address
  * @property ?Address $primaryIPv6Address
  */
@@ -87,11 +89,35 @@ class Server extends Model
     }
 
     /**
+     * The server's primary/boot storage. Expand-first: this column is still the
+     * source of truth for the primary disk's storage (the template clone reads
+     * it). It is mirrored by the `is_primary` row in {@see disks()}.
+     *
      * @return BelongsTo<Storage, $this>
      */
     public function storage(): BelongsTo
     {
         return $this->belongsTo(Storage::class);
+    }
+
+    /**
+     * All of the server's disks (one primary + zero or more secondary).
+     *
+     * @return HasMany<ServerDisk, $this>
+     */
+    public function disks(): HasMany
+    {
+        return $this->hasMany(ServerDisk::class);
+    }
+
+    /**
+     * The primary/boot disk row.
+     *
+     * @return HasOne<ServerDisk, $this>
+     */
+    public function primaryDisk(): HasOne
+    {
+        return $this->hasOne(ServerDisk::class)->where('is_primary', true);
     }
 
     public function user(): BelongsTo

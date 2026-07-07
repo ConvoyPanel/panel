@@ -93,6 +93,18 @@ class ServerCreationService
                 'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
             ]);
 
+            // Mirror the primary disk into server_disks. Expand-first: the
+            // servers.(storage_id, disk) columns remain authoritative for the
+            // clone; this row is what the disk-oriented usage aggregation and
+            // (later) secondary disks build on.
+            $server->disks()->create([
+                'storage_id' => $server->storage_id,
+                'size' => $data['limits']['disk'],
+                'interface' => null,
+                'is_primary' => true,
+                'disk_index' => 0,
+            ]);
+
             if ($addresses->isNotEmpty()) {
                 $this->networkService->syncAddresses($server, $addresses->pluck('id')->all());
             }

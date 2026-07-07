@@ -97,6 +97,16 @@ class Storage extends Model
     }
 
     /**
+     * Get the VM disks (primary and secondary) that reside on this storage.
+     * This is the disk-oriented source for "Allocated by Convoy" — a server
+     * can have disks on several storages, so we sum disk rows, not servers.
+     */
+    public function serverDisks(): HasMany
+    {
+        return $this->hasMany(ServerDisk::class);
+    }
+
+    /**
      * Get the backups stored on this storage.
      */
     public function backups(): HasMany
@@ -114,7 +124,7 @@ class Storage extends Model
      */
     public function scopeWithUsageSums(Builder $query): void
     {
-        $query->withSum('servers as servers_sum_disk', 'disk')
+        $query->withSum('serverDisks as servers_sum_disk', 'size')
             ->withSum('backups as backups_sum_size', 'size')
             ->withSum('isos as isos_sum_size', 'size')
 ;
@@ -152,7 +162,7 @@ class Storage extends Model
      */
     public function getServerUsageAttribute(): int
     {
-        return $this->getUsageAttributeValue('servers', 'disk', 'servers_sum_disk');
+        return $this->getUsageAttributeValue('serverDisks', 'size', 'servers_sum_disk');
     }
 
     /**
