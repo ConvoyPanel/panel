@@ -52,6 +52,7 @@ const EditStorageModal = () => {
             description: '',
             name: '',
             size: '',
+            reservedBytes: '',
             isShareable: false,
             storesKvm: false,
             storesLxc: false,
@@ -70,6 +71,10 @@ const EditStorageModal = () => {
             description: storage.description ?? '',
             name: storage.name,
             size: (storage.size / 1024 / 1024).toString(),
+            reservedBytes:
+                storage.reservedBytes != null
+                    ? (storage.reservedBytes / 1024 / 1024).toString()
+                    : '',
             isShareable: storage.isShareable,
             storesKvm: storage.storesKvm,
             storesLxc: storage.storesLxc,
@@ -80,10 +85,15 @@ const EditStorageModal = () => {
         })
     }, [storage])
 
-    const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
+    const submit = async ({
+        size,
+        reservedBytes,
+        ...data
+    }: z.infer<typeof storageSchema>) => {
         try {
             const updatedStorage = await updateStorage(Number(nodeId), storage!.id, {
                 size: size * 1024 * 1024,
+                reservedBytes: reservedBytes ? reservedBytes * 1024 * 1024 : null,
                 ...data,
             })
 
@@ -129,6 +139,13 @@ const EditStorageModal = () => {
                             />
                             <InputForm name={'name'} label={'Name'} autoComplete={'off'} />
                             <InputForm name={'size'} label={'Size (MiB)'} />
+                            <InputForm
+                                name={'reservedBytes'}
+                                label={'Reserved headroom (MiB)'}
+                                description={
+                                    'Free space Convoy will never allocate into. Leave blank for none.'
+                                }
+                            />
                             <div>
                                 <h3 className={'text-sm font-semibold'}>
                                     Content Types

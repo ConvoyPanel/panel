@@ -45,6 +45,7 @@ const CreateStorageModal = () => {
             description: '',
             name: '',
             size: '',
+            reservedBytes: '',
             isShareable: false,
             storesKvm: false,
             storesLxc: false,
@@ -55,10 +56,15 @@ const CreateStorageModal = () => {
         },
     })
 
-    const submit = async ({ size, ...data }: z.infer<typeof storageSchema>) => {
+    const submit = async ({
+        size,
+        reservedBytes,
+        ...data
+    }: z.infer<typeof storageSchema>) => {
         try {
             const storage = await createStorage(Number(nodeId), {
                 size: size * 1024 * 1024,
+                reservedBytes: reservedBytes ? reservedBytes * 1024 * 1024 : null,
                 ...data,
             })
 
@@ -102,6 +108,13 @@ const CreateStorageModal = () => {
                             />
                             <InputForm name={'name'} label={'Name'} autoComplete={'off'} />
                             <InputForm name={'size'} label={'Size (MiB)'} />
+                            <InputForm
+                                name={'reservedBytes'}
+                                label={'Reserved headroom (MiB)'}
+                                description={
+                                    'Free space Convoy will never allocate into. Leave blank for none.'
+                                }
+                            />
                             <div>
                                 <h3 className={'text-sm font-semibold'}>
                                     Content Types

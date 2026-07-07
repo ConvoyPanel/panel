@@ -11,8 +11,13 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
-import { SegmentedProgressBar } from '@/components/ui/Progress'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { SegmentedProgressBar, type Segment } from '@/components/ui/Progress'
+
+const fmt = (bytes: number) => {
+    const { value, unit } = byteSize(bytes, { units: 'iec', precision: 2 })
+
+    return `${value} ${unit}`
+}
 
 const ShowStorageModal = () => {
     const [storage, open, close] = useStoragesModalStore(
@@ -23,24 +28,63 @@ const ShowStorageModal = () => {
         ])
     )
 
-    const usedTotal = useMemo(() => {
-        const usages = storage?.usages
+    // Prefer live Proxmox capacity (the truth — includes the base system and any
+    // non-Convoy consumers). Fall back to Convoy's own allocation against the
+    // configured size only when the node is offline.
+    const view = useMemo(() => {
+        if (!storage) return null
 
-        return usages
-            ? usages.server + usages.backup + usages.iso
-            : 0
+        const committed =
+            storage.usages.server + storage.usages.backup + storage.usages.iso
+
+        if (storage.online && storage.physicalTotal) {
+            const total = storage.physicalTotal
+            const used = storage.physicalUsed ?? 0
+            const untracked = storage.untracked ?? 0
+            const free = storage.physicalFree ?? 0
+            const freeForConvoy = storage.freeForConvoy ?? free
+            // Reserve is carved out of the free space, not from what's used.
+            const reservedShown = Math.max(0, free - freeForConvoy)
+
+            const segments: Segment[] = [
+                { label: 'KVM', value: pct(storage.usages.server, total), color: 'hsl(var(--chart-1))' },
+                { label: 'Backups', value: pct(storage.usages.backup, total), color: 'hsl(var(--chart-2))' },
+                { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'hsl(var(--chart-3))' },
+                { label: 'Untracked (base system + other)', value: pct(untracked, total), color: 'hsl(var(--chart-4))' },
+                { label: 'Reserved (headroom)', value: pct(reservedShown, total), color: 'hsl(var(--muted-foreground) / 0.35)' },
+            ]
+
+            return {
+                online: true as const,
+                total,
+                used,
+                freeForConvoy,
+                reserved: reservedShown,
+                segments,
+            }
+        }
+
+        // Offline fallback: Convoy's bookkeeping against the configured size.
+        const total = storage.size
+        const segments: Segment[] = [
+            { label: 'KVM', value: pct(storage.usages.server, total), color: 'hsl(var(--chart-1))' },
+            { label: 'Backups', value: pct(storage.usages.backup, total), color: 'hsl(var(--chart-2))' },
+            { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'hsl(var(--chart-3))' },
+        ]
+
+        return {
+            online: false as const,
+            total,
+            used: committed,
+            freeForConvoy: Math.max(0, total - committed),
+            reserved: 0,
+            segments,
+        }
     }, [storage])
 
-    const used = byteSize(usedTotal, {
-        units: 'iec',
-        precision: 2,
-    })
-    const total = byteSize(storage?.size ?? 0, {
-        units: 'iec',
-        precision: 2,
-    })
+    if (!view) return null
 
-    const usedPercent = storage ? (usedTotal / storage.size) * 100 : 0
+    const usedPercent = view.total ? (view.used / view.total) * 100 : 0
 
     return (
         <Credenza open={open} onOpenChange={open => !open && close('show')}>
@@ -51,76 +95,80 @@ const ShowStorageModal = () => {
                     </CredenzaTitle>
                 </CredenzaHeader>
                 <CredenzaBody>
+                    {!view.online && (
+                        <p
+                            className={
+                                'mb-2 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground'
+                            }
+                        >
+                            Live usage unavailable — the node is offline. Showing
+                            Convoy&rsquo;s own allocation against the configured
+                            size.
+                        </p>
+                    )}
                     <p
                         className={
                             'mb-1 text-right text-sm text-muted-foreground'
                         }
                     >
-                        {used.value} {used.unit} used out of {total.value}{' '}
-                        {total.unit} &#x2022; {usedPercent.toFixed(2)}%
+                        {fmt(view.used)} used out of {fmt(view.total)} &#x2022;{' '}
+                        {usedPercent.toFixed(2)}%
                     </p>
                     <SegmentedProgressBar
                         className={'h-4'}
-                        segments={[
-                            {
-                                label: 'KVM',
-                                value: storage ? (storage.usages.server / storage.size) * 100 : 0,
-                                color: 'hsl(var(--chart-1))',
-                            },
-                            {
-                                label: 'Backups',
-                                value: storage ? (storage.usages.backup / storage.size) * 100 : 0,
-                                color: 'hsl(var(--chart-2))',
-                            },
-                            {
-                                label: 'ISO Images',
-                                value: storage ? (storage.usages.iso / storage.size) * 100 : 0,
-                                color: 'hsl(var(--chart-3))',
-                            },
-                        ]}
+                        segments={view.segments}
                     />
                     <ul
                         className={'mt-2 flex flex-wrap gap-3'}
                         aria-hidden={true}
                     >
-                        <li className={'flex items-center text-sm'}>
-                            <span
-                                className={
-                                    'mr-1 size-2 rounded-full bg-[hsl(var(--chart-1))]'
-                                }
-                            />
-                            KVM
-                        </li>
-                        <li className={'flex items-center text-sm'}>
-                            <span
-                                className={
-                                    'mr-1 size-2 rounded-full bg-[hsl(var(--chart-2))]'
-                                }
-                            />
-                            Backups
-                        </li>
-                        <li className={'flex items-center text-sm'}>
-                            <span
-                                className={
-                                    'mr-1 size-2 rounded-full bg-[hsl(var(--chart-3))]'
-                                }
-                            />
-                            ISO Images
-                        </li>
+                        {view.segments
+                            .filter(segment => segment.value > 0)
+                            .map(segment => (
+                                <li
+                                    key={segment.label}
+                                    className={'flex items-center text-sm'}
+                                >
+                                    <span
+                                        className={'mr-1 size-2 rounded-full'}
+                                        style={{ backgroundColor: segment.color }}
+                                    />
+                                    {segment.label}
+                                </li>
+                            ))}
                     </ul>
 
-                    <Tabs defaultValue={'all'} className={'mt-6 w-full'}>
-                        <TabsList>
-                            <TabsTrigger value={'all'}>All</TabsTrigger>
-                            <TabsTrigger value={'kvm'}>KVM</TabsTrigger>
-                            <TabsTrigger value={'backups'}>Backups</TabsTrigger>
-                            <TabsTrigger value={'iso'}>ISO Images</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                    {view.online && (
+                        <dl
+                            className={
+                                'mt-6 grid grid-cols-2 gap-x-6 gap-y-2 text-sm'
+                            }
+                        >
+                            <dt className={'text-muted-foreground'}>
+                                Free for Convoy
+                            </dt>
+                            <dd className={'text-right font-medium'}>
+                                {fmt(view.freeForConvoy)}
+                            </dd>
+                            {view.reserved > 0 && (
+                                <>
+                                    <dt className={'text-muted-foreground'}>
+                                        Reserved headroom
+                                    </dt>
+                                    <dd className={'text-right font-medium'}>
+                                        {fmt(view.reserved)}
+                                    </dd>
+                                </>
+                            )}
+                        </dl>
+                    )}
                 </CredenzaBody>
             </CredenzaContent>
         </Credenza>
     )
 }
+
+const pct = (part: number, total: number) =>
+    total > 0 ? (part / total) * 100 : 0
 
 export default ShowStorageModal
