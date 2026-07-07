@@ -72,7 +72,11 @@ class ServerCreationService
                 }
             }
 
-            $server = Server::create([
+            // forceCreate (not create): uuid / uuid_short are $guarded, so plain
+            // mass-assignment silently drops them and the NOT NULL uuid column
+            // blows up. forceCreate assigns them while unguarded; save-time
+            // validation is unchanged.
+            $server = Server::forceCreate([
                 'uuid' => $uuid,
                 'uuid_short' => substr($uuid, 0, 8),
                 'user_id' => $data['user_id'],
