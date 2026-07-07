@@ -779,8 +779,30 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED 2026-07-07, NOT YET
-  BUILT.**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICE 1 DONE
+  (2026-07-07, commit `4e9eee97`).**
+
+  > **Slice 1 (server_disks model + backfill + disk-oriented usage) — DONE.** `server_disks` table
+  > (`server_id` cascade, `storage_id`, `size` MiB, `interface` nullable, `is_primary`, `disk_index`;
+  > `unique(server_id, interface)`), backfilled with a primary row per existing server from
+  > `servers.(storage_id, disk)`. `ServerDisk` model + factory; `Server::disks()`/`primaryDisk()`,
+  > `Storage::serverDisks()`. **Expand-first held:** `servers.storage_id/disk` kept authoritative;
+  > `ServerCreationService` now also writes the primary `server_disks` row. `Storage::scopeWithUsageSums`
+  > + `getServerUsageAttribute` repointed from `servers.disk` to `server_disks.size`, so item 1's
+  > `committedByConvoy` is now disk-oriented (counts a server's disks per-storage). `OverviewService`'s
+  > per-node `SUM(disk)` still reads `servers.disk` (unaffected). Tests:
+  > `tests/Unit/Models/StorageUsageAggregationTest.php` (per-storage + cross-storage sums; relations).
+  > Suite 151; PHPStan zero.
+  >
+  > **⚠️ Discovered (pre-existing, NOT fixed — out of Slice 1 scope):** `ServerCreationService::handle`
+  > calls `Server::create(['uuid' => …, 'uuid_short' => …])`, but both are in the model's `$guarded`, so
+  > mass-assignment silently drops them → `null value in column "uuid"`. Server creation through this
+  > service is currently **broken on `next`** independent of this work. The intended pattern is the
+  > repository force-create (`ServerRepository::create($fields, force: true)` → `forceFill`); this looks
+  > like a regression. No creation test exercised it, which is why it went unnoticed. Fix separately
+  > (route the create through the repository, or narrow `$guarded`), then add a creation feature test.
+
+
   A `Server` today has a **single** `storage_id` + single `disk` (see `Server::storage()` and the
   `disk`/`storage_id` columns). Proxmox VMs support **many** disks (`scsi0..N`, `virtio0..N`, …), each
   potentially on a **different** storage. `DiskData` already parses this (`volume` = `{storage}:...`);
@@ -836,8 +858,8 @@ Verified:
     server — with the server-status/lock guards the other mutation paths use.
 
   **Slicing:**
-  1. **`server_disks` model + backfill** (expand-only). Repoint `scopeWithUsageSums` at `server_disks`;
-     item 1's `committedByConvoy` follows. Foundation.
+  1. ~~**`server_disks` model + backfill** (expand-only). Repoint `scopeWithUsageSums`.~~ **DONE**
+     (commit `4e9eee97`, see the Slice-1 note above).
   2. **Secondary-disk allocation** — `ProxmoxDiskRepository::createDisk(interface, storage, sizeGiB,
      opts)` + `ConfigureVmJob`/`AllocationService`, digest + skip-if-present; persist `interface`.
   3. **Creation accepts `limits.disks[]`** + per-disk capacity validation (generalize
