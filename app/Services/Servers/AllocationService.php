@@ -4,6 +4,7 @@ namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\Disk\DiskMediaType;
+use App\Enums\Server\DiskInterface;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
@@ -82,6 +83,83 @@ class AllocationService
                 $disk,
                 $server->disk,
             );
+        }
+    }
+
+    /**
+     * Allocate any secondary (non-primary) data disks that aren't on the VM yet.
+     *
+     * Each `server_disks` row that isn't the primary is materialized as a fresh
+     * Proxmox volume via the `STORAGE:SIZE_GiB` allocation syntax on the next
+     * free scsi slot. Idempotent + retry-safe:
+     *  - the chosen interface is persisted to the row *before* the config write,
+     *    so a `ConfigureVmJob` retry reuses the same slot instead of allocating a
+     *    second volume;
+     *  - a disk already present on the VM (its interface appears in the live
+     *    config) is skipped;
+     *  - all pending disks go out in ONE digest-guarded config write (avoids a
+     *    stale-digest failure between disks and stays atomic). No pending disks ⇒
+     *    no empty write.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     * @throws NoAvailableDiskInterfaceException
+     */
+    public function syncDisks(Server $server): void
+    {
+        $secondaryDisks = $server->disks()
+            ->where('is_primary', false)
+            ->orderBy('disk_index')
+            ->get();
+
+        if ($secondaryDisks->isEmpty()) {
+            return;
+        }
+
+        $config = $this->configRepository->setServer($server)->getConfig();
+
+        // scsi slot numbers already taken on the VM (the primary may be scsi0, or
+        // on another bus entirely — we only ever place secondaries on scsi).
+        $usedScsiSlots = $config->disks
+            ->filter(fn (DiskData $disk) => $disk->interface->getBaseType() === 'scsi')
+            ->map(fn (DiskData $disk) => $disk->interface->getSlot())
+            ->values()
+            ->all();
+
+        // Assign (and persist) an interface to any disk that doesn't have one yet.
+        foreach ($secondaryDisks as $disk) {
+            if ($disk->interface !== null) {
+                continue;
+            }
+
+            $slot = DiskInterface::getNextAvailableSlot('scsi', $usedScsiSlots);
+            if ($slot === null) {
+                throw new NoAvailableDiskInterfaceException;
+            }
+
+            $disk->interface = "scsi{$slot}";
+            $disk->save();
+            $usedScsiSlots[] = $slot;
+        }
+
+        // Build one write of the disks not already present on the VM.
+        $existingInterfaces = $config->disks
+            ->map(fn (DiskData $disk) => $disk->interface->value)
+            ->all();
+
+        $payload = [];
+        foreach ($secondaryDisks as $disk) {
+            if (in_array($disk->interface, $existingInterfaces, true)) {
+                continue;
+            }
+
+            // Allocation syntax takes whole GiB; sizes are kept GiB-aligned.
+            $sizeGib = max(1, (int) ceil($disk->size / (1024 ** 3)));
+            $payload[$disk->interface] = "{$disk->storage->name}:{$sizeGib}";
+        }
+
+        if ($payload !== []) {
+            $this->configRepository->setServer($server)->update($payload, $config->digest);
         }
     }
 

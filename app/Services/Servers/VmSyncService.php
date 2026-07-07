@@ -27,6 +27,10 @@ readonly class VmSyncService
         $this->allocationService->syncSettings($server);
         $onProgress();
 
+        // Materialize any secondary data disks (each on its own storage) after
+        // the primary/clone is in place.
+        $this->allocationService->syncDisks($server);
+
         $this->cloudinitService->setHostname($server, $server->hostname);
         $onProgress();
 
