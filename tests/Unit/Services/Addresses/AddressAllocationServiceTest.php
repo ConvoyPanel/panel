@@ -123,6 +123,19 @@ it('throws when the interface has no block of the requested version', function (
         ->toThrow(InsufficientAddressesException::class);
 });
 
+it('hands out the numerically-lowest free IP first (inet ordering, not lexical)', function () {
+    ['interface' => $interface, 'block' => $block] = interfaceWithBlock(AddressVersion::IPv4, free: 0);
+
+    // Insert .10 before .2 so row id order is the reverse of numeric IP order. With a text column
+    // ORDER BY ip would return '10.0.0.10' first ('1' < '2' lexically); with inet it returns '.2'.
+    Address::factory()->for($block)->create(['ip' => '10.0.0.10', 'server_id' => null]);
+    Address::factory()->for($block)->create(['ip' => '10.0.0.2', 'server_id' => null]);
+
+    $allocated = allocate($interface->id, 1, 0);
+
+    expect($allocated->first()->ip)->toBe('10.0.0.2');
+});
+
 it('never materializes new rows (pure consume)', function () {
     ['interface' => $interface, 'block' => $block] = interfaceWithBlock(AddressVersion::IPv4, free: 4);
 

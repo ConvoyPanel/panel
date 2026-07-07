@@ -15,7 +15,8 @@ class AddressAllocationService
      * Allocate free addresses to satisfy the requested IPv4/IPv6 counts.
      *
      * Selects from the pre-materialized free address rows (`server_id IS NULL`) with a single
-     * indexed query per version, instead of walking the whole address space by offset. The old
+     * indexed query per version — `... AND server_id IS NULL ORDER BY ip LIMIT n FOR UPDATE SKIP
+     * LOCKED`, backed by a partial inet index — instead of walking the address space by offset. The old
      * implementation did a `for ($i = 0; $i < $range->getSize(); ...)` scan keyed off
      * `prefix_length_from` — O(address-space), and effectively unbounded for an IPv6 block
      * (2^64+ iterations). It also raced: two concurrent allocations computed the same first-free
@@ -79,7 +80,9 @@ class AddressAllocationService
             ->with('addressBlock')
             ->whereIn('address_block_id', $blockIds)
             ->whereNull('server_id')
-            ->orderBy('id')
+            // ip is an inet column, so this orders numerically (10.0.0.2 before 10.0.0.10) and is
+            // served without a sort by the partial index addresses_free_by_block_ip_idx.
+            ->orderBy('ip')
             ->limit($count)
             // FOR UPDATE SKIP LOCKED is supported by both Postgres and MySQL 8.0. Laravel has no
             // dedicated skip-locked helper, so the clause is passed explicitly.
