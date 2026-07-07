@@ -704,8 +704,8 @@ Verified:
   page/API so users can see last used date, basic device info, approximate location, and revoke sessions
   one at a time.
 
-- **Storage accounting polish — PVE truth + reserve buffer (user request 2026-07-07) — DISPLAY +
-  RESERVE DONE (2026-07-07); allocation-time enforcement still open.**
+- **Storage accounting polish — PVE truth + reserve buffer (user request 2026-07-07) — DONE
+  (2026-07-07): display + reserve + allocation-time enforcement.**
 
   > **Done (commits `1ffcdc8b` backend + `a82f70cf` UI):** capacity/usage now read from **live
   > Proxmox status** merged into the storage list, cached 15s per node with graceful offline fallback
@@ -720,13 +720,16 @@ Verified:
   > verified in-browser** — the live/online path needs a real Proxmox node the dev env lacks (offline
   > path + data contract are covered).
   >
-  > **Still open — the reserve is currently informational, not enforced.** `TemplateFitsStorage` only
-  > checks template-disk vs the server's disk limit; it does **not** yet reject an allocation that
-  > exceeds `freeForConvoy`. Next slice: enforce `newDiskSize ≤ freeForConvoy` at server-create /
-  > disk-resize time (uses the same cached live lookup). **Fail-open when the node is offline** (don't
-  > block creation on a transient outage — mirror the list's degradation). This is what makes the
-  > reserve buffer actually bind. Depends on the multi-disk item below for per-disk sizing once that
-  > lands — until then it checks the single `disk`.
+  > **Enforcement — DONE (commit `1f3cb9bb`).** `HasSufficientDiskSpace` (already wired on
+  > `limits.disk` in `StoreServerRequest`) now checks the requested disk against live
+  > `freeForConvoy = physicalFree − reservedBytes` instead of the old `size − committed`, so the
+  > reserve actually binds and real capacity (incl. base system) is respected. **Fails open when the
+  > node is unreachable** (a transient outage must not block creation — mirrors the list's
+  > degradation). The live lookup was extracted to `App\Services\Nodes\LiveStorageService` (shared by
+  > the controller + the rule, one cache key `node:{id}:live-storages`). Tests:
+  > `tests/Unit/Rules/HasSufficientDiskSpaceTest.php` (reject over-line, allow at-line, fail-open
+  > offline). Suite 148; PHPStan zero. **Caveat:** checks the single `limits.disk` today; when
+  > multi-disk (below) lands, generalize to per-disk against each disk's target storage.
 
   Original problem (kept for reference):
   Today a storage's capacity is the operator-entered `Storage.size`, and "usage" is Convoy's *own
