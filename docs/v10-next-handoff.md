@@ -287,21 +287,36 @@ denied on `/tokens`; session admin still manages tokens; non-admin token rejecte
 > prefer migrating those first. The only way to get clean admin callables would be collapsing to a single
 > prefix (the deferred Option A); not worth it now.
 
-## Next up (Phase 3)
+## Phase 3 (operator cutover deliverable) — tooling DONE, not a dev gate
 
-- **Phase 3 (prod migration)** is the hard requirement after Phase 2: cross-engine
-  MySQL 8.0 → Postgres 17 cutover (pgloader) on top of 24 breaking rename migrations; dry-run
-  against a restored prod snapshot; reconcile `develop`'s newer commits.
+**Reframed 2026-07-07:** Phase 3 (the v4 MySQL 8.0 → v10 Postgres 17 cutover) is a migration path
+that **downstream operators run when upgrading their own Convoy installs** — it is NOT something the
+maintainer runs against prod data (he has none; he ships the software, he doesn't operate an
+install). Fresh v10 installs start on Postgres and skip it entirely. So the *deliverable* is the
+tooling + runbook under `database/cutover/` (RUNBOOK.md, pgloader recipe `v4-to-v10.load`, and
+`verify.sh` which validates the engine conversion is lossless on synthetic data). That deliverable
+is **done and committed**; it stays in the repo. There is no maintainer-side dry-run task pending —
+the real, prod-data rehearsal is the operator's, on their own host.
 
-> **`verify.sh` host-arch caveat (2026-07-07).** The engine-conversion harness
-> (`database/cutover/verify.sh`) is green *where pgloader can run amd64* — x86_64 hosts or
-> **macOS Docker Desktop (Rosetta)**. It cannot self-verify inside an **arm64 Linux** sandbox:
-> `dimitri/pgloader` is amd64-only and its SBCL/Lisp runtime segfaults under Linux qemu-user
-> emulation (Rosetta handles it; qemu-user doesn't). Debian's native-arm64 pgloader is too old
-> (3.6.7~devel) and dies on MySQL 8.0 collation IDs ("N fell through ECASE"). The harness now
-> takes a `PGLOADER_IMAGE` override (default unchanged) and prints a targeted diagnostic instead
-> of a raw crash. **Net: run `verify.sh` (and the real cutover) on the Mac / an x86_64 box, not
-> in an arm64 sandbox.** Steps 1–2 (boot MySQL, migrate+seed the full v10 schema) pass everywhere.
+> **`verify.sh` host-arch caveat (2026-07-07) — for operators picking a host, not a maintainer
+> blocker.** The engine-conversion harness (`database/cutover/verify.sh`) is green *where pgloader
+> can run amd64* — x86_64 hosts or **macOS Docker Desktop (Rosetta)**. It cannot self-verify inside
+> an **arm64 Linux** sandbox: `dimitri/pgloader` is amd64-only and its SBCL/Lisp runtime segfaults
+> under Linux qemu-user emulation (Rosetta handles it; qemu-user doesn't). Debian's native-arm64
+> pgloader is too old (3.6.7~devel) and dies on MySQL 8.0 collation IDs ("N fell through ECASE").
+> The harness takes a `PGLOADER_IMAGE` override (default unchanged) and prints a targeted diagnostic
+> instead of a raw crash. Steps 1–2 (boot MySQL, migrate+seed the full v10 schema) pass everywhere.
+
+## Next up — product / feature threads
+
+Phases 0/1/2/4 are done; Phase 3 tooling is a shipped operator deliverable (above). The maintainer's
+remaining work is the product follow-ups below (all doable in-sandbox, no prod data): the **IPAM
+allocator rewrite**, **API tokens v2**, and the **deployment progress tracker refactor**. See the
+"Product follow-ups" section for the researched direction on each.
+
+> Note: the IPAM allocator rewrite's write-up says storing IPs as Postgres `inet` was "cheapest as
+> part of the Phase 3 cutover." Since the cutover isn't a maintainer step, that `inet` change is now
+> just a **normal `next` migration** to schedule on its own — no longer coupled to a cutover event.
 
 ### Cutover migration audit (DONE — no prod data needed)
 The only migrations that actually *execute* at cutover are the **24 on `next` but not on
