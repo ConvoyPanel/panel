@@ -455,12 +455,24 @@ Verified:
   > (`ip: string`) is unchanged. Suite 124; PHPStan zero.
   >
   > **Remaining slices (not yet started):**
-  > - **Slice 3 — address state (`available`/`assigned`/`reserved`) + reserve-IP feature.** Replace the
-  >   binary `server_id IS NULL` with an enum; auto-exclude network/broadcast/gateway; allocator
-  >   filters `state = 'available'`. Small enum + migration; the query already filters, so it slots in.
-  > - **Slice 4 — materialization policy for huge/v6 blocks.** Slice 1 is pure-consume, so a block the
-  >   admin never fully generated can under-allocate. Small blocks: keep pre-materializing. Large/v6:
-  >   sparse-store with a per-block cursor/high-water-mark + unique constraint + retry-on-conflict.
+  > **Slice 4 (sparse materialization for large/v6 blocks) — DONE (2026-07-07), commit `eb455c95`.**
+  > Pre-materialization was the last address-space-sized operation (O(M) slots, unbounded for v6).
+  > `AddressBlock::isSparse()` splits blocks at `DENSE_MAX_HOST_BITS` (2^16 units): dense blocks are
+  > pre-materialized/browsable as before; sparse blocks (large v4 / any v6) are **minted on demand**.
+  > `GenerateAddressesAction` skips sparse blocks (returns `sparse=true`) and drops the old v6 >10000
+  > cap. The allocator reclaims free rows first (the O(log N + n) indexed path, covers dense + freed
+  > sparse rows), then mints the shortfall by appending after `MAX(ip)` (served O(log N) by the unique
+  > `(address_block_id, ip)` index) under a per-block `FOR UPDATE` lock — next candidate is always
+  > `MAX+stride`, so it can't pre-exist (no conflict, no double-assign). **No migration needed** (cursor
+  > derived from MAX(ip), not a stored column). A v6 /64 hands out its first N addresses in N index
+  > lookups, never 2^64 rows. Tests: sparse v4/v6 mint + reclaim-before-mint. Suite 127; PHPStan zero;
+  > tsc clean (`GeneratedAddressesData` gained `sparse`).
+  >
+  > **Slice 3 — address state (`available`/`assigned`/`reserved`) + reserve-IP feature — NOT STARTED
+  > (needs design input).** Two parts: (a) a *correctness* bugfix — network/broadcast/gateway are
+  > currently allocatable and shouldn't be; (b) the *reserve-IP feature* — product surface (state enum,
+  > reserve/unreserve API + UI, per-admin? notes?). The performance/correctness core of the rewrite
+  > (Slices 1/2/4) is complete without it; Slice 3 is a feature layer on top.
   >
   > **✅ Postgres-only decision — MADE (2026-07-07).** v10 is Postgres-only; MySQL runtime support is
   > dropped. CI moved from MySQL 8.0 → Postgres 17 (`0a1ea758`), `.env.ci`/`.env.example` default to
