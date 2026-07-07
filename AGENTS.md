@@ -57,12 +57,12 @@ There is no host-side `php` / `composer` / `node`; they run inside the ddev web 
 - `ddev artisan <command>` — Artisan
 - `ddev composer <command>` — Composer (the stack is up during `ddev start`, so
   `post-autoload-dump`'s `package:discover` connects to cache/DB fine)
-- `ddev npm <command>` — npm runs in-container (this is why `types:generate` calls
-  `php artisan` directly rather than shelling through docker compose)
+- `ddev npm <command>` — npm runs in-container (so `types:generate` can call
+  `php artisan` directly)
 - `ddev ssh` — open a shell in the web container
 
 DB / Redis / mail are configured via `web_environment` in `.ddev/config.yaml`, whose values
-override `.env.next` (Laravel's Dotenv does not overwrite real env vars). `ext-gmp` is added
+override `.env` (Laravel's Dotenv does not overwrite real env vars). `ext-gmp` is added
 via `webimage_extra_packages`.
 
 ## Laravel style

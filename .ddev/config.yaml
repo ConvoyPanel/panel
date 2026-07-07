@@ -16,8 +16,7 @@ webimage_extra_packages:
   - php8.4-gmp
 
 # Postgres + redis + mail overrides. These are real container env vars, so they
-# take precedence over .env.next (Laravel's Dotenv does not overwrite existing
-# env), letting ddev coexist with the docker-compose/.env flow on `develop`.
+# take precedence over .env (Laravel's Dotenv does not overwrite existing env).
 web_environment:
   - APP_URL=https://convoy.ddev.site
   - DB_CONNECTION=pgsql
@@ -53,7 +52,7 @@ web_extra_daemons:
     command: "php artisan schedule:work"
     directory: /var/www/html
 
-# Expose the Vite dev server (was port 3000 in docker-compose).
+# Expose the Vite dev server.
 web_extra_exposed_ports:
   - name: vite
     container_port: 3000
