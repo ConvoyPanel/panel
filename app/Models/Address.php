@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int $id
  * @property int $address_block_id
  * @property ?int $server_id
+ * @property AddressState $state
  * @property AddressVersion $version
  * @property string $ip
  * @property int $prefix_length
@@ -36,6 +38,13 @@ class Address extends Model
         'ip' => ['ip'],
         'prefix_length' => ['numeric', 'min:0', 'max:128', 'required'],
     ];
+
+    public function casts(): array
+    {
+        return [
+            'state' => AddressState::class,
+        ];
+    }
 
     /**
      * @return BelongsTo<AddressBlock, $this>

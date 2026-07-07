@@ -20,6 +20,15 @@ class UpdateAddressRequest extends BaseApiRequest
                     }
 
                     $address = $this->parameter('address', Address::class);
+
+                    // A reserved address is fully locked — it must be unreserved before it can be
+                    // assigned to a server.
+                    if ($address->state === \App\Enums\Network\AddressState::Reserved) {
+                        $fail('This address is reserved. Unreserve it before assigning it to a server.');
+
+                        return;
+                    }
+
                     $server = Server::find($value);
 
                     if (! $server) {

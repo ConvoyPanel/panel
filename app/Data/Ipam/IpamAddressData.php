@@ -3,6 +3,7 @@
 namespace App\Data\Ipam;
 
 use App\Data\Server\ServerData;
+use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use Spatie\LaravelData\Attributes\LoadRelation;
@@ -18,6 +19,7 @@ class IpamAddressData extends Data
         public int $id,
         public int $addressBlockId,
         public ?int $serverId,
+        public AddressState $state,
         public AddressVersion $version,
         public string $ip,
         public int $prefixLength,
@@ -35,6 +37,7 @@ class IpamAddressData extends Data
             id: $address->id,
             addressBlockId: $address->address_block_id,
             serverId: $address->server_id,
+            state: $address->state,
             version: $address->version,
             ip: $address->ip,
             prefixLength: $address->prefix_length,

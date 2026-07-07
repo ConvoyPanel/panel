@@ -4,6 +4,7 @@ namespace App\Services\Servers;
 
 use App\Data\Server\Eloquent\PrimaryAddressesData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
+use App\Enums\Network\AddressState;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Address;
 use App\Models\NetworkInterface;
@@ -156,20 +157,21 @@ class ServerNetworkService
         $addressesToAdd = array_diff($addressIds, $currentAddresses);
         $addressesToRemove = array_diff($currentAddresses, $addressIds);
 
-        // Attach new addresses
+        // Attach new addresses. The `state = available` guard means a reserved address is never
+        // silently assigned (reserved is fully locked), and it flips available -> assigned.
         if (!empty($addressesToAdd)) {
             Address::query()
-                ->whereNull('server_id')
+                ->where('state', AddressState::Available)
                 ->whereIn('id', $addressesToAdd)
-                ->update(['server_id' => $server->id]);
+                ->update(['server_id' => $server->id, 'state' => AddressState::Assigned]);
         }
 
-        // Detach addresses no longer associated
+        // Detach addresses no longer associated (assigned -> available).
         if (!empty($addressesToRemove)) {
             Address::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)
-                ->update(['server_id' => null]);
+                ->update(['server_id' => null, 'state' => AddressState::Available]);
         }
     }
 }

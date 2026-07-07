@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Models\Address;
@@ -108,6 +109,17 @@ it('skips addresses already assigned to a server', function () {
     expect(Address::where('address_block_id', $block->id)->count())->toBe(5);
 });
 
+it('never hands out a reserved address', function () {
+    ['interface' => $interface, 'block' => $block] = interfaceWithBlock(AddressVersion::IPv4, free: 1);
+    // Reserve the one other address in the block so only the reserved one could satisfy a 2nd request.
+    Address::factory()->for($block)->create(['ip' => '10.0.0.99', 'state' => AddressState::Reserved]);
+
+    // One available row exists, so a request for 1 succeeds but a request for 2 must fail — the
+    // reserved row is not eligible.
+    expect(allocate($interface->id, 1, 0))->toHaveCount(1);
+    expect(fn () => allocate($interface->id, 2, 0))->toThrow(InsufficientAddressesException::class);
+});
+
 it('throws when there are not enough free addresses', function () {
     ['interface' => $interface] = interfaceWithBlock(AddressVersion::IPv4, free: 2);
 
@@ -161,6 +173,8 @@ function interfaceWithSparseBlock(AddressVersion $version, string $baseIp, int $
     $block = AddressBlock::factory()->for($group)->create([
         'version' => $version->value,
         'base_ip' => $baseIp,
+        // No gateway so system-reservations are just the network/anycast address (deterministic).
+        'gateway' => null,
         'prefix_length_from' => $from,
         'prefix_length_to' => $version === AddressVersion::IPv6 ? 128 : 32,
     ]);
@@ -174,9 +188,11 @@ it('mints fresh addresses from a sparse IPv4 block instead of pre-materializing 
 
     $allocated = allocate($interface->id, 3, 0);
 
-    // Minted at the low end of the range, on demand — not 2^24 rows.
-    expect($allocated->pluck('ip')->all())->toBe(['10.0.0.0', '10.0.0.1', '10.0.0.2']);
-    expect(Address::where('address_block_id', $block->id)->count())->toBe(3);
+    // .0 (network) is auto-reserved, so minting starts at .1 — on demand, not 2^24 rows.
+    expect($allocated->pluck('ip')->all())->toBe(['10.0.0.1', '10.0.0.2', '10.0.0.3']);
+    // 3 minted + the reserved network row.
+    expect(Address::where('address_block_id', $block->id)->count())->toBe(4);
+    expect(Address::where('ip', '10.0.0.0')->first()->state)->toBe(AddressState::Reserved);
 });
 
 it('mints from a sparse IPv6 block without materializing the address space', function () {
@@ -185,8 +201,9 @@ it('mints from a sparse IPv6 block without materializing the address space', fun
 
     $allocated = allocate($interface->id, 0, 2);
 
-    expect($allocated->pluck('ip')->all())->toBe(['2001:db8::', '2001:db8::1']);
-    expect(Address::where('address_block_id', $block->id)->count())->toBe(2);
+    // 2001:db8:: (subnet-router anycast) is auto-reserved, so minting starts at ::1.
+    expect($allocated->pluck('ip')->all())->toBe(['2001:db8::1', '2001:db8::2']);
+    expect(Address::where('address_block_id', $block->id)->count())->toBe(3);
 });
 
 it('reclaims a freed row before minting new ones in a sparse block', function () {

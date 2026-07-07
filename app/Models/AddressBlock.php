@@ -117,6 +117,33 @@ class AddressBlock extends Model
             ->toString();
     }
 
+    /**
+     * Addresses that must never be handed to a VM and are auto-reserved: the network and broadcast
+     * addresses (IPv4 blocks larger than a point-to-point /31, per RFC 3021), the subnet-router
+     * anycast (IPv6 base), and the configured gateway.
+     *
+     * @return list<string>
+     */
+    public function systemReservedAddresses(): array
+    {
+        $reserved = [];
+
+        if ($this->version === AddressVersion::IPv4) {
+            if ($this->prefix_length_from <= 30) {
+                $reserved[] = $this->base_ip;                  // network
+                $reserved[] = $this->lastAllocatableAddress(); // broadcast
+            }
+        } else {
+            $reserved[] = $this->base_ip;                      // IPv6 subnet-router anycast
+        }
+
+        if ($this->gateway) {
+            $reserved[] = $this->gateway;
+        }
+
+        return array_values(array_unique($reserved));
+    }
+
     protected function macAddress(): Attribute
     {
         return Attribute::make(

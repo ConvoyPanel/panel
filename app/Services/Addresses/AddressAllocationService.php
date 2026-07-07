@@ -2,6 +2,7 @@
 
 namespace App\Services\Addresses;
 
+use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Models\Address;
@@ -71,13 +72,14 @@ class AddressAllocationService
             throw new InsufficientAddressesException();
         }
 
-        // 1. Reclaim existing free rows across every block of this version.
+        // 1. Reclaim existing available rows across every block of this version. Reserved rows
+        //    (network/broadcast/gateway or held-out IPs) are excluded — that's the auto-exclusion.
         $result = Address::query()
             ->with('addressBlock')
             ->whereIn('address_block_id', $blocks->pluck('id')->all())
-            ->whereNull('server_id')
+            ->where('state', AddressState::Available)
             // ip is an inet column, so this orders numerically and is served without a sort by the
-            // partial index addresses_free_by_block_ip_idx.
+            // partial index addresses_available_by_block_ip_idx.
             ->orderBy('ip')
             ->limit($count)
             // FOR UPDATE SKIP LOCKED (Postgres + MySQL 8.0). Laravel has no skip-locked helper.
@@ -123,6 +125,13 @@ class AddressAllocationService
         // Serialize cursor advancement for this block (held until the outer transaction commits).
         DB::table('address_blocks')->where('id', $block->id)->lockForUpdate()->first();
 
+        // Materialize the low system-reserved addresses (network / gateway) as reserved rows so
+        // minting — which appends after MAX(ip) — starts above them and never hands them out. The
+        // broadcast (block ceiling) is intentionally not materialized: it sits at the very top, so a
+        // reserved row there would make MAX(ip) the ceiling and stall minting. At sparse-block scale
+        // (2^16+ addresses) minting never climbs near the broadcast anyway.
+        $this->reserveLowSystemAddresses($block);
+
         $stride = $block->unitStride();
         $lastAddress = $block->lastAllocatableAddress();
         $mintedIds = [];
@@ -141,14 +150,14 @@ class AddressAllocationService
                 ),
                 chk AS (SELECT ip, ip <= ?::inet AS ok FROM cand),
                 ins AS (
-                    INSERT INTO addresses (address_block_id, ip, prefix_length, server_id)
-                    SELECT ?, ip, ?, NULL FROM chk WHERE ok
+                    INSERT INTO addresses (address_block_id, ip, prefix_length, server_id, state)
+                    SELECT ?, ip, ?, NULL, ? FROM chk WHERE ok
                     ON CONFLICT (address_block_id, ip) DO NOTHING
                     RETURNING id
                 )
                 SELECT (SELECT ok FROM chk) AS ok, (SELECT id FROM ins) AS inserted_id
                 SQL,
-                [$block->id, $stride, $block->base_ip, $lastAddress, $block->id, $block->prefix_length_to],
+                [$block->id, $stride, $block->base_ip, $lastAddress, $block->id, $block->prefix_length_to, AddressState::Available->value],
             );
 
             // !ok = block exhausted; inserted_id null with ok = unexpected conflict — stop either way.
@@ -160,5 +169,28 @@ class AddressAllocationService
         }
 
         return Address::with('addressBlock')->findMany($mintedIds);
+    }
+
+    /**
+     * Ensure the block's network and gateway addresses exist as reserved rows (idempotent). These
+     * are the "low" system-reserved addresses; the broadcast is deliberately excluded (see caller).
+     */
+    private function reserveLowSystemAddresses(AddressBlock $block): void
+    {
+        $broadcast = $block->version === AddressVersion::IPv4 && $block->prefix_length_from <= 30
+            ? $block->lastAllocatableAddress()
+            : null;
+
+        foreach ($block->systemReservedAddresses() as $ip) {
+            if ($ip === $broadcast) {
+                continue;
+            }
+
+            DB::insert(
+                'INSERT INTO addresses (address_block_id, ip, prefix_length, server_id, state)
+                 VALUES (?, ?::inet, ?, NULL, ?) ON CONFLICT (address_block_id, ip) DO NOTHING',
+                [$block->id, $ip, $block->prefix_length_to, AddressState::Reserved->value],
+            );
+        }
     }
 }

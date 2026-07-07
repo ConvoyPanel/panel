@@ -6,6 +6,9 @@ use App\Actions\Ipam\GenerateAddressesAction;
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
 use App\Data\PaginationMeta;
+use App\Enums\Network\AddressState;
+use App\Exceptions\Service\Address\AddressNotAvailableException;
+use App\Exceptions\Service\Address\AddressNotReservedException;
 use App\Http\Requests\Admin\Addresses\UpdateAddressRequest;
 use App\Jobs\Server\SyncNetworkSettingsJob;
 use App\Models\Address;
@@ -55,6 +58,14 @@ class AddressController
         $this->connection->transaction(function () use ($address, $validated) {
             $oldServerId = $address->server_id;
 
+            // Keep state in lock-step with the manual assignment (reserved addresses can't reach
+            // here — UpdateAddressRequest rejects assigning them).
+            if (array_key_exists('server_id', $validated)) {
+                $validated['state'] = filled($validated['server_id'])
+                    ? AddressState::Assigned
+                    : AddressState::Available;
+            }
+
             $address->update($validated);
 
             if (array_key_exists('server_id', $validated) && $oldServerId !== $validated['server_id']) {
@@ -74,6 +85,30 @@ class AddressController
             }
         });
 
+        $address->load('server', 'addressBlock');
+
+        return IpamAddressData::from($address);
+    }
+
+    public function reserve(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address)
+    {
+        if ($address->state !== AddressState::Available) {
+            throw new AddressNotAvailableException();
+        }
+
+        $address->update(['state' => AddressState::Reserved]);
+        $address->load('server', 'addressBlock');
+
+        return IpamAddressData::from($address);
+    }
+
+    public function unreserve(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address)
+    {
+        if ($address->state !== AddressState::Reserved) {
+            throw new AddressNotReservedException();
+        }
+
+        $address->update(['state' => AddressState::Available]);
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);

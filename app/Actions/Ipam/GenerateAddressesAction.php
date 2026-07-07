@@ -3,6 +3,7 @@
 namespace App\Actions\Ipam;
 
 use App\Models\AddressBlock;
+use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use App\Data\Ipam\GeneratedAddressesData;
 
@@ -34,6 +35,9 @@ class GenerateAddressesAction {
         $toCreate = array_diff($allAddresses, $existing);
         $batchToCreate = array_slice($toCreate, 0, self::BATCH_SIZE);
 
+        // Network / broadcast / gateway are materialized but auto-reserved so they're never allocated.
+        $systemReserved = array_flip($addressBlock->systemReservedAddresses());
+
         // Prepare data for batch insert
         $insertData = [];
         foreach ($batchToCreate as $ip) {
@@ -42,6 +46,9 @@ class GenerateAddressesAction {
                 'server_id' => null,
                 'ip' => $ip,
                 'prefix_length' => $toPrefix,
+                'state' => isset($systemReserved[$ip])
+                    ? AddressState::Reserved->value
+                    : AddressState::Available->value,
             ];
         }
 

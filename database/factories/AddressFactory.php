@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Network\AddressState;
 use App\Models\AddressBlock;
 use App\Models\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +24,21 @@ class AddressFactory extends Factory
             'server_id' => null,
             'ip' => $this->faker->unique()->ipv4(),
             'prefix_length' => 32,
+            'state' => AddressState::Available,
         ];
+    }
+
+    /**
+     * Keep state consistent with server_id: an address created with a server attached is 'assigned'
+     * unless a state was set explicitly.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Address $address) {
+            if ($address->server_id !== null && $address->state === AddressState::Available) {
+                $address->state = AddressState::Assigned;
+            }
+        });
     }
 
     public function ipv6(): self

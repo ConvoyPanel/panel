@@ -168,6 +168,8 @@ Route::prefix('/address-block-groups')->group(function () {
             Route::get('/addresses', [Admin\AddressController::class, 'index']);
             Route::post('/addresses/generate', [Admin\AddressController::class, 'generate']);
             Route::patch('/addresses/{address}', [Admin\AddressController::class, 'update']);
+            Route::post('/addresses/{address}/reserve', [Admin\AddressController::class, 'reserve']);
+            Route::delete('/addresses/{address}/reserve', [Admin\AddressController::class, 'unreserve']);
             Route::delete('/addresses/{address}', [Admin\AddressController::class, 'destroy']);
         });
     });
