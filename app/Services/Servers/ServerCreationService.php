@@ -109,6 +109,18 @@ class ServerCreationService
                 'disk_index' => 0,
             ]);
 
+            // Secondary/data disks, each on its own storage. interface is null
+            // until the build allocates them (AllocationService::syncDisks).
+            foreach (array_values(Arr::get($data, 'limits.disks', [])) as $index => $disk) {
+                $server->disks()->create([
+                    'storage_id' => $disk['storage_id'],
+                    'size' => $disk['size'],
+                    'interface' => null,
+                    'is_primary' => false,
+                    'disk_index' => $index + 1,
+                ]);
+            }
+
             if ($addresses->isNotEmpty()) {
                 $this->networkService->syncAddresses($server, $addresses->pluck('id')->all());
             }

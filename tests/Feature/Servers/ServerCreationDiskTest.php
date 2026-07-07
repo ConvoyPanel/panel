@@ -55,6 +55,26 @@ it('creates a server with its uuid populated (guarded-field regression)', functi
     expect($server->status)->toBe(ServerStatus::DEFERRED_OS_SELECTION);
 });
 
+it('creates secondary disk rows from limits.disks', function () {
+    $secondaryStorage = Storage::factory()->create();
+    $this->node->storages()->attach($secondaryStorage);
+
+    $data = creationData($this->user->id, $this->node->id, $this->storage->id);
+    $data['limits']['disks'] = [
+        ['storage_id' => $secondaryStorage->id, 'size' => 50 * 1024 * 1024 * 1024],
+    ];
+
+    $server = app(ServerCreationService::class)->handle($data);
+
+    expect($server->disks()->count())->toBe(2);
+
+    $secondary = $server->disks()->where('is_primary', false)->first();
+    expect($secondary->storage_id)->toBe($secondaryStorage->id);
+    expect($secondary->size)->toBe(50 * 1024 * 1024 * 1024);
+    expect($secondary->interface)->toBeNull(); // assigned at build time
+    expect($secondary->disk_index)->toBe(1);
+});
+
 it('mirrors the primary disk into server_disks on creation', function () {
     $server = app(ServerCreationService::class)->handle(
         creationData($this->user->id, $this->node->id, $this->storage->id),

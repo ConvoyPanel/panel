@@ -43,6 +43,14 @@ class StoreServerRequest extends BaseApiRequest
             'limits.disk'               => [...$rules['disk'], new HasSufficientDiskSpace()],
             'limits.bandwidth'          => $rules['bandwidth_limit'],
 
+            // Optional secondary/data disks, each on its own storage. The
+            // primary/OS disk stays `storage_id` + `limits.disk`; these are
+            // allocated post-clone (see AllocationService::syncDisks). Capacity
+            // is checked in aggregate by the HasSufficientDiskSpace rule above.
+            'limits.disks'              => 'sometimes|array',
+            'limits.disks.*.storage_id' => ['required', 'integer', 'exists:storages,id', new StorageAllows(StorageContentType::KVM)],
+            'limits.disks.*.size'       => ['required', 'numeric', 'min:1'],
+
             // Backup limits
             'limits.backups'            => 'required|array',
             'limits.backups.count'      => $rules['backup_count_limit'],

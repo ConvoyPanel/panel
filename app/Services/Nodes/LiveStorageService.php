@@ -5,10 +5,13 @@ namespace App\Services\Nodes;
 use App\Data\Node\Storage\StorageData;
 use App\Exceptions\Repository\Proxmox\RequestException;
 use App\Models\Node;
+use App\Models\Storage;
 use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+
+use function max;
 
 /**
  * Live Proxmox storage status is the source of truth for capacity/usage (it
@@ -42,5 +45,20 @@ class LiveStorageService
     public function get(Node $node, string $name): ?StorageData
     {
         return $this->forNode($node)->get($name);
+    }
+
+    /**
+     * Bytes Convoy may actually allocate on this storage right now:
+     * live physical free − the operator's reserve buffer. Returns null when the
+     * node/storage is unreachable, so callers fail open rather than block.
+     */
+    public function freeForConvoy(Node $node, Storage $storage): ?int
+    {
+        $live = $this->get($node, $storage->name);
+        if ($live === null) {
+            return null;
+        }
+
+        return max(0, $live->free - (int) ($storage->reserved_bytes ?? 0));
     }
 }
