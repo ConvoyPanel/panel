@@ -468,11 +468,29 @@ Verified:
   > lookups, never 2^64 rows. Tests: sparse v4/v6 mint + reclaim-before-mint. Suite 127; PHPStan zero;
   > tsc clean (`GeneratedAddressesData` gained `sparse`).
   >
-  > **Slice 3 — address state (`available`/`assigned`/`reserved`) + reserve-IP feature — NOT STARTED
-  > (needs design input).** Two parts: (a) a *correctness* bugfix — network/broadcast/gateway are
-  > currently allocatable and shouldn't be; (b) the *reserve-IP feature* — product surface (state enum,
-  > reserve/unreserve API + UI, per-admin? notes?). The performance/correctness core of the rewrite
-  > (Slices 1/2/4) is complete without it; Slice 3 is a feature layer on top.
+  > **Slice 3 — address state + reserve-IP + auto-exclusions — DONE (2026-07-07), commits `75ada6ec`
+  > (backend) + `6a5cac43` (frontend).** Design decisions (user-approved): reserve is **fully locked**
+  > (a reserved address can't be assigned until unreserved), **bare flag** (no note/owner), and
+  > network/broadcast/gateway are **auto-reserved and visible**.
+  > - `AddressState` enum (`available`/`assigned`/`reserved`) + migration (`2026_07_07_000002…`) adding
+  >   the `state` column (backfilled from `server_id`); the allocator partial index repointed from
+  >   `WHERE server_id IS NULL` to `WHERE state = 'available'`.
+  > - Allocator selects only `available`; `syncAddresses` keeps state in lock-step (available↔assigned).
+  > - Auto-exclusions: `AddressBlock::systemReservedAddresses()`; `GenerateAddressesAction` marks
+  >   network/broadcast/gateway reserved for dense blocks (skips network/broadcast on /31,/32 per RFC
+  >   3021); sparse minting materializes the low system-reserved rows (network/gateway) so they're
+  >   skipped, broadcast excluded by scale.
+  > - Reserve API: `POST`/`DELETE …/addresses/{address}/reserve` (curated 409 codes
+  >   `address_not_available` / `address_not_reserved`); `UpdateAddressRequest` rejects assigning a
+  >   reserved address. Frontend: state badge column + Reserve/Unreserve row actions in the admin
+  >   address list.
+  > - Tests: `tests/Feature/Ipam/AddressReservationTest.php` (5) + allocator "never hands out reserved".
+  >   Suite 133; PHPStan zero; tsc + vite build green.
+  >
+  > **⚠️ IPAM ALLOCATOR REWRITE COMPLETE (all 4 slices).** Allocation is O(log N + n) and proven;
+  > generation is no longer address-space-sized; IPv6 blocks work; the race is gone; reserve + auto
+  > exclusions shipped. Minor documented caveat: a pathologically *high* gateway in a sparse block
+  > leaves lower addresses unminted (append-above-MAX) — non-issue for conventional low gateways.
   >
   > **✅ Postgres-only decision — MADE (2026-07-07).** v10 is Postgres-only; MySQL runtime support is
   > dropped. CI moved from MySQL 8.0 → Postgres 17 (`0a1ea758`), `.env.ci`/`.env.example` default to
