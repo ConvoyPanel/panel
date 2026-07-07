@@ -1,8 +1,0 @@
----
-globs: *.php
-alwaysApply: false
----
-
-Prefer helper functions provided by Laravel over those provided by PHP when available. For example, instead of using `empty` or `isset`, use `filled`, `blank`, etc.
-
-Traits should be stored in app/Traits/
