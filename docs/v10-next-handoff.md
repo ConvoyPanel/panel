@@ -221,23 +221,27 @@ of real PVE strings for the two DTOs that emit (`NetworkDeviceData`, `TpmStateDi
 `DiskData` and `UsbDeviceData` are parse-only (no `toProxmoxString`), so they're out of scope here —
 covered instead by their characterization tests. Suite: 74 passed.
 
-## Phase 4 — data-layer migration to TanStack Query (IN PROGRESS)
+## Phase 4 — data-layer migration to TanStack Query (DONE)
 
-Phase 4 polish: converge the whole data layer on the **`features/*` reference pattern**
+Phase 4 goal: converge the whole data layer on the **`features/*` reference pattern**
 (`queryOptions` + `apiFetch` + Wayfinder route objects). Reference implementations:
-`features/servers/api.ts` and `features/overview/api.ts`. "Convert as you touch" — no big-bang rewrite.
+`features/servers/api.ts` and `features/overview/api.ts`.
 
-> **Status update (2026-07-06):** the old hand-written SWR-compat shim (`lib/swr.ts`) is **already
-> gone** — earlier commits `eb8922c8` (native TanStack Query migration) and `f6680ad4` (queryOptions
-> factory objects) removed it. The remaining `api/**/use-*.ts` + `get*.ts` hooks *already* use
-> TanStack `queryOptions` directly; the residual delta is purely (a) raw `axios.get('/url')` → `apiFetch`
-> + Wayfinder route objects, and (b) relocating each domain from `api/` into `features/<domain>/api.ts`.
-> ~30 old-style `use-*` hooks remain across nodes, users, servers (admin), templateGroups, addressBlockGroups,
-> account/authenticator, account/passkeys. **Admin caveat:** admin controllers are served under two
-> prefixes, so Wayfinder emits URI-keyed dictionaries — reference the `/api/admin` route explicitly
-> (`Controller.method['/api/admin/…']`), see `features/locations/api.ts` / `features/overview/api.ts`.
-> The `swrKey` prop on `ResourceComboboxForm` is a leftover name (now used as a TanStack queryKey), not
-> the old shim — harmless, rename opportunistically.
+> **Status update (2026-07-07): DONE.** The migration is complete — the old `api/` directory is
+> **gone entirely**, there are **zero raw `axios.{get,post,…}` calls** left in `resources/scripts`,
+> and every domain now lives in a `features/<domain>/api.ts` module on `apiFetch` (21 such modules:
+> account/{authenticator,passkeys,password}, auth/{,identity}, ipam/{,blocks,blocks/addresses},
+> locations, nodes/{,network-interfaces,storages}, overview, servers/{,admin,backups,detail,state},
+> template-groups/{,templates}, users). The SWR-compat shim (`lib/swr.ts`) is gone and no `swr`
+> import remains anywhere. The last residue — the misnamed `swrKey` prop on `ResourceComboboxForm`
+> (it feeds a TanStack `useInfiniteQuery` queryKey, not the removed shim) — was **renamed to
+> `queryKey`** in commit `66c00ff8` (tsc clean, behavior-preserving).
+>
+> **Admin caveat (still applies going forward):** admin controllers are served under two prefixes
+> (`/api/admin` + `/api/application`), so Wayfinder emits URI-keyed dictionaries — reference the
+> `/api/admin` route explicitly (`Controller.method['/api/admin/…']`), see `features/locations/api.ts`
+> / `features/overview/api.ts`. Client controllers (`/api/client/*`, `/api/auth/*`) have no app-API
+> twin and stay clean callables.
 
 **Landed:**
 - **Admin locations → `features/locations/api.ts`.** Consolidated the whole domain (list/detail/nodes
