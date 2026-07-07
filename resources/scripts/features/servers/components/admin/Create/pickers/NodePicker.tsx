@@ -20,7 +20,7 @@ const NodePicker = () => {
 
     return (
         <ResourceComboboxForm<Node>
-            swrKey={'nodes'}
+            queryKey={'nodes'}
             accessorKey={'id'}
             name={'nodeId'}
             fetcher={(query, page) =>

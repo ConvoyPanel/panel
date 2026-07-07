@@ -24,7 +24,7 @@ const ServerPicker = ({ addressBlockGroupId }: Props) => {
 
     return (
         <ResourceComboboxForm<Server>
-            swrKey={`compatible-servers-${addressBlockGroupId}`}
+            queryKey={`compatible-servers-${addressBlockGroupId}`}
             accessorKey={'id'}
             name={'serverId'}
             fetcher={(query, page) =>

@@ -27,7 +27,7 @@ const TemplateGroupPicker = () => {
 
     return (
         <ResourceComboboxForm<TemplateGroup>
-            swrKey={'template-groups'}
+            queryKey={'template-groups'}
             accessorKey={'uuid'}
             name={'templateGroupId'}
             fetcher={async (query, page) => {

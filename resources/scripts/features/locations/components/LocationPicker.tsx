@@ -19,7 +19,7 @@ const LocationPicker = () => {
 
     return (
         <ResourceComboboxForm<Location>
-            swrKey={'locations'}
+            queryKey={'locations'}
             accessorKey={'id'}
             name={'locationId'}
             fetcher={(query, page) =>

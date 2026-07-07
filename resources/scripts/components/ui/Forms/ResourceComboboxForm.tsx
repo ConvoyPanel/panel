@@ -29,7 +29,7 @@ import { ScrollArea } from '@/components/ui/ScrollArea'
 import Spinner from '@/components/ui/Spinner.tsx'
 
 export interface ResourceComboBoxFormProps<T> {
-    swrKey: string
+    queryKey: string
     accessorKey: keyof T
     name: string
     fetcher: (query: string, page: number) => Promise<PaginatedResult<T>>
@@ -49,7 +49,7 @@ const CommandSpinner = () => {
 }
 
 const ResourceComboboxForm = <T,>({
-    swrKey,
+    queryKey,
     accessorKey,
     name,
     fetcher,
@@ -70,7 +70,7 @@ const ResourceComboboxForm = <T,>({
         isFetchingNextPage,
         isLoading: isLoadingResults,
     } = useInfiniteQuery<PaginatedResult<T>>({
-        queryKey: [swrKey, debouncedQuery],
+        queryKey: [queryKey, debouncedQuery],
         queryFn: ({ pageParam = 1 }) =>
             fetcher(debouncedQuery, pageParam as number),
         initialPageParam: 1,

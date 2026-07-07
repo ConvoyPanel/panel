@@ -19,7 +19,7 @@ const UserPicker = () => {
 
     return (
         <ResourceComboboxForm<AdminUser>
-            swrKey={'users'}
+            queryKey={'users'}
             accessorKey={'id'}
             name={'userId'}
             fetcher={(query, page) =>
