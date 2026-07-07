@@ -7,10 +7,17 @@ export enum AddressVersion {
     IPv6 = 'ipv6',
 }
 
+export enum AddressState {
+    Available = 'available',
+    Assigned = 'assigned',
+    Reserved = 'reserved',
+}
+
 export interface Address {
     id: number
     addressBlockId: number
     serverId: number | null
+    state: AddressState
     version: AddressVersion
     ip: string
     prefixLength: number

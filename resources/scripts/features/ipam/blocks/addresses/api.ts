@@ -37,6 +37,14 @@ const destroyRoute =
     AddressController.destroy[
         '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses/{address}'
     ]
+const reserveRoute =
+    AddressController.reserve[
+        '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses/{address}/reserve'
+    ]
+const unreserveRoute =
+    AddressController.unreserve[
+        '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses/{address}/reserve'
+    ]
 
 export const getAddresses = async (
     blockGroupId: number,
@@ -142,6 +150,38 @@ export const updateAddress = async (
                 server_id: serverId,
             },
         }
+    )
+
+    return rawDataToAddress(data)
+}
+
+export const reserveAddress = async (
+    blockGroupId: number,
+    blockId: number,
+    addressId: number
+): Promise<Address> => {
+    const { data } = await apiFetch<DataResponse<unknown>>(
+        reserveRoute({
+            address_block_group: blockGroupId,
+            address_block: blockId,
+            address: addressId,
+        })
+    )
+
+    return rawDataToAddress(data)
+}
+
+export const unreserveAddress = async (
+    blockGroupId: number,
+    blockId: number,
+    addressId: number
+): Promise<Address> => {
+    const { data } = await apiFetch<DataResponse<unknown>>(
+        unreserveRoute({
+            address_block_group: blockGroupId,
+            address_block: blockId,
+            address: addressId,
+        })
     )
 
     return rawDataToAddress(data)

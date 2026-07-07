@@ -1,5 +1,6 @@
 import {
     Address,
+    AddressState,
     AddressVersion,
     GeneratedAddressesResult,
 } from '@/types/address.ts'
@@ -10,6 +11,7 @@ export const rawDataToAddress = (data: any): Address => ({
     id: data.id,
     addressBlockId: data.addressBlockId,
     serverId: data.serverId,
+    state: data.state as AddressState,
     version:
         data.version === 'ipv4' ? AddressVersion.IPv4 : AddressVersion.IPv6,
     ip: data.ip,

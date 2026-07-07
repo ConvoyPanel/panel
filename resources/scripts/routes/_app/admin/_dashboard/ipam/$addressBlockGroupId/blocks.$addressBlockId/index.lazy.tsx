@@ -1,13 +1,17 @@
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { Address, PaginatedAddresses } from '@/types/address.ts'
+import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
 import { Server } from '@/types/server.ts'
 import { createLazyFileRoute, useParams } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
+import { toast } from 'sonner'
 
 import {
     useAddresses,
     addressQueries,
+    reserveAddress,
+    unreserveAddress,
 } from '@/features/ipam/blocks/addresses/api.ts'
 import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
 
@@ -48,6 +52,40 @@ function BlockIndex() {
     )
     const openModal = useAddressModal(state => state.openModal)
 
+    const { mutate: toggleReservation } = useMutation({
+        mutationFn: async (address: Address) => {
+            const updated =
+                address.state === AddressState.Reserved
+                    ? await unreserveAddress(
+                          Number(addressBlockGroupId),
+                          Number(addressBlockId),
+                          address.id
+                      )
+                    : await reserveAddress(
+                          Number(addressBlockGroupId),
+                          Number(addressBlockId),
+                          address.id
+                      )
+
+            await mutate(data => {
+                if (!data) return
+                return {
+                    ...data,
+                    items: data.items.map(item =>
+                        item.id === updated.id ? updated : item
+                    ),
+                }
+            }, false)
+
+            toast.success(
+                updated.state === AddressState.Reserved
+                    ? 'Address reserved'
+                    : 'Address unreserved'
+            )
+        },
+        onError: () => toast.error('Failed to update reservation'),
+    })
+
     const columns: ColumnDef<Address>[] = [
         {
             header: 'IP',
@@ -81,6 +119,28 @@ function BlockIndex() {
             },
         },
         {
+            header: 'State',
+            accessorKey: 'state',
+            meta: {
+                skeletonWidth: '5rem',
+            },
+            cell: ({ cell }) => {
+                const state = cell.getValue<AddressState>()
+                return (
+                    <Badge
+                        variant={
+                            state === AddressState.Reserved
+                                ? 'outline'
+                                : 'secondary'
+                        }
+                        className={'capitalize'}
+                    >
+                        {state}
+                    </Badge>
+                )
+            },
+        },
+        {
             header: 'Server',
             accessorKey: 'server',
             meta: {
@@ -102,10 +162,17 @@ function BlockIndex() {
             },
         },
         actionsColumn(({ row }) => {
+            const address = row.original
             return (
                 <>
-                    <DropdownMenuItem onClick={() => openModal('edit', row.original)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openModal('delete', row.original)}>Delete</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openModal('edit', address)}>Edit</DropdownMenuItem>
+                    {address.state === AddressState.Available && (
+                        <DropdownMenuItem onClick={() => toggleReservation(address)}>Reserve</DropdownMenuItem>
+                    )}
+                    {address.state === AddressState.Reserved && (
+                        <DropdownMenuItem onClick={() => toggleReservation(address)}>Unreserve</DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={() => openModal('delete', address)}>Delete</DropdownMenuItem>
                 </>
             )
         }),
