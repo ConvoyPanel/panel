@@ -720,9 +720,17 @@ Verified:
   > (`physicalFree − reserved`). `ShowStorageModal` renders the breakdown against physical capacity
   > with distinct "Untracked" + "Reserved headroom" segments; create/edit forms gained the reserve
   > field. Tests: `tests/Feature/Controllers/Admin/Nodes/StorageControllerTest.php` (live merge +
-  > derivations; offline fallback). Suite 146; PHPStan zero; tsc + vite build green. **Not visually
-  > verified in-browser** — the live/online path needs a real Proxmox node the dev env lacks (offline
-  > path + data contract are covered).
+  > derivations; offline fallback). Suite 146; PHPStan zero; tsc + vite build green. The *frontend*
+  > (`ShowStorageModal`) is still only build/type-verified, not clicked in-browser.
+  >
+  > **✅ LIVE-VERIFIED against the real Proxmox node (2026-07-08, PVE 9.2.2 `us-southeast-2`).** Drove
+  > the backend/service path the `index` controller uses against the seeded `DevNodeSeeder` node with a
+  > `local` (dir) storage row (100 GiB advisory size, 5 GiB `reserved_bytes`): `LiveStorageService`
+  > fetched real PVE status (`total=107467792384`, `used≈4.8e9`, `free≈9.79e10`) byte-for-byte matching
+  > `pvesh get /nodes/us-southeast-2/storage` over SSH; `StorageEloquentData::fromModel` derivations were
+  > all correct against the live figures — `untracked = physicalUsed − committed` surfaced the
+  > base-system slice (~4.8 GB) and `freeForConvoy = physicalFree − reserved = 92500312064` (the 5 GiB
+  > reserve binds). Display path's live/online branch closed; only the in-browser render remains unproven.
   >
   > **Enforcement — DONE (commit `1f3cb9bb`).** `HasSufficientDiskSpace` (already wired on
   > `limits.disk` in `StoreServerRequest`) now checks the requested disk against live
@@ -732,8 +740,15 @@ Verified:
   > degradation). The live lookup was extracted to `App\Services\Nodes\LiveStorageService` (shared by
   > the controller + the rule, one cache key `node:{id}:live-storages`). Tests:
   > `tests/Unit/Rules/HasSufficientDiskSpaceTest.php` (reject over-line, allow at-line, fail-open
-  > offline). Suite 148; PHPStan zero. **Caveat:** checks the single `limits.disk` today; when
-  > multi-disk (below) lands, generalize to per-disk against each disk's target storage.
+  > offline). Suite 148; PHPStan zero. ~~**Caveat:** checks the single `limits.disk` today; when
+  > multi-disk (below) lands, generalize to per-disk against each disk's target storage.~~ **Done in
+  > slice 3** — the rule is now the per-storage aggregate (primary + `limits.disks[]`).
+  >
+  > **✅ LIVE-VERIFIED against the real node (2026-07-08).** With the same seeded `local` storage
+  > (`freeForConvoy ≈ 86.1 GiB`): a 95 GiB primary → **REJECTED**, an 80 GiB primary → **ALLOWED**, two
+  > 50 GiB disks on the *same* storage (100 GiB aggregate) → **REJECTED** (proves per-storage summing),
+  > and an offline node (empty live cache → `freeForConvoy` null) → a 999 GiB request **ALLOWED**
+  > (fail-open). All against real `freeForConvoy` derived from live PVE status.
 
   Original problem (kept for reference):
   Today a storage's capacity is the operator-entered `Storage.size`, and "usage" is Convoy's *own
