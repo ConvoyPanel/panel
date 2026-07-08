@@ -89,14 +89,14 @@ Researched direction retained for each; none built unless noted.
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
   both the client PAT card and the admin `/admin/tokens` screen shipped).
 
-- **SSH keychain — DONE.** `Client\Account\SSHKeyController` (index/store/destroy) on the existing
-  `ssh_keys` table, `SshPublicKey` rule (base64 blob + embedded-algorithm integrity check), real
-  `KeychainCard` (was mocked). **One-off server keys — NOT BUILT (proposed).** A server's authorized keys
-  already live in its cloud-init (`ServerAuthService::get/setSSHKeys`), independent of the keychain — so
-  "add a key to one server without saving it" needs no new table/flag: it's just a key in the server's set
-  with no keychain row. The missing piece is the **server auth-settings UI** (no server-auth frontend
-  exists yet): offer "add from keychain" (multi-select saved keys) + "paste a one-off key" (pushed to that
-  server only), optionally a "save to keychain too" checkbox. Reuse the `SshPublicKey` rule.
+- **SSH keychain + server auth — DONE.** Keychain: `Client\Account\SSHKeyController` (index/store/destroy)
+  on the existing `ssh_keys` table, `SshPublicKey` rule (base64 blob + embedded-algorithm integrity check),
+  real `KeychainCard` (was mocked). Server auth: the declared-but-missing `/servers/{uuid}/security` tab now
+  exists (`features/servers/security`), driving the existing `SettingsController` auth endpoints —
+  `SSHKeysCard` edits a server's cloud-init authorized-key set (add from keychain / paste one-off / remove /
+  save the full set) and `PasswordCard` sets the root password. **One-off keys** work as proposed: a one-off
+  is simply a key in the server's set with no keychain row — no new table/flag. *Other declared-but-unbuilt
+  server tabs remain: `iso-library`, `storage`, `networking` (nav points at them; no route files yet).*
 
 - **Logged-in session tracking — DONE.** `session_records` table + `RecordSessionActivity` middleware
   (web group, throttled, skips bearer/anon) + Logout listener + `SessionRecordController` (list/revoke via
