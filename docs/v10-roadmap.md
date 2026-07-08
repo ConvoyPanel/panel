@@ -5,6 +5,12 @@
 > accessible), so it's checked in here. Progress against these phases is tracked in
 > [v10-next-handoff.md](v10-next-handoff.md).
 
+> **Status (2026-07-08).** Phases **0, 1, 2 DONE**; **Phase 3** reframed to an *operator*
+> deliverable (tooling done) — see the reframe note under Phase 3; **Phase 4**'s data-layer
+> migration is done, the launch itself is the remaining gate. **v10 is Postgres-only** (decision
+> 2026-07-07; CI on Postgres 17), which supersedes the "MySQL prod data" framing throughout Phase 3.
+> The per-phase notes below carry the specifics; live per-feature status is in the handoff.
+
 ## Context
 
 `next` (v10) has been a ~20-month parallel rewrite of the Proxmox panel; `develop` (v4)
@@ -47,9 +53,13 @@ launch on the current UI, with the redesign and internal-quality refactors as fa
 
 ---
 
-## Phase 0 — Dev loop & CI green (enabler; your stated first focus)
+## Phase 0 — Dev loop & CI green (enabler; your stated first focus) — DONE
 
 Goal: a frictionless inner loop so every later phase is faster. **Timebox this — do not let it balloon.**
+
+> **DONE.** Both follow-ups below resolved (2026-07-08): Vite HMR points at the ddev host
+> (`vite.config.ts` detects `DDEV_PRIMARY_URL`); README documents the bootstrap path. CI is green on
+> `next`, now on **Postgres 17** (not MySQL). `types:generate` runs cleanly in-container and in CI.
 
 - **ddev adopted + Postgres switch — DONE (verified 2026-07-04).** `.ddev/config.yaml` +
   `ddev/ddev-redis` add-on now run the full stack on **Postgres 17**: web (nginx-fpm, HTTP 200),
@@ -76,9 +86,13 @@ Critical files: `Makefile`, `docker-compose.yml`, `dockerfiles/app`, `package.js
 
 ---
 
-## Phase 1 — Backend to green (unbreak the IPAM fallout)
+## Phase 1 — Backend to green (unbreak the IPAM fallout) — DONE
 
 Goal: every controller serves a full request cycle; establish a hard "backend is green" gate.
+
+> **DONE.** `api-application.php` reconciled (later deleted; `api-admin.php` now serves both guards —
+> see handoff), stale pool-era filter classes removed, controllers smoke-tested, dozens of real bugs
+> fixed. Suite green; PHPStan at zero.
 
 - **Remove the orphaned route file.** `routes/api-application.php` (registered at
   `bootstrap/app.php:40`) still wires `Admin\AddressPools\AddressController` — a deleted class.
@@ -96,9 +110,13 @@ Critical files: `routes/api-application.php`, `routes/api-admin.php`, `bootstrap
 
 ---
 
-## Phase 2 — Proxmox config-push safety (protects customer VMs)
+## Phase 2 — Proxmox config-push safety (protects customer VMs) — DONE
 
 Goal: close the type-safety gap you flagged — updates must not silently corrupt config.
+
+> **DONE.** Config digest optimistic concurrency threaded through every read-modify-write path;
+> property-list DTO codec landed (partial writes, only changed keys); golden-master round-trip tests
+> in place; redundant NIC/Configure writes filtered. Design constraints preserved in the handoff.
 
 **Problem (confirmed):** `ProxmoxConfigRepository::getConfig()` parses PVE's flat format into
 DTOs via `fromRaw()`, but `update()` re-emits whole sub-objects through
@@ -122,9 +140,18 @@ Critical files: `app/Repositories/Proxmox/Server/ProxmoxConfigRepository.php`,
 
 ---
 
-## Phase 3 — Production migration & staged cutover (the hard requirement)
+## Phase 3 — Production migration & staged cutover — REFRAMED (operator deliverable; tooling DONE)
 
 Goal: move live v4 data onto v10's schema with zero data loss and a rollback path.
+
+> **REFRAMED (2026-07-07).** The v4 MySQL 8.0 → v10 Postgres 17 cutover is a path *downstream operators*
+> run when upgrading their own installs — **not** something the maintainer runs (he ships the software,
+> has no prod data). Fresh v10 installs start on Postgres and skip it. So the deliverable is the
+> **tooling + runbook** under `database/cutover/` (RUNBOOK.md, pgloader recipe `v4-to-v10.load`,
+> `verify.sh`), which is **DONE and committed**. There is no maintainer-side dry-run pending — the real
+> prod-data rehearsal is the operator's. The migration audit, the 24 executing `next` migrations, and
+> the `develop`→`next` backport reconciliation (39 commits) are all analyzed — see the handoff.
+> `verify.sh` needs an amd64 host for pgloader (segfaults under arm64-Linux qemu).
 
 - **Now also a cross-engine migration: prod MySQL 8.0 → Postgres 17.** The full migration suite
   runs clean on Postgres (verified in Phase 0), so `next` code is engine-portable — but existing
@@ -149,19 +176,21 @@ Critical files: `database/migrations/2025_*`, `database/migrations/2026_03_10_re
 
 ---
 
-## Phase 4 — Commercial launch on current UI (fastest to revenue)
+## Phase 4 — Commercial launch on current UI (fastest to revenue) — the launch itself is the remaining gate
 
 Goal: charge customers. No new subsystems needed (v10 is feature-complete for sale).
 
+> **Note:** the enablers below are done; the actual **launch** (billing a real customer on staging) is
+> the open gate. Several open *product follow-ups* precede it — see the handoff's "Next up".
+
 - Ship on the **current functional v10 UI**. Focus on stability + polish, not redesign.
-- **Passkeys — defer, don't touch.** The hand-rolled `web-auth/webauthn-lib` implementation
-  (~570 LOC across `app/Actions/Auth/**`, `PasskeyController`, `PasskeyLoginController`,
-  `PasskeySerializer`) works. Migrating to `spatie/laravel-passkeys` is a net-new dependency
-  and a Phase-5 liability-reduction task — not a launch blocker.
-- **Data-layer refactor — "convert as you touch," don't gate launch.** 54 of 55 hooks still
-  use the hand-written SWR-compat shim (`resources/scripts/lib/swr.ts`) + raw axios with
-  hardcoded URLs; only `features/servers` uses the target pattern (Wayfinder route objects +
-  `apiFetch` + `features/`). This is maintainability debt, not a bug — migrate opportunistically.
+- **Passkeys — defer, don't touch.** Still deferred (works today). Migrating to
+  `spatie/laravel-passkeys` is a Phase-5 liability-reduction task, not a launch blocker. (Note: the
+  hand-rolled impl was fixed for `web-auth/webauthn-lib ^5` during the PHPStan pass — see handoff.)
+- **Data-layer refactor — DONE (2026-07-07).** No longer "convert as you touch": the migration is
+  **complete** — the SWR shim is gone, zero raw axios calls remain, and every domain is on a
+  `features/<domain>/api.ts` module (Wayfinder route objects + `apiFetch`). This ticks Phase-5 item 3
+  early too.
 
 Critical files: `resources/scripts/lib/{swr.ts,swr-mutation.ts,axios.ts,api.ts}`,
 `resources/scripts/features/servers/api.ts` (the reference pattern).
@@ -169,6 +198,12 @@ Critical files: `resources/scripts/lib/{swr.ts,swr-mutation.ts,axios.ts,api.ts}`
 ---
 
 ## Phase 5 — Post-launch fast-follows (backlog; this is where "improvements" live)
+
+> Since this list was written, several features graduated out of "backlog" and shipped on `next`
+> ahead of launch (IPAM allocator rewrite, application API tokens + abilities, VM power actions,
+> storage accounting, multi-disk per VM) — see the handoff's "Where we are". The still-open product
+> threads (User PATs, token UI, VLAN #150, SSO replacement, Redis session tracking) live in the
+> handoff's "Next up". The items below are the ones from the original plan still pending.
 
 Ordered by user-visible value:
 
@@ -185,7 +220,8 @@ Ordered by user-visible value:
    frontend polling `DeploymentController`. Files: `app/Actions/Server/{BuildServerAction,RebuildServerAction}.php`,
    `app/Jobs/Server/{BuildServerJob,WaitUntilVmIsCreatedJob,ConfigureVmJob}.php`,
    `app/Traits/Actions/ManagesDeploymentLifecycle.php`, `app/Models/{Deployment,DeploymentStep}.php`.
-3. **Finish the data-layer migration** to Wayfinder + `apiFetch` everywhere; delete the SWR shim.
+3. ~~**Finish the data-layer migration** to Wayfinder + `apiFetch` everywhere; delete the SWR shim.~~
+   **DONE (2026-07-07)** — see Phase 4.
 4. **Passkeys → `spatie/laravel-passkeys`** after a parity spike (validate it supports your
    passkey-only login + confirm-identity flows before committing).
 
