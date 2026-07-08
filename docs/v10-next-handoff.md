@@ -6,7 +6,7 @@ originated as `~/.claude/plans/help-me-plan-a-cryptic-peacock.md`, which isn't r
 every environment). This file tracks *what's actually done* and *what to pick up next*, so a
 cold start doesn't re-derive it.
 
-Last updated: 2026-07-07
+Last updated: 2026-07-08
 
 ---
 
@@ -779,8 +779,36 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–3 DONE
-  (2026-07-07). Next: slice 4 (post-creation add/remove/resize).**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–4 DONE
+  (2026-07-08). Next: slice 5 (frontend disk list — create form + server-settings Disks panel).**
+
+  > **Slice 4 (post-creation add/resize/remove) — DONE (2026-07-08), commit `c12b6cc7`.** Admin
+  > endpoints to manage a server's **secondary** disks on an existing VM, under the `{server}` group
+  > (so they inherit `ValidateServerStatusMiddleware` — no disk ops on a DELETING server):
+  > `GET|POST /disks`, `PATCH|DELETE /disks/{disk}`. `Admin\ServerDiskController` delegates to three
+  > new `AllocationService` methods:
+  > - **addDisk** — writes the secondary `server_disks` row then reuses `syncDisks` (shared slot
+  >   assignment on the next free `scsiN` + skip-if-present idempotency), so add takes the same
+  >   allocate path the build does. Returns 201 + the created `ServerDiskData`.
+  > - **resizeDisk** — grow only; shrink → 400 `cannot_shrink_disk`, primary → 400
+  >   `cannot_modify_primary_disk`. If the disk is still **unbuilt** (`interface === null`) only the
+  >   row is updated (the build allocates it at the new size); otherwise it finds the disk on the live
+  >   config by interface and calls `ProxmoxDiskRepository::setDiskSize`.
+  > - **removeDisk** — `delete=scsiN` only *detaches* on PVE (the volume lingers as `unusedN`), so it
+  >   diffs the raw config's `unused*` keys around the detach (new `ProxmoxConfigRepository::getRawConfig`)
+  >   and issues a second `delete=unusedN` to destroy the freed volume. An unbuilt disk just drops the
+  >   row (nothing on the VM). Primary → 400.
+  > - Capacity validated per-request against `LiveStorageService::freeForConvoy` (add: full size;
+  >   resize: only the growth delta; fail-open when the node is offline). Enforcement aggregate itself
+  >   is unit-tested in `HasSufficientDiskSpaceTest`.
+  > - Disk route param **scoped to its server** (`->scopeBindings()`; cross-server → 404) and
+  >   `ServerDisk::getRouteKeyName()` overridden to `id` (the base `Model` defaults to `uuid`, which
+  >   disks don't have). New `ServerDiskData` DTO (camelCase output, matching the rest of the app).
+  > - Tests: `tests/Feature/Servers/ServerDiskManagementTest.php` (11 — list/add/grow/pending-grow/
+  >   shrink-reject/primary-reject×2/remove+purge/unbuilt-remove/cross-server-404/non-admin-403).
+  >   Suite **171**; PHPStan **zero**; tsc clean (Wayfinder emits the `ServerDiskController` actions).
+  >   **Not yet verified against a live Proxmox node** — the dev env has none, so add/resize/remove
+  >   proxy calls are exercised via the HTTP fake; the row/DB side and guards are fully covered.
 
   > **Slice 1 (server_disks model + backfill + disk-oriented usage) — DONE.** `server_disks` table
   > (`server_id` cascade, `storage_id`, `size` MiB, `interface` nullable, `is_primary`, `disk_index`;
@@ -875,7 +903,8 @@ Verified:
      allocates). Tests: `HasSufficientDiskSpaceTest` (aggregate/same+cross-storage/offline),
      `ServerCreationDiskTest` (secondary rows). Suite 160; PHPStan zero. **Frontend still sends no
      `disks[]` until slice 5**, so no secondary disks are created in practice yet.
-  4. **Post-creation add/remove/resize** endpoints + status/lock guards.
+  4. ~~**Post-creation add/remove/resize** endpoints + status/lock guards.~~ **DONE** (commit
+     `c12b6cc7`, see the Slice-4 note above).
   5. **Frontend** disk list (create form + a server-settings Disks panel).
   6. *(Deferred, YAGNI)* `move_disk`-based splitting of a template's own multiple disks.
 
