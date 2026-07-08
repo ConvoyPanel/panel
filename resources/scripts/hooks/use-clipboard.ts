@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 interface UseClipboardOptions {
     /** Time in ms after which the copied state will reset, `2000` by default */
     timeout?: number
+    /** If set, a success toast with this message is shown on a successful copy. */
+    successMessage?: string
 }
 
 interface UseClipboardReturnValue {
@@ -32,6 +34,9 @@ const useClipboard = (
             navigator.clipboard
                 .writeText(value)
                 .then(() => {
+                    if (options?.successMessage) {
+                        toast.success(options.successMessage)
+                    }
                     setCopied(true)
                     timeoutRef.current = window.setTimeout(() => {
                         setCopied(false)
@@ -42,7 +47,7 @@ const useClipboard = (
                     throw err
                 })
         },
-        [options?.timeout]
+        [options?.timeout, options?.successMessage]
     )
 
     const reset = useCallback(() => {

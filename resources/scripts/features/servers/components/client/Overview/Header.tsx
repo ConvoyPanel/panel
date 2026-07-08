@@ -1,6 +1,5 @@
-import { toast } from 'sonner'
-
 import { useServer } from '@/features/servers/detail/api.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
 
 import Toolbar from '@/features/servers/components/client/Overview/Toolbar.tsx'
 
@@ -8,15 +7,11 @@ import { Heading } from '@/components/ui/Typography'
 
 const Header = () => {
     const { data: server } = useServer()
+    const { copy } = useClipboard({
+        successMessage: 'Copied hostname to clipboard',
+    })
 
-    const copyHostname = async () => {
-        try {
-            await navigator.clipboard.writeText(server!.hostname)
-            toast.success('Copied hostname to clipboard')
-        } catch {
-            toast.error('Failed to copy hostname to clipboard')
-        }
-    }
+    const copyHostname = () => copy(server!.hostname)
 
     return (
         <div className={'flex flex-col gap-6'}>

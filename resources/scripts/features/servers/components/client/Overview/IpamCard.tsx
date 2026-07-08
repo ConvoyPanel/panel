@@ -1,9 +1,9 @@
 import { Address } from '@/types/address.ts'
 import { IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
-import { toast } from 'sonner'
 
 import { useAddresses } from '@/features/servers/detail/api.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -18,18 +18,11 @@ const Cell = ({
     description: string
     className?: string
 }) => {
-    const copy = async () => {
-        try {
-            await navigator.clipboard.writeText(description)
-            toast.success('Copied to clipboard')
-        } catch {
-            toast.error('Failed to copy to clipboard')
-        }
-    }
+    const { copy } = useClipboard({ successMessage: 'Copied to clipboard' })
 
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
-            copy()
+            copy(description)
         }
     }
 
@@ -40,7 +33,7 @@ const Cell = ({
                 tabIndex={0}
                 className={'cursor-pointer select-none truncate text-sm'}
                 aria-label={`Click to copy ${title} ${description}`}
-                onClick={copy}
+                onClick={() => copy(description)}
                 onKeyDown={handleKeyDown}
             >
                 {description}

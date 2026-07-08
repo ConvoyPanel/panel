@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import {
     authenticatorQueries,
     useRecoveryCodes,
 } from '@/features/account/authenticator/api.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
 
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
 
@@ -33,6 +33,9 @@ const AuthenticatorRecoveryCodesDialog = () => {
 
     const queryClient = useQueryClient()
     const { data: codes } = useRecoveryCodes()
+    const { copy: copyToClipboard } = useClipboard({
+        successMessage: 'Copied recovery codes to clipboard',
+    })
 
     useEffect(() => {
         if (open) {
@@ -42,14 +45,12 @@ const AuthenticatorRecoveryCodesDialog = () => {
         }
     }, [open])
 
-    const copy = async () => {
+    const copy = () => {
         if (!codes) {
             return
         }
 
-        await navigator.clipboard.writeText(codes.join('\n'))
-
-        toast.success('Copied recovery codes to clipboard')
+        copyToClipboard(codes.join('\n'))
     }
 
     return (
