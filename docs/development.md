@@ -121,6 +121,39 @@ extra wiring. **Use a scoped Proxmox API token, not full `root@pam`** — the
 sandbox protects your machine, not your hypervisor, and an autonomous agent with
 that token can control it.
 
+### Reaching a tailnet Proxmox node (the tailscale kit)
+
+If your `PROXMOX_FQDN` is only reachable over Tailscale (a private tailnet IP, not
+a public address), the sandbox can't hit it out of the box — its microVM isn't on
+your tailnet. `.sbx/tailscale/` is a second committed kit that joins the sandbox to
+the tailnet. Kits compose, so layer it onto the dev kit — list `.sbx/tailscale`
+**first** so the tailnet comes up promptly instead of waiting behind ddev's
+(first-run) image pull, since kit startup runs in `--kit` order:
+
+```sh
+sbx run --kit .sbx/tailscale --kit .sbx/dev claude
+```
+
+The tailscale kit brings the node up on your tailnet (TUN mode — tailnet IPs route
+transparently through `tailscale0`, no proxy), the dev kit boots ddev, and then
+`DevNodeSeeder` can reach a private Proxmox host. Reach it by **tailnet IP**, not
+hostname — MagicDNS is off (`--accept-dns=false`) because the sandbox's
+`/etc/resolv.conf` is read-only — so set `PROXMOX_FQDN` to the node's `100.x` IP.
+Verify inside the sandbox with `tailscale status` and `tailscale ping <100.x-ip>`
+(traffic relays over DERP, as `sbx` blocks raw UDP; fine for the Proxmox API).
+
+The kit is secret-free — the auth key is supplied out-of-band (never committed):
+
+- `TS_AUTHKEY` in the environment, or a gitignored `.sbx/tailscale.env`
+  (`cp .sbx/tailscale.env.example .sbx/tailscale.env` and paste a key); or
+- run `sudo tailscale up --accept-routes --ssh` inside the sandbox and open the
+  printed URL in your host browser.
+
+For a hands-off setup, a personal shell wrapper can read the key from a secret
+manager (e.g. 1Password) and inject `TS_AUTHKEY` automatically — kept in your own
+dotfiles, not this repo. See [`.sbx/README.md`](../.sbx/README.md) for the auth-key
+options, the 1Password recipe, and the TUN-vs-userspace networking notes.
+
 ### Notes
 
 - Secrets stay in the gitignored `.env` (mounted in), never in the committed kit.

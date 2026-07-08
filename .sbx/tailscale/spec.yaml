@@ -1,0 +1,133 @@
+schemaVersion: "1"
+kind: mixin
+name: tailscale
+displayName: Tailscale tailnet
+description: Join the sandbox to a Tailscale tailnet so work inside can reach tailnet resources.
+
+# Egress allowlist for Tailscale's control plane and DERP relays. Under an "open"
+# network policy this is ignored; under "balanced"/restrictive policies the sandbox
+# only reaches these hosts, so the tailnet handshake must fit through here. DERP
+# relays are derpN.tailscale.com and keep traffic on 443 when raw WireGuard UDP is
+# blocked — the most allowlist-friendly path. A very restrictive `sbx policy` may
+# still need widening (see .sbx/README.md).
+network:
+  allowedDomains:
+    - controlplane.tailscale.com
+    - login.tailscale.com
+    - "*.tailscale.com"
+
+# No secrets here — this kit is committed to a public repo. The auth key is supplied
+# out-of-band at launch (env var, gitignored .sbx/tailscale.env, or interactive
+# login). See .sbx/README.md for the optional 1Password host-wrapper recipe.
+
+# Appended to the agent's memory at sandbox creation.
+agentContext: |
+  # Tailscale in this sandbox
+
+  This sandbox is (or can be) joined to a Tailscale tailnet. tailscaled is started
+  for you on boot. How it authenticated depends on how you supplied a key:
+
+    - If TS_AUTHKEY was in the environment, or a gitignored `.sbx/tailscale.env`
+      (in the workspace) defined it, the node is already logged in.
+    - Otherwise, log in interactively:
+
+          sudo tailscale up --accept-routes --ssh
+
+      It prints a URL — open it in your host browser to authenticate the node.
+
+  Verify:
+
+      tailscale status              # node should be "Running"
+      tailscale ip -4               # this node's tailnet IP
+      tailscale ping <tailnet-ip>   # reachability (shows "via DERP" — see below)
+
+  Reach tailnet hosts by **IP**, not name: MagicDNS is disabled (the sandbox's
+  /etc/resolv.conf is read-only), so `*.ts.net` names won't resolve. Use the
+  100.x tailnet IP (e.g. set PROXMOX_FQDN to the node's tailnet IP).
+
+  Networking mode is auto-detected. Normally the kit creates /dev/net/tun and runs
+  in **TUN mode**: traffic to tailnet IPs routes transparently through the
+  `tailscale0` interface — no proxy, apps just work. Only if the tun driver is
+  genuinely unavailable does it fall back to userspace-networking, where outbound
+  tailnet access is via a local proxy instead:
+
+      curl --proxy socks5h://localhost:1055 https://<tailnet-ip>
+      # or export HTTP(S)_PROXY=http://localhost:1055 for tools that honor it
+
+  Note: sbx blocks raw UDP egress, so peer traffic relays over DERP (HTTPS/443),
+  not a direct WireGuard tunnel — fine for API/control traffic, ~tens of ms added.
+
+commands:
+  # Runs ONCE at creation (as root). Installs Tailscale (slow the first time). Bake
+  # it into a template so it isn't repeated:  sbx template save
+  install:
+    - command: "command -v curl >/dev/null 2>&1 || { apt-get update && apt-get install -y curl ca-certificates; }"
+      description: ensure curl for the Tailscale installer
+    - command: "command -v tailscale >/dev/null 2>&1 || curl -fsSL https://tailscale.com/install.sh | sh"
+      description: install Tailscale
+
+  # Runs on EVERY start (as the agent user, uid 1000, which is in the sudo group).
+  # Starts tailscaled (TUN if available, else userspace networking) and, if a key is
+  # available, brings the node up non-interactively.
+  startup:
+    - command:
+        - bash
+        - -lc
+        - |
+          set -e
+          cd "${WORKSPACE_DIR:-.}"
+
+          # Resolve an auth key: env wins, then a gitignored workspace file.
+          if [ -z "${TS_AUTHKEY:-}" ] && [ -f .sbx/tailscale.env ]; then
+            set -a; . ./.sbx/tailscale.env; set +a
+          fi
+
+          state=/var/lib/tailscale/tailscaled.state
+          sock=/var/run/tailscale/tailscaled.sock
+          sudo mkdir -p /var/lib/tailscale /var/run/tailscale
+
+          # Start tailscaled once. Prefer real TUN (transparent routing — reach tailnet
+          # hosts by IP, no proxy). The sandbox often doesn't create /dev/net/tun at
+          # boot even though the kernel driver + NET_ADMIN are available, so create the
+          # node and functionally probe it; only fall back to userspace networking if
+          # the tun driver genuinely can't produce an interface.
+          if ! pgrep -x tailscaled >/dev/null 2>&1; then
+            use_tun=0
+            if [ -c /dev/net/tun ] || { sudo mkdir -p /dev/net && sudo mknod /dev/net/tun c 10 200 2>/dev/null; }; then
+              if sudo ip tuntap add mode tun name tsprobe0 2>/dev/null; then
+                sudo ip link del tsprobe0 2>/dev/null
+                use_tun=1
+              fi
+            fi
+            if [ "$use_tun" = 1 ]; then
+              echo "tailscale: TUN available — starting in TUN mode (transparent routing)"
+              sudo tailscaled --state="$state" --socket="$sock" >/tmp/tailscaled.log 2>&1 &
+            else
+              echo "tailscale: no usable TUN — starting in userspace-networking mode (proxy on :1055)"
+              sudo tailscaled --state="$state" --socket="$sock" \
+                --tun=userspace-networking \
+                --socks5-server=localhost:1055 \
+                --outbound-http-proxy-listen=localhost:1055 \
+                >/tmp/tailscaled.log 2>&1 &
+            fi
+            # Give the daemon a moment to create its socket.
+            for _ in 1 2 3 4 5 6 7 8 9 10; do [ -S "$sock" ] && break; sleep 0.5; done
+          fi
+
+          # Bring the node up. With a key this is non-interactive; without one, print
+          # guidance and let the agent run `tailscale up` (see agentContext).
+          if [ -n "${TS_AUTHKEY:-}" ]; then
+            # --accept-dns=false: the sandbox's /etc/resolv.conf is read-only, so
+            # tailscaled can't manage MagicDNS anyway (it just logs a health error).
+            # Reach tailnet hosts by IP; names won't resolve.
+            sudo tailscale --socket="$sock" up \
+              --authkey="$TS_AUTHKEY" \
+              --accept-routes \
+              --accept-dns=false \
+              --hostname=convoy-sbx \
+              --ssh
+            sudo tailscale --socket="$sock" status || true
+          else
+            echo "tailscale: no TS_AUTHKEY found — run 'sudo tailscale up --accept-routes --ssh' to log in interactively"
+          fi
+      description: start tailscaled and join the tailnet
