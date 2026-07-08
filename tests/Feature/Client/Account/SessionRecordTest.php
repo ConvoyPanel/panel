@@ -97,6 +97,20 @@ it('only lets a user revoke their own session', function () {
     expect(SessionRecord::query()->whereKey($record->id)->exists())->toBeTrue();
 });
 
+it('destroys a user\'s store sessions and rows when the user is deleted', function () {
+    $user = User::factory()->create();
+    seedSession($user, 'device-a');
+    storeSession('device-a');
+
+    $handler = app('session')->getHandler();
+    expect($handler->read('device-a'))->not->toBe(''); // live before
+
+    $user->delete();
+
+    expect($handler->read('device-a'))->toBe('') // Redis session destroyed
+        ->and(SessionRecord::query()->where('user_id', $user->id)->exists())->toBeFalse();
+});
+
 it('marks the requesting session as current', function () {
     $user = User::factory()->create();
     $record = seedSession($user, 'abc123');

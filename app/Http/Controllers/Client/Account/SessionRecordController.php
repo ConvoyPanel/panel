@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Client\Account;
 
 use App\Data\User\SessionRecordData;
 use App\Models\SessionRecord;
+use App\Services\Auth\SessionRevocationService;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\DataCollection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SessionRecordController
 {
+    public function __construct(
+        private SessionRevocationService $revocation,
+    ) {}
+
     public function index(Request $request)
     {
         $currentId = $request->session()->getId();
@@ -52,10 +57,9 @@ class SessionRecordController
             abort(422, 'You cannot revoke the session you are currently using; log out instead.');
         }
 
-        // Kill the actual session in the store (Redis) so the other device is logged out, then drop
-        // the metadata row.
-        $request->session()->getHandler()->destroy($sessionRecord->session_id);
-        $sessionRecord->delete();
+        // Kill the actual session in the store (Redis) so the other device is logged out, and drop
+        // the metadata row — kept consistent by the shared revocation service.
+        $this->revocation->revoke($sessionRecord);
 
         return response()->noContent();
     }
