@@ -38,9 +38,18 @@ follow-ups** below — all doable in-sandbox, no prod data.
   materialization for large/v6 blocks (no address-space-sized generation); `AddressState` enum
   (available/assigned/reserved) + reserve API + auto-reserved network/broadcast/gateway. Commits
   `20c6de73`/`46d9b398`/`eb455c95`/`75ada6ec`/`6a5cac43`.
-- **API tokens v2 (application half)** — SystemActor singleton ownership (survives minter deletion),
-  resource-scoped abilities (`servers:read`, `nodes:write`, `*`) enforced by `EnforceTokenAbilities` on
-  `/api/application`. Commits `446708fc`/`1cfff1b5`. *User PATs + token UI still open — see below.*
+- **API tokens v2 — COMPLETE (application + account halves + both UIs).** Application half: SystemActor
+  singleton ownership (survives minter deletion), resource-scoped abilities (`servers:read`, `nodes:write`,
+  `*`) enforced by `EnforceTokenAbilities` on `/api/application` (`446708fc`/`1cfff1b5`). **User PATs
+  (`ApiKeyType::ACCOUNT`)**: `CreateAccountTokenService` mints a token owned by the user; the client API
+  (`/api/client`) now accepts both the web session and Sanctum bearer tokens (`auth:web,sanctum`, web-first
+  so session requests carry no access token and are never ability-scoped). `AccountTokenAbilities`
+  (`servers:read/write`) is enforced via the now-vocabulary-parameterized `EnforceTokenAbilities`; the whole
+  `/account` group is `DenyApiTokenAccess` (a token can never change its own account or mint/revoke tokens).
+  A custom `ValidateCsrfToken` exempts *valid* bearer requests (browsers can't forge them) while keeping full
+  CSRF for the SPA. **Both UIs shipped**: user PATs in the account security page (`features/account/api-keys`,
+  scope picker + one-time reveal), admin app tokens at `/admin/tokens` (`features/tokens`, DataTable + full
+  resource ability picker). Frontend build/type-verified only (no in-browser click-through).
 - **VM power actions (admin + client)** — shared `SendServerPowerCommand` action, admin `getState`/`updateState`
   routes, per-server power lock (`ServerPowerLockService`, `Cache::add` SETNX+TTL, 409
   `power_action_in_progress`), pending action surfaced on `ServerStateData`. Admin server detail page +

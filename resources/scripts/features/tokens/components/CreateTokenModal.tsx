@@ -1,20 +1,20 @@
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { IconCopy, IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { createToken } from '@/features/tokens/api.ts'
+import { createToken, tokenSchema, type TokenInput } from '@/features/tokens/api.ts'
 import {
-    buildAbilities,
     resourceLabels,
     TOKEN_RESOURCES,
     type PaginatedApiKeys,
-    type ResourceAccess,
-    type TokenResource,
 } from '@/features/tokens/types.ts'
 import type { Mutator } from '@/types/query.ts'
 
 import { Button } from '@/components/ui/Button'
-import { Checkbox } from '@/components/ui/Checkbox'
 import {
     Credenza,
     CredenzaBody,
@@ -26,21 +26,23 @@ import {
     CredenzaTitle,
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/Label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/Select'
+import { Form, FormButton } from '@/components/ui/Form'
+import { CheckboxForm, InputForm } from '@/components/ui/Forms'
+import SelectForm from '@/components/ui/Forms/SelectForm'
 
-const emptyScopes = (): Record<TokenResource, ResourceAccess> =>
-    Object.fromEntries(TOKEN_RESOURCES.map(r => [r, 'none'])) as Record<
-        TokenResource,
-        ResourceAccess
-    >
+const scopeItems = [
+    { value: 'none', label: 'No access' },
+    { value: 'read', label: 'Read only' },
+    { value: 'write', label: 'Read & write' },
+]
+
+const defaultValues: TokenInput = {
+    name: '',
+    fullAccess: true,
+    scopes: Object.fromEntries(
+        TOKEN_RESOURCES.map(resource => [resource, 'none'])
+    ) as TokenInput['scopes'],
+}
 
 interface Props {
     mutate: Mutator<PaginatedApiKeys>
@@ -48,37 +50,18 @@ interface Props {
 
 const CreateTokenModal = ({ mutate }: Props) => {
     const [open, setOpen] = useState(false)
-    const [submitting, setSubmitting] = useState(false)
-
-    const [name, setName] = useState('')
-    const [fullAccess, setFullAccess] = useState(true)
-    const [scopes, setScopes] = useState(emptyScopes)
     const [plainTextToken, setPlainTextToken] = useState<string | null>(null)
 
-    const abilities = buildAbilities(fullAccess, scopes)
-    const canSubmit = name.trim().length > 0 && abilities.length > 0
+    const form = useForm<TokenInput>({
+        resolver: zodResolver(tokenSchema),
+        defaultValues,
+    })
 
-    const reset = () => {
-        setName('')
-        setFullAccess(true)
-        setScopes(emptyScopes())
-        setPlainTextToken(null)
-    }
+    const fullAccess = form.watch('fullAccess')
 
-    const onOpenChange = (next: boolean) => {
-        if (submitting) return
-        setOpen(next)
-        if (!next) {
-            // Reset after the close animation so the form doesn't flash.
-            setTimeout(reset, 200)
-        }
-    }
-
-    const submit = async () => {
-        setSubmitting(true)
-        try {
-            const token = await createToken(name.trim(), abilities)
-
+    const { mutateAsync: trigger } = useMutation({
+        mutationFn: createToken,
+        onSuccess: async token => {
             await mutate(data => {
                 if (!data) return
                 return { ...data, items: [token, ...data.items] }
@@ -86,11 +69,21 @@ const CreateTokenModal = ({ mutate }: Props) => {
 
             setPlainTextToken(token.plainTextToken ?? '')
             toast.success('API token created')
-        } catch (e) {
+        },
+        onError: e => {
+            handleFormErrors(e, form.setError)
             toast.error('Failed to create token')
-            throw e
-        } finally {
-            setSubmitting(false)
+        },
+    })
+
+    const onOpenChange = (next: boolean) => {
+        setOpen(next)
+        if (!next) {
+            // Reset after the close animation so the form doesn't flash.
+            setTimeout(() => {
+                form.reset(defaultValues)
+                setPlainTextToken(null)
+            }, 200)
         }
     }
 
@@ -154,100 +147,44 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                 A panel-wide token for the application API.
                             </CredenzaDescription>
                         </CredenzaHeader>
-                        <CredenzaBody className={'space-y-4'}>
-                            <div className={'space-y-2'}>
-                                <Label htmlFor={'token-name'}>Name</Label>
-                                <Input
-                                    id={'token-name'}
-                                    value={name}
-                                    onChange={e => setName(e.target.value)}
-                                    placeholder={'e.g. Deploy bot'}
-                                />
-                            </div>
-
-                            <label
-                                className={
-                                    'flex items-center gap-2 text-sm font-medium'
-                                }
-                            >
-                                <Checkbox
-                                    checked={fullAccess}
-                                    onCheckedChange={v =>
-                                        setFullAccess(v === true)
-                                    }
-                                />
-                                Full access (all resources)
-                            </label>
-
-                            {!fullAccess && (
-                                <div className={'space-y-2'}>
-                                    <Label>Scoped access</Label>
-                                    <div className={'space-y-2'}>
-                                        {TOKEN_RESOURCES.map(resource => (
-                                            <div
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(data => trigger(data))}>
+                                <CredenzaBody className={'space-y-4'}>
+                                    <InputForm
+                                        name={'name'}
+                                        label={'Name'}
+                                        placeholder={'e.g. Deploy bot'}
+                                    />
+                                    <CheckboxForm
+                                        name={'fullAccess'}
+                                        label={'Full access'}
+                                        description={
+                                            'Grant every ability. Turn off to scope the token per resource.'
+                                        }
+                                    />
+                                    {!fullAccess &&
+                                        TOKEN_RESOURCES.map(resource => (
+                                            <SelectForm
                                                 key={resource}
-                                                className={
-                                                    'flex items-center justify-between gap-2'
-                                                }
-                                            >
-                                                <span
-                                                    className={'text-sm'}
-                                                >
-                                                    {resourceLabels[resource]}
-                                                </span>
-                                                <Select
-                                                    value={scopes[resource]}
-                                                    onValueChange={(
-                                                        v: ResourceAccess
-                                                    ) =>
-                                                        setScopes(prev => ({
-                                                            ...prev,
-                                                            [resource]: v,
-                                                        }))
-                                                    }
-                                                >
-                                                    <SelectTrigger
-                                                        className={'w-44'}
-                                                    >
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem
-                                                            value={'none'}
-                                                        >
-                                                            No access
-                                                        </SelectItem>
-                                                        <SelectItem
-                                                            value={'read'}
-                                                        >
-                                                            Read only
-                                                        </SelectItem>
-                                                        <SelectItem
-                                                            value={'write'}
-                                                        >
-                                                            Read &amp; write
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                                                name={`scopes.${resource}`}
+                                                label={resourceLabels[resource]}
+                                                items={scopeItems}
+                                            />
                                         ))}
-                                    </div>
-                                </div>
-                            )}
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
-                            <Button
-                                onClick={submit}
-                                disabled={!canSubmit || submitting}
-                            >
-                                Create token
-                            </Button>
-                        </CredenzaFooter>
+                                </CredenzaBody>
+                                <CredenzaFooter className={'mt-4'}>
+                                    <CredenzaClose asChild>
+                                        <Button
+                                            variant={'outline'}
+                                            type={'button'}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </CredenzaClose>
+                                    <FormButton>Create token</FormButton>
+                                </CredenzaFooter>
+                            </form>
+                        </Form>
                     </>
                 )}
             </CredenzaContent>

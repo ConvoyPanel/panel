@@ -1,5 +1,6 @@
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
@@ -33,6 +34,22 @@ function TokensIndex() {
         tokenQueries.list(queryParams).queryKey
     )
 
+    const { mutate: revoke } = useMutation({
+        mutationFn: (token: ApiKey) => deleteToken(token.id),
+        onSuccess: (_, token) => {
+            mutate(data =>
+                data
+                    ? {
+                          ...data,
+                          items: data.items.filter(t => t.id !== token.id),
+                      }
+                    : data
+            )
+            toast.success('API token revoked')
+        },
+        onError: () => toast.error('Failed to revoke token'),
+    })
+
     const handleDelete = async (token: ApiKey) => {
         const confirmed = await confirm({
             title: 'Revoke API token',
@@ -40,19 +57,7 @@ function TokensIndex() {
         })
         if (!confirmed) return
 
-        try {
-            await deleteToken(token.id)
-            await mutate(data => {
-                if (!data) return
-                return {
-                    ...data,
-                    items: data.items.filter(t => t.id !== token.id),
-                }
-            })
-            toast.success('API token revoked')
-        } catch {
-            toast.error('Failed to revoke token')
-        }
+        revoke(token)
     }
 
     const columns: ColumnDef<ApiKey>[] = [

@@ -1,4 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
 
 import { apiFetch, type DataResponse } from '@/lib/api'
 import ApiKeyController from '@/wayfinder/actions/App/Http/Controllers/Client/Account/ApiKeyController'
@@ -31,6 +32,13 @@ export const apiKeyScopes = [
 
 export type ApiKeyScope = (typeof apiKeyScopes)[number]['value']
 
+export const apiKeyCreateSchema = z.object({
+    name: z.string().min(1).max(191),
+    scope: z.enum(apiKeyScopes.map(s => s.value) as [ApiKeyScope, ...ApiKeyScope[]]),
+})
+
+export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>
+
 const rawDataToApiKey = (data: App.Data.User.ApiKeyData): ApiKey => ({
     id: data.id,
     name: data.name,
@@ -47,10 +55,10 @@ export const getApiKeys = async (): Promise<ApiKey[]> => {
 }
 
 /** Creates a token and returns the one-time plaintext value (only ever shown here). */
-export const createApiKey = async (
-    name: string,
-    scope: ApiKeyScope
-): Promise<{ key: ApiKey; plainTextToken: string }> => {
+export const createApiKey = async ({
+    name,
+    scope,
+}: ApiKeyCreateInput): Promise<{ key: ApiKey; plainTextToken: string }> => {
     const { data } = await apiFetch<DataResponse<App.Data.User.ApiKeyData>>(
         ApiKeyController.store(),
         { body: { name, abilities: [scope] } }

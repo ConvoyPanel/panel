@@ -3,8 +3,14 @@ import {
     queryOptions,
     useQuery,
 } from '@tanstack/react-query'
+import { z } from 'zod'
 
-import type { ApiKey, PaginatedApiKeys } from '@/features/tokens/types.ts'
+import {
+    buildAbilities,
+    TOKEN_RESOURCES,
+    type ApiKey,
+    type PaginatedApiKeys,
+} from '@/features/tokens/types.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import {
     type QueryBuilderParams,
@@ -21,6 +27,23 @@ const destroyRoute = TokenController.destroy['/api/admin/tokens/{token}']
 
 export type TokenQueryParams = QueryBuilderParams
 
+export const tokenScopeSchema = z.enum(['none', 'read', 'write'])
+
+export const tokenSchema = z
+    .object({
+        name: z.string().min(1).max(191),
+        fullAccess: z.boolean(),
+        scopes: z.record(z.enum(TOKEN_RESOURCES), tokenScopeSchema),
+    })
+    .refine(
+        data =>
+            data.fullAccess ||
+            Object.values(data.scopes).some(access => access !== 'none'),
+        { message: 'Grant at least one ability.', path: ['scopes'] }
+    )
+
+export type TokenInput = z.infer<typeof tokenSchema>
+
 export const getTokens = async (
     params: TokenQueryParams
 ): Promise<PaginatedApiKeys> => {
@@ -32,13 +55,13 @@ export const getTokens = async (
 }
 
 /** Creates a token and returns it with the one-time plaintext value. */
-export const createToken = async (
-    name: string,
-    abilities: string[]
-): Promise<ApiKey> =>
+export const createToken = async (input: TokenInput): Promise<ApiKey> =>
     (
         await apiFetch<DataResponse<ApiKey>>(storeRoute(), {
-            body: { name, abilities },
+            body: {
+                name: input.name.trim(),
+                abilities: buildAbilities(input.fullAccess, input.scopes),
+            },
         })
     ).data
 

@@ -1,6 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { IconApi } from '@tabler/icons-react'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -10,6 +9,7 @@ import {
     useApiKeys,
     type ApiKey as ApiKeyType,
 } from '@/features/account/api-keys/api.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import ApiKey from '@/features/account/components/ApiKey.tsx'
 import ApiKeyCreateDialog from '@/features/account/components/ApiKeyCreateDialog.tsx'
@@ -28,17 +28,21 @@ import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { cn } from '@/utils'
 
-const errorMessage = (e: unknown, fallback: string): string =>
-    e instanceof AxiosError && e.response?.data?.message
-        ? e.response.data.message
-        : fallback
-
 const ApiKeysCard = () => {
-    const queryClient = useQueryClient()
     const confirm = useConfirmationStore(state => state.confirm)
+    const mutate = useQueryMutator<ApiKeyType[]>(apiKeyQueries.all())
     const [createOpen, setCreateOpen] = useState(false)
 
     const { data: keys, isLoading } = useApiKeys()
+
+    const { mutate: revoke } = useMutation({
+        mutationFn: (apiKey: ApiKeyType) => deleteApiKey(apiKey.id),
+        onSuccess: (_, apiKey) => {
+            mutate(keys => keys?.filter(k => k.id !== apiKey.id))
+            toast.success('API token revoked')
+        },
+        onError: () => toast.error('Failed to revoke token'),
+    })
 
     const handleDelete = async (apiKey: ApiKeyType) => {
         const confirmed = await confirm({
@@ -47,13 +51,7 @@ const ApiKeysCard = () => {
         })
         if (!confirmed) return
 
-        try {
-            await deleteApiKey(apiKey.id)
-            await queryClient.invalidateQueries({ queryKey: apiKeyQueries.all() })
-            toast.success('API token revoked')
-        } catch (e) {
-            toast.error(errorMessage(e, 'Failed to revoke token'))
-        }
+        revoke(apiKey)
     }
 
     return (

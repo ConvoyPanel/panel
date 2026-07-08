@@ -1,17 +1,20 @@
+import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { IconCopy } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
 
 import {
+    apiKeyCreateSchema,
     apiKeyQueries,
     apiKeyScopes,
     createApiKey,
-    type ApiKeyScope,
+    type ApiKey,
+    type ApiKeyCreateInput,
 } from '@/features/account/api-keys/api.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -28,12 +31,7 @@ import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import SelectForm from '@/components/ui/Forms/SelectForm'
 
-const schema = z.object({
-    name: z.string().min(1).max(191),
-    scope: z.enum(
-        apiKeyScopes.map(s => s.value) as [ApiKeyScope, ...ApiKeyScope[]]
-    ),
-})
+const defaultValues: ApiKeyCreateInput = { name: '', scope: 'servers:*' }
 
 interface Props {
     open: boolean
@@ -41,39 +39,39 @@ interface Props {
 }
 
 const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
-    const queryClient = useQueryClient()
+    const mutate = useQueryMutator<ApiKey[]>(apiKeyQueries.all())
     const [plainTextToken, setPlainTextToken] = useState<string | null>(null)
 
-    const form = useForm<z.infer<typeof schema>>({
-        resolver: zodResolver(schema),
-        defaultValues: { name: '', scope: 'servers:*' },
+    const form = useForm<ApiKeyCreateInput>({
+        resolver: zodResolver(apiKeyCreateSchema),
+        defaultValues,
     })
 
-    const submit = async (data: z.infer<typeof schema>) => {
-        const { plainTextToken } = await createApiKey(data.name, data.scope)
-
-        setPlainTextToken(plainTextToken)
-        await queryClient.invalidateQueries({ queryKey: apiKeyQueries.all() })
-    }
+    const { mutateAsync: trigger } = useMutation({
+        mutationFn: createApiKey,
+        onSuccess: async ({ key, plainTextToken }) => {
+            await mutate(keys => (keys ? [key, ...keys] : keys), false)
+            setPlainTextToken(plainTextToken)
+            toast.success('API token created')
+        },
+        onError: e => {
+            handleFormErrors(e, form.setError)
+            toast.error('Failed to create token')
+        },
+    })
 
     const close = (next: boolean) => {
-        if (next) {
-            return
-        }
-
+        if (next) return
         onOpenChange(false)
         // Reset only after the close animation so the form doesn't flash empty.
         setTimeout(() => {
-            form.reset()
+            form.reset(defaultValues)
             setPlainTextToken(null)
         }, 200)
     }
 
     const copy = async () => {
-        if (!plainTextToken) {
-            return
-        }
-
+        if (!plainTextToken) return
         await navigator.clipboard.writeText(plainTextToken)
         toast.success('Copied token to clipboard')
     }
@@ -132,7 +130,7 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                         </CredenzaHeader>
 
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(submit)}>
+                            <form onSubmit={form.handleSubmit(data => trigger(data))}>
                                 <CredenzaBody className={'space-y-4'}>
                                     <InputForm
                                         name={'name'}

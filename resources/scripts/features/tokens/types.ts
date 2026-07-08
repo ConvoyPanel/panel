@@ -44,15 +44,16 @@ export const resourceLabels: Record<TokenResource, string> = {
  */
 export const buildAbilities = (
     fullAccess: boolean,
-    scopes: Record<TokenResource, ResourceAccess>
+    scopes: Record<string, ResourceAccess>
 ): string[] => {
     if (fullAccess) {
         return ['*']
     }
 
-    return TOKEN_RESOURCES.flatMap(resource =>
-        scopes[resource] === 'none' ? [] : [`${resource}:${scopes[resource]}`]
-    )
+    return TOKEN_RESOURCES.flatMap(resource => {
+        const access = scopes[resource] ?? 'none'
+        return access === 'none' ? [] : [`${resource}:${access}`]
+    })
 }
 
 /** A compact human summary of a token's granted abilities, for the list. */
