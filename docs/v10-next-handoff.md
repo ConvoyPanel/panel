@@ -993,6 +993,13 @@ Verified:
 
 ## Test database isolation (RefreshDatabase + dedicated `db_test`)
 
+> ⚠️ **Run the suite with `ddev exec vendor/bin/pest` (or `ddev exec php artisan test`), NOT the
+> `ddev artisan test` wrapper (2026-07-08).** In the current sandbox the ddev *global-command* wrapper
+> (`/mnt/ddev-global-cache/global-commands/web/artisan`) segfaults (exit 139) the moment it boots the
+> test runner — `ddev artisan tinker`/`migrate` are fine, and `ddev exec vendor/bin/pest` runs the full
+> suite green, so this is a wrapper quirk, not a code regression. Last green run this way:
+> **171 passed (433 assertions)** on `next`.
+
 Tests previously ran with `DatabaseTransactions` against the **dev** database (`db`).
 Two problems: Postgres sequences are non-transactional, so every rolled-back factory
 insert still burned an autoincrement value permanently — and since the dev DB is never
