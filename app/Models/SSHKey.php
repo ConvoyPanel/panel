@@ -22,4 +22,10 @@ class SSHKey extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /** SSH keys have no uuid; bind by primary key (the base Model defaults to uuid). */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }

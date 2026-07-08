@@ -25,6 +25,13 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
             ->withoutScopedBindings();
     });
 
+    Route::prefix('/ssh-keys')->group(function () {
+        Route::get('/', [Client\Account\SSHKeyController::class, 'index']);
+        Route::post('/', [Client\Account\SSHKeyController::class, 'store']);
+        Route::delete('/{sshKey}', [Client\Account\SSHKeyController::class, 'destroy'])
+            ->withoutScopedBindings();
+    });
+
     Route::prefix('/passkeys')
         ->middleware(RequireIdentityConfirmation::class)
         ->group(function () {

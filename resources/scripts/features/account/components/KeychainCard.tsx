@@ -1,9 +1,21 @@
-import { SSHKey as Key } from '@/features/account/types.ts'
-import { cn } from '@/utils'
+import { useMutation } from '@tanstack/react-query'
 import { IconKey } from '@tabler/icons-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+
+import {
+    deleteSSHKey,
+    sshKeyQueries,
+    useSSHKeys,
+} from '@/features/account/ssh-keys/api.ts'
+import { SSHKey as SSHKeyType } from '@/features/account/types.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { cn } from '@/utils'
 
 import SSHKey from '@/features/account/components/SSHKey.tsx'
+import SSHKeyCreateDialog from '@/features/account/components/SSHKeyCreateDialog.tsx'
 
+import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -14,60 +26,87 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-
+import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const KeychainCard = () => {
-    const keys: Key[] = [
-        {
-            id: 1,
-            name: 'Key 1',
-            createdAt: new Date(),
+    const confirm = useConfirmationStore(state => state.confirm)
+    const mutate = useQueryMutator<SSHKeyType[]>(sshKeyQueries.all())
+    const [createOpen, setCreateOpen] = useState(false)
+
+    const { data: keys, isLoading } = useSSHKeys()
+
+    const { mutate: remove } = useMutation({
+        mutationFn: (key: SSHKeyType) => deleteSSHKey(key.id),
+        onSuccess: (_, key) => {
+            mutate(keys => keys?.filter(k => k.id !== key.id))
+            toast.success('SSH key removed')
         },
-        {
-            id: 2,
-            name: 'Key 2',
-            createdAt: new Date(),
-        },
-    ]
+        onError: () => toast.error('Failed to remove key'),
+    })
+
+    const handleDelete = async (key: SSHKeyType) => {
+        const confirmed = await confirm({
+            title: 'Remove SSH key',
+            description: `“${key.name}” will be removed from your keychain. Servers it was already added to are unaffected.`,
+        })
+        if (!confirmed) return
+
+        remove(key)
+    }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>SSH Keychain</CardTitle>
-                <CardDescription>Manage your SSH public keys </CardDescription>
-            </CardHeader>
-            <CardContent
-                className={cn(
-                    'min-h-[14rem]',
-                    keys.length === 0 && 'grid place-items-center'
+        <>
+            <Card>
+                <CardHeader>
+                    <CardTitle>SSH Keychain</CardTitle>
+                    <CardDescription>
+                        Manage your SSH public keys
+                    </CardDescription>
+                </CardHeader>
+                <CardContent
+                    className={cn(
+                        'min-h-[14rem]',
+                        (isLoading || keys?.length === 0) &&
+                            'grid place-items-center'
+                    )}
+                >
+                    {isLoading || !keys ? (
+                        <Skeleton className={'h-40 w-full'} />
+                    ) : keys.length > 0 ? (
+                        <ul className={'divide-y'}>
+                            {keys.map(key => (
+                                <li key={key.id}>
+                                    <SSHKey
+                                        publicKey={key}
+                                        onDelete={handleDelete}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <SimpleEmptyState
+                            icon={IconKey}
+                            title={'SSH Keychain'}
+                            description={'You have no keys in your keychain.'}
+                            action={
+                                <Button onClick={() => setCreateOpen(true)}>
+                                    Add Key
+                                </Button>
+                            }
+                        />
+                    )}
+                </CardContent>
+                {keys && keys.length > 0 && (
+                    <CardFooter className={'flex justify-end'}>
+                        <Button onClick={() => setCreateOpen(true)}>
+                            Add Key
+                        </Button>
+                    </CardFooter>
                 )}
-            >
-                {keys.length > 0 ? (
-                    <ul className={'space-y-1'}>
-                        {keys.map(key => (
-                            <li key={key.id}>
-                                <SSHKey publicKey={key} />
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <SimpleEmptyState
-                        icon={IconKey}
-                        title={'SSH Keychain'}
-                        description={'You have no keys in your keychain.'}
-                        action={<Button>Add Key</Button>}
-                    />
-                )}
-            </CardContent>
-            {keys.length > 0 && (
-                <CardFooter className={'flex justify-end space-x-3'}>
-                    <p className={'text-sm text-muted-foreground'}>
-                        3 keys remaining
-                    </p>
-                    <Button>Add Key</Button>
-                </CardFooter>
-            )}
-        </Card>
+            </Card>
+
+            <SSHKeyCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
+        </>
     )
 }
 
