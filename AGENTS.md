@@ -100,3 +100,9 @@ back to Proxmox's keys/format is the codec's job (`App\Extensions\Spatie\Data\
 Proxmox` — `#[ProxmoxProperty]`, casts, `PropertyList`), so keep conversion
 logic there and reusable, not re-implemented per DTO (e.g. byte-unit scaling).
 5. Do not call the Proxmox API; these docs are reference-only.
+
+## Live End-to-End Testing
+
+The user may specify a corresponding `$PROXMOX_SSH_TARGET` for the `$PROXMOX_FQDN` in the environment. 
+If set, you may `ssh $PROXMOX_SSH_TARGET` into the Proxmox node for enhanced testing 
+(e.g., for cases where using the Proxmox API isn't sufficient).
