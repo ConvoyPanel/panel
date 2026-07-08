@@ -171,6 +171,12 @@ Researched direction retained for each; none built unless noted.
   - *Roadmap (separate, big):* overhaul every `components/ui/*` to **latest shadcn on Base UI**
     (`@base-ui-components/react`) primitives instead of Radix, same preset. This is the component-library
     swap, distinct from the token swap already done.
+  - *Design source to mirror (user ask):* the maintainer really likes the **premade "blocks"** shown on
+    shadcn's new **`create` page / Blocks gallery** (polished cards: env-vars, invite-team, report-bug,
+    traffic-channels charts, browser-share donut, invoice, shipping-address, codespaces empty-state, etc.).
+    These are shadcn **registry blocks** — MIT, copy-pasteable — browse at **ui.shadcn.com/blocks** &
+    **/examples** (the `create` experience previews/generates them; add via `npx shadcn@latest add <block>`).
+    When doing the overhaul, lift their composition/spacing/polish rather than reinventing.
 
 ---
 
