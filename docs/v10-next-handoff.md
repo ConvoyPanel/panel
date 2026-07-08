@@ -612,7 +612,11 @@ Verified:
     `PowerActionsDropdown`. tsc clean, production build green. **Not verified against a live Proxmox
     node** — both endpoints proxy to Proxmox, so real power actions need a node the dev env doesn't have;
     the compile-time contract (Wayfinder route + DTO envelope + generated types) is fully exercised and
-    the backend endpoints are covered by feature tests.
+    the backend endpoints are covered by feature tests. **UPDATE (2026-07-08): the backend power path is
+    now LIVE-VERIFIED** — `getState`, `start`→running and `kill`→stopped were driven through
+    `SendServerPowerCommand`/`ProxmoxServerRepository` against a real PVE 9.2.2 node and cross-checked
+    with `qm status` (see the multi-disk slice-4 live-verification note). The *frontend* wiring is still
+    only build/type-verified, not clicked in-browser.
   - **Admin server detail page — DONE (2026-07-06).** The list's `/admin/servers/{id}` link is now live.
     Route mirrors the `nodes.$nodeId` pattern: `routes/_app/admin/servers.$serverId.tsx` (AppLayout +
     loader `preloadServer` + title, single **Overview** nav tab for now — room to add Settings/Backups
@@ -795,9 +799,9 @@ Verified:
   >   row is updated (the build allocates it at the new size); otherwise it finds the disk on the live
   >   config by interface and calls `ProxmoxDiskRepository::setDiskSize`.
   > - **removeDisk** — `delete=scsiN` only *detaches* on PVE (the volume lingers as `unusedN`), so it
-  >   diffs the raw config's `unused*` keys around the detach (new `ProxmoxConfigRepository::getRawConfig`)
-  >   and issues a second `delete=unusedN` to destroy the freed volume. An unbuilt disk just drops the
-  >   row (nothing on the VM). Primary → 400.
+  >   destroys the freed volume too via a second `delete=unusedN` (`ProxmoxConfigRepository::getRawConfig`
+  >   exposes the raw `unused*` keys). An unbuilt disk just drops the row (nothing on the VM). Primary → 400.
+  >   **Revised after live testing** — see the removeDisk fix note below.
   > - Capacity validated per-request against `LiveStorageService::freeForConvoy` (add: full size;
   >   resize: only the growth delta; fail-open when the node is offline). Enforcement aggregate itself
   >   is unit-tested in `HasSufficientDiskSpaceTest`.
@@ -807,8 +811,37 @@ Verified:
   > - Tests: `tests/Feature/Servers/ServerDiskManagementTest.php` (11 — list/add/grow/pending-grow/
   >   shrink-reject/primary-reject×2/remove+purge/unbuilt-remove/cross-server-404/non-admin-403).
   >   Suite **171**; PHPStan **zero**; tsc clean (Wayfinder emits the `ServerDiskController` actions).
-  >   **Not yet verified against a live Proxmox node** — the dev env has none, so add/resize/remove
-  >   proxy calls are exercised via the HTTP fake; the row/DB side and guards are fully covered.
+  >
+  > **✅ LIVE-VERIFIED against a real Proxmox node (2026-07-08, PVE 9.2.2 `us-southeast-2`).** Using
+  > the sandbox's `PROXMOX_SSH_TARGET` + the `DevNodeSeeder` node, drove the service layer the
+  > controllers call against a real diskless test VM (created via `qm`, then a matching `Server` row):
+  > `getState` (stopped/running), power `start`→running and `kill`→stopped, `addDisk`→`scsiN` allocated,
+  > `resizeDisk`→volume grown, `removeDisk`→detached **and the backing `vm-…-disk-N.raw` destroyed on
+  > storage** — each cross-checked over SSH with `qm config`/`ls` on the node. So the power-action and
+  > disk-op caveats below are now closed for the service/repo→PVE path.
+  >
+  > **🐛 removeDisk orphaned-volume bug — FOUND & FIXED live (commit `d25bf56b`).** The original
+  > before/after `unused*` count diff read the config too soon: on a **running** VM `delete=scsiN` only
+  > *schedules* the hot-unplug, so the volume becomes `unusedN` a beat AFTER the API call returns — the
+  > one-shot re-read saw no new key and skipped the destroy, leaving the volume orphaned on disk.
+  > removeDisk now captures the disk's exact volume id and **polls** the raw config (12×500ms) for the
+  > `unusedN` referencing *that* volume before deleting it (robust to a concurrent unused slot; a stopped
+  > VM exits the loop on the first read). The existing feature test's closure fake already models the
+  > detach→unused transition, so it covers the poll.
+  >
+  > **⚠️ PVE read-after-write staleness (observation, not a slice-4 regression).** Live testing also
+  > showed that an **immediate config GET in the *same process* right after a config write can miss the
+  > change** (the node had `scsiN`, but a re-read 100ms later still returned the pre-write config; the
+  > write itself was confirmed persisted + task `OK`). This does **not** affect the disk/power endpoints
+  > (one op per HTTP request → PVE is consistent by the next request) nor the build chain
+  > (`VmSyncService`: syncSettings→syncDisks→network never re-reads disk config after allocating). It
+  > *is* a latent risk for any future same-request read-modify-write that reads back its own just-written
+  > disk change — reach for a short poll (as removeDisk now does) rather than a single re-read there.
+  >
+  > **Seeder fix landed en route (commit, separate):** `DevNodeSeeder` hardcoded `name => 'dev-node'`,
+  > but `name` is the **PVE cluster node name** used verbatim in the `/nodes/{name}` API path — so every
+  > node call failed `hostname lookup 'dev-node' failed`. Now derived from the fqdn's first DNS label
+  > (override `PROXMOX_NODE_NAME`). This is what unblocked all the live verification above.
 
   > **Slice 1 (server_disks model + backfill + disk-oriented usage) — DONE.** `server_disks` table
   > (`server_id` cascade, `storage_id`, `size` MiB, `interface` nullable, `is_primary`, `disk_index`;
