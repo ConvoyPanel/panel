@@ -86,12 +86,23 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
-- **User PATs (`ApiKeyType::ACCOUNT`) — NOT STARTED.** End-users mint tokens scoped to **their own**
-  resources (their servers), `tokenable` = the user, managed from the account/security area (client-side
-  controller + `/api/client` routes + client UI). The application-token half is already done.
+- **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
+  both the client PAT card and the admin `/admin/tokens` screen shipped).
 
-- **Frontend token-management UI — NOT STARTED.** No admin screen consumes `ApiKeyData` in TS yet. An
-  ability-picker belongs here when built.
+- **SSH keychain — DONE.** `Client\Account\SSHKeyController` (index/store/destroy) on the existing
+  `ssh_keys` table, `SshPublicKey` rule (base64 blob + embedded-algorithm integrity check), real
+  `KeychainCard` (was mocked). **One-off server keys — NOT BUILT (proposed).** A server's authorized keys
+  already live in its cloud-init (`ServerAuthService::get/setSSHKeys`), independent of the keychain — so
+  "add a key to one server without saving it" needs no new table/flag: it's just a key in the server's set
+  with no keychain row. The missing piece is the **server auth-settings UI** (no server-auth frontend
+  exists yet): offer "add from keychain" (multi-select saved keys) + "paste a one-off key" (pushed to that
+  server only), optionally a "save to keychain too" checkbox. Reuse the `SshPublicKey` rule.
+
+- **Logged-in session tracking — DONE.** `session_records` table + `RecordSessionActivity` middleware
+  (web group, throttled, skips bearer/anon) + Logout listener + `SessionRecordController` (list/revoke via
+  the Redis session handler); real `SessionListCard`. Raw `session_id` is server-side only; API exposes the
+  numeric id. **Note:** device label is UA-parsed client-side; **IP→geo location was dropped** (needs a
+  GeoIP dependency) — add later if wanted.
 
 - **VLAN support (GitHub #150) — ASSESSED, NOT BUILT.** Mechanism is sound and half-built: the right PVE
   primitive is `tag=` on the VM's `netX` against a VLAN-aware bridge, which `NetworkDeviceData` already
@@ -112,12 +123,6 @@ Researched direction retained for each; none built unless noted.
   only):** provider role → Laravel **Passport**; RP role → Laravel **Socialite**. Passport lacks full OIDC
   out of the box — vet any OIDC-on-Passport bridge for reputation before adopting. Supersedes the
   app-key-JWT stopgap once done.
-
-- **Logged-in session tracking with Redis sessions — NOT BUILT.** Laravel's DB session listing is
-  unavailable with the Redis driver, so add first-party session metadata: upsert a record keyed by session
-  id/hash with `user_id`, last-used, IP-derived location, UA/device summary, current-session marker; on
-  logout/revoke delete both the metadata row and the Redis session key. Expose an account page/API to list
-  and revoke sessions individually.
 
 - **Multiple disks per VM — slice 6 (`move_disk` splitting) — DEFERRED (YAGNI).** Only needed to split a
   *template's own* multiple disks across storages; async (UPID), slow. v1 never needs it (primary comes
