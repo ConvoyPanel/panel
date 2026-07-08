@@ -1,7 +1,7 @@
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { IconCopy } from '@tabler/icons-react'
+import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -27,6 +27,8 @@ import {
     CredenzaHeader,
     CredenzaTitle,
 } from '@/components/ui/Credenza'
+import useClipboard from '@/hooks/use-clipboard.ts'
+
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import SelectForm from '@/components/ui/Forms/SelectForm'
@@ -41,6 +43,7 @@ interface Props {
 const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
     const mutate = useQueryMutator<ApiKey[]>(apiKeyQueries.all())
     const [plainTextToken, setPlainTextToken] = useState<string | null>(null)
+    const { copy, copied } = useClipboard()
 
     const form = useForm<ApiKeyCreateInput>({
         resolver: zodResolver(apiKeyCreateSchema),
@@ -68,12 +71,6 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
             form.reset(defaultValues)
             setPlainTextToken(null)
         }, 200)
-    }
-
-    const copy = async () => {
-        if (!plainTextToken) return
-        await navigator.clipboard.writeText(plainTextToken)
-        toast.success('Copied token to clipboard')
     }
 
     return (
@@ -105,10 +102,14 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
-                                    onClick={copy}
+                                    onClick={() => copy(plainTextToken)}
                                     className={'shrink-0'}
                                 >
-                                    <IconCopy className={'h-4 w-4'} />
+                                    {copied ? (
+                                        <IconCheck className={'h-4 w-4'} />
+                                    ) : (
+                                        <IconCopy className={'h-4 w-4'} />
+                                    )}
                                 </Button>
                             </div>
                         </CredenzaBody>

@@ -1,7 +1,7 @@
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { IconCopy, IconPlus } from '@tabler/icons-react'
+import { IconCheck, IconCopy, IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -12,6 +12,7 @@ import {
     TOKEN_RESOURCES,
     type PaginatedApiKeys,
 } from '@/features/tokens/types.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
 import type { Mutator } from '@/types/query.ts'
 
 import { Button } from '@/components/ui/Button'
@@ -51,6 +52,7 @@ interface Props {
 const CreateTokenModal = ({ mutate }: Props) => {
     const [open, setOpen] = useState(false)
     const [plainTextToken, setPlainTextToken] = useState<string | null>(null)
+    const { copy, copied } = useClipboard()
 
     const form = useForm<TokenInput>({
         resolver: zodResolver(tokenSchema),
@@ -87,12 +89,6 @@ const CreateTokenModal = ({ mutate }: Props) => {
         }
     }
 
-    const copy = async () => {
-        if (!plainTextToken) return
-        await navigator.clipboard.writeText(plainTextToken)
-        toast.success('Copied token to clipboard')
-    }
-
     return (
         <Credenza open={open} onOpenChange={onOpenChange}>
             <CredenzaTrigger asChild>
@@ -126,10 +122,14 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
-                                    onClick={copy}
+                                    onClick={() => copy(plainTextToken)}
                                     className={'shrink-0'}
                                 >
-                                    <IconCopy className={'h-4 w-4'} />
+                                    {copied ? (
+                                        <IconCheck className={'h-4 w-4'} />
+                                    ) : (
+                                        <IconCopy className={'h-4 w-4'} />
+                                    )}
                                 </Button>
                             </div>
                         </CredenzaBody>
