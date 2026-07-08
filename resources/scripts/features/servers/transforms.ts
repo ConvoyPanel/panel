@@ -2,8 +2,9 @@ import { ServerResources } from '@/types/server'
 import { Backup, BackupErrorCode } from '@/features/servers/types.ts'
 
 export const rawDataToServerResources = (data: any): ServerResources => ({
-    usedBytes: data.usedBytes,
-    totalBytes: data.totalBytes,
+    // ResourceController emits snake_case (it returns a raw array, not a laravel-data DTO).
+    usedBytes: data.used_bytes,
+    totalBytes: data.total_bytes,
 })
 
 export const rawDataToBackup = (data: any): Backup => ({

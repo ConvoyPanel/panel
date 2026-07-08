@@ -1,6 +1,6 @@
 import byteSize from 'byte-size'
 
-import { useStorageUsage } from '@/features/servers/storage/api.ts'
+import { useServerResources } from '@/features/servers/detail/api.ts'
 
 import {
     Card,
@@ -22,7 +22,7 @@ interface Props {
 }
 
 const StorageUsageCard = ({ uuid }: Props) => {
-    const { data: usage, isLoading, isError } = useStorageUsage(uuid)
+    const { data: usage, isLoading, isError } = useServerResources(uuid)
 
     const hasUsage = usage && usage.totalBytes > 0
     const percent = hasUsage
