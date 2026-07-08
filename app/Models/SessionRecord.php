@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -14,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SessionRecord extends Model
 {
+    use Prunable;
+
     protected $fillable = [
         'session_id',
         'user_id',
@@ -46,5 +50,22 @@ class SessionRecord extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Garbage-collect rows for sessions that can no longer exist: once a row hasn't been refreshed
+     * for the full session lifetime, its Redis session has expired too, so the metadata is dead
+     * weight. Read-time reconciliation in the controller handles listed sessions; this bounds table
+     * growth for sessions that are never listed.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()->where(
+            'last_active_at',
+            '<',
+            now()->subMinutes((int) config('session.lifetime')),
+        );
     }
 }

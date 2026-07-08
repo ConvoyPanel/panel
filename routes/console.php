@@ -7,11 +7,16 @@ use App\Console\Commands\Server\ResetUsagesCommand;
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
 use App\Models\ActivityLog;
+use App\Models\SessionRecord;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('queue:prune-batches')->daily();
 Schedule::command('queue:prune-failed')->daily();
+
+// Garbage-collect session metadata rows whose underlying session has aged out (see
+// SessionRecord::prunable) so the table stays bounded even for sessions never listed.
+Schedule::command(PruneCommand::class, ['--model' => [SessionRecord::class]])->daily();
 
 if (config('deployments.stuck_age') || config('deployments.retention_period')) {
     Schedule::command(PruneDeploymentsCommand::class)->hourly();

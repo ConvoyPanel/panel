@@ -13,14 +13,28 @@ class SessionRecordController
     public function index(Request $request)
     {
         $currentId = $request->session()->getId();
+        $handler = $request->session()->getHandler();
 
         $records = SessionRecord::query()
             ->where('user_id', $request->user()->id)
             ->latest('last_active_at')
             ->get();
 
+        // Reconcile against the session store: Redis is the source of truth for what's actually
+        // logged in, so drop (and delete) any row whose underlying session has expired or been
+        // evicted. This keeps the list from ever showing a session that no longer exists, and
+        // self-heals the metadata table on read.
+        [$live, $stale] = $records->partition(
+            fn (SessionRecord $record) => $record->session_id === $currentId
+                || $handler->read($record->session_id) !== ''
+        );
+
+        if ($stale->isNotEmpty()) {
+            SessionRecord::query()->whereKey($stale->modelKeys())->delete();
+        }
+
         return SessionRecordData::collect(
-            $records->map(fn (SessionRecord $record) => SessionRecordData::fromModel($record, $currentId)),
+            $live->map(fn (SessionRecord $record) => SessionRecordData::fromModel($record, $currentId)),
             DataCollection::class,
         );
     }
