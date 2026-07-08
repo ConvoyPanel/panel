@@ -15,9 +15,14 @@ Last updated: 2026-07-08
 - **Phase 0 (dev loop / CI green)** — DONE. ddev runs the full stack on **Postgres 17** (web
   nginx-fpm, Redis cache/queue/session, Horizon + `schedule:work` as `web_extra_daemons`,
   codegen via `ddev npm run build`). Replaces the old compose services + Makefile snapshot
-  hack (now `ddev snapshot` / `ddev snapshot restore`). Follow-ups still open: validate Vite
+  hack (now `ddev snapshot` / `ddev snapshot restore`). ~~Follow-ups still open: validate Vite
   HMR (`server.hmr.host` still `localhost` in `vite.config.ts`); document the
-  `ddev start → ddev npm install → ddev artisan migrate` path in the README.
+  `ddev start → ddev npm install → ddev artisan migrate` path in the README.~~ **Both resolved
+  (2026-07-08):** `vite.config.ts` now detects `DDEV_PRIMARY_URL` and points HMR at the ddev host
+  (`hmr: { host: ddevHost, protocol: 'wss', clientPort: 3000 }`, `origin` on the exposed :3000 https
+  port), with the bare `localhost` HMR host kept only as the non-ddev fallback; and `README.md`
+  (lines 24-33) documents the `ddev start → composer install → artisan migrate → npm install/build`
+  bootstrap (plus `npm run dev` for HMR).
 - **Phase 1 (backend to green)** — DONE. Orphaned `routes/api-application.php` reconciled,
   stale pool-era filter classes removed, dozens of real bugs fixed (route binding uuid/bigint
   on Postgres, backup semantics, storage refactor, ISO storage, node update,
