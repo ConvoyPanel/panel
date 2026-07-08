@@ -230,9 +230,23 @@ class AllocationService
     }
 
     /**
+     * How many times to re-read the config looking for the detached volume to
+     * surface as `unusedN`, and how long to wait between reads (µs).
+     *
+     * On a *running* VM `delete=scsiN` only schedules the hot-unplug: the API
+     * call returns before QEMU confirms it, and the volume moves to `unusedN`
+     * a moment later — so an immediate single re-read races it and misses the
+     * freed volume (leaving it orphaned on disk). We poll instead. On a stopped
+     * VM the entry is there on the first read, so the loop exits immediately.
+     */
+    private const UNUSED_POLL_ATTEMPTS = 12;
+
+    private const UNUSED_POLL_DELAY_US = 500_000;
+
+    /**
      * Remove a secondary disk and reclaim its space. `delete=scsiN` only
-     * *detaches* on Proxmox (the volume lingers as `unusedN`), so we diff the
-     * raw `unused*` keys around the detach and destroy the freed volume too.
+     * *detaches* on Proxmox (the volume lingers as `unusedN`); we then destroy
+     * that freed volume so nothing is left orphaned on the storage.
      *
      * @throws RequestException
      * @throws ConnectionException
@@ -253,40 +267,67 @@ class AllocationService
 
         $repository = $this->configRepository->setServer($server);
 
-        $unusedBefore = $this->unusedKeys($repository->getRawConfig());
         $config = $repository->getConfig();
-
         $onVm = $config->disks->first(
             fn (DiskData $d) => $d->interface->value === $disk->interface,
         );
 
         if ($onVm !== null) {
-            // Detach: the volume becomes an `unusedN` entry.
+            // Detach: the volume becomes an `unusedN` entry (async on a running
+            // VM — see the poll constants). Match on the exact volume id, not a
+            // before/after count, so a concurrent unused slot can't fool us.
             $repository->update(['delete' => $disk->interface], $config->digest);
-
-            // Destroy whatever unused slot(s) the detach created.
-            $rawAfter = $repository->getRawConfig();
-            $newUnused = array_diff($this->unusedKeys($rawAfter), $unusedBefore);
-            foreach ($newUnused as $key) {
-                $repository->update(['delete' => $key], $rawAfter['digest'] ?? null);
-            }
+            $this->purgeDetachedVolume($repository, $onVm->volume);
         }
 
         $disk->delete();
     }
 
     /**
-     * The `unused0`, `unused1`, … config keys present in a raw PVE config.
+     * Poll the raw config until the just-detached volume surfaces as an
+     * `unusedN` key, then delete that key to destroy the underlying volume.
+     * Best-effort: if it never appears within the window we stop (the disk is
+     * already detached; a leftover volume is preferable to blocking forever).
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    private function purgeDetachedVolume(ProxmoxConfigRepository $repository, string $volume): void
+    {
+        for ($attempt = 0; $attempt < self::UNUSED_POLL_ATTEMPTS; ++$attempt) {
+            $raw = $repository->getRawConfig();
+            $key = $this->findUnusedKeyForVolume($raw, $volume);
+
+            if ($key !== null) {
+                $repository->update(['delete' => $key], $raw['digest'] ?? null);
+
+                return;
+            }
+
+            usleep(self::UNUSED_POLL_DELAY_US);
+        }
+    }
+
+    /**
+     * The `unusedN` config key whose value references $volume, if any. PVE
+     * renders the unused entry as the bare volume id (no `,size=` suffix), so
+     * compare on the volume id portion only.
      *
      * @param  array<string, mixed>  $raw
-     * @return list<string>
      */
-    private function unusedKeys(array $raw): array
+    private function findUnusedKeyForVolume(array $raw, string $volume): ?string
     {
-        return array_values(array_filter(
-            array_keys($raw),
-            fn (string $key) => preg_match('/^unused\d+$/', $key) === 1,
-        ));
+        foreach ($raw as $key => $value) {
+            if (preg_match('/^unused\d+$/', $key) !== 1) {
+                continue;
+            }
+
+            if (is_string($value) && explode(',', $value)[0] === $volume) {
+                return $key;
+            }
+        }
+
+        return null;
     }
 
     public function setBootOrder(Server $server, array $disks)
