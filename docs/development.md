@@ -67,30 +67,30 @@ feature branch, then `ddev snapshot restore` when you switch to a bug fix.
 
 ## Sandboxed development (Docker Sandboxes / `sbx`)
 
-To run a coding agent (or a disposable throwaway environment) against Convoy
-**without touching your machine**, use [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/).
-Each sandbox is a Linux microVM with its *own* Docker daemon, database, and
-volumes — fully isolated from your host ddev, so a mistake only costs you an
-`sbx rm`.
+Run an agent against Convoy in a throwaway Linux microVM — its own Docker daemon,
+database, and volumes, isolated from your host ddev. A mistake costs only `sbx rm`.
+Two committed kits (full details in [`.sbx/README.md`](../.sbx/README.md)):
+`.sbx/dev` boots the ddev stack, `.sbx/tailscale` joins your tailnet.
 
-### The provisioning kit
-
-`.sbx/dev/` is a committed kit that installs ddev and boots the stack inside the
-sandbox (see [`.sbx/README.md`](../.sbx/README.md)):
+### 1. Start it
 
 ```sh
-sbx run --kit .sbx/dev claude        # any agent works in place of `claude`
+# ddev only
+sbx run --kit .sbx/dev claude
+
+# ddev + Tailscale — list tailscale FIRST so it isn't stuck behind ddev's image pull
+sbx run --kit .sbx/tailscale --kit .sbx/dev claude
 ```
 
-The first run installs ddev and pulls its images (slow once). Snapshot the
-provisioned sandbox into a template so later starts are instant:
+Any agent works in place of `claude`. The first run installs ddev (slow once);
+make later starts instant by saving a template:
 
 ```sh
 sbx template save <sandbox-name> convoy-dev
-sbx run -t convoy-dev --kit .sbx/dev claude   # install becomes a no-op; only `ddev start` runs
+sbx run -t convoy-dev --kit .sbx/dev claude   # install is now a no-op
 ```
 
-### Finish provisioning (inside the sandbox)
+### 2. Finish setup (run inside the sandbox)
 
 ```sh
 ddev composer install
@@ -98,14 +98,12 @@ ddev exec php artisan migrate
 ddev exec php artisan test
 ```
 
-### Testing against a real Proxmox node
+### 3. (Optional) Seed a Proxmox node
 
-Nodes (and their Proxmox credentials) normally live in the database, created
-through the UI. For a scripted dev/test node, `DevNodeSeeder` builds one from
-environment variables in your **gitignored `.env`**:
+Add to your **gitignored `.env`**, then seed:
 
 ```dotenv
-PROXMOX_FQDN=10.0.0.10
+PROXMOX_FQDN=10.0.0.10          # a tailnet IP (100.x) if you're using the tailscale kit
 PROXMOX_TOKEN_ID=root@pam!convoy
 PROXMOX_TOKEN_SECRET=xxxxxxxx
 # PROXMOX_PORT=8006
@@ -116,43 +114,24 @@ PROXMOX_TOKEN_SECRET=xxxxxxxx
 ddev exec php artisan db:seed --class=DevNodeSeeder
 ```
 
-Because `.env` rides the mounted workspace, it's available in the sandbox with no
-extra wiring. **Use a scoped Proxmox API token, not full `root@pam`** — the
-sandbox protects your machine, not your hypervisor, and an autonomous agent with
-that token can control it.
+`.env` is mounted in, so it's already there. **Use a scoped API token, not full
+`root@pam`** — the sandbox protects your machine, not your hypervisor.
 
-### Reaching a tailnet Proxmox node (the tailscale kit)
+### Tailscale auth key (only for the tailscale kit)
 
-If your `PROXMOX_FQDN` is only reachable over Tailscale (a private tailnet IP, not
-a public address), the sandbox can't hit it out of the box — its microVM isn't on
-your tailnet. `.sbx/tailscale/` is a second committed kit that joins the sandbox to
-the tailnet. Kits compose, so layer it onto the dev kit — list `.sbx/tailscale`
-**first** so the tailnet comes up promptly instead of waiting behind ddev's
-(first-run) image pull, since kit startup runs in `--kit` order:
+Do **one** of these — the key is never committed:
 
 ```sh
-sbx run --kit .sbx/tailscale --kit .sbx/dev claude
+cp .sbx/tailscale.env.example .sbx/tailscale.env   # then paste your key into it (gitignored)
 ```
 
-The tailscale kit brings the node up on your tailnet (TUN mode — tailnet IPs route
-transparently through `tailscale0`, no proxy), the dev kit boots ddev, and then
-`DevNodeSeeder` can reach a private Proxmox host. Reach it by **tailnet IP**, not
-hostname — MagicDNS is off (`--accept-dns=false`) because the sandbox's
-`/etc/resolv.conf` is read-only — so set `PROXMOX_FQDN` to the node's `100.x` IP.
-Verify inside the sandbox with `tailscale status` and `tailscale ping <100.x-ip>`
-(traffic relays over DERP, as `sbx` blocks raw UDP; fine for the Proxmox API).
+- …or `export TS_AUTHKEY=tskey-...` before `sbx run`.
+- …or skip both and run `sudo tailscale up --accept-routes --ssh` inside the
+  sandbox, then open the printed URL in your browser.
 
-The kit is secret-free — the auth key is supplied out-of-band (never committed):
-
-- `TS_AUTHKEY` in the environment, or a gitignored `.sbx/tailscale.env`
-  (`cp .sbx/tailscale.env.example .sbx/tailscale.env` and paste a key); or
-- run `sudo tailscale up --accept-routes --ssh` inside the sandbox and open the
-  printed URL in your host browser.
-
-For a hands-off setup, a personal shell wrapper can read the key from a secret
-manager (e.g. 1Password) and inject `TS_AUTHKEY` automatically — kept in your own
-dotfiles, not this repo. See [`.sbx/README.md`](../.sbx/README.md) for the auth-key
-options, the 1Password recipe, and the TUN-vs-userspace networking notes.
+Check it with `tailscale status` inside the sandbox. **Reach tailnet hosts by IP,
+not hostname** (MagicDNS is off). For hands-off 1Password auto-injection and the
+networking details, see [`.sbx/README.md`](../.sbx/README.md).
 
 ### Notes
 
