@@ -27,6 +27,20 @@ export const serverSchema = z
         disk: z.coerce.number().min(1).max(10485760),
         bandwidth: z.coerce.number().min(0).optional(),
 
+        // Optional secondary/data disks, each on its own storage. The primary
+        // OS disk is `storageId` + `disk` above; these become `limits.disks[]`.
+        // `size` is entered in GiB and converted to bytes at submit time.
+        disks: z
+            .array(
+                z.object({
+                    storageId: z
+                        .string({ error: 'Storage is required.' })
+                        .min(1),
+                    size: z.coerce.number().min(1),
+                })
+            )
+            .optional(),
+
         // backup limits
         backupCount: z.coerce.number().min(-1),
         backupSize: z.coerce.number().min(-1),
@@ -130,6 +144,7 @@ export const createServer = async ({
     memory,
     disk,
     bandwidth,
+    disks,
     backupCount,
     backupSize,
     networkInterfaceId,
@@ -157,6 +172,10 @@ export const createServer = async ({
                         memory,
                         disk,
                         bandwidth,
+                        disks: disks?.map(d => ({
+                            storage_id: Number(d.storageId),
+                            size: d.size,
+                        })),
                         backups: {
                             count: backupCount,
                             size: backupSize,

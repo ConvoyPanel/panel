@@ -23,9 +23,19 @@ import {
 interface StoragePickerProps {
     nodeId: number | null
     requiredContentTypes?: (keyof Storage)[]
+    // The form field this picker binds to. Defaults to the create form's
+    // primary `storageId`; the secondary-disk field array passes a nested path
+    // such as `disks.0.storageId`.
+    name?: string
+    label?: string
 }
 
-const StoragePicker = ({ nodeId, requiredContentTypes }: StoragePickerProps) => {
+const StoragePicker = ({
+    nodeId,
+    requiredContentTypes,
+    name = 'storageId',
+    label = 'Storage',
+}: StoragePickerProps) => {
     const { control } = useFormContext()
     const { data: storages, isLoading } = useStorages(nodeId ?? undefined)
 
@@ -37,10 +47,10 @@ const StoragePicker = ({ nodeId, requiredContentTypes }: StoragePickerProps) => 
     return (
         <FormField
             control={control}
-            name="storageId"
+            name={name}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Storage</FormLabel>
+                    <FormLabel>{label}</FormLabel>
                     <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}

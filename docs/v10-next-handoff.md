@@ -783,8 +783,36 @@ Verified:
     `StorageData` into the eloquent list, cached), `TemplateFitsStorage` (real capacity check),
     `features/nodes/storages` UI (three-figure display + reserve field).
 
-- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–4 DONE
-  (2026-07-08). Next: slice 5 (frontend disk list — create form + server-settings Disks panel).**
+- **Multiple storages (disks) per VM (user request 2026-07-07) — DESIGN APPROVED; SLICES 1–5 DONE
+  (2026-07-08). Feature complete for v1 (slice 6 `move_disk` splitting remains deferred/YAGNI).**
+
+  > **Slice 5 (frontend — create-form disks + admin Disks tab) — DONE (2026-07-08).** Frontend now
+  > produces and manages the `server_disks` rows the backend slices allocate. Two surfaces, both
+  > admin-only, both driving the endpoints verified in slice 4:
+  > - **Create form.** `serverSchema` gained an optional `disks: [{storageId, size}]`; `createServer`
+  >   maps it to `limits.disks[] = {storage_id, size}`. New `SecondaryDisksForm` (a `useFieldArray`
+  >   section between Limits and Network) lets the operator add/remove data disks, each with a KVM
+  >   storage picker + **GiB** size. `StoragePicker` was generalized with an optional `name`/`label`
+  >   (defaults to the primary `storageId`) so the field-array rows bind to `disks.N.storageId`.
+  >   The create page converts secondary sizes **GiB → bytes** at submit (primary stays MiB → bytes),
+  >   and maps `limits.disks.N.{storage_id,size}` validation errors back onto the field-array inputs.
+  > - **Admin server detail → "Disks" tab.** New nav route `servers.$serverId/disks` (`.tsx` stub +
+  >   `.lazy.tsx`) added to the `servers.$serverId` layout. `ServerDisksPanel` lists every disk
+  >   (interface/type/storage/size), with **Add** (Credenza dialog: KVM storage + GiB), **Resize**
+  >   (secondary only, grow, GiB — backend still enforces `cannot_shrink_disk`), and **Remove**
+  >   (secondary only, `useConfirmationStore` confirm; primary rows show "Managed with the server").
+  > - **New frontend files:** `features/servers/disks/api.ts` (TanStack `useServerDisks` +
+  >   add/resize/remove mutations against the URI-keyed `ServerDiskController` Wayfinder routes; the
+  >   `{server}` param takes the numeric admin id, which the AppServiceProvider route binding accepts),
+  >   `components/admin/Create/SecondaryDisksForm.tsx`, `components/admin/detail/ServerDisksPanel.tsx`
+  >   + `AddServerDiskModal.tsx` + `ResizeServerDiskModal.tsx`, and the two `disks` route files.
+  > - **Units recap (important):** `server_disks.size` column is MiB, but `StorageSizeCast` exposes the
+  >   model attribute + all endpoint `size` fields in **bytes** (`ServerDiskData.size`, add/resize
+  >   request `size`, and `limits.disks[].size` are all bytes). The UI collects **GiB** and converts.
+  > - **Verified:** `tsc` clean (before + after `types:generate`), `vite build` OK (`disks.lazy` +
+  >   `servers.create.lazy` chunks emit), `tests/Feature/Servers` **17 passed** (disk contract +
+  >   creation-disk tests pin the byte units the frontend targets). No browser driver in-sandbox, so
+  >   the panel wasn't click-tested live; the endpoints themselves were live-verified in slice 4.
 
   > **Slice 4 (post-creation add/resize/remove) — DONE (2026-07-08), commit `c12b6cc7`.** Admin
   > endpoints to manage a server's **secondary** disks on an existing VM, under the `{server}` group
@@ -938,7 +966,9 @@ Verified:
      `disks[]` until slice 5**, so no secondary disks are created in practice yet.
   4. ~~**Post-creation add/remove/resize** endpoints + status/lock guards.~~ **DONE** (commit
      `c12b6cc7`, see the Slice-4 note above).
-  5. **Frontend** disk list (create form + a server-settings Disks panel).
+  5. ~~**Frontend** disk list (create form + a server-settings Disks panel).~~ **DONE** (2026-07-08,
+     see the Slice-5 note above). Create-form `disks[]` field array + admin "Disks" tab (add/resize/
+     remove), sizes collected in GiB and converted to bytes.
   6. *(Deferred, YAGNI)* `move_disk`-based splitting of a template's own multiple disks.
 
 ## Test database isolation (RefreshDatabase + dedicated `db_test`)

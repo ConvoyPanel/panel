@@ -1,6 +1,6 @@
 import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
-import { IconLayoutGrid } from '@tabler/icons-react'
+import { IconDatabase, IconLayoutGrid } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import { preloadServer, useServer } from '@/features/servers/admin/api.ts'
@@ -31,6 +31,11 @@ function ServerLayout() {
             activeOptions: {
                 exact: true,
             },
+        },
+        {
+            icon: IconDatabase,
+            label: 'Disks',
+            path: `/admin/servers/${serverId}/disks`,
         },
     ]
 

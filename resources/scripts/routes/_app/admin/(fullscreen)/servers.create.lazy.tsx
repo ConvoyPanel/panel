@@ -12,6 +12,7 @@ import {
 } from '@/features/servers/admin/api.ts'
 import GeneralForm from '@/features/servers/components/admin/Create/GeneralForm'
 import LimitsForm from '@/features/servers/components/admin/Create/LimitsForm'
+import SecondaryDisksForm from '@/features/servers/components/admin/Create/SecondaryDisksForm'
 import NetworkForm from '@/features/servers/components/admin/Create/NetworkForm'
 import VmOptionsForm from '@/features/servers/components/admin/Create/VmOptionsForm'
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
@@ -40,6 +41,7 @@ function CreateServerPage() {
             memory: 1024,
             disk: 10240,
             bandwidth: 0,
+            disks: [],
             backupCount: 0,
             backupSize: 0,
             networkInterfaceId: '',
@@ -66,12 +68,17 @@ function CreateServerPage() {
 
     const submit = async (data: z.infer<typeof serverSchema>) => {
         try {
-            // Convert storage values from mebibytes to bytes (unless -1)
+            // Convert storage values from mebibytes to bytes (unless -1).
+            // Secondary disks are entered in GiB (PVE allocates in whole GiB).
             const convertedData = {
                 ...data,
                 memory: data.memory !== -1 ? data.memory * 1024 * 1024 : data.memory,
                 disk: data.disk !== -1 ? data.disk * 1024 * 1024 : data.disk,
                 backupSize: data.backupSize !== -1 ? data.backupSize * 1024 * 1024 : data.backupSize,
+                disks: data.disks?.map(d => ({
+                    ...d,
+                    size: d.size * 1024 * 1024 * 1024,
+                })),
             }
 
             await createServer(convertedData)
@@ -83,6 +90,15 @@ function CreateServerPage() {
                 replace: true,
             })
         } catch (e) {
+            // Map each secondary-disk field back to its field-array input, e.g.
+            // `limits.disks.0.storage_id` → `disks.0.storageId`.
+            const diskFieldMapping: Record<string, string> = {}
+            data.disks?.forEach((_, i) => {
+                diskFieldMapping[`limits.disks.${i}.storage_id`] =
+                    `disks.${i}.storageId`
+                diskFieldMapping[`limits.disks.${i}.size`] = `disks.${i}.size`
+            })
+
             handleFormErrors(e, form.setError, {
                 'limits.cpu': 'cpu',
                 'limits.memory': 'memory',
@@ -94,6 +110,7 @@ function CreateServerPage() {
                 'limits.addresses_ipv4_count': 'addressesIpv4Count',
                 'limits.addresses_ipv6_count': 'addressesIpv6Count',
                 'limits.addresses': 'addresses',
+                ...diskFieldMapping,
             })
             toast.error('Failed to create server')
             console.error(e)
@@ -120,6 +137,7 @@ function CreateServerPage() {
                     >
                         <GeneralForm />
                         <LimitsForm />
+                        <SecondaryDisksForm />
                         <NetworkForm />
                         <VmOptionsForm />
                     </div>
