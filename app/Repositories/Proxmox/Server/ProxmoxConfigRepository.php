@@ -25,6 +25,25 @@ class ProxmoxConfigRepository extends ProxmoxRepository
     }
 
     /**
+     * The raw PVE config map (unmodeled keys included, e.g. `unused0`). Used
+     * when removing a disk: `delete=scsiN` only *detaches* (the volume becomes
+     * `unusedN`), so we diff the raw `unused*` keys to find and destroy it.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getRawConfig(): array
+    {
+        $response = $this->getHttpClientWithParams()
+            ->get('/api2/json/nodes/{node}/qemu/{server}/config')
+            ->json();
+
+        return $this->getData($response);
+    }
+
+    /**
      * Update the VM config. Pass the digest captured from getConfig() to make
      * PVE reject the write if the config changed since it was read (optimistic
      * concurrency); a mismatch surfaces as a RequestException.

@@ -32,6 +32,15 @@ class ServerDisk extends Model
         'id',
     ];
 
+    /**
+     * Disks are addressed by their numeric id in routes (they have no uuid,
+     * unlike the base Model's default).
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
     protected function casts(): array
     {
         return [

@@ -6,11 +6,14 @@ use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\Disk\DiskMediaType;
 use App\Enums\Server\DiskInterface;
 use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Service\Server\Allocation\CannotModifyPrimaryDiskException;
+use App\Exceptions\Service\Server\Allocation\CannotShrinkDiskException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
 use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use App\Models\ISO;
 use App\Models\Server;
+use App\Models\ServerDisk;
 use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use App\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Illuminate\Http\Client\ConnectionException;
@@ -161,6 +164,129 @@ class AllocationService
         if ($payload !== []) {
             $this->configRepository->setServer($server)->update($payload, $config->digest);
         }
+    }
+
+    /**
+     * Add a secondary data disk to a server: persist the row, then allocate it
+     * on Proxmox (reuses {@see syncDisks}, so slot assignment + idempotency are
+     * shared). Capacity is validated by the request layer.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     * @throws NoAvailableDiskInterfaceException
+     */
+    public function addDisk(Server $server, int $storageId, int $sizeBytes): ServerDisk
+    {
+        $disk = $server->disks()->create([
+            'storage_id' => $storageId,
+            'size' => $sizeBytes,
+            'interface' => null,
+            'is_primary' => false,
+            'disk_index' => (int) $server->disks()->max('disk_index') + 1,
+        ]);
+
+        $this->syncDisks($server);
+
+        return $disk->refresh();
+    }
+
+    /**
+     * Grow a secondary disk. Proxmox resize only ever grows, so a shrink is
+     * rejected up front. If the disk isn't on the VM yet (still pending build),
+     * only the row is updated — the build allocates it at the new size.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     * @throws CannotModifyPrimaryDiskException
+     * @throws CannotShrinkDiskException
+     */
+    public function resizeDisk(Server $server, ServerDisk $disk, int $newSizeBytes): void
+    {
+        if ($disk->is_primary) {
+            throw new CannotModifyPrimaryDiskException;
+        }
+
+        if ($newSizeBytes < $disk->size) {
+            throw new CannotShrinkDiskException;
+        }
+
+        if ($newSizeBytes === $disk->size) {
+            return;
+        }
+
+        if ($disk->interface !== null) {
+            $config = $this->configRepository->setServer($server)->getConfig();
+            $onVm = $config->disks->first(
+                fn (DiskData $d) => $d->interface->value === $disk->interface,
+            );
+
+            if ($onVm !== null) {
+                $this->diskRepository->setServer($server)->setDiskSize($onVm, $newSizeBytes);
+            }
+        }
+
+        $disk->size = $newSizeBytes;
+        $disk->save();
+    }
+
+    /**
+     * Remove a secondary disk and reclaim its space. `delete=scsiN` only
+     * *detaches* on Proxmox (the volume lingers as `unusedN`), so we diff the
+     * raw `unused*` keys around the detach and destroy the freed volume too.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     * @throws CannotModifyPrimaryDiskException
+     */
+    public function removeDisk(Server $server, ServerDisk $disk): void
+    {
+        if ($disk->is_primary) {
+            throw new CannotModifyPrimaryDiskException;
+        }
+
+        // Never built (no interface assigned) — nothing on the VM to detach.
+        if ($disk->interface === null) {
+            $disk->delete();
+
+            return;
+        }
+
+        $repository = $this->configRepository->setServer($server);
+
+        $unusedBefore = $this->unusedKeys($repository->getRawConfig());
+        $config = $repository->getConfig();
+
+        $onVm = $config->disks->first(
+            fn (DiskData $d) => $d->interface->value === $disk->interface,
+        );
+
+        if ($onVm !== null) {
+            // Detach: the volume becomes an `unusedN` entry.
+            $repository->update(['delete' => $disk->interface], $config->digest);
+
+            // Destroy whatever unused slot(s) the detach created.
+            $rawAfter = $repository->getRawConfig();
+            $newUnused = array_diff($this->unusedKeys($rawAfter), $unusedBefore);
+            foreach ($newUnused as $key) {
+                $repository->update(['delete' => $key], $rawAfter['digest'] ?? null);
+            }
+        }
+
+        $disk->delete();
+    }
+
+    /**
+     * The `unused0`, `unused1`, … config keys present in a raw PVE config.
+     *
+     * @param  array<string, mixed>  $raw
+     * @return list<string>
+     */
+    private function unusedKeys(array $raw): array
+    {
+        return array_values(array_filter(
+            array_keys($raw),
+            fn (string $key) => preg_match('/^unused\d+$/', $key) === 1,
+        ));
     }
 
     public function setBootOrder(Server $server, array $disks)

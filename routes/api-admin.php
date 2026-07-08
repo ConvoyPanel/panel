@@ -126,6 +126,13 @@ Route::prefix('/servers')->group(function () {
             Route::get('/state', [Admin\ServerController::class, 'getState']);
             Route::patch('/state', [Admin\ServerController::class, 'updateState']);
 
+            Route::prefix('/disks')->scopeBindings()->group(function () {
+                Route::get('/', [Admin\ServerDiskController::class, 'index']);
+                Route::post('/', [Admin\ServerDiskController::class, 'store']);
+                Route::patch('/{disk}', [Admin\ServerDiskController::class, 'update']);
+                Route::delete('/{disk}', [Admin\ServerDiskController::class, 'destroy']);
+            });
+
             Route::prefix('/settings')->group(function () {
                 Route::patch(
                     '/build',
