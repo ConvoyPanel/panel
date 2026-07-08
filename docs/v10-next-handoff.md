@@ -146,6 +146,32 @@ Researched direction retained for each; none built unless noted.
 - **In-browser visual verification.** Several frontend surfaces are build/type-verified but never
   clicked live (see live-verification note above). Needs a browser driver + a real node.
 
+- **Admin dashboard redesign + olive/blue theme — PALETTE DONE (verified), DASHBOARD NOT YET BUILT.**
+  - *Palette (DONE, global):* migrated the whole app's theme tokens in `resources/scripts/app.css` to the
+    shadcn preset **`b1YoNB40O`** (olive-tinted neutral ramp + **BLUE `--primary`**, not orange), in
+    **OKLCH**. Repo was HSL-wrapped, so also unwrapped `hsl(var(--x))` → `var(--x)` in `tailwind.config.cjs`
+    **and all ~25 JS/TS call-sites** (Recharts colors in `features/servers/components/client/Graphs/*`,
+    `ShowStorageModal.tsx`, `utils/data-table.ts`); the one alpha site → `color-mix(in oklab, … , transparent)`.
+    Added `--sidebar-*` + `chart` tokens to the config. **Verified:** `npx tsc` clean + `npx vite build` clean
+    (compiled CSS carries oklch; `bg-primary/*` opacity → `color-mix`). **NOT clicked in-browser** — primary
+    is now blue *everywhere* (buttons, progress bars, links), so eyeball the running app. Reference preset
+    output saved in the session scratchpad `preset-vite/` & `preset-next/`.
+  - *Dashboard (designed, NOT built):* design finalized as a hosted Artifact mockup — hybrid of KPI stat
+    tiles + a *Servers by status* list + a *Needs attention* lane (capped at 4 rows, overflow opens a
+    right **`Sheet`**), responsive **node table → stacked cards** below the `md` breakpoint. To BUILD into
+    `features/overview/components/admin/OverviewContainer.tsx` with real components: `Card`, `LinearProgressBar`
+    (**needs a new `indicatorClassName` prop** for capacity tone — neutral <80%, amber ≥80%, `bg-destructive`
+    ≥95%), `Sheet` (`side='right'`), `Badge`, `byteSize`. Data is `App.Data.Admin.Overview.OverviewData`
+    (snapshot). **Two forced deviations from the mockup:** (1) NO sparklines/deltas — the API returns only a
+    snapshot, no time-series; would need a metrics-history endpoint; (2) near-capacity meter color uses amber
+    (there is no brand-orange token). Container-query layout (`@container` + `@lg:`…), NOT viewport breakpoints.
+  - *Caption-color standardization (pending):* client `StatisticCard` uses black (foreground) titles; admin
+    dashboard uses gray (`text-muted-foreground`). Plan: a semantic `--label` token + a shared `<Stat>` in
+    `components/ui/Typography`, then refactor both. Grep the drift first.
+  - *Roadmap (separate, big):* overhaul every `components/ui/*` to **latest shadcn on Base UI**
+    (`@base-ui-components/react`) primitives instead of Radix, same preset. This is the component-library
+    swap, distinct from the token swap already done.
+
 ---
 
 ## Gotchas / must-know (still live)
