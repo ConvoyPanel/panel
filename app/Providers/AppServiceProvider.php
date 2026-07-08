@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
 use App\Models\Server;
+use App\Models\SessionRecord;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -33,6 +36,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // Drop a session's metadata row when it logs out. The Logout event fires before the session
+        // is invalidated, so the id is still the one that was recorded. The event carries no request,
+        // so read the session off the current one via the helper.
+        Event::listen(Logout::class, function () {
+            $session = session();
+
+            if ($session->isStarted()) {
+                SessionRecord::query()
+                    ->where('session_id', $session->getId())
+                    ->delete();
+            }
+        });
 
         $this->bootRoute();
     }

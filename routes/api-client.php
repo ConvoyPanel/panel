@@ -32,6 +32,12 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
             ->withoutScopedBindings();
     });
 
+    Route::prefix('/sessions')->group(function () {
+        Route::get('/', [Client\Account\SessionRecordController::class, 'index']);
+        Route::delete('/{sessionRecord}', [Client\Account\SessionRecordController::class, 'destroy'])
+            ->withoutScopedBindings();
+    });
+
     Route::prefix('/passkeys')
         ->middleware(RequireIdentityConfirmation::class)
         ->group(function () {

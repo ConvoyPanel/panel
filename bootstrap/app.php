@@ -4,6 +4,7 @@ use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Coterm\CotermAuthenticate;
 use App\Http\Middleware\EnforceTokenAbilities;
+use App\Http\Middleware\RecordSessionActivity;
 use App\Support\Api\AccountTokenAbilities;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -72,6 +73,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
             \App\Http\Middleware\ValidateCsrfToken::class,
         );
+
+        // Track active web sessions (for the account "active sessions" list). Appended to the web
+        // group so it runs after the session + auth are resolved; it self-skips token/anon requests.
+        $middleware->web(append: RecordSessionActivity::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Surface a stable, machine-readable `code` for exceptions that opt in
