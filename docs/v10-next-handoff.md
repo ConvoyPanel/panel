@@ -95,8 +95,17 @@ Researched direction retained for each; none built unless noted.
   exists (`features/servers/security`), driving the existing `SettingsController` auth endpoints —
   `SSHKeysCard` edits a server's cloud-init authorized-key set (add from keychain / paste one-off / remove /
   save the full set) and `PasswordCard` sets the root password. **One-off keys** work as proposed: a one-off
-  is simply a key in the server's set with no keychain row — no new table/flag. *Other declared-but-unbuilt
-  server tabs remain: `iso-library`, `storage`, `networking` (nav points at them; no route files yet).*
+  is simply a key in the server's set with no keychain row — no new table/flag.
+
+- **Client server tabs — ALL BUILT.** The nav declared five sections with no route files; all now exist:
+  `security` (above), `networking` (`features/servers/networking`: addresses table + editable DNS),
+  `iso-library` (`features/servers/media`: mount/unmount node ISOs), `storage`
+  (`features/servers/storage`: live disk-usage bar + boot-order editor). All drive pre-existing client
+  `SettingsController`/`ResourceController`/`AddressController` endpoints — frontend-only, build/type-verified
+  (no in-browser click-through). **Latent backend note:** `features/servers/transforms.ts`
+  `rawDataToServerResources` reads `data.usedBytes/totalBytes` but `ResourceController` emits
+  `used_bytes/total_bytes` — the old `useServerResources` was getting `undefined`; the new Storage tab reads
+  the snake_case keys directly. Worth fixing the transformer if anything else depends on it.
 
 - **Logged-in session tracking — DONE.** `session_records` table + `RecordSessionActivity` middleware
   (web group, throttled, skips bearer/anon) + Logout listener + `SessionRecordController` (list/revoke via
