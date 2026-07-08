@@ -18,6 +18,7 @@ use Illuminate\Database\Seeder;
  *   PROXMOX_TOKEN_SECRET  API token secret (UUID)                           (required)
  *   PROXMOX_PORT          API port (default 8006)
  *   PROXMOX_VERIFY_TLS    verify the node's TLS cert (default false)
+ *   PROXMOX_NODE_NAME     PVE cluster node name for the API path              (default: fqdn's first label)
  *
  * Idempotent: if a node with the same fqdn already exists it is left as-is, so
  * re-running (e.g. after migrate:fresh) never creates duplicates.
@@ -50,11 +51,18 @@ class DevNodeSeeder extends Seeder
         // Reuse a location if one exists, otherwise create one with factory defaults.
         $location = Location::query()->first() ?? Location::factory()->create();
 
+        // `name` is the *PVE cluster node name* used verbatim in the API path
+        // (`/nodes/{name}/...`), NOT a friendly label — get it wrong and every
+        // node call fails with "hostname lookup '<name>' failed". It defaults to
+        // the fqdn's first DNS label (correct for a single-host `pveX.example.com`);
+        // override with PROXMOX_NODE_NAME when the PVE hostname differs.
+        $nodeName = env('PROXMOX_NODE_NAME') ?: explode('.', $fqdn)[0];
+
         // Factory supplies sane resource defaults (cpu/memory/etc.); we override
         // only the connection details from the environment.
         $node = Node::factory()->for($location)->create([
             'display_name' => 'Dev Proxmox',
-            'name' => 'dev-node',
+            'name' => $nodeName,
             'fqdn' => $fqdn,
             'port' => (int) env('PROXMOX_PORT', 8006),
             'verify_tls' => filter_var(env('PROXMOX_VERIFY_TLS', false), FILTER_VALIDATE_BOOLEAN),
