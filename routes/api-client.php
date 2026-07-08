@@ -3,6 +3,7 @@
 use App\Http\Controllers\Client;
 use App\Http\Middleware\Activity\ServerSubject;
 use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
+use App\Http\Middleware\DenyApiTokenAccess;
 use App\Http\Middleware\RequireIdentityConfirmation;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\RecoveryCodeController;
@@ -12,8 +13,17 @@ use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::get('/user', Client\SessionController::class);
 
-Route::prefix('/account')->group(function () {
+// The whole account/security surface is session-only: an end-user API token must never be able to
+// change the account it belongs to (password, 2FA, passkeys) or mint/revoke further tokens.
+Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function () {
     Route::put('/password', [Client\PasswordController::class, 'update']);
+
+    Route::prefix('/api-keys')->group(function () {
+        Route::get('/', [Client\Account\ApiKeyController::class, 'index']);
+        Route::post('/', [Client\Account\ApiKeyController::class, 'store']);
+        Route::delete('/{apiKey}', [Client\Account\ApiKeyController::class, 'destroy'])
+            ->withoutScopedBindings();
+    });
 
     Route::prefix('/passkeys')
         ->middleware(RequireIdentityConfirmation::class)

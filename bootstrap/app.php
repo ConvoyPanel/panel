@@ -4,6 +4,7 @@ use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Coterm\CotermAuthenticate;
 use App\Http\Middleware\EnforceTokenAbilities;
+use App\Support\Api\AccountTokenAbilities;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,7 +25,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 Route::middleware(['auth.session'])
                     ->group(base_path('routes/base.php'));
 
-                Route::middleware(['auth'])->prefix('/api/client')
+                // The client API accepts both the panel's web session and end-user personal
+                // access tokens (Sanctum bearer). `web` is tried first, so a session request
+                // authenticates without an access token (currentAccessToken() === null) and is
+                // never ability-scoped; a bearer request resolves to a PersonalAccessToken and is.
+                Route::middleware([
+                    'auth:web,sanctum',
+                    EnforceTokenAbilities::class.':'.AccountTokenAbilities::class,
+                ])->prefix('/api/client')
                     ->as('client.')
                     ->scopeBindings()
                     ->group(base_path('routes/api-client.php'));
@@ -57,7 +65,13 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // The client API is served under the web group but also accepts Sanctum bearer tokens;
+        // our CSRF middleware exempts genuine token requests (which browsers can't forge) while
+        // keeping full CSRF protection for the session-cookie SPA.
+        $middleware->replace(
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            \App\Http\Middleware\ValidateCsrfToken::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Surface a stable, machine-readable `code` for exceptions that opt in
