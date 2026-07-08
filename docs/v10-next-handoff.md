@@ -102,10 +102,10 @@ Researched direction retained for each; none built unless noted.
   `iso-library` (`features/servers/media`: mount/unmount node ISOs), `storage`
   (`features/servers/storage`: live disk-usage bar + boot-order editor). All drive pre-existing client
   `SettingsController`/`ResourceController`/`AddressController` endpoints — frontend-only, build/type-verified
-  (no in-browser click-through). **Latent backend note:** `features/servers/transforms.ts`
-  `rawDataToServerResources` reads `data.usedBytes/totalBytes` but `ResourceController` emits
-  `used_bytes/total_bytes` — the old `useServerResources` was getting `undefined`; the new Storage tab reads
-  the snake_case keys directly. Worth fixing the transformer if anything else depends on it.
+  (no in-browser click-through). Fixed a latent bug found here: `rawDataToServerResources`
+  read `data.usedBytes/totalBytes` but `ResourceController` emits `used_bytes/total_bytes`, so the Overview
+  "Storage Usage" card had always shown 0 used — now corrected, and the Storage tab reuses the shared
+  `useServerResources` hook.
 
 - **Logged-in session tracking — DONE.** `session_records` table + `RecordSessionActivity` middleware
   (web group, throttled, skips bearer/anon) + Logout listener + `SessionRecordController` (list/revoke via
