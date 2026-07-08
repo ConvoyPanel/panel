@@ -1,55 +1,322 @@
-import { useQuery } from '@tanstack/react-query'
-import byteSize from 'byte-size'
-import { ReactNode } from 'react'
-
 import { overviewQueries } from '@/features/overview/api'
+import { cn } from '@/utils'
+import { useQuery } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Spinner from '@/components/ui/Spinner.tsx'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/Table'
 import { Heading } from '@/components/ui/Typography'
 
-type Allocation = App.Data.Admin.Overview.ResourceAllocationData
+import NeedsAttentionCard from './NeedsAttentionCard'
+import NodesCard from './NodesCard'
+import {
+    bytes,
+    capacityTone,
+    meterIndicatorClass,
+    num,
+    toneBadgeClass,
+} from './overview-helpers'
 
-const bytes = (value: number) => {
-    const { value: size, unit } = byteSize(value, { units: 'iec', precision: 1 })
-    return `${size} ${unit}`
+type OverviewData = App.Data.Admin.Overview.OverviewData
+type Breakdown = App.Data.Admin.Overview.ServerStatusBreakdownData
+
+/** Top-line count with a muted label — the shared stat rhythm. */
+const MetricTile = ({ label, value }: { label: string; value: ReactNode }) => (
+    <div className='bg-card rounded-xl border p-4'>
+        <div className='text-muted-foreground text-sm'>{label}</div>
+        <div className='mt-1 text-2xl font-semibold tracking-tight tabular-nums'>
+            {value}
+        </div>
+    </div>
+)
+
+/** One capacity resource: label + % badge + figure + tone meter (+ optional sub). */
+const CapacityMeter = ({
+    label,
+    figure,
+    unit,
+    percent,
+    hasData,
+    emptyText,
+    sub,
+}: {
+    label: string
+    figure?: string
+    unit?: string
+    percent: number
+    hasData: boolean
+    emptyText: string
+    sub?: string
+}) => {
+    const tone = capacityTone(percent)
+    return (
+        <div>
+            <div className='flex items-center justify-between'>
+                <span className='text-muted-foreground text-xs'>{label}</span>
+                {hasData && (
+                    <span
+                        className={cn(
+                            'rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums',
+                            toneBadgeClass[tone]
+                        )}
+                    >
+                        {percent}%
+                    </span>
+                )}
+            </div>
+            <div className='mt-0.5 mb-2 text-lg font-semibold tabular-nums'>
+                {hasData ? (
+                    <>
+                        {figure}{' '}
+                        <span className='text-muted-foreground text-xs font-normal'>
+                            {unit}
+                        </span>
+                    </>
+                ) : (
+                    <span className='text-muted-foreground text-base font-normal'>
+                        {emptyText}
+                    </span>
+                )}
+            </div>
+            <LinearProgressBar
+                value={Math.min(percent, 100)}
+                indicatorClassName={meterIndicatorClass[tone]}
+            />
+            {sub && (
+                <div className='text-muted-foreground mt-1.5 text-xs'>
+                    {sub}
+                </div>
+            )}
+        </div>
+    )
 }
 
-/** A single label/value pair — the app's dense definition-list stat (see SpecificationsCard). */
-const Stat = ({ label, value }: { label: ReactNode; value: ReactNode }) => (
+const STATUS_META: ReadonlyArray<
+    [keyof Omit<Breakdown, 'total' | 'statuses'>, string, string]
+> = [
+    ['ready', 'Ready', 'bg-emerald-500'],
+    ['installing', 'Installing', 'bg-amber-500'],
+    ['restoring', 'Restoring', 'bg-amber-500'],
+    ['suspended', 'Suspended', 'bg-muted-foreground/60'],
+    ['deleting', 'Deleting', 'bg-muted-foreground/60'],
+    ['failed', 'Failed', 'bg-destructive'],
+]
+
+const StatusRow = ({
+    label,
+    count,
+    barClass,
+}: {
+    label: string
+    count: number
+    barClass: string
+}) => {
+    const zero = count === 0
+    return (
+        <div className='flex items-center gap-3 border-b py-2 first:pt-0 last:border-0 last:pb-0'>
+            <span
+                className={cn(
+                    'h-4 w-[3px] shrink-0 rounded-full',
+                    zero ? 'bg-border' : barClass
+                )}
+            />
+            <span className={cn('text-sm', zero && 'text-muted-foreground/60')}>
+                {label}
+            </span>
+            <span
+                className={cn(
+                    'ml-auto text-[15px] font-semibold tabular-nums',
+                    zero && 'text-muted-foreground/60 font-normal'
+                )}
+            >
+                {num(count)}
+            </span>
+        </div>
+    )
+}
+
+/** A labelled figure used in the Backups & ISOs grid. */
+const Stat = ({
+    label,
+    value,
+    danger,
+}: {
+    label: string
+    value: ReactNode
+    danger?: boolean
+}) => (
     <div>
-        <dt className='text-xs text-muted-foreground'>{label}</dt>
-        <dd className='text-lg font-semibold tabular-nums'>{value}</dd>
+        <div className='text-muted-foreground text-xs'>{label}</div>
+        <div
+            className={cn(
+                'mt-0.5 text-xl font-semibold tabular-nums',
+                danger && 'text-destructive'
+            )}
+        >
+            {value}
+        </div>
     </div>
 )
 
-const CapacityRow = ({
-    label,
-    allocation,
-}: {
-    label?: string
-    allocation: Allocation
-}) => (
-    <div className='space-y-1.5'>
-        <div className='flex justify-between text-xs text-muted-foreground'>
-            <span>{label}</span>
-            <span className='tabular-nums'>
-                {bytes(allocation.allocated)} / {bytes(allocation.total)} ·{' '}
-                {allocation.percent}%
-            </span>
+const Dashboard = ({ data }: { data: OverviewData }) => {
+    const {
+        summary,
+        servers,
+        memory,
+        storage,
+        addresses,
+        backups,
+        isos,
+        nodes,
+    } = data
+
+    const isFresh = summary.servers === 0
+    const successRate =
+        backups.total > 0
+            ? Math.round((backups.successful / backups.total) * 100)
+            : 0
+
+    return (
+        <div className='@container space-y-4'>
+            <Heading>Admin Dashboard</Heading>
+
+            {/* Top-line counts */}
+            <div className='grid grid-cols-2 gap-4 @xl:grid-cols-4'>
+                <MetricTile label='Servers' value={num(summary.servers)} />
+                <MetricTile label='Nodes' value={num(summary.nodes)} />
+                <MetricTile label='Users' value={num(summary.users)} />
+                <MetricTile label='Backups' value={num(backups.total)} />
+            </div>
+
+            {/* Capacity + attention */}
+            <div className='grid items-stretch gap-4 @2xl:grid-cols-[1.5fr_1fr]'>
+                <Card>
+                    <CardHeader className='p-5 pb-2'>
+                        <CardTitle className='text-base'>
+                            Fleet capacity
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className='flex flex-col gap-5 p-5 pt-2'>
+                        <CapacityMeter
+                            label='Memory allocated'
+                            figure={bytes(memory.allocated)}
+                            unit={`of ${bytes(memory.total)}`}
+                            percent={memory.percent}
+                            hasData
+                            emptyText=''
+                        />
+                        <CapacityMeter
+                            label='Storage allocated'
+                            figure={bytes(storage.allocated)}
+                            unit={`of ${bytes(storage.total)}`}
+                            percent={storage.percent}
+                            hasData={storage.total > 0}
+                            emptyText='No storage pools yet'
+                        />
+                        <CapacityMeter
+                            label='IP addresses'
+                            figure={`${num(addresses.assigned)} / ${num(addresses.total)}`}
+                            unit='assigned'
+                            percent={addresses.percent}
+                            hasData={addresses.total > 0}
+                            emptyText='No IP pools yet'
+                            sub={
+                                addresses.total > 0
+                                    ? `${num(addresses.pools)} pools · ${num(addresses.available)} available`
+                                    : undefined
+                            }
+                        />
+                    </CardContent>
+                </Card>
+
+                <NeedsAttentionCard data={data} isFresh={isFresh} />
+            </div>
+
+            {/* Status + backups/isos */}
+            <div className='grid gap-4 @xl:grid-cols-2'>
+                <Card>
+                    <CardHeader className='flex flex-row items-center justify-between space-y-0 p-5 pb-2'>
+                        <CardTitle className='text-base'>
+                            Servers by status
+                        </CardTitle>
+                        <span className='text-muted-foreground text-xs tabular-nums'>
+                            {num(servers.total)} total
+                        </span>
+                    </CardHeader>
+                    <CardContent className='p-5 pt-2'>
+                        {STATUS_META.map(([key, label, barClass]) => (
+                            <StatusRow
+                                key={key}
+                                label={label}
+                                count={servers[key]}
+                                barClass={barClass}
+                            />
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className='p-5 pb-2'>
+                        <CardTitle className='text-base'>
+                            Backups &amp; ISOs
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className='p-5 pt-2'>
+                        {backups.total > 0 || isos.total > 0 ? (
+                            <>
+                                <div className='grid grid-cols-3 gap-4'>
+                                    <Stat
+                                        label='Backups'
+                                        value={num(backups.total)}
+                                    />
+                                    <Stat
+                                        label='Success rate'
+                                        value={`${successRate}%`}
+                                    />
+                                    <Stat
+                                        label='Failed'
+                                        value={num(backups.failed)}
+                                        danger={backups.failed > 0}
+                                    />
+                                </div>
+                                <LinearProgressBar
+                                    value={successRate}
+                                    className='mt-4'
+                                />
+                                <div className='my-4 border-t' />
+                                <div className='text-muted-foreground mb-3 text-xs font-semibold'>
+                                    ISOs
+                                </div>
+                                <div className='grid grid-cols-3 gap-4'>
+                                    <Stat
+                                        label='Ready'
+                                        value={num(isos.successful)}
+                                    />
+                                    <Stat
+                                        label='Pending'
+                                        value={num(isos.pending)}
+                                    />
+                                    <Stat
+                                        label='Total'
+                                        value={num(isos.total)}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <p className='text-muted-foreground py-2 text-sm'>
+                                Nothing backed up yet — backups appear once
+                                servers run.
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <NodesCard nodes={nodes} />
         </div>
-        <LinearProgressBar value={Math.min(allocation.percent, 100)} />
-    </div>
-)
+    )
+}
 
 const OverviewContainer = () => {
     const { data, isPending, isError } = useQuery(overviewQueries.metrics())
@@ -64,166 +331,13 @@ const OverviewContainer = () => {
 
     if (isError) {
         return (
-            <p className='py-16 text-center text-sm text-muted-foreground'>
+            <p className='text-muted-foreground py-16 text-center text-sm'>
                 Couldn't load the dashboard metrics. Try again shortly.
             </p>
         )
     }
 
-    const { summary, servers, memory, storage, addresses, backups, isos, nodes } =
-        data
-
-    return (
-        <div className='@container space-y-4'>
-            <Heading>Admin Dashboard</Heading>
-
-            {/* At a glance — every top-line count in one dense card. */}
-            <Card>
-                <CardHeader className='pb-3'>
-                    <CardTitle>At a glance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <dl className='grid grid-cols-3 gap-4 @lg:grid-cols-6'>
-                        <Stat label='Servers' value={summary.servers} />
-                        <Stat label='Nodes' value={summary.nodes} />
-                        <Stat label='Users' value={summary.users} />
-                        <Stat label='Locations' value={summary.locations} />
-                        <Stat label='IP addresses' value={addresses.total} />
-                        <Stat label='Failed servers' value={summary.failedServers} />
-                    </dl>
-                </CardContent>
-            </Card>
-
-            <div className='grid gap-4 @lg:grid-cols-2'>
-                {/* Fleet capacity */}
-                <Card>
-                    <CardHeader className='pb-3'>
-                        <CardTitle>Capacity</CardTitle>
-                    </CardHeader>
-                    <CardContent className='space-y-4'>
-                        <CapacityRow label='Memory' allocation={memory} />
-                        <CapacityRow label='Storage' allocation={storage} />
-                    </CardContent>
-                </Card>
-
-                {/* Servers by status */}
-                <Card>
-                    <CardHeader className='pb-3'>
-                        <CardTitle>Servers by status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <dl className='grid grid-cols-3 gap-4'>
-                            <Stat label='Ready' value={servers.ready} />
-                            <Stat label='Installing' value={servers.installing} />
-                            <Stat label='Suspended' value={servers.suspended} />
-                            <Stat label='Restoring' value={servers.restoring} />
-                            <Stat label='Deleting' value={servers.deleting} />
-                            <Stat label='Failed' value={servers.failed} />
-                        </dl>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className='grid gap-4 @md:grid-cols-3'>
-                {/* IP addresses — counts, not bytes */}
-                <Card>
-                    <CardHeader className='pb-3'>
-                        <CardTitle>IP addresses</CardTitle>
-                    </CardHeader>
-                    <CardContent className='space-y-3'>
-                        <div className='space-y-1.5'>
-                            <div className='flex justify-between text-xs text-muted-foreground'>
-                                <span>
-                                    {addresses.assigned} / {addresses.total} assigned
-                                </span>
-                                <span>{addresses.percent}%</span>
-                            </div>
-                            <LinearProgressBar
-                                value={Math.min(addresses.percent, 100)}
-                            />
-                        </div>
-                        <dl className='grid grid-cols-2 gap-4'>
-                            <Stat label='Pools' value={addresses.pools} />
-                            <Stat label='Available' value={addresses.available} />
-                        </dl>
-                    </CardContent>
-                </Card>
-
-                {/* Backups */}
-                <Card>
-                    <CardHeader className='pb-3'>
-                        <CardTitle>Backups</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <dl className='grid grid-cols-2 gap-4'>
-                            <Stat label='Total' value={backups.total} />
-                            <Stat label='Successful' value={backups.successful} />
-                            <Stat label='Pending' value={backups.pending} />
-                            <Stat label='Failed' value={backups.failed} />
-                        </dl>
-                    </CardContent>
-                </Card>
-
-                {/* ISOs */}
-                <Card>
-                    <CardHeader className='pb-3'>
-                        <CardTitle>ISOs</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <dl className='grid grid-cols-3 gap-4'>
-                            <Stat label='Total' value={isos.total} />
-                            <Stat label='Ready' value={isos.successful} />
-                            <Stat label='Pending' value={isos.pending} />
-                        </dl>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Per-node breakdown */}
-            <Card>
-                <CardHeader className='pb-3'>
-                    <CardTitle>Nodes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {nodes.length === 0 ? (
-                        <p className='py-4 text-center text-sm text-muted-foreground'>
-                            No nodes yet.
-                        </p>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Node</TableHead>
-                                    <TableHead className='text-right'>Servers</TableHead>
-                                    <TableHead className='w-1/2'>Memory</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {nodes.map((node) => (
-                                    <TableRow key={node.id}>
-                                        <TableCell>
-                                            <div className='font-medium'>
-                                                {node.displayName}
-                                            </div>
-                                            <div className='text-xs text-muted-foreground'>
-                                                {node.fqdn}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className='text-right tabular-nums'>
-                                            {node.servers}
-                                        </TableCell>
-                                        <TableCell>
-                                            <CapacityRow allocation={node.memory} />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
-    )
+    return <Dashboard data={data} />
 }
 
 export default OverviewContainer
