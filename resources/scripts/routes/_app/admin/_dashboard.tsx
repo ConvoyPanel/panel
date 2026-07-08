@@ -2,6 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
     IconHome,
+    IconKey,
     IconMapPin,
     IconMapPins,
     IconServer,
@@ -60,5 +61,10 @@ const routes: RouteDef[] = [
         icon: IconBoxMargin,
         label: 'Templates',
         path: '/admin/templates',
+    },
+    {
+        icon: IconKey,
+        label: 'API Tokens',
+        path: '/admin/tokens',
     },
 ]
