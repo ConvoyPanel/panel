@@ -29,6 +29,23 @@ do not invent new paddings, gaps, type scales, or bespoke card layouts.
 
 When in doubt, mirror an existing page verbatim rather than introducing a new pattern.
 
+## Frontend data layer
+
+Don't hand-roll what the wrappers already do. Per `features/<domain>/api.ts`:
+
+- **Fetch** via `apiFetch` + a Wayfinder route object — never raw `axios`/`fetch` or hardcoded URLs.
+  Reads are `queryOptions` + a `useX` hook (`@tanstack/react-query`).
+- **Mutate** with `useMutation`; update the cache with `useQueryMutator`, surface server errors with
+  `handleFormErrors(e, form.setError)`. Don't call `apiFetch` straight from a click handler.
+- **Forms** are react-hook-form + `zodResolver`, with the `zod` schema exported from `api.ts`. Use the
+  `Form` field wrappers (`InputForm`, `SelectForm`, `CheckboxForm`, …) and `FormButton` — not bare
+  `Input`/`Select` + `useState`.
+- **Clipboard** goes through the `useClipboard` hook, not `navigator.clipboard` directly.
+
+Reference: `features/locations`, `features/template-groups`. Admin controllers are served under both
+`/api/admin` and `/api/application`, so Wayfinder emits URI-keyed dicts — reference the admin URI
+explicitly (see `features/tokens/api.ts`).
+
 ## Local development (ddev)
 
 Local dev runs on [ddev](https://ddev.com) with **Postgres 17**. One-time setup:
