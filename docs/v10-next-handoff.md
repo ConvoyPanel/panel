@@ -113,7 +113,10 @@ Researched direction retained for each; none built unless noted.
   numeric id. **Redis↔table desync handled:** `index()` reconciles each row against the session store
   (`getHandler()->read()`) and deletes ghosts whose session expired/was evicted; `SessionRecord` is
   `Prunable` (older than `session.lifetime`) on a daily schedule; the row-missing direction self-heals via
-  the middleware. Note `SESSION_LIFETIME=525600` (1yr). **Note:** device label is UA-parsed client-side;
+  the middleware. `SessionRevocationService` destroys the store session + row together (used by revoke and
+  by a `User::deleting` hook, so deleting a user doesn't leave live Redis sessions). Note
+  `SESSION_LIFETIME=525600` (1yr); bulk query-builder user deletes bypass the model event (rows still
+  cascade; Redis sessions then TTL-expire). **Note:** device label is UA-parsed client-side;
   **IP→geo location was dropped** (needs a GeoIP dependency) — add later if wanted.
 
 - **VLAN support (GitHub #150) — ASSESSED, NOT BUILT.** Mechanism is sound and half-built: the right PVE
