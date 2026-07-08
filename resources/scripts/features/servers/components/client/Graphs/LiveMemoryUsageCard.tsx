@@ -60,7 +60,7 @@ const LiveMemoryUsageCard = () => {
                             dataKey={'value'}
                             type={'monotone'}
                             stroke={'none'}
-                            fill='hsl(var(--chart-1))'
+                            fill='var(--chart-1)'
                         />
                     </AreaChart>
                 </ChartContainer>

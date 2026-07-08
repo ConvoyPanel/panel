@@ -27,11 +27,11 @@ const TooltipFormatter = (value: number) => {
 const config = {
     in: {
         label: 'In',
-        color: 'hsl(var(--chart-4))',
+        color: 'var(--chart-4)',
     },
     out: {
         label: 'Out',
-        color: 'hsl(var(--chart-5))',
+        color: 'var(--chart-5)',
     },
 } satisfies ChartConfig
 
@@ -101,14 +101,14 @@ const HistoricalNetworkUsageCard = () => {
                         />
                         <Line
                             type={'monotone'}
-                            stroke={'hsl(var(--chart-2))'}
+                            stroke={'var(--chart-2)'}
                             strokeWidth={2}
                             dot={false}
                             dataKey={'in'}
                         />
                         <Line
                             type={'monotone'}
-                            stroke={'hsl(var(--chart-1))'}
+                            stroke={'var(--chart-1)'}
                             strokeWidth={2}
                             dot={false}
                             dataKey={'out'}

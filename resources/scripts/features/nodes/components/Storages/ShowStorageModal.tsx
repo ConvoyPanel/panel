@@ -47,11 +47,11 @@ const ShowStorageModal = () => {
             const reservedShown = Math.max(0, free - freeForConvoy)
 
             const segments: Segment[] = [
-                { label: 'KVM', value: pct(storage.usages.server, total), color: 'hsl(var(--chart-1))' },
-                { label: 'Backups', value: pct(storage.usages.backup, total), color: 'hsl(var(--chart-2))' },
-                { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'hsl(var(--chart-3))' },
-                { label: 'Untracked (base system + other)', value: pct(untracked, total), color: 'hsl(var(--chart-4))' },
-                { label: 'Reserved (headroom)', value: pct(reservedShown, total), color: 'hsl(var(--muted-foreground) / 0.35)' },
+                { label: 'KVM', value: pct(storage.usages.server, total), color: 'var(--chart-1)' },
+                { label: 'Backups', value: pct(storage.usages.backup, total), color: 'var(--chart-2)' },
+                { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'var(--chart-3)' },
+                { label: 'Untracked (base system + other)', value: pct(untracked, total), color: 'var(--chart-4)' },
+                { label: 'Reserved (headroom)', value: pct(reservedShown, total), color: 'color-mix(in oklab, var(--muted-foreground) 35%, transparent)' },
             ]
 
             return {
@@ -67,9 +67,9 @@ const ShowStorageModal = () => {
         // Offline fallback: Convoy's bookkeeping against the configured size.
         const total = storage.size
         const segments: Segment[] = [
-            { label: 'KVM', value: pct(storage.usages.server, total), color: 'hsl(var(--chart-1))' },
-            { label: 'Backups', value: pct(storage.usages.backup, total), color: 'hsl(var(--chart-2))' },
-            { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'hsl(var(--chart-3))' },
+            { label: 'KVM', value: pct(storage.usages.server, total), color: 'var(--chart-1)' },
+            { label: 'Backups', value: pct(storage.usages.backup, total), color: 'var(--chart-2)' },
+            { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'var(--chart-3)' },
         ]
 
         return {

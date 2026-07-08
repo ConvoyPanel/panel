@@ -57,7 +57,7 @@ const HistoricalCpuUsageCard = () => {
                             dataKey={'usage'}
                             type={'monotone'}
                             stroke={'none'}
-                            fill='hsl(var(--chart-2))'
+                            fill='var(--chart-2)'
                         />
                     </AreaChart>
                 </ChartContainer>

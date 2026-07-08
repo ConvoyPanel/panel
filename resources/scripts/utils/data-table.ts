@@ -20,9 +20,9 @@ export function getCommonPinningStyles<TData>({
     return {
         boxShadow: withBorder
             ? isLastLeftPinnedColumn
-                ? '-4px 0 4px -4px hsl(var(--border)) inset'
+                ? '-4px 0 4px -4px var(--border) inset'
                 : isFirstRightPinnedColumn
-                  ? '4px 0 4px -4px hsl(var(--border)) inset'
+                  ? '4px 0 4px -4px var(--border) inset'
                   : undefined
             : undefined,
         left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
@@ -31,8 +31,8 @@ export function getCommonPinningStyles<TData>({
         opacity: isPinned ? 0.97 : 1,
         position: isPinned ? 'sticky' : 'relative',
         // background: isPinned
-        //     ? 'hsl(var(--background))'
-        //     : 'hsl(var(--background))',
+        //     ? 'var(--background)'
+        //     : 'var(--background)',
         width: column.getSize(),
         zIndex: isPinned ? 1 : 0,
     }
