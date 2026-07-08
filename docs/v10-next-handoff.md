@@ -110,8 +110,11 @@ Researched direction retained for each; none built unless noted.
 - **Logged-in session tracking — DONE.** `session_records` table + `RecordSessionActivity` middleware
   (web group, throttled, skips bearer/anon) + Logout listener + `SessionRecordController` (list/revoke via
   the Redis session handler); real `SessionListCard`. Raw `session_id` is server-side only; API exposes the
-  numeric id. **Note:** device label is UA-parsed client-side; **IP→geo location was dropped** (needs a
-  GeoIP dependency) — add later if wanted.
+  numeric id. **Redis↔table desync handled:** `index()` reconciles each row against the session store
+  (`getHandler()->read()`) and deletes ghosts whose session expired/was evicted; `SessionRecord` is
+  `Prunable` (older than `session.lifetime`) on a daily schedule; the row-missing direction self-heals via
+  the middleware. Note `SESSION_LIFETIME=525600` (1yr). **Note:** device label is UA-parsed client-side;
+  **IP→geo location was dropped** (needs a GeoIP dependency) — add later if wanted.
 
 - **VLAN support (GitHub #150) — ASSESSED, NOT BUILT.** Mechanism is sound and half-built: the right PVE
   primitive is `tag=` on the VM's `netX` against a VLAN-aware bridge, which `NetworkDeviceData` already
