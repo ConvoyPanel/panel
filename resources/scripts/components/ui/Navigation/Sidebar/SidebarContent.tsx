@@ -104,7 +104,12 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
                         // expanded, a Cloudflare-style divider line when collapsed.
                         <div className='mt-3 flex h-4 items-center'>
                             {collapsed ? (
-                                <div className='mx-2 h-px flex-1 bg-border' />
+                                // Fixed-width line aligned to the icon column, so
+                                // during the collapse animation it stays the small
+                                // collapsed size instead of shrinking from full width.
+                                <span className='grid h-4 w-10 shrink-0 place-items-center'>
+                                    <span className='h-px w-6 bg-border' />
+                                </span>
                             ) : (
                                 <span className='truncate pl-3 pr-2 text-[0.7rem] font-medium uppercase leading-none tracking-wide text-muted-foreground/70'>
                                     {group.label}
