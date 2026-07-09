@@ -3,6 +3,8 @@
 use App\Data\User\SessionRecordData;
 use App\Models\SessionRecord;
 use App\Models\User;
+use App\Services\Api\CreateAccountTokenService;
+use App\Services\Users\UserDeletionService;
 
 function seedSession(User $user, string $sessionId, array $attrs = []): SessionRecord
 {
@@ -31,7 +33,7 @@ it('records the current web session on an authenticated request', function () {
 
 it('does not record a bearer-token (sessionless) request', function () {
     $user = User::factory()->create();
-    $plain = app(\App\Services\Api\CreateAccountTokenService::class)
+    $plain = app(CreateAccountTokenService::class)
         ->handle($user, 'cli', ['servers:read'])->plainTextToken;
 
     $this->withHeader('Authorization', "Bearer {$plain}")
@@ -97,7 +99,7 @@ it('only lets a user revoke their own session', function () {
     expect(SessionRecord::query()->whereKey($record->id)->exists())->toBeTrue();
 });
 
-it('destroys a user\'s store sessions and rows when the user is deleted', function () {
+it('destroys a user\'s store sessions and rows through the user deletion service', function () {
     $user = User::factory()->create();
     seedSession($user, 'device-a');
     storeSession('device-a');
@@ -105,7 +107,7 @@ it('destroys a user\'s store sessions and rows when the user is deleted', functi
     $handler = app('session')->getHandler();
     expect($handler->read('device-a'))->not->toBe(''); // live before
 
-    $user->delete();
+    app(UserDeletionService::class)->delete($user);
 
     expect($handler->read('device-a'))->toBe('') // Redis session destroyed
         ->and(SessionRecord::query()->where('user_id', $user->id)->exists())->toBeFalse();

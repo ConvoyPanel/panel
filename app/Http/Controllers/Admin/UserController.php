@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Users\UpdateUserRequest;
 use App\Models\Filters\FiltersUserWildcard;
 use App\Models\User;
 use App\Services\Api\JWTService;
+use App\Services\Users\UserDeletionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserController
 {
-    public function __construct(private JWTService $JWTService) {}
+    public function __construct(
+        private JWTService $JWTService,
+        private UserDeletionService $userDeletion,
+    ) {}
 
     public function index(Request $request)
     {
@@ -88,9 +92,7 @@ class UserController
             );
         }
 
-        $user->tokens()->delete();
-
-        $user->delete();
+        $this->userDeletion->delete($user);
 
         return response()->noContent();
     }

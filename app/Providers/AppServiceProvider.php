@@ -5,8 +5,6 @@ namespace App\Providers;
 use App\Models\PersonalAccessToken;
 use App\Models\Server;
 use App\Models\SessionRecord;
-use App\Models\User;
-use App\Services\Auth\SessionRevocationService;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -50,12 +48,6 @@ class AppServiceProvider extends ServiceProvider
                     ->where('session_id', $session->getId())
                     ->delete();
             }
-        });
-
-        // When a user is deleted, the FK cascade removes their session_records rows but would leave
-        // their live Redis sessions behind. Destroy those too, before the rows cascade away.
-        User::deleting(function (User $user) {
-            app(SessionRevocationService::class)->revokeAllForUser($user);
         });
 
         $this->bootRoute();

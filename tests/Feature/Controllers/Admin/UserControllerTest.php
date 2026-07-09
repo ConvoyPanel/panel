@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Api\ApiKeyType;
+use App\Models\SessionRecord;
 use App\Models\User;
 
 it('revokes API tokens when an admin is demoted', function () {
@@ -32,4 +33,30 @@ it('keeps API tokens when an update does not demote the user', function () {
     ])->assertOk();
 
     expect($target->fresh()->tokens()->count())->toBe(1);
+});
+
+it('deletes users through the deletion service cleanup path', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $target = User::factory()->create();
+    $target->createToken('test', ApiKeyType::ACCOUNT);
+
+    SessionRecord::query()->create([
+        'session_id' => 'target-device',
+        'user_id' => $target->id,
+        'ip_address' => '203.0.113.7',
+        'user_agent' => 'Mozilla/5.0',
+        'last_active_at' => now(),
+    ]);
+
+    $handler = app('session')->getHandler();
+    $handler->write('target-device', 'live');
+
+    $this->actingAs($admin)
+        ->deleteJson("/api/admin/users/{$target->id}")
+        ->assertNoContent();
+
+    expect(User::query()->whereKey($target->id)->exists())->toBeFalse()
+        ->and($target->tokens()->count())->toBe(0)
+        ->and(SessionRecord::query()->where('user_id', $target->id)->exists())->toBeFalse()
+        ->and($handler->read('target-device'))->toBe('');
 });

@@ -4,15 +4,16 @@ use App\Enums\Api\ApiKeyType;
 use App\Models\PersonalAccessToken;
 use App\Models\SystemActor;
 use App\Models\User;
+use App\Services\Api\CreateApplicationTokenService;
+use App\Services\Users\UserDeletionService;
 
 /**
  * v2 panel-wide (application) tokens: owned by the system actor, not the minting admin, so they
  * survive that admin's deletion.
  */
-
 function mintApplicationToken(User $admin, string $name = 'ci'): PersonalAccessToken
 {
-    app(\App\Services\Api\CreateApplicationTokenService::class)->handle($admin, $name);
+    app(CreateApplicationTokenService::class)->handle($admin, $name);
 
     return PersonalAccessToken::query()->latest('id')->firstOrFail();
 }
@@ -35,10 +36,10 @@ it('mints an application token owned by the system actor, not the admin', functi
 
 it('keeps the token working after the creating admin is deleted', function () {
     $admin = User::factory()->create(['root_admin' => true]);
-    $plain = app(\App\Services\Api\CreateApplicationTokenService::class)
+    $plain = app(CreateApplicationTokenService::class)
         ->handle($admin, 'survivor')->plainTextToken;
 
-    $admin->delete();
+    app(UserDeletionService::class)->delete($admin);
 
     $token = PersonalAccessToken::query()->latest('id')->firstOrFail();
     expect($token->fresh()->created_by)->toBeNull(); // audit link nulled, token intact
@@ -51,7 +52,7 @@ it('keeps the token working after the creating admin is deleted', function () {
 
 it('forbids an application token from managing tokens', function () {
     $admin = User::factory()->create(['root_admin' => true]);
-    $plain = app(\App\Services\Api\CreateApplicationTokenService::class)
+    $plain = app(CreateApplicationTokenService::class)
         ->handle($admin, 'no-self-manage')->plainTextToken;
 
     $this->withHeader('Authorization', "Bearer {$plain}")
