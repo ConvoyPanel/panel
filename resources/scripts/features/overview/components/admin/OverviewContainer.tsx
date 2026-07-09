@@ -6,7 +6,7 @@ import { ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Spinner from '@/components/ui/Spinner.tsx'
-import { Heading } from '@/components/ui/Typography'
+import { Heading, Stat, StatLabel } from '@/components/ui/Typography'
 
 import NeedsAttentionCard from './NeedsAttentionCard'
 import NodesCard from './NodesCard'
@@ -23,7 +23,7 @@ type OverviewData = App.Data.Admin.Overview.OverviewData
 type Breakdown = App.Data.Admin.Overview.ServerStatusBreakdownData
 type MetricTrend = App.Data.Admin.Overview.MetricTrendData
 
-/** Top-line count with a muted label, a week-over-week delta, and a trend sparkline. */
+/** Top-line count with a label, a week-over-week delta, and a trend sparkline. */
 const MetricTile = ({
     label,
     value,
@@ -41,7 +41,7 @@ const MetricTile = ({
     return (
         <div className='bg-card overflow-hidden rounded-xl border p-4'>
             <div className='flex items-start justify-between gap-2'>
-                <div className='text-muted-foreground text-sm'>{label}</div>
+                <StatLabel className='text-sm'>{label}</StatLabel>
                 {showDelta && (
                     <span
                         className={cn(
@@ -91,7 +91,9 @@ const CapacityMeter = ({
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <span className='text-muted-foreground text-xs'>{label}</span>
+                <StatLabel as='span' className='text-xs'>
+                    {label}
+                </StatLabel>
                 {hasData && (
                     <span
                         className={cn(
@@ -107,7 +109,7 @@ const CapacityMeter = ({
                 {hasData ? (
                     <>
                         {figure}{' '}
-                        <span className='text-muted-foreground text-xs font-normal'>
+                        <span className='text-label text-xs font-normal'>
                             {unit}
                         </span>
                     </>
@@ -121,11 +123,7 @@ const CapacityMeter = ({
                 value={Math.min(percent, 100)}
                 indicatorClassName={meterIndicatorClass[tone]}
             />
-            {sub && (
-                <div className='text-muted-foreground mt-1.5 text-xs'>
-                    {sub}
-                </div>
-            )}
+            {sub && <div className='text-label mt-1.5 text-xs'>{sub}</div>}
         </div>
     )
 }
@@ -173,29 +171,6 @@ const StatusRow = ({
         </div>
     )
 }
-
-/** A labelled figure used in the Backups & ISOs grid. */
-const Stat = ({
-    label,
-    value,
-    danger,
-}: {
-    label: string
-    value: ReactNode
-    danger?: boolean
-}) => (
-    <div>
-        <div className='text-muted-foreground text-xs'>{label}</div>
-        <div
-            className={cn(
-                'mt-0.5 text-xl font-semibold tabular-nums',
-                danger && 'text-destructive'
-            )}
-        >
-            {value}
-        </div>
-    </div>
-)
 
 const Dashboard = ({ data }: { data: OverviewData }) => {
     const {
@@ -294,9 +269,9 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                         <CardTitle className='text-base'>
                             Servers by status
                         </CardTitle>
-                        <span className='text-muted-foreground text-xs tabular-nums'>
+                        <StatLabel as='span' className='text-xs tabular-nums'>
                             {num(servers.total)} total
-                        </span>
+                        </StatLabel>
                     </CardHeader>
                     <CardContent className='p-5 pt-2'>
                         {STATUS_META.map(([key, label, barClass]) => (
@@ -331,7 +306,10 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                     <Stat
                                         label='Failed'
                                         value={num(backups.failed)}
-                                        danger={backups.failed > 0}
+                                        valueClassName={cn(
+                                            backups.failed > 0 &&
+                                                'text-destructive'
+                                        )}
                                     />
                                 </div>
                                 <LinearProgressBar
@@ -339,9 +317,9 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                     className='mt-4'
                                 />
                                 <div className='my-4 border-t' />
-                                <div className='text-muted-foreground mb-3 text-xs font-semibold'>
+                                <StatLabel className='mb-3 text-xs font-semibold'>
                                     ISOs
-                                </div>
+                                </StatLabel>
                                 <div className='grid grid-cols-3 gap-4'>
                                     <Stat
                                         label='Ready'

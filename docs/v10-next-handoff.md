@@ -196,9 +196,10 @@ Researched direction retained for each; none built unless noted.
        read; regression assertion added), and mobile dashboard cards clipped horizontally (layout/grid `min-w-0` +
        explicit `grid-cols-1`). Also `ddev restart` logs a benign `scheduler: ERROR (spawn error)` (horizon starts
        fine; pre-existing). VM's instant queries lag ~30s (`latencyOffset`); use `query_range` or explicit `time`.
-  - *Caption-color standardization (pending):* client `StatisticCard` uses black (foreground) titles; admin
-    dashboard uses gray (`text-muted-foreground`). Plan: a semantic `--label` token + a shared `<Stat>` in
-    `components/ui/Typography`, then refactor both. Grep the drift first.
+  - *Caption-color standardization (DONE):* introduced semantic `--label` / `text-label` (aliased to the
+    existing muted caption color), added shared `Stat` + `StatLabel` in `components/ui/Typography`, and
+    refactored admin dashboard labels plus client `StatisticCard` titles onto the shared style. Verified
+    `ddev npm run tc` + `ddev npm run build` clean.
   - *Roadmap (separate, big):* overhaul every `components/ui/*` to **latest shadcn on Base UI**
     (`@base-ui-components/react`) primitives instead of Radix, same preset. This is the component-library
     swap, distinct from the token swap already done.

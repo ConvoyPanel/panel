@@ -10,7 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-
+import { StatLabel } from '@/components/ui/Typography'
 
 interface Props {
     title: ReactNode
@@ -30,9 +30,12 @@ const StatisticCard = ({
     return (
         <Card className={cn('flex flex-col', className)}>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2 @sm:p-6 @sm:pb-2'>
-                <CardTitle className='text-xs font-medium @sm:text-sm'>
+                <StatLabel
+                    as={CardTitle}
+                    className='text-xs font-medium @sm:text-sm'
+                >
                     {title}
-                </CardTitle>
+                </StatLabel>
                 <Icon className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent className={'p-4 pt-0 @sm:px-6 @sm:pb-6'}>

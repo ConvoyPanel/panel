@@ -8,6 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table'
+import { StatLabel } from '@/components/ui/Typography'
 
 import {
     bytes,
@@ -32,9 +33,9 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
     <Card>
         <CardHeader className='flex flex-row items-center justify-between space-y-0 p-5 pb-2'>
             <CardTitle className='text-base'>Nodes</CardTitle>
-            <span className='text-muted-foreground text-xs'>
+            <StatLabel as='span' className='text-xs'>
                 {num(nodes.length)} host{nodes.length === 1 ? '' : 's'}
-            </span>
+            </StatLabel>
         </CardHeader>
         <CardContent className='p-5 pt-2'>
             {nodes.length === 0 ? (
@@ -78,9 +79,12 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                         node.memory.percent
                                                     }
                                                 />
-                                                <span className='text-muted-foreground text-xs whitespace-nowrap tabular-nums'>
+                                                <StatLabel
+                                                    as='span'
+                                                    className='text-xs whitespace-nowrap tabular-nums'
+                                                >
                                                     {memoryFigure(node)}
-                                                </span>
+                                                </StatLabel>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -107,18 +111,18 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                     </div>
                                     <div className='shrink-0 text-sm font-semibold tracking-tight tabular-nums'>
                                         {num(node.servers)}{' '}
-                                        <span className='text-muted-foreground font-normal'>
+                                        <span className='text-label font-normal'>
                                             servers
                                         </span>
                                     </div>
                                 </div>
-                                <div className='text-muted-foreground mb-1.5 text-xs'>
+                                <StatLabel className='mb-1.5 text-xs'>
                                     Memory allocated
-                                </div>
+                                </StatLabel>
                                 <Meter percent={node.memory.percent} />
-                                <div className='text-muted-foreground mt-1.5 text-xs tabular-nums'>
+                                <StatLabel className='mt-1.5 text-xs tabular-nums'>
                                     {memoryFigure(node)}
-                                </div>
+                                </StatLabel>
                             </div>
                         ))}
                     </div>
