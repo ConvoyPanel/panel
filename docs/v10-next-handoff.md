@@ -347,8 +347,11 @@ Researched direction retained for each; none built unless noted.
 - **PHPStan is at ZERO** (level 5, `app/`). `ddev exec ./vendor/bin/phpstan analyse --memory-limit=4G` is
   green — keep it green. (Getting there fixed real runtime bugs: `ServerDeletionService` enum-vs-string
   comparison broke every admin deletion; passkey actions TypErrored under webauthn-lib ^5 — see git
-  history if these resurface. `PublicKeyCredentialSource` is `@deprecated` since 5.3 / removed in 6.0, so a
-  pre-6.0 follow-up is migrating `Passkey`/`PasskeySerializer` to the base `CredentialRecord` type.)
+  history if these resurface. **`PublicKeyCredentialSource` → `CredentialRecord` migration DONE**
+  (commit `47d9607c`): `Passkey::$data` now persists/rehydrates the base `CredentialRecord`, so
+  `AuthenticatorAssertionResponseValidator::check()` no longer takes its deprecated-argument path. The two
+  classes' serialized JSON is byte-identical (verified via the shared normalizer + a tinker round-trip), so
+  **no data migration** was needed for existing rows. Pre-6.0 webauthn item cleared.)
 - **Wayfinder emits URI-keyed dictionaries for admin controllers.** `routes/api-admin.php` is served under
   **two** prefixes — `/api/admin` (web session, `['auth', AdminAuthenticate]`) and `/api/application`
   (Sanctum Bearer, `['auth:sanctum', AdminAuthenticate]`) — so every admin action has two routes and
