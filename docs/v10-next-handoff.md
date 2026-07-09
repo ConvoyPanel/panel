@@ -4,7 +4,7 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09 (session: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; ddev db collision fixed at the core/portable; seeder env overrides)
+Last updated: 2026-07-09 (session: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
 
 ---
 
@@ -247,11 +247,28 @@ Researched direction retained for each; none built unless noted.
     divider line placeholder** centered in the gap (via transform, layout-neutral) so hovering to expand causes
     **zero vertical layout shift** (measured: item top identical collapsed vs expanded). `ServerSeeder` fixed +
     now takes `SEED_SERVER_USER` (email/id) and `SEED_SERVER_COUNT` env overrides (commit `207a76a7`).
-    **Still TODO:** (1) admin nav +
-    admin server/node layouts still pass flat `Route[]` — add groups; (2) the **admin↔client switch in the
-    avatar menu** (below); (3) the **exit** half of the transition (current is enter-only — old links don't
-    animate out; Vercel does both — acceptable but a polish gap); (4) optional top workspace switcher + ⌘K
-    search. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    **Continuation this session:** admin dashboard nav now uses grouped `SidebarNav` sections
+    (`Infrastructure` / `Provisioning` / `Administration`); admin server + node layouts now use drilled-in
+    `SidebarNav` with back links and entity context headers; the top-right avatar menu now shows a root-admin
+    `Workspace` switch between Client Area and Admin Console with the current workspace marked; the drill
+    transition now has the **exit** half (`animate-nav-out*`) so old links fade/translate out while new links
+    enter; header has a compact **global** command palette (`Ctrl+K`/`/`) backed by the existing `CommandDialog`
+    — it lists current dynamic nav first, then client/admin global entries (admin entries only for root admins),
+    contextual back shortcuts, common actions (create server/node, workspace/security), and lazy entity search for
+    client servers plus admin servers/nodes while the dialog is open.
+    Fixed a real browser-caught a11y bug while testing: shared `CommandDialog` now includes an sr-only
+    `DialogTitle`. The expanded smoke also exposed real client Security-page console noise: closed authenticator
+    dialogs eagerly fetched recovery codes / QR / secret-key endpoints and got 403s; fixed by making those
+    sensitive queries lazy and only enabling QR/secret after `enableAuthenticator()` succeeds. **Verified:**
+    installed Playwright 1.61.1 + Chromium/deps in the sandbox, browser-smoked login → admin grouped nav → global
+    command palette (admin↔client entries) → avatar workspace switch → admin server drill-down → admin node
+    drill-down; screenshots in `/tmp/opencode/panel-visual/*.png`; `ddev npm run tc` + `ddev npm run build`
+    green (build needed one retry after the known sandbox segfault). **Follow-up after richer command palette:**
+    `ddev npm run tc` + `ddev npm run build` green; entity-search behavior itself is build/type-verified but not
+    browser-smoked. **Still TODO:** optional top workspace/account switcher (design choice). **Note:**
+    the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
+    node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
+    grouping. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
@@ -270,11 +287,10 @@ Researched direction retained for each; none built unless noted.
       children + entity-context), replacing the flat `Route[]`. TanStack Router; `AppLayout` passes `routes`
       to `Sidebar`+`Header`; both client (`routes/_app/_dashboard.tsx`) and admin
       (`routes/_app/admin/_dashboard.tsx`) build their own route arrays.
-  - *Admin↔client distinction (in-flight decision).* The only current signal is `BrandLink.tsx` tinting the
-    logo `bg-orange-600` in admin vs `bg-primary` in client — color-only, fails WCAG "use of color", and now
-    off-palette. Maintainer's call: expose the **admin/client switch inside the top-right avatar menu**
-    (`components/ui/Navigation/Avatar.tsx`), so it both indicates context and navigates. (The orange was only
-    ever a quick admin/client tell.) Not yet built.
+  - *Admin↔client distinction — BUILT + BROWSER-VERIFIED.* The old color-only orange/admin signal was dropped
+    from the logo. Root admins now get a **Workspace** section inside the top-right avatar menu
+    (`components/ui/Navigation/Avatar.tsx`) with Client Area + Admin Console links and a `Current` marker, so the
+    context is text-visible and navigable. Verified by Playwright smoke + `ddev npm run tc` + `ddev npm run build`.
 
 ---
 
@@ -295,6 +311,12 @@ Researched direction retained for each; none built unless noted.
   **So plain `ddev exec php artisan migrate` and tinker now target the same DB the app reads** — no more
   `DB_HOST=` overrides needed. (During the bug, the VLAN migration had to be run twice; both DBs got it.) If
   this ever resurfaces, verify `ddev exec grep -w db /etc/hosts` shows `172.20.0.x db`.
+  **2026-07-09 follow-up observation:** during the Playwright sidebar smoke, `ddev exec psql` against
+  `172.20.0.2/db` returned seeded names (`servers.id=1` → `web-1`, `nodes.id=1` → `Sydney Compute 01`), while
+  the browser-rendered app showed different app-visible rows (`doloribus` / `et aut`) even after `ddev restart`
+  and with `/etc/hosts` correctly pinned. Cause not chased because it did not affect the UI smoke; avoid
+  hardcoding `psql` names in browser assertions until FPM/app-visible DB is re-confirmed with a debug route or
+  equivalent.
   **Portable across sandboxes (incl. a different Docker-sandbox / codex-opencode setup):** the fix is in the
   committed `.ddev/config.yaml` and its logic hardcodes nothing sandbox-specific — `getent hosts db` gets the
   container IP from docker's embedded DNS (authoritative for the service name) regardless of the host's search
