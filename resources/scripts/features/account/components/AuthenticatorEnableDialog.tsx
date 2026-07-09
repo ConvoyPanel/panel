@@ -1,15 +1,13 @@
-import { useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useShallow } from 'zustand/react/shallow'
-
 import {
-    enableAuthenticator,
     authenticatorQueries,
+    enableAuthenticator,
     useQrCode,
     useSecretKey,
 } from '@/features/account/authenticator/api.ts'
-
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -33,24 +31,42 @@ const AuthenticatorEnableDialog = () => {
         ])
     )
     const queryClient = useQueryClient()
-    const { data: qrCode, isLoading, error } = useQrCode()
-    const { data: secretKey } = useSecretKey()
+    const [setupReady, setSetupReady] = useState(false)
+    const { data: qrCode, isLoading, error } = useQrCode(open && setupReady)
+    const { data: secretKey } = useSecretKey(open && setupReady)
 
     useEffect(() => {
+        let cancelled = false
+
         const main = async () => {
-            if (open) {
-                await enableAuthenticator()
-                await queryClient.invalidateQueries({
-                    queryKey: authenticatorQueries.qrCode().queryKey,
-                })
-                await queryClient.invalidateQueries({
-                    queryKey: authenticatorQueries.secretKey().queryKey,
-                })
+            if (!open) {
+                setSetupReady(false)
+
+                return
             }
+
+            setSetupReady(false)
+            await enableAuthenticator()
+
+            if (cancelled) {
+                return
+            }
+
+            await queryClient.invalidateQueries({
+                queryKey: authenticatorQueries.qrCode().queryKey,
+            })
+            await queryClient.invalidateQueries({
+                queryKey: authenticatorQueries.secretKey().queryKey,
+            })
+            setSetupReady(true)
         }
 
-        main()
-    }, [open])
+        void main()
+
+        return () => {
+            cancelled = true
+        }
+    }, [open, queryClient])
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {

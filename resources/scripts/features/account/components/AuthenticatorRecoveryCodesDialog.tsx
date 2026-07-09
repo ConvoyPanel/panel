@@ -1,14 +1,12 @@
-import { useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useShallow } from 'zustand/react/shallow'
-
 import {
     authenticatorQueries,
     useRecoveryCodes,
 } from '@/features/account/authenticator/api.ts'
-import useClipboard from '@/hooks/use-clipboard.ts'
-
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import useClipboard from '@/hooks/use-clipboard.ts'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -32,7 +30,7 @@ const AuthenticatorRecoveryCodesDialog = () => {
     )
 
     const queryClient = useQueryClient()
-    const { data: codes } = useRecoveryCodes()
+    const { data: codes } = useRecoveryCodes(open)
     const { copy: copyToClipboard } = useClipboard({
         successMessage: 'Copied recovery codes to clipboard',
     })
