@@ -1,7 +1,7 @@
 import { cn } from '@/utils'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 import SidebarLink from '@/components/ui/Navigation/Sidebar/SidebarLink.tsx'
@@ -20,15 +20,22 @@ interface Props {
  * right going deeper, from the left going back.
  */
 const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
-    const lastDepth = useSidebarStore(state => state.lastDepth)
-    const setLastDepth = useSidebarStore(state => state.setLastDepth)
-
     const depth = nav.back ? 1 : 0
-    const goingBack = depth < lastDepth
+
+    // Freeze the drill direction for the lifetime of this nav.key. Read the
+    // previous depth NON-reactively (getState) so updating it doesn't re-render
+    // and overwrite the animation class with the wrong direction.
+    const keyRef = useRef<string | null>(null)
+    const goingBackRef = useRef(false)
+    if (keyRef.current !== nav.key) {
+        goingBackRef.current = depth < useSidebarStore.getState().lastDepth
+        keyRef.current = nav.key
+    }
+    const goingBack = goingBackRef.current
 
     useEffect(() => {
-        setLastDepth(depth)
-    }, [depth, setLastDepth])
+        useSidebarStore.getState().setLastDepth(depth)
+    }, [nav.key, depth])
 
     // When collapsed (and not hover-expanded), text hides; only icons remain.
     const labelVisibility = collapsed ? 'hidden' : 'block'
@@ -83,14 +90,18 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
                     className='flex flex-col gap-0.5'
                 >
                     {group.label ? (
-                        <p
-                            className={cn(
-                                'truncate pb-1 pl-10 pr-2 pt-3 text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground/70',
-                                labelVisibility
+                        // Fixed-height header area in BOTH states so toggling the
+                        // rail never shifts the items vertically: text when
+                        // expanded, a Cloudflare-style divider line when collapsed.
+                        <div className='mt-3 flex h-4 items-center'>
+                            {collapsed ? (
+                                <div className='mx-2 h-px flex-1 bg-border' />
+                            ) : (
+                                <span className='truncate pl-3 pr-2 text-[0.7rem] font-medium uppercase leading-none tracking-wide text-muted-foreground/70'>
+                                    {group.label}
+                                </span>
                             )}
-                        >
-                            {group.label}
-                        </p>
+                        </div>
                     ) : null}
                     {group.items.map(item => (
                         <SidebarLink
