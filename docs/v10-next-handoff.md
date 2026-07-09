@@ -224,12 +224,22 @@ Researched direction retained for each; none built unless noted.
     - **Sequence = flagship-screen-first.** Perfect ONE screen end-to-end → screenshot → maintainer
       approves the "look" → extract patterns into shared components → roll out. Do not restyle everything
       at once.
-  - *Sidebar redesign — TOP PRIORITY, spec locked (2026-07-09). This is the change the maintainer cares
-    about most.* Current sidebar (`components/ui/Navigation/Sidebar/Sidebar.tsx`) is a hover-to-expand
-    **icon rail** (`w-14`→`w-[13rem]`) taking a flat `Route[]`; it has **no hierarchy** and **no way to
-    drill between depths** (e.g. client dashboard → a specific server's dashboard). Rebuild it in the
-    **Vercel dashboard style** (maintainer explicitly prefers Vercel **over** Cloudflare — both were shown;
-    see the 4 reference screenshots the user pasted 2026-07-09):
+  - *Sidebar redesign — FLAGSHIP BUILT + BROWSER-VERIFIED (2026-07-09, commit `157f73bb`). Roll-out to
+    remaining screens is what's left.* Done: replaced the hover icon-rail with a **full labeled sidebar**
+    (`w-64`, grouped sections under muted caps headers), **contextual drill-down** (client dashboard → a
+    server swaps the whole nav), **back button** ("‹ Servers"), **entity context header** (server name +
+    icon), and the **subtle Vercel enter transition** (`animate-nav-in` in `app.css`: fade + ~6px translate,
+    keyed on `nav.key`, `prefers-reduced-motion` respected). New nav model in `Navigation.types.ts`
+    (`SidebarNav`: `key`/`back`/`context`/`groups`) + `normalizeNav` so callers may still pass a flat
+    `Route[]`; `AppLayout`/`Header`/mobile `SidebarToggle` all consume it; shared `SidebarContent.tsx` powers
+    desktop + mobile sheet. `BrandLink` now a clean "Convoy" wordmark + accessible "Admin" chip (orange
+    dropped). Verified in-browser: admin dashboard, client "My Servers", server drill-down (screens all
+    render; drill shows back + `Storage & Network`/`Configuration` groups). **Still TODO:** (1) admin nav +
+    admin server/node layouts still pass flat `Route[]` — add groups; (2) the **admin↔client switch in the
+    avatar menu** (below); (3) the **exit** half of the transition (current is enter-only — old links don't
+    animate out; Vercel does both — acceptable but a polish gap); (4) optional top workspace switcher + ⌘K
+    search. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
       first group is header-less then a divider).
@@ -257,20 +267,21 @@ Researched direction retained for each; none built unless noted.
 
 ## Gotchas / must-know (still live)
 
-- **TWO Postgres servers answer to `db` — the app (PHP-FPM) and `ddev exec` hit DIFFERENT databases
-  (discovered 2026-07-09, spent ~1h chasing it).** From inside the `web` container, `getent hosts db`
-  and `ddev exec psql .../db` resolve `db` → **172.20.0.2** (the `ddev-convoy-db` container). But
-  **PHP-FPM's PDO connects to `db` → 192.168.107.3** (an external Postgres reached via the docker gateway),
-  a *different* server with different data. Same DSN string (`host=db`), different endpoint — confirmed via
-  `inet_server_addr()` from both a debug route (FPM) and psql (CLI). Root cause not fully pinned (survives
-  `ddev restart` + php-fpm kill, so not a stale persistent connection; `db` has only one A record). **Practical
-  rule for anything that must be visible to the running app (seeding a visual-test admin, dashboard data,
-  network interfaces, running a migration the app needs):** target the FPM DB explicitly —
-  `ddev exec sh -c 'DB_HOST=192.168.107.3 php artisan migrate --force'` and
-  `ddev exec sh -c 'DB_HOST=192.168.107.3 php artisan tinker --no-ansi'`. To find the address live, hit a temp
-  route that returns `DB::selectOne("select inet_server_addr()")`. **Migrations run via plain `ddev exec php
-  artisan migrate` land on 172.20.0.2 and the app will NOT see them** (this bit the VLAN migration — had to
-  re-run it against 192.168.107.3). Tests use `db_test` so they're unaffected.
+- **`db` name-collision (PHP-FPM vs `ddev exec` hit different databases) — ROOT-CAUSED + FIXED 2026-07-09
+  (commit `f14ddd0d`). Left here because it cost ~1h and the mechanism recurs in any sandbox+ddev setup.**
+  Symptom: `getent hosts db` / `ddev exec psql .../db` resolved `db` → **172.20.0.2** (the `ddev-convoy-db`
+  container), but **PHP-FPM's libpq resolved `db` → 192.168.107.x** (a host-network Postgres reached via the
+  docker gateway) — a *different* DB with different data, same `host=db` DSN. Confirmed with
+  `inet_server_addr()` from a debug route (FPM) vs psql (CLI). **Cause:** the web container's
+  `/etc/resolv.conf` has `search claude-panel.docker.internal` + `ndots:0` and forwards misses to the sandbox
+  **host resolver**, which runs a **wildcard DNS** answering `db.claude-panel.docker.internal` with a host
+  Postgres. `getent` got the bare-name container record; libpq fell through to the search-qualified wildcard.
+  (Also why the FPM DB's IP *drifted* `.3`→`.2` between calls.) **Fix:** a `post-start` hook pins `db` in the
+  web container's `/etc/hosts` to the real container IP (`getent hosts db`), so nsswitch `files` answers before
+  DNS and nothing falls through — FPM and CLI now share one DB. Re-resolved each start to survive IP drift.
+  **So plain `ddev exec php artisan migrate` and tinker now target the same DB the app reads** — no more
+  `DB_HOST=` overrides needed. (During the bug, the VLAN migration had to be run twice; both DBs got it.) If
+  this ever resurfaces, verify `ddev exec grep -w db /etc/hosts` shows `172.20.0.x db`.
 - **Run tests with `ddev exec vendor/bin/pest` (or `ddev exec php artisan test`), NOT `ddev artisan
   test`.** The ddev global-command wrapper segfaults (exit 139) booting the test runner in this sandbox —
   `ddev artisan tinker`/`migrate` are fine, so it's a wrapper quirk, not a regression. Last green:
