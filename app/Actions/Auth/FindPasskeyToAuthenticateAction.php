@@ -9,9 +9,9 @@ use Throwable;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialSource;
 
 use function app;
 use function config;
@@ -40,17 +40,17 @@ class FindPasskeyToAuthenticateAction
             PublicKeyCredentialRequestOptions::class,
         );
 
-        $publicKeyCredentialSource = $this->determinePublicKeyCredentialSource(
+        $credentialRecord = $this->determineCredentialRecord(
             $publicKeyCredential,
             $passkeyOptions,
             $passkey,
         );
 
-        if (! $publicKeyCredentialSource) {
+        if (! $credentialRecord) {
             return null;
         }
 
-        $this->updatePasskey($passkey, $publicKeyCredentialSource);
+        $this->updatePasskey($passkey, $credentialRecord);
 
         return $passkey;
     }
@@ -77,11 +77,11 @@ class FindPasskeyToAuthenticateAction
         return Passkey::firstWhere('credential_id', $credentialId);
     }
 
-    protected function determinePublicKeyCredentialSource(
+    protected function determineCredentialRecord(
         PublicKeyCredential $publicKeyCredential,
         PublicKeyCredentialRequestOptions $passkeyOptions,
         Passkey $passkey,
-    ): ?PublicKeyCredentialSource {
+    ): ?CredentialRecord {
         if (! $publicKeyCredential->response instanceof AuthenticatorAssertionResponse) {
             return null;
         }
@@ -95,7 +95,7 @@ class FindPasskeyToAuthenticateAction
         try {
             $validator = AuthenticatorAssertionResponseValidator::create($requestCsm);
 
-            $credentialRecord = $validator->check(
+            return $validator->check(
                 credentialRecord: $passkey->data,
                 authenticatorAssertionResponse: $publicKeyCredential->response,
                 publicKeyCredentialRequestOptions: $passkeyOptions,
@@ -105,16 +105,14 @@ class FindPasskeyToAuthenticateAction
         } catch (Throwable) {
             return null;
         }
-
-        return PublicKeyCredentialSource::fromCredentialRecord($credentialRecord);
     }
 
     protected function updatePasskey(
         Passkey $passkey,
-        PublicKeyCredentialSource $publicKeyCredentialSource
+        CredentialRecord $credentialRecord
     ): self {
         $passkey->update([
-            'data' => $publicKeyCredentialSource,
+            'data' => $credentialRecord,
             'last_used_at' => now(),
         ]);
 

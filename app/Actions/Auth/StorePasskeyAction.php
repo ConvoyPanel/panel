@@ -12,9 +12,9 @@ use Throwable;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialSource;
 
 use function app;
 use function config;
@@ -28,7 +28,7 @@ class StorePasskeyAction
         string $passkeyOptionsJson,
         string $hostName,
     ): Passkey {
-        $publicKeyCredentialSource = $this->determinePublicKeyCredentialSource(
+        $credentialRecord = $this->determineCredentialRecord(
             $passkeyJson,
             $passkeyOptionsJson,
             $hostName
@@ -36,15 +36,15 @@ class StorePasskeyAction
 
         return $user->passkeys()->create([
             'name' => $name,
-            'data' => $publicKeyCredentialSource,
+            'data' => $credentialRecord,
         ]);
     }
 
-    protected function determinePublicKeyCredentialSource(
+    protected function determineCredentialRecord(
         string $passkeyJson,
         string $passkeyOptionsJson,
         string $hostName,
-    ): PublicKeyCredentialSource {
+    ): CredentialRecord {
         $passkeyOptions = $this->getPasskeyOptions($passkeyOptionsJson);
 
         $publicKeyCredential = $this->getPasskey($passkeyJson);
@@ -60,7 +60,7 @@ class StorePasskeyAction
         $creationCsm = $csmFactory->creationCeremony();
 
         try {
-            $credentialRecord = AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
+            return AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
                 authenticatorAttestationResponse: $publicKeyCredential->response,
                 publicKeyCredentialCreationOptions: $passkeyOptions,
                 host: $hostName,
@@ -68,8 +68,6 @@ class StorePasskeyAction
         } catch (Throwable $exception) {
             throw new InvalidAuthenticatorAttestationResponse($exception);
         }
-
-        return PublicKeyCredentialSource::fromCredentialRecord($credentialRecord);
     }
 
     protected function getPasskeyOptions(string $passkeyOptionsJson): PublicKeyCredentialCreationOptions
