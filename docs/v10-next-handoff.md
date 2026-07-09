@@ -4,7 +4,7 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09 (session: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
+Last updated: 2026-07-09 (session: passkey PublicKeyCredentialSource→CredentialRecord migration [+tests, verified] closing the pre-6.0 webauthn item; corrected stale CI-on-MySQL note [CI already Postgres 17]; recorded node Overview/servers/ipam/settings pages as still-unbuilt design follow-ups) — prior: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
 
 ---
 
@@ -269,7 +269,11 @@ Researched direction retained for each; none built unless noted.
     TODO:** optional top workspace/account switcher (design choice). **Note:**
     the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
     node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
-    grouping. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    grouping. **Also unbuilt (verified 2026-07-09):** the node **Overview** landing itself
+    (`routes/_app/admin/nodes.$nodeId/index{,.lazy}.tsx`) is still the scaffold `Hello "…"` placeholder — so
+    the node's default page needs building too. All four (`overview`/`servers`/`ipam`/`settings`) are content
+    /design calls (what KPIs, which list, which settings), deferred pending maintainer direction. The built
+    node sub-pages for reference are `network` and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
