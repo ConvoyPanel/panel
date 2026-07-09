@@ -1,18 +1,17 @@
 import { IconLayoutSidebar } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
-import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
+import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
+import SidebarContent from '@/components/ui/Navigation/Sidebar/SidebarContent.tsx'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet'
 
-
 interface Props {
-    routes: Route[]
+    nav: SidebarNav
 }
 
-const SidebarToggle = ({ routes }: Props) => {
+const SidebarToggle = ({ nav }: Props) => {
     const [open, setOpen] = useState(false)
 
     return (
@@ -23,33 +22,15 @@ const SidebarToggle = ({ routes }: Props) => {
                     <span className='sr-only'>Toggle Menu</span>
                 </Button>
             </SheetTrigger>
-            <SheetContent side='left' className='sm:max-w-xs'>
-                <nav className='grid gap-6 text-lg font-medium'>
-                    <Link
-                        to={'/'}
-                        onClick={() => setOpen(false)}
-                        className='group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base'
-                    >
-                        <Logo className='h-5 w-5 transition-all group-hover:scale-110' />
-                        <span className='sr-only'>Convoy Panel</span>
-                    </Link>
-                    {routes.map(route => (
-                        <Link
-                            key={route.path}
-                            to={route.path}
-                            onClick={() => setOpen(false)}
-                            className='flex items-center gap-4 px-2.5 hover:text-foreground'
-                            inactiveProps={{
-                                className: 'text-muted-foreground',
-                            }}
-                            activeProps={{
-                                className: 'text-foreground',
-                            }}
-                        >
-                            <route.icon className='h-5 w-5' />
-                            {route.label}
-                        </Link>
-                    ))}
+            <SheetContent side='left' className='w-72 bg-sidebar sm:max-w-xs'>
+                <div className='mb-3 flex items-center gap-2 px-1'>
+                    <span className='grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground'>
+                        <Logo className='h-4 w-4' />
+                    </span>
+                    <span className='text-sm font-semibold'>Convoy</span>
+                </div>
+                <nav className='flex flex-col'>
+                    <SidebarContent nav={nav} onNavigate={() => setOpen(false)} />
                 </nav>
             </SheetContent>
         </Sheet>

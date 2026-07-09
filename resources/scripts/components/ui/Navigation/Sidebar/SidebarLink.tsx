@@ -1,4 +1,5 @@
 import { cn } from '@/utils'
+import { IconChevronRight } from '@tabler/icons-react'
 import { Link, LinkOptions } from '@tanstack/react-router'
 
 import { TablerIcon } from '@/lib/tabler.ts'
@@ -8,7 +9,10 @@ interface Props {
     icon: TablerIcon
     label: string
     activeOptions?: LinkOptions['activeOptions']
+    badge?: string
+    drilldown?: boolean
     className?: string
+    onNavigate?: () => void
 }
 
 const SidebarLink = ({
@@ -16,35 +20,39 @@ const SidebarLink = ({
     icon: Icon,
     label,
     activeOptions,
+    badge,
+    drilldown,
     className,
+    onNavigate,
 }: Props) => {
     return (
         <Link
             to={to}
             activeOptions={activeOptions}
+            onClick={onNavigate}
             className={cn(
-                'relative flex h-10 w-full items-center rounded-lg transition-colors hover:bg-accent hover:text-foreground',
+                'flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
+                'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 className
             )}
             inactiveProps={{
                 className: 'text-muted-foreground',
             }}
             activeProps={{
-                className: 'bg-accent text-accent-foreground',
+                className:
+                    'bg-sidebar-accent font-medium text-sidebar-accent-foreground',
             }}
         >
-            <span className={'absolute grid h-10 w-10 place-items-center'}>
-                <Icon className='left-0 h-5 w-5 transition-colors' />
-            </span>
-            <span
-                className={cn(
-                    'absolute left-7 min-w-fit opacity-0 transition-all',
-                    'group-data-[state=expanded]:left-[2.75rem] group-data-[state=expanded]:opacity-100',
-                    'group-data-[keep-expanded=true]:left-[2.75rem] group-data-[keep-expanded=true]:opacity-100'
-                )}
-            >
-                <span className={'w-full truncate'}>{label}</span>
-            </span>
+            <Icon className='h-[1.15rem] w-[1.15rem] shrink-0' />
+            <span className='min-w-0 flex-1 truncate'>{label}</span>
+            {badge ? (
+                <span className='rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-medium leading-none text-primary'>
+                    {badge}
+                </span>
+            ) : null}
+            {drilldown ? (
+                <IconChevronRight className='h-4 w-4 shrink-0 text-muted-foreground/70' />
+            ) : null}
         </Link>
     )
 }

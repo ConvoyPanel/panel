@@ -1,20 +1,26 @@
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 
 import Header from '@/components/ui/Navigation/Header.tsx'
-import { Route } from '@/components/ui/Navigation/Navigation.types.ts'
+import {
+    SidebarNavInput,
+    normalizeNav,
+} from '@/components/ui/Navigation/Navigation.types.ts'
 import Sidebar from '@/components/ui/Navigation/Sidebar/Sidebar.tsx'
 
 interface Props {
-    routes: Route[]
+    /** A grouped `SidebarNav`, or a flat `Route[]` for simple screens. */
+    routes: SidebarNavInput
     children?: ReactNode
 }
 
 const AppLayout = ({ routes, children }: Props) => {
+    const nav = useMemo(() => normalizeNav(routes), [routes])
+
     return (
         <div className='flex min-h-screen w-full min-w-0 bg-muted/40'>
-            <Sidebar routes={routes} />
+            <Sidebar nav={nav} />
             <div className='flex min-w-0 grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
-                <Header routes={routes} />
+                <Header nav={nav} />
                 <main className={'h-full min-w-0 @container'}>
                     <div
                         className={

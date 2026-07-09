@@ -9,6 +9,7 @@ import {
     IconLock,
     IconNetwork,
     IconRefresh,
+    IconServer,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -19,7 +20,7 @@ import { useServer, preloadServer } from '@/features/servers/detail/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
-import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
+import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 
 export const Route = createFileRoute('/_app/servers/$serverUuid')({
     loader: ({ params: { serverUuid } }) =>
@@ -35,51 +36,71 @@ function ServerLayout() {
     const { data: server } = useServer(serverUuid)
     useTitle(server?.name)
 
-    const routes: RouteDef[] = [
-        {
-            icon: IconLayoutGrid,
-            label: 'Overview',
-            path: `/servers/${serverUuid}`,
-            activeOptions: {
-                exact: true,
+    const nav: SidebarNav = {
+        key: `server:${serverUuid}`,
+        back: { label: 'Servers', to: '/' },
+        context: {
+            title: server?.name ?? 'Server',
+            icon: IconServer,
+        },
+        groups: [
+            {
+                items: [
+                    {
+                        icon: IconLayoutGrid,
+                        label: 'Overview',
+                        path: `/servers/${serverUuid}`,
+                        activeOptions: { exact: true },
+                    },
+                    {
+                        icon: IconChartBar,
+                        label: 'Graphs',
+                        path: `/servers/${serverUuid}/graphs`,
+                    },
+                ],
             },
-        },
-        {
-            icon: IconChartBar,
-            label: 'Graphs',
-            path: `/servers/${serverUuid}/graphs`,
-        },
-        {
-            icon: IconCopy,
-            label: 'Backups',
-            path: `/servers/${serverUuid}/backups`,
-        },
-        {
-            icon: IconDisc,
-            label: 'ISO Library',
-            path: `/servers/${serverUuid}/iso-library`,
-        },
-        {
-            icon: IconDatabase,
-            label: 'Storage',
-            path: `/servers/${serverUuid}/storage`,
-        },
-        {
-            icon: IconNetwork,
-            label: 'Networking',
-            path: `/servers/${serverUuid}/networking`,
-        },
-        {
-            icon: IconLock,
-            label: 'Security',
-            path: `/servers/${serverUuid}/security`,
-        },
-        {
-            icon: IconRefresh,
-            label: 'Rebuild',
-            path: `/servers/${serverUuid}/rebuild`,
-        },
-    ]
+            {
+                label: 'Storage & Network',
+                items: [
+                    {
+                        icon: IconCopy,
+                        label: 'Backups',
+                        path: `/servers/${serverUuid}/backups`,
+                    },
+                    {
+                        icon: IconDisc,
+                        label: 'ISO Library',
+                        path: `/servers/${serverUuid}/iso-library`,
+                    },
+                    {
+                        icon: IconDatabase,
+                        label: 'Storage',
+                        path: `/servers/${serverUuid}/storage`,
+                    },
+                    {
+                        icon: IconNetwork,
+                        label: 'Networking',
+                        path: `/servers/${serverUuid}/networking`,
+                    },
+                ],
+            },
+            {
+                label: 'Configuration',
+                items: [
+                    {
+                        icon: IconLock,
+                        label: 'Security',
+                        path: `/servers/${serverUuid}/security`,
+                    },
+                    {
+                        icon: IconRefresh,
+                        label: 'Rebuild',
+                        path: `/servers/${serverUuid}/rebuild`,
+                    },
+                ],
+            },
+        ],
+    }
 
     const isInstalling =
         server?.status === 'installing' ||
@@ -90,7 +111,7 @@ function ServerLayout() {
     const isSuspended = server?.status === 'suspended'
 
     return (
-        <AppLayout routes={routes}>
+        <AppLayout routes={nav}>
             {isDeferred ? (
                 <DeferredOSSelection server={server} />
             ) : isInstalling ? (

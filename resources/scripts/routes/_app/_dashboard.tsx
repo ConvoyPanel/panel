@@ -1,17 +1,17 @@
 import useTitle from '@/hooks/use-title.ts'
-import { IconHome, IconLock } from '@tabler/icons-react'
+import { IconServer, IconLock } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
-import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
+import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 
 export const Route = createFileRoute('/_app/_dashboard')({
     component: () => {
         useTitle()
 
         return (
-            <AppLayout routes={routes}>
+            <AppLayout routes={nav}>
                 <Outlet />
             </AppLayout>
         )
@@ -21,15 +21,23 @@ export const Route = createFileRoute('/_app/_dashboard')({
     },
 })
 
-const routes: RouteDef[] = [
-    {
-        icon: IconHome,
-        label: 'Dashboard',
-        path: '/',
-    },
-    {
-        icon: IconLock,
-        label: 'Security',
-        path: '/security',
-    },
-]
+const nav: SidebarNav = {
+    key: 'client',
+    groups: [
+        {
+            items: [
+                {
+                    icon: IconServer,
+                    label: 'Servers',
+                    path: '/',
+                    activeOptions: { exact: true },
+                },
+                {
+                    icon: IconLock,
+                    label: 'Security',
+                    path: '/security',
+                },
+            ],
+        },
+    ],
+}

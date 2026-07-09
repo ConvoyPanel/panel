@@ -1,4 +1,3 @@
-import { cn } from '@/utils'
 import { Link, useLocation } from '@tanstack/react-router'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
@@ -8,16 +7,21 @@ const BrandLink = () => {
     const isAdmin = pathname.startsWith('/admin')
 
     return (
-        <Link to={isAdmin ? '/admin' : '/'} className='mx-1'>
-            <span
-                className={cn(
-                    'grid h-8 w-8 place-items-center rounded-full text-primary-foreground',
-                    isAdmin ? 'bg-orange-600 dark:bg-orange-500' : 'bg-primary'
-                )}
-            >
+        <Link
+            to={isAdmin ? '/admin' : '/'}
+            className='flex min-w-0 items-center gap-2 rounded-md px-1 py-1'
+        >
+            <span className='grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground'>
                 <Logo className='h-4 w-4' />
             </span>
-            <span className='sr-only'>Convoy Panel</span>
+            <span className='truncate text-sm font-semibold text-sidebar-foreground'>
+                Convoy
+            </span>
+            {isAdmin ? (
+                <span className='rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-primary'>
+                    Admin
+                </span>
+            ) : null}
         </Link>
     )
 }
