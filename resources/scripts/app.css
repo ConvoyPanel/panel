@@ -115,15 +115,15 @@
     }
 
     html {
-        @apply w-full h-full
+        @apply h-full w-full;
     }
 
     body {
-        @apply bg-background text-foreground w-full h-full;
+        @apply bg-background text-foreground h-full w-full;
     }
 
     #root {
-        @apply w-full h-full;
+        @apply h-full w-full;
     }
 }
 
@@ -140,9 +140,10 @@
     }
 
     /*
-     * Vercel-style subtle nav swap: when drilling between nav depths the new
-     * links fade in and translate a *tiny* amount from the right. Intentionally
-     * small + fast so it reads as a polish detail, never a big slide.
+     * Vercel-style subtle nav swap: when drilling between nav depths the old
+     * links fade out while the new links fade in, each translating a *tiny*
+     * amount. Intentionally small + fast so it reads as a polish detail, never a
+     * big slide.
      */
     @keyframes nav-in {
         from {
@@ -175,9 +176,41 @@
         animation: nav-in-back 300ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
+    @keyframes nav-out {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-16px);
+        }
+    }
+
+    .animate-nav-out {
+        animation: nav-out 300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    }
+
+    @keyframes nav-out-back {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(16px);
+        }
+    }
+
+    .animate-nav-out-back {
+        animation: nav-out-back 300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    }
+
     @media (prefers-reduced-motion: reduce) {
         .animate-nav-in,
-        .animate-nav-in-back {
+        .animate-nav-in-back,
+        .animate-nav-out,
+        .animate-nav-out-back {
             animation: none;
         }
     }

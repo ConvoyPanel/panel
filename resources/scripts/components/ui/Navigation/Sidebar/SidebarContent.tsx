@@ -1,7 +1,7 @@
 import { cn } from '@/utils'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 import SidebarLink from '@/components/ui/Navigation/Sidebar/SidebarLink.tsx'
@@ -11,6 +11,11 @@ interface Props {
     nav: SidebarNav
     collapsed?: boolean
     onNavigate?: () => void
+}
+
+interface ExitingNav {
+    nav: SidebarNav
+    goingBack: boolean
 }
 
 // Session-scoped: false until the sidebar has rendered once, so a direct page
@@ -26,6 +31,7 @@ let navHasRendered = false
  */
 const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
     const depth = nav.back ? 1 : 0
+    const [exitingNav, setExitingNav] = useState<ExitingNav | null>(null)
 
     // Freeze the drill direction for the lifetime of this nav.key. Read the
     // previous depth NON-reactively (getState) so updating it doesn't re-render
@@ -33,6 +39,8 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
     const keyRef = useRef<string | null>(null)
     const goingBackRef = useRef(false)
     const animateRef = useRef(false)
+    const previousNavRef = useRef<SidebarNav | null>(null)
+    const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     if (keyRef.current !== nav.key) {
         goingBackRef.current = depth < useSidebarStore.getState().lastDepth
         animateRef.current = navHasRendered
@@ -46,54 +54,75 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
         useSidebarStore.getState().setLastDepth(depth)
     }, [nav.key, depth])
 
+    useLayoutEffect(() => {
+        const previousNav = previousNavRef.current
+
+        if (previousNav && previousNav.key !== nav.key && animate) {
+            if (exitTimeoutRef.current) {
+                clearTimeout(exitTimeoutRef.current)
+            }
+
+            setExitingNav({ nav: previousNav, goingBack })
+            exitTimeoutRef.current = setTimeout(() => {
+                setExitingNav(null)
+                exitTimeoutRef.current = null
+            }, 300)
+        }
+
+        previousNavRef.current = nav
+    }, [animate, goingBack, nav])
+
+    useEffect(
+        () => () => {
+            if (exitTimeoutRef.current) {
+                clearTimeout(exitTimeoutRef.current)
+            }
+        },
+        []
+    )
+
     // When collapsed (and not hover-expanded), text hides; only icons remain.
     const labelVisibility = collapsed ? 'hidden' : 'block'
 
-    return (
-        <div
-            key={nav.key}
-            className={cn(
-                'flex flex-1 flex-col gap-1',
-                animate && (goingBack ? 'animate-nav-in-back' : 'animate-nav-in')
-            )}
-        >
-            {nav.back ? (
+    const content = (contentNav: SidebarNav) => (
+        <>
+            {contentNav.back ? (
                 <Link
-                    to={nav.back.to}
+                    to={contentNav.back.to}
                     onClick={onNavigate}
-                    title={collapsed ? nav.back.label : undefined}
-                    className='mb-1 flex h-9 items-center overflow-hidden rounded-md text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    title={collapsed ? contentNav.back.label : undefined}
+                    className='text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground mb-1 flex h-9 items-center overflow-hidden rounded-md text-sm'
                 >
                     <span className='grid h-9 w-10 shrink-0 place-items-center'>
                         <IconChevronLeft className='h-[1.15rem] w-[1.15rem]' />
                     </span>
                     <span className={cn('truncate pr-2', labelVisibility)}>
-                        {nav.back.label}
+                        {contentNav.back.label}
                     </span>
                 </Link>
             ) : null}
 
-            {nav.context ? (
+            {contentNav.context ? (
                 <div className='mb-2 flex items-center overflow-hidden py-1'>
                     <span className='grid h-9 w-10 shrink-0 place-items-center'>
-                        {nav.context.icon ? (
-                            <nav.context.icon className='h-[1.15rem] w-[1.15rem] text-sidebar-foreground' />
+                        {contentNav.context.icon ? (
+                            <contentNav.context.icon className='text-sidebar-foreground h-[1.15rem] w-[1.15rem]' />
                         ) : null}
                     </span>
                     <div className={cn('min-w-0 pr-2', labelVisibility)}>
-                        <p className='truncate text-sm font-semibold text-sidebar-foreground'>
-                            {nav.context.title}
+                        <p className='text-sidebar-foreground truncate text-sm font-semibold'>
+                            {contentNav.context.title}
                         </p>
-                        {nav.context.subtitle ? (
-                            <p className='truncate text-xs text-muted-foreground'>
-                                {nav.context.subtitle}
+                        {contentNav.context.subtitle ? (
+                            <p className='text-muted-foreground truncate text-xs'>
+                                {contentNav.context.subtitle}
                             </p>
                         ) : null}
                     </div>
                 </div>
             ) : null}
 
-            {nav.groups.map((group, index) => (
+            {contentNav.groups.map((group, index) => (
                 <div
                     key={group.label ?? `group-${index}`}
                     className='flex flex-col gap-0.5'
@@ -111,10 +140,10 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
                                 // during the collapse animation it stays the small
                                 // collapsed size instead of shrinking from full width.
                                 <span className='grid h-4 w-10 shrink-0 -translate-y-[7px] place-items-center'>
-                                    <span className='h-px w-6 bg-border' />
+                                    <span className='bg-border h-px w-6' />
                                 </span>
                             ) : (
-                                <span className='truncate pl-3 pr-2 text-[0.7rem] font-medium uppercase leading-none tracking-wide text-muted-foreground/70'>
+                                <span className='text-muted-foreground/70 truncate pr-2 pl-3 text-[0.7rem] leading-none font-medium tracking-wide uppercase'>
                                     {group.label}
                                 </span>
                             )}
@@ -135,6 +164,35 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
                     ))}
                 </div>
             ))}
+        </>
+    )
+
+    return (
+        <div className='relative flex flex-1 flex-col'>
+            {exitingNav ? (
+                <div
+                    aria-hidden='true'
+                    className={cn(
+                        'pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col gap-1',
+                        exitingNav.goingBack
+                            ? 'animate-nav-out-back'
+                            : 'animate-nav-out'
+                    )}
+                >
+                    {content(exitingNav.nav)}
+                </div>
+            ) : null}
+
+            <div
+                key={nav.key}
+                className={cn(
+                    'flex flex-1 flex-col gap-1',
+                    animate &&
+                        (goingBack ? 'animate-nav-in-back' : 'animate-nav-in')
+                )}
+            >
+                {content(nav)}
+            </div>
         </div>
     )
 }

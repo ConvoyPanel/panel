@@ -1,11 +1,11 @@
+import { logout } from '@/features/auth/api.ts'
+import { currentUserQueries, useUser } from '@/features/auth/api.ts'
 import { useTheme } from '@/providers/theme-provider.tsx'
 import useIdentityConfirmationStore from '@/stores/identity-confirmation-store.ts'
-import { useRouter } from '@tanstack/react-router'
+import { cn } from '@/utils'
 import { useQueryClient } from '@tanstack/react-query'
+import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import { useShallow } from 'zustand/react/shallow'
-
-import { logout } from '@/features/auth/api.ts'
-import { useUser, currentUserQueries } from '@/features/auth/api.ts'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
@@ -33,6 +33,8 @@ const Avatar = () => {
     const reset = useIdentityConfirmationStore(useShallow(state => state.reset))
 
     const { navigate } = useRouter()
+    const pathname = useLocation({ select: location => location.pathname })
+    const isAdminArea = pathname.startsWith('/admin')
 
     const signout = async () => {
         await logout()
@@ -58,11 +60,62 @@ const Avatar = () => {
                 </DropdownMenuLabel>
                 <p
                     className={
-                        '-mt-1 mb-3 truncate px-2 text-xs text-muted-foreground'
+                        'text-muted-foreground -mt-1 mb-3 truncate px-2 text-xs'
                     }
                 >
                     {user?.email}
                 </p>
+                {user?.rootAdmin ? (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className='text-muted-foreground text-xs font-medium'>
+                            Workspace
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem
+                            asChild
+                            className={cn(
+                                !isAdminArea &&
+                                    'bg-accent text-accent-foreground'
+                            )}
+                        >
+                            <Link
+                                to='/'
+                                aria-current={!isAdminArea ? 'page' : undefined}
+                            >
+                                <span className='min-w-0 flex-1 truncate'>
+                                    Client Area
+                                </span>
+                                {!isAdminArea ? (
+                                    <span className='text-muted-foreground ml-auto text-xs'>
+                                        Current
+                                    </span>
+                                ) : null}
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            asChild
+                            className={cn(
+                                isAdminArea &&
+                                    'bg-accent text-accent-foreground'
+                            )}
+                        >
+                            <Link
+                                to='/admin'
+                                aria-current={isAdminArea ? 'page' : undefined}
+                            >
+                                <span className='min-w-0 flex-1 truncate'>
+                                    Admin Console
+                                </span>
+                                {isAdminArea ? (
+                                    <span className='text-muted-foreground ml-auto text-xs'>
+                                        Current
+                                    </span>
+                                ) : null}
+                            </Link>
+                        </DropdownMenuItem>
+                    </>
+                ) : null}
+                <DropdownMenuSeparator />
                 <div className={'mt-2 flex items-center space-x-14 px-2 py-1'}>
                     <span className={'text-sm'}>Theme</span>
                     <Select value={theme} onValueChange={setTheme}>

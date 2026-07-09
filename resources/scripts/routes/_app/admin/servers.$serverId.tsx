@@ -1,13 +1,12 @@
+import { preloadServer, useServer } from '@/features/servers/admin/api.ts'
 import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
-import { IconDatabase, IconLayoutGrid } from '@tabler/icons-react'
+import { IconDatabase, IconLayoutGrid, IconServer } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-
-import { preloadServer, useServer } from '@/features/servers/admin/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 
-import { Route as RouteDef } from '@/components/ui/Navigation/Navigation.types.ts'
+import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 
 export const Route = createFileRoute('/_app/admin/servers/$serverId')({
     loader: ({ params: { serverId } }) =>
@@ -23,24 +22,42 @@ function ServerLayout() {
     const { data: server } = useServer(Number(serverId))
     useTitle(server?.name)
 
-    const routes: RouteDef[] = [
-        {
-            icon: IconLayoutGrid,
-            label: 'Overview',
-            path: `/admin/servers/${serverId}`,
-            activeOptions: {
-                exact: true,
+    const nav: SidebarNav = {
+        key: `admin-server:${serverId}`,
+        back: { label: 'Servers', to: '/admin/servers' },
+        context: {
+            title: server?.name ?? 'Server',
+            subtitle: server?.hostname,
+            icon: IconServer,
+        },
+        groups: [
+            {
+                items: [
+                    {
+                        icon: IconLayoutGrid,
+                        label: 'Overview',
+                        path: `/admin/servers/${serverId}`,
+                        activeOptions: {
+                            exact: true,
+                        },
+                    },
+                ],
             },
-        },
-        {
-            icon: IconDatabase,
-            label: 'Disks',
-            path: `/admin/servers/${serverId}/disks`,
-        },
-    ]
+            {
+                label: 'Storage',
+                items: [
+                    {
+                        icon: IconDatabase,
+                        label: 'Disks',
+                        path: `/admin/servers/${serverId}/disks`,
+                    },
+                ],
+            },
+        ],
+    }
 
     return (
-        <AppLayout routes={routes}>
+        <AppLayout routes={nav}>
             <Outlet />
         </AppLayout>
     )
