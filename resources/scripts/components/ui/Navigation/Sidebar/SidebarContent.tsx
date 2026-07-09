@@ -102,7 +102,10 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
                         // Fixed-height header area in BOTH states so toggling the
                         // rail never shifts the items vertically: text when
                         // expanded, a Cloudflare-style divider line when collapsed.
-                        <div className='mt-3 flex h-4 items-center'>
+                        // Symmetric top/bottom spacing so the collapsed line sits
+                        // centered in the gap (accounting for the group's gap-0.5
+                        // below and the keyed flex-col's gap-1 above).
+                        <div className='mb-2.5 mt-2 flex h-4 items-center'>
                             {collapsed ? (
                                 // Fixed-width line aligned to the icon column, so
                                 // during the collapse animation it stays the small
