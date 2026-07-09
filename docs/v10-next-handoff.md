@@ -264,8 +264,9 @@ Researched direction retained for each; none built unless noted.
     command palette (admin↔client entries) → avatar workspace switch → admin server drill-down → admin node
     drill-down; screenshots in `/tmp/opencode/panel-visual/*.png`; `ddev npm run tc` + `ddev npm run build`
     green (build needed one retry after the known sandbox segfault). **Follow-up after richer command palette:**
-    `ddev npm run tc` + `ddev npm run build` green; entity-search behavior itself is build/type-verified but not
-    browser-smoked. **Still TODO:** optional top workspace/account switcher (design choice). **Note:**
+    `ddev npm run tc` + `ddev npm run build` green; targeted Playwright smoke passed for lazy entity-search API
+    calls + action entries, screenshot `/tmp/opencode/panel-visual/command-palette-entity-search.png`. **Still
+    TODO:** optional top workspace/account switcher (design choice). **Note:**
     the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
     node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
     grouping. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
