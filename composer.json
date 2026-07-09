@@ -28,6 +28,7 @@
     "phpseclib/phpseclib": "^3.0",
     "spatie/eloquent-sortable": "^4.2",
     "spatie/laravel-data": "^4.1",
+    "spatie/laravel-passkeys": "^1.8",
     "spatie/laravel-query-builder": "^6.0",
     "spatie/laravel-typescript-transformer": "^3.2",
     "spatie/typescript-transformer": "^3.2",

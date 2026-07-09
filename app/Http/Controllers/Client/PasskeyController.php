@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Actions\Auth\GeneratePasskeyRegisterOptionsAction;
 use App\Actions\Auth\StorePasskeyAction;
 use App\Data\User\PasskeyData;
 use App\Http\Controllers\Controller;
@@ -10,6 +9,7 @@ use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
 use App\Models\Passkey;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelPasskeys\Actions\GeneratePasskeyRegisterOptionsAction;
 
 class PasskeyController extends Controller
 {
@@ -35,11 +35,11 @@ class PasskeyController extends Controller
     public function store(Request $request)
     {
         $passkey = $this->storeAction->execute(
-            user: $request->user(),
-            name: 'Passkey '.now()->format('Y-m-d'),
+            authenticatable: $request->user(),
             passkeyJson: $request->getContent(),
             passkeyOptionsJson: $request->session()->get('passkeys.registration-options'),
             hostName: $request->getHost(),
+            additionalProperties: ['name' => 'Passkey '.now()->format('Y-m-d')],
         );
 
         return PasskeyData::from($passkey);

@@ -5,46 +5,32 @@ namespace App\Actions\Auth;
 use App\Exceptions\Http\Passkey\InvalidAuthenticatorAttestationResponse;
 use App\Exceptions\Http\Passkey\InvalidPasskeyJson;
 use App\Exceptions\Http\Passkey\InvalidPasskeyPublicKeyCredential;
-use App\Models\Passkey;
-use App\Models\User;
-use App\Services\Auth\PasskeySerializer;
+use Spatie\LaravelPasskeys\Actions\ConfigureCeremonyStepManagerFactoryAction;
+use Spatie\LaravelPasskeys\Actions\StorePasskeyAction as BaseAction;
+use Spatie\LaravelPasskeys\Support\Config;
+use Spatie\LaravelPasskeys\Support\CredentialRecordConverter;
+use Spatie\LaravelPasskeys\Support\Serializer;
 use Throwable;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
-use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialSource;
 
-use function app;
-use function config;
-
-class StorePasskeyAction
+/**
+ * Extends the package's store action so we inherit its package-default storage
+ * (serialized {@see PublicKeyCredentialSource}), the passkey-registered event,
+ * and the `additionalProperties` create path — while re-throwing Convoy's
+ * curated {@see \App\Exceptions\HasErrorCode} exceptions instead of the package's
+ * generic ones, so the client always gets a real status + stable error slug.
+ */
+class StorePasskeyAction extends BaseAction
 {
-    public function execute(
-        User $user,
-        string $name,
+    protected function determinePublicKeyCredentialSource(
         string $passkeyJson,
         string $passkeyOptionsJson,
         string $hostName,
-    ): Passkey {
-        $credentialRecord = $this->determineCredentialRecord(
-            $passkeyJson,
-            $passkeyOptionsJson,
-            $hostName
-        );
-
-        return $user->passkeys()->create([
-            'name' => $name,
-            'data' => $credentialRecord,
-        ]);
-    }
-
-    protected function determineCredentialRecord(
-        string $passkeyJson,
-        string $passkeyOptionsJson,
-        string $hostName,
-    ): CredentialRecord {
+    ): PublicKeyCredentialSource {
         $passkeyOptions = $this->getPasskeyOptions($passkeyOptionsJson);
 
         $publicKeyCredential = $this->getPasskey($passkeyJson);
@@ -53,14 +39,14 @@ class StorePasskeyAction
             throw new InvalidPasskeyPublicKeyCredential;
         }
 
-        $csmFactory = new CeremonyStepManagerFactory;
-        if (app()->environment('local') && config('app.version') === 'canary') {
-            $csmFactory->setSecuredRelyingPartyId(['localhost']);
-        }
-        $creationCsm = $csmFactory->creationCeremony();
+        $configureCeremonyStepManagerFactory = Config::getAction(
+            'configure_ceremony_step_manager_factory',
+            ConfigureCeremonyStepManagerFactoryAction::class,
+        );
+        $creationCsm = $configureCeremonyStepManagerFactory->execute()->creationCeremony();
 
         try {
-            return AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
+            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create($creationCsm)->check(
                 authenticatorAttestationResponse: $publicKeyCredential->response,
                 publicKeyCredentialCreationOptions: $passkeyOptions,
                 host: $hostName,
@@ -68,6 +54,8 @@ class StorePasskeyAction
         } catch (Throwable $exception) {
             throw new InvalidAuthenticatorAttestationResponse($exception);
         }
+
+        return CredentialRecordConverter::toPublicKeyCredentialSource($publicKeyCredentialSource);
     }
 
     protected function getPasskeyOptions(string $passkeyOptionsJson): PublicKeyCredentialCreationOptions
@@ -77,9 +65,9 @@ class StorePasskeyAction
         }
 
         /** @var PublicKeyCredentialCreationOptions $passkeyOptions */
-        $passkeyOptions = PasskeySerializer::make()->fromJson(
+        $passkeyOptions = Serializer::make()->fromJson(
             $passkeyOptionsJson,
-            PublicKeyCredentialCreationOptions::class
+            PublicKeyCredentialCreationOptions::class,
         );
 
         return $passkeyOptions;
@@ -92,9 +80,9 @@ class StorePasskeyAction
         }
 
         /** @var PublicKeyCredential $publicKeyCredential */
-        $publicKeyCredential = PasskeySerializer::make()->fromJson(
+        $publicKeyCredential = Serializer::make()->fromJson(
             $passkeyJson,
-            PublicKeyCredential::class
+            PublicKeyCredential::class,
         );
 
         return $publicKeyCredential;

@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\NewAccessToken;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 
 /**
  * @property int $id
@@ -25,7 +26,7 @@ use Laravel\Sanctum\NewAccessToken;
  *
  * @mixin Eloquent
  */
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model implements AuthenticatableContract, AuthorizableContract, HasPasskeys
 {
     use Authenticatable, Authorizable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
@@ -108,6 +109,21 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function passkeys(): HasMany
     {
         return $this->hasMany(Passkey::class);
+    }
+
+    public function getPassKeyName(): string
+    {
+        return $this->email;
+    }
+
+    public function getPassKeyId(): string
+    {
+        return $this->uuid;
+    }
+
+    public function getPassKeyDisplayName(): string
+    {
+        return $this->name;
     }
 
     /**
