@@ -7,7 +7,9 @@ holds the detail) and *what to pick up next*, so a cold start doesn't re-derive 
 Last updated: 2026-07-09 (session: **adopted `spatie/laravel-passkeys`** [commit `20d8a442`] — backend-only
 swap, package-default `PublicKeyCredentialSource` storage, `user_id` schema kept via a thin model subclass,
 curated error-code exceptions + canary/localhost origins preserved via subclasses; deleted the four copied
-actions/serializer; full Pest 202 + PHPStan-zero green, live browser WebAuthn ceremony still unproven) — prior: passkey PublicKeyCredentialSource→CredentialRecord migration [interim, now superseded]; corrected stale CI-on-MySQL note [CI already Postgres 17]; recorded node Overview/servers/ipam/settings pages as still-unbuilt design follow-ups) — prior: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
+actions/serializer. **Live WebAuthn register→login→re-auth PROVEN** via a Playwright CDP virtual authenticator
+[19/19 steps]; found+fixed a route-binding regression the spatie base class caused [commit `a5e79adc`]; full
+Pest 205 + PHPStan-zero green) — prior: passkey PublicKeyCredentialSource→CredentialRecord migration [interim, now superseded]; corrected stale CI-on-MySQL note [CI already Postgres 17]; recorded node Overview/servers/ipam/settings pages as still-unbuilt design follow-ups) — prior: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
 
 ---
 
@@ -174,12 +176,32 @@ Researched direction retained for each; none built unless noted.
   - **PHPStan note:** the package's `FindPasskeyToAuthenticateAction::execute(): ?Passkey` returns the
     *base* model type, so `$passkey->user` needs a `/** @var \App\Models\Passkey */` narrow at the two
     controller call sites (config binds the subclass at runtime).
-  - **Verification:** full Pest **202 passed**, PHPStan level-5 **zero**, and a wiring smoke (config
-    resolves our subclasses, `User` passes the package's `HasPasskeys` guard, register-options generate
-    with the right challenge/user fields). **STILL UNPROVEN — the live browser WebAuthn register/login
-    ceremony** (attestation/assertion round-trip); needs a CDP virtual authenticator (Playwright), the
-    in-sandbox option flagged originally. Tinker was unusable this session (persistent SIGSEGV — the known
-    sandbox quirk), so the smoke ran through the test runner instead.
+  - **Verification — LIVE WebAuthn ceremony PROVEN end-to-end (2026-07-09).** Drove a real register→login
+    round-trip in headless Chromium (Playwright 1.61.1) with a **CDP virtual authenticator**
+    (`WebAuthn.addVirtualAuthenticator`, ctap2/internal/resident-key/UV), against the running ddev app,
+    exercising the actual endpoints in-page (native `PublicKeyCredential.parse{Creation,Request}OptionsFromJSON`
+    + `credential.toJSON()`). **All 19 steps green:** password login → confirm identity → get registration
+    options → authenticator creates credential → verify-registration (StorePasskeyAction stores it) → list →
+    rename → logout → **passkey login** (FindPasskeyToAuthenticateAction) → correct user → **confirmable
+    re-auth via passkey** (ConfirmableIdentityController) → delete → empty list. Also full Pest **205 passed**
+    (202 + 3 new binding tests), PHPStan level-5 **zero**.
+    - **Origin note:** `config/app.php` hardcodes `'version' => 'canary'`, and our
+      `ConfigureCeremonyStepManagerFactoryAction` restricts origins to `localhost` on local+canary (faithful
+      to the old code, which assumes `APP_URL=http://localhost` in dev). The ddev app runs on
+      `https://convoy.ddev.site`, so the live ceremony was proven with `version` temporarily flipped to
+      `production` (the mainline path: default `CheckOrigin`, real https host). Reverted after.
+    - **Regression found & fixed while testing (commit `a5e79adc`):** because `App\Models\Passkey` now
+      extends the **spatie** model, Laravel's **implicit route-model binding stopped resolving `{passkey}`**
+      (controller/policy got an *empty* Passkey, id null) → account passkey **rename/delete 403'd** (empty
+      model fails `can:update,passkey`), and without the gate 500'd. Sibling routes are unaffected (Server
+      uses explicit `Route::bind`; api-keys/ssh-keys/sessions extend `App\Models\Model`). Fix: an explicit
+      `Route::bind('passkey', …)` in `AppServiceProvider`, mirroring `server`. Guarded by
+      `tests/Feature/Client/Account/PasskeyRouteBindingTest.php`. (This bug was latent — passkey rename/delete
+      were never browser-tested before; the swap to the spatie base class is what exposed it.)
+    - **Two-Postgres gotcha still live:** FPM talks to a *different* Postgres (`192.168.107.2`) than
+      `ddev exec` (`172.20.0.3`), so the disposable test user had to be seeded into FPM's DB via
+      `DB_HOST=192.168.107.2 php artisan …`. See the gotchas section. Tinker remained unusable (persistent
+      SIGSEGV), so all CLI probing went through artisan commands / the test runner.
 
   <details><summary>Original plan (for reference)</summary>
 
