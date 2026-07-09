@@ -2,7 +2,7 @@ import { Route as NetworkRoute } from '@/routes/_app/admin/nodes.$nodeId/network
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -28,7 +28,7 @@ import {
     CredenzaTrigger,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const CreateNetworkModal = () => {
     const { nodeId } = NetworkRoute.useParams()
@@ -42,8 +42,17 @@ const CreateNetworkModal = () => {
         defaultValues: {
             name: '',
             description: '',
+            isVlanAware: false,
+            vlanTag: '',
         },
     })
+    const isVlanAware = form.watch('isVlanAware')
+
+    useEffect(() => {
+        if (!isVlanAware) {
+            form.setValue('vlanTag', '')
+        }
+    }, [form, isVlanAware])
 
     const submit = async (data: z.infer<typeof networkInterfaceSchema>) => {
         try {
@@ -87,6 +96,24 @@ const CreateNetworkModal = () => {
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
+                            />
+                            <CheckboxForm
+                                name={'isVlanAware'}
+                                label={'VLAN-aware bridge'}
+                                description={
+                                    'Enable this only when the Proxmox bridge has VLAN awareness enabled.'
+                                }
+                            />
+                            <InputForm
+                                name={'vlanTag'}
+                                label={'Default VLAN tag'}
+                                type={'number'}
+                                min={1}
+                                max={4094}
+                                disabled={!isVlanAware}
+                                description={
+                                    'Optional. Servers on this interface inherit this tag unless they set an override.'
+                                }
                             />
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>

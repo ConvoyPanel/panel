@@ -2,6 +2,8 @@
 
 namespace App\Services\Servers;
 
+use App\Actions\Server\BuildServerAction;
+use App\Data\Cluster\ServerResourceData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\ServerStatus;
@@ -28,9 +30,6 @@ use function collect;
 use function now;
 use function substr;
 
-use App\Actions\Server\BuildServerAction;
-use App\Data\Cluster\ServerResourceData;
-
 /**
  * Class ServerCreationService
  */
@@ -43,8 +42,7 @@ class ServerCreationService
         private ProxmoxAllocationRepository $allocationRepository,
         private ProxmoxResourceRepository $resourceRepository,
         private AddressAllocationService $addressAllocationService,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NoUniqueVmidException
@@ -81,6 +79,7 @@ class ServerCreationService
                 'uuid_short' => substr($uuid, 0, 8),
                 'user_id' => $data['user_id'],
                 'node_id' => $node->id,
+                'network_interface_id' => Arr::get($data, 'limits.network_interface_id'),
                 'storage_id' => $data['storage_id'],
                 'vmid' => $data['vmid'] ?? $this->generateUniqueVmId($node),
                 'hostname' => $data['hostname'],
@@ -95,6 +94,7 @@ class ServerCreationService
                 'backup_count_limit' => Arr::get($data, 'limits.backups.count'),
                 'backup_size_limit' => Arr::get($data, 'limits.backups.size'),
                 'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
+                'vlan_tag' => Arr::get($data, 'limits.vlan_tag'),
             ]);
 
             // Mirror the primary disk into server_disks. Expand-first: the

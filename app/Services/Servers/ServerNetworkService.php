@@ -48,22 +48,30 @@ class ServerNetworkService
             ?? ($ipv6 instanceof Address ? $ipv6->mac_address : null);
         $ipv4Interface = $ipv4?->networkInterfaces()->first();
         $ipv6Interface = $ipv6?->networkInterfaces()->first();
-        $bridge = ($ipv4Interface instanceof NetworkInterface ? $ipv4Interface->name : null)
-            ?? ($ipv6Interface instanceof NetworkInterface ? $ipv6Interface->name : null);
+        $networkInterface = $server->networkInterface instanceof NetworkInterface
+            ? $server->networkInterface
+            : (($ipv4Interface instanceof NetworkInterface ? $ipv4Interface : null)
+                ?? ($ipv6Interface instanceof NetworkInterface ? $ipv6Interface : null));
+        $bridge = $networkInterface?->name;
+        $hasDesiredVlanTag = $networkInterface instanceof NetworkInterface;
+        $vlanTag = $networkInterface?->is_vlan_aware
+            ? ($server->vlan_tag ?? $networkInterface->vlan_tag)
+            : null;
 
         $config = $this->configRepository->setServer($server)->getConfig();
 
         // Skip NICs already in the desired state so we don't rewrite them.
         // Firewall isn't the only field we set here — a NIC could be firewalled
         // but still need its mac/bridge corrected — so a device is only
-        // redundant when all three would be unchanged.
+        // redundant when every managed field would be unchanged.
         $devicesToUpdate = $config->networkDevices
-            ->filter(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
+            ->filter(function (NetworkDeviceData $device) use ($macAddress, $bridge, $hasDesiredVlanTag, $vlanTag) {
                 $needsFirewall = $device->isFirewallEnabled !== true;
                 $needsMac = $macAddress !== null && $macAddress !== $device->macAddress;
                 $needsBridge = $bridge !== null && $bridge !== $device->bridge;
+                $needsVlanTag = $hasDesiredVlanTag && $vlanTag !== $device->vlanTag;
 
-                return $needsFirewall || $needsMac || $needsBridge;
+                return $needsFirewall || $needsMac || $needsBridge || $needsVlanTag;
             });
 
         // Nothing to change — skip the write entirely rather than POST an
@@ -73,10 +81,13 @@ class ServerNetworkService
         }
 
         $networkDevices = $devicesToUpdate
-            ->map(function (NetworkDeviceData $device) use ($macAddress, $bridge) {
+            ->map(function (NetworkDeviceData $device) use ($macAddress, $bridge, $hasDesiredVlanTag, $vlanTag) {
                 $device->isFirewallEnabled = true;
                 $device->macAddress = $macAddress ?? $device->macAddress;
                 $device->bridge = $bridge ?? $device->bridge;
+                if ($hasDesiredVlanTag) {
+                    $device->vlanTag = $vlanTag;
+                }
 
                 return $device->toProxmoxString();
             })
@@ -141,7 +152,7 @@ class ServerNetworkService
      * Allocates the addresses to the server. Changes do not fully activate without running syncSettings().
      * Also, you better fucking make sure that the addresses are accessible to the server's node.
      *
-     * @param int[]|Address[] $addresses
+     * @param  int[]|Address[]  $addresses
      */
     public function syncAddresses(Server $server, array $addresses): void
     {
@@ -159,7 +170,7 @@ class ServerNetworkService
 
         // Attach new addresses. The `state = available` guard means a reserved address is never
         // silently assigned (reserved is fully locked), and it flips available -> assigned.
-        if (!empty($addressesToAdd)) {
+        if (! empty($addressesToAdd)) {
             Address::query()
                 ->where('state', AddressState::Available)
                 ->whereIn('id', $addressesToAdd)
@@ -167,7 +178,7 @@ class ServerNetworkService
         }
 
         // Detach addresses no longer associated (assigned -> available).
-        if (!empty($addressesToRemove)) {
+        if (! empty($addressesToRemove)) {
             Address::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)

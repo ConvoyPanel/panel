@@ -7,9 +7,16 @@ import { apiFetch, type DataResponse } from '@/lib/api'
 import { NetworkInterface } from '@/types/network-interface.ts'
 import NetworkInterfaceController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NetworkInterfaceController'
 
+const vlanTagSchema = z.preprocess(
+    value => (value === '' || value == null ? null : value),
+    z.coerce.number().int().min(1).max(4094).nullable()
+)
+
 export const networkInterfaceSchema = z.object({
     name: z.string().min(1).max(40),
     description: z.string().max(191),
+    isVlanAware: z.boolean(),
+    vlanTag: vlanTagSchema,
 })
 
 // NetworkInterfaceController is served under both the panel (`/api/admin`) and
@@ -61,7 +68,12 @@ export const createNetworkInterface = async (
     rawDataToNetworkInterface(
         (
             await apiFetch<DataResponse<unknown>>(storeRoute(nodeId), {
-                body: payload,
+                body: {
+                    name: payload.name,
+                    description: payload.description,
+                    is_vlan_aware: payload.isVlanAware,
+                    vlan_tag: payload.vlanTag,
+                },
             })
         ).data
     )
@@ -75,7 +87,14 @@ export const updateNetworkInterface = async (
         (
             await apiFetch<DataResponse<unknown>>(
                 updateRoute({ node: nodeId, network_interface: interfaceId }),
-                { body: payload }
+                {
+                    body: {
+                        name: payload.name,
+                        description: payload.description,
+                        is_vlan_aware: payload.isVlanAware,
+                        vlan_tag: payload.vlanTag,
+                    },
+                }
             )
         ).data
     )

@@ -12,6 +12,11 @@ export type ServerQueryParams = QueryBuilderParams<
     '*' | 'name' | 'hostname' | 'node_id' | 'user_id'
 >
 
+const vlanTagSchema = z.preprocess(
+    value => (value === '' || value == null ? null : value),
+    z.coerce.number().int().min(1).max(4094).nullable()
+)
+
 export const serverSchema = z
     .object({
         name: z.string().min(1, 'Name is required.').max(191),
@@ -49,6 +54,7 @@ export const serverSchema = z
         networkInterfaceId: z
             .string({ error: 'Network Interface is required.' })
             .min(1),
+        vlanTag: vlanTagSchema,
         addressesIpv4Count: z.coerce.number().min(0).max(100).optional(),
         addressesIpv6Count: z.coerce.number().min(0).max(100).optional(),
         addresses: z.array(z.string()).optional(),
@@ -148,6 +154,7 @@ export const createServer = async ({
     backupCount,
     backupSize,
     networkInterfaceId,
+    vlanTag,
     addressesIpv4Count,
     addressesIpv6Count,
     addresses,
@@ -181,6 +188,7 @@ export const createServer = async ({
                             size: backupSize,
                         },
                         network_interface_id: Number(networkInterfaceId),
+                        vlan_tag: vlanTag,
                         addresses_ipv4_count: addressesIpv4Count,
                         addresses_ipv6_count: addressesIpv6Count,
                         addresses: addresses?.map(Number),

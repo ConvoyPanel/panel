@@ -17,6 +17,8 @@ class NetworkInterfaceData extends Data
         public int $nodeId,
         public string $name,
         public ?string $description,
+        public bool $isVlanAware,
+        public ?int $vlanTag,
         #[LoadRelation]
         public Lazy|NodeData $node,
     ) {}
@@ -28,6 +30,8 @@ class NetworkInterfaceData extends Data
             nodeId: $interface->node_id,
             name: $interface->name,
             description: $interface->description,
+            isVlanAware: $interface->is_vlan_aware,
+            vlanTag: $interface->vlan_tag,
             node: Lazy::whenLoaded(
                 'node',
                 $interface,

@@ -2,6 +2,7 @@
 
 use App\Enums\Server\ServerStatus;
 use App\Models\Location;
+use App\Models\NetworkInterface;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\User;
@@ -90,4 +91,22 @@ it('mirrors the primary disk into server_disks on creation', function () {
     // And it flows through to the storage's disk-usage aggregation.
     $loaded = Storage::withUsageSums()->find($this->storage->id);
     expect($loaded->server_usage)->toBe(20 * 1024 * 1024 * 1024);
+});
+
+it('persists the selected network interface and VLAN override on creation', function () {
+    $interface = NetworkInterface::create([
+        'node_id' => $this->node->id,
+        'name' => 'vmbr0',
+        'is_vlan_aware' => true,
+        'vlan_tag' => 42,
+    ]);
+
+    $data = creationData($this->user->id, $this->node->id, $this->storage->id);
+    $data['limits']['network_interface_id'] = $interface->id;
+    $data['limits']['vlan_tag'] = 123;
+
+    $server = app(ServerCreationService::class)->handle($data);
+
+    expect($server->network_interface_id)->toBe($interface->id);
+    expect($server->vlan_tag)->toBe(123);
 });

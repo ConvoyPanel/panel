@@ -18,6 +18,7 @@ export interface Server {
     uuidShort: string
     userId: number
     nodeId: number
+    networkInterfaceId: number | null
     node?: Node
     vmid: number
     hostname: string
@@ -35,6 +36,7 @@ export interface Server {
         usage: number
         limit: number
     }
+    vlanTag: number | null
     createdAt: Date
 }
 

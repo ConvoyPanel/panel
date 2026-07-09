@@ -21,6 +21,7 @@ class ServerData extends Data
         public string $uuidShort,
         public int $userId,
         public int $nodeId,
+        public ?int $networkInterfaceId,
         public int $vmid,
         public string $hostname,
         public string $name,
@@ -33,6 +34,7 @@ class ServerData extends Data
         public int $backupCountLimit,
         public int $backupSizeLimit,
         public int $bandwidthLimit,
+        public ?int $vlanTag,
         public CarbonImmutable $createdAt,
         #[LoadRelation]
         public Lazy|NodeData $node,
@@ -46,6 +48,7 @@ class ServerData extends Data
             uuidShort: $server->uuid_short,
             userId: $server->user_id,
             nodeId: $server->node_id,
+            networkInterfaceId: $server->network_interface_id,
             vmid: $server->vmid,
             hostname: $server->hostname,
             name: $server->name,
@@ -58,6 +61,7 @@ class ServerData extends Data
             backupCountLimit: $server->backup_count_limit,
             backupSizeLimit: $server->backup_size_limit,
             bandwidthLimit: (int) $server->bandwidth_limit,
+            vlanTag: $server->vlan_tag,
             createdAt: CarbonImmutable::parse($server->created_at),
             node: Lazy::whenLoaded(
                 'node',

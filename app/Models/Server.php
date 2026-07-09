@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Casts\StorageSizeCast;
 use App\Enums\Server\ServerStatus;
-use App\Exceptions\Http\Server\ServerStatusConflictException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $id
  * @property int $user_id
  * @property int $node_id
+ * @property ?int $network_interface_id
  * @property int $vmid
  * @property string $uuid
  * @property string $uuid_short
@@ -30,9 +31,11 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $backup_count_limit
  * @property int $backup_size_limit
  * @property int $bandwidth_limit
+ * @property ?int $vlan_tag
  * @property Node $node
+ * @property ?NetworkInterface $networkInterface
  * @property Storage $storage
- * @property \Illuminate\Database\Eloquent\Collection<int, ServerDisk> $disks
+ * @property Collection<int, ServerDisk> $disks
  * @property ?ServerDisk $primaryDisk
  * @property ?Address $primaryIPv4Address
  * @property ?Address $primaryIPv6Address
@@ -54,6 +57,7 @@ class Server extends Model
         'name' => 'required|string|min:1|max:40',
         'node_id' => 'required|integer|exists:nodes,id',
         'storage_id' => 'required|integer|exists:storages,id',
+        'network_interface_id' => 'nullable|integer|exists:network_interfaces,id',
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
@@ -65,6 +69,7 @@ class Server extends Model
         'backup_count_limit' => 'required|integer|min:-1',
         'backup_size_limit' => 'required|integer|min:-1',
         'bandwidth_limit' => 'present|integer|min:-1',
+        'vlan_tag' => 'nullable|integer|min:1|max:4094',
         'hydrated_at' => 'nullable|date',
     ];
 
@@ -77,6 +82,7 @@ class Server extends Model
             'bandwidth_usage' => StorageSizeCast::class,
             'bandwidth_limit' => StorageSizeCast::class,
             'backup_size_limit' => StorageSizeCast::class,
+            'vlan_tag' => 'integer',
         ];
     }
 
@@ -86,6 +92,14 @@ class Server extends Model
     public function node(): BelongsTo
     {
         return $this->belongsTo(Node::class);
+    }
+
+    /**
+     * @return BelongsTo<NetworkInterface, $this>
+     */
+    public function networkInterface(): BelongsTo
+    {
+        return $this->belongsTo(NetworkInterface::class);
     }
 
     /**

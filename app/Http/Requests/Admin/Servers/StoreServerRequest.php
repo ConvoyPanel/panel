@@ -2,21 +2,23 @@
 
 namespace App\Http\Requests\Admin\Servers;
 
-use App\Rules\HasSufficientCPU;
-use App\Rules\HasSufficientMemory;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Enums\Node\Storage\StorageContentType;
+use App\Models\NetworkInterface;
 use App\Models\Server;
 use App\Rules\HasSufficientAddresses;
-use App\Rules\StorageAllows;
+use App\Rules\HasSufficientCPU;
 use App\Rules\HasSufficientDiskSpace;
+use App\Rules\HasSufficientMemory;
 use App\Rules\NetworkInterfaceBelongsToNode;
-use App\Rules\TemplateIsAvailable;
+use App\Rules\StorageAllows;
 use App\Rules\TemplateFitsStorage;
+use App\Rules\TemplateIsAvailable;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreServerRequest extends BaseApiRequest
 {
@@ -26,35 +28,35 @@ class StoreServerRequest extends BaseApiRequest
 
         return [
             // Basic server information
-            'name'       => $rules['name'],
-            'node_id'    => $rules['node_id'],
+            'name' => $rules['name'],
+            'node_id' => $rules['node_id'],
             'storage_id' => [
                 ...$rules['storage_id'],
                 new StorageAllows(StorageContentType::KVM),
             ],
-            'user_id'    => $rules['user_id'],
-            'vmid'       => ['nullable', 'numeric', 'min:100', 'max:999999999', new VMIDIsAvailable($this->input('node_id'))],
-            'hostname'   => $rules['hostname'],
+            'user_id' => $rules['user_id'],
+            'vmid' => ['nullable', 'numeric', 'min:100', 'max:999999999', new VMIDIsAvailable($this->input('node_id'))],
+            'hostname' => $rules['hostname'],
 
             // Resource limits
-            'limits'                    => 'required|array',
-            'limits.cpu'                => [...$rules['cpu'], new HasSufficientCPU()],
-            'limits.memory'             => [...$rules['memory'], new HasSufficientMemory()],
-            'limits.disk'               => [...$rules['disk'], new HasSufficientDiskSpace()],
-            'limits.bandwidth'          => $rules['bandwidth_limit'],
+            'limits' => 'required|array',
+            'limits.cpu' => [...$rules['cpu'], new HasSufficientCPU],
+            'limits.memory' => [...$rules['memory'], new HasSufficientMemory],
+            'limits.disk' => [...$rules['disk'], new HasSufficientDiskSpace],
+            'limits.bandwidth' => $rules['bandwidth_limit'],
 
             // Optional secondary/data disks, each on its own storage. The
             // primary/OS disk stays `storage_id` + `limits.disk`; these are
             // allocated post-clone (see AllocationService::syncDisks). Capacity
             // is checked in aggregate by the HasSufficientDiskSpace rule above.
-            'limits.disks'              => 'sometimes|array',
+            'limits.disks' => 'sometimes|array',
             'limits.disks.*.storage_id' => ['required', 'integer', 'exists:storages,id', new StorageAllows(StorageContentType::KVM)],
-            'limits.disks.*.size'       => ['required', 'numeric', 'min:1'],
+            'limits.disks.*.size' => ['required', 'numeric', 'min:1'],
 
             // Backup limits
-            'limits.backups'            => 'required|array',
-            'limits.backups.count'      => $rules['backup_count_limit'],
-            'limits.backups.size'       => $rules['backup_size_limit'],
+            'limits.backups' => 'required|array',
+            'limits.backups.count' => $rules['backup_count_limit'],
+            'limits.backups.size' => $rules['backup_size_limit'],
 
             // IP addresses
             'limits.network_interface_id' => [
@@ -64,9 +66,10 @@ class StoreServerRequest extends BaseApiRequest
                 new NetworkInterfaceBelongsToNode($this->input('node_id')),
                 new HasSufficientAddresses($addressAvailabilityService),
             ],
+            'limits.vlan_tag' => 'nullable|integer|min:1|max:4094',
             'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
-            'limits.addresses'        => [
+            'limits.addresses' => [
                 'array',
                 Rule::requiredIf(function () {
                     $ipv4Count = $this->input('limits.addresses_ipv4_count');
@@ -75,12 +78,12 @@ class StoreServerRequest extends BaseApiRequest
                     return (blank($ipv4Count) || $ipv4Count == 0) && (blank($ipv6Count) || $ipv6Count == 0);
                 }),
             ],
-            'limits.addresses.*'      => [
+            'limits.addresses.*' => [
                 'integer',
                 function ($attribute, $value, $fail) {
                     $address = Address::with('addressBlock.addressBlockGroup.networkInterfaces')->find($value);
 
-                    if (!$address) {
+                    if (! $address) {
                         $fail("The address with ID {$value} could not be found.");
 
                         return;
@@ -91,7 +94,7 @@ class StoreServerRequest extends BaseApiRequest
                     }
 
                     $networkInterfaceId = $this->input('limits.network_interface_id');
-                    if (!$address->addressBlock->addressBlockGroup->networkInterfaces->contains('id', $networkInterfaceId)) {
+                    if (! $address->addressBlock->addressBlockGroup->networkInterfaces->contains('id', $networkInterfaceId)) {
                         $fail("The address with ID {$value} does not belong to the selected network interface.");
                     }
                 },
@@ -99,23 +102,42 @@ class StoreServerRequest extends BaseApiRequest
 
             // Server creation options
             'deferred_os_selection' => 'required|boolean',
-            'account_password'      => [
+            'account_password' => [
                 'nullable',
-                Rule::requiredIf(fn () => $this->input('should_create_vm') && !$this->input('deferred_os_selection')),
+                Rule::requiredIf(fn () => $this->input('should_create_vm') && ! $this->input('deferred_os_selection')),
                 'string',
                 'min:8',
                 'max:191',
             ],
-            'should_create_vm'  => 'required|boolean',
-            'template_uuid'         => [
+            'should_create_vm' => 'required|boolean',
+            'template_uuid' => [
                 'nullable',
-                Rule::requiredIf(fn () => $this->input('should_create_vm') && !$this->input('deferred_os_selection')),
+                Rule::requiredIf(fn () => $this->input('should_create_vm') && ! $this->input('deferred_os_selection')),
                 'string',
                 'exists:templates,uuid',
-                new TemplateIsAvailable(),
-                new TemplateFitsStorage(),
+                new TemplateIsAvailable,
+                new TemplateFitsStorage,
             ],
-            'start_on_completion'   => 'required|boolean',
+            'start_on_completion' => 'required|boolean',
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if (! filled($this->input('limits.vlan_tag'))) {
+                    return;
+                }
+
+                $networkInterface = NetworkInterface::find($this->input('limits.network_interface_id'));
+                if ($networkInterface && ! $networkInterface->is_vlan_aware) {
+                    $validator->errors()->add(
+                        'limits.vlan_tag',
+                        'The selected network interface must be VLAN-aware before assigning a VLAN tag.',
+                    );
+                }
+            },
         ];
     }
 
@@ -136,7 +158,7 @@ class StoreServerRequest extends BaseApiRequest
             $toMerge['template_uuid'] = null;
         }
 
-        if (!empty($toMerge)) {
+        if (! empty($toMerge)) {
             $this->merge($toMerge);
         }
     }

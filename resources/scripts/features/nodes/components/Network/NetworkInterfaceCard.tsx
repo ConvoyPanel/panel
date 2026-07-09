@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'
 import { IconDots } from '@tabler/icons-react'
+import { StatLabel } from '@/components/ui/Typography'
 
 interface Props {
     interface: NetworkInterface
@@ -16,6 +17,12 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
     const openModal = useNetworkInterfacesModalStore(
         useShallow(state => state.openModal)
     )
+
+    const vlanLabel = networkInterface.vlanTag
+        ? `VLAN ${networkInterface.vlanTag}`
+        : networkInterface.isVlanAware
+          ? 'Untagged'
+          : 'Not VLAN-aware'
 
     return (
         <Card className={'flex px-5 py-2.5 pr-2.5'}>
@@ -36,6 +43,14 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
                         {networkInterface.description}
                     </p>
                 )}
+                <dl className={'mt-2 flex flex-wrap gap-4 text-sm'}>
+                    <div>
+                        <StatLabel as={'dt'} className={'text-xs'}>
+                            VLAN
+                        </StatLabel>
+                        <dd>{vlanLabel}</dd>
+                    </div>
+                </dl>
             </div>
             <div className={'flex items-center justify-end justify-items-end'}>
                 <DropdownMenu>

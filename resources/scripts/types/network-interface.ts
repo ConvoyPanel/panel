@@ -6,6 +6,8 @@ export interface NetworkInterface {
     nodeId: number
     name: string
     description: string | null
+    isVlanAware: boolean
+    vlanTag: number | null
     node?: Node
 }
 

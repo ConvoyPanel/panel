@@ -29,7 +29,7 @@ import {
     CredenzaTitle,
 } from '@/components/ui/Credenza'
 import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const EditNetworkInterfaceModal = () => {
     const { nodeId } = NetworkRoute.useParams()
@@ -49,8 +49,11 @@ const EditNetworkInterfaceModal = () => {
         defaultValues: {
             name: '',
             description: '',
+            isVlanAware: false,
+            vlanTag: '',
         },
     })
+    const isVlanAware = form.watch('isVlanAware')
 
     useEffect(() => {
         if (!networkInterface) return
@@ -58,8 +61,16 @@ const EditNetworkInterfaceModal = () => {
         form.reset({
             name: networkInterface.name,
             description: networkInterface.description ?? '',
+            isVlanAware: networkInterface.isVlanAware,
+            vlanTag: networkInterface.vlanTag ?? '',
         })
     }, [networkInterface])
+
+    useEffect(() => {
+        if (!isVlanAware) {
+            form.setValue('vlanTag', '')
+        }
+    }, [form, isVlanAware])
 
     const submit = async (data: z.infer<typeof networkInterfaceSchema>) => {
         try {
@@ -108,6 +119,24 @@ const EditNetworkInterfaceModal = () => {
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
+                            />
+                            <CheckboxForm
+                                name={'isVlanAware'}
+                                label={'VLAN-aware bridge'}
+                                description={
+                                    'Enable this only when the Proxmox bridge has VLAN awareness enabled.'
+                                }
+                            />
+                            <InputForm
+                                name={'vlanTag'}
+                                label={'Default VLAN tag'}
+                                type={'number'}
+                                min={1}
+                                max={4094}
+                                disabled={!isVlanAware}
+                                description={
+                                    'Optional. Servers on this interface inherit this tag unless they set an override.'
+                                }
                             />
                         </CredenzaBody>
                         <CredenzaFooter className={'mt-4'}>

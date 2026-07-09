@@ -119,14 +119,15 @@ Researched direction retained for each; none built unless noted.
   cascade; Redis sessions then TTL-expire). **Note:** device label is UA-parsed client-side;
   **IP→geo location was dropped** (needs a GeoIP dependency) — add later if wanted.
 
-- **VLAN support (GitHub #150) — ASSESSED, NOT BUILT.** Mechanism is sound and half-built: the right PVE
-  primitive is `tag=` on the VM's `netX` against a VLAN-aware bridge, which `NetworkDeviceData` already
-  models (`#[ProxmoxProperty('tag')] public ?int $vlanTag`, round-trips through
-  `ServerNetworkService::syncNetworkDeviceConfig`). So there's no new push mechanism — just somewhere to
-  store the desired VLAN + populate `$vlanTag` on NIC create/sync + UI. **Key call:** node-global default
-  is too coarse (a node serves many VLANs); put the **default on the `network_interfaces` row** (the real
-  L2 boundary, already bound to address blocks) with a **per-server override** on the NIC. Validate tag ∈
-  [1,4094] or null; require the bridge be VLAN-aware; apply on create *and* NIC edit.
+- **VLAN support (GitHub #150) — DONE.** `network_interfaces` now store `is_vlan_aware` plus a nullable
+  default `vlan_tag`; `servers` persist the selected primary `network_interface_id` plus a nullable override.
+  Validation enforces tag ∈ [1,4094] and blocks tags unless the selected bridge is marked VLAN-aware.
+  `ServerNetworkService` emits PVE `tag=` from server override → interface default → no tag, clears stale
+  tags when the selected interface has none, and preserves existing PVE tags when no desired interface can be
+  inferred. Admin UI exposes VLAN-aware/default fields on node network-interface create/edit/cards and a
+  server-create override that is disabled unless the selected interface is VLAN-aware. Focused Pest tests,
+  frontend typecheck/build, and PHPStan (`--debug`, serial) are green; no live PVE or in-browser click-through
+  for this slice.
 
 - **Replace the SSO-token hack — NOT BUILT.** Current `UserController::getSSOToken` mints a short-lived
   app-key-signed JWT so plugins (e.g. WHMCS) can deep-link a user into Convoy — a stopgap. Two distinct

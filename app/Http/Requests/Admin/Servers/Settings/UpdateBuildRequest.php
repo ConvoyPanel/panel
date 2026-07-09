@@ -4,8 +4,10 @@ namespace App\Http\Requests\Admin\Servers\Settings;
 
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
+use App\Models\NetworkInterface;
 use App\Models\Node;
 use App\Models\Server;
+use App\Rules\NetworkInterfaceBelongsToNode;
 use Illuminate\Validation\Validator;
 
 class UpdateBuildRequest extends BaseApiRequest
@@ -19,6 +21,13 @@ class UpdateBuildRequest extends BaseApiRequest
             'cpu' => $rules['cpu'],
             'memory' => $rules['memory'],
             'disk' => $rules['disk'],
+            'network_interface_id' => [
+                'nullable',
+                'integer',
+                'exists:network_interfaces,id',
+                new NetworkInterfaceBelongsToNode($server->node_id),
+            ],
+            'vlan_tag' => $rules['vlan_tag'],
             'address_ids' => 'present|nullable|array',
             'address_ids.*' => 'integer|exists:ip_addresses,id',
             'backup_limit' => $rules['backup_limit'],
@@ -44,6 +53,19 @@ class UpdateBuildRequest extends BaseApiRequest
                             'One or more of the selected addresses are already in use',
                         );
                         break;
+                    }
+                }
+
+                $vlanTag = $this->has('vlan_tag') ? $this->input('vlan_tag') : $server->vlan_tag;
+                if (filled($vlanTag)) {
+                    $networkInterfaceId = $this->input('network_interface_id', $server->network_interface_id);
+                    $networkInterface = $networkInterfaceId ? NetworkInterface::find($networkInterfaceId) : null;
+
+                    if (! $networkInterface?->is_vlan_aware) {
+                        $validator->errors()->add(
+                            'vlan_tag',
+                            'The selected network interface must be VLAN-aware before assigning a VLAN tag.',
+                        );
                     }
                 }
 

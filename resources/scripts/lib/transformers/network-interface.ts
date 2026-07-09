@@ -5,5 +5,7 @@ export const rawDataToNetworkInterface = (raw: any): NetworkInterface => ({
     nodeId: raw.nodeId,
     name: raw.name,
     description: raw.description,
+    isVlanAware: raw.isVlanAware,
+    vlanTag: raw.vlanTag,
     node: raw.node ?? undefined,
 })

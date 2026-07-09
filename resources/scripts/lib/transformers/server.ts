@@ -6,6 +6,7 @@ export const rawDataToServer = (data: any): Server => ({
     uuid: data.uuid,
     uuidShort: data.uuidShort,
     nodeId: data.nodeId,
+    networkInterfaceId: data.networkInterfaceId,
     node: data.node ? rawDataToNode(data.node.data ?? data.node) : undefined,
     userId: data.userId,
     vmid: data.vmid,
@@ -24,6 +25,7 @@ export const rawDataToServer = (data: any): Server => ({
         usage: data.bandwidthUsage,
         limit: data.bandwidthLimit,
     },
+    vlanTag: data.vlanTag,
     createdAt: new Date(data.createdAt),
 })
 

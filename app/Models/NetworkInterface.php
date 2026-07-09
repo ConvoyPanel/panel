@@ -11,6 +11,8 @@ use Illuminate\Support\Collection;
  * @property int $node_id
  * @property string $name
  * @property ?string $description
+ * @property bool $is_vlan_aware
+ * @property ?int $vlan_tag
  * @property Collection<int, AddressBlockGroup> $addressBlockGroups
  */
 class NetworkInterface extends Model
@@ -25,7 +27,17 @@ class NetworkInterface extends Model
         'node_id' => 'required|integer|exists:nodes,id',
         'name' => 'required|string|min:1|max:40',
         'description' => 'nullable|string|max:191',
+        'is_vlan_aware' => 'sometimes|boolean',
+        'vlan_tag' => 'nullable|integer|min:1|max:4094',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_vlan_aware' => 'boolean',
+            'vlan_tag' => 'integer',
+        ];
+    }
 
     public function node(): BelongsTo
     {

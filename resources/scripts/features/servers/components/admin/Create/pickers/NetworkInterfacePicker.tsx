@@ -53,14 +53,27 @@ const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
                                     />
                                 </div>
                             ) : (
-                                data?.map(item => (
-                                    <SelectItem
-                                        key={item.id}
-                                        value={item.id.toString()}
-                                    >
-                                        {item.name}
-                                    </SelectItem>
-                                ))
+                                data?.map(item => {
+                                    const vlanLabel = item.vlanTag
+                                        ? `VLAN ${item.vlanTag}`
+                                        : item.isVlanAware
+                                          ? 'Untagged'
+                                          : 'No VLAN'
+
+                                    return (
+                                        <SelectItem
+                                            key={item.id}
+                                            value={item.id.toString()}
+                                        >
+                                            <span className='flex w-full items-center justify-between gap-2'>
+                                                <span>{item.name}</span>
+                                                <span className='text-xs text-muted-foreground'>
+                                                    {vlanLabel}
+                                                </span>
+                                            </span>
+                                        </SelectItem>
+                                    )
+                                })
                             )}
                         </SelectContent>
                     </Select>
