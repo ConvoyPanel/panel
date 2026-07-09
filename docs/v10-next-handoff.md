@@ -4,7 +4,10 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09 (session: passkey PublicKeyCredentialSource→CredentialRecord migration [+tests, verified] closing the pre-6.0 webauthn item; corrected stale CI-on-MySQL note [CI already Postgres 17]; recorded node Overview/servers/ipam/settings pages as still-unbuilt design follow-ups) — prior: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
+Last updated: 2026-07-09 (session: **adopted `spatie/laravel-passkeys`** [commit `20d8a442`] — backend-only
+swap, package-default `PublicKeyCredentialSource` storage, `user_id` schema kept via a thin model subclass,
+curated error-code exceptions + canary/localhost origins preserved via subclasses; deleted the four copied
+actions/serializer; full Pest 202 + PHPStan-zero green, live browser WebAuthn ceremony still unproven) — prior: passkey PublicKeyCredentialSource→CredentialRecord migration [interim, now superseded]; corrected stale CI-on-MySQL note [CI already Postgres 17]; recorded node Overview/servers/ipam/settings pages as still-unbuilt design follow-ups) — prior: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; admin grouped nav + avatar workspace switch browser-verified; nav exit transition + global command palette; account security lazy sensitive queries; ddev db collision fixed at the core/portable; seeder env overrides)
 
 ---
 
@@ -140,7 +143,47 @@ Researched direction retained for each; none built unless noted.
   out of the box — vet any OIDC-on-Passport bridge for reputation before adopting. Supersedes the
   app-key-JWT stopgap once done.
 
-- **Adopt `spatie/laravel-passkeys` — PLANNED, NOT BUILT (user direction 2026-07-09).** Replace the
+- **Adopt `spatie/laravel-passkeys` — DONE (commit `20d8a442`, 2026-07-09).** Backend swapped to the
+  maintained package (v1.8.1; webauthn-lib stayed ^5.3, no dep churn). What shipped, vs. the plan below:
+  - **Schema = option (a).** Kept the `user_id` FK. `App\Models\Passkey extends
+    Spatie\LaravelPasskeys\Models\Passkey` and keeps `const UPDATED_AT = null` (our table has no
+    `updated_at` — the package model defaults `$timestamps = true`, so **this override is load-bearing**;
+    drop it and every passkey save/update SQL-errors), a `user()` belongsTo, `id` route binding (Eloquent
+    default — no override needed), and `$validationRules['name']` (still read by `RenamePasskeyRequest`).
+    `User implements HasPasskeys` + `getPassKeyName/Id/DisplayName` (id = uuid, preserving the prior
+    WebAuthn user-handle). `config/passkeys.php` points `models.*` + `actions.*` at our classes. No data
+    or schema migration (the plan's byte-identical claim held; also **no prod passkey rows** anywhere).
+  - **Storage = package default** (`PublicKeyCredentialSource` via the package cast + `CredentialRecordConverter`).
+    This **supersedes the interim `CredentialRecord` migration** (`47d9607c`) as planned.
+  - **Deleted** the four copied classes the package provides
+    (`GeneratePasskeyRegisterOptionsAction`/`GeneratePasskeyAuthenticationOptionsAction`/`FindPasskeyToAuthenticateAction`/`PasskeySerializer`);
+    controllers inject the package actions directly. **`StorePasskeyAction`** is now a thin subclass of the
+    package action — inherits its `execute()` (package-default storage + `PasskeyRegisteredEvent` +
+    `additionalProperties`) but overrides the three protected helpers to re-throw our `HasErrorCode`
+    exceptions (the package lumps all failures into one generic `InvalidPasskey`, so class-level render
+    mapping couldn't preserve our distinct slugs — hence the subclass). **`ConfigureCeremonyStepManagerFactoryAction`**
+    subclass folds canary/localhost origin handling into the package's single ceremony hook.
+  - **Kept** exactly as the plan required: controllers, routes, `PasskeyData`, the `rename` endpoint,
+    `last_used_at`, and the four curated exceptions.
+  - **Behavioral deltas from the old hand-rolled path (accepted as package defaults):** register options
+    no longer send `excludeCredentials` (double-registration guard dropped); auth options use empty
+    `allowCredentials` (discoverable/resident keys) and default userVerification instead of forced
+    REQUIRED. `credential_id` is now encoded by the package (`base64` on Postgres) — differs from the old
+    URL-safe-unpadded encoding, but immaterial with no existing rows (store + lookup both go through the
+    package, so new passkeys are self-consistent).
+  - **PHPStan note:** the package's `FindPasskeyToAuthenticateAction::execute(): ?Passkey` returns the
+    *base* model type, so `$passkey->user` needs a `/** @var \App\Models\Passkey */` narrow at the two
+    controller call sites (config binds the subclass at runtime).
+  - **Verification:** full Pest **202 passed**, PHPStan level-5 **zero**, and a wiring smoke (config
+    resolves our subclasses, `User` passes the package's `HasPasskeys` guard, register-options generate
+    with the right challenge/user fields). **STILL UNPROVEN — the live browser WebAuthn register/login
+    ceremony** (attestation/assertion round-trip); needs a CDP virtual authenticator (Playwright), the
+    in-sandbox option flagged originally. Tinker was unusable this session (persistent SIGSEGV — the known
+    sandbox quirk), so the smoke ran through the test runner instead.
+
+  <details><summary>Original plan (for reference)</summary>
+
+  Replace the
   hand-rolled passkey backend with the maintained Spatie package. **Key finding:** the current code
   (`app/Actions/Auth/*Passkey*Action.php`, `app/Models/Passkey.php`, `app/Services/Auth/PasskeySerializer.php`)
   is already a **hand-derived fork of this exact package** — the four action classes have identical names to
@@ -180,6 +223,8 @@ Researched direction retained for each; none built unless noted.
     `tests/Unit/Models/PasskeyDataCastTest.php` coverage (adjust the asserted class to whatever the adopted
     model stores). (7) Full Pest + PHPStan-zero + a real WebAuthn register/login smoke (needs a browser
     authenticator; virtual-authenticator via Playwright/CDP is the in-sandbox option).
+
+  </details>
 
 - **Multiple disks per VM — slice 6 (`move_disk` splitting) — DEFERRED (YAGNI).** Only needed to split a
   *template's own* multiple disks across storages; async (UPID), slow. v1 never needs it (primary comes
@@ -398,10 +443,11 @@ Researched direction retained for each; none built unless noted.
   (commit `47d9607c`): `Passkey::$data` now persists/rehydrates the base `CredentialRecord`, so
   `AuthenticatorAssertionResponseValidator::check()` no longer takes its deprecated-argument path. The two
   classes' serialized JSON is byte-identical (verified via the shared normalizer + a tinker round-trip), so
-  **no data migration** was needed for existing rows. Pre-6.0 webauthn item cleared **for the current
-  hand-rolled path** — note the maintainer has since decided to adopt `spatie/laravel-passkeys` and take its
-  *default* `PublicKeyCredentialSource` storage, so this fix is **interim** until that lands. See the
-  "Adopt `spatie/laravel-passkeys`" follow-up under *Next up*.)
+  **no data migration** was needed for existing rows. Pre-6.0 webauthn item cleared. **SUPERSEDED
+  2026-07-09** (commit `20d8a442`): `spatie/laravel-passkeys` was adopted and the model now stores the
+  package-default `PublicKeyCredentialSource` again — but the package's `CredentialRecordConverter` downcasts
+  to a base `CredentialRecord` before calling the validators, so the deprecated-argument path stays avoided.
+  See the "Adopt `spatie/laravel-passkeys` — DONE" entry under *Next up*.)
 - **Wayfinder emits URI-keyed dictionaries for admin controllers.** `routes/api-admin.php` is served under
   **two** prefixes — `/api/admin` (web session, `['auth', AdminAuthenticate]`) and `/api/application`
   (Sanctum Bearer, `['auth:sanctum', AdminAuthenticate]`) — so every admin action has two routes and
