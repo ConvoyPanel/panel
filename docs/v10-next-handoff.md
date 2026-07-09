@@ -341,8 +341,10 @@ Researched direction retained for each; none built unless noted.
   a dedicated **`db_test`** DB (ddev `post-start` `createdb`, idempotent). `tests/bootstrap.php` redirects
   onto `db_test` when `DB_TEST_DATABASE` is set — done in bootstrap (not phpunit `<env>`) because ddev
   exports `DB_DATABASE` into `$_SERVER`, which Laravel's `Env` reads before `$_ENV`/`getenv`. CI is
-  untouched (doesn't set the var; runs against its throwaway MySQL DB — a Postgres CI service is a
-  follow-up). ⚠️ Never point `RefreshDatabase` at dev `db` — it will wipe it; recover via
+  untouched (doesn't set the var). **CI already runs on Postgres 17** — `.github/workflows/tests.yml`
+  spins up a `postgres:17` service and `.env.ci` is `DB_CONNECTION=pgsql`; the earlier "throwaway MySQL /
+  add a Postgres CI service" note is obsolete, nothing to do there. ⚠️ Never point `RefreshDatabase` at
+  dev `db` — it will wipe it; recover via
   `ddev snapshot restore postgres-baseline`.
 - **PHPStan is at ZERO** (level 5, `app/`). `ddev exec ./vendor/bin/phpstan analyse --memory-limit=4G` is
   green — keep it green. (Getting there fixed real runtime bugs: `ServerDeletionService` enum-vs-string
