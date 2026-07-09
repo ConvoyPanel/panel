@@ -4,7 +4,7 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09
+Last updated: 2026-07-09 (session: VLAN committed + browser-verified; visual harness stood up; FE overhaul re-scoped + sidebar spec)
 
 ---
 
@@ -144,8 +144,14 @@ Researched direction retained for each; none built unless noted.
   *template's own* multiple disks across storages; async (UPID), slow. v1 never needs it (primary comes
   from the clone; secondaries are allocated fresh on their target storage).
 
-- **In-browser visual verification.** Several frontend surfaces are build/type-verified but never
-  clicked live (see live-verification note above). Needs a browser driver + a real node.
+- **In-browser visual verification — HARNESS NOW WORKING (this session).** Playwright (host sandbox,
+  v1.61.1 + chromium via `npx playwright install chromium --with-deps`) drives the running ddev app at
+  `https://convoy.ddev.site`. A reusable login+screenshot script lives in the session scratchpad
+  (`shoot.mjs`; `npm i playwright@1.61.1` in that dir first). Login as `visual-admin@example.test` /
+  `password`. **Verified this session:** admin dashboard (blue primary + olive neutrals render correctly),
+  nodes/servers/locations/users/tokens, node network page (VLAN cards render: vmbr0 "Not VLAN-aware",
+  vmbr1 "VLAN 100"), server-create. ⚠️ **See the two-Postgres gotcha below — you MUST seed into the DB
+  FPM actually uses (`192.168.107.3`), not the ddev `db` container, or the app won't see your data.**
 
 - **Admin dashboard redesign + olive/blue theme — PALETTE DONE, DASHBOARD BUILT, metrics-deltas (VictoriaMetrics) in progress.**
   - *Palette (DONE, global):* migrated the whole app's theme tokens in `resources/scripts/app.css` to the
@@ -201,20 +207,70 @@ Researched direction retained for each; none built unless noted.
     existing muted caption color), added shared `Stat` + `StatLabel` in `components/ui/Typography`, and
     refactored admin dashboard labels plus client `StatisticCard` titles onto the shared style. Verified
     `ddev npm run tc` + `ddev npm run build` clean.
-  - *Roadmap (separate, big):* overhaul every `components/ui/*` to **latest shadcn on Base UI**
-    (`@base-ui-components/react`) primitives instead of Radix, same preset. This is the component-library
-    swap, distinct from the token swap already done.
-  - *Design source to mirror (user ask):* the maintainer really likes the **premade "blocks"** shown on
-    shadcn's new **`create` page / Blocks gallery** (polished cards: env-vars, invite-team, report-bug,
-    traffic-channels charts, browser-share donut, invoice, shipping-address, codespaces empty-state, etc.).
-    These are shadcn **registry blocks** — MIT, copy-pasteable — browse at **ui.shadcn.com/blocks** &
-    **/examples** (the `create` experience previews/generates them; add via `npx shadcn@latest add <block>`).
-    When doing the overhaul, lift their composition/spacing/polish rather than reinventing.
+  - *FE overhaul — RE-SCOPED (interview 2026-07-09). READ THIS before touching UI.* The maintainer's
+    frustration: the palette token swap changed almost nothing *visible*, and a pure Radix→Base UI primitive
+    swap is **invisible by design** — so "do the Base UI migration" was the wrong first target. Re-aimed at
+    the **visual result**. Confirmed decisions from the interview:
+    - **Target look = shadcn `blocks` / `dashboard-01`.** Layered cards with subtle borders + soft shadow,
+      tight KPI tiles (delta + sparkline), data-dense muted tables, generous section spacing, clear
+      hierarchy, `rounded-lg`, muted captions, badges. Browse **ui.shadcn.com/blocks** & **/examples**;
+      MIT registry blocks, add via `npx shadcn@latest add <block>`. **Lift their composition/spacing/polish,
+      don't reinvent.** (NOT Vercel/geist, NOT Linear — those were the other interview options.)
+    - **Biggest gaps to fix:** cards are too flat/plain; spacing & density feel generic. These are the
+      levers — depth + deliberate spacing.
+    - **Base UI is a HARD requirement** (`@base-ui-components/react`), confirmed. Primitives must move off
+      Radix. BUT do it *opportunistically per screen* — migrate the primitives a flagship screen actually
+      touches; do NOT block visible work on a big-bang 40-component migration.
+    - **Sequence = flagship-screen-first.** Perfect ONE screen end-to-end → screenshot → maintainer
+      approves the "look" → extract patterns into shared components → roll out. Do not restyle everything
+      at once.
+  - *Sidebar redesign — TOP PRIORITY, spec locked (2026-07-09). This is the change the maintainer cares
+    about most.* Current sidebar (`components/ui/Navigation/Sidebar/Sidebar.tsx`) is a hover-to-expand
+    **icon rail** (`w-14`→`w-[13rem]`) taking a flat `Route[]`; it has **no hierarchy** and **no way to
+    drill between depths** (e.g. client dashboard → a specific server's dashboard). Rebuild it in the
+    **Vercel dashboard style** (maintainer explicitly prefers Vercel **over** Cloudflare — both were shown;
+    see the 4 reference screenshots the user pasted 2026-07-09):
+    - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
+      under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
+      first group is header-less then a divider).
+    - **Contextual drill-down:** clicking an **entity** (a **server** — Convoy's analog to Cloudflare's
+      **domain**) **swaps the entire nav** to that entity's deeper links. Primary target flow: **client
+      dashboard → server**. Items that drill deeper show a right chevron `>`.
+    - **Back button at the top** of the drilled-in nav — Vercel style ("‹ <SectionName>"), e.g. "‹ Back to
+      Servers" or the server name. (Cloudflare uses "‹ Back to Domains".)
+    - **Transition = Vercel's SUBTLE version** (maintainer's explicit pick): old links fade + translate a
+      *tiny* amount left, new links fade + translate in a *tiny* amount from the right. **NOT** Cloudflare's
+      full-width slide. Keep translate small (~8–12px feel), fast, tasteful.
+    - Other Vercel/Cloudflare chrome to consider: top **workspace/account switcher** (Vercel "Eric W's
+      projects · Hobby ▾"), a **search / ⌘K** field near the top, pinned **Settings / Manage account** and a
+      **user avatar + ⋯ + bell** at the bottom, a collapse toggle. Nav model needs a hierarchy type (groups +
+      children + entity-context), replacing the flat `Route[]`. TanStack Router; `AppLayout` passes `routes`
+      to `Sidebar`+`Header`; both client (`routes/_app/_dashboard.tsx`) and admin
+      (`routes/_app/admin/_dashboard.tsx`) build their own route arrays.
+  - *Admin↔client distinction (in-flight decision).* The only current signal is `BrandLink.tsx` tinting the
+    logo `bg-orange-600` in admin vs `bg-primary` in client — color-only, fails WCAG "use of color", and now
+    off-palette. Maintainer's call: expose the **admin/client switch inside the top-right avatar menu**
+    (`components/ui/Navigation/Avatar.tsx`), so it both indicates context and navigates. (The orange was only
+    ever a quick admin/client tell.) Not yet built.
 
 ---
 
 ## Gotchas / must-know (still live)
 
+- **TWO Postgres servers answer to `db` — the app (PHP-FPM) and `ddev exec` hit DIFFERENT databases
+  (discovered 2026-07-09, spent ~1h chasing it).** From inside the `web` container, `getent hosts db`
+  and `ddev exec psql .../db` resolve `db` → **172.20.0.2** (the `ddev-convoy-db` container). But
+  **PHP-FPM's PDO connects to `db` → 192.168.107.3** (an external Postgres reached via the docker gateway),
+  a *different* server with different data. Same DSN string (`host=db`), different endpoint — confirmed via
+  `inet_server_addr()` from both a debug route (FPM) and psql (CLI). Root cause not fully pinned (survives
+  `ddev restart` + php-fpm kill, so not a stale persistent connection; `db` has only one A record). **Practical
+  rule for anything that must be visible to the running app (seeding a visual-test admin, dashboard data,
+  network interfaces, running a migration the app needs):** target the FPM DB explicitly —
+  `ddev exec sh -c 'DB_HOST=192.168.107.3 php artisan migrate --force'` and
+  `ddev exec sh -c 'DB_HOST=192.168.107.3 php artisan tinker --no-ansi'`. To find the address live, hit a temp
+  route that returns `DB::selectOne("select inet_server_addr()")`. **Migrations run via plain `ddev exec php
+  artisan migrate` land on 172.20.0.2 and the app will NOT see them** (this bit the VLAN migration — had to
+  re-run it against 192.168.107.3). Tests use `db_test` so they're unaffected.
 - **Run tests with `ddev exec vendor/bin/pest` (or `ddev exec php artisan test`), NOT `ddev artisan
   test`.** The ddev global-command wrapper segfaults (exit 139) booting the test runner in this sandbox —
   `ddev artisan tinker`/`migrate` are fine, so it's a wrapper quirk, not a regression. Last green:
