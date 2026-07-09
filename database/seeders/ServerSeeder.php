@@ -12,13 +12,15 @@ use Illuminate\Database\Seeder;
 class ServerSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed a handful of servers. Reuses the first existing user/node/location so
+     * running this against a live dev database gives the account you're logged in
+     * as something to look at; only falls back to factories on an empty database.
      */
     public function run(ServerCreationService $service): void
     {
-        $location = Location::factory()->create();
-        $user = User::factory()->create();
-        $node = Node::factory()->for($location)->create();
+        $user = User::query()->first() ?? User::factory()->create();
+        $location = Location::query()->first() ?? Location::factory()->create();
+        $node = Node::query()->first() ?? Node::factory()->for($location)->create();
 
         Server::factory()->count(10)->create(function () use ($user, $node, $service) {
             $uuid = $service->generateUniqueUuidCombo();
@@ -26,14 +28,11 @@ class ServerSeeder extends Seeder
             return [
                 'uuid' => $uuid,
                 'uuid_short' => substr($uuid, 0, 8),
-                'user_id' => $user,
-                'node_id' => $node,
+                'user_id' => $user->id,
+                'node_id' => $node->id,
                 'cpu' => 2,
                 'memory' => 2048 * 1024 * 1024,
                 'disk' => 20 * 1024 * 1024 * 1024,
-                'backup_limit' => 16,
-                'snapshot_limit' => 16,
-                'bandwidth_limit' => 100 * 1024 * 1024 * 1024,
             ];
         });
     }
