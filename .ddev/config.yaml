@@ -41,13 +41,16 @@ web_environment:
 # CREATE DATABASE IF NOT EXISTS, so createdb is guarded to stay idempotent.
 hooks:
   post-start:
-    # Pin `db` in /etc/hosts to the real db container. Without this, the web
-    # container's resolver (search domain + ndots:0) lets a bare `db` lookup fall
-    # through to the sandbox host's wildcard DNS, which answers
-    # `db.claude-panel.docker.internal` with a host-network Postgres — so PHP-FPM
-    # and `ddev exec` end up on DIFFERENT databases (see docs/v10-next-handoff.md).
-    # nsswitch checks `files` before DNS, so an /etc/hosts entry closes the hole.
-    # Re-resolved every start, so it survives the container's IP drifting.
+    # Pin `db` in /etc/hosts to the real db container. Some Docker-sandbox setups
+    # give the web container a resolver with a search domain + ndots:0, so a bare
+    # `db` lookup can fall through to the sandbox host's wildcard DNS (which answers
+    # `db.<sandbox>.docker.internal` with an unrelated host-network Postgres) — and
+    # then PHP-FPM and `ddev exec` end up on DIFFERENT databases with the same
+    # DB_HOST (see docs/v10-next-handoff.md). This fix is sandbox-agnostic: `getent
+    # hosts db` gets the real container IP from docker's embedded DNS (authoritative
+    # for the service name), and pinning it in /etc/hosts makes nsswitch `files`
+    # win over DNS, closing the hole. A no-op where there's no collision. Re-run
+    # every start so it survives the container IP drifting.
     - exec: "sudo bash -c 'H=$(getent hosts db | head -n1 | sed \"s/[[:space:]].*//\"); grep -qw db /etc/hosts || echo \"$H db\" >> /etc/hosts'"
     - exec: "PGPASSWORD=db createdb -h db -U db db_test 2>/dev/null || true"
 

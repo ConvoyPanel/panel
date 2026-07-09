@@ -4,7 +4,7 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09 (session: VLAN committed + browser-verified; visual harness stood up; FE overhaul re-scoped + sidebar spec)
+Last updated: 2026-07-09 (session: VLAN committed; visual harness up; FE overhaul re-scoped; Vercel sidebar built+polished; ddev db collision fixed at the core/portable; seeder env overrides)
 
 ---
 
@@ -235,12 +235,18 @@ Researched direction retained for each; none built unless noted.
     desktop + mobile sheet. `BrandLink` now a clean "Convoy" wordmark + accessible "Admin" chip (orange
     dropped). Verified in-browser: admin dashboard, client "My Servers", server drill-down (screens all
     render; drill shows back + `Storage & Network`/`Configuration` groups). **Refinements (commits
-    `3076bdf2`/`8bbfba61`):** active item is color-only (no font-weight/reflow); no hover color transition;
-    bottom Settings replaced by a **collapse toggle** → icon rail that **hover-expands as an overlay**
-    (icons sit in a fixed centered slot so nothing shifts on collapse; hover state kept in `use-sidebar-store`
-    so it survives the nav remount); **back** drill animates in from the **left** (`animate-nav-in-back`) vs.
-    right going deeper; server context icon aligned to the nav-link icon column. `ServerSeeder` fixed
-    (dropped removed columns; reuses first user/node/location so seeding gives the logged-in account servers).
+    `3076bdf2` → `f777f02a`), all browser-verified:** active item is color-only (no font-weight/reflow); no
+    hover color transition; bottom Settings replaced by a **collapse toggle** → icon rail that **hover-expands
+    as an overlay** (icons sit in a fixed-width centered leading slot so nothing shifts on collapse; hover
+    state kept in `use-sidebar-store` so it survives the layout remount on navigation — CSS `:hover` did not,
+    because it doesn't re-fire on a stationary cursor after an SPA nav); **direction-aware drill transition**
+    (300ms/16px: from the right going deeper, from the left going back — the direction is *frozen per nav.key*
+    via refs + a non-reactive store read, else a re-render overwrote the class; and it's **suppressed on the
+    first nav render** of a session so a direct URL load doesn't animate); group headers align to the nav-link
+    **icon** column; server context icon aligned to that column; collapsed group headers render a **fixed-width
+    divider line placeholder** centered in the gap (via transform, layout-neutral) so hovering to expand causes
+    **zero vertical layout shift** (measured: item top identical collapsed vs expanded). `ServerSeeder` fixed +
+    now takes `SEED_SERVER_USER` (email/id) and `SEED_SERVER_COUNT` env overrides (commit `207a76a7`).
     **Still TODO:** (1) admin nav +
     admin server/node layouts still pass flat `Route[]` — add groups; (2) the **admin↔client switch in the
     avatar menu** (below); (3) the **exit** half of the transition (current is enter-only — old links don't
@@ -289,6 +295,21 @@ Researched direction retained for each; none built unless noted.
   **So plain `ddev exec php artisan migrate` and tinker now target the same DB the app reads** — no more
   `DB_HOST=` overrides needed. (During the bug, the VLAN migration had to be run twice; both DBs got it.) If
   this ever resurfaces, verify `ddev exec grep -w db /etc/hosts` shows `172.20.0.x db`.
+  **Portable across sandboxes (incl. a different Docker-sandbox / codex-opencode setup):** the fix is in the
+  committed `.ddev/config.yaml` and its logic hardcodes nothing sandbox-specific — `getent hosts db` gets the
+  container IP from docker's embedded DNS (authoritative for the service name) regardless of the host's search
+  domain, and it's a no-op where there's no collision. So it travels with the repo and re-applies on
+  `ddev start` in any environment; nothing to redo next session.
+
+- **Intermittent `exit 139` (SIGSEGV) running heavy commands in the sandbox — ENVIRONMENT, NOT a repo bug; no
+  core fix, just retry.** Seen sporadically on `ddev npm run build`, `php artisan tinker`, `cache:clear`, and
+  PHPStan's *parallel* workers — i.e. across node AND php, so it's not any one tool. It's an artifact of this
+  Docker sandbox (most likely CPU emulation and/or memory pressure — the same class of thing that makes the
+  amd64-only pgloader segfault under arm64 qemu), so there is **nothing to fix in the repo** and no config
+  change is warranted (forcing e.g. PHPStan serial in `phpstan.neon` would just penalise real CI for a sandbox
+  quirk). **Mitigation:** re-run the command (it usually succeeds within a couple of tries); run PHPStan with
+  `--debug` (serial) to dodge the parallel-worker crash. A different sandbox (e.g. next session's) may not hit
+  it at all. Do **not** conflate this with the `db` name-collision above — that one *is* fixed at the core.
 - **Run tests with `ddev exec vendor/bin/pest` (or `ddev exec php artisan test`), NOT `ddev artisan
   test`.** The ddev global-command wrapper segfaults (exit 139) booting the test runner in this sandbox —
   `ddev artisan tinker`/`migrate` are fine, so it's a wrapper quirk, not a regression. Last green:
