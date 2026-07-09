@@ -234,7 +234,14 @@ Researched direction retained for each; none built unless noted.
     `Route[]`; `AppLayout`/`Header`/mobile `SidebarToggle` all consume it; shared `SidebarContent.tsx` powers
     desktop + mobile sheet. `BrandLink` now a clean "Convoy" wordmark + accessible "Admin" chip (orange
     dropped). Verified in-browser: admin dashboard, client "My Servers", server drill-down (screens all
-    render; drill shows back + `Storage & Network`/`Configuration` groups). **Still TODO:** (1) admin nav +
+    render; drill shows back + `Storage & Network`/`Configuration` groups). **Refinements (commits
+    `3076bdf2`/`8bbfba61`):** active item is color-only (no font-weight/reflow); no hover color transition;
+    bottom Settings replaced by a **collapse toggle** → icon rail that **hover-expands as an overlay**
+    (icons sit in a fixed centered slot so nothing shifts on collapse; hover state kept in `use-sidebar-store`
+    so it survives the nav remount); **back** drill animates in from the **left** (`animate-nav-in-back`) vs.
+    right going deeper; server context icon aligned to the nav-link icon column. `ServerSeeder` fixed
+    (dropped removed columns; reuses first user/node/location so seeding gives the logged-in account servers).
+    **Still TODO:** (1) admin nav +
     admin server/node layouts still pass flat `Route[]` — add groups; (2) the **admin↔client switch in the
     avatar menu** (below); (3) the **exit** half of the transition (current is enter-only — old links don't
     animate out; Vercel does both — acceptable but a polish gap); (4) optional top workspace switcher + ⌘K
