@@ -21,5 +21,7 @@ class OverviewData extends Data
         public IsoSummaryData $isos,
         /** @var DataCollection<int, NodeSummaryData> $nodes */
         public DataCollection $nodes,
+        /** Week-over-week deltas + sparkline series for the KPI tiles (from VictoriaMetrics). */
+        public OverviewTrendsData $trends,
     ) {}
 }

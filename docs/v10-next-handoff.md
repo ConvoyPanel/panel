@@ -4,7 +4,7 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-08
+Last updated: 2026-07-09
 
 ---
 
@@ -146,7 +146,7 @@ Researched direction retained for each; none built unless noted.
 - **In-browser visual verification.** Several frontend surfaces are build/type-verified but never
   clicked live (see live-verification note above). Needs a browser driver + a real node.
 
-- **Admin dashboard redesign + olive/blue theme — PALETTE DONE (verified), DASHBOARD NOT YET BUILT.**
+- **Admin dashboard redesign + olive/blue theme — PALETTE DONE, DASHBOARD BUILT, metrics-deltas (VictoriaMetrics) in progress.**
   - *Palette (DONE, global):* migrated the whole app's theme tokens in `resources/scripts/app.css` to the
     shadcn preset **`b1YoNB40O`** (olive-tinted neutral ramp + **BLUE `--primary`**, not orange), in
     **OKLCH**. Repo was HSL-wrapped, so also unwrapped `hsl(var(--x))` → `var(--x)` in `tailwind.config.cjs`
@@ -156,15 +156,46 @@ Researched direction retained for each; none built unless noted.
     (compiled CSS carries oklch; `bg-primary/*` opacity → `color-mix`). **NOT clicked in-browser** — primary
     is now blue *everywhere* (buttons, progress bars, links), so eyeball the running app. Reference preset
     output saved in the session scratchpad `preset-vite/` & `preset-next/`.
-  - *Dashboard (designed, NOT built):* design finalized as a hosted Artifact mockup — hybrid of KPI stat
-    tiles + a *Servers by status* list + a *Needs attention* lane (capped at 4 rows, overflow opens a
-    right **`Sheet`**), responsive **node table → stacked cards** below the `md` breakpoint. To BUILD into
-    `features/overview/components/admin/OverviewContainer.tsx` with real components: `Card`, `LinearProgressBar`
-    (**needs a new `indicatorClassName` prop** for capacity tone — neutral <80%, amber ≥80%, `bg-destructive`
-    ≥95%), `Sheet` (`side='right'`), `Badge`, `byteSize`. Data is `App.Data.Admin.Overview.OverviewData`
-    (snapshot). **Two forced deviations from the mockup:** (1) NO sparklines/deltas — the API returns only a
-    snapshot, no time-series; would need a metrics-history endpoint; (2) near-capacity meter color uses amber
-    (there is no brand-orange token). Container-query layout (`@container` + `@lg:`…), NOT viewport breakpoints.
+  - *Dashboard (BUILT + committed):* hybrid of KPI stat tiles + a *Servers by status* list + a *Needs
+    attention* lane (capped at 4 rows, overflow opens a right **`Sheet`**; onboarding checklist when
+    `summary.servers === 0`), responsive **node table → stacked cards** below `@2xl`. Lives in
+    `features/overview/components/admin/` (`OverviewContainer.tsx` + `NeedsAttentionCard.tsx` + `NodesCard.tsx`
+    + `overview-helpers.ts`); added an `indicatorClassName` prop to `LinearProgressBar` for capacity tone
+    (neutral <80%, amber ≥80%, `bg-destructive` ≥95%). Container-query layout (`@container`+`@lg:`…), NOT
+    viewport breakpoints. **Deviation:** near-capacity meter uses amber (no brand-orange token). tsc + vite
+    build clean; **not yet clicked in a browser** (primary is blue now).
+  - *Metrics history → VictoriaMetrics (DECIDED, building):* KPI **deltas + sparklines** are backed by
+    **VictoriaMetrics**, NOT a Postgres snapshot table (evaluated + rejected Timescale [TSL forbids managed
+    DBaaS → not on RDS/CloudSQL, breaks Postgres-only], and InfluxDB [OSS v3 Core caps history to ~72h,
+    query-language whiplash]). VM is Apache-2, single binary, Prometheus-compatible, no history/feature gate.
+    **VM is OPTIONAL** — when `metrics.victoriametrics.url` is unset the recorder/trends no-op and the
+    dashboard still works (deltas just don't show), so it's never a required dependency for operators.
+    Local dev: `.ddev/docker-compose.victoriametrics.yaml` (modeled on the repo's `docker-compose.redis.yaml`),
+    reachable from `web` at `http://victoriametrics:8428`. Push model: `metrics:snapshot` command (scheduled
+    hourly) writes overview scalars via `/api/v1/import/prometheus`; `OverviewService` reads back a
+    `query_range` to compute per-KPI delta (vs ~7d ago) + series. DTO: `MetricTrendData` + trends on
+    `OverviewData`. Retention is a VM flag (`-retentionPeriod`), not a paywall.
+    - **STATUS: BUILT, verified working, visually tested.** Files added/changed: `config/metrics.php`;
+       `app/Services/Metrics/VictoriaMetrics.php`
+       (client — `writeNow()` via prometheus import, `queryRange()`); `app/Data/Admin/Overview/MetricTrendData.php`
+       + `OverviewTrendsData.php`; `app/Console/Commands/Maintenance/SnapshotOverviewMetricsCommand.php`
+       (`metrics:snapshot`); `OverviewService.php` (ctor injects VM; added `snapshotMetrics()`, `trends()`,
+       `trend()`; `build()` now returns `trends`); `OverviewData.php` (+`trends`); `routes/console.php`
+       (hourly schedule, guarded by config); `.ddev/docker-compose.victoriametrics.yaml`; `.env` +
+       `.env.example` (`VICTORIAMETRICS_URL`); frontend `Sparkline.tsx` (shadcn `ChartContainer` + Recharts
+       `AreaChart`, per maintainer preference) + `MetricTile` in `OverviewContainer.tsx` (delta ▲/▼ + sparkline,
+       wired to `data.trends.{servers,nodes,users,backups}`). TS types regenerated (`trends`/`MetricTrendData`/
+       `OverviewTrendsData` present). **Verified:** VM up in ddev; write→query loop works from `web`; `ddev exec
+       php artisan metrics:snapshot` wrote all `convoy_overview_*` series; `ddev npm run build` clean; `ddev npm
+       run tc` clean; PHPStan clean; full Pest clean (**194 passed**). **Visual verification done:** migrated the
+       dev DB, seeded disposable dashboard data (`visual-admin@example.test` / `password`), backfilled 15 daily VM
+       samples, installed Playwright Chromium/deps ephemerally in the ddev web container, removed `public/hot` so
+       Laravel used built assets, and captured desktop/mobile screenshots at `storage/app/visual-dashboard-desktop.png`
+       and `storage/app/visual-dashboard-mobile.png`. Bugs found/fixed during visual pass: cached `OverviewData`
+       could serialize `nodes` as `{ data: [...] }` after cache hydration (re-apply `withoutWrapping()` after cache
+       read; regression assertion added), and mobile dashboard cards clipped horizontally (layout/grid `min-w-0` +
+       explicit `grid-cols-1`). Also `ddev restart` logs a benign `scheduler: ERROR (spawn error)` (horizon starts
+       fine; pre-existing). VM's instant queries lag ~30s (`latencyOffset`); use `query_range` or explicit `time`.
   - *Caption-color standardization (pending):* client `StatisticCard` uses black (foreground) titles; admin
     dashboard uses gray (`text-muted-foreground`). Plan: a semantic `--label` token + a shared `<Stat>` in
     `components/ui/Typography`, then refactor both. Grep the drift first.

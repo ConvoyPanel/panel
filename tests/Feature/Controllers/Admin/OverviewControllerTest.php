@@ -87,6 +87,11 @@ it('returns overview metrics for admins', function () {
         ->assertJsonPath('data.nodes.0.servers', 2)
         ->assertJsonPath('data.nodes.0.memory.allocated', 12 * 1024 * 1024 * 1024)
         ->assertJsonPath('data.nodes.0.memory.total', 64 * 1024 * 1024 * 1024);
+
+    // The endpoint caches OverviewData; node rows must remain a plain array after cache hydration.
+    $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->assertJsonPath('data.nodes.0.servers', 2);
 });
 
 it('counts servers restoring from a backup', function () {

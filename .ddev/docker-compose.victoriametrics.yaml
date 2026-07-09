@@ -1,0 +1,23 @@
+services:
+  victoriametrics:
+    container_name: ddev-${DDEV_SITENAME}-victoriametrics
+    image: victoriametrics/victoria-metrics:v1.115.0
+    hostname: victoriametrics
+    # These labels ensure this service is discoverable by ddev.
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+    restart: "no"
+    expose:
+      - 8428
+    command:
+      - "-retentionPeriod=90d"
+      - "-storageDataPath=/victoria-metrics-data"
+    volumes:
+      - "victoriametrics:/victoria-metrics-data"
+    x-ddev:
+      describe-info: |
+        VictoriaMetrics: http://victoriametrics:8428
+
+volumes:
+  victoriametrics:

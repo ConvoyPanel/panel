@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('queue:prune-batches')->daily();
 Schedule::command('queue:prune-failed')->daily();
 
+// Capture admin-overview metrics into VictoriaMetrics for dashboard deltas/sparklines. The command
+// self-skips when VM is unconfigured, so this is a no-op on installs without it.
+if (config('metrics.victoriametrics.url')) {
+    Schedule::command('metrics:snapshot')->hourly();
+}
+
 // Garbage-collect session metadata rows whose underlying session has aged out (see
 // SessionRecord::prunable) so the table stays bounded even for sessions never listed.
 Schedule::command(PruneCommand::class, ['--model' => [SessionRecord::class]])->daily();

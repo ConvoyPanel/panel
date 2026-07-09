@@ -2,10 +2,10 @@ import { cn } from '@/utils'
 import * as React from 'react'
 import * as RechartsPrimitive from 'recharts'
 
-import { ChartStyle } from '@/components/ui/Chart/index.ts'
 import { ChartConfig } from '@/components/ui/Chart/types.ts'
 
 import { ChartContext } from './chart-provider'
+import ChartStyle from './ChartStyle.tsx'
 
 
 const ChartContainer = React.forwardRef<

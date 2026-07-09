@@ -11,14 +11,14 @@ interface Props {
 
 const AppLayout = ({ routes, children }: Props) => {
     return (
-        <div className='flex min-h-screen w-full bg-muted/40'>
+        <div className='flex min-h-screen w-full min-w-0 bg-muted/40'>
             <Sidebar routes={routes} />
-            <div className='flex grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
+            <div className='flex min-w-0 grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
                 <Header routes={routes} />
-                <main className={'h-full @container'}>
+                <main className={'h-full min-w-0 @container'}>
                     <div
                         className={
-                            'flex h-full flex-col gap-2 p-4 @md:gap-4 sm:px-6 sm:py-0'
+                            'flex h-full min-w-0 flex-col gap-2 p-4 @md:gap-4 sm:px-6 sm:py-0'
                         }
                     >
                         {children}

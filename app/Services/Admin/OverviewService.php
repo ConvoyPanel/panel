@@ -6,10 +6,13 @@ use App\Data\Admin\Overview\AddressUsageData;
 use App\Data\Admin\Overview\BackupSummaryData;
 use App\Data\Admin\Overview\FleetSummaryData;
 use App\Data\Admin\Overview\IsoSummaryData;
+use App\Data\Admin\Overview\MetricTrendData;
 use App\Data\Admin\Overview\NodeSummaryData;
 use App\Data\Admin\Overview\OverviewData;
+use App\Data\Admin\Overview\OverviewTrendsData;
 use App\Data\Admin\Overview\ResourceAllocationData;
 use App\Data\Admin\Overview\ServerStatusBreakdownData;
+use App\Services\Metrics\VictoriaMetrics;
 use App\Enums\Server\ServerStatus;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
@@ -32,9 +35,43 @@ class OverviewService
 
     private const CACHE_SECONDS = 15;
 
+    public function __construct(private readonly VictoriaMetrics $metrics) {}
+
     public function metrics(): OverviewData
     {
-        return Cache::remember(self::CACHE_KEY, self::CACHE_SECONDS, fn () => $this->build());
+        /** @var OverviewData $data */
+        $data = Cache::remember(self::CACHE_KEY, self::CACHE_SECONDS, fn () => $this->build());
+
+        // The DataCollection context is not preserved across cache serialization; re-apply the
+        // endpoint contract so cached responses keep `nodes` as an array instead of `{ data: [] }`.
+        $data->nodes->withoutWrapping();
+
+        return $data;
+    }
+
+    /**
+     * Flattened scalar metrics recorded to the time-series store. Names are prefixed so a single
+     * range query (`convoy_overview_.+`) fetches them all back for trends.
+     *
+     * @return array<string, int|float>
+     */
+    public function snapshotMetrics(): array
+    {
+        $m = $this->metrics();
+
+        return [
+            'convoy_overview_servers' => $m->summary->servers,
+            'convoy_overview_nodes' => $m->summary->nodes,
+            'convoy_overview_users' => $m->summary->users,
+            'convoy_overview_locations' => $m->summary->locations,
+            'convoy_overview_failed_servers' => $m->summary->failedServers,
+            'convoy_overview_memory_percent' => $m->memory->percent,
+            'convoy_overview_storage_percent' => $m->storage->percent,
+            'convoy_overview_addresses_assigned' => $m->addresses->assigned,
+            'convoy_overview_backups_total' => $m->backups->total,
+            'convoy_overview_backups_failed' => $m->backups->failed,
+            'convoy_overview_isos_total' => $m->isos->total,
+        ];
     }
 
     private function build(): OverviewData
@@ -56,7 +93,52 @@ class OverviewService
                 $nodes->map(fn (Node $node) => $this->node($node, $allocations))->values(),
                 DataCollection::class,
             )->withoutWrapping(),
+            trends: $this->trends(),
         );
+    }
+
+    private function trends(): OverviewTrendsData
+    {
+        // One range query over ~30 days (daily step) powers both the sparkline series and the delta.
+        $series = $this->metrics->queryRange('{__name__=~"convoy_overview_.+"}', '-30d', 'now', '86400');
+
+        return new OverviewTrendsData(
+            servers: $this->trend($series, 'convoy_overview_servers'),
+            nodes: $this->trend($series, 'convoy_overview_nodes'),
+            users: $this->trend($series, 'convoy_overview_users'),
+            backups: $this->trend($series, 'convoy_overview_backups_total'),
+        );
+    }
+
+    /** @param  array<string, array<int, array{0: int, 1: float}>>  $series */
+    private function trend(array $series, string $name): MetricTrendData
+    {
+        $points = $series[$name] ?? [];
+        if ($points === []) {
+            return new MetricTrendData(delta: null, series: []);
+        }
+
+        $values = array_map(fn (array $point): float => $point[1], $points);
+        $current = end($values);
+
+        // Delta vs. the sample nearest 7 days ago — but only once we hold ~a week of history, so a
+        // fresh install shows no misleading delta.
+        $delta = null;
+        if ($points[0][0] <= now()->subDays(6)->getTimestamp()) {
+            $target = now()->subDays(7)->getTimestamp();
+            $nearest = $points[0][1];
+            $bestDiff = PHP_INT_MAX;
+            foreach ($points as [$timestamp, $value]) {
+                $diff = abs($timestamp - $target);
+                if ($diff < $bestDiff) {
+                    $bestDiff = $diff;
+                    $nearest = $value;
+                }
+            }
+            $delta = round($current - $nearest, 2);
+        }
+
+        return new MetricTrendData(delta: $delta, series: array_values($values));
     }
 
     /** @return Collection<int, Node> */

@@ -10,6 +10,7 @@ import { Heading } from '@/components/ui/Typography'
 
 import NeedsAttentionCard from './NeedsAttentionCard'
 import NodesCard from './NodesCard'
+import Sparkline from './Sparkline'
 import {
     bytes,
     capacityTone,
@@ -20,16 +21,53 @@ import {
 
 type OverviewData = App.Data.Admin.Overview.OverviewData
 type Breakdown = App.Data.Admin.Overview.ServerStatusBreakdownData
+type MetricTrend = App.Data.Admin.Overview.MetricTrendData
 
-/** Top-line count with a muted label — the shared stat rhythm. */
-const MetricTile = ({ label, value }: { label: string; value: ReactNode }) => (
-    <div className='bg-card rounded-xl border p-4'>
-        <div className='text-muted-foreground text-sm'>{label}</div>
-        <div className='mt-1 text-2xl font-semibold tracking-tight tabular-nums'>
-            {value}
+/** Top-line count with a muted label, a week-over-week delta, and a trend sparkline. */
+const MetricTile = ({
+    label,
+    value,
+    trend,
+}: {
+    label: string
+    value: ReactNode
+    trend: MetricTrend
+}) => {
+    const delta = trend.delta
+    const rounded = delta === null ? 0 : Math.round(delta)
+    const showDelta = delta !== null && rounded !== 0
+    const up = rounded > 0
+
+    return (
+        <div className='bg-card overflow-hidden rounded-xl border p-4'>
+            <div className='flex items-start justify-between gap-2'>
+                <div className='text-muted-foreground text-sm'>{label}</div>
+                {showDelta && (
+                    <span
+                        className={cn(
+                            'text-xs font-semibold tabular-nums',
+                            up
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-muted-foreground'
+                        )}
+                        title='Change vs. last week'
+                    >
+                        {up ? '▲' : '▼'} {Math.abs(rounded)}
+                    </span>
+                )}
+            </div>
+            <div className='mt-1 text-2xl font-semibold tracking-tight tabular-nums'>
+                {value}
+            </div>
+            {trend.series.length >= 2 && (
+                <Sparkline
+                    series={trend.series}
+                    className='mt-3 -mb-4 -mx-4 h-8 w-[calc(100%+2rem)]'
+                />
+            )}
         </div>
-    </div>
-)
+    )
+}
 
 /** One capacity resource: label + % badge + figure + tone meter (+ optional sub). */
 const CapacityMeter = ({
@@ -178,19 +216,35 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
             : 0
 
     return (
-        <div className='@container space-y-4'>
+        <div className='@container min-w-0 space-y-4'>
             <Heading>Admin Dashboard</Heading>
 
             {/* Top-line counts */}
             <div className='grid grid-cols-2 gap-4 @xl:grid-cols-4'>
-                <MetricTile label='Servers' value={num(summary.servers)} />
-                <MetricTile label='Nodes' value={num(summary.nodes)} />
-                <MetricTile label='Users' value={num(summary.users)} />
-                <MetricTile label='Backups' value={num(backups.total)} />
+                <MetricTile
+                    label='Servers'
+                    value={num(summary.servers)}
+                    trend={data.trends.servers}
+                />
+                <MetricTile
+                    label='Nodes'
+                    value={num(summary.nodes)}
+                    trend={data.trends.nodes}
+                />
+                <MetricTile
+                    label='Users'
+                    value={num(summary.users)}
+                    trend={data.trends.users}
+                />
+                <MetricTile
+                    label='Backups'
+                    value={num(backups.total)}
+                    trend={data.trends.backups}
+                />
             </div>
 
             {/* Capacity + attention */}
-            <div className='grid items-stretch gap-4 @2xl:grid-cols-[1.5fr_1fr]'>
+            <div className='grid grid-cols-1 items-stretch gap-4 @2xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]'>
                 <Card>
                     <CardHeader className='p-5 pb-2'>
                         <CardTitle className='text-base'>
@@ -234,7 +288,7 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
             </div>
 
             {/* Status + backups/isos */}
-            <div className='grid gap-4 @xl:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 @xl:grid-cols-2'>
                 <Card>
                     <CardHeader className='flex flex-row items-center justify-between space-y-0 p-5 pb-2'>
                         <CardTitle className='text-base'>
