@@ -3,7 +3,6 @@ import {
     IconLayoutSidebarLeftCollapse,
     IconLayoutSidebarLeftExpand,
 } from '@tabler/icons-react'
-import { useState } from 'react'
 
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 import BrandLink from '@/components/ui/Navigation/Sidebar/BrandLink.tsx'
@@ -17,11 +16,14 @@ interface Props {
 const Sidebar = ({ nav }: Props) => {
     const collapsed = useSidebarStore(state => state.collapsed)
     const toggleCollapsed = useSidebarStore(state => state.toggleCollapsed)
-    const [hovered, setHovered] = useState(false)
+    const railHovered = useSidebarStore(state => state.railHovered)
+    const setRailHovered = useSidebarStore(state => state.setRailHovered)
 
-    // When collapsed, hovering temporarily expands the panel as an overlay
-    // without shifting page content (the reserved <aside> stays narrow).
-    const showExpanded = !collapsed || hovered
+    // Hover-expand state lives in the store so it survives the layout remount on
+    // navigation (clicking a link while hovering the rail must not snap it shut).
+    // Icons keep a fixed left position in both widths, so nothing shifts on
+    // collapse; only the labels appear/disappear.
+    const expanded = !collapsed || railHovered
 
     return (
         <aside
@@ -31,49 +33,38 @@ const Sidebar = ({ nav }: Props) => {
             )}
         >
             <div
-                onMouseEnter={() => collapsed && setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
+                onMouseEnter={() => collapsed && setRailHovered(true)}
+                onMouseLeave={() => setRailHovered(false)}
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200',
-                    showExpanded ? 'w-64' : 'w-14',
-                    collapsed && hovered ? 'shadow-xl' : null
+                    'fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200',
+                    expanded ? 'w-64' : 'w-14',
+                    collapsed && railHovered ? 'shadow-xl' : null
                 )}
             >
-                <div
-                    className={cn(
-                        'flex h-14 items-center',
-                        showExpanded ? 'px-3' : 'justify-center px-0'
-                    )}
-                >
-                    <BrandLink collapsed={!showExpanded} />
+                <div className='flex h-14 items-center px-2'>
+                    <BrandLink collapsed={!expanded} />
                 </div>
 
-                <nav
-                    className={cn(
-                        'no-scrollbar flex flex-1 flex-col overflow-y-auto pb-3',
-                        showExpanded ? 'px-3' : 'px-2'
-                    )}
-                >
-                    <SidebarContent nav={nav} collapsed={!showExpanded} />
+                <nav className='no-scrollbar flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-2 pb-3'>
+                    <SidebarContent nav={nav} collapsed={!expanded} />
                 </nav>
 
-                <div className={cn('border-t py-3', showExpanded ? 'px-3' : 'px-2')}>
+                <div className='border-t px-2 py-3'>
                     <button
                         type='button'
                         onClick={toggleCollapsed}
                         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        className={cn(
-                            'flex h-9 w-full items-center gap-2.5 rounded-md text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                            showExpanded ? 'px-2.5' : 'justify-center px-0'
-                        )}
+                        className='flex h-9 w-full items-center overflow-hidden rounded-md text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     >
-                        {collapsed ? (
-                            <IconLayoutSidebarLeftExpand className='h-[1.15rem] w-[1.15rem] shrink-0' />
-                        ) : (
-                            <IconLayoutSidebarLeftCollapse className='h-[1.15rem] w-[1.15rem] shrink-0' />
-                        )}
-                        {showExpanded ? (
-                            <span className='min-w-0 flex-1 truncate text-left'>
+                        <span className='grid h-9 w-10 shrink-0 place-items-center'>
+                            {collapsed ? (
+                                <IconLayoutSidebarLeftExpand className='h-[1.15rem] w-[1.15rem]' />
+                            ) : (
+                                <IconLayoutSidebarLeftCollapse className='h-[1.15rem] w-[1.15rem]' />
+                            )}
+                        </span>
+                        {expanded ? (
+                            <span className='min-w-0 flex-1 truncate whitespace-nowrap pr-2 text-left'>
                                 {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                             </span>
                         ) : null}
