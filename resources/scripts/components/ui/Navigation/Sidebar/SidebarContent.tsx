@@ -13,6 +13,11 @@ interface Props {
     onNavigate?: () => void
 }
 
+// Session-scoped: false until the sidebar has rendered once, so a direct page
+// load / hard navigation to a deep URL doesn't play the drill animation. Resets
+// naturally on a full page reload (module re-init); survives in-app remounts.
+let navHasRendered = false
+
 /**
  * The scrollable body of the sidebar: an optional back affordance + entity
  * context header, then the grouped links. Keyed on `nav.key` so drilling
@@ -27,11 +32,15 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
     // and overwrite the animation class with the wrong direction.
     const keyRef = useRef<string | null>(null)
     const goingBackRef = useRef(false)
+    const animateRef = useRef(false)
     if (keyRef.current !== nav.key) {
         goingBackRef.current = depth < useSidebarStore.getState().lastDepth
+        animateRef.current = navHasRendered
+        navHasRendered = true
         keyRef.current = nav.key
     }
     const goingBack = goingBackRef.current
+    const animate = animateRef.current
 
     useEffect(() => {
         useSidebarStore.getState().setLastDepth(depth)
@@ -45,7 +54,7 @@ const SidebarContent = ({ nav, collapsed, onNavigate }: Props) => {
             key={nav.key}
             className={cn(
                 'flex flex-1 flex-col gap-1',
-                goingBack ? 'animate-nav-in-back' : 'animate-nav-in'
+                animate && (goingBack ? 'animate-nav-in-back' : 'animate-nav-in')
             )}
         >
             {nav.back ? (
