@@ -38,7 +38,11 @@ function Security() {
     return (
         <>
             <Heading>Security</Heading>
-            <div className={'grid grid-cols-1 gap-5 @md:grid-cols-2'}>
+            <div
+                className={
+                    'grid grid-cols-1 items-start gap-5 @md:grid-cols-2'
+                }
+            >
                 <KeychainCard />
                 <AuthenticationCard />
                 <ApiKeysCard />
