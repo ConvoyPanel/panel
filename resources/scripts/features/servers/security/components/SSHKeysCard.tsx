@@ -32,6 +32,14 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemGroup,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const errorMessage = (e: unknown, fallback: string): string =>
@@ -104,11 +112,11 @@ const SSHKeysCard = ({ uuid }: Props) => {
                         your keychain, or paste a one-off key.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className={'min-h-[10rem]'}>
+                <CardContent>
                     {isLoading ? (
                         <Skeleton className={'h-32 w-full'} />
                     ) : keys.length > 0 ? (
-                        <ul className={'divide-y'}>
+                        <ItemGroup className={'gap-3'}>
                             {keys.map(key => {
                                 const { algorithm, comment } =
                                     describeSSHKey(key)
@@ -116,54 +124,50 @@ const SSHKeysCard = ({ uuid }: Props) => {
                                     k => k.publicKey.trim() === key.trim()
                                 )
                                 return (
-                                    <li
+                                    <Item
                                         key={key}
-                                        className={
-                                            'flex items-center gap-2 py-2 pr-2'
-                                        }
+                                        variant={'muted'}
+                                        size={'sm'}
                                     >
-                                        <IconKey
-                                            className={'shrink-0'}
-                                            size={18}
-                                        />
-                                        <div
-                                            className={
-                                                'space-y-1 overflow-x-hidden'
-                                            }
+                                        <ItemMedia variant={'icon'}>
+                                            <IconKey />
+                                        </ItemMedia>
+                                        <ItemContent
+                                            className={'overflow-x-hidden'}
                                         >
-                                            <p
-                                                className={
-                                                    'truncate text-sm font-medium leading-none'
-                                                }
-                                            >
+                                            <ItemTitle className={'truncate'}>
                                                 {named?.name ??
                                                     comment ??
                                                     'One-off key'}
-                                            </p>
+                                            </ItemTitle>
                                             <Badge
                                                 variant={'secondary'}
-                                                className={'font-mono'}
+                                                className={'w-fit font-mono'}
                                             >
                                                 {algorithm}
                                             </Badge>
-                                        </div>
-                                        <div className={'min-w-[1rem] grow'} />
-                                        <Button
-                                            variant={'ghost'}
-                                            size={'icon'}
-                                            className={'shrink-0'}
-                                            onClick={() =>
-                                                setKeys(prev =>
-                                                    prev.filter(k => k !== key)
-                                                )
-                                            }
-                                        >
-                                            <IconTrash className={'h-4 w-4'} />
-                                        </Button>
-                                    </li>
+                                        </ItemContent>
+                                        <ItemActions>
+                                            <Button
+                                                variant={'ghost'}
+                                                size={'icon'}
+                                                onClick={() =>
+                                                    setKeys(prev =>
+                                                        prev.filter(
+                                                            k => k !== key
+                                                        )
+                                                    )
+                                                }
+                                            >
+                                                <IconTrash
+                                                    className={'h-4 w-4'}
+                                                />
+                                            </Button>
+                                        </ItemActions>
+                                    </Item>
                                 )
                             })}
-                        </ul>
+                        </ItemGroup>
                     ) : (
                         <SimpleEmptyState
                             icon={IconKey}
