@@ -15,7 +15,12 @@ use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 */
 
 Route::middleware('guest')->group(function () {
-    Route::get('/consume-token', [Auth\LoginController::class, 'authorizeToken']);
+    // Single sign-on deep link (minted by Admin\UserController::getSSOToken). The `signed`
+    // middleware verifies the HMAC + expiry; the controller enforces single use. Named so
+    // `URL::temporarySignedRoute('auth.sso.consume', …)` can address it.
+    Route::get('/sso/{uuid}', [Auth\SsoController::class, 'consume'])
+        ->middleware('signed')
+        ->name('auth.sso.consume');
 
     $loginLimiter = config('fortify.limiters.login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])

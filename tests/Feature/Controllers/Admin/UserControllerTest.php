@@ -60,3 +60,24 @@ it('deletes users through the deletion service cleanup path', function () {
         ->and(SessionRecord::query()->where('user_id', $target->id)->exists())->toBeFalse()
         ->and($handler->read('target-device'))->toBe('');
 });
+
+it('mints a single-use signed SSO link for a user', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $target = User::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->postJson("/api/admin/users/{$target->id}/generate-sso-token")
+        ->assertSuccessful();
+
+    $response->assertJsonPath('data.userId', $target->id);
+    $link = $response->json('data.link');
+    expect($link)->toContain('/api/auth/sso/'.$target->uuid)
+        ->and($link)->toContain('signature=');
+
+    // The freshly minted link is honoured by the consume endpoint (logs the target in). Drop the
+    // admin session first so the `guest`-only consume route runs (a fresh browser has no session).
+    auth()->logout();
+
+    $this->get($link)->assertRedirect(route('index'));
+    $this->assertAuthenticatedAs($target);
+});

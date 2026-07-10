@@ -9,11 +9,12 @@ use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
 use App\Models\Filters\FiltersUserWildcard;
 use App\Models\User;
-use App\Services\Api\JWTService;
 use App\Services\Users\UserDeletionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -21,7 +22,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class UserController
 {
     public function __construct(
-        private JWTService $JWTService,
         private UserDeletionService $userDeletion,
     ) {}
 
@@ -99,17 +99,18 @@ class UserController
 
     public function getSSOToken(User $user)
     {
-        $token = $this->JWTService->issue(
-            signingKey: config('app.key'),
-            audience: config('app.url'),
-            identifier: $user->uuid,
-            claims: ['user_uuid' => $user->uuid],
-            expiresAt: CarbonImmutable::now()->addSeconds(15),
+        // A single-use, expiring Laravel signed URL — the integration redirects the browser
+        // straight to it. The `nonce` is consumed on first use (see Auth\SsoController) so a
+        // captured link cannot be replayed within its short lifetime.
+        $link = URL::temporarySignedRoute(
+            'auth.sso.consume',
+            CarbonImmutable::now()->addSeconds(config('sso.link_ttl')),
+            ['uuid' => $user->uuid, 'nonce' => Str::random(40)],
         );
 
         return new SSOTokenData(
             userId: $user->id,
-            token: $token->toString(),
+            link: $link,
         );
     }
 }
