@@ -1,11 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLazyFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { login } from '@/features/auth/api.ts'
+import { oauthErrorMessage } from '@/features/auth/oauth.ts'
 
 import LoginWithPasskeyButton from '@/features/auth/components/LoginWithPasskeyButton.tsx'
+import OAuthProviderButtons from '@/features/auth/components/OAuthProviderButtons.tsx'
 
 import {
     CardContent,
@@ -27,8 +31,20 @@ const schema = z.object({
 })
 
 function Login() {
-    const { redirect } = Route.useSearch()
+    const { redirect, oauth_error: oauthError } = Route.useSearch()
     const navigate = Route.useNavigate()
+
+    useEffect(() => {
+        if (oauthError) {
+            toast.error(oauthErrorMessage(oauthError))
+            void navigate({
+                to: '/auth/login',
+                search: { redirect: redirect ? redirect : undefined },
+                replace: true,
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [oauthError])
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -100,6 +116,7 @@ function Login() {
                             </div>
                         </div>
                         <LoginWithPasskeyButton redirectTo={redirect} />
+                        <OAuthProviderButtons redirectTo={redirect} />
                     </CardFooter>
                 </form>
             </Form>

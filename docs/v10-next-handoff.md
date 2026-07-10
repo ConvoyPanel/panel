@@ -4,7 +4,13 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-09 (session: **adopted `spatie/laravel-passkeys`** [commit `20d8a442`] — backend-only
+Last updated: 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
+locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
+`OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
+auto-register off by default], `Auth\OAuthController` redirect/callback [login when logged-out, link when
+logged-in], login-page "Continue with" buttons + account "Connected Accounts" card, curated HasErrorCode
+exceptions; Pest 224 + PHPStan-zero + tc/build green; NOT live-tested against a real IdP [no creds/callback
+in-sandbox]) — prior: **adopted `spatie/laravel-passkeys`** [commit `20d8a442`] — backend-only
 swap, package-default `PublicKeyCredentialSource` storage, `user_id` schema kept via a thin model subclass,
 curated error-code exceptions + canary/localhost origins preserved via subclasses; deleted the four copied
 actions/serializer. **Live WebAuthn register→login→re-auth PROVEN** via a Playwright CDP virtual authenticator
@@ -134,8 +140,10 @@ Researched direction retained for each; none built unless noted.
   frontend typecheck/build, and PHPStan (`--debug`, serial) are green; no live PVE or in-browser click-through
   for this slice.
 
-- **Replace the SSO-token hack — DELIVERABLE 1 (signed URL) DONE (commit `0fa92b40`); DELIVERABLE 2 (OIDC)
-  NOT BUILT.** Two distinct deliverables, don't conflate:
+- **Replace the SSO-token hack — DELIVERABLE 1 (signed URL) DONE (commit `0fa92b40`); DELIVERABLE 2
+  (OIDC Relying-Party via Socialite) DONE (2026-07-10).** Two distinct deliverables, don't conflate — and
+  note **both coexist**: (1) is an admin/integration-initiated deep link (WHMCS already knows the user);
+  (2) is user-driven federated login. (2) does *not* make (1) dead code.
   - **(1) first-class signed-URL — DONE.** Swapped the bespoke app-key-JWT (`getSSOToken` + `/consume-token`
     + `Auth\LoginController`, all removed) for a Laravel signed URL: `Admin\UserController::getSSOToken` now
     mints `URL::temporarySignedRoute('auth.sso.consume', now+config('sso.link_ttl'), ['uuid','nonce'])`;
@@ -152,11 +160,44 @@ Researched direction retained for each; none built unless noted.
     in-container `curl` of a minted link 403s because ddev's router terminates TLS and FPM sees `http` while
     the URL was signed `https` (no `TrustProxies`) — same proxy/origin artifact as the passkey ceremony, not a
     code bug; the browser path (correct forwarded headers) is unaffected.
-  - **(2) full OIDC/OAuth SSO — NOT BUILT.** Decide the role (Convoy as OIDC **Relying Party** for "login via
-    external IdP" vs. OAuth2/OIDC **Provider** for "login with Convoy" / API tokens); WHMCS→Convoy is the RP
-    direction. **Package rule (user req: high-rep only):** provider role → Laravel **Passport**; RP role →
-    Laravel **Socialite**. Passport lacks full OIDC out of the box — vet any OIDC-on-Passport bridge for
-    reputation before adopting. Supersedes the signed-URL path for richer SSO once done.
+  - **(2) OIDC/OAuth SSO — DONE as Relying Party via Laravel Socialite** (role locked with maintainer
+    2026-07-10: RP, "log into Convoy with an external IdP"; **Provider/Passport direction NOT built** — revisit
+    only if "log in *with* Convoy" is ever wanted). `composer require laravel/socialite` (^5.28; first-party,
+    high-rep). Feature is **OPTIONAL** (like VictoriaMetrics): a provider only appears once its
+    `oauth.providers.<p>.enabled` flag is true AND `services.<p>.client_id` is set, so a bare install keeps
+    plain email/password + passkey login untouched.
+    - **Config:** `config/oauth.php` (providers `google`/`github`/`gitlab` with `enabled`+`label`;
+      `registration` = auto-provision unknown identities [default off]; `link_by_verified_email` = link to an
+      existing user by verified email on first sign-in [default on]). `config/services.php` gained
+      client_id/secret/redirect per provider; `.env.example` documents the knobs.
+    - **Schema/model:** `oauth_connections` (`user_id` FK, `provider`, `provider_id`, `name`, `email`,
+      `last_used_at`, unique(`provider`,`provider_id`) — the per-sign-in lookup key). `App\Models\OAuthConnection`
+      (binds by `id`), `User::oauthConnections()` hasMany.
+    - **Policy** lives in `App\Services\Auth\OAuthAuthenticationService`: existing connection wins → else
+      link-by-verified-email → else auto-register (never `root_admin`; **only from a verified email** even with
+      registration on) → else refuse (`OAuthAccountNotProvisionedException`). GitHub/GitLab emails are treated as
+      implicitly verified (their Socialite drivers only return verified primaries); everyone else needs an
+      explicit `email_verified` raw claim (Google sends it).
+    - **Flow:** `Auth\OAuthController` `redirect`/`callback` at `/api/auth/oauth/{provider}/{redirect,callback}`,
+      placed **outside** the guest/auth groups on purpose — logged-out = login/provision, logged-in = **link** to
+      the current user (callback branches on `Auth::check()`). Browser-redirect endpoints, so failures redirect
+      back to the SPA with an `?oauth_error=<code>` (login) / `?oauth_linked=<provider>` (account) param the
+      frontend toasts — **not** JSON (the render hook only fires for `expectsJson`). Open-redirect guard on the
+      `intended` param (relative same-origin only). Curated `HasErrorCode` exceptions:
+      `OAuthProviderNotEnabledException` (404), `OAuthAccountNotProvisionedException` (403),
+      `OAuthIdentityAlreadyLinkedException` (409).
+    - **Frontend:** enabled providers are injected via `IndexController` → `window.SiteConfiguration.oauthProviders`
+      (typed in `globals.d.ts`; helpers in `features/auth/oauth.ts`). Login page renders `OAuthProviderButtons`
+      ("Continue with …", full-page redirect) + toasts `oauth_error`. Account **Security → Connected Accounts**
+      card (`OAuthConnectionsCard`) lists enabled providers, Connect (redirect) / Disconnect (JSON DELETE
+      `/api/client/account/oauth-connections/{id}`, owner-scoped 404); card renders nothing when no provider is
+      configured. Client half: `Client\Account\OAuthConnectionController` + `OAuthConnectionData` DTO.
+    - **Verification:** Pest **224 passed** (15 new: redirect/disabled-404, existing-connection login, link-by-
+      verified-email, unverified-no-link, registration on/off, unverified-no-provision, invalid-state, link,
+      cross-user conflict, account list/unlink/foreign-404 — Socialite driver mocked). PHPStan zero; `ddev npm run
+      tc` + `ddev npm run build` clean. **Not live-tested against a real IdP** (needs real client id/secret +
+      an allowlisted callback URL, neither available in-sandbox) — the redirect handshake itself is unexercised
+      end-to-end; everything up to and past `Socialite::driver()->user()` is covered with a mock.
 
 - **Adopt `spatie/laravel-passkeys` — DONE (commit `20d8a442`, 2026-07-09).** Backend swapped to the
   maintained package (v1.8.1; webauthn-lib stayed ^5.3, no dep churn). What shipped, vs. the plan below:

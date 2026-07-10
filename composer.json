@@ -21,6 +21,7 @@
     "laravel/helpers": "^1.7",
     "laravel/horizon": "^5.22",
     "laravel/sanctum": "^4.0",
+    "laravel/socialite": "^5.28",
     "laravel/tinker": "^2.9",
     "laravel/wayfinder": "^0.1.20",
     "lcobucci/jwt": "^5.0",
