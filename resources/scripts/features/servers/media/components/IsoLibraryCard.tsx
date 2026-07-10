@@ -21,15 +21,16 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-import Skeleton from '@/components/ui/Skeleton.tsx'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/Table'
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemMedia,
+    ItemTitle,
+    OverflowItemGroup,
+} from '@/components/ui/Item'
+import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
     uuid: string
@@ -63,67 +64,54 @@ const IsoLibraryCard = ({ uuid }: Props) => {
                 {isLoading || !media ? (
                     <Skeleton className={'h-32 w-full'} />
                 ) : media.length > 0 ? (
-                    <div className={'overflow-x-auto'}>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Size</TableHead>
-                                    <TableHead className={'text-right'}>
-                                        Status
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {media.map(iso => {
-                                    const size = byteSize(iso.size, {
-                                        units: 'iec',
-                                        precision: 1,
-                                    })
-                                    return (
-                                        <TableRow key={iso.uuid}>
-                                            <TableCell
-                                                className={'font-medium'}
-                                            >
-                                                {iso.name}
-                                                {iso.mounted && (
-                                                    <Badge
-                                                        variant={'secondary'}
-                                                        className={'ml-2'}
-                                                    >
-                                                        Mounted
-                                                    </Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell
-                                                className={
-                                                    'text-muted-foreground'
-                                                }
-                                            >
-                                                {size.value} {size.unit}
-                                            </TableCell>
-                                            <TableCell className={'text-right'}>
-                                                <Button
-                                                    variant={
-                                                        iso.mounted
-                                                            ? 'outline'
-                                                            : 'default'
-                                                    }
-                                                    size={'sm'}
-                                                    disabled={isPending}
-                                                    onClick={() => toggle(iso)}
-                                                >
-                                                    {iso.mounted
-                                                        ? 'Unmount'
-                                                        : 'Mount'}
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                })}
-                            </TableBody>
-                        </Table>
-                    </div>
+                    <OverflowItemGroup
+                        max={4}
+                        title={'ISO Library'}
+                        rows={media.map(iso => {
+                            const size = byteSize(iso.size, {
+                                units: 'iec',
+                                precision: 1,
+                            })
+                            return (
+                                <Item
+                                    key={iso.uuid}
+                                    variant={'muted'}
+                                    size={'sm'}
+                                >
+                                    <ItemMedia variant={'icon'}>
+                                        <IconDisc />
+                                    </ItemMedia>
+                                    <ItemContent className={'overflow-x-hidden'}>
+                                        <ItemTitle className={'truncate'}>
+                                            {iso.name}
+                                            {iso.mounted && (
+                                                <Badge variant={'secondary'}>
+                                                    Mounted
+                                                </Badge>
+                                            )}
+                                        </ItemTitle>
+                                        <ItemDescription>
+                                            {size.value} {size.unit}
+                                        </ItemDescription>
+                                    </ItemContent>
+                                    <ItemActions>
+                                        <Button
+                                            variant={
+                                                iso.mounted
+                                                    ? 'outline'
+                                                    : 'default'
+                                            }
+                                            size={'sm'}
+                                            disabled={isPending}
+                                            onClick={() => toggle(iso)}
+                                        >
+                                            {iso.mounted ? 'Unmount' : 'Mount'}
+                                        </Button>
+                                    </ItemActions>
+                                </Item>
+                            )
+                        })}
+                    />
                 ) : (
                     <SimpleEmptyState
                         icon={IconDisc}
