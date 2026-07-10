@@ -9,6 +9,12 @@ import {
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 /** A human label for a token's granted scope. */
 const scopeLabel = (abilities: string[]): string =>
@@ -30,20 +36,19 @@ const ApiKey = ({ apiKey, onDelete }: Props) => {
     )
 
     return (
-        <div className={'flex items-center py-2 pr-2'}>
-            <div className={'space-y-1 overflow-x-hidden'}>
-                <p className={'truncate text-sm font-medium leading-none'}>
-                    {apiKey.name}
-                </p>
+        <Item variant={'muted'}>
+            <ItemContent className={'overflow-x-hidden'}>
+                <ItemTitle className={'truncate'}>{apiKey.name}</ItemTitle>
                 <div className={'flex items-center gap-2'}>
-                    <Badge variant={'secondary'}>{scopeLabel(apiKey.abilities)}</Badge>
+                    <Badge variant={'secondary'}>
+                        {scopeLabel(apiKey.abilities)}
+                    </Badge>
                     <span className={'text-xs text-muted-foreground'}>
                         {lastUsed}
                     </span>
                 </div>
-            </div>
-            <div className={'min-w-[1rem] grow'} />
-            <div className={'shrink-0'}>
+            </ItemContent>
+            <ItemActions>
                 <Button
                     variant={'ghost'}
                     size={'icon'}
@@ -51,8 +56,8 @@ const ApiKey = ({ apiKey, onDelete }: Props) => {
                 >
                     <IconTrash className={'h-4 w-4'} />
                 </Button>
-            </div>
-        </div>
+            </ItemActions>
+        </Item>
     )
 }
 

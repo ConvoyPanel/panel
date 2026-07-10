@@ -6,6 +6,13 @@ import { Session as SessionType } from '@/features/account/sessions/api.ts'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface Props {
     session: SessionType
@@ -20,33 +27,33 @@ const Session = ({ session, onRevoke }: Props) => {
     )
 
     return (
-        <div className={'flex items-center py-2 pr-2'}>
-            <IconDeviceLaptop className={'mt-px mr-4 shrink-0'} />
-            <div className={'space-y-1 overflow-x-hidden'}>
-                <div className={'flex items-center gap-2'}>
-                    <p className={'truncate text-sm font-medium leading-none'}>
-                        {session.device}
-                    </p>
+        <Item variant={'muted'}>
+            <ItemMedia variant={'icon'}>
+                <IconDeviceLaptop />
+            </ItemMedia>
+            <ItemContent className={'overflow-x-hidden'}>
+                <ItemTitle className={'truncate'}>
+                    {session.device}
                     {session.isCurrent && (
                         <Badge variant={'secondary'}>This device</Badge>
                     )}
-                </div>
+                </ItemTitle>
                 <p className={'text-xs text-muted-foreground'}>
                     {session.ipAddress ?? 'Unknown IP'} · active {lastActive}
                 </p>
-            </div>
-            <div className={'min-w-[1rem] grow'} />
+            </ItemContent>
             {!session.isCurrent && (
-                <Button
-                    variant={'ghost'}
-                    size={'sm'}
-                    className={'shrink-0'}
-                    onClick={() => onRevoke(session)}
-                >
-                    Revoke
-                </Button>
+                <ItemActions>
+                    <Button
+                        variant={'ghost'}
+                        size={'sm'}
+                        onClick={() => onRevoke(session)}
+                    >
+                        Revoke
+                    </Button>
+                </ItemActions>
             )}
-        </div>
+        </Item>
     )
 }
 
