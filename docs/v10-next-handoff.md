@@ -134,16 +134,29 @@ Researched direction retained for each; none built unless noted.
   frontend typecheck/build, and PHPStan (`--debug`, serial) are green; no live PVE or in-browser click-through
   for this slice.
 
-- **Replace the SSO-token hack — NOT BUILT.** Current `UserController::getSSOToken` mints a short-lived
-  app-key-signed JWT so plugins (e.g. WHMCS) can deep-link a user into Convoy — a stopgap. Two distinct
-  deliverables, don't conflate: (1) a **first-class signed-URL** option for the lightweight plugin case —
-  prefer Laravel `URL::temporarySignedRoute` + `signed` middleware over bespoke JWT, wrapped in a scoped
-  API (per-integration key, expiry, single-use nonce, audit log); (2) **full OIDC/OAuth SSO** — decide the
-  role (Convoy as OIDC **Relying Party** for "login via external IdP" vs. OAuth2/OIDC **Provider** for
-  "login with Convoy" / API tokens); WHMCS→Convoy is the RP direction. **Package rule (user req: high-rep
-  only):** provider role → Laravel **Passport**; RP role → Laravel **Socialite**. Passport lacks full OIDC
-  out of the box — vet any OIDC-on-Passport bridge for reputation before adopting. Supersedes the
-  app-key-JWT stopgap once done.
+- **Replace the SSO-token hack — DELIVERABLE 1 (signed URL) DONE (commit `0fa92b40`); DELIVERABLE 2 (OIDC)
+  NOT BUILT.** Two distinct deliverables, don't conflate:
+  - **(1) first-class signed-URL — DONE.** Swapped the bespoke app-key-JWT (`getSSOToken` + `/consume-token`
+    + `Auth\LoginController`, all removed) for a Laravel signed URL: `Admin\UserController::getSSOToken` now
+    mints `URL::temporarySignedRoute('auth.sso.consume', now+config('sso.link_ttl'), ['uuid','nonce'])`;
+    `Auth\SsoController::consume` (route `/api/auth/sso/{uuid}`, `signed` middleware) verifies the HMAC+expiry,
+    burns the nonce via `Cache::add` (single-use → replay 401), resolves the user by uuid, logs in, and writes
+    an audit entry to `config('sso.audit_channel')`. Scoped by the minting **application token's existing
+    abilities** (`users:write`) — that *is* the "per-integration key" (each integration has its own revocable
+    Sanctum token), so no new model. `SSOTokenData` now returns `link` (absolute signed URL), not `token`;
+    the external plugin just redirects the browser to it. `config/sso.php` (`link_ttl`, `audit_channel`) +
+    `.env.example` knobs (both have defaults). `JWTService` **kept** (still used by Coterm). Pest **209**,
+    PHPStan zero, tc+build green. Signature mint/validate proven correct in-process (`hasValidSignature=true`,
+    tamper=false) + via feature tests through the real `ValidateSignature` middleware (consume login/redirect,
+    tamper 403, expiry 403, replay 401, unknown-user 401, admin mint round-trip). *Live-curl caveat:* an
+    in-container `curl` of a minted link 403s because ddev's router terminates TLS and FPM sees `http` while
+    the URL was signed `https` (no `TrustProxies`) — same proxy/origin artifact as the passkey ceremony, not a
+    code bug; the browser path (correct forwarded headers) is unaffected.
+  - **(2) full OIDC/OAuth SSO — NOT BUILT.** Decide the role (Convoy as OIDC **Relying Party** for "login via
+    external IdP" vs. OAuth2/OIDC **Provider** for "login with Convoy" / API tokens); WHMCS→Convoy is the RP
+    direction. **Package rule (user req: high-rep only):** provider role → Laravel **Passport**; RP role →
+    Laravel **Socialite**. Passport lacks full OIDC out of the box — vet any OIDC-on-Passport bridge for
+    reputation before adopting. Supersedes the signed-URL path for richer SSO once done.
 
 - **Adopt `spatie/laravel-passkeys` — DONE (commit `20d8a442`, 2026-07-09).** Backend swapped to the
   maintained package (v1.8.1; webauthn-lib stayed ^5.3, no dep churn). What shipped, vs. the plan below:
@@ -445,6 +458,12 @@ Researched direction retained for each; none built unless noted.
   quirk). **Mitigation:** re-run the command (it usually succeeds within a couple of tries); run PHPStan with
   `--debug` (serial) to dodge the parallel-worker crash. A different sandbox (e.g. next session's) may not hit
   it at all. Do **not** conflate this with the `db` name-collision above — that one *is* fixed at the core.
+  **Root cause + tinker-specific fix now documented in [docker-sandbox.md](docker-sandbox.md)** (2026-07-10):
+  the tinker segfault is PsySH's forking-eval loop under the sandbox's virtualized kernel — *not* `pcntl_fork`
+  itself (a bare fork loop runs clean) — so the sandbox-local, **uncommitted** fix is `usePcntl => false` in the
+  web container's `~/.config/psysh/config.php`. Most "tinker broke" moments are actually shell-quoting errors
+  (a `ParseError`/exit 1), not the exit-139 segfault. That doc also records that in the sandbox the agent is
+  free to install/run whatever it needs (throwaway + isolated), pointed to from AGENTS.md.
 - **Run tests with `ddev exec vendor/bin/pest` (or `ddev exec php artisan test`), NOT `ddev artisan
   test`.** The ddev global-command wrapper segfaults (exit 139) booting the test runner in this sandbox —
   `ddev artisan tinker`/`migrate` are fine, so it's a wrapper quirk, not a regression. Last green:
