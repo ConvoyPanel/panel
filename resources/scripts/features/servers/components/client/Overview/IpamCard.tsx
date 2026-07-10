@@ -7,6 +7,7 @@ import useClipboard from '@/hooks/use-clipboard.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { Item, ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const Cell = ({
@@ -58,12 +59,12 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
 
     if (addresses.length > 0) {
         return (
-            <ul className={'divide-y rounded-md border'}>
+            <ItemGroup className={'gap-3'}>
                 {addresses.map(address => (
-                    <li key={address.id} className={'px-3 py-2'}>
+                    <Item key={address.id} variant={'muted'} size={'sm'}>
                         <dl
                             className={
-                                'relative flex flex-col gap-2 @sm:flex-row'
+                                'relative flex w-full flex-col gap-2 @sm:flex-row'
                             }
                         >
                             <Cell
@@ -81,9 +82,9 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
                                 description={address.macAddress ?? 'N/A'}
                             />
                         </dl>
-                    </li>
+                    </Item>
                 ))}
-            </ul>
+            </ItemGroup>
         )
     }
 }
