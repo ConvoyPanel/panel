@@ -10,3 +10,4 @@ export {
     ItemHeader,
     ItemFooter,
 } from './Item.tsx'
+export { default as OverflowItemGroup } from './OverflowItemGroup.tsx'

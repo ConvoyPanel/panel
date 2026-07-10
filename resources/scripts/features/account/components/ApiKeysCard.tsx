@@ -25,7 +25,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-import { ItemGroup } from '@/components/ui/Item'
+import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { cn } from '@/utils'
 
@@ -57,7 +57,7 @@ const ApiKeysCard = () => {
 
     return (
         <>
-            <Card className={'@md:col-span-2'}>
+            <Card className={'flex flex-col'}>
                 <CardHeader>
                     <CardTitle>API Tokens</CardTitle>
                     <CardDescription>
@@ -85,15 +85,16 @@ const ApiKeysCard = () => {
                     {isLoading || !keys ? (
                         <Skeleton className={'h-40 w-full'} />
                     ) : keys.length > 0 ? (
-                        <ItemGroup className={'gap-3'}>
-                            {keys.map(key => (
+                        <OverflowItemGroup
+                            title={'API Tokens'}
+                            rows={keys.map(key => (
                                 <ApiKey
                                     key={key.id}
                                     apiKey={key}
                                     onDelete={handleDelete}
                                 />
                             ))}
-                        </ItemGroup>
+                        />
                     ) : (
                         <SimpleEmptyState
                             icon={IconApi}

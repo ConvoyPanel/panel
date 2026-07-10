@@ -26,7 +26,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-import { ItemGroup } from '@/components/ui/Item'
+import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const KeychainCard = () => {
@@ -84,15 +84,16 @@ const KeychainCard = () => {
                     {isLoading || !keys ? (
                         <Skeleton className={'h-40 w-full'} />
                     ) : keys.length > 0 ? (
-                        <ItemGroup className={'gap-3'}>
-                            {keys.map(key => (
+                        <OverflowItemGroup
+                            title={'SSH Keychain'}
+                            rows={keys.map(key => (
                                 <SSHKey
                                     key={key.id}
                                     publicKey={key}
                                     onDelete={handleDelete}
                                 />
                             ))}
-                        </ItemGroup>
+                        />
                     ) : (
                         <SimpleEmptyState
                             icon={IconKey}
