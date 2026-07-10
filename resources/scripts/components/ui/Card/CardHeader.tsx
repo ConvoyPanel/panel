@@ -6,10 +6,10 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
         <div
             ref={ref}
             className={cn(
-                'flex flex-col space-y-2 p-6',
+                'flex flex-col space-y-1 p-4',
                 // When a CardAction is present, switch to a two-column grid so
                 // the action sits top-right. Cards without one are unchanged.
-                'has-data-[slot=card-action]:grid has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-action]:items-start has-data-[slot=card-action]:gap-x-4 has-data-[slot=card-action]:gap-y-2 has-data-[slot=card-action]:space-y-0',
+                'has-data-[slot=card-action]:grid has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-action]:items-start has-data-[slot=card-action]:gap-x-4 has-data-[slot=card-action]:gap-y-1 has-data-[slot=card-action]:space-y-0',
                 className
             )}
             {...props}
