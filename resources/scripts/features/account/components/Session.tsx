@@ -27,7 +27,7 @@ const Session = ({ session, onRevoke }: Props) => {
     )
 
     return (
-        <Item variant={'muted'}>
+        <Item variant={'muted'} size={'sm'}>
             <ItemMedia variant={'icon'}>
                 <IconDeviceLaptop />
             </ItemMedia>

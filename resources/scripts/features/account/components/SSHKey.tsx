@@ -27,7 +27,7 @@ const SSHKey = ({ publicKey: key, onDelete }: Props) => {
     )
 
     return (
-        <Item variant={'muted'}>
+        <Item variant={'muted'} size={'sm'}>
             <ItemMedia variant={'icon'}>
                 <IconKeyFilled />
             </ItemMedia>

@@ -36,7 +36,7 @@ const ApiKey = ({ apiKey, onDelete }: Props) => {
     )
 
     return (
-        <Item variant={'muted'}>
+        <Item variant={'muted'} size={'sm'}>
             <ItemContent className={'overflow-x-hidden'}>
                 <ItemTitle className={'truncate'}>{apiKey.name}</ItemTitle>
                 <div className={'flex items-center gap-2'}>
