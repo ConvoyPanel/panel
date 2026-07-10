@@ -27,6 +27,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemGroup,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const ICONS: Record<string, Icon> = {
@@ -86,64 +95,60 @@ const OAuthConnectionsCard = () => {
                 {isLoading || !connections ? (
                     <Skeleton className={'h-24 w-full'} />
                 ) : (
-                    <ul className={'divide-y'}>
+                    <ItemGroup className={'gap-3'}>
                         {providers.map(provider => {
                             const ProviderIcon =
                                 ICONS[provider.id] ?? IconPlugConnected
                             const connection = connectionFor(provider.id)
 
                             return (
-                                <li
+                                <Item
                                     key={provider.id}
-                                    className={
-                                        'flex items-center justify-between py-3'
-                                    }
+                                    variant={'muted'}
                                 >
-                                    <div className={'flex items-center gap-3'}>
+                                    <ItemMedia variant={'icon'}>
                                         <ProviderIcon
-                                            className={'h-5 w-5 text-muted-foreground'}
+                                            className={'text-muted-foreground'}
                                         />
-                                        <div>
-                                            <p className={'text-sm font-medium'}>
-                                                {provider.label}
-                                            </p>
-                                            {connection?.email && (
-                                                <p
-                                                    className={
-                                                        'text-xs text-muted-foreground'
-                                                    }
-                                                >
-                                                    {connection.email}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {connection ? (
-                                        <Button
-                                            variant={'outline'}
-                                            size={'sm'}
-                                            onClick={() =>
-                                                handleDisconnect(connection)
-                                            }
-                                        >
-                                            Disconnect
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            variant={'outline'}
-                                            size={'sm'}
-                                            onClick={() => {
-                                                window.location.href =
-                                                    oauthRedirectUrl(provider.id)
-                                            }}
-                                        >
-                                            Connect
-                                        </Button>
-                                    )}
-                                </li>
+                                    </ItemMedia>
+                                    <ItemContent>
+                                        <ItemTitle>{provider.label}</ItemTitle>
+                                        {connection?.email && (
+                                            <ItemDescription>
+                                                {connection.email}
+                                            </ItemDescription>
+                                        )}
+                                    </ItemContent>
+                                    <ItemActions>
+                                        {connection ? (
+                                            <Button
+                                                variant={'outline'}
+                                                size={'sm'}
+                                                onClick={() =>
+                                                    handleDisconnect(connection)
+                                                }
+                                            >
+                                                Disconnect
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant={'outline'}
+                                                size={'sm'}
+                                                onClick={() => {
+                                                    window.location.href =
+                                                        oauthRedirectUrl(
+                                                            provider.id
+                                                        )
+                                                }}
+                                            >
+                                                Connect
+                                            </Button>
+                                        )}
+                                    </ItemActions>
+                                </Item>
                             )
                         })}
-                    </ul>
+                    </ItemGroup>
                 )}
             </CardContent>
         </Card>

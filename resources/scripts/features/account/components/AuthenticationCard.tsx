@@ -9,7 +9,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { Separator } from '@/components/ui/Separator.tsx'
 
 
 const AuthenticationCard = () => {
@@ -21,11 +20,9 @@ const AuthenticationCard = () => {
                     Manage your account authentication settings
                 </CardDescription>
             </CardHeader>
-            <CardContent className={'space-y-3'}>
+            <CardContent className={'flex flex-col gap-3'}>
                 <PasswordChangeDialog />
-                <Separator />
                 <AuthenticatorContainer />
-                <Separator />
                 <PasskeysContainer />
             </CardContent>
         </Card>

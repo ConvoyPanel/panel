@@ -18,13 +18,14 @@ import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
+    CardAction,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { cn } from '@/utils'
 
@@ -63,6 +64,17 @@ const ApiKeysCard = () => {
                         Personal access tokens that authenticate to the API on
                         your behalf.
                     </CardDescription>
+                    {keys && keys.length > 0 && (
+                        <CardAction>
+                            <Button
+                                variant={'outline'}
+                                size={'sm'}
+                                onClick={() => setCreateOpen(true)}
+                            >
+                                Create token
+                            </Button>
+                        </CardAction>
+                    )}
                 </CardHeader>
                 <CardContent
                     className={cn(
@@ -74,16 +86,15 @@ const ApiKeysCard = () => {
                     {isLoading || !keys ? (
                         <Skeleton className={'h-40 w-full'} />
                     ) : keys.length > 0 ? (
-                        <ul className={'divide-y'}>
+                        <ItemGroup className={'gap-3'}>
                             {keys.map(key => (
-                                <li key={key.id}>
-                                    <ApiKey
-                                        apiKey={key}
-                                        onDelete={handleDelete}
-                                    />
-                                </li>
+                                <ApiKey
+                                    key={key.id}
+                                    apiKey={key}
+                                    onDelete={handleDelete}
+                                />
                             ))}
-                        </ul>
+                        </ItemGroup>
                     ) : (
                         <SimpleEmptyState
                             icon={IconApi}
@@ -99,13 +110,6 @@ const ApiKeysCard = () => {
                         />
                     )}
                 </CardContent>
-                {keys && keys.length > 0 && (
-                    <CardFooter className={'flex justify-end'}>
-                        <Button onClick={() => setCreateOpen(true)}>
-                            Create token
-                        </Button>
-                    </CardFooter>
-                )}
             </Card>
 
             <ApiKeyCreateDialog

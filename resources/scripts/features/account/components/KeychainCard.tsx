@@ -19,13 +19,14 @@ import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
+    CardAction,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const KeychainCard = () => {
@@ -62,6 +63,17 @@ const KeychainCard = () => {
                     <CardDescription>
                         Manage your SSH public keys
                     </CardDescription>
+                    {keys && keys.length > 0 && (
+                        <CardAction>
+                            <Button
+                                variant={'outline'}
+                                size={'sm'}
+                                onClick={() => setCreateOpen(true)}
+                            >
+                                Add Key
+                            </Button>
+                        </CardAction>
+                    )}
                 </CardHeader>
                 <CardContent
                     className={cn(
@@ -73,16 +85,15 @@ const KeychainCard = () => {
                     {isLoading || !keys ? (
                         <Skeleton className={'h-40 w-full'} />
                     ) : keys.length > 0 ? (
-                        <ul className={'divide-y'}>
+                        <ItemGroup className={'gap-3'}>
                             {keys.map(key => (
-                                <li key={key.id}>
-                                    <SSHKey
-                                        publicKey={key}
-                                        onDelete={handleDelete}
-                                    />
-                                </li>
+                                <SSHKey
+                                    key={key.id}
+                                    publicKey={key}
+                                    onDelete={handleDelete}
+                                />
                             ))}
-                        </ul>
+                        </ItemGroup>
                     ) : (
                         <SimpleEmptyState
                             icon={IconKey}
@@ -96,13 +107,6 @@ const KeychainCard = () => {
                         />
                     )}
                 </CardContent>
-                {keys && keys.length > 0 && (
-                    <CardFooter className={'flex justify-end'}>
-                        <Button onClick={() => setCreateOpen(true)}>
-                            Add Key
-                        </Button>
-                    </CardFooter>
-                )}
             </Card>
 
             <SSHKeyCreateDialog open={createOpen} onOpenChange={setCreateOpen} />

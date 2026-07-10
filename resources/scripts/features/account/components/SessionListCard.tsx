@@ -22,6 +22,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const SessionListCard = () => {
@@ -68,16 +69,15 @@ const SessionListCard = () => {
                 {isLoading || !sessions ? (
                     <Skeleton className={'h-40 w-full'} />
                 ) : sessions.length > 0 ? (
-                    <ul className={'divide-y'}>
+                    <ItemGroup className={'gap-3'}>
                         {sessions.map(session => (
-                            <li key={session.id}>
-                                <Session
-                                    session={session}
-                                    onRevoke={handleRevoke}
-                                />
-                            </li>
+                            <Session
+                                key={session.id}
+                                session={session}
+                                onRevoke={handleRevoke}
+                            />
                         ))}
-                    </ul>
+                    </ItemGroup>
                 ) : (
                     <SimpleEmptyState
                         icon={IconDevices}

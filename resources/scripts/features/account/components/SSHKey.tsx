@@ -7,6 +7,13 @@ import { sshKeyAlgorithm } from '@/features/account/ssh-keys/api.ts'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface Props {
     publicKey: Key
@@ -20,12 +27,12 @@ const SSHKey = ({ publicKey: key, onDelete }: Props) => {
     )
 
     return (
-        <div className={'flex items-center py-2 pr-2'}>
-            <IconKeyFilled className={'mt-px mr-4 shrink-0'} />
-            <div className='space-y-1 overflow-x-hidden'>
-                <p className='truncate text-sm font-medium leading-none'>
-                    {key.name}
-                </p>
+        <Item variant={'muted'}>
+            <ItemMedia variant={'icon'}>
+                <IconKeyFilled />
+            </ItemMedia>
+            <ItemContent className={'overflow-x-hidden'}>
+                <ItemTitle className={'truncate'}>{key.name}</ItemTitle>
                 <div className={'flex items-center gap-2'}>
                     <Badge variant={'secondary'} className={'font-mono'}>
                         {sshKeyAlgorithm(key.publicKey)}
@@ -34,17 +41,17 @@ const SSHKey = ({ publicKey: key, onDelete }: Props) => {
                         Added {formattedDate}
                     </span>
                 </div>
-            </div>
-            <div className={'min-w-[1rem] grow'} />
-            <Button
-                variant={'ghost'}
-                size={'icon'}
-                className={'shrink-0'}
-                onClick={() => onDelete(key)}
-            >
-                <IconTrash className={'h-4 w-4'} />
-            </Button>
-        </div>
+            </ItemContent>
+            <ItemActions>
+                <Button
+                    variant={'ghost'}
+                    size={'icon'}
+                    onClick={() => onDelete(key)}
+                >
+                    <IconTrash className={'h-4 w-4'} />
+                </Button>
+            </ItemActions>
+        </Item>
     )
 }
 
