@@ -82,6 +82,15 @@ DB / Redis / mail are configured via `web_environment` in `.ddev/config.yaml`, w
 override `.env` (Laravel's Dotenv does not overwrite real env vars). `ext-gmp` is added
 via `webimage_extra_packages`.
 
+## Docker sandbox
+
+When developing inside an isolated **Docker Sandbox** (an AI agent's disposable VM), see
+[docs/docker-sandbox.md](docs/docker-sandbox.md). In that environment you are free to install and
+run whatever tooling you need to develop and test (it's throwaway and isolated — don't commit those
+installs). It also documents the sandbox-local fix for `php artisan tinker` segfaulting
+(PsySH `usePcntl` fork crash) and the intermittent heavy-command SIGSEGVs (retry). These are
+sandbox-only notes — nothing there belongs in committed project config or CI.
+
 ## Laravel style
 
 Prefer current, namespaced support APIs over legacy Laravel 5 helper aliases: use `Arr::get`
