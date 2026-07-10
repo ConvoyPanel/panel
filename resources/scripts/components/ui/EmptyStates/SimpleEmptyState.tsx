@@ -1,7 +1,15 @@
-import { cn } from '@/utils'
 import { ComponentProps, ReactNode } from 'react'
 
 import { TablerIcon } from '@/lib/tabler.ts'
+
+import {
+    Empty,
+    EmptyContent,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/components/ui/Empty'
 
 interface Props extends ComponentProps<'div'> {
     icon: TablerIcon
@@ -10,32 +18,31 @@ interface Props extends ComponentProps<'div'> {
     action?: ReactNode
 }
 
+/**
+ * Thin abstraction over the shadcn Empty primitive so callers keep passing
+ * `{ icon, title, description, action }` and inherit the latest empty-state
+ * styling without recomposing every usage.
+ */
 const SimpleEmptyState = ({
     icon: Icon,
     title,
     description,
     action,
-    className,
     ...props
 }: Props) => {
     return (
-        <div className={cn('text-center', className)} {...props}>
-            <Icon
-                className={'mx-auto h-12 w-12 text-muted-foreground'}
-                stroke={1}
-            />
-            <h3 className={'mt-3 text-sm font-semibold'}>{title}</h3>
-            {description && (
-                <p
-                    className={
-                        'mx-auto mt-0.5 max-w-md text-sm text-muted-foreground'
-                    }
-                >
-                    {description}
-                </p>
-            )}
-            {action && <div className={'mt-6'}>{action}</div>}
-        </div>
+        <Empty {...props}>
+            <EmptyHeader>
+                <EmptyMedia variant={'icon'}>
+                    <Icon />
+                </EmptyMedia>
+                <EmptyTitle>{title}</EmptyTitle>
+                {description && (
+                    <EmptyDescription>{description}</EmptyDescription>
+                )}
+            </EmptyHeader>
+            {action && <EmptyContent>{action}</EmptyContent>}
+        </Empty>
     )
 }
 
