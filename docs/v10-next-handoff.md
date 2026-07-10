@@ -386,6 +386,29 @@ Researched direction retained for each; none built unless noted.
     - **Sequence = flagship-screen-first.** Perfect ONE screen end-to-end → screenshot → maintainer
       approves the "look" → extract patterns into shared components → roll out. Do not restyle everything
       at once.
+  - *FE overhaul — CORRECTED TARGET + LARGELY EXECUTED (2026-07-10, on `next`). SUPERSEDES the
+    "target = blocks/dashboard-01" line above.* The real reference is the polished **example cards on
+    shadcn's CREATE page** — source `shadcn-ui/ui` `apps/v4/registry/bases/base/blocks/preview-02/cards/*.tsx`,
+    rendered under the create-page default **base variant, style `nova`** (`registry/config.ts` `DEFAULT_CONFIG`:
+    base=base, style=nova). **Match nova's concrete VALUES in plain Tailwind — NOT new-york-v4 (it deviates)
+    and NOT the `cn-*` classes (that's shadcn.com theming-playground infra, not a product practice).** Exact
+    nova values live in `apps/v4/styles/base-nova/ui/*.tsx`. Shipped: `Item`/`ItemGroup`/`ItemMedia` (`variant=muted`
+    = the depth) + `OverflowItemGroup` (capped list + right Sheet), `CardAction`, `Empty` primitive (+
+    `SimpleEmptyState` rewired to it). Card = flat `ring-1 ring-foreground/10` (not border+shadow), 16px padding,
+    `CardTitle text-base font-medium` (500, not semibold), muted `CardFooter`. Controls `Input`/`Label`/`Button`
+    → nova (`h-8`, `rounded-lg`, no shadow, `ring-3` focus). v4 shadow scale everywhere. Content column capped
+    `max-w-[1600px]`. Rolled out: whole client Security page + server ISO/SSH-keys tabs; every other card inherits
+    the chrome globally. Browser-verified across login/security/dialog/server tabs. **DECISION TO REVISIT
+    (2026-07-10):** the `destructive` Button uses nova's **soft tint** (`bg-destructive/10 text-destructive`),
+    kept as-is for now — but *every* usage is an irreversible-confirm button (delete modals, Kill/Stop VM,
+    disable 2FA, delete passkey). If it ever reads underpowered, flip that one variant back to **solid red** in
+    `components/ui/Button/Button.variants.ts` (one line; won't clash with nova since destructive is confirm-only).
+    **Still TODO:** create `Field`/`InputGroup` primitives (nova; last reference primitives — forms currently
+    inherit via the `InputForm` abstraction); roll list→`Item` to remaining screens (admin nodes/locations/tokens
+    DataTables, client server Overview/backups); reconcile admin-dashboard `MetricTile` (raw `border` div vs the
+    new ring Card). **Test data:** `UserSeeder` (`db:seed --class=UserSeeder`, `SEED_USER=` override) seeds account
+    SSH keys/API tokens + a server's IPAM addresses. **Note:** server-settings tabs (SSH keys/DNS/disks/boot-order)
+    read live Proxmox, not the DB — they only populate against a reachable node, not via seeders.
   - *Sidebar redesign — FLAGSHIP BUILT + BROWSER-VERIFIED (2026-07-09, commit `157f73bb`). Roll-out to
     remaining screens is what's left.* Done: replaced the hover icon-rail with a **full labeled sidebar**
     (`w-64`, grouped sections under muted caps headers), **contextual drill-down** (client dashboard → a
