@@ -39,7 +39,7 @@ const MetricTile = ({
     const up = rounded > 0
 
     return (
-        <div className='bg-card overflow-hidden rounded-xl border p-4'>
+        <div className='bg-card ring-foreground/10 overflow-hidden rounded-xl p-4 ring-1'>
             <div className='flex items-start justify-between gap-2'>
                 <StatLabel className='text-sm'>{label}</StatLabel>
                 {showDelta && (
