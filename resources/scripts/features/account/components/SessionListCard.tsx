@@ -22,7 +22,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-import { ItemGroup } from '@/components/ui/Item'
+import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const SessionListCard = () => {
@@ -51,7 +51,7 @@ const SessionListCard = () => {
     }
 
     return (
-        <Card className={'@md:col-span-2'}>
+        <Card className={'flex flex-col'}>
             <CardHeader>
                 <CardTitle>Active Sessions</CardTitle>
                 <CardDescription>
@@ -68,15 +68,16 @@ const SessionListCard = () => {
                 {isLoading || !sessions ? (
                     <Skeleton className={'h-40 w-full'} />
                 ) : sessions.length > 0 ? (
-                    <ItemGroup className={'gap-3'}>
-                        {sessions.map(session => (
+                    <OverflowItemGroup
+                        title={'Active Sessions'}
+                        rows={sessions.map(session => (
                             <Session
                                 key={session.id}
                                 session={session}
                                 onRevoke={handleRevoke}
                             />
                         ))}
-                    </ItemGroup>
+                    />
                 ) : (
                     <SimpleEmptyState
                         icon={IconDevices}
