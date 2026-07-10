@@ -34,18 +34,18 @@ const OverflowItemGroup = ({ rows, max = 3, title, className }: Props) => {
 
     return (
         <>
-            <ItemGroup className={cn('gap-3', className)}>
-                {visible}
-                {hasOverflow && (
-                    <button
-                        type='button'
-                        onClick={() => setOpen(true)}
-                        className='hover:bg-muted mt-1 w-full rounded-md border py-2 text-sm font-semibold transition-colors'
-                    >
-                        Show all {rows.length} &rarr;
-                    </button>
-                )}
-            </ItemGroup>
+            <ItemGroup className={cn('gap-3', className)}>{visible}</ItemGroup>
+            {/* Kept outside ItemGroup: a trigger isn't a list item, so it must
+                not be a child of the group's role="list". */}
+            {hasOverflow && (
+                <button
+                    type='button'
+                    onClick={() => setOpen(true)}
+                    className='hover:bg-muted mt-3 w-full rounded-md border py-2 text-sm font-semibold transition-colors'
+                >
+                    Show all {rows.length} &rarr;
+                </button>
+            )}
 
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetContent

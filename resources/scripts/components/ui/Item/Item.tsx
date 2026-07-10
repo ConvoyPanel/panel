@@ -70,6 +70,9 @@ function Item({
     const Comp = asChild ? Slot : 'div'
     return (
         <Comp
+            // Pairs with ItemGroup's role="list" so screen readers announce a
+            // real list (equivalent to <ul><li>). Overridable via props.
+            role='listitem'
             data-slot='item'
             data-variant={variant}
             data-size={size}
