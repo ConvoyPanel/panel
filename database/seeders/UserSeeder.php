@@ -3,7 +3,11 @@
 namespace Database\Seeders;
 
 use App\Enums\Api\ApiKeyType;
+use App\Enums\Network\AddressVersion;
+use App\Models\Address;
+use App\Models\AddressBlock;
 use App\Models\PersonalAccessToken;
+use App\Models\Server;
 use App\Models\User;
 use App\Services\Api\CreateAccountTokenService;
 use Illuminate\Database\Seeder;
@@ -13,9 +17,11 @@ class UserSeeder extends Seeder
     /**
      * Seed a testable account: ensures a user exists and gives them something to
      * look at on the account "Security" page — SSH keychain keys and personal API
-     * tokens. Reuses the first existing user by default (so it targets the account
-     * you're logged in as); on an empty database it creates a demo login. Idempotent
-     * (skips rows that already exist by name), so it's safe to re-run.
+     * tokens — plus IP addresses on their first server (the one server-settings
+     * surface that's DB-backed; the others read live Proxmox and can't be seeded).
+     * Reuses the first existing user by default (so it targets the account you're
+     * logged in as); on an empty database it creates a demo login. Idempotent, so
+     * it's safe to re-run.
      *
      * Override the target user from the CLI (email or id), e.g.:
      *   ddev exec sh -c 'SEED_USER=you@example.com php artisan db:seed --class=UserSeeder'
@@ -26,8 +32,9 @@ class UserSeeder extends Seeder
 
         $this->seedSshKeys($user);
         $this->seedApiTokens($user, $tokens);
+        $this->seedServerAddresses($user);
 
-        $this->command->info("Seeded SSH keys + API tokens for {$user->email}.");
+        $this->command->info("Seeded account data for {$user->email}.");
     }
 
     /** A few realistic public keys across algorithms. */
@@ -67,6 +74,46 @@ class UserSeeder extends Seeder
             if (! $exists) {
                 $tokens->handle($user, $name, $abilities);
             }
+        }
+    }
+
+    /**
+     * Assign a few public IPv4 addresses to the user's first server so the
+     * Networking → Addresses card has content. This is the only server-settings
+     * surface backed by the DB (IPAM); SSH keys, DNS, disks and boot order all
+     * read live Proxmox config, so they only populate against a reachable node.
+     */
+    private function seedServerAddresses(User $user): void
+    {
+        $server = Server::query()->where('user_id', $user->getKey())->first();
+
+        if (! $server) {
+            $this->command->warn('  No server for this user — skipping IP addresses (run ServerSeeder first).');
+
+            return;
+        }
+
+        if ($server->addresses()->exists()) {
+            return;
+        }
+
+        // TEST-NET-3 (203.0.113.0/24) — a documentation range, safe for fixtures.
+        $block = AddressBlock::factory()->create([
+            'name' => 'Public IPv4',
+            'version' => AddressVersion::IPv4,
+            'base_ip' => '203.0.113.0',
+            'gateway' => '203.0.113.1',
+            'prefix_length_from' => 24,
+            'prefix_length_to' => 32,
+        ]);
+
+        foreach (['203.0.113.10', '203.0.113.11', '203.0.113.12'] as $ip) {
+            Address::factory()->create([
+                'address_block_id' => $block->getKey(),
+                'server_id' => $server->getKey(),
+                'ip' => $ip,
+                'prefix_length' => 24,
+            ]);
         }
     }
 
