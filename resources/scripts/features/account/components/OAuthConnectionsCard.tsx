@@ -90,7 +90,7 @@ const OAuthConnectionsCard = () => {
                 </CardDescription>
             </CardHeader>
             <CardContent
-                className={cn('min-h-[8rem]', isLoading && 'grid place-items-center')}
+                className={cn(isLoading && 'grid min-h-[8rem] place-items-center')}
             >
                 {isLoading || !connections ? (
                     <Skeleton className={'h-24 w-full'} />

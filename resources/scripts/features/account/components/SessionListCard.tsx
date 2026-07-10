@@ -61,9 +61,8 @@ const SessionListCard = () => {
             </CardHeader>
             <CardContent
                 className={cn(
-                    'min-h-[14rem]',
                     (isLoading || sessions?.length === 0) &&
-                        'grid place-items-center'
+                        'grid min-h-[12rem] place-items-center'
                 )}
             >
                 {isLoading || !sessions ? (

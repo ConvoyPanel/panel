@@ -78,9 +78,8 @@ const ApiKeysCard = () => {
                 </CardHeader>
                 <CardContent
                     className={cn(
-                        'min-h-[14rem]',
                         (isLoading || keys?.length === 0) &&
-                            'grid place-items-center'
+                            'grid min-h-[12rem] place-items-center'
                     )}
                 >
                     {isLoading || !keys ? (
