@@ -134,6 +134,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->hasMany(SSHKey::class);
     }
 
+    /**
+     * @return HasMany<OAuthConnection, $this>
+     */
+    public function oauthConnections(): HasMany
+    {
+        return $this->hasMany(OAuthConnection::class);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'id';

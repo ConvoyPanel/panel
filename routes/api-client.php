@@ -38,6 +38,14 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
             ->withoutScopedBindings();
     });
 
+    // Federated (OAuth/OIDC) identities linked to the account. Linking itself is a browser redirect
+    // flow (Auth\OAuthController) — only listing/unlinking are JSON here.
+    Route::prefix('/oauth-connections')->group(function () {
+        Route::get('/', [Client\Account\OAuthConnectionController::class, 'index']);
+        Route::delete('/{oauthConnection}', [Client\Account\OAuthConnectionController::class, 'destroy'])
+            ->withoutScopedBindings();
+    });
+
     Route::prefix('/passkeys')
         ->middleware(RequireIdentityConfirmation::class)
         ->group(function () {

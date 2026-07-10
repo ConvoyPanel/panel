@@ -14,6 +14,14 @@ use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 |
 */
 
+// OAuth/OIDC federated login (Convoy as Relying Party). Outside the guest/auth groups on purpose:
+// a logged-out user hits these to sign in, a logged-in user hits them to link a provider — the
+// callback branches on the current auth state. Web session applies (Socialite needs it for state).
+Route::get('/oauth/{provider}/redirect', [Auth\OAuthController::class, 'redirect'])
+    ->name('auth.oauth.redirect');
+Route::get('/oauth/{provider}/callback', [Auth\OAuthController::class, 'callback'])
+    ->name('auth.oauth.callback');
+
 Route::middleware('guest')->group(function () {
     // Single sign-on deep link (minted by Admin\UserController::getSSOToken). The `signed`
     // middleware verifies the HMAC + expiry; the controller enforces single use. Named so
