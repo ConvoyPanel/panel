@@ -11,6 +11,7 @@ class SSOTokenData extends Data
 {
     public function __construct(
         public int $userId,
-        public string $token,
+        /** Absolute, single-use, expiring signed URL the integration redirects the browser to. */
+        public string $link,
     ) {}
 }
