@@ -21,7 +21,18 @@ const AppLayout = ({ routes, children }: Props) => {
             <Sidebar nav={nav} />
             <div className='flex min-w-0 grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
                 <Header nav={nav} />
-                <main className={'h-full min-w-0 @container'}>
+                {/*
+                 * Cap + center the content column so it doesn't stretch
+                 * awkwardly wide on large screens. Centered within the content
+                 * area (right of the sidebar), not the viewport — the standard
+                 * dashboard convention; we intentionally don't compensate for
+                 * the sidebar offset. max-width lives on the @container element
+                 * so the dashboards' container-query breakpoints measure the
+                 * constrained width.
+                 */}
+                <main
+                    className={'mx-auto h-full w-full min-w-0 max-w-[1600px] @container'}
+                >
                     <div
                         className={
                             'flex h-full min-w-0 flex-col gap-2 p-4 @md:gap-4 sm:px-6 sm:py-0'
