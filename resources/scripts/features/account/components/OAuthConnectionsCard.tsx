@@ -105,6 +105,7 @@ const OAuthConnectionsCard = () => {
                                 <Item
                                     key={provider.id}
                                     variant={'muted'}
+                                    size={'sm'}
                                 >
                                     <ItemMedia variant={'icon'}>
                                         <ProviderIcon
