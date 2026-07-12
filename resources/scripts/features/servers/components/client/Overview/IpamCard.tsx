@@ -1,47 +1,72 @@
 import { Address } from '@/types/address.ts'
-import { IconWifiOff } from '@tabler/icons-react'
+import { IconNetwork, IconWifiOff } from '@tabler/icons-react'
 import { KeyboardEvent } from 'react'
 
 import { useAddresses } from '@/features/servers/detail/api.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
+import { cn } from '@/utils'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    Item,
+    ItemContent,
+    ItemMedia,
+    ItemTitle,
+    OverflowItemGroup,
+} from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-const Cell = ({
-    title,
-    description,
+/** A single click-to-copy value (keyboard accessible). */
+const CopyValue = ({
+    label,
+    value,
     className,
 }: {
-    title: string
-    description: string
+    label: string
+    value: string
     className?: string
 }) => {
     const { copy } = useClipboard({ successMessage: 'Copied to clipboard' })
 
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
-            copy(description)
+            event.preventDefault()
+            copy(value)
         }
     }
 
     return (
-        <div className={className}>
-            <dd
-                role='button'
-                tabIndex={0}
-                className={'cursor-pointer select-none truncate text-sm'}
-                aria-label={`Click to copy ${title} ${description}`}
-                onClick={() => copy(description)}
-                onKeyDown={handleKeyDown}
-            >
-                {description}
-            </dd>
-            <dt className={'text-xs text-muted-foreground'}>{title}</dt>
-        </div>
+        <span
+            role={'button'}
+            tabIndex={0}
+            aria-label={`Click to copy ${label} ${value}`}
+            onClick={() => copy(value)}
+            onKeyDown={handleKeyDown}
+            className={cn(
+                'cursor-pointer select-none truncate rounded-sm font-mono outline-none hover:text-primary focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                className
+            )}
+        >
+            {value}
+        </span>
     )
 }
+
+/** A labeled, copyable secondary field (Gateway / MAC). */
+const Field = ({ label, value }: { label: string; value: string }) => (
+    <div className={'min-w-0'}>
+        <CopyValue label={label} value={value} className={'block text-xs'} />
+        <p className={'text-xs text-muted-foreground'}>{label}</p>
+    </div>
+)
 
 const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
     if (addresses.length === 0) {
@@ -56,36 +81,38 @@ const RenderAddresses = ({ addresses }: { addresses: Address[] }) => {
         )
     }
 
-    if (addresses.length > 0) {
-        return (
-            <ul className={'divide-y rounded-md border'}>
-                {addresses.map(address => (
-                    <li key={address.id} className={'px-3 py-2'}>
-                        <dl
-                            className={
-                                'relative flex flex-col gap-2 @sm:flex-row'
-                            }
-                        >
-                            <Cell
-                                title={'Address'}
-                                description={`${address.ip}/${address.prefixLength}`}
-                                className={'w-full @sm:max-w-[30%]'}
+    return (
+        <OverflowItemGroup
+            max={4}
+            title={'IP Addresses'}
+            rows={addresses.map(address => (
+                <Item key={address.id} variant={'muted'} size={'sm'}>
+                    <ItemMedia variant={'icon'}>
+                        <IconNetwork />
+                    </ItemMedia>
+                    <ItemContent className={'overflow-x-hidden'}>
+                        <ItemTitle>
+                            <CopyValue
+                                label={'Address'}
+                                value={`${address.ip}/${address.prefixLength}`}
+                                className={'truncate text-sm'}
                             />
-                            <Cell
-                                title={'Gateway'}
-                                description={address.gateway}
-                                className={'w-full @sm:max-w-[30%]'}
+                            <Badge variant={'secondary'}>
+                                {address.version}
+                            </Badge>
+                        </ItemTitle>
+                        <div className={'flex flex-wrap gap-x-6 gap-y-1'}>
+                            <Field label={'Gateway'} value={address.gateway} />
+                            <Field
+                                label={'MAC'}
+                                value={address.macAddress ?? 'N/A'}
                             />
-                            <Cell
-                                title={'Mac Address'}
-                                description={address.macAddress ?? 'N/A'}
-                            />
-                        </dl>
-                    </li>
-                ))}
-            </ul>
-        )
-    }
+                        </div>
+                    </ItemContent>
+                </Item>
+            ))}
+        />
+    )
 }
 
 const IpamCard = () => {
@@ -95,6 +122,9 @@ const IpamCard = () => {
         <Card className={'col-span-2 min-h-[15rem] @md:col-span-4'}>
             <CardHeader>
                 <CardTitle>IPAM</CardTitle>
+                <CardDescription>
+                    Addresses allocated to this server.
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 {addresses ? (
