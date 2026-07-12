@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Auth\Socialite\OidcProvider;
 use App\Models\Passkey;
 use App\Models\PersonalAccessToken;
 use App\Models\Server;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use Laravel\Socialite\Contracts\Factory as Socialite;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +54,33 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->bootRoute();
+        $this->bootOidc();
+    }
+
+    /**
+     * Register the generic OpenID Connect Socialite driver so operators can federate against
+     * any standards-compliant IdP by pointing `services.oidc.base_url` at its issuer. Socialite
+     * ships no such driver, so we extend it with our own {@see OidcProvider}.
+     */
+    public function bootOidc(): void
+    {
+        $socialite = $this->app->make(Socialite::class);
+
+        $socialite->extend('oidc', function () use ($socialite) {
+            $config = config('services.oidc', []);
+
+            $provider = $socialite->buildProvider(OidcProvider::class, $config);
+
+            // OIDC scopes are operator-tunable (some IdPs want extra scopes to release claims),
+            // but `openid` is mandatory. setScopes fully replaces the driver defaults so operators
+            // retain control; we just fold `openid` back in unconditionally.
+            $scopes = array_values(array_unique(array_merge(
+                ['openid'],
+                (array) ($config['scopes'] ?? ['profile', 'email']),
+            )));
+
+            return $provider->setScopes($scopes);
+        });
     }
 
     public function bootRoute(): void
