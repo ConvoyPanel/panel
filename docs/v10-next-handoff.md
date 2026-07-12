@@ -8,8 +8,8 @@ Last updated: 2026-07-12 (session: **nova form primitive follow-through** — `F
 `FormDescription`/`FormMessage` now expose the same `field*` slots/classes as the `Field` primitive;
 checkbox form wrappers moved off old `space-*` overrides to gap-based nova rhythm; admin-dashboard
 `MetricTile` now uses the shared `Card` chrome; client backup rows now use muted `ItemGroup`/`Item`;
-admin nodes/locations/tokens DataTables now have opt-in mobile `Item` rows; `ddev npm run tc` +
-`ddev npm run build` green) — prior:
+admin nodes/locations/tokens DataTables now have opt-in mobile `Item` rows; node Overview placeholder replaced
+with a details/capacity/resources landing page; `ddev npm run tc` + `ddev npm run build` green) — prior:
 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
@@ -463,11 +463,11 @@ Researched direction retained for each; none built unless noted.
     TODO:** optional top workspace/account switcher (design choice). **Note:**
     the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
     node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
-    grouping. **Also unbuilt (verified 2026-07-09):** the node **Overview** landing itself
-    (`routes/_app/admin/nodes.$nodeId/index{,.lazy}.tsx`) is still the scaffold `Hello "…"` placeholder — so
-    the node's default page needs building too. All four (`overview`/`servers`/`ipam`/`settings`) are content
-    /design calls (what KPIs, which list, which settings), deferred pending maintainer direction. The built
-    node sub-pages for reference are `network` and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    grouping. **Update 2026-07-12:** node **Overview** now has a first useful landing page (node details,
+    memory capacity, configured servers/storages/network interfaces) using existing node/storage/network queries;
+    `ddev npm run tc` + `ddev npm run build` green. **Still unbuilt:** node `servers`/`ipam`/`settings` route
+    files are missing and remain content/design calls. The built node sub-pages for reference are `overview`,
+    `network`, and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
