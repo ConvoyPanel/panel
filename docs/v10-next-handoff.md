@@ -9,7 +9,8 @@ Last updated: 2026-07-12 (session: **nova form primitive follow-through** — `F
 checkbox form wrappers moved off old `space-*` overrides to gap-based nova rhythm; admin-dashboard
 `MetricTile` now uses the shared `Card` chrome; client backup rows now use muted `ItemGroup`/`Item`;
 admin nodes/locations/tokens DataTables now have opt-in mobile `Item` rows; node Overview placeholder replaced
-with a details/capacity/resources landing page; `ddev npm run tc` + `ddev npm run build` green) — prior:
+with a details/capacity/resources landing page; node Servers route now lists node-scoped servers via existing
+`filter[node_id]`; `ddev npm run tc` + `ddev npm run build` green) — prior:
 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
@@ -465,9 +466,10 @@ Researched direction retained for each; none built unless noted.
     node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
     grouping. **Update 2026-07-12:** node **Overview** now has a first useful landing page (node details,
     memory capacity, configured servers/storages/network interfaces) using existing node/storage/network queries;
-    `ddev npm run tc` + `ddev npm run build` green. **Still unbuilt:** node `servers`/`ipam`/`settings` route
-    files are missing and remain content/design calls. The built node sub-pages for reference are `overview`,
-    `network`, and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    node **Servers** now uses the existing admin servers API with `filter[node_id]`, preserving search/pagination
+    and power actions. `ddev npm run tc` + `ddev npm run build` green (one known sandbox exit-139 retry).
+    **Still unbuilt:** node `ipam`/`settings` route files are missing and remain content/design calls. The built
+    node sub-pages for reference are `overview`, `servers`, `network`, and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's

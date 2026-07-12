@@ -1,0 +1,137 @@
+import useDataTable from '@/hooks/use-data-table.ts'
+import { Server } from '@/types/server.ts'
+import { cn } from '@/utils'
+import { IconPlus } from '@tabler/icons-react'
+import { Link, createLazyFileRoute } from '@tanstack/react-router'
+import { ColumnDef } from '@tanstack/react-table'
+
+import {
+    ServerQueryParams,
+    useServers,
+} from '@/features/servers/admin/api.ts'
+import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
+
+import { Badge } from '@/components/ui/Badge.tsx'
+import { buttonVariants } from '@/components/ui/Button'
+import { DataTable } from '@/components/ui/DataTable'
+import DataTableColumnHeader from '@/components/ui/DataTable/DataTableColumnHeader.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { Heading } from '@/components/ui/Typography'
+
+export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/servers')({
+    component: NodeServers,
+})
+
+const statusLabel = (status: Server['status']) => status.replace(/_/g, ' ')
+
+function NodeServers() {
+    const { nodeId } = Route.useParams()
+    const numericNodeId = Number(nodeId)
+    const { queryParams, tableProps } = useDataTable()
+    const scopedQueryParams: ServerQueryParams = {
+        ...queryParams,
+        filters: {
+            ...queryParams.filters,
+            node_id: numericNodeId,
+        },
+    }
+    const { data, isPlaceholderData } = useServers(scopedQueryParams)
+
+    const columns: ColumnDef<Server>[] = [
+        {
+            accessorKey: 'name',
+            enableHiding: false,
+            enableSorting: true,
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title='Name' />
+            ),
+            meta: {
+                skeletonWidth: '5rem',
+            },
+            cell: ({ cell }) => (
+                <Link
+                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
+                    to={`/admin/servers/${cell.row.original.id}` as string}
+                >
+                    {cell.getValue<string>()}
+                </Link>
+            ),
+        },
+        {
+            header: 'Hostname',
+            accessorKey: 'hostname',
+            meta: {
+                skeletonWidth: '4rem',
+            },
+        },
+        actionsColumn<Server>(({ row }) => (
+            <ServerPowerActions server={row.original} />
+        )),
+    ]
+
+    return (
+        <>
+            <Heading>Servers</Heading>
+            <DataTable
+                paginated
+                searchable
+                toolbar
+                data={data}
+                columns={columns}
+                isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const server = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'overflow-x-hidden'}>
+                                <ItemTitle>
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto p-0'
+                                        )}
+                                        to={`/admin/servers/${server.id}` as string}
+                                    >
+                                        {server.name}
+                                    </Link>
+                                </ItemTitle>
+                                <ItemDescription className={'truncate'}>
+                                    {server.hostname}
+                                </ItemDescription>
+                                <Badge
+                                    variant={'secondary'}
+                                    className={'w-fit capitalize'}
+                                >
+                                    {statusLabel(server.status)}
+                                </Badge>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>
+                                    <ServerPowerActions server={server} />
+                                </Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
+                rightActions={
+                    <Link
+                        className={cn(buttonVariants({ size: 'sm' }), 'flex')}
+                        to='/admin/servers/create'
+                    >
+                        <IconPlus className={'mr-2 size-4'} />
+                        Add server
+                    </Link>
+                }
+                {...tableProps}
+            />
+        </>
+    )
+}
