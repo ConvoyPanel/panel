@@ -61,7 +61,7 @@ const ServerBuildSettingsCard = () => {
             addressIds: pluckedAddressIds,
             snapshotLimit: server.limits.snapshots?.toString() ?? '',
             backupLimit: server.limits.backups?.toString() ?? '',
-            bandwidthLimit: server.limits.bandwidth
+            bandwidthLimit: server.limits.bandwidth !== null
                 ? (server.limits.bandwidth / 1048576).toString()
                 : '',
             bandwidthUsage: (server.usages.bandwidth / 1048576).toString(),
