@@ -4,7 +4,20 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
+Last updated: 2026-07-12 (session: **shadcn Item-pattern rollout continued** — rolled the muted
+`Item` / `OverflowItemGroup` row pattern to three more surfaces: **server Security tab SSH keys**
+[`397d9441`], **client Overview IPAM card** [`7916614f`, kept per-field click-to-copy + added a
+version badge; the networking-tab `AddressesCard` stays a Table], and the **account passkeys dialog
+list** [`a712ac4e`, plain `ItemGroup`, dialog already scrolls]. Each browser-verified in isolation
+via a *temporary top-level dev-route* rendering the real component with Playwright-stubbed API
+responses [this sandbox had no live PVE node + empty DB], covering populated/overflow/empty states;
+temp routes deleted, tree clean, `tc`+`build` green. Also **AGENTS.md**: documented live-node e2e
+seeding [`DevNodeSeeder` → optional `ServerSeeder`] as the preferred browser-verify path, and called
+out the recurring trap that `PROXMOX_*`/config live in **`.env`** read by Laravel's Dotenv, **not the
+container shell** — `echo $VAR` shows blank even when set, so grep `.env` or just run the seeder.
+**Remaining hand-rolled list:** `InstallingServer`/`DeploymentStepRow` — a status/progress timeline,
+not an entity list; deferred because its running/failed states need a live deploy to verify. — prior:
+**SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
 auto-register off by default], `Auth\OAuthController` redirect/callback [login when logged-out, link when
