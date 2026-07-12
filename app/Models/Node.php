@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
+use App\Data\Server\OveragePenaltyData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -32,6 +34,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property bool $coterm_tls_enabled
  * @property string $coterm_fqdn
  * @property int $coterm_port
+ * @property ?OveragePenaltyData $overage_penalty
  * @property ?Coterm $coterm
  */
 class Node extends Model
@@ -67,6 +70,11 @@ class Node extends Model
         'memory_overallocate' => 'required|integer',
         // 'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
         'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
+        // Per-node override of the quota-overage penalty; null = inherit the global
+        // BandwidthSettings default. See docs/bandwidth-rate-limiting-plan.md §5.
+        'overage_penalty' => 'sometimes|nullable|array',
+        'overage_penalty.action' => 'required_with:overage_penalty|string|in:throttle,disconnect',
+        'overage_penalty.rate' => 'nullable|integer|min:1',
     ];
 
     /**
@@ -80,6 +88,7 @@ class Node extends Model
             'verify_tls' => 'boolean',
             'memory' => StorageSizeCast::class,
             'token_secret' => 'encrypted',
+            'overage_penalty' => OveragePenaltyCast::class,
         ];
     }
 

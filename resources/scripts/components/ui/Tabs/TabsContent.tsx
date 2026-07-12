@@ -1,20 +1,19 @@
 import { cn } from '@/utils'
-import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Tabs } from '@base-ui/react/tabs'
+import { forwardRef } from 'react'
 
-const TabsContent = forwardRef<
-    ElementRef<typeof TabsPrimitive.Content>,
-    ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-    <TabsPrimitive.Content
-        ref={ref}
-        className={cn(
-            'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            className
-        )}
-        {...props}
-    />
-))
-TabsContent.displayName = TabsPrimitive.Content.displayName
+const TabsContent = forwardRef<HTMLDivElement, Tabs.Panel.Props>(
+    ({ className, ...props }, ref) => (
+        <Tabs.Panel
+            ref={ref}
+            className={cn(
+                'ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                className
+            )}
+            {...props}
+        />
+    )
+)
+TabsContent.displayName = 'TabsContent'
 
 export default TabsContent

@@ -1,8 +1,7 @@
+import { cn } from '@/utils'
 import { Slot } from '@radix-ui/react-slot'
 import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
-
-import { cn } from '@/utils'
 
 import { Separator } from '@/components/ui/Separator'
 
@@ -70,6 +69,9 @@ function Item({
     const Comp = asChild ? Slot : 'div'
     return (
         <Comp
+            // Pairs with ItemGroup's role="list" so screen readers announce a
+            // real list (equivalent to <ul><li>). Overridable via props.
+            role='listitem'
             data-slot='item'
             data-variant={variant}
             data-size={size}
@@ -80,7 +82,7 @@ function Item({
 }
 
 const itemMediaVariants = cva(
-    "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none",
+    'flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none',
     {
         variants: {
             variant: {
@@ -141,8 +143,8 @@ function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
         <p
             data-slot='item-description'
             className={cn(
-                'line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground',
-                '[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary',
+                'text-muted-foreground line-clamp-2 text-sm leading-normal font-normal text-balance',
+                '[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4',
                 className
             )}
             {...props}

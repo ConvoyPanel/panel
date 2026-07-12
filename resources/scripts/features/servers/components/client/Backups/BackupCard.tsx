@@ -1,7 +1,12 @@
 import { Backup, BackupErrorCode } from '@/features/servers/types.ts'
 import { IconAlertTriangle } from '@tabler/icons-react'
 
-import { Card } from '@/components/ui/Card'
+import {
+    Item,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface Props {
     backup: Backup
@@ -19,27 +24,21 @@ const BackupCard = ({ backup }: Props) => {
     const isFailed = backup.errorCode !== null
 
     return (
-        <Card className={'flex flex-col gap-1 py-2.5 px-5'}>
-            <div className={'flex items-center gap-2'}>
-                <p className={'font-semibold'}>{backup.name}</p>
+        <Item variant={'muted'} size={'sm'}>
+            <ItemContent className={'overflow-x-hidden'}>
+                <ItemTitle className={'truncate'}>{backup.name}</ItemTitle>
                 {isFailed && (
-                    <span
-                        className={
-                            'inline-flex items-center gap-1 text-xs font-medium text-red-500'
-                        }
-                    >
-                        <IconAlertTriangle className={'h-3.5 w-3.5'} />
-                        Failed
-                    </span>
+                    <ItemDescription className={'text-destructive'}>
+                        <span className={'inline-flex items-center gap-1'}>
+                            <IconAlertTriangle className={'h-3.5 w-3.5'} />
+                            Failed
+                        </span>{' '}
+                        {BACKUP_ERROR_LABELS[backup.errorCode!]}
+                        {backup.errorMessage ? `: ${backup.errorMessage}` : ''}
+                    </ItemDescription>
                 )}
-            </div>
-            {isFailed && (
-                <p className={'text-xs text-red-500'}>
-                    {BACKUP_ERROR_LABELS[backup.errorCode!]}
-                    {backup.errorMessage ? `: ${backup.errorMessage}` : ''}
-                </p>
-            )}
-        </Card>
+            </ItemContent>
+        </Item>
     )
 }
 

@@ -15,10 +15,11 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
+import { Item, ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import {
     Table,
@@ -102,6 +103,7 @@ const DataTable = <TData,>({
     bulkActions,
     isPlaceholderData,
     rightActions,
+    mobileRow,
     ...props
 }: DataTableProps<TData>) => {
     const [query, setQuery] = useControllableState({
@@ -227,7 +229,7 @@ const DataTable = <TData,>({
         enableRowSelection && !!bulkActions && selectedRows.length > 0
 
     return (
-        <div className='space-y-4'>
+        <div className='@container space-y-4'>
             {toolbar && (
                 <DataTableToolbar
                     filterFields={filterFields}
@@ -254,7 +256,12 @@ const DataTable = <TData,>({
                     </Button>
                 </div>
             )}
-            <div className='rounded-md border bg-background'>
+            <div
+                className={cn(
+                    'rounded-md border bg-background',
+                    mobileRow && 'hidden @md:block'
+                )}
+            >
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map(headerGroup => (
@@ -374,6 +381,45 @@ const DataTable = <TData,>({
                     </TableBody>
                 </Table>
             </div>
+            {mobileRow && (
+                <ItemGroup
+                    className={cn(
+                        'gap-3 @md:hidden',
+                        isPlaceholderData &&
+                            data &&
+                            'opacity-60 transition-opacity'
+                    )}
+                >
+                    {data ? (
+                        table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <Fragment key={row.id}>
+                                    {mobileRow(row)}
+                                </Fragment>
+                            ))
+                        ) : (
+                            <Item
+                                variant={'muted'}
+                                size={'sm'}
+                                className='justify-center text-muted-foreground'
+                            >
+                                No results.
+                            </Item>
+                        )
+                    ) : (
+                        Array.from({ length: skeletonRows }).map((_, i) => (
+                            <Item
+                                key={i}
+                                variant={'muted'}
+                                size={'sm'}
+                                className='h-16'
+                            >
+                                <Skeleton className='h-6 w-full' />
+                            </Item>
+                        ))
+                    )}
+                </ItemGroup>
+            )}
             {paginated && (
                 <DataTablePagination
                     table={table}

@@ -4,7 +4,10 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-12 (session: **admin node Overview built and live-verified** — replaced the
+Last updated: 2026-07-12 (session: **frontend handoff branches reconciled** — retained the richer
+admin node Overview and its live PVE status polling while integrating `next`'s node-scoped Servers
+page, editable Settings page, nova `Field`/`InputGroup` and form refinements, mobile admin `Item`
+rows, backup-row rollout, generic OIDC provider, and bandwidth backend. The node Overview replaced the
 scaffold route with a responsive, data-dense three-card Overview for live CPU/memory/load/uptime,
 configured memory allocation, hardware/topology, root filesystem, PVE/kernel/boot, and endpoint
 details. Added a saved-node `/status` endpoint over `ProxmoxStatusRepository`, expanded the status
@@ -13,7 +16,8 @@ every 30s with an offline/retry state. `DevNodeSeeder` resolved the configured P
 repository and authenticated browser route both returned real live values. Playwright desktop +
 390px mobile passed with no console errors or horizontal overflow; screenshots:
 `storage/app/node-overview-{desktop,mobile}.png`. Focused Pest 10 + full Pest 226, PHPStan-zero,
-`tc`, and `build` green. — prior: **shadcn Item-pattern rollout completed** - converted the final
+`tc` and `build` are green after reconciliation; full Pest 252 and PHPStan-zero also pass. — prior:
+**shadcn Item-pattern rollout completed** - converted the final
 hand-rolled list, `InstallingServer` / `DeploymentStepRow`, to an always-visible compact `ItemGroup`
 of muted `Item` rows; retained polling, timing, byte/percentage progress, errors, and retry behavior,
 and restored standard Card spacing. Browser-verified through the real authenticated server route and
@@ -119,6 +123,45 @@ cross-checked with `qm`/`pvesh` over SSH:
 ## Next up — open product follow-ups
 
 Researched direction retained for each; none built unless noted.
+
+- **Design-input queue — intentionally deferred.** Do not choose these UX/product details without the
+  maintainer: node IPAM scope and its required backend filter; the existing-server limits/settings page and
+  bandwidth inheritance presentation; the global admin Settings information architecture; whether the optional
+  workspace/account switcher belongs in the top chrome; and whether irreversible actions should keep nova's
+  soft destructive tint or return to solid red. The implementation constraints remain in the relevant entries
+  below so design input can start from a concrete boundary rather than re-discovery.
+
+- **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
+  Full design + phase log in [`docs/bandwidth-rate-limiting-plan.md`](bandwidth-rate-limiting-plan.md).
+  Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
+  (`servers.speed_limit`, bytes/s) plus a **configurable overage penalty**
+  (throttle-to-rate or disconnect the NIC) resolved by a **server → node → global**
+  cascade (`servers.overage_penalty` / `nodes.overage_penalty` json overrides →
+  `App\Settings\BandwidthSettings` global default via `spatie/laravel-settings`).
+  Quota reset moved to a **per-server day-of-month anchor** (`bandwidth_reset_day`,
+  daily sweep). Enforcement was **re-architected into a per-server
+  `SyncServerRateLimitJob` batched per node** (was one node-wide loop). Also fixed:
+  `RateLimitCast` now uses Proxmox's decimal MB (was binary MiB, ~4.86% off) and the
+  `-1`=unlimited quota no longer false-throttles. Scheduler (`routes/console.php`) is
+  now live for `sync-usages` / `reset-usages` / `sync-rate-limits`.
+
+  **Frontend still to build (admin-only; intentionally deferred for maintainer design input):**
+  1. **Speed cap field** on server creation — add to the create wizard's `LimitsForm`
+     (unit MB/s in the UI, convert to bytes/s: `limits.speed_limit`). Fold into the
+     planned wizard overhaul.
+  2. **Per-server speed cap + overage-penalty override** on an existing server —
+     **no "edit build/limits" admin page exists yet** (the `updateBuild` endpoint is
+     unwired). Needs that page built first; then add a speed-cap input and an
+     overage-penalty control with an explicit **"inherit from node/global"** state.
+  3. **Per-node overage-penalty override** on the node **settings** page
+     (`nodes.$nodeId/settings.lazy.tsx` + `features/nodes/api.ts`) — an action select
+     (throttle/disconnect) + conditional rate input, with an "inherit from global"
+     state. The backend already accepts `overage_penalty` on `UpdateNodeRequest`.
+  4. **Global default** (`BandwidthSettings`) is not yet UI-editable — a small admin
+     Settings screen is the eventual home (there's no settings-screen infra yet).
+  UX note: **disconnect** is a hard penalty (guest keeps the NIC but loses carrier) —
+  label it clearly; it's reversible. Show the resolved *effective* value where an
+  override is left on "inherit".
 
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
   both the client PAT card and the admin `/admin/tokens` screen shipped).
@@ -403,12 +446,44 @@ Researched direction retained for each; none built unless noted.
       don't reinvent.** (NOT Vercel/geist, NOT Linear — those were the other interview options.)
     - **Biggest gaps to fix:** cards are too flat/plain; spacing & density feel generic. These are the
       levers — depth + deliberate spacing.
-    - **Base UI is a HARD requirement** (`@base-ui-components/react`), confirmed. Primitives must move off
+    - **Base UI is a HARD requirement** (`@base-ui/react`), confirmed. Primitives must move off
       Radix. BUT do it *opportunistically per screen* — migrate the primitives a flagship screen actually
       touches; do NOT block visible work on a big-bang 40-component migration.
     - **Sequence = flagship-screen-first.** Perfect ONE screen end-to-end → screenshot → maintainer
       approves the "look" → extract patterns into shared components → roll out. Do not restyle everything
       at once.
+  - *FE overhaul — CORRECTED TARGET + LARGELY EXECUTED (2026-07-10, on `next`). SUPERSEDES the
+    "target = blocks/dashboard-01" line above.* The real reference is the polished **example cards on
+    shadcn's CREATE page** — source `shadcn-ui/ui` `apps/v4/registry/bases/base/blocks/preview-02/cards/*.tsx`,
+    rendered under the create-page default **base variant, style `nova`** (`registry/config.ts` `DEFAULT_CONFIG`:
+    base=base, style=nova). **Match nova's concrete VALUES in plain Tailwind — NOT new-york-v4 (it deviates)
+    and NOT the `cn-*` classes (that's shadcn.com theming-playground infra, not a product practice).** Exact
+    nova values live in `apps/v4/styles/base-nova/ui/*.tsx`. Shipped: `Item`/`ItemGroup`/`ItemMedia` (`variant=muted`
+    = the depth) + `OverflowItemGroup` (capped list + right Sheet), `CardAction`, `Empty` primitive (+
+    `SimpleEmptyState` rewired to it). Card = flat `ring-1 ring-foreground/10` (not border+shadow), 16px padding,
+    `CardTitle text-base font-medium` (500, not semibold), muted `CardFooter`. Controls `Input`/`Label`/`Button`
+    → nova (`h-8`, `rounded-lg`, no shadow, `ring-3` focus). v4 shadow scale everywhere. Content column capped
+    `max-w-[1600px]`. Rolled out: whole client Security page + server ISO/SSH-keys tabs; every other card inherits
+    the chrome globally. Browser-verified across login/security/dialog/server tabs. **DECISION TO REVISIT
+    (2026-07-10):** the `destructive` Button uses nova's **soft tint** (`bg-destructive/10 text-destructive`),
+    kept as-is for now — but *every* usage is an irreversible-confirm button (delete modals, Kill/Stop VM,
+    disable 2FA, delete passkey). If it ever reads underpowered, flip that one variant back to **solid red** in
+    `components/ui/Button/Button.variants.ts` (one line; won't clash with nova since destructive is confirm-only).
+    **Done:** `Field`/`InputGroup` primitives exist; legacy `Form*` wrappers now inherit nova field slots/text
+    rhythm and checkbox wrappers use gap-based layout instead of old `space-*` overrides; admin-dashboard
+    `MetricTile` uses the shared `Card` chrome; client backup rows use muted `ItemGroup`/`Item`; admin
+    nodes/locations/tokens DataTables keep the desktop table but render opt-in mobile `Item` rows below `@md`.
+    **Base UI follow-through (2026-07-12):** replaced the deprecated `@base-ui-components/react` RC with current
+    `@base-ui/react`; migrated the low-risk shared Progress, Separator, and Tabs primitives; preserved decorative
+    separator semantics and Radix's automatic keyboard tab activation; removed the three superseded Radix
+    packages. Remaining primitives are intentionally opportunistic: dialogs/sheets, menus/popovers/tooltips,
+    selects/checkboxes, scroll areas, and `asChild` wrappers have different Base UI composition or DOM contracts
+    and require focused interaction/browser verification when their owning screen is next touched, not a blind
+    bulk swap. **Still TODO:** none for the nova list→`Item` rollout called out here; the design-input queue above
+    owns the remaining screen decisions. **Test data:** `UserSeeder`
+    (`db:seed --class=UserSeeder`, `SEED_USER=` override) seeds account
+    SSH keys/API tokens + a server's IPAM addresses. **Note:** server-settings tabs (SSH keys/DNS/disks/boot-order)
+    read live Proxmox, not the DB — they only populate against a reachable node, not via seeders.
   - *Sidebar redesign — FLAGSHIP BUILT + BROWSER-VERIFIED (2026-07-09, commit `157f73bb`). Roll-out to
     remaining screens is what's left.* Done: replaced the hover icon-rail with a **full labeled sidebar**
     (`w-64`, grouped sections under muted caps headers), **contextual drill-down** (client dashboard → a
@@ -453,11 +528,14 @@ Researched direction retained for each; none built unless noted.
     calls + action entries, screenshot `/tmp/opencode/panel-visual/command-palette-entity-search.png`. **Still
     TODO:** optional top workspace/account switcher (design choice). **Note:**
     the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
-    node, but those route files still do not exist — pre-existing product/page follow-ups, not introduced by
-    the grouping. The node **Overview is now built and live-verified** (2026-07-12): live PVE status plus
-    configured allocation/system detail in the established dense-card layout. The remaining three pages are
-    content/design calls (which server list, IPAM scope, and settings), deferred pending maintainer direction.
-    The other built node sub-pages are `network` and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    node. **Update 2026-07-12:** node **Overview** is built and live-verified with PVE status,
+    configured allocation, hardware/topology, root filesystem, PVE/kernel/boot, and endpoint details;
+    node **Servers** now uses the existing admin servers API with `filter[node_id]`, preserving search/pagination
+    and power actions; node **Settings** now edits node metadata/connection/specs with update-specific optional
+    token rotation fields. `ddev npm run tc` + `ddev npm run build` green (one known sandbox exit-139 retry in an
+    earlier build). **Still unbuilt:** node `ipam` route file is missing; the address-block-group index currently
+    does **not** allow `node_id` filtering, so building it properly needs a backend filter/API decision first. The
+    built node sub-pages for reference are `overview`, `servers`, `network`, `storages`, and `settings`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's

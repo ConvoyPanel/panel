@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
+use App\Data\Server\OveragePenaltyData;
 use App\Enums\Server\ServerStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -31,6 +33,9 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property int $backup_count_limit
  * @property int $backup_size_limit
  * @property int $bandwidth_limit
+ * @property ?int $speed_limit
+ * @property ?OveragePenaltyData $overage_penalty
+ * @property ?int $bandwidth_reset_day
  * @property ?int $vlan_tag
  * @property Node $node
  * @property ?NetworkInterface $networkInterface
@@ -69,6 +74,15 @@ class Server extends Model
         'backup_count_limit' => 'required|integer|min:-1',
         'backup_size_limit' => 'required|integer|min:-1',
         'bandwidth_limit' => 'present|integer|min:-1',
+        // Persistent NIC speed cap in bytes/s (null = unlimited); the request layer
+        // converts the operator's MB/s input. See docs/bandwidth-rate-limiting-plan.md.
+        'speed_limit' => 'sometimes|nullable|integer|min:0',
+        // Per-server override of the quota-overage penalty; null = inherit. Nested
+        // shape is validated where it's exposed (UpdateBuildRequest).
+        'overage_penalty' => 'sometimes|nullable|array',
+        'overage_penalty.action' => 'required_with:overage_penalty|string|in:throttle,disconnect',
+        'overage_penalty.rate' => 'nullable|integer|min:1',
+        'bandwidth_reset_day' => 'sometimes|nullable|integer|min:1|max:31',
         'vlan_tag' => 'nullable|integer|min:1|max:4094',
         'hydrated_at' => 'nullable|date',
     ];
@@ -82,6 +96,9 @@ class Server extends Model
             'bandwidth_usage' => StorageSizeCast::class,
             'bandwidth_limit' => StorageSizeCast::class,
             'backup_size_limit' => StorageSizeCast::class,
+            'speed_limit' => 'integer',
+            'overage_penalty' => OveragePenaltyCast::class,
+            'bandwidth_reset_day' => 'integer',
             'vlan_tag' => 'integer',
         ];
     }
@@ -201,6 +218,25 @@ class Server extends Model
     public function activity(): MorphToMany
     {
         return $this->morphToMany(ActivityLog::class, 'subject', 'activity_log_subjects');
+    }
+
+    /**
+     * Whether the server has blown its monthly bandwidth quota. A negative
+     * `bandwidth_limit` (the -1 sentinel) means unlimited and is never "over".
+     */
+    public function isOverBandwidthQuota(): bool
+    {
+        return $this->bandwidth_limit >= 0
+            && $this->bandwidth_usage >= $this->bandwidth_limit;
+    }
+
+    /**
+     * The day-of-month (1-31) the monthly quota resets on, falling back to the
+     * server's creation day when no explicit anchor is stored.
+     */
+    public function bandwidthResetDay(): int
+    {
+        return $this->bandwidth_reset_day ?? $this->created_at->day;
     }
 
     public function isInstalled(): bool

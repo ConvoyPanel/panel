@@ -23,7 +23,7 @@ const CheckboxItemForm = ({ name, label, formItemProps, ...props }: Props) => {
                 <FormItem
                     {...formItemProps}
                     className={cn(
-                        'flex flex-row items-center space-x-3 space-y-0',
+                        'flex-row items-center gap-3',
                         formItemProps?.className
                     )}
                 >

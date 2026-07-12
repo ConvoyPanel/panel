@@ -7,6 +7,7 @@ use App\Models\Node;
 use App\Models\Storage;
 use App\Models\User;
 use App\Services\Servers\ServerCreationService;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -54,6 +55,20 @@ it('creates a server with its uuid populated (guarded-field regression)', functi
     expect($server->uuid)->not->toBeNull();
     expect($server->uuid_short)->toBe(substr($server->uuid, 0, 8));
     expect($server->status)->toBe(ServerStatus::DEFERRED_OS_SELECTION);
+});
+
+it('persists the speed cap and anchors the bandwidth reset day', function () {
+    Carbon::setTestNow('2026-04-09 12:00:00');
+
+    $data = creationData($this->user->id, $this->node->id, $this->storage->id);
+    $data['limits']['speed_limit'] = 100_000_000; // 100 MB/s in bytes/s
+
+    $server = app(ServerCreationService::class)->handle($data);
+
+    expect($server->speed_limit)->toBe(100_000_000)
+        ->and($server->bandwidth_reset_day)->toBe(9);
+
+    Carbon::setTestNow();
 });
 
 it('creates secondary disk rows from limits.disks', function () {

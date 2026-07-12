@@ -1,35 +1,34 @@
 import { cn } from '@/utils'
-import * as ProgressPrimitive from '@radix-ui/react-progress'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Progress } from '@base-ui/react/progress'
+import { forwardRef } from 'react'
 
-type LinearProgressBarProps = ComponentPropsWithoutRef<
-    typeof ProgressPrimitive.Root
-> & {
+type LinearProgressBarProps = Omit<Progress.Root.Props, 'value'> & {
+    value?: number | null
     /** Override the fill color, e.g. a capacity tone like `bg-destructive`. */
     indicatorClassName?: string
 }
 
-const LinearProgressBar = forwardRef<
-    ElementRef<typeof ProgressPrimitive.Root>,
-    LinearProgressBarProps
->(({ className, indicatorClassName, value, ...props }, ref) => (
-    <ProgressPrimitive.Root
-        ref={ref}
-        className={cn(
-            'bg-primary/20 relative h-2 w-full overflow-hidden rounded-full',
-            className
-        )}
-        {...props}
-    >
-        <ProgressPrimitive.Indicator
+const LinearProgressBar = forwardRef<HTMLDivElement, LinearProgressBarProps>(
+    ({ className, indicatorClassName, value = null, ...props }, ref) => (
+        <Progress.Root
+            ref={ref}
+            value={value}
             className={cn(
-                'bg-primary h-full w-full flex-1 transition-all',
-                indicatorClassName
+                'bg-primary/20 relative h-2 w-full overflow-hidden rounded-full',
+                className
             )}
-            style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-        />
-    </ProgressPrimitive.Root>
-))
-LinearProgressBar.displayName = ProgressPrimitive.Root.displayName
+            {...props}
+        >
+            <Progress.Indicator
+                className={cn(
+                    'bg-primary h-full w-full flex-1 transition-all',
+                    indicatorClassName
+                )}
+                style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
+            />
+        </Progress.Root>
+    )
+)
+LinearProgressBar.displayName = 'LinearProgressBar'
 
 export default LinearProgressBar

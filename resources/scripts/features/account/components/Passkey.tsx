@@ -1,16 +1,16 @@
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 import { Passkey as PasskeyType } from '@/features/account/types.ts'
 import { IconKeyFilled, IconPencil, IconTrash } from '@tabler/icons-react'
 import { format } from 'date-fns'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
-
 import { Button } from '@/components/ui/Button'
 import {
     Item,
     ItemActions,
     ItemContent,
+    ItemDescription,
     ItemMedia,
     ItemTitle,
 } from '@/components/ui/Item'
@@ -35,9 +35,7 @@ const Passkey = ({ passkey }: Props) => {
             </ItemMedia>
             <ItemContent className={'overflow-x-hidden'}>
                 <ItemTitle className={'truncate'}>{passkey.name}</ItemTitle>
-                <span className={'text-xs text-muted-foreground'}>
-                    Added {formattedDate}
-                </span>
+                <ItemDescription>Added {formattedDate}</ItemDescription>
             </ItemContent>
             <ItemActions>
                 <Button

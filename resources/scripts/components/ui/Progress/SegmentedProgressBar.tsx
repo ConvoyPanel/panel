@@ -1,6 +1,6 @@
 import { cn } from '@/utils'
-import * as ProgressPrimitive from '@radix-ui/react-progress'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Progress } from '@base-ui/react/progress'
+import { forwardRef } from 'react'
 
 import {
     Tooltip,
@@ -15,22 +15,27 @@ export interface Segment {
     label: string
 }
 
-interface SegmentedProgressBarProps
-    extends ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
+interface SegmentedProgressBarProps extends Omit<Progress.Root.Props, 'value'> {
     segments: Segment[]
+    value?: number | null
 }
 
 const SegmentedProgressBar = forwardRef<
-    ElementRef<typeof ProgressPrimitive.Root>,
+    HTMLDivElement,
     SegmentedProgressBarProps
->(({ className, segments, ...props }, ref) => {
+>(({ className, segments, value, ...props }, ref) => {
     let accumulated = 0
+    const total = Math.min(
+        segments.reduce((sum, segment) => sum + segment.value, 0),
+        100
+    )
 
     return (
-        <ProgressPrimitive.Root
+        <Progress.Root
             ref={ref}
+            value={value ?? total}
             className={cn(
-                'relative h-2 w-full overflow-hidden rounded-full bg-primary/10',
+                'bg-primary/10 relative h-2 w-full overflow-hidden rounded-full',
                 className
             )}
             {...props}
@@ -45,7 +50,7 @@ const SegmentedProgressBar = forwardRef<
                     return (
                         <Tooltip key={index}>
                             <TooltipTrigger asChild>
-                                <ProgressPrimitive.Indicator
+                                <Progress.Indicator
                                     className='absolute h-full transition-all'
                                     style={{
                                         left: `${startPosition}%`,
@@ -63,7 +68,7 @@ const SegmentedProgressBar = forwardRef<
                     )
                 })}
             </TooltipProvider>
-        </ProgressPrimitive.Root>
+        </Progress.Root>
     )
 })
 

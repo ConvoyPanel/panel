@@ -1,9 +1,3 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { IconClipboard, IconKey, IconPlus, IconTrash } from '@tabler/icons-react'
-import { AxiosError } from 'axios'
-import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-
 import { useSSHKeys } from '@/features/account/ssh-keys/api.ts'
 import {
     describeSSHKey,
@@ -11,8 +5,17 @@ import {
     updateServerSSHKeys,
     useServerSSHKeys,
 } from '@/features/servers/security/api.ts'
-
 import PasteKeyDialog from '@/features/servers/security/components/PasteKeyDialog.tsx'
+import {
+    IconClipboard,
+    IconKey,
+    IconPlus,
+    IconTrash,
+} from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -112,7 +115,7 @@ const SSHKeysCard = ({ uuid }: Props) => {
                         your keychain, or paste a one-off key.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className={'min-h-[10rem]'}>
+                <CardContent>
                     {isLoading ? (
                         <Skeleton className={'h-32 w-full'} />
                     ) : keys.length > 0 ? (

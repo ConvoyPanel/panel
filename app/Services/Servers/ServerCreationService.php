@@ -94,6 +94,10 @@ class ServerCreationService
                 'backup_count_limit' => Arr::get($data, 'limits.backups.count'),
                 'backup_size_limit' => Arr::get($data, 'limits.backups.size'),
                 'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
+                'speed_limit' => Arr::get($data, 'limits.speed_limit'),
+                // Anchor the monthly quota reset to today's day-of-month; a seam
+                // Paymenter can later point at the real renewal date (see the plan §6).
+                'bandwidth_reset_day' => now()->day,
                 'vlan_tag' => Arr::get($data, 'limits.vlan_tag'),
             ]);
 

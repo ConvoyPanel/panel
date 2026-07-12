@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Server\OveragePenaltyAction;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
@@ -131,6 +132,19 @@ it('can update a node', function () {
     );
 
     $response->assertOk();
+});
+
+it('persists a per-node overage penalty override', function () {
+    $response = $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$this->node->id}",
+        nodePayload(['overage_penalty' => ['action' => 'disconnect', 'rate' => null]]),
+    );
+
+    $response->assertOk();
+
+    expect($this->node->refresh()->overage_penalty)->not->toBeNull()
+        ->and($this->node->overage_penalty->action)
+        ->toBe(OveragePenaltyAction::DISCONNECT);
 });
 
 it("can't downsize memory below what's allocated", function () {

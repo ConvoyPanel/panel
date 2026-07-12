@@ -1,10 +1,9 @@
-import { Address } from '@/types/address.ts'
-import { IconNetwork, IconWifiOff } from '@tabler/icons-react'
-import { KeyboardEvent } from 'react'
-
 import { useAddresses } from '@/features/servers/detail/api.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
+import { Address } from '@/types/address.ts'
 import { cn } from '@/utils'
+import { IconNetwork, IconWifiOff } from '@tabler/icons-react'
+import { KeyboardEvent } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
 import {
@@ -51,7 +50,7 @@ const CopyValue = ({
             onClick={() => copy(value)}
             onKeyDown={handleKeyDown}
             className={cn(
-                'cursor-pointer select-none truncate rounded-sm font-mono outline-none hover:text-primary focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'hover:text-primary focus-visible:ring-ring/50 cursor-pointer truncate rounded-sm font-mono outline-none select-none focus-visible:ring-[3px]',
                 className
             )}
         >
@@ -64,7 +63,7 @@ const CopyValue = ({
 const Field = ({ label, value }: { label: string; value: string }) => (
     <div className={'min-w-0'}>
         <CopyValue label={label} value={value} className={'block text-xs'} />
-        <p className={'text-xs text-muted-foreground'}>{label}</p>
+        <p className={'text-muted-foreground text-xs'}>{label}</p>
     </div>
 )
 

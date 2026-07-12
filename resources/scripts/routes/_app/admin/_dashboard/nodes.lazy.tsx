@@ -15,17 +15,41 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes')({
     component: NodesIndex,
 })
 
+const formatMemory = (value: number) => {
+    const memory = byteSize(value, { units: 'iec' })
+
+    return `${memory.value} ${memory.unit}`
+}
+
 function NodesIndex() {
     const { copy } = useClipboard()
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData } = useNodes(queryParams)
+
+    const renderActions = (node: Node) => (
+        <>
+            <DropdownMenuItem onClick={() => copy(node.id.toString())}>
+                Copy ID
+            </DropdownMenuItem>{' '}
+            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Delete</DropdownMenuItem>
+        </>
+    )
 
     const columns: ColumnDef<Node>[] = [
         {
@@ -58,26 +82,9 @@ function NodesIndex() {
             meta: {
                 skeletonWidth: '1rem',
             },
-            cell: ({ cell }) => {
-                const memory = byteSize(cell.getValue<number>(), {
-                    units: 'iec',
-                })
-
-                return `${memory.value} ${memory.unit}`
-            },
+            cell: ({ cell }) => formatMemory(cell.getValue<number>()),
         },
-        actionsColumn<Node>(_data => (
-            <>
-                <DropdownMenuItem
-                    onClick={() => copy(_data.row.original.id.toString())}
-                >
-                    Copy ID
-                </DropdownMenuItem>{' '}
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-            </>
-        )),
+        actionsColumn<Node>(({ row }) => renderActions(row.original)),
     ]
 
     return (
@@ -90,6 +97,37 @@ function NodesIndex() {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const node = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'overflow-x-hidden'}>
+                                <ItemTitle>
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto p-0'
+                                        )}
+                                        to='/admin/nodes/$nodeId'
+                                        params={{ nodeId: String(node.id) }}
+                                    >
+                                        {node.displayName}
+                                    </Link>
+                                </ItemTitle>
+                                <ItemDescription className={'truncate'}>
+                                    {node.fqdn}
+                                </ItemDescription>
+                                <ItemDescription>
+                                    {formatMemory(node.memory)} memory
+                                </ItemDescription>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(node)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={
                     <Link
                         className={cn(buttonVariants({ size: 'sm' }), 'flex')}

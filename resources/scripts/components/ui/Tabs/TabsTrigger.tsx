@@ -1,20 +1,19 @@
 import { cn } from '@/utils'
-import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Tabs } from '@base-ui/react/tabs'
+import { forwardRef } from 'react'
 
-const TabsTrigger = forwardRef<
-    ElementRef<typeof TabsPrimitive.Trigger>,
-    ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-    <TabsPrimitive.Trigger
-        ref={ref}
-        className={cn(
-            'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow',
-            className
-        )}
-        {...props}
-    />
-))
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+const TabsTrigger = forwardRef<HTMLElement, Tabs.Tab.Props>(
+    ({ className, ...props }, ref) => (
+        <Tabs.Tab
+            ref={ref}
+            className={cn(
+                'ring-offset-background focus-visible:ring-ring data-active:bg-background data-active:text-foreground inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-active:shadow',
+                className
+            )}
+            {...props}
+        />
+    )
+)
+TabsTrigger.displayName = 'TabsTrigger'
 
 export default TabsTrigger

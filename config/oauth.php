@@ -39,6 +39,12 @@ return [
             'enabled' => (bool) env('OAUTH_GITLAB_ENABLED', false),
             'label' => 'GitLab',
         ],
+        // Generic OpenID Connect against any standards-compliant IdP. The button label is
+        // operator-set (e.g. "Keycloak", "Okta", "Company SSO") since there's no fixed brand.
+        'oidc' => [
+            'enabled' => (bool) env('OAUTH_OIDC_ENABLED', false),
+            'label' => env('OAUTH_OIDC_LABEL', 'OpenID Connect'),
+        ],
     ],
 
     /*
