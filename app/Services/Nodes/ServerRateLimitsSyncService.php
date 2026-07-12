@@ -19,7 +19,7 @@ class ServerRateLimitsSyncService
 
         $servers->each(function (Server $server) {
             try {
-                if ($server->bandwidth_usage >= $server->bandwidth_limit && isset($server->bandwidth_limit)) {
+                if ($server->bandwidth_limit !== null && $server->bandwidth_usage >= $server->bandwidth_limit) {
                     $this->service->updateRateLimit($server, 1);
                 } else {
                     $this->service->updateRateLimit($server);
