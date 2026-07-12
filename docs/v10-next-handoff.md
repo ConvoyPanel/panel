@@ -10,7 +10,8 @@ checkbox form wrappers moved off old `space-*` overrides to gap-based nova rhyth
 `MetricTile` now uses the shared `Card` chrome; client backup rows now use muted `ItemGroup`/`Item`;
 admin nodes/locations/tokens DataTables now have opt-in mobile `Item` rows; node Overview placeholder replaced
 with a details/capacity/resources landing page; node Servers route now lists node-scoped servers via existing
-`filter[node_id]`; `ddev npm run tc` + `ddev npm run build` green) — prior:
+`filter[node_id]`; node Settings now edits node metadata/connection/specs with optional token rotation;
+`ddev npm run tc` + `ddev npm run build` green) — prior:
 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
@@ -467,9 +468,11 @@ Researched direction retained for each; none built unless noted.
     grouping. **Update 2026-07-12:** node **Overview** now has a first useful landing page (node details,
     memory capacity, configured servers/storages/network interfaces) using existing node/storage/network queries;
     node **Servers** now uses the existing admin servers API with `filter[node_id]`, preserving search/pagination
-    and power actions. `ddev npm run tc` + `ddev npm run build` green (one known sandbox exit-139 retry).
-    **Still unbuilt:** node `ipam`/`settings` route files are missing and remain content/design calls. The built
-    node sub-pages for reference are `overview`, `servers`, `network`, and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    and power actions; node **Settings** now edits node metadata/connection/specs with update-specific optional
+    token rotation fields. `ddev npm run tc` + `ddev npm run build` green (one known sandbox exit-139 retry in an
+    earlier build). **Still unbuilt:** node `ipam` route file is missing; the address-block-group index currently
+    does **not** allow `node_id` filtering, so building it properly needs a backend filter/API decision first. The
+    built node sub-pages for reference are `overview`, `servers`, `network`, `storages`, and `settings`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's

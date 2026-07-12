@@ -49,8 +49,26 @@ export const nodeSchema = z.object({
 const indexRoute = NodeController.index['/api/admin/nodes']
 const showRoute = NodeController.show['/api/admin/nodes/{node}']
 const storeRoute = NodeController.store['/api/admin/nodes']
+const updateRoute = NodeController.update['/api/admin/nodes/{node}']
 const testConnectionRoute =
     NodeConnectionTestController['/api/admin/nodes/test-connection']
+
+const optionalCredential = z.preprocess(
+    value => (value === '' || value == null ? undefined : value),
+    z.string().min(1).max(191).optional()
+)
+
+export const nodeUpdateSchema = nodeSchema
+    .omit({
+        rootPrivileges: true,
+        privilegeSeparationDisabled: true,
+        tokenId: true,
+        tokenSecret: true,
+    })
+    .extend({
+        tokenId: optionalCredential,
+        tokenSecret: optionalCredential,
+    })
 
 export const getNodes = async (
     params: NodeQueryParams
@@ -132,6 +150,48 @@ export const createNode = async (
             memory_overallocate: memoryOverallocate,
         },
     })
+
+    return res.data
+}
+
+export const updateNode = async (
+    id: number,
+    payload: z.infer<typeof nodeUpdateSchema>
+): Promise<Node> => {
+    const {
+        displayName,
+        locationId,
+        fqdn,
+        port,
+        name,
+        verifyTls,
+        tokenId,
+        tokenSecret,
+        socketCount,
+        coreCount,
+        cpuCount,
+        memory,
+        memoryOverallocate,
+    } = payload
+
+    const body: Record<string, unknown> = {
+        display_name: displayName,
+        location_id: locationId,
+        fqdn,
+        port,
+        name,
+        verify_tls: verifyTls,
+        socket_count: socketCount,
+        core_count: coreCount,
+        cpu_count: cpuCount,
+        memory,
+        memory_overallocate: memoryOverallocate,
+    }
+
+    if (tokenId) body.token_id = tokenId
+    if (tokenSecret) body.token_secret = tokenSecret
+
+    const res = await apiFetch<DataResponse<Node>>(updateRoute(id), { body })
 
     return res.data
 }
