@@ -129,6 +129,6 @@ logic there and reusable, not re-implemented per DTO (e.g. byte-unit scaling).
 
 ## Live End-to-End Testing
 
-The user may specify an optional corresponding `$PROXMOX_SSH_TARGET` variable for the `$PROXMOX_FQDN` in the environment. 
+The user may specify an optional corresponding `$PROXMOX_SSH_TARGET` variable for the `$PROXMOX_FQDN` in the environment file. 
 If set, you may `ssh $PROXMOX_SSH_TARGET` into the Proxmox node for enhanced testing 
 (e.g., for cases where using the Proxmox API isn't sufficient).
