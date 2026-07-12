@@ -19,12 +19,22 @@ import { useConfirmationStore } from '@/components/ui/AlertDialog'
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/tokens')({
     component: TokensIndex,
 })
+
+const formatLastUsed = (value: string | null) =>
+    value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : 'Never'
 
 function TokensIndex() {
     const confirm = useConfirmationStore(state => state.confirm)
@@ -60,6 +70,12 @@ function TokensIndex() {
         revoke(token)
     }
 
+    const renderActions = (token: ApiKey) => (
+        <DropdownMenuItem onClick={() => handleDelete(token)}>
+            Revoke
+        </DropdownMenuItem>
+    )
+
     const columns: ColumnDef<ApiKey>[] = [
         {
             header: 'Name',
@@ -92,18 +108,15 @@ function TokensIndex() {
             meta: { skeletonWidth: '6rem' },
             cell: ({ cell }) => {
                 const value = cell.getValue<string | null>()
+
                 return value ? (
-                    formatDistanceToNow(new Date(value), { addSuffix: true })
+                    formatLastUsed(value)
                 ) : (
                     <span className={'text-muted-foreground'}>Never</span>
                 )
             },
         },
-        actionsColumn<ApiKey>(({ row }) => (
-            <DropdownMenuItem onClick={() => handleDelete(row.original)}>
-                Revoke
-            </DropdownMenuItem>
-        )),
+        actionsColumn<ApiKey>(({ row }) => renderActions(row.original)),
     ]
 
     return (
@@ -115,6 +128,41 @@ function TokensIndex() {
                 paginated
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const token = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'overflow-x-hidden'}>
+                                <ItemTitle className={'truncate'}>
+                                    {token.name}
+                                </ItemTitle>
+                                <div className={'flex flex-wrap gap-2'}>
+                                    <Badge variant={'secondary'}>
+                                        {summarizeAbilities(token.abilities)}
+                                    </Badge>
+                                    <span
+                                        className={
+                                            'text-xs text-muted-foreground'
+                                        }
+                                    >
+                                        {token.lastUsedAt
+                                            ? `Last used ${formatLastUsed(token.lastUsedAt)}`
+                                            : 'Never used'}
+                                    </span>
+                                </div>
+                                <ItemDescription className={'truncate'}>
+                                    {token.createdBy?.email
+                                        ? `Created by ${token.createdBy.email}`
+                                        : 'No creator recorded'}
+                                </ItemDescription>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(token)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={<CreateTokenModal mutate={mutate} />}
                 {...tableProps}
             />

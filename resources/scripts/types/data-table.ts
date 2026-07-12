@@ -3,6 +3,7 @@ import {
     ColumnFiltersState,
     OnChangeFn,
     RowSelectionState,
+    Row,
     SortingState,
     TableOptions,
     VisibilityState,
@@ -65,6 +66,12 @@ export interface DataTableProps<TData>
     showPerPageOptions?: boolean
 
     rightActions?: ReactNode
+
+    /**
+     * Optional compact mobile representation for each row. Desktop keeps the
+     * full table so sorting, column visibility, and pinned actions stay intact.
+     */
+    mobileRow?: (row: Row<TData>) => ReactNode
 
     /**
      * Opt-in per-column sorting state. When provided (e.g. from `useDataTable`),

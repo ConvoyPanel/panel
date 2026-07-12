@@ -23,7 +23,14 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/locations')({
@@ -43,6 +50,18 @@ function LocationsIndex() {
     const { data, isPlaceholderData } = useLocations(queryParams)
     const mutate = useQueryMutator<PaginatedLocations>(
         locationQueries.list(queryParams).queryKey
+    )
+
+    const renderActions = (location: Location) => (
+        <>
+            <DropdownMenuItem onClick={() => openModal('edit', location)}>
+                Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => openModal('delete', location)}>
+                Delete
+            </DropdownMenuItem>
+        </>
     )
 
     const columns: ColumnDef<Location>[] = [
@@ -97,21 +116,7 @@ function LocationsIndex() {
             ),
             maxSize: 40,
         },
-        actionsColumn<Location>(({ row }) => (
-            <>
-                <DropdownMenuItem
-                    onClick={() => openModal('edit', row.original)}
-                >
-                    Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    onClick={() => openModal('delete', row.original)}
-                >
-                    Delete
-                </DropdownMenuItem>
-            </>
-        )),
+        actionsColumn<Location>(({ row }) => renderActions(row.original)),
     ]
 
     return (
@@ -124,6 +129,47 @@ function LocationsIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const location = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'overflow-x-hidden'}>
+                                <ItemTitle>
+                                    <button
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto p-0'
+                                        )}
+                                        onClick={() => openModal('show', location)}
+                                    >
+                                        {location.shortCode}
+                                    </button>
+                                </ItemTitle>
+                                <ItemDescription className={'truncate'}>
+                                    {location.description}
+                                </ItemDescription>
+                                <div className={'flex flex-wrap gap-2'}>
+                                    <Badge
+                                        variant={'secondary'}
+                                        className={'font-mono'}
+                                    >
+                                        {location.nodesCount} nodes
+                                    </Badge>
+                                    <Badge
+                                        variant={'secondary'}
+                                        className={'font-mono'}
+                                    >
+                                        {location.serversCount} servers
+                                    </Badge>
+                                </div>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(location)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={<CreateLocationModal mutate={mutate} />}
                 {...tableProps}
             />
