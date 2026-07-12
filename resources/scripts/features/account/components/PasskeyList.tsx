@@ -4,6 +4,7 @@ import { usePasskeys } from '@/features/account/passkeys/api.ts'
 
 import Passkey from '@/features/account/components/Passkey.tsx'
 
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState.tsx'
@@ -26,13 +27,11 @@ const PasskeyList = () => {
     }
 
     return (
-        <ul className={'flex flex-col divide-y divide-accent'}>
+        <ItemGroup className={'gap-3'}>
             {data.map(passkey => (
-                <li key={passkey.id}>
-                    <Passkey passkey={passkey} />
-                </li>
+                <Passkey key={passkey.id} passkey={passkey} />
             ))}
-        </ul>
+        </ItemGroup>
     )
 }
 
