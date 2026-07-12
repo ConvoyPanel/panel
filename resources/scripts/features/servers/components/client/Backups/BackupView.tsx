@@ -10,6 +10,7 @@ import BackupCard from '@/features/servers/components/client/Backups/BackupCard.
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import LengthAwarePaginator from '@/components/ui/Pagination/LengthAwarePaginator.tsx'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -41,9 +42,11 @@ const BackupView = () => {
     return (
         <LengthAwarePaginator page={page} data={data} onPageChange={setPage}>
             {({ items }) =>
-                items.map(backup => (
-                    <BackupCard backup={backup} key={backup.uuid} />
-                ))
+                <ItemGroup className={'gap-3'}>
+                    {items.map(backup => (
+                        <BackupCard backup={backup} key={backup.uuid} />
+                    ))}
+                </ItemGroup>
             }
         </LengthAwarePaginator>
     )

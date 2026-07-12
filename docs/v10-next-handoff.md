@@ -7,7 +7,8 @@ holds the detail) and *what to pick up next*, so a cold start doesn't re-derive 
 Last updated: 2026-07-12 (session: **nova form primitive follow-through** — `FormItem`/`FormLabel`/
 `FormDescription`/`FormMessage` now expose the same `field*` slots/classes as the `Field` primitive;
 checkbox form wrappers moved off old `space-*` overrides to gap-based nova rhythm; admin-dashboard
-`MetricTile` now uses the shared `Card` chrome; `ddev npm run tc` + `ddev npm run build` green) — prior:
+`MetricTile` now uses the shared `Card` chrome; client backup rows now use muted `ItemGroup`/`Item`;
+`ddev npm run tc` + `ddev npm run build` green) — prior:
 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
@@ -409,8 +410,9 @@ Researched direction retained for each; none built unless noted.
     `components/ui/Button/Button.variants.ts` (one line; won't clash with nova since destructive is confirm-only).
     **Done:** `Field`/`InputGroup` primitives exist; legacy `Form*` wrappers now inherit nova field slots/text
     rhythm and checkbox wrappers use gap-based layout instead of old `space-*` overrides; admin-dashboard
-    `MetricTile` uses the shared `Card` chrome. **Still TODO:** roll list→`Item` to remaining screens (admin
-    nodes/locations/tokens DataTables, client server Overview/backups). **Test data:** `UserSeeder`
+    `MetricTile` uses the shared `Card` chrome; client backup rows use muted `ItemGroup`/`Item`. **Still TODO:**
+    roll list→`Item` to remaining admin DataTable screens (nodes/locations/tokens) without regressing table
+    behavior. **Test data:** `UserSeeder`
     (`db:seed --class=UserSeeder`, `SEED_USER=` override) seeds account
     SSH keys/API tokens + a server's IPAM addresses. **Note:** server-settings tabs (SSH keys/DNS/disks/boot-order)
     read live Proxmox, not the DB — they only populate against a reachable node, not via seeders.
