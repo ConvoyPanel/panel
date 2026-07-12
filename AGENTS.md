@@ -129,6 +129,38 @@ logic there and reusable, not re-implemented per DTO (e.g. byte-unit scaling).
 
 ## Live End-to-End Testing
 
-The user may specify an optional corresponding `$PROXMOX_SSH_TARGET` variable for the `$PROXMOX_FQDN` in the environment. 
-If set, you may `ssh $PROXMOX_SSH_TARGET` into the Proxmox node for enhanced testing 
+The Proxmox credentials live in the project **`.env`** (`PROXMOX_FQDN`, `PROXMOX_TOKEN_ID`,
+`PROXMOX_TOKEN_SECRET`, and usually `PROXMOX_NODE_NAME` / `PROXMOX_SSH_TARGET`). **They are read by
+Laravel's Dotenv (`env()` / `config()`), NOT exported into the container shell** — so
+`ddev exec sh -c 'echo $PROXMOX_FQDN'` prints nothing even when they are set. Do **not** conclude
+from an empty `echo` that they are missing. To check, read the file directly (`grep -E '^PROXMOX_'
+.env`) or ask Laravel (`ddev artisan tinker --execute="echo config('...')"`). In practice, assume
+they are defined and just run the seeder — it warns and no-ops if they truly are not.
+
+When these credentials are present, **seed a live node so you can test against real data** instead
+of stubbing the network:
+
+```bash
+ddev artisan db:seed --class=DevNodeSeeder          # a real Proxmox node from the env vars
+```
+
+`DevNodeSeeder` is idempotent (skips itself when the creds are unset or the node already exists),
+so it is safe to run on every fresh sandbox / after `migrate:fresh`. Optional knobs: `PROXMOX_PORT`,
+`PROXMOX_VERIFY_TLS`, `PROXMOX_NODE_NAME` (see the seeder's docblock).
+
+With a node seeded, provision servers to exercise the client/admin UI end-to-end (this clones real
+VMs on the node, so it needs the live node above):
+
+```bash
+# SEED_SERVER_USER is an email or user id; SEED_SERVER_COUNT defaults to 10.
+ddev exec sh -c 'SEED_SERVER_USER=you@example.com SEED_SERVER_COUNT=3 php artisan db:seed --class=ServerSeeder'
+```
+
+This is the preferred way to browser-verify frontend work (log in, drive the real screens with a
+Playwright/CDP harness) — reach for isolated dev-routes with stubbed responses only when no live
+node is available.
+
+The user may also specify an optional corresponding `$PROXMOX_SSH_TARGET` variable for the
+`$PROXMOX_FQDN` in the environment.
+If set, you may `ssh $PROXMOX_SSH_TARGET` into the Proxmox node for enhanced testing
 (e.g., for cases where using the Proxmox API isn't sufficient).
