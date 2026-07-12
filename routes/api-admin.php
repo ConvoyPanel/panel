@@ -50,6 +50,7 @@ Route::prefix('/nodes')->group(function () {
 
     Route::prefix('/{node}')->group(function () {
         Route::get('/', [Admin\Nodes\NodeController::class, 'show']);
+        Route::get('/status', Admin\Nodes\NodeStatusController::class);
         Route::put('/', [Admin\Nodes\NodeController::class, 'update']);
         Route::delete('/', [Admin\Nodes\NodeController::class, 'destroy']);
 

@@ -6,6 +6,13 @@ import { differenceInMilliseconds, intervalToDuration } from 'date-fns'
 import { useEffect, useState } from 'react'
 
 import { LinearProgressBar } from '@/components/ui/Progress'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface DeploymentStepRowProps {
     step: DeploymentStep
@@ -87,73 +94,62 @@ export default function DeploymentStepRow({
     }
 
     return (
-        <li
+        <Item
+            role={'listitem'}
+            variant={'muted'}
+            size={'sm'}
             className={cn(
-                'flex flex-col gap-2 p-3',
-                isRunning ? 'bg-secondary/50' : 'bg-card',
-                isPending ? 'opacity-50' : '',
+                isPending && 'opacity-50',
                 className
             )}
         >
-            <div className='flex items-center justify-between'>
-                <div className='flex items-center gap-3'>
-                    <div className='flex h-6 w-6 items-center justify-center'>
-                        {isPending && (
-                            <div className='h-2 w-2 rounded-full bg-muted-foreground' />
-                        )}
-                        {isRunning && (
-                            <IconLoader className='h-4 w-4 animate-spin text-primary' />
-                        )}
-                        {isCompleted && (
-                            <IconCheck className='h-4 w-4 text-green-500' />
-                        )}
-                        {isFailed && <IconX className='h-4 w-4 text-red-500' />}
-                    </div>
-                    <div className='flex flex-col'>
-                        <span className='text-sm font-medium'>
-                            {mapping.label}
-                        </span>
-                    </div>
-                </div>
-                <div className='flex flex-col'>
-                    {step.startedAt && (
-                        <span className='text-right font-mono text-xs text-muted-foreground'>
-                            {isRunning &&
-                                formatStepDuration(step.startedAt, now)}
-                            {isCompleted &&
-                                step.completedAt &&
-                                formatStepDuration(
-                                    step.startedAt,
-                                    step.completedAt
-                                )}
-                        </span>
-                    )}
-                    {mapping.showProgress && isRunning && (
-                        <span className='text-right font-mono text-xs text-muted-foreground'>
-                            {formatProgress()}
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            {mapping.showProgress && isRunning && (
-                <div className='pl-9'>
+            <ItemMedia variant={'icon'}>
+                {isPending && (
+                    <div className='size-2 rounded-full bg-muted-foreground' />
+                )}
+                {isRunning && (
+                    <IconLoader className='animate-spin text-primary' />
+                )}
+                {isCompleted && <IconCheck className='text-green-500' />}
+                {isFailed && <IconX className='text-destructive' />}
+            </ItemMedia>
+            <ItemContent className={'min-w-0'}>
+                <ItemTitle>{mapping.label}</ItemTitle>
+                {mapping.showProgress && isRunning && (
                     <LinearProgressBar
                         value={progressPercent}
                         className='h-1.5'
                     />
-                </div>
-            )}
-            {isFailed && (step.errorCode || step.errorMessage) && (
-                <div className='pl-9 text-xs text-red-500'>
-                    {step.errorCode && (
-                        <span className='font-mono font-bold'>
-                            {step.errorCode}:{' '}
-                        </span>
-                    )}
-                    {step.errorMessage}
-                </div>
-            )}
-        </li>
+                )}
+                {isFailed && (step.errorCode || step.errorMessage) && (
+                    <div className='text-xs text-destructive'>
+                        {step.errorCode && (
+                            <span className='font-mono font-bold'>
+                                {step.errorCode}:{' '}
+                            </span>
+                        )}
+                        {step.errorMessage}
+                    </div>
+                )}
+            </ItemContent>
+            <ItemActions className={'flex-col items-end gap-0'}>
+                {step.startedAt && (
+                    <span className='text-right font-mono text-xs text-muted-foreground'>
+                        {isRunning && formatStepDuration(step.startedAt, now)}
+                        {isCompleted &&
+                            step.completedAt &&
+                            formatStepDuration(
+                                step.startedAt,
+                                step.completedAt
+                            )}
+                    </span>
+                )}
+                {mapping.showProgress && isRunning && (
+                    <span className='text-right font-mono text-xs text-muted-foreground'>
+                        {formatProgress()}
+                    </span>
+                )}
+            </ItemActions>
+        </Item>
     )
 }

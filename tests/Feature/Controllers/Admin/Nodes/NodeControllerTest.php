@@ -32,6 +32,38 @@ function nodePayload(array $overrides = []): array
     ], $overrides);
 }
 
+function liveNodeStatusPayload(): array
+{
+    return [
+        'current-kernel' => [
+            'version' => '#1 SMP PREEMPT_DYNAMIC',
+            'release' => '6.14.8-2-pve',
+            'sysname' => 'Linux',
+            'machine' => 'x86_64',
+        ],
+        'cpuinfo' => [
+            'cpus' => 32,
+            'sockets' => 1,
+            'cores' => 16,
+            'model' => 'AMD EPYC',
+            'flags' => 'fpu sse',
+        ],
+        'cpu' => 0.125,
+        'loadavg' => ['0.50', '0.75', '1.00'],
+        'memory' => [
+            'used' => 32_000,
+            'free' => 16_000,
+            'available' => 24_000,
+            'total' => 64_000,
+        ],
+        'swap' => ['used' => 1_000, 'free' => 3_000, 'total' => 4_000],
+        'rootfs' => ['used' => 40_000, 'free' => 60_000, 'avail' => 55_000, 'total' => 100_000],
+        'boot-info' => ['mode' => 'efi', 'secureboot' => true],
+        'pveversion' => 'pve-manager/9.2.2',
+        'uptime' => 90_061,
+    ];
+}
+
 it('can fetch nodes', function () {
     $response = $this->actingAs($this->user)->getJson('/api/admin/nodes');
 
@@ -42,6 +74,48 @@ it('can fetch a node', function () {
     $response = $this->actingAs($this->user)->getJson("/api/admin/nodes/{$this->node->id}");
 
     $response->assertOk();
+});
+
+it('can fetch live node status', function () {
+    Http::fake([
+        '*/api2/json/nodes/*/status' => Http::response(['data' => liveNodeStatusPayload()], 200),
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}/status",
+    );
+
+    $response->assertOk()
+        ->assertJsonPath('data.cpuUsage', 0.125)
+        ->assertJsonPath('data.loadAverage.1', 0.75)
+        ->assertJsonPath('data.memory.available', 24_000)
+        ->assertJsonPath('data.rootFilesystem.total', 100_000)
+        ->assertJsonPath('data.boot.mode', 'efi')
+        ->assertJsonPath('data.uptimeSeconds', 90_061);
+});
+
+it('handles optional live node status fields', function () {
+    $payload = liveNodeStatusPayload();
+    unset(
+        $payload['cpuinfo']['flags'],
+        $payload['memory']['available'],
+        $payload['swap'],
+        $payload['boot-info']['secureboot'],
+    );
+
+    Http::fake([
+        '*/api2/json/nodes/*/status' => Http::response(['data' => $payload], 200),
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}/status",
+    );
+
+    $response->assertOk()
+        ->assertJsonPath('data.cpu.flags', '')
+        ->assertJsonPath('data.memory.available', null)
+        ->assertJsonPath('data.swap.total', 0)
+        ->assertJsonPath('data.boot.secureBoot', null);
 });
 
 it('can create a node', function () {

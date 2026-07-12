@@ -1,9 +1,12 @@
+import NodeOverview from '@/features/nodes/components/Overview/NodeOverview.tsx'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/')({
-  component: RouteComponent,
+    component: NodeOverviewRoute,
 })
 
-function RouteComponent() {
-  return <div>Hello "/_app/admin/nodes/$nodeId/"!</div>
+function NodeOverviewRoute() {
+    const { nodeId } = Route.useParams()
+
+    return <NodeOverview nodeId={Number(nodeId)} />
 }

@@ -4,19 +4,29 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-12 (session: **shadcn Item-pattern rollout continued** — rolled the muted
-`Item` / `OverflowItemGroup` row pattern to three more surfaces: **server Security tab SSH keys**
-[`397d9441`], **client Overview IPAM card** [`7916614f`, kept per-field click-to-copy + added a
-version badge; the networking-tab `AddressesCard` stays a Table], and the **account passkeys dialog
-list** [`a712ac4e`, plain `ItemGroup`, dialog already scrolls]. Each browser-verified in isolation
-via a *temporary top-level dev-route* rendering the real component with Playwright-stubbed API
-responses [this sandbox had no live PVE node + empty DB], covering populated/overflow/empty states;
-temp routes deleted, tree clean, `tc`+`build` green. Also **AGENTS.md**: documented live-node e2e
-seeding [`DevNodeSeeder` → optional `ServerSeeder`] as the preferred browser-verify path, and called
-out the recurring trap that `PROXMOX_*`/config live in **`.env`** read by Laravel's Dotenv, **not the
-container shell** — `echo $VAR` shows blank even when set, so grep `.env` or just run the seeder.
-**Remaining hand-rolled list:** `InstallingServer`/`DeploymentStepRow` — a status/progress timeline,
-not an entity list; deferred because its running/failed states need a live deploy to verify. — prior:
+Last updated: 2026-07-12 (session: **admin node Overview built and live-verified** — replaced the
+scaffold route with a responsive, data-dense three-card Overview for live CPU/memory/load/uptime,
+configured memory allocation, hardware/topology, root filesystem, PVE/kernel/boot, and endpoint
+details. Added a saved-node `/status` endpoint over `ProxmoxStatusRepository`, expanded the status
+DTO to model the documented PVE status response (including a backed boot-mode enum), and poll it
+every 30s with an offline/retry state. `DevNodeSeeder` resolved the configured PVE 9.2.2 node; the
+repository and authenticated browser route both returned real live values. Playwright desktop +
+390px mobile passed with no console errors or horizontal overflow; screenshots:
+`storage/app/node-overview-{desktop,mobile}.png`. Focused Pest 10 + full Pest 226, PHPStan-zero,
+`tc`, and `build` green. — prior: **shadcn Item-pattern rollout completed** - converted the final
+hand-rolled list, `InstallingServer` / `DeploymentStepRow`, to an always-visible compact `ItemGroup`
+of muted `Item` rows; retained polling, timing, byte/percentage progress, errors, and retry behavior,
+and restored standard Card spacing. Browser-verified through the real authenticated server route and
+deployment API at desktop + 390px mobile with deterministic running and failed deployment records;
+list/listitem semantics, progress, long failure detail, and retry footer all passed. Screenshots:
+`/tmp/opencode/deployment-timeline-{desktop,mobile}.png` and
+`/tmp/opencode/deployment-timeline-failed-{desktop,mobile}.png`. `tc` + `build` green (build passed on
+the documented retry after sandbox SIGSEGV). Live PVE credentials/node were available and seeded, but
+an actual clone was not required for deterministic UI-state coverage. The FPM/CLI DB split warning
+below reproduced (`FPM=192.168.107.2`, CLI=`172.20.0.4`) despite the hosts pin; browser fixtures were
+therefore seeded with an explicit `DB_HOST=192.168.107.2`. **No hand-rolled entity/status lists remain
+in this rollout.** - prior: rolled the pattern to server Security SSH keys [`397d9441`], client Overview
+IPAM [`7916614f`], and account passkeys [`a712ac4e`]; documented live-node e2e seeding in AGENTS.md. - prior:
 **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
@@ -443,12 +453,11 @@ Researched direction retained for each; none built unless noted.
     calls + action entries, screenshot `/tmp/opencode/panel-visual/command-palette-entity-search.png`. **Still
     TODO:** optional top workspace/account switcher (design choice). **Note:**
     the admin node nav grouping preserved the existing links to `/servers`, `/ipam`, and `/settings` under a
-    node, but those route files still do not exist — pre-existing product/page follow-up, not introduced by the
-    grouping. **Also unbuilt (verified 2026-07-09):** the node **Overview** landing itself
-    (`routes/_app/admin/nodes.$nodeId/index{,.lazy}.tsx`) is still the scaffold `Hello "…"` placeholder — so
-    the node's default page needs building too. All four (`overview`/`servers`/`ipam`/`settings`) are content
-    /design calls (what KPIs, which list, which settings), deferred pending maintainer direction. The built
-    node sub-pages for reference are `network` and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    node, but those route files still do not exist — pre-existing product/page follow-ups, not introduced by
+    the grouping. The node **Overview is now built and live-verified** (2026-07-12): live PVE status plus
+    configured allocation/system detail in the established dense-card layout. The remaining three pages are
+    content/design calls (which server list, IPAM scope, and settings), deferred pending maintainer direction.
+    The other built node sub-pages are `network` and `storages`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's

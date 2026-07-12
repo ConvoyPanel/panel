@@ -1,5 +1,3 @@
-import { Duration } from 'date-fns'
-
 import { PaginatedResult } from '@/utils/http.ts'
 
 export interface Node {
@@ -34,7 +32,7 @@ export enum ConnectionErrorType {
 
 export interface ConnectionResult {
     success: boolean
-    errorMessage: string | null,
+    errorMessage: string | null
     errorCode: ConnectionErrorType | null
     data: NodeStatus | null
 }
@@ -53,15 +51,30 @@ export interface NodeStatus {
         model: string
         flags: string
     }
+    cpuUsage: number
+    loadAverage: [number, number, number]
     memory: {
         used: number
         free: number
         total: number
+        available: number | null
     }
     swap: {
         used: number
         free: number
         total: number
+        available: number | null
     }
-    uptime: Duration
+    rootFilesystem: {
+        used: number
+        free: number
+        available: number
+        total: number
+    }
+    boot: {
+        mode: 'efi' | 'legacy-bios'
+        secureBoot: boolean | null
+    }
+    pveVersion: string
+    uptimeSeconds: number
 }

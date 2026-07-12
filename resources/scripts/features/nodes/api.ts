@@ -1,22 +1,22 @@
-import { useParams } from '@tanstack/react-router'
-import {
-    keepPreviousData,
-    queryOptions,
-    useQuery,
-} from '@tanstack/react-query'
-import { z } from 'zod'
-
-import { rawDataToConnectionResult } from '@/lib/transformers/node.ts'
-import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import { queryClient } from '@/lib/query-client.ts'
-import type { Node, PaginatedNodes } from '@/types/node.ts'
-import { hostname } from '@/utils/validation.ts'
+import type { Node, NodeStatus, PaginatedNodes } from '@/types/node.ts'
 import {
     type QueryBuilderParams,
     withQueryBuilderParams,
 } from '@/utils/http.ts'
-import NodeController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeController'
+import { hostname } from '@/utils/validation.ts'
 import NodeConnectionTestController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeConnectionTestController'
+import NodeController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeController'
+import NodeStatusController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeStatusController'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
+import { z } from 'zod'
+
+import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
+import { queryClient } from '@/lib/query-client.ts'
+import {
+    rawDataToConnectionResult,
+    rawDataToNodeStatus,
+} from '@/lib/transformers/node.ts'
 
 export type NodeQueryParams = QueryBuilderParams<
     '*' | 'id' | 'display_name' | 'fqdn' | 'location_id' | 'coterm_id'
@@ -48,6 +48,7 @@ export const nodeSchema = z.object({
 // reference the admin route explicitly.
 const indexRoute = NodeController.index['/api/admin/nodes']
 const showRoute = NodeController.show['/api/admin/nodes/{node}']
+const statusRoute = NodeStatusController['/api/admin/nodes/{node}/status']
 const storeRoute = NodeController.store['/api/admin/nodes']
 const testConnectionRoute =
     NodeConnectionTestController['/api/admin/nodes/test-connection']
@@ -65,6 +66,11 @@ export const getNodes = async (
 const getNode = async (id: number): Promise<Node> =>
     (await apiFetch<DataResponse<Node>>(showRoute(id))).data
 
+const getNodeStatus = async (id: number): Promise<NodeStatus> =>
+    rawDataToNodeStatus(
+        (await apiFetch<DataResponse<unknown>>(statusRoute(id))).data
+    )
+
 export const nodeQueries = {
     all: () => ['admin', 'nodes'] as const,
     lists: () => [...nodeQueries.all(), 'list'] as const,
@@ -81,6 +87,13 @@ export const nodeQueries = {
             queryFn: () => getNode(id as number),
             enabled: typeof id === 'number',
         }),
+    status: (id: number | null | undefined) =>
+        queryOptions({
+            queryKey: [...nodeQueries.details(), id, 'status'] as const,
+            queryFn: () => getNodeStatus(id as number),
+            enabled: typeof id === 'number',
+            refetchInterval: 30_000,
+        }),
 }
 
 export const useNodes = (params: NodeQueryParams) =>
@@ -94,6 +107,13 @@ export const useNode = (id?: number | null) => {
     const nodeId = id ?? params.nodeId
 
     return useQuery(nodeQueries.detail(nodeId))
+}
+
+export const useNodeStatus = (id?: number | null) => {
+    const params = useParams({ strict: false }) as { nodeId?: number }
+    const nodeId = id ?? params.nodeId
+
+    return useQuery(nodeQueries.status(nodeId))
 }
 
 export const createNode = async (

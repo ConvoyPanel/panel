@@ -2,21 +2,22 @@
 
 namespace App\Data\Node\Status;
 
-use Carbon\CarbonInterval;
+use App\Enums\Node\BootMode;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Attributes\WithTransformer;
-use App\Extensions\Spatie\Data\CarbonIntervalTransformer;
-use Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer;
 
 class NodeStatusData extends Data
 {
     public function __construct(
         public KernelInfoData $kernel,
         public CpuInfoData $cpu,
+        public float $cpuUsage,
+        public array $loadAverage,
         public MemoryUsageData $memory,
         public MemoryUsageData $swap,
-        #[WithTransformer(CarbonIntervalTransformer::class)]
-        public CarbonInterval $uptime,
+        public FilesystemUsageData $rootFilesystem,
+        public BootInfoData $boot,
+        public string $pveVersion,
+        public int $uptimeSeconds,
     ) {}
 
     public static function fromRaw(array $raw): self
@@ -33,19 +34,33 @@ class NodeStatusData extends Data
                 socketCount: $raw['cpuinfo']['sockets'],
                 coreCount: $raw['cpuinfo']['cores'],
                 model: $raw['cpuinfo']['model'],
-                flags: $raw['cpuinfo']['flags']
+                flags: (string) ($raw['cpuinfo']['flags'] ?? '')
             ),
+            cpuUsage: (float) $raw['cpu'],
+            loadAverage: array_map('floatval', $raw['loadavg']),
             memory: new MemoryUsageData(
                 used : $raw['memory']['used'],
                 free : $raw['memory']['free'],
-                total: $raw['memory']['total']
+                total: $raw['memory']['total'],
+                available: $raw['memory']['available'] ?? null,
             ),
             swap: new MemoryUsageData(
-                used : $raw['swap']['used'],
-                free : $raw['swap']['free'],
-                total: $raw['swap']['total']
+                used : $raw['swap']['used'] ?? 0,
+                free : $raw['swap']['free'] ?? 0,
+                total: $raw['swap']['total'] ?? 0,
             ),
-            uptime: CarbonInterval::seconds($raw['uptime'])->cascade()
+            rootFilesystem: new FilesystemUsageData(
+                used: $raw['rootfs']['used'],
+                free: $raw['rootfs']['free'],
+                available: $raw['rootfs']['avail'],
+                total: $raw['rootfs']['total'],
+            ),
+            boot: new BootInfoData(
+                mode: BootMode::from($raw['boot-info']['mode']),
+                secureBoot: $raw['boot-info']['secureboot'] ?? null,
+            ),
+            pveVersion: $raw['pveversion'],
+            uptimeSeconds: (int) ($raw['uptime'] ?? 0),
         );
     }
 }

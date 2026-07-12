@@ -4,7 +4,6 @@ import {
     Node,
     NodeStatus,
 } from '@/types/node.ts'
-import { intervalToDuration } from 'date-fns'
 
 export const rawDataToNode = (data: any): Node => data as Node
 
@@ -43,17 +42,24 @@ export const rawDataToNodeStatus = (data: any): NodeStatus => ({
         model: data.cpu.model,
         flags: data.cpu.flags,
     },
+    cpuUsage: data.cpuUsage,
+    loadAverage: data.loadAverage,
     memory: {
         used: data.memory.used,
         free: data.memory.free,
         total: data.memory.total,
+        available: data.memory.available,
     },
     swap: {
         used: data.swap.used,
         free: data.swap.free,
         total: data.swap.total,
+        available: data.swap.available,
     },
-    uptime: intervalToDuration({ start: 0, end: data.uptime }),
+    rootFilesystem: data.rootFilesystem,
+    boot: data.boot,
+    pveVersion: data.pveVersion,
+    uptimeSeconds: data.uptimeSeconds,
 })
 
 export const rawDataToConnectionResult = (data: any): ConnectionResult => {

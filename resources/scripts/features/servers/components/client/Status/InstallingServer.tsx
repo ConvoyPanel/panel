@@ -20,6 +20,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import { ItemGroup } from '@/components/ui/Item'
 
 import DeploymentStepRow from './DeploymentStepRow.tsx'
 
@@ -84,7 +85,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
     return (
         <div className='flex h-full min-h-[50vh] flex-col items-center justify-center p-4'>
             <Card className='w-full max-w-lg'>
-                <CardHeader className={'px-2.5 py-4'}>
+                <CardHeader>
                     <div className={'flex items-center space-x-2'}>
                         {isFailed ? (
                             <div className={'text-red-500'}>
@@ -108,13 +109,13 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className='px-2 pb-2'>
+                <CardContent>
                     {deployment ? (
-                        <ul className='divide-y overflow-hidden rounded-md border'>
+                        <ItemGroup className={'gap-3'}>
                             {deployment.steps.map((step: DeploymentStep) => (
                                 <DeploymentStepRow key={step.id} step={step} />
                             ))}
-                        </ul>
+                        </ItemGroup>
                     ) : (
                         <p className='text-center text-sm text-muted-foreground'>
                             {getLoadingText()}
@@ -122,7 +123,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                     )}
                 </CardContent>
                 {isFailed && (
-                    <CardFooter className='flex justify-end px-2 pb-2 pt-0'>
+                    <CardFooter className='justify-end'>
                         <Button onClick={handleRetry} variant='destructive'>
                             Retry Installation
                         </Button>
