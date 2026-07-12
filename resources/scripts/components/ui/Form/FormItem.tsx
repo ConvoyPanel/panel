@@ -12,7 +12,12 @@ const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
             <FormItemContext.Provider value={{ id }}>
                 <div
                     ref={ref}
-                    className={cn('space-y-1', className)}
+                    role='group'
+                    data-slot='field'
+                    className={cn(
+                        'group/field flex w-full flex-col gap-2',
+                        className
+                    )}
                     {...props}
                 />
             </FormItemContext.Provider>

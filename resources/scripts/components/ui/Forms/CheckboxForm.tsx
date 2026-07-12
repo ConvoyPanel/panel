@@ -34,7 +34,7 @@ const CheckboxForm = ({
                 <FormItem
                     {...formItemProps}
                     className={cn(
-                        'flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-xs',
+                        'flex-row items-start gap-3 rounded-lg border p-3 shadow-xs',
                         formItemProps?.className
                     )}
                 >
@@ -46,7 +46,7 @@ const CheckboxForm = ({
                             disabled={formState.isSubmitting}
                         />
                     </FormControl>
-                    <div className='space-y-1 leading-none'>
+                    <div className='flex flex-col gap-1 leading-none'>
                         {label && <FormLabel>{label}</FormLabel>}
                         {description && (
                             <FormDescription>{description}</FormDescription>

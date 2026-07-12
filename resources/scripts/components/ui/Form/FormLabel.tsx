@@ -16,7 +16,12 @@ const FormLabel = forwardRef<
     return (
         <Label
             ref={ref}
-            className={cn(error && 'text-destructive', className)}
+            data-slot='field-label'
+            className={cn(
+                'group/field-label peer/field-label flex w-fit gap-2 leading-snug',
+                error && 'text-destructive',
+                className
+            )}
             htmlFor={formItemId}
             {...props}
         />

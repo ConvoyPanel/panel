@@ -4,7 +4,11 @@ Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
 [v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
 holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
 
-Last updated: 2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
+Last updated: 2026-07-12 (session: **nova form primitive follow-through** — `FormItem`/`FormLabel`/
+`FormDescription`/`FormMessage` now expose the same `field*` slots/classes as the `Field` primitive;
+checkbox form wrappers moved off old `space-*` overrides to gap-based nova rhythm; admin-dashboard
+`MetricTile` now uses the shared `Card` chrome; `ddev npm run tc` + `ddev npm run build` green) — prior:
+2026-07-10 (session: **SSO Deliverable 2 — OIDC Relying Party via Laravel Socialite** [role
 locked = RP, not Provider]: config-gated optional providers [google/github/gitlab], `oauth_connections` +
 `OAuthConnection`, `OAuthAuthenticationService` link/register policy [verified-email link, non-admin
 auto-register off by default], `Auth\OAuthController` redirect/callback [login when logged-out, link when
@@ -403,10 +407,11 @@ Researched direction retained for each; none built unless noted.
     kept as-is for now — but *every* usage is an irreversible-confirm button (delete modals, Kill/Stop VM,
     disable 2FA, delete passkey). If it ever reads underpowered, flip that one variant back to **solid red** in
     `components/ui/Button/Button.variants.ts` (one line; won't clash with nova since destructive is confirm-only).
-    **Still TODO:** create `Field`/`InputGroup` primitives (nova; last reference primitives — forms currently
-    inherit via the `InputForm` abstraction); roll list→`Item` to remaining screens (admin nodes/locations/tokens
-    DataTables, client server Overview/backups); reconcile admin-dashboard `MetricTile` (raw `border` div vs the
-    new ring Card). **Test data:** `UserSeeder` (`db:seed --class=UserSeeder`, `SEED_USER=` override) seeds account
+    **Done:** `Field`/`InputGroup` primitives exist; legacy `Form*` wrappers now inherit nova field slots/text
+    rhythm and checkbox wrappers use gap-based layout instead of old `space-*` overrides; admin-dashboard
+    `MetricTile` uses the shared `Card` chrome. **Still TODO:** roll list→`Item` to remaining screens (admin
+    nodes/locations/tokens DataTables, client server Overview/backups). **Test data:** `UserSeeder`
+    (`db:seed --class=UserSeeder`, `SEED_USER=` override) seeds account
     SSH keys/API tokens + a server's IPAM addresses. **Note:** server-settings tabs (SSH keys/DNS/disks/boot-order)
     read live Proxmox, not the DB — they only populate against a reachable node, not via seeders.
   - *Sidebar redesign — FLAGSHIP BUILT + BROWSER-VERIFIED (2026-07-09, commit `157f73bb`). Roll-out to

@@ -39,7 +39,7 @@ const MetricTile = ({
     const up = rounded > 0
 
     return (
-        <div className='bg-card ring-foreground/10 overflow-hidden rounded-xl p-4 ring-1'>
+        <Card className='overflow-hidden p-4'>
             <div className='flex items-start justify-between gap-2'>
                 <StatLabel className='text-sm'>{label}</StatLabel>
                 {showDelta && (
@@ -65,7 +65,7 @@ const MetricTile = ({
                     className='mt-3 -mb-4 -mx-4 h-8 w-[calc(100%+2rem)]'
                 />
             )}
-        </div>
+        </Card>
     )
 }
 

@@ -14,7 +14,11 @@ const FormDescription = forwardRef<
         <p
             ref={ref}
             id={formDescriptionId}
-            className={cn('text-[0.8rem] text-muted-foreground', className)}
+            data-slot='field-description'
+            className={cn(
+                'text-sm leading-normal font-normal text-muted-foreground',
+                className
+            )}
             {...props}
         />
     )
