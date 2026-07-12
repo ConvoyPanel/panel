@@ -14,6 +14,8 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/.claude/settings.local.json
+/.claude/projects
 /supervisord.log
 /supervisord.pid
 _ide_*.php
