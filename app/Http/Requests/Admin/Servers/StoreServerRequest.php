@@ -44,6 +44,8 @@ class StoreServerRequest extends BaseApiRequest
             'limits.memory' => [...$rules['memory'], new HasSufficientMemory],
             'limits.disk' => [...$rules['disk'], new HasSufficientDiskSpace],
             'limits.bandwidth' => $rules['bandwidth_limit'],
+            // Persistent NIC speed cap in bytes/s (null = unlimited).
+            'limits.speed_limit' => $rules['speed_limit'],
 
             // Optional secondary/data disks, each on its own storage. The
             // primary/OS disk stays `storage_id` + `limits.disk`; these are

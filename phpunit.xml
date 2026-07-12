@@ -18,6 +18,9 @@
     <env name="MAIL_MAILER" value="array"/>
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
+    <!-- Settings cache leaks across tests (RefreshDatabase only resets the DB),
+         so disable it here; it's a production read optimization. -->
+    <env name="SETTINGS_CACHE_ENABLED" value="false"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
   </php>
   <source>

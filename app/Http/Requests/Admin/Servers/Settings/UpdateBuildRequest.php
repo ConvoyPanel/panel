@@ -30,9 +30,17 @@ class UpdateBuildRequest extends BaseApiRequest
             'vlan_tag' => $rules['vlan_tag'],
             'address_ids' => 'present|nullable|array',
             'address_ids.*' => 'integer|exists:ip_addresses,id',
-            'backup_limit' => $rules['backup_limit'],
+            // NOTE: a dead 'backup_limit' => $rules['backup_limit'] line was removed
+            // here — that rule key never existed (the column is backup_count_limit),
+            // so it emitted an undefined-key warning and mapped to a phantom column.
             'bandwidth_limit' => $rules['bandwidth_limit'],
             'bandwidth_usage' => $rules['bandwidth_usage'],
+            // Persistent NIC speed cap (bytes/s, null = unlimited) and the
+            // per-server overage-penalty override (null = inherit node/global).
+            'speed_limit' => $rules['speed_limit'],
+            'overage_penalty' => $rules['overage_penalty'],
+            'overage_penalty.action' => $rules['overage_penalty.action'],
+            'overage_penalty.rate' => $rules['overage_penalty.rate'],
         ];
     }
 

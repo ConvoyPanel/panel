@@ -37,7 +37,12 @@ if (config('activity.prune_days')) {
     Schedule::command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
 }
 
-// Schedule::command(ResetUsagesCommand::class)->daily();
+// Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
+// Usage must accumulate for quotas to ever trip, so all three run together:
+// accumulate usage, reset it on each server's monthly anniversary, and reconcile
+// the resulting speed caps / overage penalties onto the VMs' NICs.
+Schedule::command(UpdateUsagesCommand::class)->everyFiveMinutes();
+Schedule::command(ResetUsagesCommand::class)->dailyAt('00:05');
+Schedule::command(UpdateRateLimitsCommand::class)->everyTenMinutes();
+
 // Schedule::command(PruneUsersCommand::class)->daily();
-// Schedule::command(UpdateUsagesCommand::class)->everyFiveMinutes();
-// Schedule::command(UpdateRateLimitsCommand::class)->everyTenMinutes();

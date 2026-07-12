@@ -105,6 +105,39 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
+  Full design + phase log in [`docs/bandwidth-rate-limiting-plan.md`](bandwidth-rate-limiting-plan.md).
+  Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
+  (`servers.speed_limit`, bytes/s) plus a **configurable overage penalty**
+  (throttle-to-rate or disconnect the NIC) resolved by a **server → node → global**
+  cascade (`servers.overage_penalty` / `nodes.overage_penalty` json overrides →
+  `App\Settings\BandwidthSettings` global default via `spatie/laravel-settings`).
+  Quota reset moved to a **per-server day-of-month anchor** (`bandwidth_reset_day`,
+  daily sweep). Enforcement was **re-architected into a per-server
+  `SyncServerRateLimitJob` batched per node** (was one node-wide loop). Also fixed:
+  `RateLimitCast` now uses Proxmox's decimal MB (was binary MiB, ~4.86% off) and the
+  `-1`=unlimited quota no longer false-throttles. Scheduler (`routes/console.php`) is
+  now live for `sync-usages` / `reset-usages` / `sync-rate-limits`.
+
+  **Frontend still to build (admin-only; deferred here because the server
+  create/edit UI is mid-overhaul):**
+  1. **Speed cap field** on server creation — add to the create wizard's `LimitsForm`
+     (unit MB/s in the UI, convert to bytes/s: `limits.speed_limit`). Fold into the
+     planned wizard overhaul.
+  2. **Per-server speed cap + overage-penalty override** on an existing server —
+     **no "edit build/limits" admin page exists yet** (the `updateBuild` endpoint is
+     unwired). Needs that page built first; then add a speed-cap input and an
+     overage-penalty control with an explicit **"inherit from node/global"** state.
+  3. **Per-node overage-penalty override** on the node **settings** page
+     (`nodes.$nodeId/settings.lazy.tsx` + `features/nodes/api.ts`) — an action select
+     (throttle/disconnect) + conditional rate input, with an "inherit from global"
+     state. The backend already accepts `overage_penalty` on `UpdateNodeRequest`.
+  4. **Global default** (`BandwidthSettings`) is not yet UI-editable — a small admin
+     Settings screen is the eventual home (there's no settings-screen infra yet).
+  UX note: **disconnect** is a hard penalty (guest keeps the NIC but loses carrier) —
+  label it clearly; it's reversible. Show the resolved *effective* value where an
+  override is left on "inherit".
+
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
   both the client PAT card and the admin `/admin/tokens` screen shipped).
 

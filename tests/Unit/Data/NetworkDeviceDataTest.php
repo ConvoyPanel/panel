@@ -14,7 +14,8 @@ it('parses every modeled tail field into a typed value', function () {
         ->and($device->bridge)->toBe('vmbr1')
         ->and($device->vlanTag)->toBe(42)
         ->and($device->isFirewallEnabled)->toBeTrue()
-        ->and($device->rateLimit)->toBe(10 * 1024 * 1024)
+        // Proxmox rate is decimal MB/s: rate=10 -> 10_000_000 bytes/s (not binary MiB).
+        ->and($device->rateLimit)->toBe(10 * 1_000_000)
         ->and($device->packetQueueCount)->toBe(4)
         ->and($device->mtu)->toBe(9000)
         ->and($device->isLinkDown)->toBeTrue()
