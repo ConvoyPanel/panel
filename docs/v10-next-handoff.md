@@ -1,8 +1,9 @@
 # v10 (`next`) rewrite — working handoff
 
-Living notes for shipping `next` (v10) as the new trunk. Roadmap of record:
-[v10-roadmap.md](v10-roadmap.md). This file tracks *what's done* (one-line pointers — git history
-holds the detail) and *what to pick up next*, so a cold start doesn't re-derive it.
+Living notes for shipping `next` (v10) as the new trunk. This file tracks *what's done*
+(one-line pointers — git history holds the detail) and *what to pick up next*, so a cold start
+doesn't re-derive it. Remaining visual-system work is tracked in
+[frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-12 (session: **frontend handoff branches reconciled** — retained the richer
 admin node Overview and its live PVE status polling while integrating `next`'s node-scoped Servers
@@ -132,7 +133,6 @@ Researched direction retained for each; none built unless noted.
   below so design input can start from a concrete boundary rather than re-discovery.
 
 - **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
-  Full design + phase log in [`docs/bandwidth-rate-limiting-plan.md`](bandwidth-rate-limiting-plan.md).
   Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
   (`servers.speed_limit`, bytes/s) plus a **configurable overage penalty**
   (throttle-to-rate or disconnect the NIC) resolved by a **server → node → global**
