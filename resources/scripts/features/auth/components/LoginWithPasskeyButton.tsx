@@ -58,7 +58,7 @@ const LoginWithPasskeyButton = ({ redirectTo }: Props) => {
             variant='outline'
             loading={state.loading}
         >
-            <IconKey className='mr-2 h-4 w-4' />
+            <IconKey className='size-4' />
             Passkeys
         </Button>
     )

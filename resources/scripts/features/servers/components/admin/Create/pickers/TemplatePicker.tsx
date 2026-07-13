@@ -23,6 +23,10 @@ interface TemplatePickerProps {
 const TemplatePicker = ({ templateGroupId }: TemplatePickerProps) => {
     const { control } = useFormContext()
     const { data, isLoading } = useTemplates(templateGroupId, {})
+    const items = (data ?? []).map(template => ({
+        value: template.uuid,
+        label: template.name,
+    }))
 
     return (
         <FormField
@@ -32,19 +36,20 @@ const TemplatePicker = ({ templateGroupId }: TemplatePickerProps) => {
                 <FormItem>
                     <FormLabel>Template</FormLabel>
                     <Select
+                        items={items}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         disabled={!templateGroupId || isLoading}
                     >
                         <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className='w-full'>
                                 <SelectValue placeholder="Select a template" />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            {data?.map(item => (
-                                <SelectItem key={item.uuid} value={item.uuid}>
-                                    {item.name}
+                            {items.map(item => (
+                                <SelectItem key={item.value} value={item.value}>
+                                    {item.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>

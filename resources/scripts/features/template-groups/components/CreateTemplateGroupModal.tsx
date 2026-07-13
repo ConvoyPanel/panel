@@ -69,7 +69,7 @@ const CreateTemplateGroupModal = () => {
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
                 <Button size={'sm'} className={'self-end'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add template group
+                    <IconPlus className={'size-4'} /> Add template group
                 </Button>
             </CredenzaTrigger>
             <CredenzaContent>

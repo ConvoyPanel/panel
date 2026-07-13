@@ -122,7 +122,7 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button>
-                                <IconBolt className='mr-2 size-4' />
+                                <IconBolt className='size-4' />
                                 Power
                             </Button>
                         </DropdownMenuTrigger>

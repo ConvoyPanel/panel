@@ -42,23 +42,19 @@ const SelectForm = ({
         <FormField
             name={name}
             render={({ field, formState }) => {
-                const selectedItem = items.find(
-                    item => item.value === field.value
-                )
-
                 return (
                     <FormItem>
                         <FormLabel>{label}</FormLabel>
                         <Select
+                            items={items}
+                            modal={false}
                             onValueChange={field.onChange}
                             value={field.value}
                             disabled={disabled || formState.isSubmitting}
                         >
                             <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder={placeholder}>
-                                        {selectedItem?.label}
-                                    </SelectValue>
+                                <SelectTrigger className='w-full'>
+                                    <SelectValue placeholder={placeholder} />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>

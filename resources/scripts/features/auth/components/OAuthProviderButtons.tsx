@@ -48,7 +48,7 @@ const OAuthProviderButtons = ({ redirectTo, verb = 'Continue with' }: Props) => 
                             )
                         }}
                     >
-                        <ProviderIcon className='mr-2 h-4 w-4' />
+                        <ProviderIcon className='size-4' />
                         {verb} {provider.label}
                     </Button>
                 )

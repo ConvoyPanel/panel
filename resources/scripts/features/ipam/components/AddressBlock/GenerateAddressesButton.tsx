@@ -34,8 +34,7 @@ const GenerateAddressesButton = ({ mutate }: Props) => {
 
     return (
         <Button
-            icon={<IconPlus className={'mr-2 size-4'} />}
-            size={'sm'}
+            icon={<IconPlus className={'size-4'} />}
             onClick={() => trigger()}
             loading={isPending}
         >

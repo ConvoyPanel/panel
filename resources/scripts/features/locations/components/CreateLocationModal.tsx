@@ -62,10 +62,10 @@ const CreateLocationModal = ({ mutate }: Props) => {
 
     return (
         <>
-            <Credenza open={open} onOpenChange={setOpen}>
-                <CredenzaTrigger asChild>
-                    <Button className={'flex'} size={'sm'}>
-                        <IconPlus className={'mr-2 size-4'} /> Add location
+                <Credenza open={open} onOpenChange={setOpen}>
+                    <CredenzaTrigger asChild>
+                    <Button>
+                        <IconPlus className={'size-4'} /> Add location
                     </Button>
                 </CredenzaTrigger>
                 <CredenzaContent>

@@ -92,8 +92,8 @@ const CreateTokenModal = ({ mutate }: Props) => {
     return (
         <Credenza open={open} onOpenChange={onOpenChange}>
             <CredenzaTrigger asChild>
-                <Button className={'flex'} size={'sm'}>
-                    <IconPlus className={'mr-2 size-4'} /> Create token
+                <Button>
+                    <IconPlus className={'size-4'} /> Create token
                 </Button>
             </CredenzaTrigger>
             <CredenzaContent>

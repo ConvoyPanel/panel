@@ -26,6 +26,11 @@ const DataTablePagination = <TData,>({
     perPageOptions = [10, 20, 30, 40, 50],
     showPerPageOptions,
 }: DataTablePaginationProps<TData>) => {
+    const perPageItems = perPageOptions.map(pageSize => ({
+        value: `${pageSize}`,
+        label: pageSize,
+    }))
+
     return (
         <div className='flex items-center justify-between px-2'>
             <div className='flex-1' />
@@ -34,25 +39,30 @@ const DataTablePagination = <TData,>({
                     <div className='flex items-center space-x-2'>
                         <p className='text-sm font-medium'>Rows per page</p>
                         <Select
+                            items={perPageItems}
                             value={`${table.getState().pagination.pageSize}`}
                             onValueChange={value => {
+                                if (!value) return
                                 table.setPageSize(Number(value))
                             }}
                         >
-                            <SelectTrigger className='h-8 w-[70px]'>
+                            <SelectTrigger className='w-[70px]'>
                                 <SelectValue
                                     placeholder={
                                         table.getState().pagination.pageSize
                                     }
                                 />
                             </SelectTrigger>
-                            <SelectContent side='top'>
-                                {perPageOptions.map(pageSize => (
+                            <SelectContent
+                                side='top'
+                                alignItemWithTrigger={false}
+                            >
+                                {perPageItems.map(item => (
                                     <SelectItem
-                                        key={pageSize}
-                                        value={`${pageSize}`}
+                                        key={item.value}
+                                        value={item.value}
                                     >
-                                        {pageSize}
+                                        {item.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -66,7 +76,8 @@ const DataTablePagination = <TData,>({
                 <div className='flex items-center space-x-2'>
                     <Button
                         variant='outline'
-                        className='hidden h-8 w-8 p-0 lg:flex'
+                        size='icon'
+                        className='hidden lg:flex'
                         onClick={() => table.setPageIndex(0)}
                         disabled={!table.getCanPreviousPage()}
                     >
@@ -75,7 +86,7 @@ const DataTablePagination = <TData,>({
                     </Button>
                     <Button
                         variant='outline'
-                        className='h-8 w-8 p-0'
+                        size='icon'
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
@@ -84,7 +95,7 @@ const DataTablePagination = <TData,>({
                     </Button>
                     <Button
                         variant='outline'
-                        className='h-8 w-8 p-0'
+                        size='icon'
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
@@ -93,7 +104,8 @@ const DataTablePagination = <TData,>({
                     </Button>
                     <Button
                         variant='outline'
-                        className='hidden h-8 w-8 p-0 lg:flex'
+                        size='icon'
+                        className='hidden lg:flex'
                         onClick={() =>
                             table.setPageIndex(table.getPageCount() - 1)
                         }

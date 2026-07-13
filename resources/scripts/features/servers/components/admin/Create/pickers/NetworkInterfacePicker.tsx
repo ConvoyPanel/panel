@@ -25,6 +25,25 @@ interface NetworkInterfacePickerProps {
 const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
     const { control } = useFormContext()
     const { data, isLoading } = useNetworkInterfaces(nodeId)
+    const items = (data ?? []).map(item => {
+        const vlanLabel = item.vlanTag
+            ? `VLAN ${item.vlanTag}`
+            : item.isVlanAware
+              ? 'Untagged'
+              : 'No VLAN'
+
+        return {
+            value: item.id.toString(),
+            label: (
+                <span className='flex w-full items-center justify-between gap-2'>
+                    <span>{item.name}</span>
+                    <span className='text-muted-foreground text-xs'>
+                        {vlanLabel}
+                    </span>
+                </span>
+            ),
+        }
+    })
 
     return (
         <FormField
@@ -34,12 +53,13 @@ const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
                 <FormItem>
                     <FormLabel>Network Interface</FormLabel>
                     <Select
+                        items={items}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         disabled={!nodeId || isLoading}
                     >
                         <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className='w-full'>
                                 <SelectValue placeholder="Select a network interface" />
                             </SelectTrigger>
                         </FormControl>
@@ -53,27 +73,14 @@ const NetworkInterfacePicker = ({ nodeId }: NetworkInterfacePickerProps) => {
                                     />
                                 </div>
                             ) : (
-                                data?.map(item => {
-                                    const vlanLabel = item.vlanTag
-                                        ? `VLAN ${item.vlanTag}`
-                                        : item.isVlanAware
-                                          ? 'Untagged'
-                                          : 'No VLAN'
-
-                                    return (
-                                        <SelectItem
-                                            key={item.id}
-                                            value={item.id.toString()}
-                                        >
-                                            <span className='flex w-full items-center justify-between gap-2'>
-                                                <span>{item.name}</span>
-                                                <span className='text-xs text-muted-foreground'>
-                                                    {vlanLabel}
-                                                </span>
-                                            </span>
-                                        </SelectItem>
-                                    )
-                                })
+                                items.map(item => (
+                                    <SelectItem
+                                        key={item.value}
+                                        value={item.value}
+                                    >
+                                        {item.label}
+                                    </SelectItem>
+                                ))
                             )}
                         </SelectContent>
                     </Select>

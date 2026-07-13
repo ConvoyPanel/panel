@@ -123,7 +123,11 @@
     }
 
     #root {
-        @apply h-full w-full;
+        @apply isolate h-full w-full;
+    }
+
+    [data-base-ui-inert] {
+        pointer-events: none !important;
     }
 }
 

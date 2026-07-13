@@ -25,6 +25,7 @@ const CheckboxForm = ({
     description,
     showErrors,
     formItemProps,
+    disabled,
     ...props
 }: Props) => {
     return (
@@ -43,7 +44,7 @@ const CheckboxForm = ({
                             {...props}
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            disabled={formState.isSubmitting}
+                            disabled={disabled || formState.isSubmitting}
                         />
                     </FormControl>
                     <div className='flex flex-col gap-1 leading-none'>

@@ -43,6 +43,26 @@ const StoragePicker = ({
         if (!requiredContentTypes) return true
         return requiredContentTypes.every(type => storage[type] === true)
     })
+    const items = (filteredStorages ?? []).map(storage => {
+        const used =
+            storage.usages.server + storage.usages.backup + storage.usages.iso
+        const free = storage.size - used
+
+        return {
+            value: storage.id.toString(),
+            label: (
+                <div className='flex flex-col gap-1'>
+                    <span className='font-medium'>
+                        {storage.displayName} ({storage.name})
+                    </span>
+                    <span className='text-muted-foreground text-xs'>
+                        {byteSize(free, { units: 'iec' }).toString()} free out of{' '}
+                        {byteSize(storage.size, { units: 'iec' }).toString()}
+                    </span>
+                </div>
+            ),
+        }
+    })
 
     return (
         <FormField
@@ -52,12 +72,13 @@ const StoragePicker = ({
                 <FormItem>
                     <FormLabel>{label}</FormLabel>
                     <Select
+                        items={items}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         disabled={!nodeId || isLoading}
                     >
                         <FormControl>
-                            <SelectTrigger className="h-auto text-left [&>span]:line-clamp-none">
+                            <SelectTrigger className='h-auto! w-full text-left *:data-[slot=select-value]:line-clamp-none!'>
                                 <SelectValue placeholder="Select a storage" />
                             </SelectTrigger>
                         </FormControl>
@@ -71,35 +92,14 @@ const StoragePicker = ({
                                     />
                                 </div>
                             ) : (
-                                filteredStorages?.map(storage => {
-                                    const used =
-                                        storage.usages.server +
-                                        storage.usages.backup +
-                                        storage.usages.iso
-                                    const free = storage.size - used
-
-                                    return (
-                                        <SelectItem
-                                            key={storage.name}
-                                            value={storage.id.toString()}
-                                        >
-                                            <div className="flex flex-col gap-1">
-                                                <span className="font-medium">
-                                                    {storage.displayName} ({storage.name})
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {byteSize(free, {
-                                                        units: 'iec',
-                                                    }).toString()}{' '}
-                                                    free out of{' '}
-                                                    {byteSize(storage.size, {
-                                                        units: 'iec',
-                                                    }).toString()}
-                                                </span>
-                                            </div>
-                                        </SelectItem>
-                                    )
-                                })
+                                items.map(item => (
+                                    <SelectItem
+                                        key={item.value}
+                                        value={item.value}
+                                    >
+                                        {item.label}
+                                    </SelectItem>
+                                ))
                             )}
                         </SelectContent>
                     </Select>

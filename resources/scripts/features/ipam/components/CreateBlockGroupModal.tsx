@@ -68,8 +68,8 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
     return (
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
-                <Button size={'sm'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add block group
+                <Button>
+                    <IconPlus className={'size-4'} /> Add block group
                 </Button>
             </CredenzaTrigger>
             <CredenzaContent>

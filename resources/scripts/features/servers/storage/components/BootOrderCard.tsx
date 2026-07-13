@@ -167,7 +167,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant={'outline'} size={'sm'}>
-                                <IconPlus className={'mr-2 size-4'} />
+                                <IconPlus className={'size-4'} />
                                 Add device
                             </Button>
                         </DropdownMenuTrigger>

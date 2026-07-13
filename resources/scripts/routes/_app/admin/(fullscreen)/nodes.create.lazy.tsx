@@ -77,7 +77,7 @@ function CreateNodePage() {
                     title={'Add a new node'}
                     headerActions={
                         <FormButton size={'sm'} className={'flex'}>
-                            Add node <IconCheck className={'ml-2 size-4'} />
+                            Add node <IconCheck className={'size-4'} />
                         </FormButton>
                     }
                     center

@@ -29,7 +29,7 @@ const SecondaryDisksForm = () => {
                     disabled={!nodeId}
                     onClick={() => append({ storageId: '', size: 10 })}
                 >
-                    <IconPlus className={'mr-2 size-4'} /> Add disk
+                    <IconPlus className={'size-4'} /> Add disk
                 </Button>
             </div>
 

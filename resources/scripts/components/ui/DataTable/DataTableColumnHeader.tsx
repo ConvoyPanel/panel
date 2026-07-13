@@ -34,17 +34,16 @@ const DataTableColumnHeader = <TData, TValue>({
     return (
         <Button
             variant='ghost'
-            size='sm'
-            className={cn('-ml-3 h-8 data-[state=open]:bg-accent', className)}
+            className={cn('-ml-3 data-[state=open]:bg-accent', className)}
             onClick={() => column.toggleSorting(sorted === 'asc')}
         >
             <span>{title}</span>
             {sorted === 'desc' ? (
-                <IconArrowDown className='ml-2 size-4' />
+                <IconArrowDown className='size-4' />
             ) : sorted === 'asc' ? (
-                <IconArrowUp className='ml-2 size-4' />
+                <IconArrowUp className='size-4' />
             ) : (
-                <IconArrowsSort className='ml-2 size-4 opacity-50' />
+                <IconArrowsSort className='size-4 opacity-50' />
             )}
         </Button>
     )

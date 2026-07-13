@@ -81,8 +81,8 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
     return (
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
-                <Button size={'sm'}>
-                    <IconPlus className={'mr-2 size-4'} /> Add address block
+                <Button>
+                    <IconPlus className={'size-4'} /> Add address block
                 </Button>
             </CredenzaTrigger>
             <CredenzaContent>

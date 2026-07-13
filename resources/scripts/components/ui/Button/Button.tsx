@@ -40,9 +40,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
             >
                 {loading ? (
-                    <Spinner
-                        className={'mr-2 h-4 w-4'}
-                    />
+                    <Spinner className={'size-4'} />
                 ) : (
                     icon
                 )}

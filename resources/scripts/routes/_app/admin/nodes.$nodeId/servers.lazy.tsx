@@ -123,10 +123,10 @@ function NodeServers() {
                 }}
                 rightActions={
                     <Link
-                        className={cn(buttonVariants({ size: 'sm' }), 'flex')}
+                        className={buttonVariants()}
                         to='/admin/servers/create'
                     >
-                        <IconPlus className={'mr-2 size-4'} />
+                        <IconPlus className={'size-4'} />
                         Add server
                     </Link>
                 }

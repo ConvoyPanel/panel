@@ -1,6 +1,9 @@
 # Frontend Overhaul Audit
 
-Status: audited 2026-07-13 against `next` after the base + nova rollout.
+Status: audited 2026-07-13 against `next` after the base + nova rollout. The
+shared Textarea, Select, Checkbox, DataTable toolbar, and admin server Disks work
+identified below was completed and verified later that day; unchecked items
+remain.
 
 This document tracks the remaining visual-system and screen-composition work in
 the frontend overhaul. It is an implementation checklist, not a record of work
@@ -96,30 +99,30 @@ destructive variant, so irreversible menu actions look neutral.
 
 ### Textarea and form wrapper
 
-- [ ] Match `Textarea` chrome to the canonical `Input` values.
-- [ ] Preserve multiline-specific behavior and an appropriate minimum height.
-- [ ] Add matching invalid, disabled, and dark-state treatment.
-- [ ] Make `TextareaForm` combine caller-provided `disabled` with form submission
+- [x] Match `Textarea` chrome to the canonical `Input` values.
+- [x] Preserve multiline-specific behavior and an appropriate minimum height.
+- [x] Add matching invalid, disabled, and dark-state treatment.
+- [x] Make `TextareaForm` combine caller-provided `disabled` with form submission
       state instead of overwriting it.
 - [ ] Browser-check the SSH key, IPAM, template, and network dialogs.
 
 ### Select
 
-- [ ] Align the default trigger with the nova control height, radius, padding,
+- [x] Align the default trigger with the nova control height, radius, padding,
       shadow, focus, invalid, disabled, and dark states.
-- [ ] Add a size API rather than relying on one-off height overrides.
-- [ ] Retain `h-auto` for intentionally rich, multi-line selectors.
-- [ ] Update popup, viewport, scroll buttons, and items as one component family.
+- [x] Add a size API rather than relying on one-off height overrides.
+- [x] Retain `h-auto` for intentionally rich, multi-line selectors.
+- [x] Update popup, viewport, scroll buttons, and items as one component family.
 - [ ] Browser-check keyboard navigation, typeahead, focus return, collision
       handling, validation, and mobile dialogs.
-- [ ] Migrate to Base UI during this work if its interaction contract can be
+- [x] Migrate to Base UI during this work if its interaction contract can be
       verified on the owning screens.
 
 ### Checkbox, radio, and OTP
 
-- [ ] Move Checkbox off the old primary border, shadow, and one-pixel focus ring.
-- [ ] Add nova invalid, disabled, dark-state, and hit-target treatment.
-- [ ] Make `CheckboxForm` and `CheckboxItemForm` preserve caller `disabled` state.
+- [x] Move Checkbox off the old primary border, shadow, and one-pixel focus ring.
+- [x] Add nova invalid, disabled, dark-state, and hit-target treatment.
+- [x] Make `CheckboxForm` and `CheckboxItemForm` preserve caller `disabled` state.
 - [ ] Update the dormant RadioGroup primitive before introducing new consumers.
 - [ ] Align OTP slots with the current control dimensions and focus treatment.
 - [ ] Browser-check login authenticator entry and representative checkbox forms.
@@ -136,13 +139,13 @@ destructive variant, so irreversible menu actions look neutral.
 
 ## Priority 1: buttons and DataTable
 
-- [ ] Define one toolbar action size contract and remove contradictory `size` plus
+- [x] Define one toolbar action size contract and remove contradictory `size` plus
       height overrides.
-- [ ] Remove stale `mr-2`/`ml-2` icon margins now that Button supplies `gap`.
-- [ ] Remove the loading spinner's built-in manual margin from `Button`.
-- [ ] Use `size="icon"` consistently for pagination and action controls.
+- [x] Remove stale `mr-2`/`ml-2` icon margins now that Button supplies `gap`.
+- [x] Remove the loading spinner's built-in manual margin from `Button`.
+- [x] Use `size="icon"` consistently for pagination and action controls.
 - [ ] Add accessible names to icon-only buttons.
-- [ ] Make `DataTableToolbar` wrap or reflow on narrow screens.
+- [x] Make `DataTableToolbar` wrap or reflow on narrow screens.
 - [ ] Distinguish an empty collection from a filtered no-results state.
 - [ ] Allow contextual empty copy and a primary onboarding/create action.
 
@@ -159,12 +162,12 @@ Representative affected shared components:
 
 ### Admin server Disks
 
-- [ ] Adopt the standard page or card collection composition.
-- [ ] Add loading rows/skeletons that match the eventual layout.
-- [ ] Add a contextual empty state with Add disk as the primary action.
-- [ ] Replace inline row buttons with the standard action menu.
-- [ ] Add a mobile `Item` row representation.
-- [ ] Add route title metadata and normalize title casing.
+- [x] Adopt the standard page or card collection composition.
+- [x] Add loading rows/skeletons that match the eventual layout.
+- [x] Add a contextual empty state with Add disk as the primary action.
+- [x] Replace inline row buttons with the standard action menu.
+- [x] Add a mobile `Item` row representation.
+- [x] Add route title metadata and normalize title casing.
 - [ ] Verify add, resize, remove, primary-disk restrictions, and empty/loading
       states against a live seeded node.
 
@@ -201,7 +204,7 @@ scrolling desktop tables on small screens.
 - [ ] IPAM address-block list.
 - [ ] IPAM attached-nodes list.
 - [ ] Address list within a block.
-- [ ] Admin server Disks.
+- [x] Admin server Disks.
 - [ ] Server Addresses.
 
 Every converted page should be checked at desktop width and approximately 390px,

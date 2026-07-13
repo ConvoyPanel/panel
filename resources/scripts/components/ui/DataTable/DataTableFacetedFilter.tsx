@@ -40,8 +40,7 @@ const DataTableFacetedFilter = <TData, TValue>({
             <PopoverTrigger asChild>
                 <Button
                     variant='outline'
-                    size='sm'
-                    className='h-8 border-dashed'
+                    className='border-dashed'
                 >
                     <IconCirclePlus />
                     {title}

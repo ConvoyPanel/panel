@@ -78,9 +78,9 @@ const ServerBulkPowerActions = ({ servers, onDone }: Props) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant='outline' size='sm' className='h-8' loading={pending}>
+                <Button variant='outline' loading={pending}>
                     Power
-                    <IconChevronDown className='ml-2 size-4' />
+                    <IconChevronDown className='size-4' />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='start'>

@@ -15,7 +15,13 @@ interface Props extends CheckboxProps {
     formItemProps?: HTMLAttributes<HTMLDivElement>
 }
 
-const CheckboxItemForm = ({ name, label, formItemProps, ...props }: Props) => {
+const CheckboxItemForm = ({
+    name,
+    label,
+    formItemProps,
+    disabled,
+    ...props
+}: Props) => {
     return (
         <FormField
             name={name}
@@ -32,7 +38,7 @@ const CheckboxItemForm = ({ name, label, formItemProps, ...props }: Props) => {
                             {...props}
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            disabled={formState.isSubmitting}
+                            disabled={disabled || formState.isSubmitting}
                         />
                     </FormControl>
 

@@ -26,6 +26,12 @@ import {
     SelectValue,
 } from '@/components/ui/Select'
 
+const themeItems = [
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+    { value: 'system', label: 'System' },
+] as const
+
 const Avatar = () => {
     const { theme, setTheme } = useTheme()
     const { data: user } = useUser()
@@ -118,9 +124,13 @@ const Avatar = () => {
                 <DropdownMenuSeparator />
                 <div className={'mt-2 flex items-center space-x-14 px-2 py-1'}>
                     <span className={'text-sm'}>Theme</span>
-                    <Select value={theme} onValueChange={setTheme}>
+                    <Select
+                        items={themeItems}
+                        value={theme}
+                        onValueChange={value => value && setTheme(value)}
+                    >
                         <SelectTrigger className={'w-28'}>
-                            <SelectValue placeholder='Select a fruit' />
+                            <SelectValue placeholder='Select theme' />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>

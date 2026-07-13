@@ -22,6 +22,7 @@ const TextareaForm = ({
     label,
     description,
     formItemProps,
+    disabled,
     ...props
 }: Props) => {
     return (
@@ -34,7 +35,7 @@ const TextareaForm = ({
                         <Textarea
                             {...props}
                             {...field}
-                            disabled={formState.isSubmitting}
+                            disabled={disabled || formState.isSubmitting}
                         />
                     </FormControl>
                     {description && (

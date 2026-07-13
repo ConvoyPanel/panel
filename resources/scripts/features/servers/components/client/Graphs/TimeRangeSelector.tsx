@@ -9,6 +9,14 @@ import {
 } from '@/components/ui/Select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 
+const timeRangeItems = [
+    { value: 'hour', label: 'Hourly' },
+    { value: 'day', label: 'Daily' },
+    { value: 'week', label: 'Weekly' },
+    { value: 'month', label: 'Monthly' },
+    { value: 'year', label: 'Yearly' },
+] as const
+
 interface Props {
     from: TimeRange
     setFrom: (from: TimeRange) => void
@@ -31,18 +39,19 @@ const TimeRangeSelector = ({ from, setFrom }: Props) => {
                 </TabsList>
             </Tabs>
             <Select
+                items={timeRangeItems}
                 value={from}
-                onValueChange={val => setFrom(val as TimeRange)}
+                onValueChange={value => value && setFrom(value)}
             >
                 <SelectTrigger className={'mb-5 flex w-56 @sm:hidden'}>
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value={'hour'}>Hourly</SelectItem>
-                    <SelectItem value={'day'}>Daily</SelectItem>
-                    <SelectItem value={'week'}>Weekly</SelectItem>
-                    <SelectItem value={'month'}>Monthly</SelectItem>
-                    <SelectItem value={'year'}>Yearly</SelectItem>
+                    {timeRangeItems.map(item => (
+                        <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                        </SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
         </>

@@ -196,7 +196,7 @@ const SSHKeysCard = ({ uuid }: Props) => {
                                     size={'sm'}
                                     disabled={available.length === 0}
                                 >
-                                    <IconPlus className={'mr-2 size-4'} />
+                                    <IconPlus className={'size-4'} />
                                     Add from keychain
                                 </Button>
                             </DropdownMenuTrigger>
@@ -220,7 +220,7 @@ const SSHKeysCard = ({ uuid }: Props) => {
                             size={'sm'}
                             onClick={() => setPasteOpen(true)}
                         >
-                            <IconClipboard className={'mr-2 size-4'} />
+                            <IconClipboard className={'size-4'} />
                             Paste a key
                         </Button>
                     </div>

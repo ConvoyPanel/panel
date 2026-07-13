@@ -72,6 +72,49 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
         [templateGroups, selectedTemplateGroupUuid]
     )
 
+    const templateGroupItems = (templateGroups ?? []).map(group => ({
+        value: group.uuid,
+        label: (
+            <div className='flex items-center gap-3 pr-4'>
+                <TemplateIconDisplay
+                    icon={group.icon}
+                    className='text-muted-foreground size-5'
+                />
+                <div className='flex flex-col text-left'>
+                    <span className='block truncate font-medium'>
+                        {group.name}
+                    </span>
+                    {group.description && (
+                        <span className='text-muted-foreground block truncate text-xs'>
+                            {group.description}
+                        </span>
+                    )}
+                </div>
+            </div>
+        ),
+    }))
+    const templateItems = (selectedGroup?.templates ?? []).map(template => ({
+        value: template.uuid,
+        label: (
+            <div className='flex items-center gap-3 pr-4'>
+                <TemplateIconDisplay
+                    icon={selectedGroup?.icon ?? null}
+                    className='text-muted-foreground size-5'
+                />
+                <div className='flex flex-col text-left'>
+                    <span className='block truncate font-medium'>
+                        {template.name}
+                    </span>
+                    {template.description && (
+                        <span className='text-muted-foreground block truncate text-xs'>
+                            {template.description}
+                        </span>
+                    )}
+                </div>
+            </div>
+        ),
+    }))
+
     const onSubmit = async (values: FormData) => {
         try {
             await reinstallServer(server.uuid, {
@@ -98,36 +141,22 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                         <FormItem>
                             <FormLabel>Pick your operating system</FormLabel>
                             <Select
+                                items={templateGroupItems}
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
                             >
                                 <FormControl>
-                                    <SelectTrigger className='h-auto text-left [&>span]:line-clamp-none'>
+                                    <SelectTrigger className='h-auto! w-full text-left *:data-[slot=select-value]:line-clamp-none!'>
                                         <SelectValue placeholder='Select an OS family' />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {templateGroups?.map(group => (
+                                    {templateGroupItems.map(item => (
                                         <SelectItem
-                                            key={group.uuid}
-                                            value={group.uuid}
+                                            key={item.value}
+                                            value={item.value}
                                         >
-                                            <div className='flex items-center gap-3 pr-4'>
-                                                <TemplateIconDisplay
-                                                    icon={group.icon}
-                                                    className='h-5 w-5 text-muted-foreground'
-                                                />
-                                                <div className='flex flex-col text-left'>
-                                                    <span className='block truncate font-medium'>
-                                                        {group.name}
-                                                    </span>
-                                                    {group.description && (
-                                                        <span className='block truncate text-xs text-muted-foreground'>
-                                                            {group.description}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            {item.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -144,39 +173,23 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                         <FormItem>
                             <FormLabel>Pick which version</FormLabel>
                             <Select
+                                items={templateItems}
                                 onValueChange={field.onChange}
                                 value={field.value}
                                 disabled={!selectedTemplateGroupUuid}
                             >
                                 <FormControl>
-                                    <SelectTrigger className='h-auto text-left [&>span]:line-clamp-none'>
+                                    <SelectTrigger className='h-auto! w-full text-left *:data-[slot=select-value]:line-clamp-none!'>
                                         <SelectValue placeholder='Select a version' />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {selectedGroup?.templates?.map(template => (
+                                    {templateItems.map(item => (
                                         <SelectItem
-                                            key={template.uuid}
-                                            value={template.uuid}
+                                            key={item.value}
+                                            value={item.value}
                                         >
-                                            <div className='flex items-center gap-3 pr-4'>
-                                                <TemplateIconDisplay
-                                                    icon={selectedGroup.icon}
-                                                    className='h-5 w-5 text-muted-foreground'
-                                                />
-                                                <div className='flex flex-col text-left'>
-                                                    <span className='block truncate font-medium'>
-                                                        {template.name}
-                                                    </span>
-                                                    {template.description && (
-                                                        <span className='block truncate text-xs text-muted-foreground'>
-                                                            {
-                                                                template.description
-                                                            }
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            {item.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

@@ -25,10 +25,9 @@ const DataTableViewOptions = <TData,>({
             <DropdownMenuTrigger asChild>
                 <Button
                     variant='outline'
-                    size='sm'
-                    className='hidden h-8 lg:flex'
+                    className='hidden lg:flex'
                 >
-                    <IconSettings className={'mr-2 size-4'} />
+                    <IconSettings className={'size-4'} />
                     View
                 </Button>
             </DropdownMenuTrigger>
