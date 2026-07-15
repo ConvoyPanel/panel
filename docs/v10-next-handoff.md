@@ -44,26 +44,31 @@ highlights, Escape closes only the select, 2nd Escape closes the dialog.
 - **Remaining Radix:** `Accordion` (prefer the new Base UI `Collapsible` for single disclosures),
   `react-icons`, `label`, `scroll-area`, `slot`, `tooltip`, `alert-dialog`.
 
-**NEXT UP — rewrite `hooks/create-modal-store.ts` on real nested dialogs** (decided with the maintainer
-2026-07-15; groundwork landed in `a7578f40`). The store keeps **one** `activeModal`; opening another sets it to
-`null`, waits a hardcoded **`setTimeout(250)`**, then mounts the next — **that unmount/remount IS the backdrop
-flash**, and the timeout exists only to hide the seam. It hand-rolls a `modalQueue` + `middleware`
-(`shouldContinue()` + fallback id) + `backOutFromMiddleware` to gate the security page behind
-`AuthDialog`.
-- **Decision: use Base UI's real nested dialogs.** A `<Dialog.Root>` inside another dialog's content.
+**Modal store rebuilt on real nested dialogs — DONE (`a7578f40` + `1a2ed14a`).** The store used to keep one
+`activeModal`; opening another set it to `null`, waited a hardcoded `setTimeout(250)`, then mounted the next —
+**that unmount/remount WAS the backdrop flash**, and the timeout only hid the seam. The `modalQueue`,
+`middleware`/`createAuthMiddleware`, `backOutFromMiddleware` and `pushToQueue` are all **deleted**.
+- **The pattern:** a `<ResponsiveDialog>` rendered **inside** another dialog's content is a nested dialog.
   **Base UI renders NO backdrop for the child** ("so you can present the parent dialog in a clean way behind
-  the one on top") — so there is one backdrop, no stacking, and **nothing to flash**. The parent signals depth
-  instead: `DialogContent` now scales back per `--nested-dialogs` via `data-nested-dialog-open` (`a7578f40`).
-  (An "one dialog, swap the content" alternative was proposed and rejected by the maintainer — build nested.)
-- **Scope:** `hooks/create-modal-store.ts` (drop `middleware`/`modalQueue`/`backOutFromMiddleware`/the 250ms),
-  `components/ui/Dialog/AuthDialog.tsx` (+`createAuthMiddleware`), `features/account/components/`
-  `AuthenticatorContainer.tsx` (mounts **6** dialogs at once) and `PasskeysContainer.tsx`, plus the
-  Authenticator step dialogs. The **other six** stores (ipam ×3, nodes ×2, template-groups, locations) use the
-  store *without* middleware — they are just "open edit/delete for row X" and are NOT part of this flow.
-- **It IS testable — do not defer for lack of a harness.** The password tab needs only the account password;
-  the passkey tab is drivable with a **Playwright CDP virtual authenticator**, which this repo has already
-  proven end-to-end (19/19 steps) *including* the `ConfirmableIdentityController` re-auth path this gate uses.
-  See the passkey entry below.
+  the one on top") — one backdrop, no stacking, **nothing to flash**. The parent signals depth instead:
+  `DialogContent` scales back per `--nested-dialogs` via `data-nested-dialog-open`. **Use this for any
+  modal-on-modal; do NOT reintroduce a queue.**
+- **The gate:** `AuthDialog` takes only `onCancel`, renders inside the dialog it guards, and opens itself while
+  `isIdentityValid()` is false. Confirming flips it closed and reveals the parent. Cancelling closes the whole
+  flow (`onCancel`) so nobody is left in settings they never authenticated for.
+- `createModalStore` now keeps only `activeModal`/`modalData`/`openModal`/`closeModal` — all the six row-modal
+  stores (ipam ×3, nodes ×2, template-groups, locations) ever used; they inherit the no-flash fix for free.
+  `openModal` already replaces the active step, so the old `pushToQueue` + `closeModal` pairs are one call.
+- **Verified** by driving the real gate on **`/security`** (note: NOT `/account/security`) with
+  `localStorage.removeItem('identity-confirmation-store')` to force it: opening Authenticator → **2 dialogs but
+  ONE backdrop**, titles `["Authenticator","Authorization Required"]`, parent `data-nested-dialog-open` with
+  `--nested-dialogs: 1`; after confirming → 1 dialog, `--nested-dialogs: 0`, **parent never unmounted**, and the
+  backdrop count **never leaves 1** (it was 1→0→1 before — that was the flash). No console errors.
+- **Still unverified:** the **passkey** tab of the gate, and the Authenticator *step* dialogs
+  (enable → recovery-codes, disable, reset-recovery-codes) — only the password path was driven. The passkey tab
+  is drivable with a **Playwright CDP virtual authenticator**, already proven in this repo end-to-end (19/19
+  steps) *including* the `ConfirmableIdentityController` re-auth path this gate uses; see the passkey entry
+  below. Enabling the authenticator needs a real TOTP code.
 
 — prior: **repository layer removed + backups quota wired & verified + IPAM mobile rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
 backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
