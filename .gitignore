@@ -14,8 +14,13 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+# Claude Code: local/runtime state only. `.claude/settings.json` and any
+# agents/, commands/, or skills/ are meant to be shared, so this stays an
+# explicit list rather than ignoring /.claude wholesale.
 /.claude/settings.local.json
 /.claude/projects
+/.claude/worktrees
+/.claude/*.lock
 /supervisord.log
 /supervisord.pid
 _ide_*.php
