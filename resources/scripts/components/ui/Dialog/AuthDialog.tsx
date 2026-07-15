@@ -75,19 +75,19 @@ const AuthDialog = ({ onCancel }: Props) => {
 
     const type = form.watch('type')
 
-    // Auto-submit when the modal initially opens with Passkey selected
+    // A passkey needs no input, so the ceremony starts on its own — whether the
+    // gate opened with Passkey already selected or the user just picked the tab.
+    //
+    // This MUST stay a single effect. As two (one keyed on open, one on type),
+    // both initial invocations ran when the gate mounted already-open, firing the
+    // ceremony twice and 403ing the second on a consumed challenge. That was
+    // survivable only while this dialog was a page-level sibling that mounted
+    // closed; it mounts open now that it is nested inside the dialog it guards.
     useEffect(() => {
-        if (isAuthDialogOpen && type === ConfirmationType.Passkey) {
-            form.handleSubmit(submit)()
-        }
-    }, [isAuthDialogOpen])
+        if (!isAuthDialogOpen || type !== ConfirmationType.Passkey) return
 
-    // Auto-submit when the user manually selects Passkey
-    useEffect(() => {
-        if (isAuthDialogOpen && type === ConfirmationType.Passkey) {
-            form.handleSubmit(submit)()
-        }
-    }, [type])
+        form.handleSubmit(submit)()
+    }, [isAuthDialogOpen, type])
 
     const submit = async (_data: any) => {
         const data = _data as z.infer<typeof schema>
