@@ -19,7 +19,15 @@ const AppLayout = ({ routes, children }: Props) => {
     return (
         <div className='flex min-h-screen w-full min-w-0 bg-muted/40'>
             <Sidebar nav={nav} />
-            <div className='flex min-w-0 grow flex-col overflow-x-hidden sm:gap-4 sm:py-4'>
+            {/*
+             * overflow-x-clip, not -hidden: `overflow-x: hidden` forces
+             * `overflow-y` to compute to `auto`, which makes this div a scroll
+             * container. Descendant `position: sticky` then binds to it instead
+             * of the viewport — and since this div grows to fit its content and
+             * never scrolls, sticky silently does nothing. `clip` leaves
+             * overflow-y `visible`, so sticky headers work.
+             */}
+            <div className='flex min-w-0 grow flex-col overflow-x-clip sm:gap-4 sm:py-4'>
                 <Header nav={nav} />
                 {/*
                  * Cap + center the content column so it doesn't stretch

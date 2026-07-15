@@ -1,3 +1,4 @@
+import useDelayedLoading from '@/hooks/use-delayed-loading.ts'
 import { cn } from '@/utils'
 import { Slot } from '@radix-ui/react-slot'
 import type { VariantProps } from 'class-variance-authority'
@@ -32,6 +33,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref
     ) => {
         const Comp = asChild ? Slot : 'button'
+
+        // Pass `loading` plainly from the call site; the timing lives here.
+        // A spinner that comes and goes within a couple hundred milliseconds
+        // reads as a glitch, so it is withheld until the work proves slow and
+        // then held briefly so it cannot flash. `disabled` deliberately tracks
+        // the raw flag, not this one: the press is acknowledged instantly and
+        // can never fire twice while the spinner is being withheld.
+        const showSpinner = useDelayedLoading(!!loading)
+
         return (
             <Comp
                 className={cn(buttonVariants({ variant, size, className }))}
@@ -39,11 +49,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 {...props}
             >
-                {loading ? (
-                    <Spinner className={'size-4'} />
-                ) : (
-                    icon
-                )}
+                {showSpinner ? <Spinner className={'size-4'} /> : icon}
                 {children}
             </Comp>
         )

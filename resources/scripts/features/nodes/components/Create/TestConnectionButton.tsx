@@ -1,11 +1,17 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { ConnectionResult } from '@/types/node.ts'
-import { IconCheck, IconX } from '@tabler/icons-react'
+import {
+    IconCheck,
+    IconChevronRight,
+    IconPlugConnected,
+    IconX,
+} from '@tabler/icons-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { testConnection } from '@/features/nodes/api.ts'
+import { connectionErrorCopy } from '@/features/nodes/components/Create/connection-errors.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -47,6 +53,8 @@ const TestConnectionButton = () => {
         }
     })
 
+    const errorCopy = connectionErrorCopy(result?.errorCode ?? null)
+
     const askChatGPT = () => {
         const url = new URL('https://chat.openai.com/')
         url.searchParams.set('q', result?.errorMessage ?? '')
@@ -78,9 +86,12 @@ const TestConnectionButton = () => {
                         )}
                     </div>
                 )}
+                {/* The icon keeps the icon slot occupied so swapping in the
+                    spinner doesn't resize the button mid-click. */}
                 <Button
                     type={'button'}
                     onClick={handle}
+                    icon={<IconPlugConnected className={'size-4'} />}
                     loading={state.loading}
                 >
                     Test connection
@@ -90,15 +101,33 @@ const TestConnectionButton = () => {
             <Credenza open={open} onOpenChange={setOpen}>
                 <CredenzaContent>
                     <CredenzaHeader>
-                        <CredenzaTitle>Connection failed</CredenzaTitle>
+                        <CredenzaTitle>{errorCopy.title}</CredenzaTitle>
                         <CredenzaDescription>
-                            Error code: {result?.errorCode}
+                            {errorCopy.description}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <p className={'text-sm text-muted-foreground'}>
-                            {result?.errorMessage}
-                        </p>
+                        <details className={'group/details'}>
+                            <summary
+                                className={
+                                    'flex cursor-pointer list-none items-center gap-1 text-sm text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden'
+                                }
+                            >
+                                <IconChevronRight
+                                    className={
+                                        'size-3.5 transition-transform group-open/details:rotate-90'
+                                    }
+                                />
+                                Technical details
+                            </summary>
+                            <p
+                                className={
+                                    'mt-2 font-mono text-xs leading-relaxed break-words text-muted-foreground'
+                                }
+                            >
+                                {result?.errorMessage}
+                            </p>
+                        </details>
                     </CredenzaBody>
                     <CredenzaFooter>
                         <CredenzaClose asChild>

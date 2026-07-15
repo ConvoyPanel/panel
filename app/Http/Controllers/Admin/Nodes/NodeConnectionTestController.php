@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin\Nodes;
 
-use App\Data\Node\Testing\ConnectionResultData;
 use App\Http\Requests\Admin\Nodes\TestNodeConnectionRequest;
 use App\Models\Node;
 use App\Services\Nodes\NodeConnectionTestService;
@@ -16,6 +15,6 @@ class NodeConnectionTestController
         $node = new Node;
         $node->fill($request->validated());
 
-        return ConnectionResultData::from($this->service->handle($node));
+        return $this->service->handle($node);
     }
 }
