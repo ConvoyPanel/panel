@@ -5,7 +5,19 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-15 (session: **shared DataTable empty states + admin dashboard Nodes card completed** —
+Last updated: 2026-07-15 (session: **IPAM mobile rows + a shared title-truncation fix completed** — the four
+IPAM collections (global groups, address-block list, attached nodes, address list within a block) were the last
+DataTables with no `mobileRow`, so below `@md` they fell back to horizontally scrolling desktop tables; each now
+renders the established muted `Item` row, and their `actionsColumn` callbacks are hoisted into shared
+`renderActions` helpers so the two representations can't drift. Verification turned up a **real latent bug that
+also affected admin Servers, admin Nodes, node Servers, and node IPAM**: `buttonVariants` is `inline-flex
+shrink-0`, so `truncate` on a title `Link` neither shrinks it inside `ItemTitle`'s flex row nor ellipsises its
+text — long names escaped the row and were clipped mid-word by `ItemContent`'s `overflow-x-hidden`, with **no
+page overflow to make it visible**. All sites fixed; the trap is written up at the top of
+[frontend-overhaul-audit.md](frontend-overhaul-audit.md). Browser-verified at desktop + 390px against seeded
+data (mobile `Item` rows vs desktop table, zero horizontal overflow, row menus correct + focus returns to the
+trigger on Escape, long node name ellipsises). `tc` + build green; main JS unchanged at 378.69 kB. — prior:
+**shared DataTable empty states + admin dashboard Nodes card completed** —
 DataTable now distinguishes an unfiltered empty collection (contextual `emptyState`, which replaces the whole
 table and carries the create action) from a filtered no-results state (shared `DataTableFilteredEmpty` with a
 Clear filters action inside the still-usable shell); the toolbar Reset now also tracks the search query, not
