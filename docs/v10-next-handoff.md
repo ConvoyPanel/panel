@@ -64,11 +64,22 @@ highlights, Escape closes only the select, 2nd Escape closes the dialog.
   ONE backdrop**, titles `["Authenticator","Authorization Required"]`, parent `data-nested-dialog-open` with
   `--nested-dialogs: 1`; after confirming → 1 dialog, `--nested-dialogs: 0`, **parent never unmounted**, and the
   backdrop count **never leaves 1** (it was 1→0→1 before — that was the flash). No console errors.
-- **Still unverified:** the **passkey** tab of the gate, and the Authenticator *step* dialogs
-  (enable → recovery-codes, disable, reset-recovery-codes) — only the password path was driven. The passkey tab
-  is drivable with a **Playwright CDP virtual authenticator**, already proven in this repo end-to-end (19/19
-  steps) *including* the `ConfirmableIdentityController` re-auth path this gate uses; see the passkey entry
-  below. Enabling the authenticator needs a real TOTP code.
+- **Passkey path of the gate — ALSO VERIFIED (2026-07-15)** with a Playwright **CDP virtual authenticator**
+  (`WebAuthn.addVirtualAuthenticator`, ctap2/internal/resident-key/UV). Full round trip: Passkeys → gate
+  (2 dialogs / **1 backdrop**) → password confirm → **real passkey registration** → the **nested Rename Passkey
+  dialog** opens inside Passkeys (2 dialogs / 1 backdrop / `--nested-dialogs: 1`) → rename saves with **zero API
+  failures** → identity cleared → gate reopened → **Passkey tab auto-confirms** → 1 dialog, `--nested-dialogs: 0`.
+  ⚠️ **Requires the documented origin flip**: `config/app.php` hardcodes `'version' => 'canary'`, and
+  `ConfigureCeremonyStepManagerFactoryAction` then restricts origins to `localhost` on `local`+`canary`, while
+  ddev serves `https://convoy.ddev.site`. Temporarily set `version => 'production'` **and `ddev restart`**
+  (OPcache `validate_timestamps=0`), then revert + restart. Done and reverted; test passkey rows deleted.
+- ⚠️ **Latent bug spotted, NOT fixed (pre-existing):** `AuthDialog` has **two** `useEffect`s that each call
+  `form.handleSubmit(submit)()` when the type is Passkey — one keyed on the dialog opening, one on `type`
+  changing. Opening the gate with Passkey preselected fires the ceremony **twice**; the second attempt 403s on
+  an already-consumed challenge. The flow still succeeds (the first wins) and the toast is swallowed, which is
+  why nobody noticed. Collapse them into one effect when next in this file.
+- **Still unverified:** the Authenticator *step* dialogs (enable → recovery-codes, disable,
+  reset-recovery-codes) — enabling needs a real TOTP code.
 
 — prior: **repository layer removed + backups quota wired & verified + IPAM mobile rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
 backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.

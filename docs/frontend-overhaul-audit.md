@@ -146,8 +146,14 @@ shared destructive item variant.
 - [x] Add a size API rather than relying on one-off height overrides.
 - [x] Retain `h-auto` for intentionally rich, multi-line selectors.
 - [x] Update popup, viewport, scroll buttons, and items as one component family.
-- [ ] Browser-check keyboard navigation, typeahead, focus return, collision
-      handling, validation, and mobile dialogs.
+- [x] Browser-check keyboard navigation, typeahead, focus return, collision
+      handling, validation, and mobile dialogs. Done 2026-07-15 — and it found
+      two real bugs in Select-inside-a-dialog (Escape closed the whole dialog;
+      keyboard nav was dead because Radix's focus trap fought Base UI's portaled
+      popup). Both are fixed at the root by the Dialog/Drawer/Sheet migration to
+      Base UI; re-verified afterwards on the previously-broken `/admin/tokens`.
+      Plain-page selects: Enter opens, ArrowDown highlights, Escape closes, focus
+      returns to the trigger.
 - [x] Migrate to Base UI during this work if its interaction contract can be
       verified on the owning screens.
 
