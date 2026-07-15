@@ -42,7 +42,7 @@ const AuthenticatorMainDialog = () => {
                     </ResponsiveDialogDescription>
                 </ResponsiveDialogHeader>
 
-                <ResponsiveDialogBody className={'pb-4 md:pb-0'}>
+                <ResponsiveDialogBody>
                     <AuthenticatorStatus />
                 </ResponsiveDialogBody>
 

@@ -1,4 +1,5 @@
 import AuthenticatorStatusController from '@/wayfinder/actions/App/Http/Controllers/Client/AuthenticatorStatusController'
+import ConfirmedTwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/ConfirmedTwoFactorAuthenticationController'
 import RecoveryCodeController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/RecoveryCodeController'
 import TwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticationController'
 import TwoFactorQrCodeController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorQrCodeController'
@@ -36,6 +37,10 @@ const enableRoute =
 const disableRoute =
     TwoFactorAuthenticationController.destroy[
         '/api/client/account/authenticator/disable'
+    ]
+const confirmRoute =
+    ConfirmedTwoFactorAuthenticationController.store[
+        '/api/client/account/authenticator/confirm'
     ]
 
 export const isAuthenticatorEnabled = async (): Promise<boolean> => {
@@ -99,6 +104,14 @@ export const useRecoveryCodes = (enabled = true) =>
 
 export const enableAuthenticator = async (force?: boolean): Promise<void> => {
     await apiFetch(enableRoute(), { body: { force } })
+}
+
+/**
+ * Proves the user scanned the secret. Until this lands the secret exists but
+ * two factor is not enabled, so an abandoned setup never gates their next login.
+ */
+export const confirmAuthenticator = async (code: string): Promise<void> => {
+    await apiFetch(confirmRoute(), { body: { code } })
 }
 
 export const disableAuthenticator = async (): Promise<void> => {

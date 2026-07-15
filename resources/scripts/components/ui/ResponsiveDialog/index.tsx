@@ -132,7 +132,11 @@ const ResponsiveDialogFooter = (props: SlotProps) => {
 const ResponsiveDialogBody = ({ className, ...props }: SlotProps) => (
     <div
         data-slot={'responsive-dialog-body'}
-        className={cn('px-4 md:px-0', className)}
+        // The drawer popup has no padding of its own, so the body supplies it
+        // and needs the bottom inset too — without it the last row sits flush
+        // against the footer bar. On desktop the popup's own `p-4` and `gap-4`
+        // already do this, hence md:pb-0.
+        className={cn('px-4 pb-4 md:px-0 md:pb-0', className)}
         {...props}
     />
 )

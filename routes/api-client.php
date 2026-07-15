@@ -6,6 +6,7 @@ use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use App\Http\Middleware\DenyApiTokenAccess;
 use App\Http\Middleware\RequireIdentityConfirmation;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\ConfirmedTwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\RecoveryCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
@@ -78,7 +79,9 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
         ->group(function () {
             Route::post('/enable', [TwoFactorAuthenticationController::class, 'store']);
             Route::post('/disable', [TwoFactorAuthenticationController::class, 'destroy']);
-            // Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
+            // Proves the user actually scanned the secret. `enable` only mints
+            // it; nothing is enabled until a generated code lands here.
+            Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
             Route::get('/qr-code', [TwoFactorQrCodeController::class, 'show']);
             Route::get('/secret-key', [TwoFactorSecretKeyController::class, 'show']);
             Route::get('/recovery-codes', [RecoveryCodeController::class, 'index']);

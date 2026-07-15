@@ -133,7 +133,15 @@ return [
 
     'features' => [
         Features::twoFactorAuthentication([
-            'confirm' => false,
+            // Require a generated code before two factor counts as enabled.
+            // Enabling mints the secret as soon as the setup dialog opens, so
+            // with this off a user who opened it and walked away — or who never
+            // finished scanning — still had `two_factor_secret` set, which is
+            // all `hasEnabledTwoFactorAuthentication()` looked at. Their next
+            // login then demanded a code from an authenticator they never
+            // configured. With confirm on, an unfinished setup leaves
+            // `two_factor_confirmed_at` null and is simply inert.
+            'confirm' => true,
             'confirmPassword' => true,
             'window' => 30,
         ]),
