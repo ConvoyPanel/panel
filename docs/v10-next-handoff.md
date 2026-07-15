@@ -5,8 +5,67 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-15 (session: **repository layer removed + backups quota wired & verified + IPAM mobile
-rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
+Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
+IPAM mobile rows**.
+
+## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
+
+**`vaul` and `@radix-ui/react-dialog` are UNINSTALLED. `Credenza` is GONE → `ResponsiveDialog`.**
+Main JS **378.75 → 359.42 kB** (gzip 115.92 → 109.18).
+
+**Why (don't undo this):** two bugs existed on every Select-inside-a-dialog, reproduced on `/admin/tokens` — a
+screen that session never touched (both token UIs were *build/type-verified only, never clicked*, which is
+exactly why they were missed):
+1. **Escape closed the whole dialog**, discarding the user's form.
+2. **Keyboard nav was dead** — focus never entered the popup, so arrows/typeahead did nothing. Mouse-only.
+
+One root cause: **Radix Dialog + Base UI Select are two dismissal/focus systems.** Base UI portals its popup
+*outside* the dialog, so Radix's focus trap pulls focus back; and both listen for Escape on document in the
+**capture** phase, Radix first, whose only cancel lever (`defaultPrevented`) Base UI *also* respects. **No shim
+leaves both libraries' handlers intact** — two were tried and both made it worse (one made Escape do nothing).
+Migrating removed the whole class of bug with **zero shim code**. Verified: focus enters the popup, ArrowDown
+highlights, Escape closes only the select, 2nd Escape closes the dialog.
+
+- **Drawer:** Base UI ships a **first-party Drawer, stable since 1.3.0** — we were already on 1.6.0 with it
+  unused. No need to rebuild vaul or use the `vaul-base` community port. This is also where shadcn's own drawer
+  went ("The drawer component now uses Base UI instead of Vaul"), and their migration guide prescribes the same
+  `asChild` → `render` swap.
+- **`Credenza` → `ResponsiveDialog`** (`components/ui/ResponsiveDialog`). The *concept* was right (it is what
+  shadcn documents: Dialog desktop / Drawer mobile) but all **eight** parts called `useMediaQuery` — eight
+  subscriptions to one breakpoint. Now resolved **once** at the root via context; both families being Base UI
+  means every part is a plain alias with **no adapter**.
+- **`asChild` → `render` across 47 files.** Base UI composes via `render`. Prefer `render={<Button/>}`.
+  ⚠️ The state-*function* forms of `className`/`render` differ between Dialog and Drawer (Dialog has
+  `nestedDialogOpen`, Drawer has swipe state), so `ResponsiveDialog` narrows them to string/element. Use the
+  underlying family directly if you need state-driven styling.
+- ⚠️ **Base UI attributes are not Radix's** — see the mapping table in
+  [frontend-overhaul-audit.md](frontend-overhaul-audit.md). `data-starting-style`/`data-ending-style` replace
+  `data-[state=open]/[state=closed]`; a ported Radix selector compiles clean and **silently never matches**.
+- **Remaining Radix:** `Accordion` (prefer the new Base UI `Collapsible` for single disclosures),
+  `react-icons`, `label`, `scroll-area`, `slot`, `tooltip`, `alert-dialog`.
+
+**NEXT UP — rewrite `hooks/create-modal-store.ts` on real nested dialogs** (decided with the maintainer
+2026-07-15; groundwork landed in `a7578f40`). The store keeps **one** `activeModal`; opening another sets it to
+`null`, waits a hardcoded **`setTimeout(250)`**, then mounts the next — **that unmount/remount IS the backdrop
+flash**, and the timeout exists only to hide the seam. It hand-rolls a `modalQueue` + `middleware`
+(`shouldContinue()` + fallback id) + `backOutFromMiddleware` to gate the security page behind
+`AuthDialog`.
+- **Decision: use Base UI's real nested dialogs.** A `<Dialog.Root>` inside another dialog's content.
+  **Base UI renders NO backdrop for the child** ("so you can present the parent dialog in a clean way behind
+  the one on top") — so there is one backdrop, no stacking, and **nothing to flash**. The parent signals depth
+  instead: `DialogContent` now scales back per `--nested-dialogs` via `data-nested-dialog-open` (`a7578f40`).
+  (An "one dialog, swap the content" alternative was proposed and rejected by the maintainer — build nested.)
+- **Scope:** `hooks/create-modal-store.ts` (drop `middleware`/`modalQueue`/`backOutFromMiddleware`/the 250ms),
+  `components/ui/Dialog/AuthDialog.tsx` (+`createAuthMiddleware`), `features/account/components/`
+  `AuthenticatorContainer.tsx` (mounts **6** dialogs at once) and `PasskeysContainer.tsx`, plus the
+  Authenticator step dialogs. The **other six** stores (ipam ×3, nodes ×2, template-groups, locations) use the
+  store *without* middleware — they are just "open edit/delete for row X" and are NOT part of this flow.
+- **It IS testable — do not defer for lack of a harness.** The password tab needs only the account password;
+  the passkey tab is drivable with a **Playwright CDP virtual authenticator**, which this repo has already
+  proven end-to-end (19/19 steps) *including* the `ConfirmableIdentityController` re-auth path this gate uses.
+  See the passkey entry below.
+
+— prior: **repository layer removed + backups quota wired & verified + IPAM mobile rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
 backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
 
 **Backups quota is now BROWSER-VERIFIED (2026-07-15).** Seeded 3 good backups (4 GiB + 2.5 GiB + 1 GiB) plus
