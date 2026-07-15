@@ -115,7 +115,10 @@
     }
 
     html {
-        @apply h-full w-full;
+        /* Paint the root too, not just body: macOS rubber-band overscroll
+           reveals the html element's background, which otherwise falls back to
+           the browser default (black) and flashes behind sheets/dialogs. */
+        @apply bg-background h-full w-full;
     }
 
     body {

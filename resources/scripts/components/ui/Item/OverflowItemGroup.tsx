@@ -47,14 +47,24 @@ const OverflowItemGroup = ({ rows, max = 3, title, className }: Props) => {
             )}
 
             <Sheet open={open} onOpenChange={setOpen}>
+                {/* Keep the fixed sheet element itself non-scrolling and scroll
+                    an inner div instead. On macOS Chrome, overscrolling a
+                    `position: fixed` scroll container elastically translates the
+                    whole element, revealing the dark overlay behind it. Bouncing
+                    an inner child keeps the overscroll inside the sheet's own
+                    background. */}
                 <SheetContent
                     side='right'
-                    className='w-full overflow-y-auto sm:max-w-md'
+                    /* Header uses py-4; the shared close button sits at top-4, so
+                       nudge it to the header's vertical center. */
+                    className='flex w-full flex-col overflow-hidden p-0 sm:max-w-md [&>button]:top-[1.375rem]'
                 >
-                    <SheetHeader>
+                    <SheetHeader className='border-b px-6 py-4'>
                         <SheetTitle>{title}</SheetTitle>
                     </SheetHeader>
-                    <ItemGroup className='mt-4 gap-3'>{rows}</ItemGroup>
+                    <div className='flex-1 overflow-y-auto overscroll-contain px-6 py-4 mask-[linear-gradient(to_bottom,transparent,black_1rem,black_calc(100%-1rem),transparent)]'>
+                        <ItemGroup className='gap-3'>{rows}</ItemGroup>
+                    </div>
                 </SheetContent>
             </Sheet>
         </>
