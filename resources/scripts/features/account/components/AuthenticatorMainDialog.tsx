@@ -1,8 +1,13 @@
-import { useShallow } from 'zustand/react/shallow'
+import { useState } from 'react'
 
 import AuthSetting from '@/features/account/components/AuthSetting.tsx'
-import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import AuthenticatorDisableDialog from '@/features/account/components/AuthenticatorDisableDialog.tsx'
+import AuthenticatorEnableDialog from '@/features/account/components/AuthenticatorEnableDialog.tsx'
+import AuthenticatorRecoveryCodesDialog from '@/features/account/components/AuthenticatorRecoveryCodesDialog.tsx'
+import AuthenticatorResetRecoveryCodesDialog from '@/features/account/components/AuthenticatorResetRecoveryCodesDialog.tsx'
 import AuthenticatorStatus from '@/features/account/components/AuthenticatorStatus.tsx'
+
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
 
 import {
     ResponsiveDialog,
@@ -15,24 +20,10 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 
 const AuthenticatorMainDialog = () => {
-    const [open, openModal, closeModal] = useAuthenticatorModalStore(
-        useShallow(state => [
-            state.activeModal === 'main',
-            state.openModal,
-            state.closeModal,
-        ])
-    )
-
-    const handleOpenChange = (open: boolean) => {
-        if (open) {
-            openModal('main')
-        } else {
-            closeModal('main')
-        }
-    }
+    const [open, setOpen] = useState(false)
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
             <ResponsiveDialogTrigger
                 render={
                     <AuthSetting
@@ -54,6 +45,16 @@ const AuthenticatorMainDialog = () => {
                 <ResponsiveDialogBody className={'pb-4 md:pb-0'}>
                     <AuthenticatorStatus />
                 </ResponsiveDialogBody>
+
+                {/* Nested inside the parent's content on purpose: Base UI gives
+                    these no backdrop of their own, so the parent stays visible
+                    (scaled back) underneath instead of being torn down and
+                    rebuilt between steps. */}
+                <AuthDialog onCancel={() => setOpen(false)} />
+                <AuthenticatorEnableDialog />
+                <AuthenticatorDisableDialog />
+                <AuthenticatorRecoveryCodesDialog />
+                <AuthenticatorResetRecoveryCodesDialog />
             </ResponsiveDialogContent>
         </ResponsiveDialog>
     )

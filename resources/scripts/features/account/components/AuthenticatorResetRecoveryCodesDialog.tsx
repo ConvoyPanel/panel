@@ -18,11 +18,11 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 
 const AuthenticatorResetRecoveryCodesDialog = () => {
-    const [open, closeModal, pushToQueue] = useAuthenticatorModalStore(
+    const [open, closeModal, openModal] = useAuthenticatorModalStore(
         useShallow(state => [
             state.activeModal === 'reset-recovery-codes',
             state.closeModal,
-            state.pushToQueue,
+            state.openModal,
         ])
     )
 
@@ -32,9 +32,9 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
 
             toast.success('Recovery codes reset')
 
-            pushToQueue('recovery-codes')
-
-            closeModal('reset-recovery-codes')
+            // openModal replaces the active step, so this both closes this
+            // dialog and reveals the freshly generated codes.
+            openModal('recovery-codes')
         } catch (e) {
             toast.error('Failed to reset recovery codes')
             throw e

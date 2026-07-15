@@ -23,12 +23,8 @@ import { ResponsiveDialogFooter } from '@/components/ui/ResponsiveDialog'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const AuthenticatorEnableDialog = () => {
-    const [open, closeModal, pushToQueue] = useAuthenticatorModalStore(
-        useShallow(state => [
-            state.activeModal === 'enable',
-            state.closeModal,
-            state.pushToQueue,
-        ])
+    const [open, openModal] = useAuthenticatorModalStore(
+        useShallow(state => [state.activeModal === 'enable', state.openModal])
     )
     const queryClient = useQueryClient()
     const [setupReady, setSetupReady] = useState(false)
@@ -70,8 +66,9 @@ const AuthenticatorEnableDialog = () => {
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {
-            pushToQueue('recovery-codes')
-            closeModal('enable')
+            // openModal replaces the active step, so this both closes 'enable'
+            // and reveals the codes — no queue involved.
+            openModal('recovery-codes')
         }
     }
 

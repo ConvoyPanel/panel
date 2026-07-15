@@ -1,4 +1,3 @@
-import { ModalStore } from '@/hooks/create-modal-store.ts'
 import usePasskeyConfirmation from '@/hooks/use-passkey-confirmation.ts'
 import useIdentityConfirmationStore, {
     ConfirmationType,
@@ -34,28 +33,32 @@ const schema = z.object({
 })
 
 interface Props {
-    selector?: string
-    useModalStore: ModalStore<any, any>
+    /**
+     * Dismissing the gate has to close the flow it guards — otherwise the user is
+     * left looking at settings they never authenticated for.
+     */
+    onCancel: () => void
 }
 
-export const createAuthMiddleware = <T extends string>(id: T) => ({
-    id,
-    shouldContinue: () =>
-        useIdentityConfirmationStore.getState().isIdentityValid(),
-})
-
-const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
+/**
+ * Identity gate, rendered INSIDE the dialog it guards so Base UI treats it as a
+ * nested dialog: the child gets no backdrop of its own, the parent stays mounted
+ * and visible (scaled back) underneath, and confirming just closes this one.
+ *
+ * The predecessor swapped the two dialogs through a modal queue — unmounting the
+ * parent, waiting 250ms, then mounting the gate — which is what made the backdrop
+ * flash.
+ */
+const AuthDialog = ({ onCancel }: Props) => {
     const [confirmationType, dispatchIdentityConfirmed] =
         useIdentityConfirmationStore(
             useShallow(state => [state.confirmationType, state.confirmIdentity])
         )
     const { confirm: confirmWithPasskey } = usePasskeyConfirmation()
-    const [isAuthDialogOpen, back, closeModal] = useModalStore(
-        useShallow(state => [
-            state.activeModal === selector,
-            state.backOutFromMiddleware,
-            state.closeModal,
-        ])
+    // Open precisely while identity is unconfirmed; confirming flips this false
+    // and reveals the parent underneath. No imperative close needed.
+    const isAuthDialogOpen = useIdentityConfirmationStore(state =>
+        !state.isIdentityValid()
     )
 
     const form = useForm({
@@ -96,8 +99,6 @@ const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
             }
 
             dispatchIdentityConfirmed(data.type)
-
-            closeModal(selector)
         } catch (e) {
             if (handleFormErrors(e, form.setError)) return
 
@@ -113,7 +114,7 @@ const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
     return (
         <ResponsiveDialog
             open={isAuthDialogOpen}
-            onOpenChange={open => !open && back(selector)}
+            onOpenChange={open => !open && onCancel()}
         >
             <ResponsiveDialogContent className={'max-h-[50vh]'}>
                 <ResponsiveDialogHeader className={'overflow-x-hidden'}>

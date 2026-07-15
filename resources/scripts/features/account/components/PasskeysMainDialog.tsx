@@ -1,7 +1,7 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { startRegistration } from '@simplewebauthn/browser'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
 
 import {
     getRegistrationOptions,
@@ -9,8 +9,12 @@ import {
 } from '@/features/account/passkeys/api.ts'
 
 import AuthSetting from '@/features/account/components/AuthSetting.tsx'
+import PasskeyDeleteDialog from '@/features/account/components/PasskeyDeleteDialog.tsx'
 import PasskeyList from '@/features/account/components/PasskeyList.tsx'
+import PasskeyRenameDialog from '@/features/account/components/PasskeyRenameDialog.tsx'
 import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
+
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -26,14 +30,9 @@ import {
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
 
-const PasskeysContainer = () => {
-    const [isMainDialogOpen, openModal, closeModal] = usePasskeysModalStore(
-        useShallow(state => [
-            state.activeModal === 'main',
-            state.openModal,
-            state.closeModal,
-        ])
-    )
+const PasskeysMainDialog = () => {
+    const [isMainDialogOpen, setMainDialogOpen] = useState(false)
+    const openModal = usePasskeysModalStore(state => state.openModal)
 
     const [state, register] = useAsyncFunction(async () => {
         try {
@@ -57,16 +56,11 @@ const PasskeysContainer = () => {
         }
     })
 
-    const handleOpenChange = (open: boolean) => {
-        if (open) {
-            openModal('main')
-        } else {
-            closeModal('main')
-        }
-    }
-
     return (
-        <ResponsiveDialog open={isMainDialogOpen} onOpenChange={handleOpenChange}>
+        <ResponsiveDialog
+            open={isMainDialogOpen}
+            onOpenChange={setMainDialogOpen}
+        >
             <ResponsiveDialogTrigger
                 render={
                     <AuthSetting
@@ -120,9 +114,15 @@ const PasskeysContainer = () => {
                         Add passkey
                     </Button>
                 </ResponsiveDialogFooter>
+                {/* Nested inside the parent's content: Base UI gives these no
+                    backdrop of their own, so the parent stays visible (scaled
+                    back) underneath rather than being torn down between steps. */}
+                <AuthDialog onCancel={() => setMainDialogOpen(false)} />
+                <PasskeyRenameDialog />
+                <PasskeyDeleteDialog />
             </ResponsiveDialogContent>
         </ResponsiveDialog>
     )
 }
 
-export default PasskeysContainer
+export default PasskeysMainDialog

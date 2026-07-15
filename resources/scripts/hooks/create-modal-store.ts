@@ -1,27 +1,23 @@
 import { StoreApi, UseBoundStore, create } from 'zustand'
 
+/**
+ * Tracks which modal of a family is open, plus the row it was opened for.
+ *
+ * Deliberately has no queue, no middleware and no transition delay. The previous
+ * version simulated a modal stack: opening a second modal set `activeModal` to
+ * null, waited a hardcoded 250ms, then mounted the next — that unmount/remount
+ * is what made the backdrop flash, and the delay existed only to hide the seam.
+ *
+ * Anything that needs one modal *on top of* another is a nested dialog now:
+ * render a `<ResponsiveDialog>` inside another dialog's content. Base UI gives
+ * the child no backdrop of its own, so the parent stays visible underneath and
+ * there is nothing to flash.
+ */
 export interface ModalState<ModalData, ModalIdentifier extends string> {
-    modalQueue: ModalIdentifier[]
     activeModal: ModalIdentifier | null
     modalData: ModalData | null
     openModal: (modal: ModalIdentifier, data?: ModalData) => void
     closeModal: (modal: ModalIdentifier) => void
-    backOutFromMiddleware: (middlewareId: ModalIdentifier) => void
-    pushToQueue: (modal: ModalIdentifier) => void
-}
-
-export interface ModalConfig<ModalIdentifier extends string> {
-    middleware: ModalMiddleware<ModalIdentifier>
-}
-
-export type ModalConfigs<ModalIdentifier extends string> = Partial<
-    Record<ModalIdentifier, ModalConfig<ModalIdentifier>>
->
-
-export interface ModalMiddleware<ModalIdentifier extends string> {
-    // ID here is the fallback modal to show if shouldContinue() is false
-    id: ModalIdentifier
-    shouldContinue: () => boolean
 }
 
 export type ModalStore<
@@ -29,110 +25,21 @@ export type ModalStore<
     ModalIdentifier extends string,
 > = UseBoundStore<StoreApi<ModalState<ModalData, ModalIdentifier>>>
 
-const createModalStore = <ModalData, ModalIdentifier extends string>(
-    modalConfigs?: ModalConfigs<ModalIdentifier>,
-    transitionDelay: number = 250
-) => {
-    return create<ModalState<ModalData, ModalIdentifier>>((set, get) => ({
-        modalQueue: [],
+const createModalStore = <ModalData, ModalIdentifier extends string>() =>
+    create<ModalState<ModalData, ModalIdentifier>>((set, get) => ({
         activeModal: null,
         modalData: null,
-        openModal: (modal, data) => {
-            if (get().modalQueue.includes(modal)) {
-                return
-            }
-
-            const middleware = modalConfigs?.[modal]?.middleware
-            const hasActiveModal = Boolean(get().activeModal)
-
-            if (middleware && !middleware.shouldContinue()) {
-                // Middleware says we cannot continue, queue fallback modal + requested modal
-                if (hasActiveModal) {
-                    set({ activeModal: null })
-                }
-
-                setTimeout(
-                    () => {
-                        set(state => ({
-                            modalQueue: [
-                                ...state.modalQueue,
-                                modal,
-                                middleware.id,
-                            ],
-                            activeModal: middleware.id,
-                            modalData: data ?? state.modalData,
-                        }))
-                    },
-                    hasActiveModal ? transitionDelay : 0
-                )
-
-                return
-            }
-
-            // Otherwise, normal flow
-            if (hasActiveModal) {
-                set({ activeModal: null })
-            }
-
-            setTimeout(
-                () => {
-                    set(state => ({
-                        modalQueue: [...state.modalQueue, modal],
-                        activeModal: modal,
-                        modalData: data || state.modalData,
-                    }))
-                },
-                hasActiveModal ? transitionDelay : 0
-            )
-        },
+        openModal: (modal, data) =>
+            set(state => ({
+                activeModal: modal,
+                modalData: data ?? state.modalData,
+            })),
         closeModal: modal => {
-            if (get().activeModal !== modal) {
-                return
-            }
+            // Ignore a stale close from a modal that is no longer the active one.
+            if (get().activeModal !== modal) return
 
             set({ activeModal: null })
-
-            setTimeout(() => {
-                set(state => {
-                    const updatedQueue = state.modalQueue.slice(0, -1)
-
-                    return {
-                        modalQueue: updatedQueue,
-                        activeModal: updatedQueue[updatedQueue.length - 1],
-                    }
-                })
-            }, transitionDelay)
-        },
-        backOutFromMiddleware: middlewareId => {
-            if (get().activeModal !== middlewareId) {
-                return
-            }
-
-            set({ activeModal: null })
-            setTimeout(() => {
-                set(state => {
-                    // Remove the top two modals: the fallback modal and the requested modal
-                    const updatedQueue = state.modalQueue.slice(0, -2)
-
-                    return {
-                        modalQueue: updatedQueue,
-                        activeModal: updatedQueue[updatedQueue.length - 1],
-                    }
-                })
-            }, transitionDelay)
-        },
-        pushToQueue: modal => {
-            set(state => {
-                const queue = [...state.modalQueue]
-                if (queue.length >= 2) {
-                    queue.splice(queue.length - 1, 0, modal)
-                } else {
-                    queue.push(modal)
-                }
-                return { modalQueue: queue }
-            })
         },
     }))
-}
 
 export default createModalStore
