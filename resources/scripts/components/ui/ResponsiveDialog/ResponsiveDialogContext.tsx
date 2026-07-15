@@ -31,9 +31,17 @@ export const ResponsiveDialogProvider = ({
 }: {
     children: ReactNode
 }) => {
-    // `initializeWithValue: false` keeps the first paint deterministic; mantine
-    // resolves the real match on mount.
-    const isDesktop = useMediaQuery(DESKTOP_QUERY, false)
+    // Resolve the match synchronously on the first render. Mantine defaults to
+    // `getInitialValueInEffect: true`, which returns the `false` initial value
+    // until a mount effect runs — so on desktop every dialog rendered as a
+    // Drawer for one paint and then swapped to a Dialog. Drawer and Dialog are
+    // different component types, so that swap remounts the whole subtree: it
+    // replayed the enter transitions and re-created the child's Base UI store,
+    // which is what made a nested gate intermittently miss its parent's
+    // DialogRootContext and render its own backdrop over the parent.
+    const isDesktop = useMediaQuery(DESKTOP_QUERY, false, {
+        getInitialValueInEffect: false,
+    })
 
     return (
         <ResponsiveDialogContext.Provider value={isDesktop}>

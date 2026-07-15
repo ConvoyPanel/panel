@@ -21,7 +21,9 @@ const DrawerContent = ({
             <DrawerPrimitive.Popup
                 data-slot={'drawer-content'}
                 className={cn(
-                    'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background',
+                    // Surface matches the nova dialog popup: rounded-xl on
+                    // bg-popover with a flat ring instead of a border.
+                    'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl bg-popover text-sm text-popover-foreground ring-1 ring-foreground/10',
                     'translate-y-[calc(var(--drawer-snap-point-offset,0px)+var(--drawer-swipe-movement-y,0px))]',
                     'transition-transform duration-300 data-ending-style:translate-y-full data-starting-style:translate-y-full',
                     // Follow the finger 1:1 mid-gesture.

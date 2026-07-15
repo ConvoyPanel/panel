@@ -75,7 +75,10 @@ const SelectContent = ({
     sideOffset = 4,
     align = 'center',
     alignOffset = 0,
-    alignItemWithTrigger = false,
+    // nova's default: the popup overlays the trigger with the selected item
+    // sitting on top of it, the way a native select behaves. Pass `false` for a
+    // menu that drops below the trigger instead.
+    alignItemWithTrigger = true,
     ...props
 }: SelectContentProps) => (
     <SelectPrimitive.Portal>
@@ -97,7 +100,15 @@ const SelectContent = ({
                 {...props}
             >
                 <SelectScrollUpButton />
-                <SelectPrimitive.List>{children}</SelectPrimitive.List>
+                {/* Upstream leaves List unpadded and gets the inset from
+                    SelectGroup's `p-1`, but every consumer here puts SelectItems
+                    straight into the list, so without this the rows run
+                    edge-to-edge and the item's rounded focus ring has nothing to
+                    sit inside. SelectGroup keeps its own `p-1` for the grouped
+                    case; nothing nests the two today. */}
+                <SelectPrimitive.List className={'p-1'}>
+                    {children}
+                </SelectPrimitive.List>
                 <SelectScrollDownButton />
             </SelectPrimitive.Popup>
         </SelectPrimitive.Positioner>

@@ -6,6 +6,8 @@ import {
     DialogClose,
     DialogContent,
     DialogDescription,
+    DialogFooter,
+    DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/Dialog'
@@ -14,6 +16,8 @@ import {
     DrawerClose,
     DrawerContent,
     DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
 } from '@/components/ui/Drawer'
@@ -109,37 +113,20 @@ interface SlotProps {
     children?: ReactNode
 }
 
-const ResponsiveDialogHeader = ({ className, ...props }: SlotProps) => {
-    const isDesktop = useIsDesktopDialog()
+// Header and footer pick a side the same way every other part here does. They
+// used to inline their own copies of the two families' classes, which meant the
+// nova footer bar existed verbatim in both DialogFooter and this file — two
+// places to keep in sync for one look. The Dialog/Drawer parts own the values.
+const ResponsiveDialogHeader = (props: SlotProps) => {
+    const Header = useIsDesktopDialog() ? DialogHeader : DrawerHeader
 
-    return (
-        <div
-            data-slot={'responsive-dialog-header'}
-            className={cn(
-                'flex flex-col gap-1.5',
-                isDesktop ? 'text-left' : 'p-4 text-center',
-                className
-            )}
-            {...props}
-        />
-    )
+    return <Header {...props} />
 }
 
-const ResponsiveDialogFooter = ({ className, ...props }: SlotProps) => {
-    const isDesktop = useIsDesktopDialog()
+const ResponsiveDialogFooter = (props: SlotProps) => {
+    const Footer = useIsDesktopDialog() ? DialogFooter : DrawerFooter
 
-    return (
-        <div
-            data-slot={'responsive-dialog-footer'}
-            className={cn(
-                isDesktop
-                    ? 'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'
-                    : 'mt-auto flex flex-col gap-2 p-4',
-                className
-            )}
-            {...props}
-        />
-    )
+    return <Footer {...props} />
 }
 
 const ResponsiveDialogBody = ({ className, ...props }: SlotProps) => (

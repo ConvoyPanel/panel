@@ -6,7 +6,9 @@ const DrawerHeader = ({
     ...props
 }: HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn('grid gap-1.5 p-4 text-center md:text-left', className)}
+        data-slot={'drawer-header'}
+        // Matches the nova DialogHeader stack; left-aligned at every width.
+        className={cn('flex flex-col gap-2 p-4 text-left', className)}
         {...props}
     />
 )

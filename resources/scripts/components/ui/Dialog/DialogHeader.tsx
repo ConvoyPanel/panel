@@ -6,10 +6,11 @@ const DialogHeader = ({
     ...props
 }: HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn(
-            'flex flex-col space-y-1.5 text-center sm:text-left',
-            className
-        )}
+        data-slot={'dialog-header'}
+        // Values from the create-page default (base + style "nova"): a plain
+        // gap-2 stack. nova left-aligns at every width — the old
+        // `text-center sm:text-left` was shadcn's pre-nova mobile treatment.
+        className={cn('flex flex-col gap-2', className)}
         {...props}
     />
 )
