@@ -225,11 +225,18 @@ patterns:
 
 ### Server subpage consistency
 
-- [ ] Replace residual `gap-5`/`gap-6` page spacing with the established responsive
-      `gap-2`/`gap-4` rhythm where no semantic exception exists.
-- [ ] Give Graphs a page-specific heading instead of reusing the Overview header.
-- [ ] Consolidate Backups heading/quota/list controls into the normal page rhythm.
-- [ ] Remove hardcoded backup quota presentation and wire the empty-state action.
+- [x] Replace residual `gap-5`/`gap-6` page spacing with the established responsive
+      `gap-2`/`gap-4` rhythm where no semantic exception exists. Server subpages
+      done; `Header`'s internal `gap-6` is component rhythm, not page spacing, and
+      was left alone.
+- [x] Give Graphs a page-specific heading instead of reusing the Overview header.
+      Now `Resource usage`. Note this also drops the power Toolbar from Graphs
+      (it came bundled in Overview's `Header`), matching every other subpage.
+- [x] Consolidate Backups heading/quota/list controls into the normal page rhythm.
+- [x] Remove hardcoded backup quota presentation and wire the empty-state action.
+      The quota was fully mocked; it now reads real limits plus a new `backupSize`
+      total. The empty-state action needed a create dialog built from scratch --
+      there was no create-backup UI anywhere.
 - [ ] Review Rebuild's isolated width and spacing model against sibling pages.
 
 ## Priority 2: responsive coverage
@@ -253,7 +260,8 @@ actions.
 
 ## Priority 2: Base UI follow-through
 
-Progress, Separator, and Tabs already use `@base-ui/react`. The following
+Progress, Separator, Tabs, Select, Checkbox, DropdownMenu, Popover, Toggle/
+ToggleGroup, and Collapsible already use `@base-ui/react`. The following
 families remain intentionally deferred because their composition and DOM
 contracts differ from Radix:
 
@@ -267,6 +275,28 @@ Migrate these opportunistically with their owning screen. Do not perform a blind
 package-level replacement. Each migration requires interaction tests for focus,
 keyboard behavior, dismissal, nested portals, mobile behavior, and accessible
 names/descriptions.
+
+⚠️ **Base UI's state attributes are not Radix's, and a wrong selector fails
+silently** — Tailwind never errors on a class that matches nothing, so a ported
+Radix selector compiles clean and simply never fires. Known mappings, each
+verified against the rendered DOM (`@base-ui/react` 1.6.0):
+
+| Component   | Radix                | Base UI                                        |
+|-------------|----------------------|------------------------------------------------|
+| Collapsible | `data-state=open`    | trigger `data-panel-open` (absent when closed); panel `data-open`/`data-closed` |
+| ToggleGroup | `data-horizontal`    | `data-orientation="horizontal"`                |
+
+The rule Base UI follows: its default state→attribute mapping emits a bare
+`data-<key>` only when the state value is boolean `true`, and stringifies
+otherwise (some components override this with a custom mapping — check
+`utils/*StateMapping` in the dist before assuming). **Verify against the DOM,
+not a green build.** The remaining Radix consumers are `Accordion` and the
+dormant `RadioGroup`; Base UI ships equivalents for both when their owning
+screens come up.
+
+The `Collapsible` primitive (`components/ui/Collapsible`) was added for the
+backups Advanced disclosure. Prefer it over `Accordion` for a single disclosure —
+it is Base UI, and it avoids adding a new Radix consumer.
 
 ## Intentional exceptions
 
