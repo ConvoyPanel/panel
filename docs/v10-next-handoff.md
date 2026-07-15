@@ -139,10 +139,19 @@ action in each of the empty and populated states; drawer at 390px with no overfl
   single disclosure. See the audit's Base UI section for the **attribute-mapping table** — Radix's
   `data-state=open` matches nothing on Base UI and fails silently.
 
-**Next up**, from [frontend-overhaul-audit.md](frontend-overhaul-audit.md): "Server subpage consistency" is
-**4 of 5 done** — only **review Rebuild's isolated width/spacing model** remains. Then the last unchecked
-responsive/primitive items: the dormant **`RadioGroup`** (still Radix — the audit says migrate it *before*
-adding consumers) and the remaining browser-check boxes under Textarea/Select.
+**The frontend-overhaul audit is now 62 done / 4 open**, and the 4 are deliberate:
+1. **Verify the admin server Disks tab against a live seeded node** — the only real task left. The disks
+   service/repo path was live-verified on PVE 9.2.2 back on 2026-07-08 (add/resize/remove, incl. the
+   orphaned-volume race), but **the tab has never been rendered in a browser against a live node**, and it
+   reads live Proxmox so a seeded fake node can't exercise it (`storage_to_node` is empty for the seeded
+   servers; they 409/`cURL error 6` before reaching PVE). Needs `DevNodeSeeder` + the real
+   `us-southeast-2.performave.com` node and a real VM — expensive, and it provisions on live hardware.
+2–4. Three "definition of done" lines left open on purpose: collection loading/empty/error behaviour and
+   mobile representations are true for every screen touched but **not audited exhaustively app-wide**, and the
+   flagship-verified line is gated on (1).
+
+Everything else in the audit is ticked **with how it was verified** — including accessible names, which were
+checked against the **real DOM** (zero unnamed icon-only controls across five pages), not by grep.
 
 **Repository removal (`85a6977a`, `84bb7bf8`)** — see the new **Design constraints** entry for the rule and
 its Proxmox carve-out. Deleted 846 lines for 69: `EloquentRepository` (~280 lines re-implementing Eloquent,
