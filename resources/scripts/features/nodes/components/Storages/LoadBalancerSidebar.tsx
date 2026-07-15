@@ -1,5 +1,11 @@
-import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
+import SortableStorageCard from '@/features/nodes/components/Storages/SortableStorageCard.tsx'
+import {
+    storageQueries,
+    updateBackupOrder,
+    useStorages,
+} from '@/features/nodes/storages/api.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
+import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import {
     DndContext,
     DragEndEvent,
@@ -13,22 +19,16 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { IconDatabase } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { useQueryClient } from '@tanstack/react-query'
-
-import {
-    updateBackupOrder,
-    useStorages,
-    storageQueries,
-} from '@/features/nodes/storages/api.ts'
-
-import SortableStorageCard from '@/features/nodes/components/Storages/SortableStorageCard.tsx'
-
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import {
     Sheet,
     SheetContent,
@@ -41,7 +41,7 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const LoadBalancerSidebar = () => {
     const { nodeId } = StorageRoute.useParams()
-    const { data: allStorages, isLoading } = useStorages()
+    const { data: allStorages, isLoading, isError, refetch } = useStorages()
     const queryClient = useQueryClient()
     const [draggingStorage, setDraggingStorage] = useState<NodeStorage | null>(
         null
@@ -151,11 +151,7 @@ const LoadBalancerSidebar = () => {
     return (
         <Sheet>
             <SheetTrigger
-                render={
-                    <Button variant={'outline'}>
-                        Load balancer
-                    </Button>
-                }
+                render={<Button variant={'outline'}>Load balancer</Button>}
             />
             <SheetContent side={'right'} className='flex flex-col'>
                 {' '}
@@ -171,7 +167,13 @@ const LoadBalancerSidebar = () => {
                 <div className='flex-grow overflow-y-auto py-4'>
                     {' '}
                     {/* Make content scrollable */}
-                    {isLoading ? (
+                    {isError && !allStorages ? (
+                        <Card>
+                            <CardContent>
+                                <CollectionErrorState onRetry={refetch} />
+                            </CardContent>
+                        </Card>
+                    ) : isLoading ? (
                         <div className={'flex flex-col gap-2 px-4 @md:gap-4'}>
                             {Array.from({ length: 4 }).map((_, index) => (
                                 <Skeleton

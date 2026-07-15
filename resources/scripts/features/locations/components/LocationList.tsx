@@ -1,11 +1,13 @@
+import { useLocations } from '@/features/locations/api.ts'
 import { Location } from '@/features/locations/types.ts'
 import { IconCheck, IconMapPin } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 
-import { useLocations } from '@/features/locations/api.ts'
-
 import { buttonVariants } from '@/components/ui/Button'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { Entity, EntityGroup } from '@/components/ui/Entity'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -17,13 +19,17 @@ interface Props {
 }
 
 const LocationList = ({ query, page, value, onSelect }: Props) => {
-    const { data, isLoading } = useLocations({
+    const { data, isLoading, isError, refetch } = useLocations({
         page,
         filters: { '*': query },
     })
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />
+    }
+
+    if (isError && !data) {
+        return <CollectionErrorState onRetry={refetch} />
     }
 
     if (!data || data.pagination.count === 0) {
@@ -42,13 +48,13 @@ const LocationList = ({ query, page, value, onSelect }: Props) => {
     }
 
     return (
-        <div className={'overflow-y-auto overflow-x-visible'}>
+        <div className={'overflow-x-visible overflow-y-auto'}>
             <EntityGroup className={'truncate'}>
                 {data.items.map(location => (
                     <Entity
                         key={location.id}
                         className={
-                            'group flex truncate data-[selected=true]:bg-foreground data-[selected=true]:text-background'
+                            'group data-[selected=true]:bg-foreground data-[selected=true]:text-background flex truncate'
                         }
                         onClick={() => onSelect(location)}
                         data-selected={value === location.id}
@@ -59,7 +65,7 @@ const LocationList = ({ query, page, value, onSelect }: Props) => {
                             </p>
                             <p
                                 className={
-                                    'truncate text-xs text-muted-foreground group-data-[selected=true]:text-muted/80'
+                                    'text-muted-foreground group-data-[selected=true]:text-muted/80 truncate text-xs'
                                 }
                             >
                                 {location.description}
@@ -67,7 +73,7 @@ const LocationList = ({ query, page, value, onSelect }: Props) => {
                         </div>
                         {value === location.id && (
                             <IconCheck
-                                className={'ml-auto mr-1 size-5 shrink-0'}
+                                className={'mr-1 ml-auto size-5 shrink-0'}
                             />
                         )}
                     </Entity>

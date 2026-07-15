@@ -1,19 +1,23 @@
+import Passkey from '@/features/account/components/Passkey.tsx'
+import { usePasskeys } from '@/features/account/passkeys/api.ts'
 import { IconKey } from '@tabler/icons-react'
 
-import { usePasskeys } from '@/features/account/passkeys/api.ts'
-
-import Passkey from '@/features/account/components/Passkey.tsx'
-
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState.tsx'
-
 const PasskeyList = () => {
-    const { data, isLoading } = usePasskeys()
+    const { data, isLoading, isError, refetch } = usePasskeys()
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />
+    }
+
+    if (isError && !data) {
+        return <CollectionErrorState onRetry={refetch} />
     }
 
     if (!data || data?.length === 0) {

@@ -1,15 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { IconDisc } from '@tabler/icons-react'
-import byteSize from 'byte-size'
-import { toast } from 'sonner'
-
 import {
+    type ServerMedia,
     mediaQueries,
     mountMedia,
     unmountMedia,
     useMedia,
-    type ServerMedia,
 } from '@/features/servers/media/api.ts'
+import { IconDisc } from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import byteSize from 'byte-size'
+import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -20,7 +19,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import {
     Item,
     ItemActions,
@@ -38,7 +40,7 @@ interface Props {
 
 const IsoLibraryCard = ({ uuid }: Props) => {
     const queryClient = useQueryClient()
-    const { data: media, isLoading } = useMedia(uuid)
+    const { data: media, isLoading, isError, refetch } = useMedia(uuid)
 
     const { mutate: toggle, isPending } = useMutation({
         mutationFn: (iso: ServerMedia) =>
@@ -61,7 +63,9 @@ const IsoLibraryCard = ({ uuid }: Props) => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading || !media ? (
+                {isError && !media ? (
+                    <CollectionErrorState onRetry={refetch} />
+                ) : isLoading || !media ? (
                     <Skeleton className={'h-32 w-full'} />
                 ) : media.length > 0 ? (
                     <OverflowItemGroup
@@ -81,7 +85,9 @@ const IsoLibraryCard = ({ uuid }: Props) => {
                                     <ItemMedia variant={'icon'}>
                                         <IconDisc />
                                     </ItemMedia>
-                                    <ItemContent className={'overflow-x-hidden'}>
+                                    <ItemContent
+                                        className={'overflow-x-hidden'}
+                                    >
                                         <ItemTitle className={'truncate'}>
                                             {iso.name}
                                             {iso.mounted && (

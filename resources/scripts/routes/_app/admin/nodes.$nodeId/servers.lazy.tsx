@@ -1,15 +1,11 @@
+import { ServerQueryParams, useServers } from '@/features/servers/admin/api.ts'
+import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
 import { IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-
-import {
-    ServerQueryParams,
-    useServers,
-} from '@/features/servers/admin/api.ts'
-import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -42,7 +38,8 @@ function NodeServers() {
             node_id: numericNodeId,
         },
     }
-    const { data, isPlaceholderData } = useServers(scopedQueryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useServers(scopedQueryParams)
 
     const columns: ColumnDef<Server>[] = [
         {
@@ -86,12 +83,16 @@ function NodeServers() {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const server = row.original
 
                     return (
                         <Item variant={'muted'} size={'sm'}>
-                            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                            <ItemContent
+                                className={'min-w-0 overflow-x-hidden'}
+                            >
                                 <ItemTitle className={'w-full min-w-0'}>
                                     {/* buttonVariants is inline-flex shrink-0, so
                                         `truncate` on the link itself neither shrinks
@@ -100,9 +101,11 @@ function NodeServers() {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
-                                        to={`/admin/servers/${server.id}` as string}
+                                        to={
+                                            `/admin/servers/${server.id}` as string
+                                        }
                                     >
                                         <span className={'truncate'}>
                                             {server.name}

@@ -19,7 +19,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -27,7 +30,7 @@ const SessionListCard = () => {
     const confirm = useConfirmationStore(state => state.confirm)
     const mutate = useQueryMutator<SessionType[]>(sessionQueries.all())
 
-    const { data: sessions, isLoading } = useSessions()
+    const { data: sessions, isLoading, isError, refetch } = useSessions()
 
     const { mutate: revoke } = useMutation({
         mutationFn: (session: SessionType) => revokeSession(session.id),
@@ -59,11 +62,13 @@ const SessionListCard = () => {
             </CardHeader>
             <CardContent
                 className={cn(
-                    (isLoading || sessions?.length === 0) &&
+                    (isLoading || isError || sessions?.length === 0) &&
                         'grid min-h-[12rem] place-items-center'
                 )}
             >
-                {isLoading || !sessions ? (
+                {isError && !sessions ? (
+                    <CollectionErrorState onRetry={refetch} />
+                ) : isLoading || !sessions ? (
                     <Skeleton className={'h-40 w-full'} />
                 ) : sessions.length > 0 ? (
                     <OverflowItemGroup

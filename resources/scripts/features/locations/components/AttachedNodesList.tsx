@@ -1,9 +1,11 @@
+import { useAttachedNodes } from '@/features/locations/api.ts'
 import { Location } from '@/features/locations/types.ts'
 import { IconServer } from '@tabler/icons-react'
 
-import { useAttachedNodes } from '@/features/locations/api.ts'
-
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { Entity, EntityGroup } from '@/components/ui/Entity'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -12,10 +14,14 @@ interface Props {
 }
 
 const AttachedNodesList = ({ location }: Props) => {
-    const { data, isLoading } = useAttachedNodes(location?.id)
+    const { data, isLoading, isError, refetch } = useAttachedNodes(location?.id)
 
     if (isLoading) {
         return <Skeleton className={'h-24 w-full'} />
+    }
+
+    if (isError && !data) {
+        return <CollectionErrorState onRetry={refetch} />
     }
 
     if (!data || data?.length === 0) {
@@ -33,7 +39,7 @@ const AttachedNodesList = ({ location }: Props) => {
             {data.map(node => (
                 <Entity className={'flex-col'} key={node.id}>
                     <p className={'text-sm'}>{node.displayName}</p>
-                    <p className={'text-xs text-muted-foreground'}>
+                    <p className={'text-muted-foreground text-xs'}>
                         {node.fqdn}
                     </p>
                 </Entity>

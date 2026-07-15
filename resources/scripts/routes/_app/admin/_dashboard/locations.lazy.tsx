@@ -1,20 +1,17 @@
-import createModalStore from '@/hooks/create-modal-store.ts'
-import useDataTable from '@/hooks/use-data-table.ts'
-import { Location } from '@/features/locations/types.ts'
-import { cn } from '@/utils'
-import { createLazyFileRoute } from '@tanstack/react-router'
-import { ColumnDef } from '@tanstack/react-table'
-import { useShallow } from 'zustand/react/shallow'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { PaginatedLocations } from '@/features/locations/types.ts'
-
 import { locationQueries, useLocations } from '@/features/locations/api.ts'
-
 import CreateLocationModal from '@/features/locations/components/CreateLocationModal.tsx'
 import DeleteLocationModal from '@/features/locations/components/DeleteLocationModal.tsx'
 import EditLocationModal from '@/features/locations/components/EditLocationModal.tsx'
 import ShowLocationModal from '@/features/locations/components/ShowLocationModal.tsx'
+import { Location } from '@/features/locations/types.ts'
+import { PaginatedLocations } from '@/features/locations/types.ts'
+import createModalStore from '@/hooks/create-modal-store.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { cn } from '@/utils'
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { ColumnDef } from '@tanstack/react-table'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -47,7 +44,8 @@ function LocationsIndex() {
         useShallow(state => state.openModal)
     )
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useLocations(queryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useLocations(queryParams)
     const mutate = useQueryMutator<PaginatedLocations>(
         locationQueries.list(queryParams).queryKey
     )
@@ -132,6 +130,8 @@ function LocationsIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const location = row.original
 
@@ -144,7 +144,9 @@ function LocationsIndex() {
                                             buttonVariants({ variant: 'link' }),
                                             'h-auto p-0'
                                         )}
-                                        onClick={() => openModal('show', location)}
+                                        onClick={() =>
+                                            openModal('show', location)
+                                        }
                                     >
                                         {location.shortCode}
                                     </button>

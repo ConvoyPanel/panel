@@ -1,3 +1,6 @@
+import { useServers } from '@/features/servers/admin/api.ts'
+import ServerBulkPowerActions from '@/features/servers/components/admin/ServerBulkPowerActions.tsx'
+import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
@@ -5,10 +8,6 @@ import { IconPlus, IconServer } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import { useServers } from '@/features/servers/admin/api.ts'
-
-import ServerBulkPowerActions from '@/features/servers/components/admin/ServerBulkPowerActions.tsx'
-import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { DataTable } from '@/components/ui/DataTable'
@@ -31,7 +30,8 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/servers')({
 
 function ServersIndex() {
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useServers(queryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useServers(queryParams)
 
     const columns: ColumnDef<Server>[] = [
         {
@@ -76,6 +76,8 @@ function ServersIndex() {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 bulkActions={servers => (
                     <ServerBulkPowerActions servers={servers} />
                 )}
@@ -132,9 +134,11 @@ function ServersIndex() {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
-                                        to={`/admin/servers/${server.id}` as string}
+                                        to={
+                                            `/admin/servers/${server.id}` as string
+                                        }
                                     >
                                         <span className={'truncate'}>
                                             {server.name}

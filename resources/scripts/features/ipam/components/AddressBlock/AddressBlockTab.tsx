@@ -1,23 +1,19 @@
-import useDataTable from '@/hooks/use-data-table.ts'
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/index.lazy.tsx'
 import {
-    AddressBlock,
-    PaginatedAddressBlocks,
-} from '@/types/address-block.ts'
-import { AddressVersion } from '@/types/address.ts'
-import { Link } from '@tanstack/react-router'
-import { ColumnDef } from '@tanstack/react-table'
-
-import {
-    useAddressBlocks,
     addressBlockQueries,
+    useAddressBlocks,
 } from '@/features/ipam/blocks/api.ts'
-
 import CreateAddressBlockModal from '@/features/ipam/components/AddressBlock/CreateAddressBlockModal.tsx'
 import DeleteAddressBlockModal from '@/features/ipam/components/AddressBlock/DeleteAddressBlockModal.tsx'
 import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
 import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
+import useDataTable from '@/hooks/use-data-table.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/index.lazy.tsx'
+import { AddressBlock, PaginatedAddressBlocks } from '@/types/address-block.ts'
+import { AddressVersion } from '@/types/address.ts'
+import { cn } from '@/utils'
+import { Link } from '@tanstack/react-router'
+import { ColumnDef } from '@tanstack/react-table'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -35,13 +31,13 @@ import {
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { TabsContent } from '@/components/ui/Tabs'
-import { cn } from '@/utils'
 
 const AddressBlockTab = () => {
     const { addressBlockGroupId } = Route.useParams()
     const groupId = parseInt(addressBlockGroupId)
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useAddressBlocks(queryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useAddressBlocks(queryParams)
     const mutate = useQueryMutator<PaginatedAddressBlocks>(
         addressBlockQueries.list(groupId, queryParams).queryKey
     )
@@ -126,6 +122,8 @@ const AddressBlockTab = () => {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const block = row.original
 
@@ -140,7 +138,7 @@ const AddressBlockTab = () => {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
                                         to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
                                         params={{

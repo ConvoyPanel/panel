@@ -1,21 +1,22 @@
+import {
+    addressQueries,
+    reserveAddress,
+    unreserveAddress,
+    useAddresses,
+} from '@/features/ipam/blocks/addresses/api.ts'
+import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
+import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAddressModal.tsx'
+import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
+import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/GenerateAddressesButton.tsx'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
 import { Server } from '@/types/server.ts'
-import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
+import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { toast } from 'sonner'
-
-import {
-    useAddresses,
-    addressQueries,
-    reserveAddress,
-    unreserveAddress,
-} from '@/features/ipam/blocks/addresses/api.ts'
-import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
-
-import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/GenerateAddressesButton.tsx'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
@@ -29,9 +30,6 @@ import {
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
-import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
-import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
-import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAddressModal.tsx'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'
@@ -48,7 +46,10 @@ function BlockIndex() {
         addressBlockGroupId: number
         addressBlockId: number
     }
-    const { data, isPlaceholderData } = useAddresses(queryParams, ['server'])
+    const { data, isPlaceholderData, isError, refetch } = useAddresses(
+        queryParams,
+        ['server']
+    )
     const mutate = useQueryMutator<PaginatedAddresses>(
         addressQueries.list(
             Number(addressBlockGroupId),
@@ -207,6 +208,8 @@ function BlockIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const address = row.original
 

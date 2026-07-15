@@ -35,7 +35,10 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import {
     Item,
     ItemActions,
@@ -61,7 +64,12 @@ interface Props {
 
 const SSHKeysCard = ({ uuid }: Props) => {
     const queryClient = useQueryClient()
-    const { data: serverKeys, isLoading } = useServerSSHKeys(uuid)
+    const {
+        data: serverKeys,
+        isLoading,
+        isError,
+        refetch,
+    } = useServerSSHKeys(uuid)
     const { data: keychain } = useSSHKeys()
 
     const [keys, setKeys] = useState<string[]>([])
@@ -117,7 +125,9 @@ const SSHKeysCard = ({ uuid }: Props) => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? (
+                    {isError && !serverKeys ? (
+                        <CollectionErrorState onRetry={refetch} />
+                    ) : isLoading ? (
                         <Skeleton className={'h-32 w-full'} />
                     ) : keys.length > 0 ? (
                         <OverflowItemGroup
@@ -190,7 +200,10 @@ const SSHKeysCard = ({ uuid }: Props) => {
                         />
                     )}
 
-                    <div className={'mt-4 flex flex-wrap gap-2'}>
+                    <div
+                        className={'mt-4 flex flex-wrap gap-2'}
+                        hidden={isError && !serverKeys}
+                    >
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button

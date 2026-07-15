@@ -6,7 +6,7 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
-IPAM mobile rows + live Disks verification**).
+IPAM mobile rows + live Disks verification + collection-state/mobile close-out**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -139,7 +139,8 @@ action in each of the empty and populated states; drawer at 390px with no overfl
   single disclosure. See the audit's Base UI section for the **attribute-mapping table** — Radix's
   `data-state=open` matches nothing on Base UI and fails silently.
 
-**The frontend-overhaul audit is now 64 done / 2 open.** The last known flagship-screen gap is closed:
+**The frontend-overhaul audit is now 66 done / 0 open.** The last known flagship-screen gap is closed,
+and the final app-wide collection-state/mobile sweeps are complete:
 1. **Admin server Disks tab — LIVE-VERIFIED 2026-07-15.** The groundwork also found a real bug on the way
    (`458b04d7`, see below). Maintainer authorised provisioning on real hardware:
    - `DevNodeSeeder` + `.env` `PROXMOX_*` gives a working node; `/api/admin/nodes/{id}/status` returned real
@@ -171,8 +172,12 @@ action in each of the empty and populated states; drawer at 390px with no overfl
    Fixed with `$primaryKey = 'storage_id'` + `$incrementing = false`, matching the key column
    `updateBackupOrder()` already passed to `setNewOrder()`. *This is the same family as the Phase-1
    Postgres bugs; assume any composite pivot extending `App\Models\Model` has it.*
-2–3. Two "definition of done" lines remain open on purpose: collection loading/empty/error behaviour and
-   mobile representations are true for every screen touched but **not audited exhaustively app-wide**.
+2. **Collection states/mobile — CLOSED 2026-07-15.** All 11 `DataTable` screens now expose query failures
+   through a shared retryable error state, as do the query-backed page/card collections. Every `DataTable`
+   has a deliberate `mobileRow`; the only raw table outside it is the admin dashboard Nodes card's documented
+   desktop-table/mobile-`Item` split. A real-browser 390 px check forced the Nodes list through four 503s,
+   proved the error state replaced its skeletons, then recovered 10 real rows through Try again with no
+   horizontal overflow or unexpected console errors. See the audit definition-of-done lines for the sweep.
 
 Everything else in the audit is ticked **with how it was verified** — including accessible names, which were
 checked against the **real DOM** (zero unnamed icon-only controls across five pages), not by grep.
@@ -338,8 +343,9 @@ cross-checked with `qm`/`pvesh` over SSH:
   `unusedN` before destroying, because a running VM's `delete=scsiN` schedules the unplug async);
   `DevNodeSeeder` hardcoded `name=dev-node` broke every `/nodes/{name}` call (now derived from the fqdn's
   first DNS label, override `PROXMOX_NODE_NAME`).
-- **Still unproven:** in-browser render of the storage modal, power actions, and disks tab; these
-  specific live interactions still need browser coverage.
+- **Browser coverage:** the disks tab is now live-verified end-to-end (see the close-out at the top of this
+  handoff). The storage modal and power actions still lack focused in-browser interaction coverage; those
+  are separate product follow-ups, not open frontend-overhaul audit criteria.
 
 ---
 

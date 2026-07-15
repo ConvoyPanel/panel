@@ -1,16 +1,9 @@
-import { useState } from 'react'
+import {
+    addressBlockGroupQueries,
+    useAttachedNodes,
+} from '@/features/ipam/api.ts'
 import AttachNodeModal from '@/features/ipam/components/AddressBlock/AttachNodeModal.tsx'
 import DetachNodeModal from '@/features/ipam/components/AddressBlock/DetachNodeModal.tsx'
-import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemDescription,
-    ItemTitle,
-} from '@/components/ui/Item'
-import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
-import { Badge } from '@/components/ui/Badge.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
@@ -22,19 +15,26 @@ import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import {
-    useAttachedNodes,
-    addressBlockGroupQueries,
-} from '@/features/ipam/api.ts'
+import { useState } from 'react'
 
+import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
+import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { TabsContent } from '@/components/ui/Tabs'
 
 const AttachedNodesTab = () => {
     const { queryParams, tableProps } = useDataTable()
     const { addressBlockGroupId } = Route.useParams()
-    const { data, isPlaceholderData } = useAttachedNodes(
+    const { data, isPlaceholderData, isError, refetch } = useAttachedNodes(
         Number(addressBlockGroupId),
         queryParams
     )
@@ -100,6 +100,8 @@ const AttachedNodesTab = () => {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const networkInterface = row.original
                     const node = networkInterface.node
@@ -115,7 +117,7 @@ const AttachedNodesTab = () => {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
                                         to='/admin/nodes/$nodeId'
                                         params={{ nodeId: String(node?.id) }}

@@ -38,7 +38,8 @@ function NodeIpam() {
             node_id: numericNodeId,
         },
     }
-    const { data, isPlaceholderData } = useAddressBlockGroups(scopedQueryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useAddressBlockGroups(scopedQueryParams)
 
     const columns: ColumnDef<AddressBlockGroup>[] = [
         {
@@ -105,12 +106,16 @@ function NodeIpam() {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const group = row.original
 
                     return (
                         <Item variant={'muted'} size={'sm'}>
-                            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                            <ItemContent
+                                className={'min-w-0 overflow-x-hidden'}
+                            >
                                 <ItemTitle className={'w-full min-w-0'}>
                                     {/* buttonVariants is inline-flex shrink-0, so
                                         `truncate` on the link itself neither shrinks
@@ -119,7 +124,7 @@ function NodeIpam() {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
                                         to='/admin/ipam/$addressBlockGroupId'
                                         params={{

@@ -2,25 +2,24 @@ import { PaginatedResult } from '@/utils/http.ts'
 import {
     ColumnFiltersState,
     OnChangeFn,
-    RowSelectionState,
     Row,
+    RowSelectionState,
     SortingState,
     TableOptions,
     VisibilityState,
 } from '@tanstack/react-table'
 import { ReactNode } from 'react'
 
-export interface DataTableProps<TData>
-    extends Omit<
-        TableOptions<TData>,
-        | 'data'
-        | 'state'
-        | 'pageCount'
-        | 'getCoreRowModel'
-        | 'manualFiltering'
-        | 'manualPagination'
-        | 'manualSorting'
-    > {
+export interface DataTableProps<TData> extends Omit<
+    TableOptions<TData>,
+    | 'data'
+    | 'state'
+    | 'pageCount'
+    | 'getCoreRowModel'
+    | 'manualFiltering'
+    | 'manualPagination'
+    | 'manualSorting'
+> {
     data: TData[] | PaginatedResult<TData> | null | undefined
 
     /**
@@ -128,6 +127,18 @@ export interface DataTableProps<TData>
      * `keepPreviousData`). Pass `isPlaceholderData` from the query result.
      */
     isPlaceholderData?: boolean
+
+    /**
+     * Initial query failure state. Cached rows remain visible when a
+     * background refetch fails; this only replaces an otherwise-empty table.
+     */
+    isError?: boolean
+
+    /** Retry callback used by the default collection error state. */
+    onRetry?: () => void
+
+    /** Optional replacement for the default collection error state. */
+    errorState?: ReactNode
 }
 
 export interface DataTableFilterField<TData> {

@@ -1,5 +1,4 @@
 import { useAddresses } from '@/features/servers/detail/api.ts'
-
 import AddressList from '@/features/servers/networking/components/AddressList.tsx'
 
 import {
@@ -9,6 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import { CollectionErrorState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const AddressesCard = ({ uuid }: Props) => {
-    const { data: addresses, isLoading } = useAddresses(uuid)
+    const { data: addresses, isLoading, isError, refetch } = useAddresses(uuid)
 
     return (
         <Card className={'@md:col-span-2'}>
@@ -27,7 +27,9 @@ const AddressesCard = ({ uuid }: Props) => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading || !addresses ? (
+                {isError && !addresses ? (
+                    <CollectionErrorState onRetry={refetch} />
+                ) : isLoading || !addresses ? (
                     <Skeleton className={'h-32 w-full'} />
                 ) : (
                     <AddressList addresses={addresses} />

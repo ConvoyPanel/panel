@@ -47,7 +47,12 @@ const formatBytes = (bytes: number) => {
 
 const ServerDisksPanel = ({ serverId }: Props) => {
     const { data: server } = useServer(serverId)
-    const { data: disks, isLoading } = useServerDisks(serverId)
+    const {
+        data: disks,
+        isLoading,
+        isError,
+        refetch,
+    } = useServerDisks(serverId)
     const remove = useRemoveServerDisk(serverId)
     const confirm = useConfirmationStore(state => state.confirm)
 
@@ -148,6 +153,8 @@ const ServerDisksPanel = ({ serverId }: Props) => {
                 data={disks}
                 columns={columns}
                 isPlaceholderData={isLoading}
+                isError={isError}
+                onRetry={refetch}
                 skeletonRows={3}
                 rightActions={addButton}
                 emptyState={
@@ -172,14 +179,12 @@ const ServerDisksPanel = ({ serverId }: Props) => {
                                     {disk.interface ?? 'Pending'}
                                 </ItemTitle>
                                 <ItemDescription>
-                                    {disk.storageName ?? 'Unknown storage'}{' '}
-                                    · {formatBytes(disk.size)}
+                                    {disk.storageName ?? 'Unknown storage'} ·{' '}
+                                    {formatBytes(disk.size)}
                                 </ItemDescription>
                                 <Badge
                                     variant={
-                                        disk.isPrimary
-                                            ? 'default'
-                                            : 'outline'
+                                        disk.isPrimary ? 'default' : 'outline'
                                     }
                                     className='w-fit'
                                 >

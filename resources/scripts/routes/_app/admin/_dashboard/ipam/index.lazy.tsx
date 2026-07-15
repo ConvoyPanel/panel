@@ -1,3 +1,11 @@
+import {
+    addressBlockGroupQueries,
+    useAddressBlockGroups,
+} from '@/features/ipam/api.ts'
+import CreateBlockGroupModal from '@/features/ipam/components/CreateBlockGroupModal.tsx'
+import DeleteBlockGroupModal from '@/features/ipam/components/DeleteBlockGroupModal.tsx'
+import EditBlockGroupModal from '@/features/ipam/components/EditBlockGroupModal.tsx'
+import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import {
@@ -8,16 +16,6 @@ import { cn } from '@/utils'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useShallow } from 'zustand/react/shallow'
-
-import {
-    useAddressBlockGroups,
-    addressBlockGroupQueries,
-} from '@/features/ipam/api.ts'
-
-import CreateBlockGroupModal from '@/features/ipam/components/CreateBlockGroupModal.tsx'
-import DeleteBlockGroupModal from '@/features/ipam/components/DeleteBlockGroupModal.tsx'
-import EditBlockGroupModal from '@/features/ipam/components/EditBlockGroupModal.tsx'
-import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -42,7 +40,8 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/ipam/')({
 
 function IpamIndex() {
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useAddressBlockGroups(queryParams)
+    const { data, isPlaceholderData, isError, refetch } =
+        useAddressBlockGroups(queryParams)
     const mutate = useQueryMutator<PaginatedAddressBlockGroups>(
         addressBlockGroupQueries.list(queryParams).queryKey
     )
@@ -77,7 +76,9 @@ function IpamIndex() {
                 <Link
                     className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
                     to='/admin/ipam/$addressBlockGroupId'
-                    params={{ addressBlockGroupId: String(cell.row.original.id) }}
+                    params={{
+                        addressBlockGroupId: String(cell.row.original.id),
+                    }}
                 >
                     {cell.getValue<string>()}
                 </Link>
@@ -118,6 +119,8 @@ function IpamIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const group = row.original
 
@@ -132,7 +135,7 @@ function IpamIndex() {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
                                         to='/admin/ipam/$addressBlockGroupId'
                                         params={{

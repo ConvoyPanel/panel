@@ -1,4 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    type BootDevice,
+    storageQueries,
+    updateBootOrder,
+    useBootOrder,
+} from '@/features/servers/storage/api.ts'
 import {
     IconArrowDown,
     IconArrowUp,
@@ -6,16 +11,10 @@ import {
     IconPlus,
     IconX,
 } from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import byteSize from 'byte-size'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-
-import {
-    storageQueries,
-    updateBootOrder,
-    useBootOrder,
-    type BootDevice,
-} from '@/features/servers/storage/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -32,7 +31,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import {
     Item,
     ItemActions,
@@ -57,7 +59,7 @@ interface Props {
 
 const BootOrderCard = ({ uuid }: Props) => {
     const queryClient = useQueryClient()
-    const { data, isLoading } = useBootOrder(uuid)
+    const { data, isLoading, isError, refetch } = useBootOrder(uuid)
 
     const [order, setOrder] = useState<BootDevice[]>([])
     const [unused, setUnused] = useState<BootDevice[]>([])
@@ -139,7 +141,9 @@ const BootOrderCard = ({ uuid }: Props) => {
                 </CardDescription>
             </CardHeader>
             <CardContent className={'space-y-3'}>
-                {isLoading ? (
+                {isError && !data ? (
+                    <CollectionErrorState onRetry={refetch} />
+                ) : isLoading ? (
                     <Skeleton className={'h-32 w-full'} />
                 ) : order.length > 0 ? (
                     <ItemGroup className={'gap-3'}>
@@ -156,9 +160,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                                     />
                                 </ItemMedia>
                                 <ItemContent className={'min-w-0'}>
-                                    <ItemTitle
-                                        className={'truncate font-mono'}
-                                    >
+                                    <ItemTitle className={'truncate font-mono'}>
                                         {label(device)}
                                     </ItemTitle>
                                 </ItemContent>
@@ -202,7 +204,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                     />
                 )}
 
-                {order.length > 0 && addDeviceMenu}
+                {data && order.length > 0 && addDeviceMenu}
             </CardContent>
             {dirty && (
                 <CardFooter className={'flex justify-end gap-3'}>

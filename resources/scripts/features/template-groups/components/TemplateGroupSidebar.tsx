@@ -1,16 +1,17 @@
+import CreateTemplateCard from '@/features/template-groups/components/CreateTemplateCard.tsx'
+import TemplateCard from '@/features/template-groups/components/TemplateCard.tsx'
+import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
+import { useTemplates } from '@/features/template-groups/templates/api.ts'
 import { IconPlus, IconTemplate } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useTemplates } from '@/features/template-groups/templates/api.ts'
-
-import CreateTemplateCard from '@/features/template-groups/components/CreateTemplateCard.tsx'
-import TemplateCard from '@/features/template-groups/components/TemplateCard.tsx'
-import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
-
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import {
     Sheet,
     SheetContent,
@@ -29,11 +30,19 @@ const TemplateGroupSidebar = () => {
     )
     const [isCreating, setIsCreating] = useState(false)
 
-    const { data: templates, isLoading } = useTemplates(modalData?.uuid, {})
+    const {
+        data: templates,
+        isLoading,
+        isError,
+        refetch,
+    } = useTemplates(modalData?.uuid, {})
 
     return (
         <Sheet open={isOpen} onOpenChange={val => !val && closeModal('show')}>
-            <SheetContent className={'w-11/12 overflow-y-auto sm:max-w-lg'} side={'right'}>
+            <SheetContent
+                className={'w-11/12 overflow-y-auto sm:max-w-lg'}
+                side={'right'}
+            >
                 <SheetHeader>
                     <SheetTitle className={'truncate'}>
                         {modalData?.name}
@@ -49,7 +58,11 @@ const TemplateGroupSidebar = () => {
                         </Button>
                     </div>
                 )}
-                {isLoading ? (
+                {isError && !templates ? (
+                    <Card className={'py-6'}>
+                        <CollectionErrorState onRetry={refetch} />
+                    </Card>
+                ) : isLoading ? (
                     <div className={'flex flex-col gap-2'}>
                         {Array.from({ length: 4 }).map((_, index) => (
                             <Skeleton key={index} className={'h-24'} />
@@ -79,11 +92,7 @@ const TemplateGroupSidebar = () => {
                         </Card>
                     )
                 ) : (
-                    <div
-                        className={
-                            'flex flex-col border-t'
-                        }
-                    >
+                    <div className={'flex flex-col border-t'}>
                         {isCreating && (
                             <CreateTemplateCard
                                 templateGroup={modalData!}

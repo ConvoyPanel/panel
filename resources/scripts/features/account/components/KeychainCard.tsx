@@ -23,7 +23,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -32,7 +35,7 @@ const KeychainCard = () => {
     const mutate = useQueryMutator<SSHKeyType[]>(sshKeyQueries.all())
     const [createOpen, setCreateOpen] = useState(false)
 
-    const { data: keys, isLoading } = useSSHKeys()
+    const { data: keys, isLoading, isError, refetch } = useSSHKeys()
 
     const { mutate: remove } = useMutation({
         mutationFn: (key: SSHKeyType) => deleteSSHKey(key.id),
@@ -75,11 +78,13 @@ const KeychainCard = () => {
                 </CardHeader>
                 <CardContent
                     className={cn(
-                        (isLoading || keys?.length === 0) &&
+                        (isLoading || isError || keys?.length === 0) &&
                             'grid min-h-[12rem] place-items-center'
                     )}
                 >
-                    {isLoading || !keys ? (
+                    {isError && !keys ? (
+                        <CollectionErrorState onRetry={refetch} />
+                    ) : isLoading || !keys ? (
                         <Skeleton className={'h-40 w-full'} />
                     ) : keys.length > 0 ? (
                         <OverflowItemGroup

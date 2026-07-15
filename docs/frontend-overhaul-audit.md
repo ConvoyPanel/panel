@@ -1,11 +1,11 @@
 # Frontend Overhaul Audit
 
-Status: audited 2026-07-13 against `next` after the base + nova rollout. The
+Status: audited through 2026-07-15 against `next` after the base + nova rollout. The
 shared Textarea, Select, Checkbox, DropdownMenu, Popover, Command/combobox,
 DataTable toolbar, OTP, accessible icon actions, admin server Disks, DataTable
 empty/filtered-empty states, shared Show all control, admin dashboard Nodes
-card, and IPAM mobile-row work identified below has since been completed;
-unchecked items remain.
+card, IPAM mobile-row work, and app-wide collection-state/responsive sweeps
+identified below have been completed. All tracked items are closed.
 
 ⚠️ **Truncating inside `Item` needs two non-obvious overrides** (cost real time,
 will recur on every row conversion). `ItemTitle` is a `w-fit` flex row, so
@@ -360,12 +360,23 @@ product/design decisions, not migration defects.
       Verified 2026-07-15: zero `size="sm"` + `h-*` override pairs remain.
 - [x] Icons rely on Button gap rather than call-site margins. Verified
       2026-07-15: zero `mr-2`/`ml-2` icon margins at call sites.
-- [ ] Collection pages have loading, empty, populated, filtered-empty, and error
-      behavior where applicable. (Every screen converted so far has them; not
-      audited exhaustively across the whole app, so left open deliberately.)
-- [ ] Collection screens have deliberate mobile representations rather than
-      accidental horizontal overflow. (Every table under "responsive coverage"
-      now has one; left open until the remaining non-table screens are swept.)
+- [x] Collection pages have loading, empty, populated, filtered-empty, and error
+      behavior where applicable. Exhaustively swept 2026-07-15: all 11
+      `DataTable` consumers now pass initial query failures into a shared error
+      state with a retry action, and query-backed page/card collections use the
+      same state rather than treating a failure as perpetual loading or empty
+      data. Browser-verified at 390 px by forcing the admin Nodes request to 503
+      through all four React Query attempts, then restoring it: the error state
+      replaced the skeletons and Try again recovered to 10 real rows with no
+      unexpected console errors.
+- [x] Collection screens have deliberate mobile representations rather than
+      accidental horizontal overflow. Exhaustively swept 2026-07-15: every
+      `DataTable` consumer supplies `mobileRow`; the only raw table outside the
+      shared component is the admin dashboard Nodes card's documented,
+      intentional desktop-table/mobile-`Item` split. Remaining page/card
+      collections use the responsive `Item`/`OverflowItemGroup` patterns. The
+      forced-error/retry Nodes check had no page overflow at 390 px before or
+      after recovery.
 - [x] Destructive actions are visually and semantically distinct (shared
       `variant="destructive"`, 29 call sites; nova's soft tint per the
       maintainer's decision).

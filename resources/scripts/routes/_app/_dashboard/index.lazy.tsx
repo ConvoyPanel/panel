@@ -1,14 +1,15 @@
+import ServerCard from '@/features/overview/components/client/ServerCard.tsx'
+import { serverQueries } from '@/features/servers/api.ts'
 import usePagination from '@/hooks/use-pagination.ts'
 import { IconServerOff } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import { serverQueries } from '@/features/servers/api.ts'
-
-import ServerCard from '@/features/overview/components/client/ServerCard.tsx'
-
 import { Card } from '@/components/ui/Card'
-import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    CollectionErrorState,
+    SimpleEmptyState,
+} from '@/components/ui/EmptyStates'
 import { ItemGroup } from '@/components/ui/Item'
 import LengthAwarePaginator from '@/components/ui/Pagination/LengthAwarePaginator.tsx'
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -20,12 +21,18 @@ export const Route = createLazyFileRoute('/_app/_dashboard/')({
 
 function Dashboard() {
     const { page, setPage } = usePagination()
-    const { data, isLoading } = useQuery(serverQueries.list({ page }))
+    const { data, isLoading, isError, refetch } = useQuery(
+        serverQueries.list({ page })
+    )
 
     return (
         <>
             <Heading>My Servers</Heading>
-            {isLoading ? (
+            {isError && !data ? (
+                <Card className={'py-6'}>
+                    <CollectionErrorState onRetry={refetch} />
+                </Card>
+            ) : isLoading ? (
                 <ItemGroup className={'gap-3'}>
                     {Array.from({ length: 4 }).map((_, index) => (
                         <Skeleton key={index} className={'h-24 w-full'} />

@@ -37,7 +37,7 @@ const formatLastUsed = (value: string | null) =>
 function TokensIndex() {
     const confirm = useConfirmationStore(state => state.confirm)
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useTokens(queryParams)
+    const { data, isPlaceholderData, isError, refetch } = useTokens(queryParams)
     const mutate = useQueryMutator<PaginatedApiKeys>(
         tokenQueries.list(queryParams).queryKey
     )
@@ -129,6 +129,8 @@ function TokensIndex() {
                 paginated
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const token = row.original
 

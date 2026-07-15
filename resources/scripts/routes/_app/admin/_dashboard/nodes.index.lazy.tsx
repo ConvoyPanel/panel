@@ -1,3 +1,4 @@
+import { useNodes } from '@/features/nodes/api.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Node } from '@/types/node.ts'
@@ -6,8 +7,6 @@ import { IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
-
-import { useNodes } from '@/features/nodes/api.ts'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
@@ -38,7 +37,7 @@ const formatMemory = (value: number) => {
 function NodesIndex() {
     const { copy } = useClipboard()
     const { queryParams, tableProps } = useDataTable()
-    const { data, isPlaceholderData } = useNodes(queryParams)
+    const { data, isPlaceholderData, isError, refetch } = useNodes(queryParams)
 
     const renderActions = (node: Node) => (
         <>
@@ -97,12 +96,16 @@ function NodesIndex() {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                isError={isError}
+                onRetry={refetch}
                 mobileRow={row => {
                     const node = row.original
 
                     return (
                         <Item variant={'muted'} size={'sm'}>
-                            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                            <ItemContent
+                                className={'min-w-0 overflow-x-hidden'}
+                            >
                                 <ItemTitle className={'w-full min-w-0'}>
                                     {/* buttonVariants is inline-flex shrink-0, so
                                         `truncate` on the link itself neither shrinks
@@ -111,7 +114,7 @@ function NodesIndex() {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0'
                                         )}
                                         to='/admin/nodes/$nodeId'
                                         params={{ nodeId: String(node.id) }}
@@ -137,10 +140,7 @@ function NodesIndex() {
                     )
                 }}
                 rightActions={
-                    <Link
-                        className={buttonVariants()}
-                        to='/admin/nodes/create'
-                    >
+                    <Link className={buttonVariants()} to='/admin/nodes/create'>
                         <IconPlus className={'size-4'} />
                         Add node
                     </Link>

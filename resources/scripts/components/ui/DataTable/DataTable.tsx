@@ -19,6 +19,7 @@ import { Fragment, useMemo } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
+import { CollectionErrorState } from '@/components/ui/EmptyStates'
 import { Item, ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import {
@@ -53,9 +54,7 @@ const selectionColumn = <TData,>(): ColumnDef<TData> => ({
         <Checkbox
             checked={table.getIsAllPageRowsSelected()}
             indeterminate={table.getIsSomePageRowsSelected()}
-            onCheckedChange={value =>
-                table.toggleAllPageRowsSelected(!!value)
-            }
+            onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
             aria-label='Select all'
             className='translate-y-[2px]'
         />
@@ -101,6 +100,9 @@ const DataTable = <TData,>({
     enableRowSelection = false,
     bulkActions,
     isPlaceholderData,
+    isError = false,
+    onRetry,
+    errorState,
     rightActions,
     emptyState,
     filteredEmptyState,
@@ -136,8 +138,7 @@ const DataTable = <TData,>({
             prop: _rowSelection,
             defaultProp: {},
             onChange: _setRowSelection as
-                | ((state: RowSelectionState) => void)
-                | undefined,
+                ((state: RowSelectionState) => void) | undefined,
         })
 
     const [columnVisibility, setColumnVisibility] =
@@ -145,8 +146,7 @@ const DataTable = <TData,>({
             prop: _columnVisibility,
             defaultProp: {},
             onChange: _setColumnVisibility as
-                | ((state: VisibilityState) => void)
-                | undefined,
+                ((state: VisibilityState) => void) | undefined,
         })
 
     const [columnFilters, setColumnFilters] =
@@ -154,8 +154,7 @@ const DataTable = <TData,>({
             prop: _columnFilters,
             defaultProp: [],
             onChange: _setColumnFilters as
-                | ((state: ColumnFiltersState) => void)
-                | undefined,
+                ((state: ColumnFiltersState) => void) | undefined,
         })
 
     const resolvedColumns = useMemo(
@@ -168,7 +167,7 @@ const DataTable = <TData,>({
 
     const resolvedData = !data ? [] : Array.isArray(data) ? data : data.items
     const pageCount = !Array.isArray(data)
-        ? data?.pagination.totalPages ?? -1
+        ? (data?.pagination.totalPages ?? -1)
         : -1
 
     const pagination: PaginationState = {
@@ -238,6 +237,19 @@ const DataTable = <TData,>({
         setColumnFilters([])
     }
 
+    if (!data && isError) {
+        return (
+            <>
+                {errorState ?? (
+                    <CollectionErrorState
+                        className='bg-background rounded-md border'
+                        onRetry={onRetry}
+                    />
+                )}
+            </>
+        )
+    }
+
     /**
      * An unfiltered empty collection has nothing to search, filter, or
      * paginate, so the contextual empty state stands in for the whole table
@@ -249,9 +261,9 @@ const DataTable = <TData,>({
 
     const noRowsContent =
         hasNoRows && isFiltered
-            ? filteredEmptyState ?? (
+            ? (filteredEmptyState ?? (
                   <DataTableFilteredEmpty onClear={clearFilters} />
-              )
+              ))
             : null
 
     return (
@@ -265,8 +277,8 @@ const DataTable = <TData,>({
                 />
             )}
             {showBulkBar && (
-                <div className='flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2'>
-                    <span className='text-sm text-muted-foreground'>
+                <div className='bg-muted/40 flex items-center gap-2 rounded-md border px-3 py-2'>
+                    <span className='text-muted-foreground text-sm'>
                         {selectedRows.length} selected
                     </span>
                     <div className='flex items-center gap-2'>
@@ -284,7 +296,7 @@ const DataTable = <TData,>({
             )}
             <div
                 className={cn(
-                    'rounded-md border bg-background',
+                    'bg-background rounded-md border',
                     mobileRow && 'hidden @md:block'
                 )}
             >
@@ -321,8 +333,7 @@ const DataTable = <TData,>({
                     </TableHeader>
                     <TableBody
                         className={cn(
-                            isPlaceholderData &&
-                                'opacity-60 transition-opacity'
+                            isPlaceholderData && 'opacity-60 transition-opacity'
                         )}
                     >
                         {data ? (
@@ -368,7 +379,7 @@ const DataTable = <TData,>({
                                             className='p-0'
                                         >
                                             {noRowsContent ?? (
-                                                <div className='flex h-24 items-center justify-center text-center text-muted-foreground'>
+                                                <div className='text-muted-foreground flex h-24 items-center justify-center text-center'>
                                                     No results.
                                                 </div>
                                             )}
@@ -436,7 +447,7 @@ const DataTable = <TData,>({
                             <Item
                                 variant={'muted'}
                                 size={'sm'}
-                                className='justify-center text-muted-foreground'
+                                className='text-muted-foreground justify-center'
                             >
                                 No results.
                             </Item>

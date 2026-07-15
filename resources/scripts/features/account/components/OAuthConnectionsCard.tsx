@@ -26,6 +26,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import { CollectionErrorState } from '@/components/ui/EmptyStates'
 import {
     Item,
     ItemActions,
@@ -50,7 +51,12 @@ const OAuthConnectionsCard = () => {
         oauthConnectionQueries.all()
     )
 
-    const { data: connections, isLoading } = useOAuthConnections()
+    const {
+        data: connections,
+        isLoading,
+        isError,
+        refetch,
+    } = useOAuthConnections()
 
     const { mutate: unlink } = useMutation({
         mutationFn: (connection: OAuthConnection) =>
@@ -90,10 +96,13 @@ const OAuthConnectionsCard = () => {
             </CardHeader>
             <CardContent
                 className={cn(
-                    isLoading && 'grid min-h-[8rem] place-items-center'
+                    (isLoading || isError) &&
+                        'grid min-h-[8rem] place-items-center'
                 )}
             >
-                {isLoading || !connections ? (
+                {isError && !connections ? (
+                    <CollectionErrorState onRetry={refetch} />
+                ) : isLoading || !connections ? (
                     <Skeleton className={'h-24 w-full'} />
                 ) : (
                     <ItemGroup className={'gap-3'}>
