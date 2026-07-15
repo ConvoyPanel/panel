@@ -6,7 +6,7 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
-IPAM mobile rows**.
+IPAM mobile rows + live Disks verification**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -139,10 +139,9 @@ action in each of the empty and populated states; drawer at 390px with no overfl
   single disclosure. See the audit's Base UI section for the **attribute-mapping table** — Radix's
   `data-state=open` matches nothing on Base UI and fails silently.
 
-**The frontend-overhaul audit is now 62 done / 4 open**, and the 4 are deliberate:
-1. **Verify the admin server Disks tab against a live seeded node** — STILL OPEN, but the groundwork is now
-   mapped and it **found a real bug on the way** (`458b04d7`, see below). What was established live
-   (2026-07-15, maintainer authorised provisioning on real hardware):
+**The frontend-overhaul audit is now 64 done / 2 open.** The last known flagship-screen gap is closed:
+1. **Admin server Disks tab — LIVE-VERIFIED 2026-07-15.** The groundwork also found a real bug on the way
+   (`458b04d7`, see below). Maintainer authorised provisioning on real hardware:
    - `DevNodeSeeder` + `.env` `PROXMOX_*` gives a working node; `/api/admin/nodes/{id}/status` returned real
      hardware (AMD EPYC 9654, PVE 9.2.2, kernel 7.0.2-6). **SSH works** from the sandbox:
      `ddev exec ssh -o StrictHostKeyChecking=no root@100.124.151.52` (`PROXMOX_SSH_TARGET`).
@@ -153,9 +152,16 @@ action in each of the empty and populated states; drawer at 390px with no overfl
      **Cleanup: `qm destroy 9999 --purge`** (verify `/var/lib/vz/images/` is empty afterwards).
    - The node's only storage is **`local`** (~100GB, `storesKvm`). Attaching it via
      `POST /api/admin/nodes/{id}/storages` needs `stores_snippets` (it is required and easy to miss).
-   - **Remaining:** a Convoy server row (vmid 9999, node, storage) + a primary `server_disks` row, then drive
-     `/admin/servers/{id}/disks` for add/resize/remove, primary-disk restrictions, and empty/loading.
-   - **Everything created live was destroyed** (VM purged, 0 images left) and the dev-DB rows removed.
+   - A disposable Convoy server + primary-disk row pointed the UI at stopped VM 9999. Authenticated Playwright
+     at 1440 px proved the 8 GiB `scsi0` primary is labelled **Managed** with no action menu, then used the real
+     UI/API/PVE path to add a 1 GiB `scsi1`, resize it to 2 GiB, confirm removal, and return to primary-only.
+     PVE config and `/var/lib/vz/images/9999` then contained only the original 8 GiB primary — no `unusedN`
+     entry and no orphaned secondary volume. A delayed real disks GET showed three table-shaped skeleton rows;
+     a browser-intercepted empty response showed the contextual single Add disk action; the real primary-only
+     list rendered as a mobile `Item` at 390 px with no horizontal overflow. No unexpected request/console
+     errors occurred (only the login page's intentional unauthenticated `/api/client/user` probe returned 401).
+   - **Everything created live was destroyed** (`qm destroy 9999 --purge`; `/var/lib/vz/images/` empty) and
+     the disposable server, disk, storage, and pivot rows were removed. The pre-existing fake fixtures remain.
 
    ⚠️ **`storage_to_node` pivot bug — FOUND AND FIXED (`458b04d7`).** Attaching a storage 500'd with
    `column "id" does not exist ... returning "id"`: the pivot is composite with **no `id` column**, but
@@ -165,9 +171,8 @@ action in each of the empty and populated states; drawer at 390px with no overfl
    Fixed with `$primaryKey = 'storage_id'` + `$incrementing = false`, matching the key column
    `updateBackupOrder()` already passed to `setNewOrder()`. *This is the same family as the Phase-1
    Postgres bugs; assume any composite pivot extending `App\Models\Model` has it.*
-2–4. Three "definition of done" lines left open on purpose: collection loading/empty/error behaviour and
-   mobile representations are true for every screen touched but **not audited exhaustively app-wide**, and the
-   flagship-verified line is gated on (1).
+2–3. Two "definition of done" lines remain open on purpose: collection loading/empty/error behaviour and
+   mobile representations are true for every screen touched but **not audited exhaustively app-wide**.
 
 Everything else in the audit is ticked **with how it was verified** — including accessible names, which were
 checked against the **real DOM** (zero unnamed icon-only controls across five pages), not by grep.

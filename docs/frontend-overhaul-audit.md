@@ -219,8 +219,14 @@ Representative affected shared components:
 - [x] Replace inline row buttons with the standard action menu.
 - [x] Add a mobile `Item` row representation.
 - [x] Add route title metadata and normalize title casing.
-- [ ] Verify add, resize, remove, primary-disk restrictions, and empty/loading
-      states against a live seeded node.
+- [x] Verify add, resize, remove, primary-disk restrictions, and empty/loading
+      states against a live seeded node. Verified 2026-07-15 on PVE 9.2.2:
+      stopped VM 9999 rendered its 8 GiB `scsi0` primary as Managed with no
+      mutation menu; the UI allocated a 1 GiB `scsi1`, grew it to 2 GiB, and
+      removed it. PVE then had no `unusedN` entry or secondary volume. A delayed
+      real index response showed three table-shaped skeleton rows, an intercepted
+      empty response showed the contextual Add disk state, and the primary-only
+      list rendered as an `Item` at 390 px with no horizontal overflow.
 
 ### Remaining bespoke collections
 
@@ -374,7 +380,7 @@ product/design decisions, not migration defects.
 - [x] `ddev npm run tc` and `ddev npm run build` pass. ⚠️ Run `tc` FIRST — vite
       does not typecheck, so build-before-tc can leave a bundle that contradicts
       the source.
-- [ ] Flagship screens are browser-verified at desktop and mobile widths with no
-      console errors or horizontal page overflow. (Extensively true for every
-      screen touched; the only known unverified surface is the admin server
-      Disks tab against a live node — see Priority 1 above.)
+- [x] Flagship screens are browser-verified at desktop and mobile widths with no
+      unexpected console errors or horizontal page overflow. The final gap — the
+      admin server Disks tab — was verified against a live PVE 9.2.2 node on
+      2026-07-15 at 1440 px and 390 px; see Priority 1 above.
