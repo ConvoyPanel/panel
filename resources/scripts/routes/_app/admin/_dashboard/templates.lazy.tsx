@@ -9,8 +9,9 @@ import EditTemplateGroupModal from '@/features/template-groups/components/EditTe
 import TemplateGroupCard from '@/features/template-groups/components/TemplateGroupCard.tsx'
 import TemplateGroupSidebar from '@/features/template-groups/components/TemplateGroupSidebar.tsx'
 
-import { Card, CardContent, CardHeader } from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -23,9 +24,13 @@ function TemplatesIndex() {
 
     return (
         <>
-            <Heading>Templates</Heading>
+            <div className={'flex flex-wrap items-center justify-between gap-2'}>
+                <Heading>Templates</Heading>
+                {(isLoading || Boolean(groups?.length)) && (
+                    <CreateTemplateGroupModal />
+                )}
+            </div>
 
-            <CreateTemplateGroupModal />
             <EditTemplateGroupModal />
             <DeleteTemplateGroupModal />
             <TemplateGroupSidebar />
@@ -37,24 +42,22 @@ function TemplatesIndex() {
                     ))}
                 </div>
             ) : groups!.length === 0 ? (
-                <Card>
-                    <CardHeader />
-                    <CardContent>
-                        <SimpleEmptyState
-                            icon={IconTemplate}
-                            title={'No template groups found'}
-                            description={
-                                'Create a new template group to get started.'
-                            }
-                        />
-                    </CardContent>
+                <Card className={'py-6'}>
+                    <SimpleEmptyState
+                        icon={IconTemplate}
+                        title={'No template groups'}
+                        description={
+                            'Create a template group to organize installable server templates.'
+                        }
+                        action={<CreateTemplateGroupModal />}
+                    />
                 </Card>
             ) : (
-                <div className={'flex flex-col gap-2'}>
+                <ItemGroup className={'gap-3'}>
                     {groups!.map(group => (
                         <TemplateGroupCard key={group.uuid} group={group} />
                     ))}
-                </div>
+                </ItemGroup>
             )}
         </>
     )

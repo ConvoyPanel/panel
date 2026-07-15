@@ -131,6 +131,15 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Admin Templates collection — DONE (2026-07-14).** Template groups now use shared muted `ItemGroup` rows
+  with icon, description, admin-only state, and existing action menus. Page/create actions use the standard
+  control height and move into the contextual empty state when appropriate. The nested group sheet also drops
+  its empty `CardHeader` shim, uses accurate no-templates copy, and exposes one create action in its empty state.
+  Browser verification covered real/intercepted empty and populated groups, long names, the nested sheet/create
+  transition, and 390px layout with no console/API errors or horizontal overflow. `tc` and direct Vite production
+  build pass; the full build wrapper's PHP generator hit the documented sandbox SIGSEGV twice and remains queued
+  for a clean retry.
+
 - **Client server Boot Order collection — DONE (2026-07-14).** Replaced the hand-built bordered list with
   compact muted `ItemGroup` rows while preserving move up/down, remove, add, reset, and save behavior. The
   add-device control now uses the standard height and sits inside the contextual empty state when no devices

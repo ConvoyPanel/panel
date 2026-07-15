@@ -177,7 +177,7 @@ These are the clearest screens that still predate the documented Item/DataTable
 patterns:
 
 - [x] Client My Servers: bespoke cards, no loading skeleton, and no empty state.
-- [ ] Admin Templates: bespoke cards and detached create/empty-state actions.
+- [x] Admin Templates: bespoke cards and detached create/empty-state actions.
 - [x] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
 - [x] Node Storages: bespoke cards, detached actions, and spacing shims.
 - [x] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.

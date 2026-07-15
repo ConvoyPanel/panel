@@ -9,7 +9,7 @@ import TemplateCard from '@/features/template-groups/components/TemplateCard.tsx
 import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent, CardHeader } from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     Sheet,
@@ -39,11 +39,16 @@ const TemplateGroupSidebar = () => {
                         {modalData?.name}
                     </SheetTitle>
                 </SheetHeader>
-                <div className={'mb-4 flex justify-end'}>
-                    <Button size={'sm'} onClick={() => setIsCreating(true)} disabled={isCreating}>
-                        <IconPlus className={'size-4'} /> New
-                    </Button>
-                </div>
+                {(isLoading || Boolean(templates?.length)) && (
+                    <div className={'mb-4 flex justify-end'}>
+                        <Button
+                            onClick={() => setIsCreating(true)}
+                            disabled={isCreating}
+                        >
+                            <IconPlus className={'size-4'} /> New template
+                        </Button>
+                    </div>
+                )}
                 {isLoading ? (
                     <div className={'flex flex-col gap-2'}>
                         {Array.from({ length: 4 }).map((_, index) => (
@@ -57,17 +62,20 @@ const TemplateGroupSidebar = () => {
                             onClose={() => setIsCreating(false)}
                         />
                     ) : (
-                        <Card>
-                            <CardHeader />
-                            <CardContent>
-                                <SimpleEmptyState
-                                    icon={IconTemplate}
-                                    title={'No template groups found'}
-                                    description={
-                                        'Create a new template group to get started.'
-                                    }
-                                />
-                            </CardContent>
+                        <Card className={'py-6'}>
+                            <SimpleEmptyState
+                                icon={IconTemplate}
+                                title={'No templates'}
+                                description={
+                                    'Add a template to make it available from this group.'
+                                }
+                                action={
+                                    <Button onClick={() => setIsCreating(true)}>
+                                        <IconPlus className={'size-4'} /> New
+                                        template
+                                    </Button>
+                                }
+                            />
                         </Card>
                     )
                 ) : (
