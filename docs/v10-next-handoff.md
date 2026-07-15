@@ -6,8 +6,8 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
-IPAM mobile rows + live Disks/storage/power verification + collection-state/mobile close-out + server-create
-speed-cap verification**).
+IPAM mobile rows + live Disks/storage/power/backup verification + collection-state/mobile close-out +
+server-create speed-cap verification**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -120,7 +120,7 @@ and the quota rendered `out of undefined backups` / `out of NaN`. Ten minutes we
 When a browser result contradicts the source you're reading, `grep` the built asset in
 `public/build/assets/*.js` before debugging the source — it settles it instantly.
 
-**Create Backup dialog — BUILT + BROWSER-VERIFIED (`63dc0c59`).** The empty-state button was dead and there
+**Create Backup dialog — BUILT + LIVE-VERIFIED (`63dc0c59`).** The empty-state button was dead and there
 was no create-backup UI anywhere, so this was a feature. **Shape decided by the maintainer: name up front,
 `mode`/`compression`/`lock` behind an Advanced disclosure.** `mode` + `compression_type` are both required by
 `StoreBackupRequest` with no config default, so the form always sends them — **snapshot + zstd** are the
@@ -131,11 +131,19 @@ its window; a node with no backup-capable storage says so) via the existing `Nam
 `{name, mode:snapshot, compression_type:zstd, is_locked:false}` with Advanced untouched; exactly one create
 action in each of the empty and populated states; drawer at 390px with no overflow; a real 409 surfaced as
 "No backup-capable storage is configured for this node."
-- ⚠️ **A real create was never completed end-to-end**: every seeded server sits on a fake node with **no
-  backup-capable storage** (`storage_to_node` is empty for them), so the service 409s before touching PVE.
-  Validation, mapping, and the error path are proven; **a successful create + the optimistic list/quota
-  update are not.** Needs a node with a `stores_backups` storage (the real PVE node, or seed
-  `storage_to_node`).
+- **Successful path LIVE-VERIFIED 2026-07-15.** Attached the real node's `local` storage with
+  `stores_backups` through the admin UI, created disposable stopped VM 2694 with a 1 GiB raw disk and 4 MiB
+  of incompressible data, then drove the real client dialog. The POST returned immediately, the new row
+  appeared optimistically, and quota count moved **1 → 2** before the PVE task finished. Horizon completed
+  the monitor job; PVE reported a **4,233,187-byte** archive, the legacy whole-MiB `StorageSizeCast` persisted
+  4 MiB, and reload rendered **2 backups / 4 MiB used**. A diskless control archive was only 336 bytes and
+  correctly rounded to 0 under that existing storage contract.
+  - The run found a real lock-contract bug: the request/frontend use `is_locked`, but `BackupController`
+    read `locked`, silently forcing every backup unlocked. It now reads `$request->boolean('is_locked')`;
+    an endpoint test pins both the response and database value for `true`.
+  - Both archives, their logs, VM 2694/disk, the disposable storage/pivot, and backup rows were removed;
+    PVE and the app DB were checked clean. Full Pest **270 / 723 assertions**, PHPStan zero, `tc`, and build
+    pass with no unexpected browser/API errors.
 - **New shared primitive: `components/ui/Collapsible`** (Base UI). Prefer it over the Radix `Accordion` for a
   single disclosure. See the audit's Base UI section for the **attribute-mapping table** — Radix's
   `data-state=open` matches nothing on Base UI and fails silently.

@@ -51,7 +51,7 @@ class BackupController
                 name: $request->name,
                 mode: $request->enum('mode', BackupMode::class),
                 compressionType: $request->enum('compression_type', BackupCompressionType::class),
-                isLocked: $request->input('locked', false),
+                isLocked: $request->boolean('is_locked'),
             );
 
         return BackupEloquentData::from($backup);

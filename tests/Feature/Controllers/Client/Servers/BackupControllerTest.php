@@ -41,8 +41,8 @@ function testCreateBackup(
         }
 
         $response->assertCreated()
-                 ->assertJsonPath('data.name', 'Test Backup')
-                 ->assertJsonPath('data.isLocked', false);
+            ->assertJsonPath('data.name', 'Test Backup')
+            ->assertJsonPath('data.isLocked', false);
 
         Queue::assertPushed(MonitorBackupJob::class);
     };
@@ -129,6 +129,32 @@ function testDeleteBackups(
 }
 
 it('can create backups', testCreateBackup());
+
+it('persists the requested backup lock', function () {
+    Http::fake([
+        '*' => Http::response(['data' => 'upid'], 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/backups",
+        [
+            'name' => 'Locked Backup',
+            'mode' => 'snapshot',
+            'compression_type' => 'zstd',
+            'is_locked' => true,
+        ],
+    )
+        ->assertCreated()
+        ->assertJsonPath('data.isLocked', true);
+
+    $this->assertDatabaseHas('backups', [
+        'server_id' => $server->id,
+        'name' => 'Locked Backup',
+        'is_locked' => true,
+    ]);
+});
 
 it('can restore backups', testRestoreBackups());
 
@@ -217,8 +243,8 @@ describe('index quota totals', function () {
         );
 
         $response->assertOk()
-                 ->assertJsonCount(1, 'items')
-                 ->assertJsonPath('backupCount', 2)
-                 ->assertJsonPath('backupSize', 8 * 1024 * 1024);
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('backupCount', 2)
+            ->assertJsonPath('backupSize', 8 * 1024 * 1024);
     });
 });
