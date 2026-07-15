@@ -21,6 +21,7 @@ import {
     InputGroupAddon,
     InputGroupInput,
 } from '@/components/ui/InputGroup'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/ToggleGroup'
 
 const iec = { units: 'iec' as const, precision: 1 }
 
@@ -46,10 +47,12 @@ const GroupHeader = ({
     </div>
 )
 
+type MemoryUnit = 'MiB' | 'GiB'
+
 /** Memory amount input with a MiB/GiB display toggle. The form value is always
  * stored in MiB; GiB is a convenience conversion for entry. */
 const MemoryAmountField = () => {
-    const [unit, setUnit] = useState<'MiB' | 'GiB'>('MiB')
+    const [unit, setUnit] = useState<MemoryUnit>('MiB')
 
     const toDisplay = (mib: number | string) => {
         if (mib === '' || mib === null || mib === undefined) return ''
@@ -89,27 +92,31 @@ const MemoryAmountField = () => {
                                 align={'inline-end'}
                                 className={'py-0'}
                             >
-                                <div
-                                    className={
-                                        'flex h-5 items-center rounded-md bg-muted p-0.5 text-xs font-medium'
-                                    }
+                                {/* nova's smallest toggle size is h-7, still too
+                                    tall for an addon in an h-8 group, so the item
+                                    height/padding is overridden down to h-5. */}
+                                <ToggleGroup
+                                    spacing={0}
+                                    multiple={false}
+                                    value={[unit]}
+                                    onValueChange={value => {
+                                        const next = value[0]
+                                        if (next) setUnit(next as MemoryUnit)
+                                    }}
+                                    aria-label={'Memory unit'}
                                 >
                                     {(['MiB', 'GiB'] as const).map(u => (
-                                        <button
+                                        <ToggleGroupItem
                                             key={u}
-                                            type={'button'}
-                                            onClick={() => setUnit(u)}
+                                            value={u}
                                             className={
-                                                'flex h-4 items-center rounded px-1.5 leading-none transition-colors ' +
-                                                (unit === u
-                                                    ? 'bg-background text-foreground shadow-sm'
-                                                    : 'text-muted-foreground')
+                                                'h-5 min-w-0 px-1.5 text-xs leading-none text-muted-foreground aria-pressed:text-foreground'
                                             }
                                         >
                                             {u}
-                                        </button>
+                                        </ToggleGroupItem>
                                     ))}
-                                </div>
+                                </ToggleGroup>
                             </InputGroupAddon>
                         </InputGroup>
                     </FormControl>

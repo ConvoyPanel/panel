@@ -76,6 +76,13 @@ it (DELETE `/api/admin/nodes/2` → 204)**. Only the seeded node remains.
    object directly (`return $this->service->handle($node);`). This is why a CLI repro of
    `handle()` alone passed while the fpm/controller path 500'd.
 
+### Update 2026-07-15 — MiB/GiB toggle refactored onto a shared primitive
+The hand-rolled `<button>` pair is gone; `MemoryAmountField` now uses the new shared
+`ToggleGroup`/`ToggleGroupItem` (Base UI + nova styling) at `spacing={0}` / `multiple={false}`.
+Conversion behavior is unchanged and browser-verified. Note the **visual polarity flip** (nova marks the
+*selected* item with `bg-muted`; there's no raised track anymore) and a nova-vs-Base-UI orientation
+attribute gotcha — both written up in the v10 handoff's "Segmented control primitive" entry.
+
 ### Minor a11y nit (not fixed — noted for later)
 `MemoryAmountField` (`SpecificationsSettingsForm.tsx`) puts `FormControl` around
 `<InputGroup>`, so shadcn's `FormControl` injects its `id`/aria onto the wrapper `<div>`, not
@@ -88,9 +95,16 @@ wiring the id/name through `InputGroupInput`.
   pick up a `npm run build`).
 - **PVE:** `us-southeast-2.performave.com:8006`, node `us-southeast-2`, PVE 9.2.2, 6 cores /
   ~16 GiB, self-signed (turn Verify TLS **off**). Creds in `.env` (`PROXMOX_*`).
-- **ddev gotcha #1 — split databases:** `ddev psql` / `ddev exec php artisan` talk to a
-  *different* Postgres than fpm/web. Verify web-DB state via the HTTP API (as done here), not
-  `ddev psql`.
+- **ddev gotcha #1 — split databases: NO LONGER REPRODUCES (re-checked 2026-07-15).** `ddev exec psql`,
+  `ddev exec php artisan`, and fpm/web all now agree: each resolves `db` → `172.20.0.4` and reports the
+  same row counts, and a user created via `php artisan users:create` logged in through the browser
+  immediately. This is the committed `.ddev/config.yaml` `post-start` `/etc/hosts` pin (commit `f14ddd0d`)
+  doing its job — see the v10 handoff's gotchas section. Trust `ddev psql` again, but if rows ever go
+  missing re-verify with `ddev exec grep -w db /etc/hosts`.
+- **ddev gotcha #3 — `php artisan tinker <file>` executes the file and then HANGS** on the REPL, so a
+  `timeout` kills it and you lose the output. It looks like the script never ran; **it did**. Don't re-run
+  it (you'll double-apply writes) and don't conclude the DB is split — verify with `psql` first. Prefer
+  `psql` or a real artisan command over tinker for one-off queries.
 - **ddev gotcha #2 — OPcache `validate_timestamps=0`:** PHP edits need `ddev restart` to take
   effect (frontend is fine).
 - Web admin user: `test@test.com` / `Zzz!98765` (HTTP login returns 200). Browser login lands
