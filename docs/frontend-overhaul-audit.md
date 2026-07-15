@@ -348,17 +348,33 @@ product/design decisions, not migration defects.
 
 ## Definition of done
 
-- [ ] Shared controls use one documented size, radius, focus, invalid, disabled,
+- [x] Shared controls use one documented size, radius, focus, invalid, disabled,
       and dark-state system.
-- [ ] No component requests one Button size and overrides it back to another.
-- [ ] Icons rely on Button gap rather than call-site margins.
+- [x] No component requests one Button size and overrides it back to another.
+      Verified 2026-07-15: zero `size="sm"` + `h-*` override pairs remain.
+- [x] Icons rely on Button gap rather than call-site margins. Verified
+      2026-07-15: zero `mr-2`/`ml-2` icon margins at call sites.
 - [ ] Collection pages have loading, empty, populated, filtered-empty, and error
-      behavior where applicable.
+      behavior where applicable. (Every screen converted so far has them; not
+      audited exhaustively across the whole app, so left open deliberately.)
 - [ ] Collection screens have deliberate mobile representations rather than
-      accidental horizontal overflow.
-- [ ] Destructive actions are visually and semantically distinct.
-- [ ] Icon-only controls have accessible names.
-- [ ] Base UI migrations retain keyboard, focus, portal, and dismissal behavior.
-- [ ] `ddev npm run tc` and `ddev npm run build` pass.
+      accidental horizontal overflow. (Every table under "responsive coverage"
+      now has one; left open until the remaining non-table screens are swept.)
+- [x] Destructive actions are visually and semantically distinct (shared
+      `variant="destructive"`, 29 call sites; nova's soft tint per the
+      maintainer's decision).
+- [x] Icon-only controls have accessible names. Verified 2026-07-15 in the real
+      DOM (not by grep) across /admin, /admin/nodes, /admin/ipam, /security and
+      /admin/servers: **zero** visible controls with neither text nor an
+      accessible name.
+- [x] Base UI migrations retain keyboard, focus, portal, and dismissal behavior.
+      Proven on the hard case: a Select nested in a dialog (focus enters the
+      popup, ArrowDown highlights, Escape closes only the select, a 2nd Escape
+      closes the dialog), plus nested dialogs sharing ONE backdrop.
+- [x] `ddev npm run tc` and `ddev npm run build` pass. ⚠️ Run `tc` FIRST — vite
+      does not typecheck, so build-before-tc can leave a bundle that contradicts
+      the source.
 - [ ] Flagship screens are browser-verified at desktop and mobile widths with no
-      console errors or horizontal page overflow.
+      console errors or horizontal page overflow. (Extensively true for every
+      screen touched; the only known unverified surface is the admin server
+      Disks tab against a live node — see Priority 1 above.)
