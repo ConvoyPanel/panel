@@ -15,23 +15,14 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/Select'
-
-const themeItems = [
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-    { value: 'system', label: 'System' },
-] as const
 
 const Avatar = () => {
     const { theme, setTheme } = useTheme()
@@ -132,25 +123,34 @@ const Avatar = () => {
                     </>
                 ) : null}
                 <DropdownMenuSeparator />
-                <div className={'mt-2 flex items-center space-x-14 px-2 py-1'}>
-                    <span className={'text-sm'}>Theme</span>
-                    <Select
-                        items={themeItems}
-                        value={theme}
-                        onValueChange={value => value && setTheme(value)}
-                    >
-                        <SelectTrigger className={'w-28'}>
-                            <SelectValue placeholder='Select theme' />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value='light'>Light</SelectItem>
-                                <SelectItem value='dark'>Dark</SelectItem>
-                                <SelectItem value='system'>System</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                        <span className={'flex-1'}>Theme</span>
+                        <span
+                            className={
+                                'text-xs capitalize text-muted-foreground'
+                            }
+                        >
+                            {theme}
+                        </span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                        <DropdownMenuRadioGroup
+                            value={theme}
+                            onValueChange={setTheme}
+                        >
+                            <DropdownMenuRadioItem value={'light'}>
+                                Light
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value={'dark'}>
+                                Dark
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value={'system'}>
+                                System
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signout}>Sign out</DropdownMenuItem>
             </DropdownMenuContent>

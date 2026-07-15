@@ -27,7 +27,7 @@ function AuthLayout() {
     useTitle()
 
     return (
-        <div className={'flex h-full justify-center px-4'}>
+        <main className={'flex h-full justify-center px-4'}>
             <div className={'w-full pt-6 sm:w-96 md:pt-14 lg:w-[30rem]'}>
                 <LogoWithName className={'pb-6'} />
                 <Card>
@@ -37,7 +37,7 @@ function AuthLayout() {
                     <ThemeToggle variant={'ghost'} />
                 </div>
             </div>
-        </div>
+        </main>
     )
 }
 

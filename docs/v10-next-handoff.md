@@ -131,14 +131,31 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Initial bundle performance pass — DONE (2026-07-14).** The always-loaded server layout no longer imports
+  installation, suspended, and deferred-OS workflows synchronously; those branches now load through
+  `React.lazy` only when the server status needs them. The avatar's three-option theme picker now reuses the
+  already-loaded menu radio/submenu primitives instead of eagerly importing the full Base UI Select/floating
+  stack. The unused Geist 800 weight was removed. Main production JS fell from **518.2 kB / 164.7 kB gzip** to
+  **414.0 kB / 128.7 kB gzip** (about 20% smaller; no entry-chunk warning). Browser verification proved theme
+  selection and that the admin dashboard requests none of the status-workflow chunks. Full `tc` and scripted
+  production build pass.
+  - Lighthouse 13.4 production results: login mobile **86/95/96/100** and desktop **99/95/96/100**
+    (Performance/Accessibility/Best Practices/SEO); authenticated admin mobile **83/89/100/100**. Mobile used
+    Lighthouse simulated throttling: 150ms RTT, ~1.47 Mbps download, 675 Kbps upload, and **4x CPU slowdown**.
+    Login mobile FCP/LCP/TBT/CLS: 2.9s/3.5s/50ms/0; admin mobile: 2.8s/4.0s/80ms/0.001. The authenticated desktop
+    audit crashed the sandbox Chromium tab twice; do not infer a score from that.
+  - Remaining performance findings are mainly delivery-level: hashed assets lack long cache lifetimes in the
+    local ddev server, the global CSS/font path is render-blocking, and route-tree/shared providers still leave
+    unused initial JS. Remaining a11y findings include theme color contrast (design input), admin progressbar
+    names, and heading order. The login 401 user probe is expected but costs the Best Practices console audit.
+
 - **Admin Templates collection — DONE (2026-07-14).** Template groups now use shared muted `ItemGroup` rows
   with icon, description, admin-only state, and existing action menus. Page/create actions use the standard
   control height and move into the contextual empty state when appropriate. The nested group sheet also drops
   its empty `CardHeader` shim, uses accurate no-templates copy, and exposes one create action in its empty state.
   Browser verification covered real/intercepted empty and populated groups, long names, the nested sheet/create
-  transition, and 390px layout with no console/API errors or horizontal overflow. `tc` and direct Vite production
-  build pass; the full build wrapper's PHP generator hit the documented sandbox SIGSEGV twice and remains queued
-  for a clean retry.
+  transition, and 390px layout with no console/API errors or horizontal overflow. `tc` and production build pass
+  after retrying the documented sandbox PHP generator SIGSEGV.
 
 - **Client server Boot Order collection — DONE (2026-07-14).** Replaced the hand-built bordered list with
   compact muted `ItemGroup` rows while preserving move up/down, remove, add, reset, and save behavior. The

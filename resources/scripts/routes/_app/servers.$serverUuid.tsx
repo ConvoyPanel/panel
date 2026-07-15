@@ -12,15 +12,33 @@ import {
     IconServer,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { Suspense, lazy } from 'react'
 
-import InstallingServer from '@/features/servers/components/client/Status/InstallingServer.tsx'
-import SuspendedServer from '@/features/servers/components/client/Status/SuspendedServer.tsx'
-import DeferredOSSelection from '@/features/servers/components/client/Status/DeferredOSSelection.tsx'
 import { useServer, preloadServer } from '@/features/servers/detail/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
+import Spinner from '@/components/ui/Spinner.tsx'
 
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
+
+const InstallingServer = lazy(
+    () =>
+        import(
+            '@/features/servers/components/client/Status/InstallingServer.tsx'
+        )
+)
+const SuspendedServer = lazy(
+    () =>
+        import(
+            '@/features/servers/components/client/Status/SuspendedServer.tsx'
+        )
+)
+const DeferredOSSelection = lazy(
+    () =>
+        import(
+            '@/features/servers/components/client/Status/DeferredOSSelection.tsx'
+        )
+)
 
 export const Route = createFileRoute('/_app/servers/$serverUuid')({
     loader: ({ params: { serverUuid } }) =>
@@ -112,15 +130,23 @@ function ServerLayout() {
 
     return (
         <AppLayout routes={nav}>
-            {isDeferred ? (
-                <DeferredOSSelection server={server} />
-            ) : isInstalling ? (
-                <InstallingServer server={server} />
-            ) : isSuspended ? (
-                <SuspendedServer />
-            ) : (
-                <Outlet />
-            )}
+            <Suspense
+                fallback={
+                    <div className={'flex justify-center py-16'}>
+                        <Spinner className={'size-6'} />
+                    </div>
+                }
+            >
+                {isDeferred ? (
+                    <DeferredOSSelection server={server} />
+                ) : isInstalling ? (
+                    <InstallingServer server={server} />
+                ) : isSuspended ? (
+                    <SuspendedServer />
+                ) : (
+                    <Outlet />
+                )}
+            </Suspense>
         </AppLayout>
     )
 }
