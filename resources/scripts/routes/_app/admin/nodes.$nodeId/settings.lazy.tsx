@@ -10,6 +10,8 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { overagePenaltyDefaults } from '@/features/bandwidth/overage-penalty.ts'
+import OveragePenaltyFields from '@/features/bandwidth/components/OveragePenaltyFields.tsx'
 import {
     nodeQueries,
     nodeUpdateSchema,
@@ -51,6 +53,7 @@ const defaultsFromNode = (node: Node): z.input<typeof nodeUpdateSchema> =>
         cpuCount: String(node.cpuCount),
         memory: String(Math.round(node.memory / mebibytes)),
         memoryOverallocate: String(node.memoryOverallocate),
+        ...overagePenaltyDefaults(node.overagePenalty),
     }) as unknown as z.input<typeof nodeUpdateSchema>
 
 function NodeSettings() {
@@ -220,6 +223,23 @@ function NodeSettings() {
                                         type={'number'}
                                     />
                                 </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className={'@xl:col-span-2'}>
+                            <CardHeader>
+                                <CardTitle>Bandwidth</CardTitle>
+                                <CardDescription>
+                                    What happens to a server on this node once it
+                                    exceeds its monthly bandwidth quota. Servers
+                                    can override this individually.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <OveragePenaltyFields
+                                    inheritedFrom={node.defaultOveragePenalty}
+                                    inheritedLabel={'global'}
+                                />
                             </CardContent>
                         </Card>
                     </div>

@@ -49,7 +49,12 @@ const SelectForm = ({
                             items={items}
                             modal={false}
                             onValueChange={field.onChange}
-                            value={field.value}
+                            // `?? null` is load-bearing: Base UI reads an
+                            // `undefined` value as "uncontrolled" and then
+                            // ignores every later value. Forms that mount before
+                            // a `reset()` lands (e.g. while a query resolves)
+                            // would otherwise stay stuck on the placeholder.
+                            value={field.value ?? null}
                             disabled={disabled || formState.isSubmitting}
                         >
                             <FormControl>

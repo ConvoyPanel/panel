@@ -147,6 +147,51 @@ it('persists a per-node overage penalty override', function () {
         ->toBe(OveragePenaltyAction::DISCONNECT);
 });
 
+it('clears a per-node overage penalty override back to inherit', function () {
+    $this->node->update([
+        'overage_penalty' => ['action' => 'throttle', 'rate' => 5_000_000],
+    ]);
+    expect($this->node->refresh()->overage_penalty)->not->toBeNull();
+
+    // A null (rather than an omitted key) is how the settings UI says "inherit";
+    // `sometimes|nullable` must treat it as a clear, not as "leave unchanged".
+    $response = $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$this->node->id}",
+        nodePayload(['overage_penalty' => null]),
+    );
+
+    $response->assertOk();
+    expect($this->node->refresh()->overage_penalty)->toBeNull();
+});
+
+it('exposes the node override and the global default it falls back to', function () {
+    $this->node->update([
+        'overage_penalty' => ['action' => 'throttle', 'rate' => 5_000_000],
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}",
+    );
+
+    // The settings screen needs both: the node's own override, and the global
+    // tier it would inherit if the override were cleared (the "effective" hint).
+    $response->assertOk()
+        ->assertJsonPath('data.overagePenalty.action', 'throttle')
+        ->assertJsonPath('data.overagePenalty.rate', 5_000_000)
+        ->assertJsonPath('data.defaultOveragePenalty.action', 'throttle')
+        ->assertJsonPath('data.defaultOveragePenalty.rate', 1_000_000);
+});
+
+it('reports a null override when the node inherits', function () {
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}",
+    );
+
+    $response->assertOk()
+        ->assertJsonPath('data.overagePenalty', null)
+        ->assertJsonPath('data.defaultOveragePenalty.action', 'throttle');
+});
+
 it("can't downsize memory below what's allocated", function () {
     $node = Node::factory()->for($this->location)->create([
         'memory' => 64 * 1024 * 1024 * 1024, // 64GB

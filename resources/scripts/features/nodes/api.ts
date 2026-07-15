@@ -11,6 +11,12 @@ import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { z } from 'zod'
 
+import {
+    overagePenaltyFields,
+    overagePenaltyPayload,
+    refineOveragePenalty,
+} from '@/features/bandwidth/overage-penalty.ts'
+
 import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import {
@@ -59,17 +65,20 @@ const optionalCredential = z.preprocess(
     z.string().min(1).max(191).optional()
 )
 
-export const nodeUpdateSchema = nodeSchema
-    .omit({
-        rootPrivileges: true,
-        privilegeSeparationDisabled: true,
-        tokenId: true,
-        tokenSecret: true,
-    })
-    .extend({
-        tokenId: optionalCredential,
-        tokenSecret: optionalCredential,
-    })
+export const nodeUpdateSchema = refineOveragePenalty(
+    nodeSchema
+        .omit({
+            rootPrivileges: true,
+            privilegeSeparationDisabled: true,
+            tokenId: true,
+            tokenSecret: true,
+        })
+        .extend({
+            tokenId: optionalCredential,
+            tokenSecret: optionalCredential,
+            ...overagePenaltyFields,
+        })
+)
 
 export const getNodes = async (
     params: NodeQueryParams
@@ -206,6 +215,9 @@ export const updateNode = async (
         cpu_count: cpuCount,
         memory,
         memory_overallocate: memoryOverallocate,
+        // Always sent: null is meaningful here (it clears the override back to
+        // "inherit"), so this must not be omitted the way the token fields are.
+        overage_penalty: overagePenaltyPayload(payload),
     }
 
     if (tokenId) body.token_id = tokenId

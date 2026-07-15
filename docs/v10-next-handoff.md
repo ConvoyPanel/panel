@@ -125,12 +125,49 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
-- **Design-input queue — intentionally deferred.** Do not choose these UX/product details without the
-  maintainer: the existing-server limits/settings page and bandwidth inheritance presentation; the global admin
-  Settings information architecture; whether the optional workspace/account switcher belongs in the top chrome;
-  and whether irreversible actions should keep nova's soft destructive tint or return to solid red. The
-  implementation constraints remain in the relevant entries below so design input can start from a concrete
-  boundary rather than re-discovery.
+- **Design-input queue — RESOLVED with the maintainer 2026-07-15.** All four open questions are now
+  decided; build against these, don't re-litigate:
+  1. **Inheritance presentation = segmented `Inherit | Custom`.** A two-segment control sits at the top of
+     an overridable field; `Inherit` shows the resolved *effective* value as muted text beneath (e.g.
+     "Effective: Throttle to 10 MB/s (from global)"), `Custom` swaps in the real inputs. Applies to the
+     per-node and per-server overage-penalty / speed-cap overrides.
+  2. **Global admin Settings IA = sub-nav drill-down in the sidebar.** Settings becomes a drilled-in
+     `SidebarNav` like nodes/servers, one route per section (`/admin/settings/<section>`), NOT a single
+     sectioned page and NOT tabs. `BandwidthSettings` is the first section.
+  3. **Workspace switcher stays in the avatar menu.** The existing root-admin Workspace section (Client
+     Area / Admin Console + `Current` marker) is the only path; no top-chrome switcher. **Item closed.**
+  4. **Destructive buttons keep nova's soft tint.** `bg-destructive/10 text-destructive` stays; do NOT flip
+     `Button.variants.ts` to solid red. **This settles the "DECISION TO REVISIT (2026-07-10)" below.**
+
+- **Segmented control primitive — BUILT (2026-07-15).** Decision 1 above needs a segmented control, so
+  `Toggle` + `ToggleGroup` now exist as shared primitives (`components/ui/Toggle`, `components/ui/ToggleGroup`),
+  ported from nova's source (`apps/v4/styles/base-nova/ui/{toggle,toggle-group}.tsx`) — which is already
+  **Base UI**-backed, so this satisfies the hard Base-UI requirement rather than fighting it. `spacing={0}`
+  gives the connected segmented look; `multiple={false}` gives single-select. The hand-rolled MiB/GiB toggle in
+  `features/nodes/components/Create/SpecificationsSettingsForm.tsx` was refactored onto it (first consumer).
+  Use these for the `Inherit | Custom` control — at nova's default `h-8` they need no size overrides.
+  - ⚠️ **nova-vs-Base-UI gotcha (cost real time; expect it in future nova ports).** nova's toggle-group source
+    styles orientation with `group-data-horizontal/…` / `data-vertical:`, i.e. **bare** `[data-horizontal]`
+    attribute selectors. `@base-ui/react` 1.6.0 emits **`data-orientation="horizontal"`** instead — its default
+    state→attribute mapping (`internals/getStateAttributesProps.js`) only emits a bare `data-<key>` when the
+    state value is boolean `true`, and stringifies otherwise. The string `data-horizontal` appears **nowhere**
+    in Base UI's dist. So nova's classes compile fine and then **silently never match** (segmented corners stay
+    square). Ported classes are keyed off `data-[orientation=…]` instead. **Lesson: Tailwind never errors on a
+    class that matches nothing — after porting nova source, verify against the rendered DOM, not just a green
+    build.**
+  - **Verified in-browser** (Playwright, real authenticated `/admin/nodes/create`): group renders
+    `data-orientation="horizontal"` + `data-spacing="0"`, computed `gap: 0px`, asymmetric rounding
+    (MiB `10px/0`, GiB `0/10px`) = connected look, `aria-pressed` flips with `bg-muted` on the pressed item,
+    clicking the pressed item does **not** deselect (guard in `onValueChange` keeps one unit always selected),
+    and MiB↔GiB conversion is intact (2048 MiB↔2 GiB, 4 GiB→4096 MiB, 1.5 GiB→1536 MiB). `tc` + `build` green.
+  - **Visual delta (accepted by the maintainer):** the old MiB/GiB toggle was an iOS-style segmented control
+    (muted *track*, selected item raised on `bg-background` + shadow). nova inverts the polarity — no track,
+    transparent by default, **selected** item gets `bg-muted`. Inside the `h-8` `InputGroup` addon the item
+    height is overridden to `h-5` (nova's smallest `sm` is `h-7`, still too tall).
+  - **Known-deferred, unchanged:** the a11y nit from the node-create redesign still stands — `FormControl`
+    wraps `<InputGroup>`, so the "Amount" label isn't associated with the inner `<input>`.
+  - **`components.json` is stale** (`"style": "new-york"`). Do **not** `npx shadcn@latest add <component>` —
+    it would pull new-york + Radix, wrong on both axes. Port nova's source by hand, as done here.
 
 - **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
   Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
@@ -145,23 +182,52 @@ Researched direction retained for each; none built unless noted.
   `-1`=unlimited quota no longer false-throttles. Scheduler (`routes/console.php`) is
   now live for `sync-usages` / `reset-usages` / `sync-rate-limits`.
 
-  **Frontend still to build (admin-only; intentionally deferred for maintainer design input):**
+  **Frontend — item 3 DONE (2026-07-15); 1, 2, 4 still to build:**
   1. **Speed cap field** on server creation — add to the create wizard's `LimitsForm`
      (unit MB/s in the UI, convert to bytes/s: `limits.speed_limit`). Fold into the
      planned wizard overhaul.
   2. **Per-server speed cap + overage-penalty override** on an existing server —
      **no "edit build/limits" admin page exists yet** (the `updateBuild` endpoint is
-     unwired). Needs that page built first; then add a speed-cap input and an
-     overage-penalty control with an explicit **"inherit from node/global"** state.
-  3. **Per-node overage-penalty override** on the node **settings** page
-     (`nodes.$nodeId/settings.lazy.tsx` + `features/nodes/api.ts`) — an action select
-     (throttle/disconnect) + conditional rate input, with an "inherit from global"
-     state. The backend already accepts `overage_penalty` on `UpdateNodeRequest`.
-  4. **Global default** (`BandwidthSettings`) is not yet UI-editable — a small admin
-     Settings screen is the eventual home (there's no settings-screen infra yet).
+     unwired). Needs that page built first; then add a speed-cap input and reuse
+     `OveragePenaltyFields` (below) with `inheritedLabel="node"`, passing the *node's*
+     resolved penalty as `inheritedFrom`.
+  3. **Per-node overage-penalty override — DONE.** Shipped on the node settings page as a
+     "Bandwidth" card using the decided segmented `Inherit | Custom` control.
+     - **Shared, reusable pieces** (built for item 2 and 4 to consume, not node-specific):
+       `features/bandwidth/overage-penalty.ts` (zod fields + `refineOveragePenalty`
+       conditional validation, `overagePenaltyDefaults`, `overagePenaltyPayload`,
+       `describePenalty`, `BYTES_PER_MB`) and
+       `features/bandwidth/components/OveragePenaltyFields.tsx` (the control; props
+       `inheritedFrom` + `inheritedLabel`).
+     - **Backend:** `NodeData` now exposes `overagePenalty` (the node's own override, null =
+       inherit) **and** `defaultOveragePenalty` (the global tier, read-only, resolved via
+       `OveragePenaltyResolver::global()`) so the UI can print the effective value. `updateNode`
+       **always sends** `overage_penalty` — `null` is meaningful (it clears the override), so
+       unlike the token fields it must never be omitted.
+     - **Units:** UI is decimal **MB/s**, stored bytes/s (`BYTES_PER_MB = 1_000_000`, matching
+       `RateLimitCast`'s decimal MB). Global default 1 MB/s renders as "Throttle to 1 MB/s".
+     - **Verified:** 4 new Pest tests (persist / clear-to-inherit / exposes both fields /
+       null when inheriting) — full Pest **256**, PHPStan zero, `tc` + `build` green. Browser
+       round-trip on the real settings page: Inherit shows "Effective: Throttle to 1 MB/s (from
+       global)"; Custom → save → API `{throttle, 10000000}`; reload rehydrates Custom/10;
+       Disconnect hides the rate input → `{disconnect, null}`; back to Inherit → `null`.
+  4. **Global default** (`BandwidthSettings`) is not yet UI-editable — it's the first section of
+     the new admin Settings screen (IA now decided: sidebar sub-nav drill-down, one route per
+     section). Reuse `OveragePenaltyFields` there **without** the Inherit segment (the global
+     tier has nothing to inherit from) — i.e. render the action + rate directly.
   UX note: **disconnect** is a hard penalty (guest keeps the NIC but loses carrier) —
   label it clearly; it's reversible. Show the resolved *effective* value where an
   override is left on "inherit".
+
+  ⚠️ **Base UI `Select` controlled-value gotcha (found + fixed here; will bite again).**
+  `components/ui/Forms/SelectForm.tsx` now passes `value={field.value ?? null}`, and the
+  `?? null` is **load-bearing**. Base UI reads `value={undefined}` as *uncontrolled* and then
+  **ignores every later value**, so the trigger stays stuck on its placeholder
+  (`data-placeholder` set) even though RHF holds a real value. This bites any form that mounts
+  before its `form.reset(...)` lands — i.e. every page that resets from a query, including the
+  node settings page. Text inputs hide the problem (`value ?? ''`), so a select is where it
+  surfaces. `SelectForm` was previously **unexported and unused**, which is why this was latent;
+  it's now exported from `Forms/index.ts`.
 
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
   both the client PAT card and the admin `/admin/tokens` screen shipped).

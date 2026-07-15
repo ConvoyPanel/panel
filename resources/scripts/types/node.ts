@@ -16,6 +16,10 @@ export interface Node {
     memoryAllocated: number
     cotermId: number | null
     serversCount: number
+    /** This node's override of the quota-overage penalty; null = inherit global. */
+    overagePenalty: App.Data.Server.OveragePenaltyData | null
+    /** Read-only global-tier fallback, for showing the effective value. */
+    defaultOveragePenalty: App.Data.Server.OveragePenaltyData | null
 }
 
 export type PaginatedNodes = PaginatedResult<Node>
