@@ -5,7 +5,45 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-15 (session: **IPAM mobile rows + a shared title-truncation fix completed** — the four
+Last updated: 2026-07-15 (session: **repository layer removed + backups quota wired + IPAM mobile rows**.
+Four commits, all green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows,
+`71fc1132` backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
+
+⚠️ **PICK UP HERE — one thing is built but NOT browser-verified.** The **backups quota display**
+(`71fc1132`) is proven only by tests/typecheck; it was never clicked. There were **zero backup rows in the
+dev DB**, so it has never rendered with real data. To verify: seed backups for a server (note
+`BackupFactory` writes `size` through `StorageSizeCast`, so pass **bytes** — `4*1024*1024` stores as 4 MiB),
+then check `/servers/{uuid}/backups` at desktop + 390px: the two trigger rings, the Sheet's count/size
+figures, the `-1` unlimited path on both limits, and that the quota reads the **cached** list query rather
+than firing a second request. Also unverified in-browser: the Graphs page's new `Resource usage` heading
+(replacing Overview's `Header`, which **also removes the power Toolbar from Graphs** — intentional, matches
+Networking/Storage/Security, but eyeball it).
+
+**Next up after that**, from [frontend-overhaul-audit.md](frontend-overhaul-audit.md) "Server subpage
+consistency" — 2 of 5 done this session (Graphs heading; `gap-5` → `gap-2`/`@md:gap-4`). Remaining:
+consolidate the Backups heading/quota/list controls further, **wire the empty-state `Create Backup` button**
+(⚠️ it is currently dead and there is **no create-backup UI anywhere in the codebase** — this is a new
+feature, not a wiring fix; `StoreBackupRequest` wants `name` + `mode` [snapshot/suspend/kill] +
+`compression_type` [none/lzo/gzip/zstd] + `is_locked`, so it needs a design decision on which fields to
+expose), and review Rebuild's isolated width/spacing model. `RadioGroup` primitive is also still unmigrated.
+
+**Repository removal (`85a6977a`, `84bb7bf8`)** — see the new **Design constraints** entry for the rule and
+its Proxmox carve-out. Deleted 846 lines for 69: `EloquentRepository` (~280 lines re-implementing Eloquent,
+two methods already marked `@deprecated Just use the model`), `Repository`, `ServerRepository`,
+`BackupRepository`, the 3 contracts, and `RepositoryServiceProvider` (which existed *solely* to bind
+`ActivityRepository` — itself **dead code**; its only apparent consumer was the unrelated
+`ProxmoxActivityRepository`). `ServerRepository::getByUuid` had no callers and was not carried over.
+`app/Repositories/` and `app/Contracts/` no longer exist.
+
+**Backups quota (`71fc1132`)** — the sidebar was **entirely mocked** (hardcoded `3 of 10 backups`,
+`24 GiB of 24.5 GiB`, fetched server unused). Now reads the server's real limits + a new `backupSize` total
+on the index endpoint, beside the `backupCount` that was already there for this.
+⚠️ **`backups.size` is persisted in MiB but read back as bytes via `StorageSizeCast`, and a SQL aggregate
+bypasses the cast** — so `SUM(size)` is scaled through `ByteUnit::Mebibytes` in `Server::nonFailedBackupSize()`.
+Returning it raw is off by **1,048,576×**; a test pins the round-trip. Same family as the documented
+`RateLimitCast` decimal-vs-binary bug — assume any aggregate over a cast column has this problem.
+
+— prior: **IPAM mobile rows + a shared title-truncation fix completed** — the four
 IPAM collections (global groups, address-block list, attached nodes, address list within a block) were the last
 DataTables with no `mobileRow`, so below `@md` they fell back to horizontally scrolling desktop tables; each now
 renders the established muted `Item` row, and their `actionsColumn` callbacks are hoisted into shared
@@ -611,6 +649,25 @@ Researched direction retained for each; none built unless noted.
   nodes/servers/locations/users/tokens, node network page (VLAN cards render: vmbr0 "Not VLAN-aware",
   vmbr1 "VLAN 100"), server-create. ⚠️ **See the two-Postgres gotcha below — you MUST seed into the DB
   FPM actually uses (`192.168.107.3`), not the ddev `db` container, or the app won't see your data.**
+  - **Update 2026-07-15 — the two-Postgres gotcha did NOT reproduce this session** (matching the
+    node-create handoff's 2026-07-15 re-check): `ddev exec psql`, `ddev exec php artisan`, and the browser
+    all agreed, and plain `ddev exec php artisan db:seed` was immediately visible in the app. No `DB_HOST=`
+    override needed. Trust `ddev psql`, but re-verify with `ddev exec grep -w db /etc/hosts` if rows vanish.
+  - **Working recipe (used for the IPAM pass, reuse it):** `npm i playwright@1.61.1` +
+    `npx playwright install chromium --with-deps` in the scratchpad (the chromium install takes >10 min —
+    background it). Log in as **`test@test.com` / `Zzz!98765`** (the `visual-admin@example.test` account above
+    is stale-ish; `test@test.com` works). Seed via a **disposable `database/seeders/XVisualSeeder.php`** run
+    with `ddev exec php artisan db:seed --class=X --force`, then **delete the file** — do not commit it.
+    `db:seed` hits the documented sandbox SIGSEGV; just retry.
+  - **Checks worth automating in the driver** (these caught real bugs this session): assert
+    `document.documentElement.scrollWidth <= clientWidth` per viewport; count visible `[role="listitem"]`
+    vs `table tbody tr` to prove the desktop/mobile swap actually happened; and **compare each row link's
+    `getBoundingClientRect().right` against its row's** — page-level overflow stays false even when a title
+    escapes its row and gets clipped, so overflow alone will not catch it (see the audit's truncation trap).
+  - **Long-value fixtures already in the seed data:** node `display_name` =
+    `A node with a deliberately long display name for truncation`. Note **nodes 2/3/4 share one
+    `display_name`/`fqdn`** ("Sydney Compute 01"), which makes them useless for telling rows apart — pick
+    nodes 5/6 instead.
 
 - **Admin dashboard redesign + olive/blue theme — PALETTE DONE, DASHBOARD BUILT, metrics-deltas (VictoriaMetrics) in progress.**
   - *Palette (DONE, global):* migrated the whole app's theme tokens in `resources/scripts/app.css` to the
@@ -889,7 +946,29 @@ Researched direction retained for each; none built unless noted.
   and never attach `$previous` where it could leak internals; **no auto-derived codes** (that's what leaks
   internals in private forks). The render hook lives in `bootstrap/app.php`, fires only for
   `$request->expectsJson()`, emits `{ message, code }`. `ConvoyException` kept as base for
-  `RepositoryException`/`DataValidationException`/`InvalidJWTException`.
+  `DataValidationException`/`InvalidJWTException`. (`RepositoryException` and
+  `RecordNotFoundException` were deleted with the repository layer on 2026-07-15 — both were
+  orphaned once `EloquentRepository`, their only thrower, was gone.)
+
+- **No repository layer over Eloquent; models own their query logic** (decision 2026-07-15, from the
+  maintainer: *"get rid of the eloquent repository pattern… people like Taylor Otwell advocate for
+  stuff in the models instead"*). Eloquent is already the data-access layer, so a repository over it
+  is a redundant second abstraction. Query logic belongs in the model as **scopes** (see
+  `Backup::scopeNonFailed`/`scopeCreatedWithinSeconds` next to the pre-existing
+  `scopeSuccessful`/`scopeRunning`) or as intent-revealing model methods
+  (`Server::nonFailedBackupSize()`, `Server::isUniqueVmId()`). Call sites read as plain Eloquent:
+  `$server->backups()->nonFailed()`. **Do not reintroduce `app/Repositories/` for database access.**
+  - ⚠️ **This does NOT apply to the Proxmox API clients** (`app/Services/Proxmox/*Client.php`). Those
+    wrap a *remote HTTP API we don't control*, not our own database — a real and necessary boundary.
+    They were only ever misnamed. Placement follows this repo's own precedent
+    (`app/Services/Metrics/VictoriaMetrics.php`, likewise a thin client for a remote HTTP API);
+    Laravel prescribes nothing here.
+  - **Known-remaining (deliberate, not an oversight):** the Proxmox clients keep their fluent
+    `->setNode($n)` / `->setServer($s)` **mutable state**. Renaming was in scope; changing that
+    contract to per-call arguments (`$client->send($server, $cmd)`) is a real refactor of every call
+    site and was explicitly deferred. It's the next thing to consider here if it ever bites — nothing
+    binds these as singletons, so each injection gets a fresh instance and the mutation is scoped to
+    the injecting service.
 - **Proxmox property-list DTO codec** (`app/Extensions/Spatie/Data/Proxmox/`). Attribute-driven codec for
   PVE's `head[,key=value]*` format, replacing hand-written parse ladders. `#[ProxmoxProperty('key', cast)]`
   declares each property; `MapsProxmoxProperties` trait does reflection; `extraProperties` preserves
