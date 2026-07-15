@@ -140,12 +140,31 @@ action in each of the empty and populated states; drawer at 390px with no overfl
   `data-state=open` matches nothing on Base UI and fails silently.
 
 **The frontend-overhaul audit is now 62 done / 4 open**, and the 4 are deliberate:
-1. **Verify the admin server Disks tab against a live seeded node** — the only real task left. The disks
-   service/repo path was live-verified on PVE 9.2.2 back on 2026-07-08 (add/resize/remove, incl. the
-   orphaned-volume race), but **the tab has never been rendered in a browser against a live node**, and it
-   reads live Proxmox so a seeded fake node can't exercise it (`storage_to_node` is empty for the seeded
-   servers; they 409/`cURL error 6` before reaching PVE). Needs `DevNodeSeeder` + the real
-   `us-southeast-2.performave.com` node and a real VM — expensive, and it provisions on live hardware.
+1. **Verify the admin server Disks tab against a live seeded node** — STILL OPEN, but the groundwork is now
+   mapped and it **found a real bug on the way** (`458b04d7`, see below). What was established live
+   (2026-07-15, maintainer authorised provisioning on real hardware):
+   - `DevNodeSeeder` + `.env` `PROXMOX_*` gives a working node; `/api/admin/nodes/{id}/status` returned real
+     hardware (AMD EPYC 9654, PVE 9.2.2, kernel 7.0.2-6). **SSH works** from the sandbox:
+     `ddev exec ssh -o StrictHostKeyChecking=no root@100.124.151.52` (`PROXMOX_SSH_TARGET`).
+   - ⚠️ **The node has ZERO ISOs and ZERO templates**, so the create-server wizard **cannot** clone a VM. The
+     cheap path is to make one by hand and point a Convoy server row at its vmid — the Disks tab only needs the
+     VM to *exist*, since add/resize/remove act on its config, not its OS:
+     `qm create 9999 --name convoy-disk-test --memory 512 --cores 1 --scsihw virtio-scsi-pci --scsi0 local:8 --ostype l26`
+     **Cleanup: `qm destroy 9999 --purge`** (verify `/var/lib/vz/images/` is empty afterwards).
+   - The node's only storage is **`local`** (~100GB, `storesKvm`). Attaching it via
+     `POST /api/admin/nodes/{id}/storages` needs `stores_snippets` (it is required and easy to miss).
+   - **Remaining:** a Convoy server row (vmid 9999, node, storage) + a primary `server_disks` row, then drive
+     `/admin/servers/{id}/disks` for add/resize/remove, primary-disk restrictions, and empty/loading.
+   - **Everything created live was destroyed** (VM purged, 0 images left) and the dev-DB rows removed.
+
+   ⚠️ **`storage_to_node` pivot bug — FOUND AND FIXED (`458b04d7`).** Attaching a storage 500'd with
+   `column "id" does not exist ... returning "id"`: the pivot is composite with **no `id` column**, but
+   `StorageToNode` extends the standard Eloquent `Model`, so `$incrementing` defaulted to true. **Postgres-only**
+   (MySQL tolerated it — so the v10 move exposed it) and **only reachable against a live node**, because the
+   store endpoint runs straight after fetching real storages from PVE and seeders write the pivot directly.
+   Fixed with `$primaryKey = 'storage_id'` + `$incrementing = false`, matching the key column
+   `updateBackupOrder()` already passed to `setNewOrder()`. *This is the same family as the Phase-1
+   Postgres bugs; assume any composite pivot extending `App\Models\Model` has it.*
 2–4. Three "definition of done" lines left open on purpose: collection loading/empty/error behaviour and
    mobile representations are true for every screen touched but **not audited exhaustively app-wide**, and the
    flagship-verified line is gated on (1).
