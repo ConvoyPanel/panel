@@ -2,8 +2,19 @@
 
 Status: audited 2026-07-13 against `next` after the base + nova rollout. The
 shared Textarea, Select, Checkbox, DropdownMenu, Popover, Command/combobox,
-DataTable toolbar, OTP, accessible icon actions, and admin server Disks work
-identified below has since been completed; unchecked items remain.
+DataTable toolbar, OTP, accessible icon actions, admin server Disks, DataTable
+empty/filtered-empty states, shared Show all control, and admin dashboard Nodes
+card work identified below has since been completed; unchecked items remain.
+
+⚠️ **Truncating inside `Item` needs two non-obvious overrides** (cost real time,
+will recur on every row conversion). `ItemTitle` is a `w-fit` flex row, so
+`truncate` on it never ellipsises — put the text in a `<span className='truncate'>`
+inside a `w-full min-w-0` title. `ItemDescription` defaults to `line-clamp-2` +
+`text-balance`; `text-wrap` is a longhand of `white-space`, so `text-balance`
+silently overrides `truncate`'s `nowrap` (you get `text-overflow: ellipsis` with
+`white-space: normal` — it wraps and the ellipsis never shows). Use
+`block truncate text-nowrap`. `text-nowrap` is in tailwind-merge's `text-wrap`
+group, so it genuinely replaces `text-balance`; plain `truncate` does not.
 
 This document tracks the remaining visual-system and screen-composition work in
 the frontend overhaul. It is an implementation checklist, not a record of work
@@ -135,7 +146,7 @@ shared destructive item variant.
       `h-10` while standard controls use `h-8`.
 - [x] Give `ResourceComboboxForm` normal `FormControl` IDs, `aria-invalid`,
       description/error linkage, and combobox role/state semantics.
-- [ ] Replace duplicated bespoke Show all controls with the shared Button.
+- [x] Replace duplicated bespoke Show all controls with the shared Button.
 
 ## Priority 1: buttons and DataTable
 
@@ -146,8 +157,8 @@ shared destructive item variant.
 - [x] Use `size="icon"` consistently for pagination and action controls.
 - [x] Add accessible names to icon-only buttons.
 - [x] Make `DataTableToolbar` wrap or reflow on narrow screens.
-- [ ] Distinguish an empty collection from a filtered no-results state.
-- [ ] Allow contextual empty copy and a primary onboarding/create action.
+- [x] Distinguish an empty collection from a filtered no-results state.
+- [x] Allow contextual empty copy and a primary onboarding/create action.
 
 Representative affected shared components:
 
@@ -182,7 +193,7 @@ patterns:
 - [x] Node Storages: bespoke cards, detached actions, and spacing shims.
 - [x] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
 - [x] Server Addresses: raw desktop table and duplicated overflow handling.
-- [ ] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text
+- [x] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text
       empty state.
 
 ### Server subpage consistency

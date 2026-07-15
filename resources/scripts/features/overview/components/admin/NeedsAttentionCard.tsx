@@ -10,18 +10,21 @@ import {
     IconUserPlus,
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 
 import { TablerIcon } from '@/lib/tabler.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/Sheet'
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemMedia,
+    ItemTitle,
+    OverflowItemGroup,
+} from '@/components/ui/Item'
 
 import { bytes, num } from './overview-helpers'
 
@@ -59,23 +62,29 @@ const ActionLink = ({ to, children }: { to: string; children: ReactNode }) => (
 const AttentionRow = ({ item }: { item: AttentionItem }) => {
     const Icon = item.icon
     return (
-        <div className='flex items-center gap-3 border-b py-2.5 first:pt-0 last:border-0 last:pb-0'>
-            <span
-                className={cn(
-                    'grid size-8 shrink-0 place-items-center rounded-lg',
-                    iconWrapClass[item.tone]
-                )}
-            >
-                <Icon className='size-4' />
-            </span>
-            <div className='min-w-0'>
-                <p className='truncate text-sm font-semibold'>{item.title}</p>
-                <p className='text-muted-foreground truncate text-xs'>
+        <Item variant='muted' size='sm'>
+            <ItemMedia>
+                <span
+                    className={cn(
+                        'grid size-8 shrink-0 place-items-center rounded-lg',
+                        iconWrapClass[item.tone]
+                    )}
+                >
+                    <Icon className='size-4' />
+                </span>
+            </ItemMedia>
+            <ItemContent className='min-w-0'>
+                {/* ItemTitle is a `w-fit` flex row, so the ellipsis has to live
+                    on a child that can actually shrink. */}
+                <ItemTitle className='w-full min-w-0'>
+                    <span className='truncate'>{item.title}</span>
+                </ItemTitle>
+                <ItemDescription className='block truncate text-nowrap text-xs'>
                     {item.description}
-                </p>
-            </div>
-            {item.action}
-        </div>
+                </ItemDescription>
+            </ItemContent>
+            <ItemActions className='shrink-0'>{item.action}</ItemActions>
+        </Item>
     )
 }
 
@@ -176,18 +185,13 @@ interface Props {
 }
 
 const NeedsAttentionCard = ({ data, isFresh }: Props) => {
-    const [sheetOpen, setSheetOpen] = useState(false)
-
     const items = isFresh ? deriveSetup(data) : deriveAttention(data)
-    const visible = items.slice(0, MAX_VISIBLE)
-    const hasOverflow = items.length > MAX_VISIBLE
+    const title = isFresh ? 'Finish setup' : 'Needs attention'
 
     return (
         <Card className='flex flex-col'>
             <CardHeader className='p-5 pb-2'>
-                <CardTitle className='text-base'>
-                    {isFresh ? 'Finish setup' : 'Needs attention'}
-                </CardTitle>
+                <CardTitle className='text-base'>{title}</CardTitle>
             </CardHeader>
             <CardContent className='flex flex-1 flex-col p-5 pt-0'>
                 {items.length === 0 ? (
@@ -198,42 +202,15 @@ const NeedsAttentionCard = ({ data, isFresh }: Props) => {
                         description='No failed servers, backups, or capacity warnings.'
                     />
                 ) : (
-                    <>
-                        <div className='flex-1'>
-                            {visible.map(item => (
-                                <AttentionRow key={item.id} item={item} />
-                            ))}
-                        </div>
-                        {hasOverflow && (
-                            <button
-                                type='button'
-                                onClick={() => setSheetOpen(true)}
-                                className='hover:bg-muted mt-4 w-full rounded-lg border py-2 text-sm font-semibold transition-colors'
-                            >
-                                Show all {num(items.length)} &rarr;
-                            </button>
-                        )}
-                    </>
-                )}
-            </CardContent>
-
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-                <SheetContent
-                    side='right'
-                    className='w-full overflow-y-auto sm:max-w-md'
-                >
-                    <SheetHeader>
-                        <SheetTitle>
-                            {isFresh ? 'Finish setup' : 'Needs attention'}
-                        </SheetTitle>
-                    </SheetHeader>
-                    <div className='mt-4'>
-                        {items.map(item => (
+                    <OverflowItemGroup
+                        title={title}
+                        max={MAX_VISIBLE}
+                        rows={items.map(item => (
                             <AttentionRow key={item.id} item={item} />
                         ))}
-                    </div>
-                </SheetContent>
-            </Sheet>
+                    />
+                )}
+            </CardContent>
         </Card>
     )
 }

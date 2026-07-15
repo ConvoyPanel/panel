@@ -1,13 +1,17 @@
+import { IconServerBolt } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
+
+import { buttonVariants } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { LinearProgressBar } from '@/components/ui/Progress'
+import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/Table'
+    Item,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+    OverflowItemGroup,
+} from '@/components/ui/Item'
+import { LinearProgressBar } from '@/components/ui/Progress'
 import { StatLabel } from '@/components/ui/Typography'
 
 import {
@@ -19,15 +23,60 @@ import {
 
 type NodeSummary = App.Data.Admin.Overview.NodeSummaryData
 
+/** Keeps the card from growing with the fleet; overflow moves into the sheet. */
+const MAX_VISIBLE = 5
+
 const memoryFigure = (node: NodeSummary) =>
     `${bytes(node.memory.allocated)} / ${bytes(node.memory.total)} · ${node.memory.percent}%`
 
-const Meter = ({ percent, label }: { percent: number; label: string }) => (
-    <LinearProgressBar
-        value={Math.min(percent, 100)}
-        aria-label={`${label}: ${percent}%`}
-        indicatorClassName={meterIndicatorClass[capacityTone(percent)]}
-    />
+const NodeRow = ({ node }: { node: NodeSummary }) => (
+    <Item variant='muted' size='sm' className='items-start gap-3'>
+        <ItemContent className='min-w-0'>
+            <div className='flex items-start justify-between gap-2'>
+                <div className='min-w-0'>
+                    {/* ItemTitle is a `w-fit` flex row, so the ellipsis has to
+                        live on a child that can actually shrink. */}
+                    <ItemTitle className='w-full min-w-0'>
+                        <span className='truncate'>{node.displayName}</span>
+                    </ItemTitle>
+                    {/* `block` and `text-nowrap` are both load-bearing on top
+                        of `truncate`: ItemDescription defaults to
+                        `line-clamp-2` (display: -webkit-box) and
+                        `text-balance`. `text-wrap` is a longhand of
+                        `white-space`, so text-balance quietly beats truncate's
+                        `nowrap` and the FQDN wraps with an ellipsis that never
+                        shows. */}
+                    <ItemDescription className='block truncate text-nowrap font-mono text-xs'>
+                        {node.fqdn}
+                    </ItemDescription>
+                </div>
+                <div className='shrink-0 text-sm font-semibold tracking-tight tabular-nums'>
+                    {num(node.servers)}{' '}
+                    <span className='text-label font-normal'>
+                        server{node.servers === 1 ? '' : 's'}
+                    </span>
+                </div>
+            </div>
+            {/* The meter and its figure sit side by side once the row is wide
+                enough; stacking below that keeps the bar from being squeezed
+                to a few pixels. */}
+            <div className='mt-2.5 grid gap-1.5 @2xl:grid-cols-[1fr_auto] @2xl:items-center @2xl:gap-3'>
+                <LinearProgressBar
+                    value={Math.min(node.memory.percent, 100)}
+                    aria-label={`Memory allocated for ${node.displayName}: ${node.memory.percent}%`}
+                    indicatorClassName={
+                        meterIndicatorClass[capacityTone(node.memory.percent)]
+                    }
+                />
+                <StatLabel
+                    as='span'
+                    className='text-xs whitespace-nowrap tabular-nums'
+                >
+                    {memoryFigure(node)}
+                </StatLabel>
+            </div>
+        </ItemContent>
+    </Item>
 )
 
 const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
@@ -40,98 +89,25 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
         </CardHeader>
         <CardContent className='p-5 pt-2'>
             {nodes.length === 0 ? (
-                <p className='text-muted-foreground py-2 text-sm'>
-                    No nodes yet.
-                </p>
+                <SimpleEmptyState
+                    className='p-0 py-4'
+                    icon={IconServerBolt}
+                    title='No nodes yet'
+                    description='Add a node to start provisioning servers.'
+                    action={
+                        <Link className={buttonVariants()} to='/admin/nodes'>
+                            Add node
+                        </Link>
+                    }
+                />
             ) : (
-                <>
-                    {/* Desktop: dense table */}
-                    <div className='hidden @2xl:block'>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className='pl-0'>Node</TableHead>
-                                    <TableHead className='w-24 text-center'>
-                                        Servers
-                                    </TableHead>
-                                    <TableHead className='w-[46%] pr-0'>
-                                        Memory allocated
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {nodes.map(node => (
-                                    <TableRow key={node.id}>
-                                        <TableCell className='pl-0'>
-                                            <div className='font-semibold'>
-                                                {node.displayName}
-                                            </div>
-                                            <div className='text-muted-foreground font-mono text-xs'>
-                                                {node.fqdn}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className='text-center tabular-nums'>
-                                            {num(node.servers)}
-                                        </TableCell>
-                                        <TableCell className='pr-0'>
-                                            <div className='grid grid-cols-[1fr_auto] items-center gap-3'>
-                                                <Meter
-                                                    percent={
-                                                        node.memory.percent
-                                                    }
-                                                    label={`Memory allocated for ${node.displayName}`}
-                                                />
-                                                <StatLabel
-                                                    as='span'
-                                                    className='text-xs whitespace-nowrap tabular-nums'
-                                                >
-                                                    {memoryFigure(node)}
-                                                </StatLabel>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-
-                    {/* Mobile: stacked cards so the meter never gets squeezed */}
-                    <div className='@2xl:hidden'>
-                        {nodes.map(node => (
-                            <div
-                                key={node.id}
-                                className='border-b py-3.5 first:pt-0 last:border-0 last:pb-0'
-                            >
-                                <div className='mb-2.5 flex items-start justify-between gap-2'>
-                                    <div className='min-w-0'>
-                                        <div className='font-semibold'>
-                                            {node.displayName}
-                                        </div>
-                                        <div className='text-muted-foreground truncate font-mono text-xs'>
-                                            {node.fqdn}
-                                        </div>
-                                    </div>
-                                    <div className='shrink-0 text-sm font-semibold tracking-tight tabular-nums'>
-                                        {num(node.servers)}{' '}
-                                        <span className='text-label font-normal'>
-                                            servers
-                                        </span>
-                                    </div>
-                                </div>
-                                <StatLabel className='mb-1.5 text-xs'>
-                                    Memory allocated
-                                </StatLabel>
-                                <Meter
-                                    percent={node.memory.percent}
-                                    label={`Memory allocated for ${node.displayName}`}
-                                />
-                                <StatLabel className='mt-1.5 text-xs tabular-nums'>
-                                    {memoryFigure(node)}
-                                </StatLabel>
-                            </div>
-                        ))}
-                    </div>
-                </>
+                <OverflowItemGroup
+                    title='Nodes'
+                    max={MAX_VISIBLE}
+                    rows={nodes.map(node => (
+                        <NodeRow key={node.id} node={node} />
+                    ))}
+                />
             )}
         </CardContent>
     </Card>

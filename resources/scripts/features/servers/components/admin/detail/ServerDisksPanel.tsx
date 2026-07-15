@@ -143,59 +143,58 @@ const ServerDisksPanel = ({ serverId }: Props) => {
         <>
             <Heading>Disks</Heading>
 
-            {!isLoading && disks?.length === 0 ? (
-                <Card>
-                    <CardContent>
-                        <SimpleEmptyState
-                            icon={IconDatabaseOff}
-                            title='No attached disks'
-                            description='Add a disk to expand this server’s storage.'
-                            action={addButton}
-                        />
-                    </CardContent>
-                </Card>
-            ) : (
-                <DataTable
-                    toolbar
-                    data={disks}
-                    columns={columns}
-                    isPlaceholderData={isLoading}
-                    skeletonRows={3}
-                    rightActions={addButton}
-                    mobileRow={row => {
-                        const disk = row.original
+            <DataTable
+                toolbar
+                data={disks}
+                columns={columns}
+                isPlaceholderData={isLoading}
+                skeletonRows={3}
+                rightActions={addButton}
+                emptyState={
+                    <Card>
+                        <CardContent>
+                            <SimpleEmptyState
+                                icon={IconDatabaseOff}
+                                title='No attached disks'
+                                description='Add a disk to expand this server’s storage.'
+                                action={addButton}
+                            />
+                        </CardContent>
+                    </Card>
+                }
+                mobileRow={row => {
+                    const disk = row.original
 
-                        return (
-                            <Item variant='muted' size='sm'>
-                                <ItemContent className='min-w-0'>
-                                    <ItemTitle className='font-mono text-xs'>
-                                        {disk.interface ?? 'Pending'}
-                                    </ItemTitle>
-                                    <ItemDescription>
-                                        {disk.storageName ?? 'Unknown storage'}{' '}
-                                        · {formatBytes(disk.size)}
-                                    </ItemDescription>
-                                    <Badge
-                                        variant={
-                                            disk.isPrimary
-                                                ? 'default'
-                                                : 'outline'
-                                        }
-                                        className='w-fit'
-                                    >
-                                        {disk.isPrimary ? 'Primary' : 'Data'}
-                                    </Badge>
-                                </ItemContent>
-                                {!disk.isPrimary && (
-                                    <ItemActions>
-                                        <Actions>{renderActions(disk)}</Actions>
-                                    </ItemActions>
-                                )}
-                            </Item>
-                        )
-                    }}
-                />
-            )}
+                    return (
+                        <Item variant='muted' size='sm'>
+                            <ItemContent className='min-w-0'>
+                                <ItemTitle className='font-mono text-xs'>
+                                    {disk.interface ?? 'Pending'}
+                                </ItemTitle>
+                                <ItemDescription>
+                                    {disk.storageName ?? 'Unknown storage'}{' '}
+                                    · {formatBytes(disk.size)}
+                                </ItemDescription>
+                                <Badge
+                                    variant={
+                                        disk.isPrimary
+                                            ? 'default'
+                                            : 'outline'
+                                    }
+                                    className='w-fit'
+                                >
+                                    {disk.isPrimary ? 'Primary' : 'Data'}
+                                </Badge>
+                            </ItemContent>
+                            {!disk.isPrimary && (
+                                <ItemActions>
+                                    <Actions>{renderActions(disk)}</Actions>
+                                </ItemActions>
+                            )}
+                        </Item>
+                    )
+                }}
+            />
 
             {server && (
                 <AddServerDiskModal

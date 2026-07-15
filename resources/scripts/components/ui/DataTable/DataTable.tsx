@@ -30,6 +30,7 @@ import {
     TableRow,
 } from '@/components/ui/Table'
 
+import DataTableFilteredEmpty from './DataTableFilteredEmpty.tsx'
 import DataTablePagination from './DataTablePagination'
 import DataTableToolbar from './DataTableToolbar.tsx'
 
@@ -101,6 +102,8 @@ const DataTable = <TData,>({
     bulkActions,
     isPlaceholderData,
     rightActions,
+    emptyState,
+    filteredEmptyState,
     mobileRow,
     ...props
 }: DataTableProps<TData>) => {
@@ -226,6 +229,31 @@ const DataTable = <TData,>({
     const showBulkBar =
         enableRowSelection && !!bulkActions && selectedRows.length > 0
 
+    const rows = table.getRowModel().rows
+    const isFiltered = !!query || (columnFilters?.length ?? 0) > 0
+    const hasNoRows = !!data && rows.length === 0
+
+    const clearFilters = () => {
+        setQuery('')
+        setColumnFilters([])
+    }
+
+    /**
+     * An unfiltered empty collection has nothing to search, filter, or
+     * paginate, so the contextual empty state stands in for the whole table
+     * rather than rendering as a row inside an otherwise-functional shell.
+     */
+    if (hasNoRows && !isFiltered && emptyState) {
+        return <>{emptyState}</>
+    }
+
+    const noRowsContent =
+        hasNoRows && isFiltered
+            ? filteredEmptyState ?? (
+                  <DataTableFilteredEmpty onClear={clearFilters} />
+              )
+            : null
+
     return (
         <div className='@container space-y-4'>
             {toolbar && (
@@ -299,8 +327,8 @@ const DataTable = <TData,>({
                     >
                         {data ? (
                             <>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map(row => (
+                                {rows.length ? (
+                                    rows.map(row => (
                                         <TableRow
                                             key={row.id}
                                             data-state={
@@ -334,12 +362,16 @@ const DataTable = <TData,>({
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow>
+                                    <TableRow className='hover:bg-transparent'>
                                         <TableCell
                                             colSpan={resolvedColumns.length}
-                                            className='h-24 text-center'
+                                            className='p-0'
                                         >
-                                            No results.
+                                            {noRowsContent ?? (
+                                                <div className='flex h-24 items-center justify-center text-center text-muted-foreground'>
+                                                    No results.
+                                                </div>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -379,7 +411,12 @@ const DataTable = <TData,>({
                     </TableBody>
                 </Table>
             </div>
-            {mobileRow && (
+            {/* Kept outside ItemGroup: an empty state isn't a list item, so it
+                must not be a child of the group's role="list". */}
+            {mobileRow && noRowsContent && (
+                <div className='@md:hidden'>{noRowsContent}</div>
+            )}
+            {mobileRow && !noRowsContent && (
                 <ItemGroup
                     className={cn(
                         'gap-3 @md:hidden',
@@ -389,8 +426,8 @@ const DataTable = <TData,>({
                     )}
                 >
                     {data ? (
-                        table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map(row => (
+                        rows.length ? (
+                            rows.map(row => (
                                 <Fragment key={row.id}>
                                     {mobileRow(row)}
                                 </Fragment>

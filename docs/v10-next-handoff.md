@@ -5,7 +5,14 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-15 (session: **dashboard accessibility + second bundle pass completed** — shared
+Last updated: 2026-07-15 (session: **shared DataTable empty states + admin dashboard Nodes card completed** —
+DataTable now distinguishes an unfiltered empty collection (contextual `emptyState`, which replaces the whole
+table and carries the create action) from a filtered no-results state (shared `DataTableFilteredEmpty` with a
+Clear filters action inside the still-usable shell); the toolbar Reset now also tracks the search query, not
+just column filters. The admin dashboard Nodes card and Needs-attention card moved onto shared muted `Item`
+rows + `OverflowItemGroup`, deleting a duplicated Sheet/"Show all" implementation, and the Nodes card gained a
+real contextual empty state with an Add node action. Browser-verified at desktop + 390px. — prior:
+**dashboard accessibility + second bundle pass completed** — shared
 empty states now render for Needs attention and Backups & ISOs; the global muted token and configurable
 `CardTitle` hierarchy bring throttled login/admin Lighthouse Accessibility to 100; command search,
 error pages, and confirmation UI now load only on demand; main JS is 378.66 kB / 115.88 kB gzip. — prior:

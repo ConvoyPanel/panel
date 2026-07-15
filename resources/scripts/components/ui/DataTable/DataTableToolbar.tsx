@@ -22,7 +22,14 @@ const DataTableToolbar = <TData,>({
     searchable,
     rightActions,
 }: DataTableToolbarProps<TData>) => {
-    const isFiltered = table.getState().columnFilters.length > 0
+    const isFiltered =
+        table.getState().columnFilters.length > 0 ||
+        !!table.getState().globalFilter
+
+    const reset = () => {
+        table.resetColumnFilters()
+        table.setGlobalFilter('')
+    }
 
     return (
         <div className='flex flex-wrap items-center gap-2'>
@@ -51,7 +58,7 @@ const DataTableToolbar = <TData,>({
                 {isFiltered && (
                     <Button
                         variant='ghost'
-                        onClick={() => table.resetColumnFilters()}
+                        onClick={reset}
                         className='h-8 px-2 lg:px-3'
                     >
                         Reset

@@ -1,6 +1,7 @@
 import { cn } from '@/utils'
 import { ReactNode, useState } from 'react'
 
+import { Button } from '@/components/ui/Button'
 import {
     Sheet,
     SheetContent,
@@ -37,13 +38,13 @@ const OverflowItemGroup = ({ rows, max = 3, title, className }: Props) => {
             {/* Kept outside ItemGroup: a trigger isn't a list item, so it must
                 not be a child of the group's role="list". */}
             {hasOverflow && (
-                <button
-                    type='button'
+                <Button
+                    variant='outline'
+                    className='mt-3 w-full'
                     onClick={() => setOpen(true)}
-                    className='hover:bg-muted mt-3 w-full rounded-md border py-2 text-sm font-semibold transition-colors'
                 >
                     Show all {rows.length} &rarr;
-                </button>
+                </Button>
             )}
 
             <Sheet open={open} onOpenChange={setOpen}>

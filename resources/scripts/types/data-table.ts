@@ -68,6 +68,23 @@ export interface DataTableProps<TData>
     rightActions?: ReactNode
 
     /**
+     * Contextual empty state for a collection that holds no records at all.
+     * When given, it replaces the whole table — toolbar, rows, and pagination
+     * included — because searching and filtering nothing is meaningless. This
+     * is where a primary onboarding/create action belongs.
+     *
+     * Without it the table falls back to the plain in-body "No results." row.
+     */
+    emptyState?: ReactNode
+
+    /**
+     * Empty state for a collection that has records but none matching the
+     * active search/filters. Defaults to a shared no-results state offering to
+     * clear the filters, so callers only pass this to override the copy.
+     */
+    filteredEmptyState?: ReactNode
+
+    /**
      * Optional compact mobile representation for each row. Desktop keeps the
      * full table so sorting, column visibility, and pinned actions stay intact.
      */
