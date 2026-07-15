@@ -346,7 +346,12 @@ follow-ups** below — all doable in-sandbox, no prod data.
   A custom `ValidateCsrfToken` exempts *valid* bearer requests (browsers can't forge them) while keeping full
   CSRF for the SPA. **Both UIs shipped**: user PATs in the account security page (`features/account/api-keys`,
   scope picker + one-time reveal), admin app tokens at `/admin/tokens` (`features/tokens`, DataTable + full
-  resource ability picker). Frontend build/type-verified only (no in-browser click-through).
+  resource ability picker). **Browser-verified 2026-07-15:** the admin flow created a scoped
+  `overview:read` application token, showed and copied its one-time plaintext, inserted the DataTable row,
+  and revoked it through the action menu/confirmation. At 390 px, the account flow created
+  `servers:read`, copied the reveal, rendered the correctly-labelled Item row, revoked it, and returned to
+  the contextual empty state. Both disposable tokens were removed; no horizontal overflow or unexpected
+  console/API errors.
 - **VM power actions (admin + client)** — shared `SendServerPowerCommand` action, admin `getState`/`updateState`
   routes, per-server power lock (`ServerPowerLockService`, `Cache::add` SETNX+TTL, 409
   `power_action_in_progress`), pending action surfaced on `ServerStateData`. Admin server detail page +
@@ -626,7 +631,7 @@ Researched direction retained for each; none built unless noted.
   it's now exported from `Forms/index.ts`.
 
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
-  both the client PAT card and the admin `/admin/tokens` screen shipped).
+  both the client PAT card and the admin `/admin/tokens` screen shipped and browser-verified).
 
 - **SSH keychain + server auth — DONE.** Keychain: `Client\Account\SSHKeyController` (index/store/destroy)
   on the existing `ssh_keys` table, `SshPublicKey` rule (base64 blob + embedded-algorithm integrity check),
