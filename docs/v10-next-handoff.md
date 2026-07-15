@@ -5,19 +5,29 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-15 (session: **repository layer removed + backups quota wired + IPAM mobile rows**.
-Four commits, all green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows,
-`71fc1132` backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
+Last updated: 2026-07-15 (session: **repository layer removed + backups quota wired & verified + IPAM mobile
+rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
+backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
 
-⚠️ **PICK UP HERE — one thing is built but NOT browser-verified.** The **backups quota display**
-(`71fc1132`) is proven only by tests/typecheck; it was never clicked. There were **zero backup rows in the
-dev DB**, so it has never rendered with real data. To verify: seed backups for a server (note
-`BackupFactory` writes `size` through `StorageSizeCast`, so pass **bytes** — `4*1024*1024` stores as 4 MiB),
-then check `/servers/{uuid}/backups` at desktop + 390px: the two trigger rings, the Sheet's count/size
-figures, the `-1` unlimited path on both limits, and that the quota reads the **cached** list query rather
-than firing a second request. Also unverified in-browser: the Graphs page's new `Resource usage` heading
-(replacing Overview's `Header`, which **also removes the power Toolbar from Graphs** — intentional, matches
-Networking/Storage/Security, but eyeball it).
+**Backups quota is now BROWSER-VERIFIED (2026-07-15).** Seeded 3 good backups (4 GiB + 2.5 GiB + 1 GiB) plus
+a 90 GiB **failed** one on server 3, as `visual-admin@example.test` / `password` (⚠️ **all seeded servers are
+owned by user 38, not `test@test.com`** — the client area scopes to servers you own, deliberately, even for
+root admins, so `test@test.com` sees nothing). Proven: API `backupSize` = **8,053,063,680** = exactly
+7680 MiB × 1048576 (so the cast scaling is right) with the 90 GiB failed backup excluded from both figures;
+the Sheet renders `3 backups / out of 16 backups` + `7.5 GiB used / out of 100 GiB`; the **`-1` unlimited
+path** renders `of unlimited backups` / `of unlimited storage` with no NaN; **exactly one** backups API
+request per load (the quota shares `BackupView`'s cached query rather than double-fetching); the heading row
+holds up at desktop + 390px with no overflow and no console errors beyond the documented login 401 probe.
+Still unverified in-browser: the Graphs page's new `Resource usage` heading (which **also removes the power
+Toolbar from Graphs** — intentional, matches Networking/Storage/Security, but eyeball it).
+
+⚠️ **`npm run build` does NOT typecheck — and that burned a whole verification pass.** Vite happily emitted
+type-broken code (`server.backupCountLimit` when the field is `server.backup.countLimit`); `tc` caught it
+afterwards, the source was fixed, but **the bundle was never rebuilt**, so the browser ran the stale build
+and the quota rendered `out of undefined backups` / `out of NaN`. Ten minutes went into hunting a
+"bug" that existed only in `public/build`. **Always run `tc` BEFORE `build`, and rebuild after any fix.**
+When a browser result contradicts the source you're reading, `grep` the built asset in
+`public/build/assets/*.js` before debugging the source — it settles it instantly.
 
 **Next up after that**, from [frontend-overhaul-audit.md](frontend-overhaul-audit.md) "Server subpage
 consistency" — 2 of 5 done this session (Graphs heading; `gap-5` → `gap-2`/`@md:gap-4`). Remaining:
