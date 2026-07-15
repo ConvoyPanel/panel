@@ -63,22 +63,22 @@ export const getQrCode = (): Promise<AuthenticatorQrCode> =>
 export const getRecoveryCodes = (): Promise<string[]> =>
     apiFetch<string[]>(recoveryCodesRoute())
 
+/**
+ * The QR code and secret key are deliberately absent here. They describe one
+ * setup attempt, not durable server state: `enable` mints a fresh secret
+ * whenever the account has none, so a cached QR can outlive the secret it
+ * encodes. Cached, re-entering setup painted the previous attempt's QR from the
+ * cache while refetching behind it — a window in which scanning seeded the
+ * authenticator with a dead secret and every code it produced was rejected.
+ * AuthenticatorEnableDialog fetches both with getQrCode()/getSecretKey() into
+ * component state instead.
+ */
 export const authenticatorQueries = {
     all: () => ['account', 'authenticator'] as const,
     enabled: () =>
         queryOptions({
             queryKey: [...authenticatorQueries.all(), 'enabled'] as const,
             queryFn: isAuthenticatorEnabled,
-        }),
-    secretKey: () =>
-        queryOptions({
-            queryKey: [...authenticatorQueries.all(), 'secret-key'] as const,
-            queryFn: getSecretKey,
-        }),
-    qrCode: () =>
-        queryOptions({
-            queryKey: [...authenticatorQueries.all(), 'qr-code'] as const,
-            queryFn: getQrCode,
         }),
     recoveryCodes: () =>
         queryOptions({
@@ -92,12 +92,6 @@ export const authenticatorQueries = {
 
 export const useIsAuthenticatorEnabled = () =>
     useQuery(authenticatorQueries.enabled())
-
-export const useQrCode = (enabled = true) =>
-    useQuery({ ...authenticatorQueries.qrCode(), enabled })
-
-export const useSecretKey = (enabled = true) =>
-    useQuery({ ...authenticatorQueries.secretKey(), enabled })
 
 export const useRecoveryCodes = (enabled = true) =>
     useQuery({ ...authenticatorQueries.recoveryCodes(), enabled })

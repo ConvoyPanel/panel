@@ -2,11 +2,12 @@ import {
     authenticatorQueries,
     confirmAuthenticator,
     enableAuthenticator,
-    useQrCode,
-    useSecretKey,
+    getQrCode,
+    getSecretKey,
+    type AuthenticatorQrCode,
 } from '@/features/account/authenticator/api.ts'
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
-import { handleFormErrors } from '@/utils/http.ts'
+import { getApiErrorMessage, handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -55,9 +56,17 @@ const AuthenticatorEnableDialog = () => {
         ])
     )
     const queryClient = useQueryClient()
-    const [setupReady, setSetupReady] = useState(false)
-    const { data: qrCode, isLoading, error } = useQrCode(open && setupReady)
-    const { data: secretKey } = useSecretKey(open && setupReady)
+    // Setup material is fetched straight into state rather than through the
+    // query cache. It belongs to ONE setup attempt: `enable` mints a new secret
+    // whenever there isn't one, so a cached QR is a QR for a secret the server
+    // may already have thrown away. Cached, re-opening setup painted the
+    // previous attempt's QR from cache while refetching behind it — scan during
+    // that window and your authenticator is seeded with a dead secret, so every
+    // code it ever generates is rejected. There is no cache to go stale now.
+    const [setup, setSetup] = useState<{
+        qrCode: AuthenticatorQrCode
+        secretKey: string
+    } | null>(null)
 
     const form = useForm({
         resolver: zodResolver(schema),
@@ -68,27 +77,36 @@ const AuthenticatorEnableDialog = () => {
         let cancelled = false
 
         const main = async () => {
+            setSetup(null)
+
             if (!open) {
-                setSetupReady(false)
-
                 return
             }
 
-            setSetupReady(false)
             form.reset({ code: '' })
-            await enableAuthenticator()
 
-            if (cancelled) {
-                return
+            try {
+                await enableAuthenticator()
+
+                const [qrCode, secretKey] = await Promise.all([
+                    getQrCode(),
+                    getSecretKey(),
+                ])
+
+                if (cancelled) {
+                    return
+                }
+
+                setSetup({ qrCode, secretKey })
+            } catch (e) {
+                if (cancelled) {
+                    return
+                }
+
+                toast.error(
+                    getApiErrorMessage(e, 'Could not start authenticator setup')
+                )
             }
-
-            await queryClient.invalidateQueries({
-                queryKey: authenticatorQueries.qrCode().queryKey,
-            })
-            await queryClient.invalidateQueries({
-                queryKey: authenticatorQueries.secretKey().queryKey,
-            })
-            setSetupReady(true)
         }
 
         void main()
@@ -96,7 +114,7 @@ const AuthenticatorEnableDialog = () => {
         return () => {
             cancelled = true
         }
-    }, [open, queryClient])
+    }, [open])
 
     const { mutateAsync: confirm } = useMutation({
         mutationFn: confirmAuthenticator,
@@ -120,12 +138,15 @@ const AuthenticatorEnableDialog = () => {
             openModal('recovery-codes')
         },
         onError: e => {
+            // A wrong code is a 422 and handleFormErrors surfaces Fortify's own
+            // wording. Anything else is NOT a wrong code — reporting it as one
+            // sent people rescanning a QR when the real problem was a 500 or an
+            // expired session.
             if (handleFormErrors(e, form.setError)) return
 
-            form.setError('code', {
-                type: 'manual',
-                message: 'That code is not valid. Try the next one.',
-            })
+            toast.error(
+                getApiErrorMessage(e, 'Could not verify that code. Please try again.')
+            )
         },
     })
 
@@ -136,8 +157,7 @@ const AuthenticatorEnableDialog = () => {
         if (!next) closeModal('enable')
     }
 
-    const isSetupVisible =
-        !error && !isLoading && Boolean(qrCode?.url) && Boolean(secretKey)
+    const isSetupVisible = setup !== null
 
     return (
         <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
@@ -163,11 +183,11 @@ const AuthenticatorEnableDialog = () => {
                                     <div
                                         className={'grid place-items-center'}
                                         dangerouslySetInnerHTML={{
-                                            __html: qrCode!.svg,
+                                            __html: setup!.qrCode.svg,
                                         }}
                                     />
                                     <p className={'text-center'}>
-                                        <strong>Secret Key:</strong> {secretKey}
+                                        <strong>Secret Key:</strong> {setup!.secretKey}
                                     </p>
                                     <FormField
                                         control={form.control}
