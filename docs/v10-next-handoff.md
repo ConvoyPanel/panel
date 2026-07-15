@@ -188,7 +188,7 @@ Researched direction retained for each; none built unless noted.
   - **`components.json` is stale** (`"style": "new-york"`). Do **not** `npx shadcn@latest add <component>` —
     it would pull new-york + Radix, wrong on both axes. Port nova's source by hand, as done here.
 
-- **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
+- **Bandwidth rate-limiting rework (GitHub #108) — COMPLETE.**
   Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
   (`servers.speed_limit`, bytes/s) plus a **configurable overage penalty**
   (throttle-to-rate or disconnect the NIC) resolved by a **server → node → global**
@@ -201,7 +201,7 @@ Researched direction retained for each; none built unless noted.
   `-1`=unlimited quota no longer false-throttles. Scheduler (`routes/console.php`) is
   now live for `sync-usages` / `reset-usages` / `sync-rate-limits`.
 
-  **Frontend — items 1, 3, 4 DONE (2026-07-15); only item 2 remains (it's blocked):**
+  **Frontend — all four items DONE (2026-07-15):**
   1. **Speed cap on server creation — DONE.** `Speed Limit (MB/s)` in the create wizard's
      `LimitsForm`, mapped to `limits.speed_limit` in bytes/s. The backend already accepted it
      (`StoreServerRequest` + `ServerCreationService`), so this was frontend-only.
@@ -216,11 +216,26 @@ Researched direction retained for each; none built unless noted.
      wizard run against a real node (use the deferred-OS + `should_create_vm: false` path, as
      `ServerCreationDiskTest` does, to avoid Proxmox). It's plain arithmetic + JSON, but this repo
      has **no JS test runner** (no `test` script in package.json), so nothing else covers it.
-  2. **Per-server speed cap + overage-penalty override** on an existing server —
-     **no "edit build/limits" admin page exists yet** (the `updateBuild` endpoint is
-     unwired). Needs that page built first; then add a speed-cap input and reuse
-     `OveragePenaltyFields` (below) with `inheritedLabel="node"`, passing the *node's*
-     resolved penalty as `inheritedFrom`.
+  2. **Per-server speed cap + overage-penalty override — DONE.** The admin server
+     drill-down now has a **Build & limits** section at `/admin/servers/{id}/settings`,
+     backed by the previously unwired `updateBuild` endpoint. The page uses the standard
+     dense card/grid pattern for compute, backup, and bandwidth limits; the bandwidth card
+     adds decimal `Speed Limit (MB/s)` plus the shared `OveragePenaltyFields` with the
+     resolved node-tier penalty shown while inheriting.
+     - `ServerData` now exposes `speedLimit` and the server's own `overagePenalty`; its
+       already-loaded `NodeData` supplies node override → global fallback context.
+     - Blank speed cap deliberately sends `null` (clear to uncapped), while custom values
+       convert from decimal MB/s to bytes/s. MiB resource/quota fields preserve the `-1`
+       unlimited sentinel instead of multiplying it.
+     - `updateBuild` now accepts the real `backup_count_limit` / `backup_size_limit` fields.
+       `address_ids` is optional and `syncAddresses()` only runs when it is explicitly
+       present, so a limits-only save cannot silently detach every IP address.
+     - **Verified:** 2 focused endpoint tests (persist + clear), full Pest **265** / 707
+       assertions, PHPStan zero, `tc`, and production build. Authenticated Playwright on
+       the real app proved Custom `12.5 MB/s` + throttle `7 MB/s` → API `12,500,000` +
+       `7,000,000` bytes/s → reload rehydrates → Inherit/blank clears both to `null`.
+       Desktop and 390px mobile had no console errors or horizontal overflow. The seeded
+       server was a DB-only factory record; no VM was cloned or provisioned on PVE.
   3. **Per-node overage-penalty override — DONE.** Shipped on the node settings page as a
      "Bandwidth" card using the decided segmented `Inherit | Custom` control.
      - **Shared, reusable pieces** (built for item 2 and 4 to consume, not node-specific):

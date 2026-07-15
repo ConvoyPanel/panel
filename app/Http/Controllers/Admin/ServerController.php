@@ -106,7 +106,12 @@ class ServerController
     {
         $server->update($request->safe()->except('address_ids'));
 
-        $this->networkService->syncAddresses($server, $request->address_ids ?? []);
+        // Build/limit-only forms must not have to echo the server's addresses
+        // back merely to preserve them. Only reconcile IP assignments when a
+        // caller explicitly includes that part of the payload.
+        if ($request->has('address_ids')) {
+            $this->networkService->syncAddresses($server, $request->address_ids ?? []);
+        }
 
         try {
             $this->buildModificationService->handle($server);

@@ -28,13 +28,15 @@ class UpdateBuildRequest extends BaseApiRequest
                 new NetworkInterfaceBelongsToNode($server->node_id),
             ],
             'vlan_tag' => $rules['vlan_tag'],
-            'address_ids' => 'present|nullable|array',
+            'address_ids' => 'sometimes|nullable|array',
             'address_ids.*' => 'integer|exists:ip_addresses,id',
             // NOTE: a dead 'backup_limit' => $rules['backup_limit'] line was removed
             // here — that rule key never existed (the column is backup_count_limit),
             // so it emitted an undefined-key warning and mapped to a phantom column.
             'bandwidth_limit' => $rules['bandwidth_limit'],
             'bandwidth_usage' => $rules['bandwidth_usage'],
+            'backup_count_limit' => $rules['backup_count_limit'],
+            'backup_size_limit' => $rules['backup_size_limit'],
             // Persistent NIC speed cap (bytes/s, null = unlimited) and the
             // per-server overage-penalty override (null = inherit node/global).
             'speed_limit' => $rules['speed_limit'],
@@ -48,19 +50,19 @@ class UpdateBuildRequest extends BaseApiRequest
     {
         return [
             function (Validator $validator) {
-                $addressIds = $this->input('address_ids');
-
-                $addresses = Address::whereIn('id', $addressIds)->get();
-
                 $server = $this->parameter('server', Server::class);
 
-                foreach ($addresses as $address) {
-                    if ($address->server_id !== null && $address->server_id !== $server->id) {
-                        $validator->errors()->add(
-                            'address_ids',
-                            'One or more of the selected addresses are already in use',
-                        );
-                        break;
+                if ($this->has('address_ids')) {
+                    $addresses = Address::whereIn('id', $this->input('address_ids') ?? [])->get();
+
+                    foreach ($addresses as $address) {
+                        if ($address->server_id !== null && $address->server_id !== $server->id) {
+                            $validator->errors()->add(
+                                'address_ids',
+                                'One or more of the selected addresses are already in use',
+                            );
+                            break;
+                        }
                     }
                 }
 

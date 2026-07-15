@@ -1,7 +1,12 @@
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { BYTES_PER_MB } from '@/features/bandwidth/overage-penalty.ts'
+import {
+    BYTES_PER_MB,
+    overagePenaltyFields,
+    overagePenaltyPayload,
+    refineOveragePenalty,
+} from '@/features/bandwidth/overage-penalty.ts'
 
 import { rawDataToServer } from '@/lib/transformers/server.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
@@ -25,6 +30,30 @@ const vlanTagSchema = z.preprocess(
 const speedLimitSchema = z.preprocess(
     value => (value === '' || value == null ? undefined : value),
     z.coerce.number().min(1, 'Must be at least 1 MB/s').optional()
+)
+
+const nullableSpeedLimitSchema = z.preprocess(
+    value => (value === '' || value == null ? null : value),
+    z.coerce.number().min(1, 'Must be at least 1 MB/s').nullable()
+)
+
+const unlimitedOrNonNegative = z.coerce
+    .number()
+    .int()
+    .min(-1, 'Use -1 for unlimited')
+
+export const serverBuildSchema = refineOveragePenalty(
+    z.object({
+        cpu: z.coerce.number().int().min(1),
+        memory: z.coerce.number().int().min(16),
+        disk: z.coerce.number().int().min(1),
+        backupCountLimit: unlimitedOrNonNegative,
+        backupSizeLimit: unlimitedOrNonNegative,
+        bandwidthLimit: unlimitedOrNonNegative,
+        bandwidthUsage: z.coerce.number().int().min(0),
+        speedLimit: nullableSpeedLimitSchema,
+        ...overagePenaltyFields,
+    })
 )
 
 export const serverSchema = z
@@ -104,6 +133,8 @@ export const serverSchema = z
 const indexRoute = ServerController.index['/api/admin/servers']
 const showRoute = ServerController.show['/api/admin/servers/{server}']
 const storeRoute = ServerController.store['/api/admin/servers']
+const updateBuildRoute =
+    ServerController.updateBuild['/api/admin/servers/{server}/settings/build']
 
 export const getServers = async (
     params: ServerQueryParams
@@ -218,3 +249,40 @@ export const createServer = async ({
             })
         ).data
     )
+
+const MEBIBYTE = 1024 * 1024
+
+export const updateServerBuild = async (
+    serverId: number,
+    payload: z.infer<typeof serverBuildSchema>
+): Promise<Server> => {
+    const res = await apiFetch<DataResponse<unknown>>(
+        updateBuildRoute(serverId),
+        {
+            body: {
+                cpu: payload.cpu,
+                memory: payload.memory * MEBIBYTE,
+                disk: payload.disk * MEBIBYTE,
+                backup_count_limit: payload.backupCountLimit,
+                backup_size_limit:
+                    payload.backupSizeLimit === -1
+                        ? -1
+                        : payload.backupSizeLimit * MEBIBYTE,
+                bandwidth_limit:
+                    payload.bandwidthLimit === -1
+                        ? -1
+                        : payload.bandwidthLimit * MEBIBYTE,
+                bandwidth_usage: payload.bandwidthUsage * MEBIBYTE,
+                speed_limit:
+                    payload.speedLimit == null
+                        ? null
+                        : Math.round(payload.speedLimit * BYTES_PER_MB),
+                // Always send this field: null explicitly clears the server-level
+                // override and returns it to the node -> global cascade.
+                overage_penalty: overagePenaltyPayload(payload),
+            },
+        }
+    )
+
+    return rawDataToServer(res.data)
+}

@@ -35,6 +35,8 @@ export interface Server {
     bandwidth: {
         usage: number
         limit: number
+        speedLimit: number | null
+        overagePenalty: App.Data.Server.OveragePenaltyData | null
     }
     vlanTag: number | null
     createdAt: Date

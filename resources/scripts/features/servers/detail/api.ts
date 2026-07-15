@@ -65,6 +65,8 @@ export const getServer = async (uuid: string): Promise<Server> => {
         bandwidth: {
             usage: data.bandwidthUsage,
             limit: data.bandwidthLimit,
+            speedLimit: data.speedLimit,
+            overagePenalty: data.overagePenalty,
         },
         vlanTag: data.vlanTag,
         createdAt: new Date(data.createdAt),

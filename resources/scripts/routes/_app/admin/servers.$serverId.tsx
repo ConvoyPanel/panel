@@ -1,7 +1,12 @@
 import { preloadServer, useServer } from '@/features/servers/admin/api.ts'
 import useTitle from '@/hooks/use-title.ts'
 import { processAxiosError } from '@/utils/http.ts'
-import { IconDatabase, IconLayoutGrid, IconServer } from '@tabler/icons-react'
+import {
+    IconAdjustments,
+    IconDatabase,
+    IconLayoutGrid,
+    IconServer,
+} from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -50,6 +55,16 @@ function ServerLayout() {
                         icon: IconDatabase,
                         label: 'Disks',
                         path: `/admin/servers/${serverId}/disks`,
+                    },
+                ],
+            },
+            {
+                label: 'Configuration',
+                items: [
+                    {
+                        icon: IconAdjustments,
+                        label: 'Build & limits',
+                        path: `/admin/servers/${serverId}/settings`,
                     },
                 ],
             },

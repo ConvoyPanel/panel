@@ -34,6 +34,8 @@ class ServerData extends Data
         public int $backupCountLimit,
         public int $backupSizeLimit,
         public int $bandwidthLimit,
+        public ?int $speedLimit,
+        public ?OveragePenaltyData $overagePenalty,
         public ?int $vlanTag,
         public CarbonImmutable $createdAt,
         #[LoadRelation]
@@ -61,6 +63,8 @@ class ServerData extends Data
             backupCountLimit: $server->backup_count_limit,
             backupSizeLimit: $server->backup_size_limit,
             bandwidthLimit: (int) $server->bandwidth_limit,
+            speedLimit: $server->speed_limit,
+            overagePenalty: $server->overage_penalty,
             vlanTag: $server->vlan_tag,
             createdAt: CarbonImmutable::parse($server->created_at),
             node: Lazy::whenLoaded(
