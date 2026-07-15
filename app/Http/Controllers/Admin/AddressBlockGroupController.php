@@ -35,6 +35,19 @@ class AddressBlockGroupController
                 AllowedFilter::custom(
                     '*', new FiltersAddressBlockGroupWildcard,
                 ),
+                AllowedFilter::callback(
+                    'node_id',
+                    function (Builder $query, $value): void {
+                        $nodeIds = is_array($value) ? $value : [$value];
+
+                        $query->whereHas(
+                            'networkInterfaces',
+                            function (Builder $query) use ($nodeIds): void {
+                                $query->whereIn('node_id', $nodeIds);
+                            },
+                        );
+                    },
+                ),
                 'name',
                 'description',
             )
@@ -100,7 +113,7 @@ class AddressBlockGroupController
     public function attachNode(AttachNodeRequest $request, AddressBlockGroup $addressBlockGroup)
     {
         $addressBlockGroup->networkInterfaces()->syncWithoutDetaching([
-            $request->input('network_interface_id')
+            $request->input('network_interface_id'),
         ]);
 
         return response()->json([], 201);

@@ -23,7 +23,7 @@ import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts
 import AddressBlockGroupController from '@/wayfinder/actions/App/Http/Controllers/Admin/AddressBlockGroupController'
 
 export type AddressBlockGroupQueryParams = QueryBuilderParams<
-    '*' | 'name' | 'description'
+    '*' | 'name' | 'description' | 'node_id'
 >
 export type AttachedNodesQueryParams = QueryBuilderParams<'*' | 'id'>
 export type CompatibleServerQueryParams = QueryBuilderParams<

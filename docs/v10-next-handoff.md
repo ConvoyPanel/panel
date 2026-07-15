@@ -126,11 +126,11 @@ cross-checked with `qm`/`pvesh` over SSH:
 Researched direction retained for each; none built unless noted.
 
 - **Design-input queue — intentionally deferred.** Do not choose these UX/product details without the
-  maintainer: node IPAM scope and its required backend filter; the existing-server limits/settings page and
-  bandwidth inheritance presentation; the global admin Settings information architecture; whether the optional
-  workspace/account switcher belongs in the top chrome; and whether irreversible actions should keep nova's
-  soft destructive tint or return to solid red. The implementation constraints remain in the relevant entries
-  below so design input can start from a concrete boundary rather than re-discovery.
+  maintainer: the existing-server limits/settings page and bandwidth inheritance presentation; the global admin
+  Settings information architecture; whether the optional workspace/account switcher belongs in the top chrome;
+  and whether irreversible actions should keep nova's soft destructive tint or return to solid red. The
+  implementation constraints remain in the relevant entries below so design input can start from a concrete
+  boundary rather than re-discovery.
 
 - **Bandwidth rate-limiting rework (GitHub #108) — BACKEND DONE, FRONTEND TODO.**
   Backend (P0–P4) is shipped and tested: a persistent **per-server speed cap**
@@ -532,10 +532,14 @@ Researched direction retained for each; none built unless noted.
     configured allocation, hardware/topology, root filesystem, PVE/kernel/boot, and endpoint details;
     node **Servers** now uses the existing admin servers API with `filter[node_id]`, preserving search/pagination
     and power actions; node **Settings** now edits node metadata/connection/specs with update-specific optional
-    token rotation fields. `ddev npm run tc` + `ddev npm run build` green (one known sandbox exit-139 retry in an
-    earlier build). **Still unbuilt:** node `ipam` route file is missing; the address-block-group index currently
-    does **not** allow `node_id` filtering, so building it properly needs a backend filter/API decision first. The
-    built node sub-pages for reference are `overview`, `servers`, `network`, `storages`, and `settings`. Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
+    token rotation fields; node **IPAM** now uses a new address-block-group `filter[node_id]` backed by
+    `AddressBlockGroup::networkInterfaces()` and renders the node-scoped block-group table with mobile `Item`
+    rows. Focused backend filter test and PHPStan, `ddev npm run tc`, type/Wayfinder generation, and
+    `ddev npm run build` green on the documented sandbox retry. Authenticated Playwright desktop + 390px mobile
+    passed with the node filter present on the API request, no console errors, and no horizontal overflow;
+    screenshots: `/tmp/opencode/node-ipam-{desktop,mobile}.png`. The built node sub-pages for reference are
+    `overview`, `servers`, `network`, `storages`, `ipam`, and `settings`.
+    Reference spec (Vercel style, maintainer prefers it **over** Cloudflare; 4 screenshots pasted
     2026-07-09):
     - **Full labeled sidebar** (icon + text, always expanded — not a hover rail), with **grouped sections**
       under muted caps **section headers** (cf. Cloudflare's *Observe / Build / Protect & Connect*; Vercel's
