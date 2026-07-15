@@ -83,8 +83,18 @@ highlights, Escape closes only the select, 2nd Escape closes the dialog.
   `GET passkey-authentication-options` + one `POST identity/confirm` (was two of each), no API failures.
   *Lesson: an effect guarded on a prop that used to be false at mount is a landmine when the component's mount
   timing changes.*
-- **Still unverified:** the Authenticator *step* dialogs (enable → recovery-codes, disable,
-  reset-recovery-codes) — enabling needs a real TOTP code.
+- **Authenticator step dialogs — VERIFIED (2026-07-15).** No TOTP needed: the Enable dialog calls
+  `enableAuthenticator()` on open (QR + secret are just displayed), and **closing it** is what opens Recovery
+  Codes — that is the path the old `pushToQueue` served. Driven end-to-end: Authenticator (1 dialog) → Enable
+  nested (2 dialogs / **1 backdrop** / `--nested-dialogs: 1`) → close → **Recovery Codes** nested (2 dialogs /
+  **1 backdrop** / `--nested-dialogs` still **1**). The step swapped underneath a parent that never unmounted
+  and **the backdrop count never changed** — previously this was queue + 250ms + remount. No API failures, no
+  console errors.
+  ⚠️ **Cleanup trap:** driving this **enables 2FA on `visual-admin@example.test`**, which would put a 2FA
+  challenge in front of every later test login. There is no `two_factor_confirmed_at` column, so a secret alone
+  arms it. Reset with
+  `update users set two_factor_secret=null, two_factor_recovery_codes=null where id=38;` — done, and login
+  re-verified to land on `/`.
 
 — prior: **repository layer removed + backups quota wired & verified + IPAM mobile rows**. All green (Pest **266**, PHPStan zero, `tc` + build): `42373438` IPAM mobile rows, `71fc1132`
 backups quota, `85a6977a` Eloquent repository removal, `84bb7bf8` Proxmox → `app/Services/Proxmox`.
