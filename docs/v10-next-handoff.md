@@ -131,6 +131,13 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Client server Boot Order collection — DONE (2026-07-14).** Replaced the hand-built bordered list with
+  compact muted `ItemGroup` rows while preserving move up/down, remove, add, reset, and save behavior. The
+  add-device control now uses the standard height and sits inside the contextual empty state when no devices
+  are enabled. Browser verification covered reorder/reset, adding an unused device, populated and empty states,
+  accessible action names, and 390px layout with no console errors or horizontal overflow. `tc` and production
+  build pass.
+
 - **Client server Addresses collection — DONE (2026-07-14).** Overview IPAM and the Networking page now
   share one `AddressList` instead of maintaining separate renderers. Networking's raw horizontally scrolling
   table and duplicate overflow wrapper were replaced with the established compact `OverflowItemGroup` rows;

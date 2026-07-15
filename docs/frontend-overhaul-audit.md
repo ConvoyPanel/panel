@@ -180,7 +180,7 @@ patterns:
 - [ ] Admin Templates: bespoke cards and detached create/empty-state actions.
 - [x] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
 - [x] Node Storages: bespoke cards, detached actions, and spacing shims.
-- [ ] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
+- [x] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
 - [x] Server Addresses: raw desktop table and duplicated overflow handling.
 - [ ] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text
       empty state.

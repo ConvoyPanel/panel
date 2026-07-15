@@ -33,6 +33,14 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemGroup,
+    ItemMedia,
+    ItemTitle,
+} from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const label = (device: BootDevice) => {
@@ -100,6 +108,27 @@ const BootOrderCard = ({ uuid }: Props) => {
         onError: () => toast.error('Failed to update boot order'),
     })
 
+    const addDeviceMenu = unused.length > 0 && (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={'outline'}>
+                    <IconPlus className={'size-4'} />
+                    Add device
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align={'start'}>
+                {unused.map(device => (
+                    <DropdownMenuItem
+                        key={device.interface}
+                        onClick={() => add(device)}
+                    >
+                        <span className={'font-mono'}>{label(device)}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+
     return (
         <Card>
             <CardHeader>
@@ -113,81 +142,67 @@ const BootOrderCard = ({ uuid }: Props) => {
                 {isLoading ? (
                     <Skeleton className={'h-32 w-full'} />
                 ) : order.length > 0 ? (
-                    <ul className={'space-y-1'}>
+                    <ItemGroup className={'gap-3'}>
                         {order.map((device, index) => (
-                            <li
+                            <Item
                                 key={device.interface}
-                                className={
-                                    'flex items-center gap-2 rounded-md border p-2'
-                                }
+                                variant={'muted'}
+                                size={'sm'}
                             >
-                                <IconGripVertical
-                                    className={'text-muted-foreground'}
-                                    size={16}
-                                />
-                                <span className={'font-mono text-sm'}>
-                                    {label(device)}
-                                </span>
-                                <div className={'min-w-[1rem] grow'} />
-                                <Button
-                                    variant={'ghost'}
-                                    size={'icon'}
-                                    aria-label={`Move ${label(device)} up`}
-                                    disabled={index === 0}
-                                    onClick={() => move(index, -1)}
-                                >
-                                    <IconArrowUp className={'h-4 w-4'} />
-                                </Button>
-                                <Button
-                                    variant={'ghost'}
-                                    size={'icon'}
-                                    aria-label={`Move ${label(device)} down`}
-                                    disabled={index === order.length - 1}
-                                    onClick={() => move(index, 1)}
-                                >
-                                    <IconArrowDown className={'h-4 w-4'} />
-                                </Button>
-                                <Button
-                                    variant={'ghost'}
-                                    size={'icon'}
-                                    aria-label={`Remove ${label(device)} from boot order`}
-                                    onClick={() => remove(device)}
-                                >
-                                    <IconX className={'h-4 w-4'} />
-                                </Button>
-                            </li>
+                                <ItemMedia>
+                                    <IconGripVertical
+                                        className={'text-muted-foreground'}
+                                        size={16}
+                                    />
+                                </ItemMedia>
+                                <ItemContent className={'min-w-0'}>
+                                    <ItemTitle
+                                        className={'truncate font-mono'}
+                                    >
+                                        {label(device)}
+                                    </ItemTitle>
+                                </ItemContent>
+                                <ItemActions className={'ml-auto'}>
+                                    <Button
+                                        variant={'ghost'}
+                                        size={'icon'}
+                                        aria-label={`Move ${label(device)} up`}
+                                        disabled={index === 0}
+                                        onClick={() => move(index, -1)}
+                                    >
+                                        <IconArrowUp className={'h-4 w-4'} />
+                                    </Button>
+                                    <Button
+                                        variant={'ghost'}
+                                        size={'icon'}
+                                        aria-label={`Move ${label(device)} down`}
+                                        disabled={index === order.length - 1}
+                                        onClick={() => move(index, 1)}
+                                    >
+                                        <IconArrowDown className={'h-4 w-4'} />
+                                    </Button>
+                                    <Button
+                                        variant={'ghost'}
+                                        size={'icon'}
+                                        aria-label={`Remove ${label(device)} from boot order`}
+                                        onClick={() => remove(device)}
+                                    >
+                                        <IconX className={'h-4 w-4'} />
+                                    </Button>
+                                </ItemActions>
+                            </Item>
                         ))}
-                    </ul>
+                    </ItemGroup>
                 ) : (
                     <SimpleEmptyState
                         icon={IconGripVertical}
                         title={'No boot devices'}
                         description={'No devices are set to boot.'}
+                        action={addDeviceMenu}
                     />
                 )}
 
-                {unused.length > 0 && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant={'outline'} size={'sm'}>
-                                <IconPlus className={'size-4'} />
-                                Add device
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align={'start'}>
-                            {unused.map(device => (
-                                <DropdownMenuItem
-                                    key={device.interface}
-                                    onClick={() => add(device)}
-                                >
-                                    <span className={'font-mono'}>
-                                        {label(device)}
-                                    </span>
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                {order.length > 0 && addDeviceMenu}
             </CardContent>
             {dirty && (
                 <CardFooter className={'flex justify-end gap-3'}>
