@@ -3,7 +3,7 @@ import { PaginatedResult } from '@/utils/http.ts'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { CommandLoading } from 'cmdk'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useId, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -15,6 +15,8 @@ import {
     CommandList,
 } from '@/components/ui/Command'
 import {
+    FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -38,6 +40,7 @@ export interface ResourceComboBoxFormProps<T> {
     label: string
     searchPlaceholder?: string
     nothingFoundMessage?: ReactNode
+    description?: ReactNode
 }
 
 const CommandSpinner = () => {
@@ -58,10 +61,12 @@ const ResourceComboboxForm = <T,>({
     label,
     searchPlaceholder,
     nothingFoundMessage,
+    description,
 }: ResourceComboBoxFormProps<T>) => {
     const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [debouncedQuery] = useDebouncedValue(query, 300)
+    const listId = useId()
 
     const {
         data,
@@ -88,34 +93,48 @@ const ResourceComboboxForm = <T,>({
     return (
         <FormField
             name={name}
-            render={({ field }) => (
+            render={({ field, formState }) => (
                 <FormItem>
                     <FormLabel>{label}</FormLabel>
                     <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant='outline'
-                                className={cn(
-                                    'w-full text-left font-normal',
-                                    !field.value && 'text-muted-foreground'
-                                )}
-                                onClick={() => setOpen(true)}
-                            >
-                                {renderTrigger()}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className='w-md p-0'>
+                        <FormControl>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    type={'button'}
+                                    variant={'outline'}
+                                    role={'combobox'}
+                                    aria-expanded={open}
+                                    aria-controls={listId}
+                                    aria-autocomplete={'list'}
+                                    disabled={formState.isSubmitting}
+                                    className={cn(
+                                        'w-full justify-between text-left font-normal',
+                                        !field.value && 'text-muted-foreground'
+                                    )}
+                                >
+                                    {renderTrigger()}
+                                </Button>
+                            </PopoverTrigger>
+                        </FormControl>
+                        <PopoverContent id={listId} className='w-md p-0'>
                             <Command shouldFilter={false}>
                                 <CommandInput
                                     value={query}
                                     onValueChange={setQuery}
-                                    placeholder={searchPlaceholder ?? 'Search...'}
-                                    className='h-9'
+                                    placeholder={
+                                        searchPlaceholder ?? 'Search...'
+                                    }
+                                    aria-label={
+                                        searchPlaceholder ?? `Search ${label}`
+                                    }
                                 />
                                 <CommandList>
                                     <ScrollArea
                                         onBottomReached={() => {
-                                            if (hasNextPage && !isFetchingNextPage) {
+                                            if (
+                                                hasNextPage &&
+                                                !isFetchingNextPage
+                                            ) {
                                                 fetchNextPage()
                                             }
                                         }}
@@ -133,45 +152,60 @@ const ResourceComboboxForm = <T,>({
                                         )}
                                         <CommandGroup>
                                             {pages.map(pageData =>
-                                                pageData.items.map((item: T) => {
-                                                    const rawVal = (item as any)[
-                                                        accessorKey
-                                                    ]
-                                                    if (
-                                                        rawVal === undefined ||
-                                                        rawVal === null
-                                                    )
-                                                        return null
-                                                    const strVal = String(rawVal)
-                                                    return (
-                                                        <CommandItem
-                                                            key={strVal}
-                                                            value={strVal}
-                                                            onSelect={val => {
-                                                                field.onChange(val)
-                                                                setOpen(false)
-                                                            }}
-                                                        >
-                                                            {renderItem(
-                                                                item,
-                                                                field.value ===
-                                                                    String(
-                                                                        (item as any)[
-                                                                            accessorKey
-                                                                        ]
+                                                pageData.items.map(
+                                                    (item: T) => {
+                                                        const rawVal = (
+                                                            item as any
+                                                        )[accessorKey]
+                                                        if (
+                                                            rawVal ===
+                                                                undefined ||
+                                                            rawVal === null
+                                                        )
+                                                            return null
+                                                        const strVal =
+                                                            String(rawVal)
+                                                        return (
+                                                            <CommandItem
+                                                                key={strVal}
+                                                                value={strVal}
+                                                                onSelect={val => {
+                                                                    field.onChange(
+                                                                        val
                                                                     )
-                                                            )}
-                                                        </CommandItem>
-                                                    )
-                                                })
+                                                                    setOpen(
+                                                                        false
+                                                                    )
+                                                                }}
+                                                            >
+                                                                {renderItem(
+                                                                    item,
+                                                                    field.value ===
+                                                                        String(
+                                                                            (
+                                                                                item as any
+                                                                            )[
+                                                                                accessorKey
+                                                                            ]
+                                                                        )
+                                                                )}
+                                                            </CommandItem>
+                                                        )
+                                                    }
+                                                )
                                             )}
                                         </CommandGroup>
-                                        {isFetchingNextPage && <CommandSpinner />}
+                                        {isFetchingNextPage && (
+                                            <CommandSpinner />
+                                        )}
                                     </ScrollArea>
                                 </CommandList>
                             </Command>
                         </PopoverContent>
                     </Popover>
+                    {description && (
+                        <FormDescription>{description}</FormDescription>
+                    )}
                     <FormMessage />
                 </FormItem>
             )}

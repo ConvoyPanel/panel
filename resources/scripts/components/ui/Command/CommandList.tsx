@@ -8,8 +8,9 @@ const CommandList = forwardRef<
 >(({ className, ...props }, ref) => (
     <CommandPrimitive.List
         ref={ref}
+        data-slot={'command-list'}
         className={cn(
-            'max-h-[300px] overflow-y-auto overflow-x-hidden',
+            'max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none',
             className
         )}
         {...props}

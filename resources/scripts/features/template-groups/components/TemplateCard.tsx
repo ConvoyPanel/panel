@@ -192,6 +192,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                             className={'shrink-0'}
                             size={'icon'}
                             variant={'ghost'}
+                            aria-label={'Open template actions'}
                         >
                             <IconDots
                                 className={'size-4 text-muted-foreground'}
@@ -202,7 +203,10 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                         <DropdownMenuItem onClick={() => setIsEditing(true)}>
                             Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setIsDeleting(true)}>
+                        <DropdownMenuItem
+                            variant={'destructive'}
+                            onClick={() => setIsDeleting(true)}
+                        >
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>

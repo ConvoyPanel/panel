@@ -172,7 +172,12 @@ function BlockIndex() {
                     {address.state === AddressState.Reserved && (
                         <DropdownMenuItem onClick={() => toggleReservation(address)}>Unreserve</DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => openModal('delete', address)}>Delete</DropdownMenuItem>
+                    <DropdownMenuItem
+                        variant={'destructive'}
+                        onClick={() => openModal('delete', address)}
+                    >
+                        Delete
+                    </DropdownMenuItem>
                 </>
             )
         }),

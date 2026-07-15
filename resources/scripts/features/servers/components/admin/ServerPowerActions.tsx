@@ -49,7 +49,7 @@ interface Props {
     server: Server
 }
 
-// Rendered inside the row's actions dropdown. Radix only mounts the dropdown
+// Rendered inside the row's actions dropdown. The menu only mounts its popup
 // content while it is open, so the state query below runs on demand (when the
 // menu opens) rather than polling every row in the table.
 const ServerPowerActions = ({ server }: Props) => {
@@ -74,11 +74,6 @@ const ServerPowerActions = ({ server }: Props) => {
             title: actions[action].title,
             description: actions[action].description,
         })
-        // Radix leaves pointer-events locked on the body after a dialog closes
-        // over a dropdown; restore it (matches the client power dropdown).
-        setTimeout(() => {
-            document.body.style.pointerEvents = 'auto'
-        }, 1000)
         if (!confirmed) return
 
         try {
@@ -101,6 +96,7 @@ const ServerPowerActions = ({ server }: Props) => {
             {(Object.keys(actions) as PowerAction[]).map(action => (
                 <DropdownMenuItem
                     key={action}
+                    variant={action === 'kill' ? 'destructive' : 'default'}
                     disabled={!enabled[action]}
                     onClick={() => handlePowerAction(action)}
                 >

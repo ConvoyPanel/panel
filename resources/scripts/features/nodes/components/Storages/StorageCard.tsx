@@ -79,7 +79,11 @@ const StorageCard = ({ storage }: Props) => {
             <div className={'flex items-center justify-end justify-items-end'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button size={'icon'} variant={'ghost'}>
+                        <Button
+                            size={'icon'}
+                            variant={'ghost'}
+                            aria-label={'Open storage actions'}
+                        >
                             <IconDots className={'text-muted-foreground'} />
                         </Button>
                     </DropdownMenuTrigger>
@@ -95,6 +99,7 @@ const StorageCard = ({ storage }: Props) => {
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                            variant={'destructive'}
                             onClick={() => openModal('delete', storage)}
                         >
                             Delete

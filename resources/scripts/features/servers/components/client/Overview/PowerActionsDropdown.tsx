@@ -64,6 +64,7 @@ const PowerActionsDropdown = () => {
                     Restart
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                    variant={'destructive'}
                     disabled={!data || pending || data?.state === 'stopped'}
                     onClick={() => handlePowerAction('kill')}
                 >

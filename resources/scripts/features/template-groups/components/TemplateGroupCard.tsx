@@ -59,7 +59,11 @@ const TemplateGroupCard = ({ group }: Props) => {
             >
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button size={'icon'} variant={'ghost'}>
+                        <Button
+                            size={'icon'}
+                            variant={'ghost'}
+                            aria-label={'Open template group actions'}
+                        >
                             <IconDots className={'text-muted-foreground'} />
                         </Button>
                     </DropdownMenuTrigger>
@@ -75,6 +79,7 @@ const TemplateGroupCard = ({ group }: Props) => {
                             View
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                            variant={'destructive'}
                             onClick={() => openModal('delete', group)}
                         >
                             Delete

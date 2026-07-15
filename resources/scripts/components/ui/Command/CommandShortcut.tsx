@@ -7,8 +7,9 @@ const CommandShortcut = ({
 }: HTMLAttributes<HTMLSpanElement>) => {
     return (
         <span
+            data-slot={'command-shortcut'}
             className={cn(
-                'ml-auto text-xs tracking-widest text-muted-foreground',
+                'text-muted-foreground ml-auto text-xs tracking-widest',
                 className
             )}
             {...props}

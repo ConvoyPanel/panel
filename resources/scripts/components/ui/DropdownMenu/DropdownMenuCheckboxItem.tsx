@@ -1,31 +1,36 @@
 import { cn } from '@/utils'
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { CheckIcon } from '@radix-ui/react-icons'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
-
+import { Menu as MenuPrimitive } from '@base-ui/react/menu'
+import { IconCheck } from '@tabler/icons-react'
+import { forwardRef } from 'react'
 
 const DropdownMenuCheckboxItem = forwardRef<
-    ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
-    ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
->(({ className, children, checked, ...props }, ref) => (
-    <DropdownMenuPrimitive.CheckboxItem
+    HTMLElement,
+    MenuPrimitive.CheckboxItem.Props & { inset?: boolean }
+>(({ className, children, checked, inset, ...props }, ref) => (
+    <MenuPrimitive.CheckboxItem
         ref={ref}
+        data-slot={'dropdown-menu-checkbox-item'}
+        data-inset={inset || undefined}
         className={cn(
-            'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+            'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-[inset=true]:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
             className
         )}
         checked={checked}
         {...props}
     >
-        <span className='absolute left-2 flex h-3.5 w-3.5 items-center justify-center'>
-            <DropdownMenuPrimitive.ItemIndicator>
-                <CheckIcon className='h-4 w-4' />
-            </DropdownMenuPrimitive.ItemIndicator>
+        <span
+            data-slot={'dropdown-menu-checkbox-item-indicator'}
+            className={
+                'pointer-events-none absolute right-2 flex items-center justify-center'
+            }
+        >
+            <MenuPrimitive.CheckboxItemIndicator>
+                <IconCheck />
+            </MenuPrimitive.CheckboxItemIndicator>
         </span>
         {children}
-    </DropdownMenuPrimitive.CheckboxItem>
+    </MenuPrimitive.CheckboxItem>
 ))
-DropdownMenuCheckboxItem.displayName =
-    DropdownMenuPrimitive.CheckboxItem.displayName
+DropdownMenuCheckboxItem.displayName = 'DropdownMenuCheckboxItem'
 
 export default DropdownMenuCheckboxItem

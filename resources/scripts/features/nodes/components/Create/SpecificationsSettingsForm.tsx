@@ -1,11 +1,10 @@
-import byteSize from 'byte-size'
+import { nodeSchema } from '@/features/nodes/api.ts'
+import SectionRow from '@/features/nodes/components/Create/SectionRow.tsx'
 import { IconCpu, IconDeviceSdCard } from '@tabler/icons-react'
+import byteSize from 'byte-size'
 import { ReactNode, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { z } from 'zod'
-
-import { nodeSchema } from '@/features/nodes/api.ts'
-import SectionRow from '@/features/nodes/components/Create/SectionRow.tsx'
 
 import { Card } from '@/components/ui/Card'
 import {
@@ -37,7 +36,7 @@ const GroupHeader = ({
     <div className={'mb-3 flex items-center gap-2'}>
         <span
             className={
-                'flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary'
+                'bg-primary/10 text-primary flex size-6 items-center justify-center rounded-md'
             }
         >
             {icon}
@@ -58,7 +57,9 @@ const MemoryAmountField = () => {
         if (mib === '' || mib === null || mib === undefined) return ''
         const n = Number(mib)
         if (Number.isNaN(n)) return ''
-        return unit === 'MiB' ? String(n) : String(Math.round((n / 1024) * 100) / 100)
+        return unit === 'MiB'
+            ? String(n)
+            : String(Math.round((n / 1024) * 100) / 100)
     }
 
     return (
@@ -67,9 +68,10 @@ const MemoryAmountField = () => {
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                        <InputGroup>
+                    <InputGroup>
+                        <FormControl>
                             <InputGroupInput
+                                name={field.name}
                                 type={'number'}
                                 inputMode={'numeric'}
                                 value={toDisplay(field.value as never)}
@@ -86,40 +88,40 @@ const MemoryAmountField = () => {
                                     )
                                 }}
                             />
-                            {/* py-0 overrides the addon's default py-1.5, which
+                        </FormControl>
+                        {/* py-0 overrides the addon's default py-1.5, which
                                 would make this 36px tall inside the h-8 group. */}
-                            <InputGroupAddon
-                                align={'inline-end'}
-                                className={'py-0'}
-                            >
-                                {/* nova's smallest toggle size is h-7, still too
+                        <InputGroupAddon
+                            align={'inline-end'}
+                            className={'py-0'}
+                        >
+                            {/* nova's smallest toggle size is h-7, still too
                                     tall for an addon in an h-8 group, so the item
                                     height/padding is overridden down to h-5. */}
-                                <ToggleGroup
-                                    spacing={0}
-                                    multiple={false}
-                                    value={[unit]}
-                                    onValueChange={value => {
-                                        const next = value[0]
-                                        if (next) setUnit(next as MemoryUnit)
-                                    }}
-                                    aria-label={'Memory unit'}
-                                >
-                                    {(['MiB', 'GiB'] as const).map(u => (
-                                        <ToggleGroupItem
-                                            key={u}
-                                            value={u}
-                                            className={
-                                                'h-5 min-w-0 px-1.5 text-xs leading-none text-muted-foreground aria-pressed:text-foreground'
-                                            }
-                                        >
-                                            {u}
-                                        </ToggleGroupItem>
-                                    ))}
-                                </ToggleGroup>
-                            </InputGroupAddon>
-                        </InputGroup>
-                    </FormControl>
+                            <ToggleGroup
+                                spacing={0}
+                                multiple={false}
+                                value={[unit]}
+                                onValueChange={value => {
+                                    const next = value[0]
+                                    if (next) setUnit(next as MemoryUnit)
+                                }}
+                                aria-label={'Memory unit'}
+                            >
+                                {(['MiB', 'GiB'] as const).map(u => (
+                                    <ToggleGroupItem
+                                        key={u}
+                                        value={u}
+                                        className={
+                                            'text-muted-foreground aria-pressed:text-foreground h-5 min-w-0 px-1.5 text-xs leading-none'
+                                        }
+                                    >
+                                        {u}
+                                    </ToggleGroupItem>
+                                ))}
+                            </ToggleGroup>
+                        </InputGroupAddon>
+                    </InputGroup>
                     <FormMessage />
                 </FormItem>
             )}
@@ -144,7 +146,7 @@ const MemoryResult = () => {
         <Card className={'mt-3 p-3.5'}>
             {/* Empty leaves the track bare — filling it would render a full
                 bar of overcommit for a node with no memory entered yet. */}
-            <div className={'flex h-3 overflow-hidden rounded-full bg-muted'}>
+            <div className={'bg-muted flex h-3 overflow-hidden rounded-full'}>
                 {hasMemory && (
                     <>
                         <span
@@ -158,9 +160,7 @@ const MemoryResult = () => {
                     </>
                 )}
             </div>
-            <div
-                className={'mt-2.5 flex items-baseline justify-between gap-3'}
-            >
+            <div className={'mt-2.5 flex items-baseline justify-between gap-3'}>
                 <p className={'flex items-baseline gap-1.5'}>
                     <span
                         className={
@@ -170,12 +170,14 @@ const MemoryResult = () => {
                     >
                         {hasMemory ? usable.value : '—'}
                     </span>
-                    <span className={'text-xs text-muted-foreground'}>
+                    <span className={'text-muted-foreground text-xs'}>
                         {hasMemory ? `${usable.unit} usable` : 'usable'}
                     </span>
                 </p>
-                <p className={'text-xs text-muted-foreground'}>
-                    {hasMemory ? `${physical.value} ${physical.unit} physical` : ''}
+                <p className={'text-muted-foreground text-xs'}>
+                    {hasMemory
+                        ? `${physical.value} ${physical.unit} physical`
+                        : ''}
                     {hasMemory && overPct > 0 && (
                         <span className={'text-muted-foreground/70'}>
                             {' '}
@@ -195,7 +197,7 @@ const ProcessorTag = () => {
     return (
         <span
             className={
-                'rounded-md bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary'
+                'bg-primary/10 text-primary rounded-md px-2 py-0.5 font-mono text-xs font-semibold'
             }
         >
             = {n} vCPU

@@ -30,6 +30,7 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
@@ -161,6 +162,7 @@ const SSHKeysCard = ({ uuid }: Props) => {
                                             <Button
                                                 variant={'ghost'}
                                                 size={'icon'}
+                                                aria-label={'Remove SSH key'}
                                                 onClick={() =>
                                                     setKeys(prev =>
                                                         prev.filter(
@@ -201,17 +203,21 @@ const SSHKeysCard = ({ uuid }: Props) => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align={'start'}>
-                                <DropdownMenuLabel>
-                                    Your keychain
-                                </DropdownMenuLabel>
-                                {available.map(k => (
-                                    <DropdownMenuItem
-                                        key={k.id}
-                                        onClick={() => addKeys([k.publicKey])}
-                                    >
-                                        {k.name}
-                                    </DropdownMenuItem>
-                                ))}
+                                <DropdownMenuGroup>
+                                    <DropdownMenuLabel>
+                                        Your keychain
+                                    </DropdownMenuLabel>
+                                    {available.map(k => (
+                                        <DropdownMenuItem
+                                            key={k.id}
+                                            onClick={() =>
+                                                addKeys([k.publicKey])
+                                            }
+                                        >
+                                            {k.name}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
 

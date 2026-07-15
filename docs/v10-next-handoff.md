@@ -5,7 +5,13 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-12 (session: **frontend handoff branches reconciled** — retained the richer
+Last updated: 2026-07-14 (session: **shared menu/popover and accessibility slice completed** — migrated
+shared DropdownMenu and Popover from Radix to `@base-ui/react`, ported nova popup/item styling, added and
+applied destructive menu-item treatment, normalized Command/resource-combobox controls, aligned and
+browser-verified the real login OTP flow, fixed form-control semantics and icon-only accessible names, and
+verified keyboard/focus/dialog handoff plus 390px behavior. `tc`, production build, and the full regression
+suite are green; see the dedicated entry under open follow-ups. — prior: **frontend handoff branches
+reconciled** — retained the richer
 admin node Overview and its live PVE status polling while integrating `next`'s node-scoped Servers
 page, editable Settings page, nova `Field`/`InputGroup` and form refinements, mobile admin `Item`
 rows, backup-row rollout, generic OIDC provider, and bandwidth backend. The node Overview replaced the
@@ -124,6 +130,21 @@ cross-checked with `qm`/`pvesh` over SSH:
 ## Next up — open product follow-ups
 
 Researched direction retained for each; none built unless noted.
+
+- **Shared menu/popover and accessibility slice — DONE (2026-07-14).** Shared `DropdownMenu` and
+  `Popover` now use `@base-ui/react`; the two superseded Radix packages were removed. Compatibility wrappers
+  preserve existing `asChild` consumers through Base UI's `render` API. Menus/popovers now use nova's compact
+  popup/item chrome, and irreversible menu actions use the shared `variant="destructive"`. Command search and
+  `ResourceComboboxForm` use the standard 32px `InputGroup`; the combobox now exposes its form ID,
+  `aria-invalid`/description linkage, expanded/controls state, disabled submission state, and an accessible
+  search label. OTP slots use the same 32px/ring/radius treatment, the authenticator input is properly labelled,
+  and formerly silent icon-only actions now have accessible names. The node-create memory Amount label now
+  targets the actual input. Browser verification covered menu keyboard navigation and focus return,
+  checkbox-menu semantics/stay-open behavior, menu→responsive confirmation-dialog handoff, Command keyboard
+  selection, real node selection with a valid controlled popup ID and focus return, the real 2FA route, and
+  desktop/390px overflow with no settled-page console errors. Base UI requires `Menu.GroupLabel` to be nested
+  in `Menu.Group`; violating that contract throws production error #31, so grouped labels in the DataTable,
+  SSH-key, and avatar menus retain that structure.
 
 - **Design-input queue — RESOLVED with the maintainer 2026-07-15.** All four open questions are now
   decided; build against these, don't re-litigate:

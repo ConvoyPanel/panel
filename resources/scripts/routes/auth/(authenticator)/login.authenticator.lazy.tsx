@@ -117,13 +117,14 @@ function Authenticator() {
 
                                     return (
                                         <FormItem>
-                                            <FormControl>
-                                                <div
-                                                    className={
-                                                        'flex justify-center'
-                                                    }
-                                                >
+                                            <div
+                                                className={'flex justify-center'}
+                                            >
+                                                <FormControl>
                                                     <InputOTP
+                                                        aria-label={
+                                                            'Authenticator code'
+                                                        }
                                                         onChange={e =>
                                                             form.setValue(
                                                                 'code',
@@ -158,8 +159,8 @@ function Authenticator() {
                                                             />
                                                         </InputOTPGroup>
                                                     </InputOTP>
-                                                </div>
-                                            </FormControl>
+                                                </FormControl>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )
@@ -182,6 +183,7 @@ function Authenticator() {
                     >
                         {type === 'code' ? (
                             <Button
+                                type={'button'}
                                 className={'max-sm:w-full'}
                                 variant={'ghost'}
                                 onClick={() =>
@@ -192,6 +194,7 @@ function Authenticator() {
                             </Button>
                         ) : (
                             <Button
+                                type={'button'}
                                 className={'max-sm:w-full'}
                                 variant={'ghost'}
                                 onClick={() => form.setValue('type', 'code')}

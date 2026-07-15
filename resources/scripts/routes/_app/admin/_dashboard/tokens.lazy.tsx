@@ -71,7 +71,10 @@ function TokensIndex() {
     }
 
     const renderActions = (token: ApiKey) => (
-        <DropdownMenuItem onClick={() => handleDelete(token)}>
+        <DropdownMenuItem
+            variant={'destructive'}
+            onClick={() => handleDelete(token)}
+        >
             Revoke
         </DropdownMenuItem>
     )

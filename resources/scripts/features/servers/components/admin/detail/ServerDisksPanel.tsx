@@ -75,12 +75,12 @@ const ServerDisksPanel = ({ serverId }: Props) => {
 
         return (
             <>
-                <DropdownMenuItem onSelect={() => setResizeDisk(disk)}>
+                <DropdownMenuItem onClick={() => setResizeDisk(disk)}>
                     Resize
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    className='text-destructive focus:bg-destructive/10 focus:text-destructive'
-                    onSelect={() => void handleRemove(disk)}
+                    variant={'destructive'}
+                    onClick={() => void handleRemove(disk)}
                 >
                     Remove
                 </DropdownMenuItem>

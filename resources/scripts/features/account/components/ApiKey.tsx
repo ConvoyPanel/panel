@@ -52,6 +52,7 @@ const ApiKey = ({ apiKey, onDelete }: Props) => {
                 <Button
                     variant={'ghost'}
                     size={'icon'}
+                    aria-label={'Delete API key'}
                     onClick={() => onDelete(apiKey)}
                 >
                     <IconTrash className={'h-4 w-4'} />

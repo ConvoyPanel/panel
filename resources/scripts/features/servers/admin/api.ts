@@ -257,7 +257,7 @@ export const updateServerBuild = async (
     payload: z.infer<typeof serverBuildSchema>
 ): Promise<Server> => {
     const res = await apiFetch<DataResponse<unknown>>(
-        updateBuildRoute(serverId),
+        updateBuildRoute(String(serverId)),
         {
             body: {
                 cpu: payload.cpu,

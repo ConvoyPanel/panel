@@ -46,6 +46,7 @@ const SSHKey = ({ publicKey: key, onDelete }: Props) => {
                 <Button
                     variant={'ghost'}
                     size={'icon'}
+                    aria-label={'Delete SSH key'}
                     onClick={() => onDelete(key)}
                 >
                     <IconTrash className={'h-4 w-4'} />

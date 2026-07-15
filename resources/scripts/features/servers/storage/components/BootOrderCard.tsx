@@ -132,6 +132,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
+                                    aria-label={`Move ${label(device)} up`}
                                     disabled={index === 0}
                                     onClick={() => move(index, -1)}
                                 >
@@ -140,6 +141,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
+                                    aria-label={`Move ${label(device)} down`}
                                     disabled={index === order.length - 1}
                                     onClick={() => move(index, 1)}
                                 >
@@ -148,6 +150,7 @@ const BootOrderCard = ({ uuid }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
+                                    aria-label={`Remove ${label(device)} from boot order`}
                                     onClick={() => remove(device)}
                                 >
                                     <IconX className={'h-4 w-4'} />

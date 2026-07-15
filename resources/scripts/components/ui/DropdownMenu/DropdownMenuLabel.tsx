@@ -1,23 +1,22 @@
 import { cn } from '@/utils'
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Menu as MenuPrimitive } from '@base-ui/react/menu'
+import { forwardRef } from 'react'
 
 const DropdownMenuLabel = forwardRef<
-    ElementRef<typeof DropdownMenuPrimitive.Label>,
-    ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
-        inset?: boolean
-    }
+    HTMLDivElement,
+    MenuPrimitive.GroupLabel.Props & { inset?: boolean }
 >(({ className, inset, ...props }, ref) => (
-    <DropdownMenuPrimitive.Label
+    <MenuPrimitive.GroupLabel
         ref={ref}
+        data-slot={'dropdown-menu-label'}
+        data-inset={inset || undefined}
         className={cn(
-            'px-2 py-1.5 text-sm font-semibold',
-            inset && 'pl-8',
+            'text-muted-foreground px-1.5 py-1 text-xs font-medium data-[inset=true]:pl-7',
             className
         )}
         {...props}
     />
 ))
-DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
+DropdownMenuLabel.displayName = 'DropdownMenuLabel'
 
 export default DropdownMenuLabel

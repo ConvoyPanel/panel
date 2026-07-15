@@ -55,7 +55,11 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
             <div className={'flex items-center justify-end justify-items-end'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button size={'icon'} variant={'ghost'}>
+                        <Button
+                            size={'icon'}
+                            variant={'ghost'}
+                            aria-label={'Open network interface actions'}
+                        >
                             <IconDots className={'text-muted-foreground'} />
                         </Button>
                     </DropdownMenuTrigger>
@@ -66,6 +70,7 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                            variant={'destructive'}
                             onClick={() => openModal('delete', networkInterface)}
                         >
                             Delete

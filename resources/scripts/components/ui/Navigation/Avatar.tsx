@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button'
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -56,69 +57,78 @@ const Avatar = () => {
                     variant='outline'
                     size='icon'
                     className='overflow-hidden rounded-full'
+                    aria-label={'Open account menu'}
                 >
                     <Logo className='h-6 w-6 rounded-full' />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className={'w-60'}>
-                <DropdownMenuLabel className={'truncate'}>
-                    {user?.name}
-                </DropdownMenuLabel>
-                <p
-                    className={
-                        'text-muted-foreground -mt-1 mb-3 truncate px-2 text-xs'
-                    }
-                >
-                    {user?.email}
-                </p>
+                <DropdownMenuGroup>
+                    <DropdownMenuLabel className={'truncate'}>
+                        {user?.name}
+                    </DropdownMenuLabel>
+                    <p
+                        className={
+                            'text-muted-foreground -mt-1 mb-3 truncate px-2 text-xs'
+                        }
+                    >
+                        {user?.email}
+                    </p>
+                </DropdownMenuGroup>
                 {user?.rootAdmin ? (
                     <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel className='text-muted-foreground text-xs font-medium'>
-                            Workspace
-                        </DropdownMenuLabel>
-                        <DropdownMenuItem
-                            asChild
-                            className={cn(
-                                !isAdminArea &&
-                                    'bg-accent text-accent-foreground'
-                            )}
-                        >
-                            <Link
-                                to='/'
-                                aria-current={!isAdminArea ? 'page' : undefined}
+                        <DropdownMenuGroup>
+                            <DropdownMenuLabel className='text-muted-foreground text-xs font-medium'>
+                                Workspace
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem
+                                asChild
+                                className={cn(
+                                    !isAdminArea &&
+                                        'bg-accent text-accent-foreground'
+                                )}
                             >
-                                <span className='min-w-0 flex-1 truncate'>
-                                    Client Area
-                                </span>
-                                {!isAdminArea ? (
-                                    <span className='text-muted-foreground ml-auto text-xs'>
-                                        Current
+                                <Link
+                                    to='/'
+                                    aria-current={
+                                        !isAdminArea ? 'page' : undefined
+                                    }
+                                >
+                                    <span className='min-w-0 flex-1 truncate'>
+                                        Client Area
                                     </span>
-                                ) : null}
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            asChild
-                            className={cn(
-                                isAdminArea &&
-                                    'bg-accent text-accent-foreground'
-                            )}
-                        >
-                            <Link
-                                to='/admin'
-                                aria-current={isAdminArea ? 'page' : undefined}
+                                    {!isAdminArea ? (
+                                        <span className='text-muted-foreground ml-auto text-xs'>
+                                            Current
+                                        </span>
+                                    ) : null}
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                asChild
+                                className={cn(
+                                    isAdminArea &&
+                                        'bg-accent text-accent-foreground'
+                                )}
                             >
-                                <span className='min-w-0 flex-1 truncate'>
-                                    Admin Console
-                                </span>
-                                {isAdminArea ? (
-                                    <span className='text-muted-foreground ml-auto text-xs'>
-                                        Current
+                                <Link
+                                    to='/admin'
+                                    aria-current={
+                                        isAdminArea ? 'page' : undefined
+                                    }
+                                >
+                                    <span className='min-w-0 flex-1 truncate'>
+                                        Admin Console
                                     </span>
-                                ) : null}
-                            </Link>
-                        </DropdownMenuItem>
+                                    {isAdminArea ? (
+                                        <span className='text-muted-foreground ml-auto text-xs'>
+                                            Current
+                                        </span>
+                                    ) : null}
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
                     </>
                 ) : null}
                 <DropdownMenuSeparator />

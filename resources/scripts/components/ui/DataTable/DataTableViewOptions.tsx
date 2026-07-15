@@ -1,6 +1,5 @@
 'use client'
 
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { IconSettings } from '@tabler/icons-react'
 import { Table } from '@tanstack/react-table'
 
@@ -9,8 +8,10 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuLabel,
     DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 
 interface DataTableViewOptionsProps<TData> {
@@ -32,29 +33,31 @@ const DataTableViewOptions = <TData,>({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-[150px]'>
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                    .getAllColumns()
-                    .filter(
-                        column =>
-                            typeof column.accessorFn !== 'undefined' &&
-                            column.getCanHide()
-                    )
-                    .map(column => {
-                        return (
-                            <DropdownMenuCheckboxItem
-                                key={column.id}
-                                className='capitalize'
-                                checked={column.getIsVisible()}
-                                onCheckedChange={value =>
-                                    column.toggleVisibility(!!value)
-                                }
-                            >
-                                {column.id}
-                            </DropdownMenuCheckboxItem>
+                <DropdownMenuGroup>
+                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {table
+                        .getAllColumns()
+                        .filter(
+                            column =>
+                                typeof column.accessorFn !== 'undefined' &&
+                                column.getCanHide()
                         )
-                    })}
+                        .map(column => {
+                            return (
+                                <DropdownMenuCheckboxItem
+                                    key={column.id}
+                                    className='capitalize'
+                                    checked={column.getIsVisible()}
+                                    onCheckedChange={value =>
+                                        column.toggleVisibility(!!value)
+                                    }
+                                >
+                                    {column.id}
+                                </DropdownMenuCheckboxItem>
+                            )
+                        })}
+                </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     )

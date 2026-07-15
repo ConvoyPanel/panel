@@ -101,6 +101,7 @@ const AddressBlockTab = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                        variant={'destructive'}
                         onClick={() => openModal('delete', row.original)}
                     >
                         Delete

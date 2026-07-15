@@ -7,8 +7,9 @@ const DropdownMenuShortcut = ({
 }: HTMLAttributes<HTMLSpanElement>) => {
     return (
         <span
+            data-slot={'dropdown-menu-shortcut'}
             className={cn(
-                'ml-auto text-xs tracking-widest opacity-60',
+                'text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground ml-auto text-xs tracking-widest',
                 className
             )}
             {...props}

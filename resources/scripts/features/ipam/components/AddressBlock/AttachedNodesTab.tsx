@@ -71,6 +71,7 @@ const AttachedNodesTab = () => {
         },
         actionsColumn(({ row }) => (
             <DropdownMenuItem
+                variant={'destructive'}
                 onClick={() => setSelectedNode(row.original.node || null)}
             >
                 Detach

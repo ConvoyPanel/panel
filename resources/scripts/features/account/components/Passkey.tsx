@@ -41,6 +41,7 @@ const Passkey = ({ passkey }: Props) => {
                 <Button
                     variant={'ghost'}
                     size={'icon'}
+                    aria-label={'Rename passkey'}
                     onClick={() => openModal('rename', passkey)}
                 >
                     <IconPencil className={'h-4 w-4'} />
@@ -48,6 +49,7 @@ const Passkey = ({ passkey }: Props) => {
                 <Button
                     variant={'ghost'}
                     size={'icon'}
+                    aria-label={'Delete passkey'}
                     onClick={() => openModal('delete', passkey)}
                 >
                     <IconTrash className={'h-4 w-4'} />

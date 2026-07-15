@@ -47,7 +47,7 @@ function NodesIndex() {
             </DropdownMenuItem>{' '}
             <DropdownMenuItem>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem variant={'destructive'}>Delete</DropdownMenuItem>
         </>
     )
 

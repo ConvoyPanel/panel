@@ -85,7 +85,11 @@ const ServerCard = ({ server }: Props) => {
             >
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button size={'icon'} variant={'ghost'}>
+                        <Button
+                            size={'icon'}
+                            variant={'ghost'}
+                            aria-label={'Open server actions'}
+                        >
                             <IconDots className={'text-muted-foreground'} />
                         </Button>
                     </DropdownMenuTrigger>

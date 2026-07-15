@@ -58,7 +58,10 @@ function LocationsIndex() {
                 Edit
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => openModal('delete', location)}>
+            <DropdownMenuItem
+                variant={'destructive'}
+                onClick={() => openModal('delete', location)}
+            >
                 Delete
             </DropdownMenuItem>
         </>

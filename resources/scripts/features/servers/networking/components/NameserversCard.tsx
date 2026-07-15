@@ -100,6 +100,7 @@ const NameserversCard = ({ uuid }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
+                                    aria-label={`Remove nameserver ${index + 1}`}
                                     className={'shrink-0'}
                                     onClick={() =>
                                         setValues(prev =>

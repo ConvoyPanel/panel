@@ -102,6 +102,9 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                 <Button
                                     variant={'ghost'}
                                     size={'icon'}
+                                    aria-label={
+                                        copied ? 'Token copied' : 'Copy token'
+                                    }
                                     onClick={() => copy(plainTextToken)}
                                     className={'shrink-0'}
                                 >

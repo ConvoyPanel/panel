@@ -1,9 +1,9 @@
 # Frontend Overhaul Audit
 
 Status: audited 2026-07-13 against `next` after the base + nova rollout. The
-shared Textarea, Select, Checkbox, DataTable toolbar, and admin server Disks work
-identified below was completed and verified later that day; unchecked items
-remain.
+shared Textarea, Select, Checkbox, DropdownMenu, Popover, Command/combobox,
+DataTable toolbar, OTP, accessible icon actions, and admin server Disks work
+identified below has since been completed; unchecked items remain.
 
 This document tracks the remaining visual-system and screen-composition work in
 the frontend overhaul. It is an implementation checklist, not a record of work
@@ -92,8 +92,8 @@ family remains on the previous visual system:
 - `SelectItem`: old item radius, padding, and focus treatment.
 - No shared `sm`/`default` size API.
 
-The actual `DropdownMenu` family is also still old-style. Its shared item has no
-destructive variant, so irreversible menu actions look neutral.
+The actual `DropdownMenu` family was subsequently aligned with nova and given a
+shared destructive item variant.
 
 ## Priority 0: shared primitives
 
@@ -124,16 +124,16 @@ destructive variant, so irreversible menu actions look neutral.
 - [x] Add nova invalid, disabled, dark-state, and hit-target treatment.
 - [x] Make `CheckboxForm` and `CheckboxItemForm` preserve caller `disabled` state.
 - [ ] Update the dormant RadioGroup primitive before introducing new consumers.
-- [ ] Align OTP slots with the current control dimensions and focus treatment.
-- [ ] Browser-check login authenticator entry and representative checkbox forms.
+- [x] Align OTP slots with the current control dimensions and focus treatment.
+- [x] Browser-check login authenticator entry and representative checkbox forms.
 
 ### Menus, command inputs, and comboboxes
 
-- [ ] Update DropdownMenu content and items to the current popup/item treatment.
-- [ ] Add a destructive menu-item variant and use it for delete/kill actions.
-- [ ] Normalize Command/combobox input heights; current consumers mix `h-9` and
+- [x] Update DropdownMenu content and items to the current popup/item treatment.
+- [x] Add a destructive menu-item variant and use it for delete/kill actions.
+- [x] Normalize Command/combobox input heights; current consumers mix `h-9` and
       `h-10` while standard controls use `h-8`.
-- [ ] Give `ResourceComboboxForm` normal `FormControl` IDs, `aria-invalid`,
+- [x] Give `ResourceComboboxForm` normal `FormControl` IDs, `aria-invalid`,
       description/error linkage, and combobox role/state semantics.
 - [ ] Replace duplicated bespoke Show all controls with the shared Button.
 
@@ -144,7 +144,7 @@ destructive variant, so irreversible menu actions look neutral.
 - [x] Remove stale `mr-2`/`ml-2` icon margins now that Button supplies `gap`.
 - [x] Remove the loading spinner's built-in manual margin from `Button`.
 - [x] Use `size="icon"` consistently for pagination and action controls.
-- [ ] Add accessible names to icon-only buttons.
+- [x] Add accessible names to icon-only buttons.
 - [x] Make `DataTableToolbar` wrap or reflow on narrow screens.
 - [ ] Distinguish an empty collection from a filtered no-results state.
 - [ ] Allow contextual empty copy and a primary onboarding/create action.

@@ -1,29 +1,26 @@
 import { cn } from '@/utils'
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { ChevronRightIcon } from '@radix-ui/react-icons'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
-
+import { Menu as MenuPrimitive } from '@base-ui/react/menu'
+import { IconChevronRight } from '@tabler/icons-react'
+import { forwardRef } from 'react'
 
 const DropdownMenuSubTrigger = forwardRef<
-    ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
-    ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
-        inset?: boolean
-    }
+    HTMLElement,
+    MenuPrimitive.SubmenuTrigger.Props & { inset?: boolean }
 >(({ className, inset, children, ...props }, ref) => (
-    <DropdownMenuPrimitive.SubTrigger
+    <MenuPrimitive.SubmenuTrigger
         ref={ref}
+        data-slot={'dropdown-menu-sub-trigger'}
+        data-inset={inset || undefined}
         className={cn(
-            'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent',
-            inset && 'pl-8',
+            'focus:bg-accent focus:text-accent-foreground data-popup-open:bg-accent data-popup-open:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-none select-none data-[inset=true]:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
             className
         )}
         {...props}
     >
         {children}
-        <ChevronRightIcon className='ml-auto h-4 w-4' />
-    </DropdownMenuPrimitive.SubTrigger>
+        <IconChevronRight className={'ml-auto'} />
+    </MenuPrimitive.SubmenuTrigger>
 ))
-DropdownMenuSubTrigger.displayName =
-    DropdownMenuPrimitive.SubTrigger.displayName
+DropdownMenuSubTrigger.displayName = 'DropdownMenuSubTrigger'
 
 export default DropdownMenuSubTrigger
