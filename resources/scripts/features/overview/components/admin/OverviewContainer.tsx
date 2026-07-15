@@ -123,6 +123,7 @@ const CapacityMeter = ({
             </div>
             <LinearProgressBar
                 value={Math.min(percent, 100)}
+                aria-label={`${label}: ${percent}%`}
                 indicatorClassName={meterIndicatorClass[tone]}
             />
             {sub && <div className='text-label mt-1.5 text-xs'>{sub}</div>}
@@ -316,6 +317,7 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                 </div>
                                 <LinearProgressBar
                                     value={successRate}
+                                    aria-label={`Successful backups: ${successRate}%`}
                                     className='mt-4'
                                 />
                                 <div className='my-4 border-t' />

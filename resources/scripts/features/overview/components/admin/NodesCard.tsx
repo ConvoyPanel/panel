@@ -22,9 +22,10 @@ type NodeSummary = App.Data.Admin.Overview.NodeSummaryData
 const memoryFigure = (node: NodeSummary) =>
     `${bytes(node.memory.allocated)} / ${bytes(node.memory.total)} · ${node.memory.percent}%`
 
-const Meter = ({ percent }: { percent: number }) => (
+const Meter = ({ percent, label }: { percent: number; label: string }) => (
     <LinearProgressBar
         value={Math.min(percent, 100)}
+        aria-label={`${label}: ${percent}%`}
         indicatorClassName={meterIndicatorClass[capacityTone(percent)]}
     />
 )
@@ -78,6 +79,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     percent={
                                                         node.memory.percent
                                                     }
+                                                    label={`Memory allocated for ${node.displayName}`}
                                                 />
                                                 <StatLabel
                                                     as='span'
@@ -119,7 +121,10 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                 <StatLabel className='mb-1.5 text-xs'>
                                     Memory allocated
                                 </StatLabel>
-                                <Meter percent={node.memory.percent} />
+                                <Meter
+                                    percent={node.memory.percent}
+                                    label={`Memory allocated for ${node.displayName}`}
+                                />
                                 <StatLabel className='mt-1.5 text-xs tabular-nums'>
                                     {memoryFigure(node)}
                                 </StatLabel>

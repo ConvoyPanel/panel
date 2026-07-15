@@ -140,14 +140,16 @@ Researched direction retained for each; none built unless noted.
   selection and that the admin dashboard requests none of the status-workflow chunks. Full `tc` and scripted
   production build pass.
   - Lighthouse 13.4 production results: login mobile **86/95/96/100** and desktop **99/95/96/100**
-    (Performance/Accessibility/Best Practices/SEO); authenticated admin mobile **83/89/100/100**. Mobile used
+    (Performance/Accessibility/Best Practices/SEO); authenticated admin mobile **83/93/100/100**. Mobile used
     Lighthouse simulated throttling: 150ms RTT, ~1.47 Mbps download, 675 Kbps upload, and **4x CPU slowdown**.
     Login mobile FCP/LCP/TBT/CLS: 2.9s/3.5s/50ms/0; admin mobile: 2.8s/4.0s/80ms/0.001. The authenticated desktop
     audit crashed the sandbox Chromium tab twice; do not infer a score from that.
   - Remaining performance findings are mainly delivery-level: hashed assets lack long cache lifetimes in the
     local ddev server, the global CSS/font path is render-blocking, and route-tree/shared providers still leave
-    unused initial JS. Remaining a11y findings include theme color contrast (design input), admin progressbar
-    names, and heading order. The login 401 user probe is expected but costs the Best Practices console audit.
+    unused initial JS. Remaining a11y findings include theme color contrast (design input) and the global
+    CardTitle heading order. Dashboard progress meters now have contextual accessible names; that raised the
+    authenticated admin Accessibility score from 89 to 93. The login 401 user probe is expected but costs the
+    Best Practices console audit.
 
 - **Admin Templates collection — DONE (2026-07-14).** Template groups now use shared muted `ItemGroup` rows
   with icon, description, admin-only state, and existing action menus. Page/create actions use the standard
