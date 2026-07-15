@@ -103,7 +103,12 @@ function NodeServers() {
                                         {server.name}
                                     </Link>
                                 </ItemTitle>
-                                <ItemDescription className={'truncate'}>
+                                {/* `block`/`text-nowrap` beat ItemDescription's
+                                    default line-clamp-2 + text-balance, which
+                                    otherwise silently defeat `truncate`. */}
+                                <ItemDescription
+                                    className={'block truncate text-nowrap'}
+                                >
                                     {server.hostname}
                                 </ItemDescription>
                                 <Badge

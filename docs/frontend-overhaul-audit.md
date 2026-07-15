@@ -210,7 +210,9 @@ patterns:
 `DataTable.mobileRow` is opt-in, so several tables still become horizontally
 scrolling desktop tables on small screens.
 
-- [ ] Global admin Servers.
+- [x] Global admin Servers. The mobile row carries its own selection checkbox —
+      the desktop selection column is not rendered below `@md`, so without it
+      bulk power actions are unreachable on mobile.
 - [ ] Global admin IPAM groups.
 - [ ] IPAM address-block list.
 - [ ] IPAM attached-nodes list.
