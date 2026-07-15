@@ -15,7 +15,12 @@ const DialogContent = ({
             data-slot={'dialog-content'}
             className={cn(
                 'fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
-                'transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
+                'transition-[opacity,transform,scale] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
+                // A nested dialog renders NO backdrop of its own (Base UI hides
+                // it so the parent stays visible underneath), so the parent is
+                // what signals depth: it scales back per level of nesting.
+                // --nested-dialogs is the open-descendant count.
+                'data-nested-dialog-open:scale-[calc(1-0.05*var(--nested-dialogs))]',
                 'motion-reduce:transition-none',
                 className
             )}
