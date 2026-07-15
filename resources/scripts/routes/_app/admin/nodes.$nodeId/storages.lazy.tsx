@@ -10,8 +10,9 @@ import LoadBalancerSidebar from '@/features/nodes/components/Storages/LoadBalanc
 import ShowStorageModal from '@/features/nodes/components/Storages/ShowStorageModal.tsx'
 import StorageCard from '@/features/nodes/components/Storages/StorageCard.tsx'
 
-import { Card, CardContent, CardHeader } from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -24,10 +25,14 @@ function NodeStorages() {
 
     return (
         <>
-            <Heading>Storages</Heading>
-            <div className={'flex justify-end gap-2'}>
-                <LoadBalancerSidebar />
-                <CreateStorageModal />
+            <div className={'flex flex-wrap items-center justify-between gap-2'}>
+                <Heading>Storages</Heading>
+                {(isLoading || Boolean(storages?.length)) && (
+                    <div className={'flex gap-2'}>
+                        <LoadBalancerSidebar />
+                        <CreateStorageModal />
+                    </div>
+                )}
             </div>
             <DeleteStorageModal />
             <ShowStorageModal />
@@ -39,24 +44,22 @@ function NodeStorages() {
                     ))}
                 </div>
             ) : storages?.length === 0 ? (
-                <Card>
-                    <CardHeader className={'pb-0'} />
-                    <CardContent>
-                        <SimpleEmptyState
-                            icon={IconDatabase}
-                            title={'Storages'}
-                            description={
-                                'No storages have been created for this node yet. Add a storage to enable server deployments and resource management.'
-                            }
-                        />
-                    </CardContent>
+                <Card className={'py-6'}>
+                    <SimpleEmptyState
+                        icon={IconDatabase}
+                        title={'No storages'}
+                        description={
+                            'Add a storage to enable server deployments and resource management.'
+                        }
+                        action={<CreateStorageModal />}
+                    />
                 </Card>
             ) : (
-                <div className={'flex flex-col gap-2'}>
+                <ItemGroup className={'gap-3'}>
                     {storages!.map(storage => (
                         <StorageCard key={storage.id} storage={storage} />
                     ))}
-                </div>
+                </ItemGroup>
             )}
         </>
     )

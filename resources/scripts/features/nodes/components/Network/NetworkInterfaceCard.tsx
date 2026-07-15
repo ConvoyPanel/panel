@@ -1,13 +1,22 @@
 import { NetworkInterface } from '@/types/network-interface.ts'
 
-import { Card } from '@/components/ui/Card'
-import useNetworkInterfacesModalStore
-    from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
-import { useShallow } from 'zustand/react/shallow'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/DropdownMenu'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
 import { IconDots } from '@tabler/icons-react'
-import { StatLabel } from '@/components/ui/Typography'
+import { useShallow } from 'zustand/react/shallow'
 
 interface Props {
     interface: NetworkInterface
@@ -25,34 +34,32 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
           : 'Not VLAN-aware'
 
     return (
-        <Card className={'flex px-5 py-2.5 pr-2.5'}>
-            <div className={'flex grow flex-col justify-center'}>
-                <button
-                    className={'inline-block text-left font-semibold'}
-                    title={`Edit details for ${networkInterface.name}`}
-                    onClick={() => openModal('edit', networkInterface)}
-                >
-                    {networkInterface.name}
-                </button>
-                {networkInterface.description && (
-                    <p
-                        className={
-                            'text-ellipsis text-sm text-muted-foreground'
-                        }
+        <Item variant={'muted'} size={'sm'}>
+            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                <ItemTitle>
+                    <button
+                        className={'truncate text-left'}
+                        title={`Edit details for ${networkInterface.name}`}
+                        onClick={() => openModal('edit', networkInterface)}
                     >
+                        {networkInterface.name}
+                    </button>
+                </ItemTitle>
+                {networkInterface.description && (
+                    <ItemDescription className={'truncate'}>
                         {networkInterface.description}
-                    </p>
+                    </ItemDescription>
                 )}
-                <dl className={'mt-2 flex flex-wrap gap-4 text-sm'}>
+                <dl>
                     <div>
-                        <StatLabel as={'dt'} className={'text-xs'}>
+                        <dt className={'text-xs text-muted-foreground'}>
                             VLAN
-                        </StatLabel>
-                        <dd>{vlanLabel}</dd>
+                        </dt>
+                        <dd className={'text-sm'}>{vlanLabel}</dd>
                     </div>
                 </dl>
-            </div>
-            <div className={'flex items-center justify-end justify-items-end'}>
+            </ItemContent>
+            <ItemActions className={'ml-auto'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
@@ -77,8 +84,8 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
-        </Card>
+            </ItemActions>
+        </Item>
     )
 }
 

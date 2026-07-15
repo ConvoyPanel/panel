@@ -178,8 +178,8 @@ patterns:
 
 - [x] Client My Servers: bespoke cards, no loading skeleton, and no empty state.
 - [ ] Admin Templates: bespoke cards and detached create/empty-state actions.
-- [ ] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
-- [ ] Node Storages: bespoke cards, detached actions, and spacing shims.
+- [x] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
+- [x] Node Storages: bespoke cards, detached actions, and spacing shims.
 - [ ] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
 - [ ] Server Addresses: raw desktop table and duplicated overflow handling.
 - [ ] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text

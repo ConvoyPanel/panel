@@ -1,19 +1,24 @@
 import { NodeStorage } from '@/features/nodes/types.ts'
-import { cn } from '@/utils'
 import { IconDots } from '@tabler/icons-react'
 import { useShallow } from 'zustand/react/shallow'
 
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
-import { Badge, badgeVariants } from '@/components/ui/Badge.tsx'
+import { Badge } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface Props {
     storage: NodeStorage
@@ -25,35 +30,26 @@ const StorageCard = ({ storage }: Props) => {
     )
 
     return (
-        <Card className={'flex px-5 py-2.5 pr-2.5'}>
-            <div className={'flex grow flex-col justify-center'}>
-                <button
-                    className={'inline-block text-left font-semibold'}
-                    onClick={() => openModal('show', storage)}
-                    title={`View details for ${storage.displayName ?? storage.name}`}
-                >
-                    {storage.displayName ?? storage.name}{' '}
-                    {storage.displayName && (
-                        <span
-                            className={cn(
-                                'inline-flex align-middle tracking-tight',
-                                badgeVariants({
-                                    variant: 'secondary',
-                                })
-                            )}
-                        >
-                            {storage.name}
-                        </span>
-                    )}
-                </button>
-                {storage.description && (
-                    <p
-                        className={
-                            'text-ellipsis text-sm text-muted-foreground'
-                        }
+        <Item variant={'muted'} size={'sm'}>
+            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                <ItemTitle className={'max-w-full'}>
+                    <button
+                        className={'truncate text-left'}
+                        onClick={() => openModal('show', storage)}
+                        title={`View details for ${storage.displayName ?? storage.name}`}
                     >
+                        {storage.displayName ?? storage.name}
+                    </button>
+                    {storage.displayName && (
+                        <Badge variant={'secondary'} className={'shrink-0'}>
+                            {storage.name}
+                        </Badge>
+                    )}
+                </ItemTitle>
+                {storage.description && (
+                    <ItemDescription className={'truncate'}>
                         {storage.description}
-                    </p>
+                    </ItemDescription>
                 )}
                 <div className={'mt-1 flex flex-wrap gap-1'}>
                     {storage.storesKvm && (
@@ -75,8 +71,8 @@ const StorageCard = ({ storage }: Props) => {
                         <Badge variant={'secondary'}>Snippets</Badge>
                     )}
                 </div>
-            </div>
-            <div className={'flex items-center justify-end justify-items-end'}>
+            </ItemContent>
+            <ItemActions className={'ml-auto'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
@@ -106,8 +102,8 @@ const StorageCard = ({ storage }: Props) => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
-        </Card>
+            </ItemActions>
+        </Item>
     )
 }
 

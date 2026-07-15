@@ -87,7 +87,7 @@ const CreateStorageModal = () => {
     return (
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
-                <Button className={'flex'} size={'sm'}>
+                <Button>
                     <IconPlus className={'size-4'} /> Add storage
                 </Button>
             </CredenzaTrigger>

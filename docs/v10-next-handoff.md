@@ -131,6 +131,14 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Node Network and Storages collections — DONE (2026-07-14).** Both node subpages now use shared muted
+  `ItemGroup` rows instead of bespoke mini-cards, with compact descriptions, VLAN/storage metadata, badges, and
+  existing action menus preserved. Page actions share a responsive heading row; the create action moves into
+  the contextual empty state when no records exist, and empty `CardHeader` spacing shims are gone. Toolbar
+  actions use the standard control height. Browser verification covered real/intercepted empty and populated
+  data, create-dialog handoff, long names, action availability, and both pages at 390px with no console errors
+  or horizontal overflow. `tc` and production build pass.
+
 - **Client My Servers collection — DONE (2026-07-14).** Replaced the bespoke per-server cards with the
   shared muted `ItemGroup` row pattern, removed the hardcoded placeholder IP, and packed status plus
   CPU/memory/disk values into a responsive definition list using `byte-size`. The page now has matching initial

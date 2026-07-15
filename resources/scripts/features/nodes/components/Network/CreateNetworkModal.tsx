@@ -77,7 +77,7 @@ const CreateNetworkModal = () => {
     return (
         <Credenza open={open} onOpenChange={setOpen}>
             <CredenzaTrigger asChild>
-                <Button size={'sm'} className={'self-end'}>
+                <Button>
                     <IconPlus className={'size-4'} /> Add network interface
                 </Button>
             </CredenzaTrigger>

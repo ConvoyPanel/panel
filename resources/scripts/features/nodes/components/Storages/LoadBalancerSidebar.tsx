@@ -151,7 +151,7 @@ const LoadBalancerSidebar = () => {
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <Button variant={'outline'} size={'sm'}>
+                <Button variant={'outline'}>
                     Load balancer
                 </Button>
             </SheetTrigger>
