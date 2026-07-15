@@ -73,11 +73,16 @@ highlights, Escape closes only the select, 2nd Escape closes the dialog.
   `ConfigureCeremonyStepManagerFactoryAction` then restricts origins to `localhost` on `local`+`canary`, while
   ddev serves `https://convoy.ddev.site`. Temporarily set `version => 'production'` **and `ddev restart`**
   (OPcache `validate_timestamps=0`), then revert + restart. Done and reverted; test passkey rows deleted.
-- ⚠️ **Latent bug spotted, NOT fixed (pre-existing):** `AuthDialog` has **two** `useEffect`s that each call
-  `form.handleSubmit(submit)()` when the type is Passkey — one keyed on the dialog opening, one on `type`
-  changing. Opening the gate with Passkey preselected fires the ceremony **twice**; the second attempt 403s on
-  an already-consumed challenge. The flow still succeeds (the first wins) and the toast is swallowed, which is
-  why nobody noticed. Collapse them into one effect when next in this file.
+- **Double-ceremony bug — FOUND AND FIXED (`8cc5182d`).** `AuthDialog` had **two** `useEffect`s each
+  auto-submitting the passkey ceremony (one keyed on open, one on `type`). Both of their *initial* invocations
+  run when the gate mounts already-open, so the ceremony fired **twice** and the second 403'd on a consumed
+  challenge — the first won and the toast was swallowed, so it looked fine. ⚠️ **It was the nesting refactor
+  that made this fire**: as a page-level sibling the dialog mounted *closed*, so the guard blocked both initial
+  runs. Now a single effect keyed on both values (React coalesces a simultaneous open+type change into one
+  run). **Keep it one effect.** Verified with a CDP virtual authenticator: exactly one
+  `GET passkey-authentication-options` + one `POST identity/confirm` (was two of each), no API failures.
+  *Lesson: an effect guarded on a prop that used to be false at mount is a landmine when the component's mount
+  timing changes.*
 - **Still unverified:** the Authenticator *step* dialogs (enable → recovery-codes, disable,
   reset-recovery-codes) — enabling needs a real TOTP code.
 
