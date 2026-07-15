@@ -66,4 +66,8 @@ export enum BackupErrorCode {
     Other = 'other',
 }
 
-export type PaginatedBackups = PaginatedResult<Backup> & { backupCount: number }
+export type PaginatedBackups = PaginatedResult<Backup> & {
+    // Quota figures spanning every non-failed backup, not just the current page.
+    backupCount: number
+    backupSize: number
+}

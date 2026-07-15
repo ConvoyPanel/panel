@@ -19,7 +19,7 @@ function ServerNetworking() {
     return (
         <>
             <Heading>Networking</Heading>
-            <div className={'grid grid-cols-1 gap-5 @md:grid-cols-2'}>
+            <div className={'grid grid-cols-1 gap-2 @md:grid-cols-2 @md:gap-4'}>
                 <AddressesCard uuid={serverUuid} />
                 <NameserversCard uuid={serverUuid} />
             </div>

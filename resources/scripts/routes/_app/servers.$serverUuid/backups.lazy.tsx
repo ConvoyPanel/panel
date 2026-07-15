@@ -15,8 +15,10 @@ export const Route = createLazyFileRoute('/_app/servers/$serverUuid/backups')({
 function ServerBackups() {
     return (
         <>
-            <Heading>Backups</Heading>
-            <BackupQuotaSidebar />
+            <div className={'flex flex-wrap items-center justify-between gap-2'}>
+                <Heading>Backups</Heading>
+                <BackupQuotaSidebar />
+            </div>
             <BackupView />
         </>
     )

@@ -36,9 +36,12 @@ class BackupController
             ->allowedSorts('created_at', 'completed_at')
             ->paginate(min($request->query('per_page') ?? 20, 50));
 
+        // Both quota figures span every non-failed backup, not just the current
+        // page, so they are aggregated separately from the paginator.
         return [
             ...PaginationMeta::paginate($backups, BackupEloquentData::class),
             'backupCount' => $this->backupRepository->getNonFailedBackups($server)->count(),
+            'backupSize' => $this->backupRepository->getNonFailedBackupSize($server),
         ];
     }
 

@@ -12,10 +12,13 @@ import BackupController from '@/wayfinder/actions/App/Http/Controllers/Client/Se
 
 export type BackupListParams = QueryBuilderParams<'completed_at' | 'created_at'>
 
-// The index endpoint augments the standard paginated envelope with a
-// server-wide backup count (used for the quota display), and every backup row
-// needs date/enum normalization via rawDataToBackup.
-type RawBackupsResponse = PaginatedResponse<unknown> & { backupCount: number }
+// The index endpoint augments the standard paginated envelope with server-wide
+// backup count and size totals (used for the quota display), and every backup
+// row needs date/enum normalization via rawDataToBackup.
+type RawBackupsResponse = PaginatedResponse<unknown> & {
+    backupCount: number
+    backupSize: number
+}
 
 export const backupQueries = {
     all: (serverUuid: string) => ['server', serverUuid, 'backups'] as const,
@@ -37,6 +40,7 @@ export const backupQueries = {
                     items: res.items.map(rawDataToBackup),
                     pagination: res.pagination,
                     backupCount: res.backupCount,
+                    backupSize: res.backupSize,
                 }
             },
             placeholderData: keepPreviousData,

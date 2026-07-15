@@ -190,3 +190,35 @@ describe('unauthorized users', function () {
 
     it("can't delete backups", testDeleteBackups(true));
 });
+
+describe('index quota totals', function () {
+    it('reports count and size across every non-failed backup, not just the page', function () {
+        [$user, $_, $_, $server] = createServerModel();
+
+        // StorageSizeCast persists MiB, so these are 4 MiB each on disk and
+        // must come back as bytes -- a raw SUM() would report 8, not 8 MiB.
+        Backup::factory()->count(2)->create([
+            'server_id' => $server->id,
+            'size' => 4 * 1024 * 1024,
+            'completed_at' => now(),
+            'error_code' => null,
+        ]);
+
+        // Failed backups are excluded from both figures.
+        Backup::factory()->create([
+            'server_id' => $server->id,
+            'size' => 512 * 1024 * 1024,
+            'completed_at' => now(),
+            'error_code' => 'other',
+        ]);
+
+        $response = $this->actingAs($user)->getJson(
+            "/api/client/servers/{$server->uuid}/backups?per_page=1",
+        );
+
+        $response->assertOk()
+                 ->assertJsonCount(1, 'items')
+                 ->assertJsonPath('backupCount', 2)
+                 ->assertJsonPath('backupSize', 8 * 1024 * 1024);
+    });
+});
