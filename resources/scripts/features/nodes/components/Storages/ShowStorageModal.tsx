@@ -5,12 +5,12 @@ import { useShallow } from 'zustand/react/shallow'
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaContent,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogContent,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { SegmentedProgressBar, type Segment } from '@/components/ui/Progress'
 
 const fmt = (bytes: number) => {
@@ -87,14 +87,14 @@ const ShowStorageModal = () => {
     const usedPercent = view.total ? (view.used / view.total) * 100 : 0
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('show')}>
-            <CredenzaContent className={'gap-0'}>
-                <CredenzaHeader>
-                    <CredenzaTitle>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close('show')}>
+            <ResponsiveDialogContent className={'gap-0'}>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>
                         {storage?.displayName ?? storage?.name}
-                    </CredenzaTitle>
-                </CredenzaHeader>
-                <CredenzaBody>
+                    </ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody>
                     {!view.online && (
                         <p
                             className={
@@ -162,9 +162,9 @@ const ShowStorageModal = () => {
                             )}
                         </dl>
                     )}
-                </CredenzaBody>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogBody>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

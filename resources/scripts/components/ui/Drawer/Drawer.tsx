@@ -1,14 +1,7 @@
-import { ComponentProps } from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 
-const Drawer = ({
-    shouldScaleBackground = true,
-    ...props
-}: ComponentProps<typeof DrawerPrimitive.Root>) => (
-    <DrawerPrimitive.Root
-        shouldScaleBackground={shouldScaleBackground}
-        {...props}
-    />
+const Drawer = (props: DrawerPrimitive.Root.Props) => (
+    <DrawerPrimitive.Root swipeDirection={'down'} {...props} />
 )
 Drawer.displayName = 'Drawer'
 

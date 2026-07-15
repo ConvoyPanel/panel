@@ -1,33 +1,38 @@
 import { cn } from '@/utils'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { Cross2Icon } from '@radix-ui/react-icons'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { IconX } from '@tabler/icons-react'
 
-import { DialogOverlay, DialogPortal } from '@/components/ui/Dialog/index.ts'
+import { DialogOverlay, DialogPortal } from '@/components/ui/Dialog'
 
-
-const DialogContent = forwardRef<
-    ElementRef<typeof DialogPrimitive.Content>,
-    ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+const DialogContent = ({
+    className,
+    children,
+    ...props
+}: DialogPrimitive.Popup.Props) => (
     <DialogPortal>
         <DialogOverlay />
-        <DialogPrimitive.Content
-            ref={ref}
+        <DialogPrimitive.Popup
+            data-slot={'dialog-content'}
             className={cn(
-                'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg',
+                'fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
+                'transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
+                'motion-reduce:transition-none',
                 className
             )}
             {...props}
         >
             {children}
-            <DialogPrimitive.Close className='absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'>
-                <Cross2Icon className='h-4 w-4' />
-                <span className='sr-only'>Close</span>
+            <DialogPrimitive.Close
+                className={
+                    'absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none'
+                }
+            >
+                <IconX className={'size-4'} />
+                <span className={'sr-only'}>Close</span>
             </DialogPrimitive.Close>
-        </DialogPrimitive.Content>
+        </DialogPrimitive.Popup>
     </DialogPortal>
-))
-DialogContent.displayName = DialogPrimitive.Content.displayName
+)
+DialogContent.displayName = 'DialogContent'
 
 export default DialogContent

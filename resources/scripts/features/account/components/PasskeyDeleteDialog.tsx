@@ -13,14 +13,14 @@ import { usePasskeysModalStore } from '@/features/account/components/PasskeysCon
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 
 const PasskeyDeleteDialog = () => {
     const queryClient = useQueryClient()
@@ -52,26 +52,28 @@ const PasskeyDeleteDialog = () => {
     )
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={isDeleteDialogOpen}
             onOpenChange={open => !open && closeModal('delete')}
         >
-            <CredenzaContent className={'max-h-[50vh]'}>
-                <CredenzaHeader className={'overflow-x-hidden'}>
-                    <CredenzaTitle className={'truncate'}>
+            <ResponsiveDialogContent className={'max-h-[50vh]'}>
+                <ResponsiveDialogHeader className={'overflow-x-hidden'}>
+                    <ResponsiveDialogTitle className={'truncate'}>
                         Delete {passkey?.name}?
-                    </CredenzaTitle>
-                    <CredenzaDescription>
+                    </ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to delete this passkey? You will
                         no longer be able to use it to authenticate once you
                         delete it.
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
-                <CredenzaFooter className={'mt-4'}>
-                    <CredenzaTrigger asChild>
-                        <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaTrigger>
+                <ResponsiveDialogFooter className={'mt-4'}>
+                    <ResponsiveDialogTrigger
+                        render={
+                            <Button variant={'outline'}>Cancel</Button>
+                        }
+                    />
                     <Button
                         loading={state.loading}
                         variant={'destructive'}
@@ -79,9 +81,9 @@ const PasskeyDeleteDialog = () => {
                     >
                         Delete
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

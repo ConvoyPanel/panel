@@ -20,14 +20,14 @@ import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-sto
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
@@ -119,16 +119,16 @@ const EditStorageModal = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('edit')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>
                         Editing {storage?.displayName ?? storage?.name}
-                    </CredenzaTitle>
-                </CredenzaHeader>
+                    </ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody className={'space-y-2'}>
+                        <ResponsiveDialogBody className={'space-y-2'}>
                             <InputForm
                                 name={'displayName'}
                                 label={'Display Name'}
@@ -197,19 +197,21 @@ const EditStorageModal = () => {
                                     </li>
                                 </ul>
                             </div>
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Save</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

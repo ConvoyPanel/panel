@@ -8,14 +8,14 @@ import { useAuthenticatorModalStore } from '@/features/account/components/Authen
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const AuthenticatorResetRecoveryCodesDialog = () => {
     const [open, closeModal, pushToQueue] = useAuthenticatorModalStore(
@@ -42,22 +42,24 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
     })
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('reset-recovery-codes')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Reset Recovery Codes</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Reset Recovery Codes</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to reset your recovery codes? This
                         will invalidate all existing codes.
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Cancel</Button>
+                        }
+                    />
                     <Button
                         loading={state.loading}
                         variant={'destructive'}
@@ -65,9 +67,9 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
                     >
                         Reset
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -11,14 +11,14 @@ import StoragePicker from '@/features/servers/components/admin/Create/pickers/St
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 
@@ -67,14 +67,14 @@ const AddServerDiskModal = ({ serverId, nodeId, open, onOpenChange }: Props) => 
     }
 
     return (
-        <Credenza open={open} onOpenChange={onOpenChange}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Add a disk</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Add a disk</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as never)}>
-                        <CredenzaBody className={'space-y-4'}>
+                        <ResponsiveDialogBody className={'space-y-4'}>
                             <StoragePicker
                                 nodeId={nodeId}
                                 requiredContentTypes={['storesKvm']}
@@ -85,19 +85,21 @@ const AddServerDiskModal = ({ serverId, nodeId, open, onOpenChange }: Props) => 
                                 type={'number'}
                                 min={1}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Add disk</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

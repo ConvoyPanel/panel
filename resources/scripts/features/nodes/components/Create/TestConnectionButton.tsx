@@ -15,15 +15,15 @@ import { connectionErrorCopy } from '@/features/nodes/components/Create/connecti
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const TestConnectionButton = () => {
     const form = useFormContext()
@@ -98,15 +98,15 @@ const TestConnectionButton = () => {
                 </Button>
             </div>
 
-            <Credenza open={open} onOpenChange={setOpen}>
-                <CredenzaContent>
-                    <CredenzaHeader>
-                        <CredenzaTitle>{errorCopy.title}</CredenzaTitle>
-                        <CredenzaDescription>
+            <ResponsiveDialog open={open} onOpenChange={setOpen}>
+                <ResponsiveDialogContent>
+                    <ResponsiveDialogHeader>
+                        <ResponsiveDialogTitle>{errorCopy.title}</ResponsiveDialogTitle>
+                        <ResponsiveDialogDescription>
                             {errorCopy.description}
-                        </CredenzaDescription>
-                    </CredenzaHeader>
-                    <CredenzaBody>
+                        </ResponsiveDialogDescription>
+                    </ResponsiveDialogHeader>
+                    <ResponsiveDialogBody>
                         <details className={'group/details'}>
                             <summary
                                 className={
@@ -128,15 +128,17 @@ const TestConnectionButton = () => {
                                 {result?.errorMessage}
                             </p>
                         </details>
-                    </CredenzaBody>
-                    <CredenzaFooter>
-                        <CredenzaClose asChild>
-                            <Button variant={'outline'}>Close</Button>
-                        </CredenzaClose>
+                    </ResponsiveDialogBody>
+                    <ResponsiveDialogFooter>
+                        <ResponsiveDialogClose
+                            render={
+                                <Button variant={'outline'}>Close</Button>
+                            }
+                        />
                         <Button onClick={askChatGPT}>Ask ChatGPT</Button>
-                    </CredenzaFooter>
-                </CredenzaContent>
-            </Credenza>
+                    </ResponsiveDialogFooter>
+                </ResponsiveDialogContent>
+            </ResponsiveDialog>
         </>
     )
 }

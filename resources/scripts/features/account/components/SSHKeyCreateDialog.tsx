@@ -15,15 +15,15 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
@@ -63,19 +63,19 @@ const SSHKeyCreateDialog = ({ open, onOpenChange }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={close}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Add SSH key</CredenzaTitle>
-                    <CredenzaDescription>
+        <ResponsiveDialog open={open} onOpenChange={close}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Add SSH key</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Save a public key to your keychain to reuse it across
                         your servers.
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(data => trigger(data))}>
-                        <CredenzaBody className={'space-y-4'}>
+                        <ResponsiveDialogBody className={'space-y-4'}>
                             <InputForm
                                 name={'name'}
                                 label={'Name'}
@@ -86,19 +86,21 @@ const SSHKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                 label={'Public key'}
                                 placeholder={'ssh-ed25519 AAAA… user@host'}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Add key</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

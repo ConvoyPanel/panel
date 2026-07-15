@@ -15,16 +15,16 @@ import { usePasskeysModalStore } from '@/features/account/components/PasskeysCon
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 
 const PasskeysContainer = () => {
     const [isMainDialogOpen, openModal, closeModal] = usePasskeysModalStore(
@@ -66,23 +66,25 @@ const PasskeysContainer = () => {
     }
 
     return (
-        <Credenza open={isMainDialogOpen} onOpenChange={handleOpenChange}>
-            <CredenzaTrigger asChild>
-                <AuthSetting
-                    title={'Passkeys'}
-                    description={
-                        'Securely sign in with fingerprint, face, screen lock, or security key'
-                    }
-                />
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Passkeys</CredenzaTitle>
+        <ResponsiveDialog open={isMainDialogOpen} onOpenChange={handleOpenChange}>
+            <ResponsiveDialogTrigger
+                render={
+                    <AuthSetting
+                        title={'Passkeys'}
+                        description={
+                            'Securely sign in with fingerprint, face, screen lock, or security key'
+                        }
+                    />
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Passkeys</ResponsiveDialogTitle>
 
-                    <CredenzaDescription>
+                    <ResponsiveDialogDescription>
                         Securely sign in with fingerprint, face, screen lock, or
                         security key
-                    </CredenzaDescription>
+                    </ResponsiveDialogDescription>
 
                     {!window.isSecureContext && (
                         <Alert variant={'destructive'}>
@@ -94,19 +96,21 @@ const PasskeysContainer = () => {
                             </AlertDescription>
                         </Alert>
                     )}
-                </CredenzaHeader>
+                </ResponsiveDialogHeader>
 
-                <CredenzaBody
+                <ResponsiveDialogBody
                     className={
                         'relative h-full max-h-[50vh] overflow-y-auto overflow-x-visible'
                     }
                 >
                     <PasskeyList />
-                </CredenzaBody>
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Close</Button>
-                    </CredenzaClose>
+                </ResponsiveDialogBody>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Close</Button>
+                        }
+                    />
 
                     <Button
                         loading={state.loading}
@@ -115,9 +119,9 @@ const PasskeysContainer = () => {
                     >
                         Add passkey
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

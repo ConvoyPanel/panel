@@ -16,12 +16,14 @@ const SidebarToggle = ({ nav }: Props) => {
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-                <Button size='icon' variant='outline' className='sm:hidden'>
-                    <IconLayoutSidebar className='h-5 w-5' />
-                    <span className='sr-only'>Toggle Menu</span>
-                </Button>
-            </SheetTrigger>
+            <SheetTrigger
+                render={
+                    <Button size='icon' variant='outline' className='sm:hidden'>
+                        <IconLayoutSidebar className='h-5 w-5' />
+                        <span className='sr-only'>Toggle Menu</span>
+                    </Button>
+                }
+            />
             <SheetContent side='left' className='w-72 bg-sidebar sm:max-w-xs'>
                 <div className='mb-3 flex items-center gap-2 px-1'>
                     <span className='grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground'>

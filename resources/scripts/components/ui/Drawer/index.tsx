@@ -1,4 +1,4 @@
-import { Drawer as DrawerPrimitive } from 'vaul'
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 
 import Drawer from './Drawer'
 import DrawerContent from './DrawerContext'
@@ -8,11 +8,8 @@ import DrawerHeader from './DrawerHeader'
 import DrawerOverlay from './DrawerOverlay'
 import DrawerTitle from './DrawerTitle'
 
-
-const DrawerTrigger = DrawerPrimitive.Trigger
-
 const DrawerPortal = DrawerPrimitive.Portal
-
+const DrawerTrigger = DrawerPrimitive.Trigger
 const DrawerClose = DrawerPrimitive.Close
 
 export {

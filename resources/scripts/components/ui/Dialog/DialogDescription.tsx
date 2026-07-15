@@ -1,17 +1,16 @@
 import { cn } from '@/utils'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 
-const DialogDescription = forwardRef<
-    ElementRef<typeof DialogPrimitive.Description>,
-    ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
+const DialogDescription = ({
+    className,
+    ...props
+}: DialogPrimitive.Description.Props) => (
     <DialogPrimitive.Description
-        ref={ref}
+        data-slot={'dialog-description'}
         className={cn('text-sm text-muted-foreground', className)}
         {...props}
     />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
+)
+DialogDescription.displayName = 'DialogDescription'
 
 export default DialogDescription

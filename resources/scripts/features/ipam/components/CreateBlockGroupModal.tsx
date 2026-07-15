@@ -15,15 +15,15 @@ import {
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
@@ -66,37 +66,41 @@ const CreateBlockGroupModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button>
-                    <IconPlus className={'size-4'} /> Add block group
-                </Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>New Block Group</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button>
+                        <IconPlus className={'size-4'} /> Add block group
+                    </Button>
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>New Block Group</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody className={'space-y-2'}>
+                        <ResponsiveDialogBody className={'space-y-2'}>
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Add block group</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -1,16 +1,16 @@
-import {
-    Root as Sheet,
-    Close as SheetClose,
-    Portal as SheetPortal,
-    Trigger as SheetTrigger,
-} from '@radix-ui/react-dialog'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 
-import SheetContent, { SheetContentProps } from './SheetContent'
+import SheetContent, { type SheetContentProps } from './SheetContent'
 import SheetDescription from './SheetDescription'
 import SheetFooter from './SheetFooter'
 import SheetHeader from './SheetHeader'
 import SheetOverlay from './SheetOverlay'
 import SheetTitle from './SheetTitle'
+
+const Sheet = SheetPrimitive.Root
+const SheetPortal = SheetPrimitive.Portal
+const SheetTrigger = SheetPrimitive.Trigger
+const SheetClose = SheetPrimitive.Close
 
 export {
     Sheet,

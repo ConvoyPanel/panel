@@ -3,7 +3,7 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { AxiosError } from 'axios'
-import { ReactNode, useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -22,15 +22,15 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/Collapsible'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, SelectForm } from '@/components/ui/Forms'
 
@@ -61,7 +61,7 @@ const errorMessage = (e: unknown, fallback: string): string =>
 interface Props {
     serverUuid: string
     mutate: Mutator<PaginatedBackups>
-    trigger?: ReactNode
+    trigger?: ReactElement
 }
 
 const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
@@ -98,21 +98,23 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                {trigger ?? (
-                    <Button>
-                        <IconPlus className={'size-4'} /> Create backup
-                    </Button>
-                )}
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Create Backup</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    (trigger as ReactElement) ?? (
+                        <Button>
+                            <IconPlus className={'size-4'} /> Create backup
+                        </Button>
+                    )
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Create Backup</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className={'space-y-4'}>
+                        <ResponsiveDialogBody className={'space-y-4'}>
                             <InputForm name={'name'} label={'Name'} />
                             {/* Defaults (snapshot + zstd) cover the common case;
                                 the rest stays out of the way until asked for. */}
@@ -143,19 +145,21 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
                                     </div>
                                 </CollapsiblePanel>
                             </Collapsible>
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Create backup</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

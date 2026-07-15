@@ -17,14 +17,14 @@ import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
@@ -89,32 +89,34 @@ const EditBlockGroupModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('edit')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Editing {blockGroup?.name}</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Editing {blockGroup?.name}</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody className={'space-y-2'}>
+                        <ResponsiveDialogBody className={'space-y-2'}>
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Save</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -13,14 +13,14 @@ import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-te
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const DeleteTemplateGroupModal = () => {
     const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
@@ -55,25 +55,27 @@ const DeleteTemplateGroupModal = () => {
     }
 
     return (
-        <Credenza open={isOpen} onOpenChange={() => closeModal('delete')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Delete Template Group</CredenzaTitle>
-                    <CredenzaDescription>
+        <ResponsiveDialog open={isOpen} onOpenChange={() => closeModal('delete')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Delete Template Group</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to delete this template group?
                         This action cannot be undone.
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter className={'mt-4'}>
-                    <CredenzaClose asChild>
-                        <Button
-                            variant={'outline'}
-                            type={'button'}
-                            disabled={isMutating}
-                        >
-                            Cancel
-                        </Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter className={'mt-4'}>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button
+                                variant={'outline'}
+                                type={'button'}
+                                disabled={isMutating}
+                            >
+                                Cancel
+                            </Button>
+                        }
+                    />
                     <Button
                         onClick={submit}
                         loading={isMutating}
@@ -81,9 +83,9 @@ const DeleteTemplateGroupModal = () => {
                     >
                         Delete
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

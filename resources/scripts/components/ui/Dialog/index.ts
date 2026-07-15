@@ -1,9 +1,4 @@
-import {
-    Root as Dialog,
-    Close as DialogClose,
-    Portal as DialogPortal,
-    Trigger as DialogTrigger,
-} from '@radix-ui/react-dialog'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 
 import DialogContent from './DialogContent'
 import DialogDescription from './DialogDescription'
@@ -11,6 +6,11 @@ import DialogFooter from './DialogFooter'
 import DialogHeader from './DialogHeader'
 import DialogOverlay from './DialogOverlay'
 import DialogTitle from './DialogTitle'
+
+const Dialog = DialogPrimitive.Root
+const DialogPortal = DialogPrimitive.Portal
+const DialogTrigger = DialogPrimitive.Trigger
+const DialogClose = DialogPrimitive.Close
 
 export {
     Dialog,

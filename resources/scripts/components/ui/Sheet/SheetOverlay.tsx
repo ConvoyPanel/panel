@@ -1,20 +1,20 @@
 import { cn } from '@/utils'
-import * as SheetPrimitive from '@radix-ui/react-dialog'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 
-const SheetOverlay = forwardRef<
-    ElementRef<typeof SheetPrimitive.Overlay>,
-    ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-    <SheetPrimitive.Overlay
+const SheetOverlay = ({
+    className,
+    ...props
+}: SheetPrimitive.Backdrop.Props) => (
+    <SheetPrimitive.Backdrop
+        data-slot={'sheet-overlay'}
         className={cn(
-            'fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            'fixed inset-0 z-50 bg-black/80 transition-opacity duration-300',
+            'data-ending-style:opacity-0 data-starting-style:opacity-0',
             className
         )}
         {...props}
-        ref={ref}
     />
-))
-SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
+)
+SheetOverlay.displayName = 'SheetOverlay'
 
 export default SheetOverlay

@@ -11,15 +11,15 @@ import { deleteLocation } from '@/features/locations/api.ts'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 interface Props {
     mutate: Mutator<PaginatedLocations>
@@ -61,18 +61,18 @@ const DeleteLocationModal = ({ mutate }: Props) => {
     )
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('delete')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Delete {location?.shortCode}</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Delete {location?.shortCode}</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to delete this location?
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaBody>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody>
                     {Boolean(
                         location?.nodesCount && location.nodesCount > 0
                     ) && (
@@ -85,11 +85,13 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                             </AlertDescription>
                         </Alert>
                     )}
-                </CredenzaBody>
-                <CredenzaFooter className={'mt-4'}>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaClose>
+                </ResponsiveDialogBody>
+                <ResponsiveDialogFooter className={'mt-4'}>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Cancel</Button>
+                        }
+                    />
                     <Button
                         autoFocus
                         loading={state.loading}
@@ -101,9 +103,9 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                     >
                         Delete
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

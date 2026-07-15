@@ -1,17 +1,16 @@
 import { cn } from '@/utils'
-import * as SheetPrimitive from '@radix-ui/react-dialog'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 
-const SheetDescription = forwardRef<
-    ElementRef<typeof SheetPrimitive.Description>,
-    ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
->(({ className, ...props }, ref) => (
+const SheetDescription = ({
+    className,
+    ...props
+}: SheetPrimitive.Description.Props) => (
     <SheetPrimitive.Description
-        ref={ref}
+        data-slot={'sheet-description'}
         className={cn('text-sm text-muted-foreground', className)}
         {...props}
     />
-))
-SheetDescription.displayName = SheetPrimitive.Description.displayName
+)
+SheetDescription.displayName = 'SheetDescription'
 
 export default SheetDescription

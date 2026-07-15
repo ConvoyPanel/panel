@@ -12,14 +12,14 @@ import { useAuthenticatorModalStore } from '@/features/account/components/Authen
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const AuthenticatorDisableDialog = () => {
     const queryClient = useQueryClient()
@@ -45,22 +45,24 @@ const AuthenticatorDisableDialog = () => {
     })
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('disable')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Disable Authenticator</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Disable Authenticator</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to disable the authenticator for
                         your account?
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Cancel</Button>
+                        }
+                    />
                     <Button
                         loading={state.loading}
                         variant={'destructive'}
@@ -68,9 +70,9 @@ const AuthenticatorDisableDialog = () => {
                     >
                         Disable
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -10,15 +10,15 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const AuthenticatorRecoveryCodesDialog = () => {
@@ -52,21 +52,21 @@ const AuthenticatorRecoveryCodesDialog = () => {
     }
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('recovery-codes')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Recovery Codes</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Recovery Codes</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Store these recovery codes in a safe place. If you lose
                         access to your authenticator app, you can use these
                         codes to recover your account.
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
-                <CredenzaBody>
+                <ResponsiveDialogBody>
                     {codes ? (
                         <ul className={'text-center'}>
                             {codes.map(code => (
@@ -76,20 +76,22 @@ const AuthenticatorRecoveryCodesDialog = () => {
                     ) : (
                         <Skeleton className={'h-48 w-full'} />
                     )}
-                </CredenzaBody>
+                </ResponsiveDialogBody>
 
-                <CredenzaFooter>
+                <ResponsiveDialogFooter>
                     <Button variant={'outline'} onClick={copy}>
                         Copy codes
                     </Button>
-                    <CredenzaClose asChild>
-                        <Button variant={'destructive'}>
-                            I saved my codes
-                        </Button>
-                    </CredenzaClose>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'destructive'}>
+                                I saved my codes
+                            </Button>
+                        }
+                    />
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

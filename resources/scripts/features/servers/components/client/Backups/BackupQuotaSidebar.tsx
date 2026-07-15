@@ -70,24 +70,26 @@ const BackupQuotaSidebar = () => {
 
     return (
         <Sheet>
-            <SheetTrigger asChild>
-                <Button
-                    variant={'outline'}
-                    className={'gap-3'}
-                    aria-label={`Backup quota: ${data.backupCount} backups, ${formatBytes(data.backupSize)} used`}
-                >
-                    <RingProgress
-                        thickness={'xl'}
-                        className={'h-6 w-6'}
-                        value={countPercentage}
-                    />
-                    <RingProgress
-                        thickness={'xl'}
-                        className={'h-6 w-6'}
-                        value={sizePercentage}
-                    />
-                </Button>
-            </SheetTrigger>
+            <SheetTrigger
+                render={
+                    <Button
+                        variant={'outline'}
+                        className={'gap-3'}
+                        aria-label={`Backup quota: ${data.backupCount} backups, ${formatBytes(data.backupSize)} used`}
+                    >
+                        <RingProgress
+                            thickness={'xl'}
+                            className={'h-6 w-6'}
+                            value={countPercentage}
+                        />
+                        <RingProgress
+                            thickness={'xl'}
+                            className={'h-6 w-6'}
+                            value={sizePercentage}
+                        />
+                    </Button>
+                }
+            />
             <SheetContent side={'right'}>
                 <SheetHeader>
                     <SheetTitle>Backup Quota</SheetTitle>

@@ -16,14 +16,14 @@ import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 
 const addressSchema = z.object({
@@ -95,14 +95,14 @@ const EditAddressModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('edit')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Editing Address {address?.ip}</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Editing Address {address?.ip}</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody>
+                        <ResponsiveDialogBody>
                             <ServerPicker
                                 addressBlockGroupId={Number(
                                     addressBlockGroupId
@@ -116,19 +116,21 @@ const EditAddressModal = ({ mutate }: Props) => {
                             >
                                 Clear
                             </Button>
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Save</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

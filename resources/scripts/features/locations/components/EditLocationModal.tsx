@@ -12,14 +12,14 @@ import { updateLocation } from '@/features/locations/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 
@@ -78,17 +78,17 @@ const EditLocationModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('edit')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Editing {location?.shortCode}</CredenzaTitle>
-                </CredenzaHeader>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Editing {location?.shortCode}</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className={'space-y-2'}>
+                        <ResponsiveDialogBody className={'space-y-2'}>
                             <InputForm
                                 name={'shortCode'}
                                 label={'Short Code'}
@@ -97,19 +97,21 @@ const EditLocationModal = ({ mutate }: Props) => {
                                 name={'description'}
                                 label={'Description'}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Save</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

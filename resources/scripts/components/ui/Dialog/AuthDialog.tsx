@@ -15,15 +15,15 @@ import { confirmIdentity } from '@/features/auth/identity/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
@@ -111,23 +111,23 @@ const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
     }
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={isAuthDialogOpen}
             onOpenChange={open => !open && back(selector)}
         >
-            <CredenzaContent className={'max-h-[50vh]'}>
-                <CredenzaHeader className={'overflow-x-hidden'}>
-                    <CredenzaTitle className={'truncate'}>
+            <ResponsiveDialogContent className={'max-h-[50vh]'}>
+                <ResponsiveDialogHeader className={'overflow-x-hidden'}>
+                    <ResponsiveDialogTitle className={'truncate'}>
                         Authorization Required
-                    </CredenzaTitle>
-                    <CredenzaDescription>
+                    </ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Please enter your credentials to continue
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody>
+                        <ResponsiveDialogBody>
                             <Tabs
                                 value={type}
                                 onValueChange={val =>
@@ -163,19 +163,21 @@ const AuthDialog = ({ selector = 'auth', useModalStore }: Props) => {
                                     />
                                 </TabsContent>
                             </Tabs>
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Confirm</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

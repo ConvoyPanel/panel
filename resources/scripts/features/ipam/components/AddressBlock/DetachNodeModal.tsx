@@ -3,14 +3,14 @@ import { toast } from 'sonner'
 import { detachNode } from '@/features/ipam/api.ts'
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import { Node } from '@/types/node.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
@@ -48,18 +48,20 @@ const DetachNodeModal = ({ mutate, node, open, onOpenChange }: Props) => {
     })
 
     return (
-        <Credenza open={open} onOpenChange={onOpenChange}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Detach {node?.displayName || 'Node'}</CredenzaTitle>
-                    <CredenzaDescription>
+        <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Detach {node?.displayName || 'Node'}</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to detach this node from the address block group?
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter className="mt-4">
-                    <CredenzaClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter className="mt-4">
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant="outline">Cancel</Button>
+                        }
+                    />
                     <Button
                         autoFocus
                         loading={state.loading}
@@ -68,9 +70,9 @@ const DetachNodeModal = ({ mutate, node, open, onOpenChange }: Props) => {
                     >
                         Detach
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

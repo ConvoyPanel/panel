@@ -2,15 +2,15 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Label } from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/Textarea'
 
@@ -42,16 +42,16 @@ const PasteKeyDialog = ({ open, onOpenChange, onAdd }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={close}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Paste a one-off key</CredenzaTitle>
-                    <CredenzaDescription>
+        <ResponsiveDialog open={open} onOpenChange={close}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Paste a one-off key</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Added to this server only — it isn’t saved to your
                         keychain. One key per line.
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaBody className={'space-y-2'}>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody className={'space-y-2'}>
                     <Label htmlFor={'paste-key'}>Public key</Label>
                     <Textarea
                         id={'paste-key'}
@@ -61,19 +61,21 @@ const PasteKeyDialog = ({ open, onOpenChange, onAdd }: Props) => {
                         placeholder={'ssh-ed25519 AAAA… user@host'}
                         className={'font-mono text-xs'}
                     />
-                </CredenzaBody>
-                <CredenzaFooter className={'mt-4'}>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'} type={'button'}>
-                            Cancel
-                        </Button>
-                    </CredenzaClose>
+                </ResponsiveDialogBody>
+                <ResponsiveDialogFooter className={'mt-4'}>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'} type={'button'}>
+                                Cancel
+                            </Button>
+                        }
+                    />
                     <Button onClick={add} disabled={value.trim().length === 0}>
                         Add key
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

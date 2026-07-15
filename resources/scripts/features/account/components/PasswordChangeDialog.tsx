@@ -11,15 +11,15 @@ import AuthSetting from '@/features/account/components/AuthSetting.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
@@ -65,21 +65,23 @@ const PasswordChangeDialog = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <AuthSetting
-                    title={'Password'}
-                    description={'Change your account password'}
-                    onClick={() => {}}
-                />
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Change Your Password</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    <AuthSetting
+                        title={'Password'}
+                        description={'Change your account password'}
+                        onClick={() => {}}
+                    />
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Change Your Password</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className={'space-y-2'}>
+                        <ResponsiveDialogBody className={'space-y-2'}>
                             <InputForm
                                 label={'Current Password'}
                                 name={'currentPassword'}
@@ -99,19 +101,21 @@ const PasswordChangeDialog = () => {
                                 autoComplete={'new-password'}
                                 type={'password'}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Confirm</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

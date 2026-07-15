@@ -1,20 +1,16 @@
 import { cn } from '@/utils'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 
-const DrawerTitle = forwardRef<
-    ElementRef<typeof DrawerPrimitive.Title>,
-    ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
->(({ className, ...props }, ref) => (
+const DrawerTitle = ({ className, ...props }: DrawerPrimitive.Title.Props) => (
     <DrawerPrimitive.Title
-        ref={ref}
+        data-slot={'drawer-title'}
         className={cn(
-            'text-lg font-semibold leading-none tracking-tight',
+            'text-lg leading-none font-semibold tracking-tight',
             className
         )}
         {...props}
     />
-))
-DrawerTitle.displayName = DrawerPrimitive.Title.displayName
+)
+DrawerTitle.displayName = 'DrawerTitle'
 
 export default DrawerTitle

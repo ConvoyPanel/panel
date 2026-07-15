@@ -4,13 +4,13 @@ import { useShallow } from 'zustand/react/shallow'
 import AttachedNodesList from '@/features/locations/components/AttachedNodesList.tsx'
 
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const ShowLocationModal = () => {
     const [location, open, closeModal] = useLocationsModalStore(
@@ -22,26 +22,26 @@ const ShowLocationModal = () => {
     )
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('show')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>{location?.shortCode}</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>{location?.shortCode}</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Nodes attached to this location
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaBody
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody
                     className={
                         'h-full max-h-[50vh] overflow-y-auto overflow-x-visible'
                     }
                 >
                     <AttachedNodesList location={location} />
-                </CredenzaBody>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogBody>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

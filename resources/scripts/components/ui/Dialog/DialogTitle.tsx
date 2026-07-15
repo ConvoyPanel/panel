@@ -1,20 +1,16 @@
 import { cn } from '@/utils'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 
-const DialogTitle = forwardRef<
-    ElementRef<typeof DialogPrimitive.Title>,
-    ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
+const DialogTitle = ({ className, ...props }: DialogPrimitive.Title.Props) => (
     <DialogPrimitive.Title
-        ref={ref}
+        data-slot={'dialog-title'}
         className={cn(
-            'text-lg font-semibold leading-none tracking-tight',
+            'text-lg leading-none font-semibold tracking-tight',
             className
         )}
         {...props}
     />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
+)
+DialogTitle.displayName = 'DialogTitle'
 
 export default DialogTitle

@@ -18,15 +18,15 @@ import TemplateIconSelect from '@/features/template-groups/components/TemplateIc
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 
@@ -66,19 +66,21 @@ const CreateTemplateGroupModal = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button>
-                    <IconPlus className={'size-4'} /> Add template group
-                </Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>New Template Group</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button>
+                        <IconPlus className={'size-4'} /> Add template group
+                    </Button>
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>New Template Group</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className={'space-y-4'}>
+                        <ResponsiveDialogBody className={'space-y-4'}>
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
@@ -93,19 +95,21 @@ const CreateTemplateGroupModal = () => {
                                     'If checked, this template group will only be accessible to admin users.'
                                 }
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Add template group</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

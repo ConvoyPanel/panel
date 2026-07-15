@@ -11,15 +11,15 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
-import CredenzaFooter from '@/components/ui/Credenza/CredenzaFooter.tsx'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
+import { ResponsiveDialogFooter } from '@/components/ui/ResponsiveDialog'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const AuthenticatorEnableDialog = () => {
@@ -76,18 +76,18 @@ const AuthenticatorEnableDialog = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={handleOpenChange}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Enable Authenticator</CredenzaTitle>
-                    <CredenzaDescription>
+        <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Enable Authenticator</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         To finish enabling two factor authentication, scan the
                         following QR code using your phone's authenticator
                         application or enter the setup key and provide the
                         generated OTP code.
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaBody>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody>
                     {error ||
                     isLoading ||
                     !Boolean(qrCode?.url) ||
@@ -106,15 +106,17 @@ const AuthenticatorEnableDialog = () => {
                             </p>
                         </>
                     )}
-                </CredenzaBody>
+                </ResponsiveDialogBody>
 
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button>Next</Button>
-                    </CredenzaClose>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button>Next</Button>
+                        }
+                    />
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

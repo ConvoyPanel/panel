@@ -11,14 +11,14 @@ import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 interface Props {
     mutate: Mutator<PaginatedAddresses>
@@ -68,24 +68,26 @@ const DeleteAddressModal = ({ mutate }: Props) => {
     )
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={open}
             onOpenChange={open => !open && closeModal('delete')}
         >
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Delete {address?.ip}</CredenzaTitle>
-                    <CredenzaDescription>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Delete {address?.ip}</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to delete this address? This
                         action cannot be undone.
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'} type={'button'}>
-                            Cancel
-                        </Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'} type={'button'}>
+                                Cancel
+                            </Button>
+                        }
+                    />
                     <Button
                         variant={'destructive'}
                         onClick={() => deleteAddressTrigger()}
@@ -93,9 +95,9 @@ const DeleteAddressModal = ({ mutate }: Props) => {
                     >
                         Delete
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

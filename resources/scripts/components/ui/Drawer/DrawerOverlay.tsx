@@ -1,17 +1,23 @@
 import { cn } from '@/utils'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 
-const DrawerOverlay = forwardRef<
-    ElementRef<typeof DrawerPrimitive.Overlay>,
-    ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-    <DrawerPrimitive.Overlay
-        ref={ref}
-        className={cn('fixed inset-0 z-50 bg-black/80', className)}
+const DrawerOverlay = ({
+    className,
+    ...props
+}: DrawerPrimitive.Backdrop.Props) => (
+    <DrawerPrimitive.Backdrop
+        data-slot={'drawer-overlay'}
+        className={cn(
+            'fixed inset-0 z-50 bg-black/80',
+            // Base UI drives the backdrop from the live swipe progress, so it
+            // fades with the drag instead of only on open/close.
+            'opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-300',
+            'data-ending-style:opacity-0 data-starting-style:opacity-0',
+            className
+        )}
         {...props}
     />
-))
-DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
+)
+DrawerOverlay.displayName = 'DrawerOverlay'
 
 export default DrawerOverlay

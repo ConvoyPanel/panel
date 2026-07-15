@@ -16,14 +16,14 @@ import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-i
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 
 const DeleteNetworkInterfaceModal = () => {
     const { nodeId } = Route.useParams()
@@ -70,20 +70,22 @@ const DeleteNetworkInterfaceModal = () => {
     )
 
     return (
-        <Credenza open={open} onOpenChange={open => !open && close('delete')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close('delete')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>
                         Delete {networkInterface?.name}
-                    </CredenzaTitle>
-                    <CredenzaDescription>
+                    </ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Are you sure you want to delete this network interface?
-                    </CredenzaDescription>
-                </CredenzaHeader>
-                <CredenzaFooter className={'mt-4'}>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Cancel</Button>
-                    </CredenzaClose>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogFooter className={'mt-4'}>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Cancel</Button>
+                        }
+                    />
                     <Button
                         autoFocus
                         loading={state.loading}
@@ -92,9 +94,9 @@ const DeleteNetworkInterfaceModal = () => {
                     >
                         Delete
                     </Button>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

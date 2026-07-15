@@ -1,28 +1,30 @@
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 
 const ConsoleButton = () => {
     return (
-        <Credenza>
-            <CredenzaTrigger asChild>
-                <Button variant={'outline'}>Console</Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle className={'text-sm font-normal'}>
+        <ResponsiveDialog>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button variant={'outline'}>Console</Button>
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle className={'text-sm font-normal'}>
                         Select a Console
-                    </CredenzaTitle>
-                </CredenzaHeader>
-                <CredenzaBody>
+                    </ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
+                <ResponsiveDialogBody>
                     <div className={'-mx-2 flex flex-col'}>
                         <button
                             className={
@@ -54,14 +56,16 @@ const ConsoleButton = () => {
                             </span>
                         </button>
                     </div>
-                </CredenzaBody>
-                <CredenzaFooter>
-                    <CredenzaClose asChild>
-                        <Button variant={'outline'}>Close</Button>
-                    </CredenzaClose>
-                </CredenzaFooter>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogBody>
+                <ResponsiveDialogFooter>
+                    <ResponsiveDialogClose
+                        render={
+                            <Button variant={'outline'}>Close</Button>
+                        }
+                    />
+                </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -150,11 +150,13 @@ const LoadBalancerSidebar = () => {
 
     return (
         <Sheet>
-            <SheetTrigger asChild>
-                <Button variant={'outline'}>
-                    Load balancer
-                </Button>
-            </SheetTrigger>
+            <SheetTrigger
+                render={
+                    <Button variant={'outline'}>
+                        Load balancer
+                    </Button>
+                }
+            />
             <SheetContent side={'right'} className='flex flex-col'>
                 {' '}
                 {/* Ensure flex column layout */}

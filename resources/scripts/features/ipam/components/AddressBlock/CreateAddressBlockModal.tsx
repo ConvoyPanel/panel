@@ -16,15 +16,15 @@ import {
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm, TextareaForm } from '@/components/ui/Forms'
 import TabForm from '@/components/ui/Forms/TabForm.tsx'
@@ -79,19 +79,21 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button>
-                    <IconPlus className={'size-4'} /> Add address block
-                </Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>New Address Block</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button>
+                        <IconPlus className={'size-4'} /> Add address block
+                    </Button>
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>New Address Block</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <CredenzaBody className={'space-y-2 max-sm:max-h-[60vh] max-sm:overflow-y-auto'}>
+                        <ResponsiveDialogBody className={'space-y-2 max-sm:max-h-[60vh] max-sm:overflow-y-auto'}>
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
@@ -123,19 +125,21 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
                                     max={128}
                                 />
                             </div>
-                        </CredenzaBody>
-                        <CredenzaFooter className={'sm:mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'sm:mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Add address block</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

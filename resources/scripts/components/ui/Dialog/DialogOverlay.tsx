@@ -1,20 +1,22 @@
 import { cn } from '@/utils'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 
-const DialogOverlay = forwardRef<
-    ElementRef<typeof DialogPrimitive.Overlay>,
-    ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-    <DialogPrimitive.Overlay
-        ref={ref}
+const DialogOverlay = ({
+    className,
+    ...props
+}: DialogPrimitive.Backdrop.Props) => (
+    <DialogPrimitive.Backdrop
+        data-slot={'dialog-overlay'}
         className={cn(
-            'fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            'fixed inset-0 z-50 bg-black/80 transition-opacity duration-200',
+            // Base UI attributes: data-starting-style/data-ending-style, NOT
+            // Radix's data-[state=open]/[state=closed].
+            'data-ending-style:opacity-0 data-starting-style:opacity-0',
             className
         )}
         {...props}
     />
-))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+)
+DialogOverlay.displayName = 'DialogOverlay'
 
 export default DialogOverlay

@@ -5,14 +5,14 @@ import { useAuthenticatorModalStore } from '@/features/account/components/Authen
 import AuthenticatorStatus from '@/features/account/components/AuthenticatorStatus.tsx'
 
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 
 const AuthenticatorMainDialog = () => {
     const [open, openModal, closeModal] = useAuthenticatorModalStore(
@@ -32,28 +32,30 @@ const AuthenticatorMainDialog = () => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={handleOpenChange}>
-            <CredenzaTrigger asChild>
-                <AuthSetting
-                    title={'Authenticator'}
-                    description={'Time-based verification codes using an app'}
-                />
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Authenticator</CredenzaTitle>
+        <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+            <ResponsiveDialogTrigger
+                render={
+                    <AuthSetting
+                        title={'Authenticator'}
+                        description={'Time-based verification codes using an app'}
+                    />
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Authenticator</ResponsiveDialogTitle>
 
-                    <CredenzaDescription>
+                    <ResponsiveDialogDescription>
                         Use an authenticator app to generate time-based
                         verification codes.
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
-                <CredenzaBody className={'pb-4 md:pb-0'}>
+                <ResponsiveDialogBody className={'pb-4 md:pb-0'}>
                     <AuthenticatorStatus />
-                </CredenzaBody>
-            </CredenzaContent>
-        </Credenza>
+                </ResponsiveDialogBody>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

@@ -17,16 +17,16 @@ import type { Mutator } from '@/types/query.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import SelectForm from '@/components/ui/Forms/SelectForm'
@@ -90,23 +90,25 @@ const CreateTokenModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={onOpenChange}>
-            <CredenzaTrigger asChild>
-                <Button>
-                    <IconPlus className={'size-4'} /> Create token
-                </Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
+        <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button>
+                        <IconPlus className={'size-4'} /> Create token
+                    </Button>
+                }
+            />
+            <ResponsiveDialogContent>
                 {plainTextToken ? (
                     <>
-                        <CredenzaHeader>
-                            <CredenzaTitle>Token created</CredenzaTitle>
-                            <CredenzaDescription>
+                        <ResponsiveDialogHeader>
+                            <ResponsiveDialogTitle>Token created</ResponsiveDialogTitle>
+                            <ResponsiveDialogDescription>
                                 Copy this token now. For security, it won’t be
                                 shown again.
-                            </CredenzaDescription>
-                        </CredenzaHeader>
-                        <CredenzaBody>
+                            </ResponsiveDialogDescription>
+                        </ResponsiveDialogHeader>
+                        <ResponsiveDialogBody>
                             <div
                                 className={
                                     'flex items-center gap-2 rounded-md border bg-muted p-3'
@@ -135,24 +137,26 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                     )}
                                 </Button>
                             </div>
-                        </CredenzaBody>
-                        <CredenzaFooter>
-                            <CredenzaClose asChild>
-                                <Button>Done</Button>
-                            </CredenzaClose>
-                        </CredenzaFooter>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button>Done</Button>
+                                }
+                            />
+                        </ResponsiveDialogFooter>
                     </>
                 ) : (
                     <>
-                        <CredenzaHeader>
-                            <CredenzaTitle>Create API token</CredenzaTitle>
-                            <CredenzaDescription>
+                        <ResponsiveDialogHeader>
+                            <ResponsiveDialogTitle>Create API token</ResponsiveDialogTitle>
+                            <ResponsiveDialogDescription>
                                 A panel-wide token for the application API.
-                            </CredenzaDescription>
-                        </CredenzaHeader>
+                            </ResponsiveDialogDescription>
+                        </ResponsiveDialogHeader>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(data => trigger(data))}>
-                                <CredenzaBody className={'space-y-4'}>
+                                <ResponsiveDialogBody className={'space-y-4'}>
                                     <InputForm
                                         name={'name'}
                                         label={'Name'}
@@ -174,24 +178,26 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                                 items={scopeItems}
                                             />
                                         ))}
-                                </CredenzaBody>
-                                <CredenzaFooter className={'mt-4'}>
-                                    <CredenzaClose asChild>
-                                        <Button
-                                            variant={'outline'}
-                                            type={'button'}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </CredenzaClose>
+                                </ResponsiveDialogBody>
+                                <ResponsiveDialogFooter className={'mt-4'}>
+                                    <ResponsiveDialogClose
+                                        render={
+                                            <Button
+                                                variant={'outline'}
+                                                type={'button'}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        }
+                                    />
                                     <FormButton>Create token</FormButton>
-                                </CredenzaFooter>
+                                </ResponsiveDialogFooter>
                             </form>
                         </Form>
                     </>
                 )}
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

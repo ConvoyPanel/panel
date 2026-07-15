@@ -19,14 +19,14 @@ import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-te
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 import TemplateIconSelect from '@/features/template-groups/components/TemplateIconSelect.tsx'
@@ -82,14 +82,14 @@ const EditTemplateGroupModal = () => {
     }
 
     return (
-        <Credenza open={isOpen} onOpenChange={() => closeModal('edit')}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Edit Template Group</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={isOpen} onOpenChange={() => closeModal('edit')}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Edit Template Group</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className={'space-y-4'}>
+                        <ResponsiveDialogBody className={'space-y-4'}>
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
@@ -104,19 +104,21 @@ const EditTemplateGroupModal = () => {
                                     'If checked, this template group will only be accessible to admin users.'
                                 }
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Save changes</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

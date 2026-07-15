@@ -13,15 +13,15 @@ import { handleFormErrors } from '@/utils/http.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 
@@ -72,40 +72,42 @@ const ResizeServerDiskModal = ({ serverId, disk, onOpenChange }: Props) => {
     }
 
     return (
-        <Credenza open={disk !== null} onOpenChange={onOpenChange}>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Resize disk</CredenzaTitle>
+        <ResponsiveDialog open={disk !== null} onOpenChange={onOpenChange}>
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Resize disk</ResponsiveDialogTitle>
                     {disk && (
-                        <CredenzaDescription>
+                        <ResponsiveDialogDescription>
                             {disk.interface ?? 'This disk'} is currently{' '}
                             {byteSize(disk.size, { units: 'iec' }).toString()}.
                             Disks can only grow.
-                        </CredenzaDescription>
+                        </ResponsiveDialogDescription>
                     )}
-                </CredenzaHeader>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as never)}>
-                        <CredenzaBody>
+                        <ResponsiveDialogBody>
                             <InputForm
                                 name={'size'}
                                 label={'New size (GiB)'}
                                 type={'number'}
                                 min={currentGib}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Resize</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

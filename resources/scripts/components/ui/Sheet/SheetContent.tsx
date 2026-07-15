@@ -1,37 +1,43 @@
 import { cn } from '@/utils'
-import * as SheetPrimitive from '@radix-ui/react-dialog'
-import { Cross2Icon } from '@radix-ui/react-icons'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
+import { IconX } from '@tabler/icons-react'
 import type { VariantProps } from 'class-variance-authority'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
 
 import sheetVariants from '@/components/ui/Sheet/Sheet.variants.ts'
 import SheetOverlay from '@/components/ui/Sheet/SheetOverlay.tsx'
-import { SheetPortal } from '@/components/ui/Sheet/index.ts'
-
+import { SheetPortal } from '@/components/ui/Sheet'
 
 export interface SheetContentProps
-    extends ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-        VariantProps<typeof sheetVariants> {}
+    extends Omit<SheetPrimitive.Popup.Props, 'className'>,
+        VariantProps<typeof sheetVariants> {
+    className?: string
+}
 
-const SheetContent = forwardRef<
-    ElementRef<typeof SheetPrimitive.Content>,
-    SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
+const SheetContent = ({
+    side = 'right',
+    className,
+    children,
+    ...props
+}: SheetContentProps) => (
     <SheetPortal>
         <SheetOverlay />
-        <SheetPrimitive.Content
-            ref={ref}
+        <SheetPrimitive.Popup
+            data-slot={'sheet-content'}
             className={cn(sheetVariants({ side }), className)}
             {...props}
         >
             {children}
-            <SheetPrimitive.Close className='absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none'>
-                <Cross2Icon className='h-4 w-4' />
-                <span className='sr-only'>Close</span>
+            <SheetPrimitive.Close
+                className={
+                    'absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none'
+                }
+            >
+                <IconX className={'size-4'} />
+                <span className={'sr-only'}>Close</span>
             </SheetPrimitive.Close>
-        </SheetPrimitive.Content>
+        </SheetPrimitive.Popup>
     </SheetPortal>
-))
-SheetContent.displayName = SheetPrimitive.Content.displayName
+)
+SheetContent.displayName = 'SheetContent'
 
 export default SheetContent

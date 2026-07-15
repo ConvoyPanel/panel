@@ -18,15 +18,15 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import useClipboard from '@/hooks/use-clipboard.ts'
 
 import { Form, FormButton } from '@/components/ui/Form'
@@ -74,19 +74,19 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={close}>
-            <CredenzaContent>
+        <ResponsiveDialog open={open} onOpenChange={close}>
+            <ResponsiveDialogContent>
                 {plainTextToken ? (
                     <>
-                        <CredenzaHeader>
-                            <CredenzaTitle>API token created</CredenzaTitle>
-                            <CredenzaDescription>
+                        <ResponsiveDialogHeader>
+                            <ResponsiveDialogTitle>API token created</ResponsiveDialogTitle>
+                            <ResponsiveDialogDescription>
                                 Copy your token now. For your security, it
                                 won’t be shown again.
-                            </CredenzaDescription>
-                        </CredenzaHeader>
+                            </ResponsiveDialogDescription>
+                        </ResponsiveDialogHeader>
 
-                        <CredenzaBody>
+                        <ResponsiveDialogBody>
                             <div
                                 className={
                                     'flex items-center gap-2 rounded-md border bg-muted p-3'
@@ -115,27 +115,29 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                     )}
                                 </Button>
                             </div>
-                        </CredenzaBody>
+                        </ResponsiveDialogBody>
 
-                        <CredenzaFooter>
-                            <CredenzaClose asChild>
-                                <Button>Done</Button>
-                            </CredenzaClose>
-                        </CredenzaFooter>
+                        <ResponsiveDialogFooter>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button>Done</Button>
+                                }
+                            />
+                        </ResponsiveDialogFooter>
                     </>
                 ) : (
                     <>
-                        <CredenzaHeader>
-                            <CredenzaTitle>Create API token</CredenzaTitle>
-                            <CredenzaDescription>
+                        <ResponsiveDialogHeader>
+                            <ResponsiveDialogTitle>Create API token</ResponsiveDialogTitle>
+                            <ResponsiveDialogDescription>
                                 Generate a personal access token to use the API
                                 on your behalf.
-                            </CredenzaDescription>
-                        </CredenzaHeader>
+                            </ResponsiveDialogDescription>
+                        </ResponsiveDialogHeader>
 
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(data => trigger(data))}>
-                                <CredenzaBody className={'space-y-4'}>
+                                <ResponsiveDialogBody className={'space-y-4'}>
                                     <InputForm
                                         name={'name'}
                                         label={'Name'}
@@ -149,24 +151,26 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                             label: scope.label,
                                         }))}
                                     />
-                                </CredenzaBody>
-                                <CredenzaFooter className={'mt-4'}>
-                                    <CredenzaClose asChild>
-                                        <Button
-                                            variant={'outline'}
-                                            type={'button'}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </CredenzaClose>
+                                </ResponsiveDialogBody>
+                                <ResponsiveDialogFooter className={'mt-4'}>
+                                    <ResponsiveDialogClose
+                                        render={
+                                            <Button
+                                                variant={'outline'}
+                                                type={'button'}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        }
+                                    />
                                     <FormButton>Create token</FormButton>
-                                </CredenzaFooter>
+                                </ResponsiveDialogFooter>
                             </form>
                         </Form>
                     </>
                 )}
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

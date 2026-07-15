@@ -1,17 +1,16 @@
 import { cn } from '@/utils'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 
-const DrawerDescription = forwardRef<
-    ElementRef<typeof DrawerPrimitive.Description>,
-    ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
->(({ className, ...props }, ref) => (
+const DrawerDescription = ({
+    className,
+    ...props
+}: DrawerPrimitive.Description.Props) => (
     <DrawerPrimitive.Description
-        ref={ref}
+        data-slot={'drawer-description'}
         className={cn('text-sm text-muted-foreground', className)}
         {...props}
     />
-))
-DrawerDescription.displayName = DrawerPrimitive.Description.displayName
+)
+DrawerDescription.displayName = 'DrawerDescription'
 
 export default DrawerDescription

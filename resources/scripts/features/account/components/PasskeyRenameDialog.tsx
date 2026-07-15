@@ -15,15 +15,15 @@ import { usePasskeysModalStore } from '@/features/account/components/PasskeysCon
 
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaDescription,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogDescription,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 
@@ -63,37 +63,39 @@ const PasskeyRenameDialog = () => {
     }
 
     return (
-        <Credenza
+        <ResponsiveDialog
             open={isRenameDialogOpen}
             onOpenChange={open => !open && closeModal('rename')}
         >
-            <CredenzaContent className={'max-h-[50vh]'}>
-                <CredenzaHeader className={'overflow-x-hidden'}>
-                    <CredenzaTitle className={'truncate'}>
+            <ResponsiveDialogContent className={'max-h-[50vh]'}>
+                <ResponsiveDialogHeader className={'overflow-x-hidden'}>
+                    <ResponsiveDialogTitle className={'truncate'}>
                         Rename {passkey?.name}
-                    </CredenzaTitle>
-                    <CredenzaDescription>
+                    </ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
                         Change the name of this passkey.
-                    </CredenzaDescription>
-                </CredenzaHeader>
+                    </ResponsiveDialogDescription>
+                </ResponsiveDialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody>
+                        <ResponsiveDialogBody>
                             <InputForm name={'name'} label={'Name'} />
-                        </CredenzaBody>
-                        <CredenzaFooter className={'mt-4'}>
-                            <CredenzaClose asChild>
-                                <Button variant={'outline'} type={'button'}>
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className={'mt-4'}>
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant={'outline'} type={'button'}>
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Confirm</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 

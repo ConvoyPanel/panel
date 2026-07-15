@@ -10,15 +10,15 @@ import { attachNode } from '@/features/ipam/api.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
 import { Button } from '@/components/ui/Button'
 import {
-    Credenza,
-    CredenzaBody,
-    CredenzaClose,
-    CredenzaContent,
-    CredenzaFooter,
-    CredenzaHeader,
-    CredenzaTitle,
-    CredenzaTrigger,
-} from '@/components/ui/Credenza'
+    ResponsiveDialog,
+    ResponsiveDialogBody,
+    ResponsiveDialogClose,
+    ResponsiveDialogContent,
+    ResponsiveDialogFooter,
+    ResponsiveDialogHeader,
+    ResponsiveDialogTitle,
+    ResponsiveDialogTrigger,
+} from '@/components/ui/ResponsiveDialog'
 import { Form, FormButton } from '@/components/ui/Form'
 import NodePicker from '@/features/servers/components/admin/Create/pickers/NodePicker.tsx'
 import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker.tsx'
@@ -61,36 +61,40 @@ const AttachNodeModal = ({ mutate }: Props) => {
     }
 
     return (
-        <Credenza open={open} onOpenChange={setOpen}>
-            <CredenzaTrigger asChild>
-                <Button>
-                    <IconPlus className="size-4" /> Attach Node
-                </Button>
-            </CredenzaTrigger>
-            <CredenzaContent>
-                <CredenzaHeader>
-                    <CredenzaTitle>Attach Node</CredenzaTitle>
-                </CredenzaHeader>
+        <ResponsiveDialog open={open} onOpenChange={setOpen}>
+            <ResponsiveDialogTrigger
+                render={
+                    <Button>
+                        <IconPlus className="size-4" /> Attach Node
+                    </Button>
+                }
+            />
+            <ResponsiveDialogContent>
+                <ResponsiveDialogHeader>
+                    <ResponsiveDialogTitle>Attach Node</ResponsiveDialogTitle>
+                </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <CredenzaBody className="space-y-4">
+                        <ResponsiveDialogBody className="space-y-4">
                             <NodePicker />
                             <NetworkInterfacePicker
                                 nodeId={nodeId ? Number(nodeId) : null}
                             />
-                        </CredenzaBody>
-                        <CredenzaFooter className="mt-4">
-                            <CredenzaClose asChild>
-                                <Button variant="outline" type="button">
-                                    Cancel
-                                </Button>
-                            </CredenzaClose>
+                        </ResponsiveDialogBody>
+                        <ResponsiveDialogFooter className="mt-4">
+                            <ResponsiveDialogClose
+                                render={
+                                    <Button variant="outline" type="button">
+                                        Cancel
+                                    </Button>
+                                }
+                            />
                             <FormButton>Attach</FormButton>
-                        </CredenzaFooter>
+                        </ResponsiveDialogFooter>
                     </form>
                 </Form>
-            </CredenzaContent>
-        </Credenza>
+            </ResponsiveDialogContent>
+        </ResponsiveDialog>
     )
 }
 
