@@ -20,13 +20,22 @@ import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditA
 import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 
 import { Badge } from '@/components/ui/Badge.tsx'
+import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { TabsContent } from '@/components/ui/Tabs'
+import { cn } from '@/utils'
 
 const AddressBlockTab = () => {
     const { addressBlockGroupId } = Route.useParams()
@@ -35,6 +44,33 @@ const AddressBlockTab = () => {
     const { data, isPlaceholderData } = useAddressBlocks(queryParams)
     const mutate = useQueryMutator<PaginatedAddressBlocks>(
         addressBlockQueries.list(groupId, queryParams).queryKey
+    )
+    const openModal = useAddressBlockModal(state => state.openModal)
+
+    const renderActions = (block: AddressBlock) => (
+        <>
+            <DropdownMenuItem asChild>
+                <Link
+                    to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
+                    params={{
+                        addressBlockGroupId: String(block.addressBlockGroupId),
+                        addressBlockId: String(block.id),
+                    }}
+                >
+                    View
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openModal('edit', block)}>
+                Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+                variant={'destructive'}
+                onClick={() => openModal('delete', block)}
+            >
+                Delete
+            </DropdownMenuItem>
+        </>
     )
 
     const columns: ColumnDef<AddressBlock>[] = [
@@ -78,37 +114,7 @@ const AddressBlockTab = () => {
                 </Badge>
             ),
         },
-        actionsColumn(({ row }) => {
-            const openModal = useAddressBlockModal(state => state.openModal)
-
-            return (
-                <>
-                    <DropdownMenuItem asChild>
-                        <Link
-                            to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
-                            params={{
-                                addressBlockGroupId: String(row.original.addressBlockGroupId),
-                                addressBlockId: String(row.original.id),
-                            }}
-                        >
-                            View
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => openModal('edit', row.original)}
-                    >
-                        Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        variant={'destructive'}
-                        onClick={() => openModal('delete', row.original)}
-                    >
-                        Delete
-                    </DropdownMenuItem>
-                </>
-            )
-        }),
+        actionsColumn<AddressBlock>(({ row }) => renderActions(row.original)),
     ]
 
     return (
@@ -120,6 +126,60 @@ const AddressBlockTab = () => {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const block = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'min-w-0'}>
+                                <ItemTitle className={'w-full min-w-0'}>
+                                    {/* buttonVariants is inline-flex shrink-0, so
+                                        `truncate` on the link itself neither shrinks
+                                        nor ellipsises — the text has to truncate in
+                                        an inner span. */}
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                        )}
+                                        to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
+                                        params={{
+                                            addressBlockGroupId: String(
+                                                block.addressBlockGroupId
+                                            ),
+                                            addressBlockId: String(block.id),
+                                        }}
+                                    >
+                                        <span className={'truncate'}>
+                                            {block.name}
+                                        </span>
+                                    </Link>
+                                </ItemTitle>
+                                <ItemDescription
+                                    className={'block truncate text-nowrap'}
+                                >
+                                    {block.description || 'No description'}
+                                </ItemDescription>
+                                <div className={'flex flex-wrap gap-2'}>
+                                    <Badge
+                                        variant={'secondary'}
+                                        className={'font-mono'}
+                                    >
+                                        {block.baseIp}/{block.prefixLengthFrom}
+                                    </Badge>
+                                    <Badge variant={'secondary'}>
+                                        {block.version === AddressVersion.IPv4
+                                            ? 'IPv4'
+                                            : 'IPv6'}
+                                    </Badge>
+                                </div>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(block)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={
                     <CreateAddressBlockModal
                         addressBlockGroupId={groupId}

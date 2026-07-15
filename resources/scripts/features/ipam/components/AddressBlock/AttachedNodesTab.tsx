@@ -2,7 +2,15 @@ import { useState } from 'react'
 import AttachNodeModal from '@/features/ipam/components/AddressBlock/AttachNodeModal.tsx'
 import DetachNodeModal from '@/features/ipam/components/AddressBlock/DetachNodeModal.tsx'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { Badge } from '@/components/ui/Badge.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
@@ -37,6 +45,15 @@ const AttachedNodesTab = () => {
 
     const [selectedNode, setSelectedNode] = useState<Node | null>(null)
 
+    const renderActions = (networkInterface: NetworkInterface) => (
+        <DropdownMenuItem
+            variant={'destructive'}
+            onClick={() => setSelectedNode(networkInterface.node || null)}
+        >
+            Detach
+        </DropdownMenuItem>
+    )
+
     const columns: ColumnDef<NetworkInterface>[] = [
         {
             header: 'Interface',
@@ -69,14 +86,9 @@ const AttachedNodesTab = () => {
                 skeletonWidth: '7rem',
             },
         },
-        actionsColumn(({ row }) => (
-            <DropdownMenuItem
-                variant={'destructive'}
-                onClick={() => setSelectedNode(row.original.node || null)}
-            >
-                Detach
-            </DropdownMenuItem>
-        )),
+        actionsColumn<NetworkInterface>(({ row }) =>
+            renderActions(row.original)
+        ),
     ]
 
     return (
@@ -88,6 +100,51 @@ const AttachedNodesTab = () => {
                 data={data}
                 columns={columns}
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const networkInterface = row.original
+                    const node = networkInterface.node
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'min-w-0'}>
+                                <ItemTitle className={'w-full min-w-0'}>
+                                    {/* buttonVariants is inline-flex shrink-0, so
+                                        `truncate` on the link itself neither shrinks
+                                        nor ellipsises — the text has to truncate in
+                                        an inner span. */}
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                        )}
+                                        to='/admin/nodes/$nodeId'
+                                        params={{ nodeId: String(node?.id) }}
+                                    >
+                                        <span className={'truncate'}>
+                                            {node?.displayName}
+                                        </span>
+                                    </Link>
+                                </ItemTitle>
+                                <ItemDescription
+                                    className={'block truncate text-nowrap'}
+                                >
+                                    {node?.fqdn}
+                                </ItemDescription>
+                                <Badge
+                                    variant={'secondary'}
+                                    className={'w-fit font-mono'}
+                                >
+                                    {networkInterface.name}
+                                </Badge>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>
+                                    {renderActions(networkInterface)}
+                                </Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={<AttachNodeModal mutate={mutate} />}
                 {...tableProps}
             />

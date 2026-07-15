@@ -20,7 +20,14 @@ import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/Gen
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
 import DropdownMenuItem from '@/components/ui/DropdownMenu/DropdownMenuItem.tsx'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
@@ -85,6 +92,30 @@ function BlockIndex() {
         },
         onError: () => toast.error('Failed to update reservation'),
     })
+
+    const renderActions = (address: Address) => (
+        <>
+            <DropdownMenuItem onClick={() => openModal('edit', address)}>
+                Edit
+            </DropdownMenuItem>
+            {address.state === AddressState.Available && (
+                <DropdownMenuItem onClick={() => toggleReservation(address)}>
+                    Reserve
+                </DropdownMenuItem>
+            )}
+            {address.state === AddressState.Reserved && (
+                <DropdownMenuItem onClick={() => toggleReservation(address)}>
+                    Unreserve
+                </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+                variant={'destructive'}
+                onClick={() => openModal('delete', address)}
+            >
+                Delete
+            </DropdownMenuItem>
+        </>
+    )
 
     const columns: ColumnDef<Address>[] = [
         {
@@ -161,26 +192,7 @@ function BlockIndex() {
                 )
             },
         },
-        actionsColumn(({ row }) => {
-            const address = row.original
-            return (
-                <>
-                    <DropdownMenuItem onClick={() => openModal('edit', address)}>Edit</DropdownMenuItem>
-                    {address.state === AddressState.Available && (
-                        <DropdownMenuItem onClick={() => toggleReservation(address)}>Reserve</DropdownMenuItem>
-                    )}
-                    {address.state === AddressState.Reserved && (
-                        <DropdownMenuItem onClick={() => toggleReservation(address)}>Unreserve</DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                        variant={'destructive'}
-                        onClick={() => openModal('delete', address)}
-                    >
-                        Delete
-                    </DropdownMenuItem>
-                </>
-            )
-        }),
+        actionsColumn<Address>(({ row }) => renderActions(row.original)),
     ]
 
     return (
@@ -195,6 +207,56 @@ function BlockIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const address = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'min-w-0'}>
+                                <ItemTitle className={'w-full min-w-0'}>
+                                    <span className={'truncate font-mono'}>
+                                        {address.ip}/{address.prefixLength}
+                                    </span>
+                                </ItemTitle>
+                                {address.macAddress && (
+                                    <ItemDescription
+                                        className={
+                                            'block truncate font-mono text-nowrap'
+                                        }
+                                    >
+                                        {address.macAddress}
+                                    </ItemDescription>
+                                )}
+                                <div className={'flex flex-wrap gap-2'}>
+                                    <Badge
+                                        variant={
+                                            address.state ===
+                                            AddressState.Reserved
+                                                ? 'outline'
+                                                : 'secondary'
+                                        }
+                                        className={'capitalize'}
+                                    >
+                                        {address.state}
+                                    </Badge>
+                                    {address.server && (
+                                        <Badge
+                                            variant={'secondary'}
+                                            className={
+                                                'max-w-full truncate font-mono'
+                                            }
+                                        >
+                                            {address.server.name}
+                                        </Badge>
+                                    )}
+                                </div>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(address)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={<GenerateAddressesButton mutate={mutate} />}
                 {...tableProps}
             />

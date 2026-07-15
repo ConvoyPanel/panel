@@ -26,7 +26,14 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu'
-import { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
+import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/ipam/')({
@@ -41,6 +48,21 @@ function IpamIndex() {
     )
     const openModal = useBlockGroupModalStore(
         useShallow(state => state.openModal)
+    )
+
+    const renderActions = (group: AddressBlockGroup) => (
+        <>
+            <DropdownMenuItem onClick={() => openModal('edit', group)}>
+                Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+                variant={'destructive'}
+                onClick={() => openModal('delete', group)}
+            >
+                Delete
+            </DropdownMenuItem>
+        </>
     )
 
     const columns: ColumnDef<AddressBlockGroup>[] = [
@@ -81,24 +103,9 @@ function IpamIndex() {
                 </Badge>
             ),
         },
-        actionsColumn(({ row }) => {
-            return (
-                <>
-                    <DropdownMenuItem
-                        onClick={() => openModal('edit', row.original)}
-                    >
-                        Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        variant={'destructive'}
-                        onClick={() => openModal('delete', row.original)}
-                    >
-                        Delete
-                    </DropdownMenuItem>
-                </>
-            )
-        }),
+        actionsColumn<AddressBlockGroup>(({ row }) =>
+            renderActions(row.original)
+        ),
     ]
 
     return (
@@ -111,6 +118,53 @@ function IpamIndex() {
                 searchable
                 toolbar
                 isPlaceholderData={isPlaceholderData}
+                mobileRow={row => {
+                    const group = row.original
+
+                    return (
+                        <Item variant={'muted'} size={'sm'}>
+                            <ItemContent className={'min-w-0'}>
+                                <ItemTitle className={'w-full min-w-0'}>
+                                    {/* buttonVariants is inline-flex shrink-0, so
+                                        `truncate` on the link itself neither shrinks
+                                        nor ellipsises — the text has to truncate in
+                                        an inner span. */}
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({ variant: 'link' }),
+                                            'h-auto min-w-0 max-w-full shrink p-0'
+                                        )}
+                                        to='/admin/ipam/$addressBlockGroupId'
+                                        params={{
+                                            addressBlockGroupId: String(
+                                                group.id
+                                            ),
+                                        }}
+                                    >
+                                        <span className={'truncate'}>
+                                            {group.name}
+                                        </span>
+                                    </Link>
+                                </ItemTitle>
+                                <ItemDescription
+                                    className={'block truncate text-nowrap'}
+                                >
+                                    {group.description || 'No description'}
+                                </ItemDescription>
+                                <Badge
+                                    variant={'secondary'}
+                                    className={'w-fit font-mono'}
+                                >
+                                    {group.nodesCount}{' '}
+                                    {group.nodesCount === 1 ? 'node' : 'nodes'}
+                                </Badge>
+                            </ItemContent>
+                            <ItemActions>
+                                <Actions>{renderActions(group)}</Actions>
+                            </ItemActions>
+                        </Item>
+                    )
+                }}
                 rightActions={<CreateBlockGroupModal mutate={mutate} />}
                 {...tableProps}
             />

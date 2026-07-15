@@ -125,14 +125,20 @@ function ServersIndex() {
                             </ItemMedia>
                             <ItemContent className={'min-w-0'}>
                                 <ItemTitle className={'w-full min-w-0'}>
+                                    {/* buttonVariants is inline-flex shrink-0, so
+                                        `truncate` on the link itself neither shrinks
+                                        nor ellipsises — the text has to truncate in
+                                        an inner span. */}
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto truncate p-0'
+                                            'h-auto min-w-0 max-w-full shrink p-0'
                                         )}
                                         to={`/admin/servers/${server.id}` as string}
                                     >
-                                        {server.name}
+                                        <span className={'truncate'}>
+                                            {server.name}
+                                        </span>
                                     </Link>
                                 </ItemTitle>
                                 <ItemDescription

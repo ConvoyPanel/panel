@@ -102,20 +102,28 @@ function NodesIndex() {
 
                     return (
                         <Item variant={'muted'} size={'sm'}>
-                            <ItemContent className={'overflow-x-hidden'}>
-                                <ItemTitle>
+                            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                                <ItemTitle className={'w-full min-w-0'}>
+                                    {/* buttonVariants is inline-flex shrink-0, so
+                                        `truncate` on the link itself neither shrinks
+                                        nor ellipsises — the text has to truncate in
+                                        an inner span. */}
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto p-0'
+                                            'h-auto min-w-0 max-w-full shrink p-0'
                                         )}
                                         to='/admin/nodes/$nodeId'
                                         params={{ nodeId: String(node.id) }}
                                     >
-                                        {node.displayName}
+                                        <span className={'truncate'}>
+                                            {node.displayName}
+                                        </span>
                                     </Link>
                                 </ItemTitle>
-                                <ItemDescription className={'truncate'}>
+                                <ItemDescription
+                                    className={'block truncate text-nowrap'}
+                                >
                                     {node.fqdn}
                                 </ItemDescription>
                                 <ItemDescription>

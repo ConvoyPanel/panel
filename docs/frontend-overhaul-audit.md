@@ -3,8 +3,9 @@
 Status: audited 2026-07-13 against `next` after the base + nova rollout. The
 shared Textarea, Select, Checkbox, DropdownMenu, Popover, Command/combobox,
 DataTable toolbar, OTP, accessible icon actions, admin server Disks, DataTable
-empty/filtered-empty states, shared Show all control, and admin dashboard Nodes
-card work identified below has since been completed; unchecked items remain.
+empty/filtered-empty states, shared Show all control, admin dashboard Nodes
+card, and IPAM mobile-row work identified below has since been completed;
+unchecked items remain.
 
 ⚠️ **Truncating inside `Item` needs two non-obvious overrides** (cost real time,
 will recur on every row conversion). `ItemTitle` is a `w-fit` flex row, so
@@ -15,6 +16,27 @@ silently overrides `truncate`'s `nowrap` (you get `text-overflow: ellipsis` with
 `white-space: normal` — it wraps and the ellipsis never shows). Use
 `block truncate text-nowrap`. `text-nowrap` is in tailwind-merge's `text-wrap`
 group, so it genuinely replaces `text-balance`; plain `truncate` does not.
+
+⚠️ **A title that is a `Link`/`Button` needs a third override** (found 2026-07-15
+while converting the IPAM tables; the same bug was already latent in admin
+Servers, admin Nodes, node Servers, and node IPAM). `buttonVariants` is
+`inline-flex shrink-0`, so putting `truncate` on the link itself does nothing
+twice over: `shrink-0` stops it shrinking inside `ItemTitle`'s flex row, and
+`text-overflow` never applies to a flex container's own children. The link
+escapes the row and `ItemContent`'s `overflow-x-hidden` clips it mid-word with
+no ellipsis — the page does not overflow, so it looks fine at a glance and only
+a long name reveals it. Use:
+
+```tsx
+<ItemTitle className='w-full min-w-0'>
+    <Link className={cn(buttonVariants({ variant: 'link' }), 'h-auto min-w-0 max-w-full shrink p-0')}>
+        <span className='truncate'>{name}</span>
+    </Link>
+</ItemTitle>
+```
+
+Verify with a genuinely long value — the `nodes` seed data carries
+`A node with a deliberately long display name for truncation` for this.
 
 This document tracks the remaining visual-system and screen-composition work in
 the frontend overhaul. It is an implementation checklist, not a record of work
@@ -218,10 +240,10 @@ scrolling desktop tables on small screens.
 - [x] Global admin Servers. The mobile row carries its own selection checkbox —
       the desktop selection column is not rendered below `@md`, so without it
       bulk power actions are unreachable on mobile.
-- [ ] Global admin IPAM groups.
-- [ ] IPAM address-block list.
-- [ ] IPAM attached-nodes list.
-- [ ] Address list within a block.
+- [x] Global admin IPAM groups.
+- [x] IPAM address-block list.
+- [x] IPAM attached-nodes list.
+- [x] Address list within a block.
 - [x] Admin server Disks.
 - [x] Server Addresses.
 
