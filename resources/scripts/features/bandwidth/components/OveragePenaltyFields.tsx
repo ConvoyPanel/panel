@@ -1,5 +1,6 @@
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import PenaltyActionFields from '@/features/bandwidth/components/PenaltyActionFields.tsx'
 import {
     OveragePenalty,
     describePenalty,
@@ -12,7 +13,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
-import { InputForm, SelectForm } from '@/components/ui/Forms'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/ToggleGroup'
 
 interface Props {
@@ -26,11 +26,13 @@ interface Props {
  * Segmented Inherit | Custom control for a quota-overage penalty override.
  * On Inherit the field sends null and shows the resolved effective value; on
  * Custom it reveals the action, plus a rate when the action is a throttle.
+ *
+ * The global tier can't inherit, so it renders {@see PenaltyActionFields} on its
+ * own instead of using this.
  */
 const OveragePenaltyFields = ({ inheritedFrom, inheritedLabel }: Props) => {
     const { control } = useFormContext()
     const mode = useWatch({ control, name: 'overagePenaltyMode' })
-    const action = useWatch({ control, name: 'overagePenaltyAction' })
 
     return (
         <div className={'space-y-3'}>
@@ -72,30 +74,7 @@ const OveragePenaltyFields = ({ inheritedFrom, inheritedLabel }: Props) => {
                     {inheritedLabel})
                 </p>
             ) : (
-                <div className={'space-y-3'}>
-                    <SelectForm
-                        name={'overagePenaltyAction'}
-                        label={'Action'}
-                        items={[
-                            { value: 'throttle', label: 'Throttle to rate' },
-                            { value: 'disconnect', label: 'Disconnect NIC' },
-                        ]}
-                        description={
-                            action === 'disconnect'
-                                ? 'The guest keeps its NIC but loses carrier until the quota resets. Reversible, but it drops all traffic.'
-                                : 'Caps every NIC on the server at the rate below once its quota is used up.'
-                        }
-                    />
-
-                    {action === 'throttle' && (
-                        <InputForm
-                            name={'overagePenaltyRate'}
-                            label={'Rate (MB/s)'}
-                            type={'number'}
-                            inputMode={'numeric'}
-                        />
-                    )}
-                </div>
+                <PenaltyActionFields />
             )}
         </div>
     )

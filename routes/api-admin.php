@@ -246,6 +246,28 @@ Route::prefix('/coterms')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Panel Settings Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/settings/*
+|
+| Panel-wide defaults, one section per route — the same split the admin
+| Settings screen's sidebar sub-nav uses.
+|
+*/
+Route::prefix('/settings')->group(function () {
+    Route::get(
+        '/bandwidth',
+        [Admin\Settings\BandwidthSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/bandwidth',
+        [Admin\Settings\BandwidthSettingsController::class, 'update'],
+    );
+});
+
+/*
+|--------------------------------------------------------------------------
 | API Token Controller Routes
 |--------------------------------------------------------------------------
 |

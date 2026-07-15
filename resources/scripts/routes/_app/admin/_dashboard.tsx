@@ -6,6 +6,7 @@ import {
     IconMapPin,
     IconMapPins,
     IconServer,
+    IconSettings,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -85,6 +86,11 @@ const nav: SidebarNav = {
                     icon: IconKey,
                     label: 'API Tokens',
                     path: '/admin/tokens',
+                },
+                {
+                    icon: IconSettings,
+                    label: 'Settings',
+                    path: '/admin/settings',
                 },
             ],
         },

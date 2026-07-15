@@ -131,13 +131,32 @@ Researched direction retained for each; none built unless noted.
      an overridable field; `Inherit` shows the resolved *effective* value as muted text beneath (e.g.
      "Effective: Throttle to 10 MB/s (from global)"), `Custom` swaps in the real inputs. Applies to the
      per-node and per-server overage-penalty / speed-cap overrides.
-  2. **Global admin Settings IA = sub-nav drill-down in the sidebar.** Settings becomes a drilled-in
-     `SidebarNav` like nodes/servers, one route per section (`/admin/settings/<section>`), NOT a single
-     sectioned page and NOT tabs. `BandwidthSettings` is the first section.
+  2. **Global admin Settings IA = sub-nav drill-down in the sidebar. — BUILT 2026-07-15.** Settings
+     is a drilled-in `SidebarNav` like nodes/servers, one route per section
+     (`/admin/settings/<section>`), NOT a single sectioned page and NOT tabs. `BandwidthSettings` is
+     the first section. See the **Admin Settings screen** entry below.
   3. **Workspace switcher stays in the avatar menu.** The existing root-admin Workspace section (Client
      Area / Admin Console + `Current` marker) is the only path; no top-chrome switcher. **Item closed.**
   4. **Destructive buttons keep nova's soft tint.** `bg-destructive/10 text-destructive` stays; do NOT flip
      `Button.variants.ts` to solid red. **This settles the "DECISION TO REVISIT (2026-07-10)" below.**
+
+- **Admin Settings screen — BUILT (2026-07-15), infra now exists.** The "there's no settings-screen
+  infra yet" blocker is gone. `/admin/settings` is a drilled-in layout
+  (`routes/_app/admin/settings.tsx`, a sibling of `nodes.$nodeId.tsx` — drilled-in layouts own their
+  own `AppLayout`, so it lives **outside** `_dashboard`), with `back: Admin`, a "Settings /
+  Panel-wide defaults" context header, and one route per section. `settings/index.tsx` redirects
+  `/admin/settings` → the first section. A **Settings** item was added to the admin sidebar's
+  Administration group.
+  - **Adding a section:** create `routes/_app/admin/settings/<name>.{tsx,lazy.tsx}` (+ a
+    `features/settings/api.ts` entry) **and** add the nav item in `settings.tsx`. Only add the nav
+    item once the route file exists — a nav pointing at nothing is how the client server tabs ended
+    up declared-but-missing. Bandwidth is currently the only section; General/Auth/Metrics from the
+    IA sketch are **not** built.
+  - **Route tree:** `tc` fails against new route files until `npm run build` regenerates
+    `routeTree.gen.ts` — build first, then typecheck.
+  - **Verified in-browser:** admin sidebar → Settings → redirects to `/admin/settings/bandwidth`;
+    drilled nav shows back/context/section; form loads the real global default (Throttle, 1 MB/s);
+    save → API `{throttle, 25000000}`; reload rehydrates. No Inherit segment on the global tier.
 
 - **Segmented control primitive — BUILT (2026-07-15).** Decision 1 above needs a segmented control, so
   `Toggle` + `ToggleGroup` now exist as shared primitives (`components/ui/Toggle`, `components/ui/ToggleGroup`),
@@ -211,10 +230,16 @@ Researched direction retained for each; none built unless noted.
        round-trip on the real settings page: Inherit shows "Effective: Throttle to 1 MB/s (from
        global)"; Custom → save → API `{throttle, 10000000}`; reload rehydrates Custom/10;
        Disconnect hides the rate input → `{disconnect, null}`; back to Inherit → `null`.
-  4. **Global default** (`BandwidthSettings`) is not yet UI-editable — it's the first section of
-     the new admin Settings screen (IA now decided: sidebar sub-nav drill-down, one route per
-     section). Reuse `OveragePenaltyFields` there **without** the Inherit segment (the global
-     tier has nothing to inherit from) — i.e. render the action + rate directly.
+  4. **Global default — DONE.** `BandwidthSettings` is now UI-editable at
+     `/admin/settings/bandwidth`, the first section of the new admin Settings screen (see the
+     **Admin Settings screen** entry below). Renders `PenaltyActionFields` **without** the
+     Inherit segment, since the global tier has nothing above it. Backend:
+     `Admin\Settings\BandwidthSettingsController` (show/update) + `BandwidthSettingsData` +
+     `UpdateBandwidthSettingsRequest`, routed at `/settings/bandwidth` in `routes/api-admin.php`.
+     Reads/writes go through `OveragePenaltyResolver::global()` so the screen and the enforcement
+     path agree on how the stored strings become a typed penalty. **Switching to `disconnect`
+     deliberately preserves the stored rate** (it isn't part of that penalty, but discarding it
+     would lose the operator's figure the moment they flipped back). 6 new Pest tests.
   UX note: **disconnect** is a hard penalty (guest keeps the NIC but loses carrier) —
   label it clearly; it's reversible. Show the resolved *effective* value where an
   override is left on "inherit".
