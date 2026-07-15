@@ -41,6 +41,9 @@ function CreateServerPage() {
             memory: 1024,
             disk: 10240,
             bandwidth: 0,
+            // '' (not 0) so a left-alone field stays "uncapped" rather than
+            // capping every NIC at zero.
+            speedLimit: '',
             disks: [],
             backupCount: 0,
             backupSize: 0,

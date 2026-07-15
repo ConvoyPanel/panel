@@ -201,10 +201,21 @@ Researched direction retained for each; none built unless noted.
   `-1`=unlimited quota no longer false-throttles. Scheduler (`routes/console.php`) is
   now live for `sync-usages` / `reset-usages` / `sync-rate-limits`.
 
-  **Frontend — item 3 DONE (2026-07-15); 1, 2, 4 still to build:**
-  1. **Speed cap field** on server creation — add to the create wizard's `LimitsForm`
-     (unit MB/s in the UI, convert to bytes/s: `limits.speed_limit`). Fold into the
-     planned wizard overhaul.
+  **Frontend — items 1, 3, 4 DONE (2026-07-15); only item 2 remains (it's blocked):**
+  1. **Speed cap on server creation — DONE.** `Speed Limit (MB/s)` in the create wizard's
+     `LimitsForm`, mapped to `limits.speed_limit` in bytes/s. The backend already accepted it
+     (`StoreServerRequest` + `ServerCreationService`), so this was frontend-only.
+     **Blank must omit the key, not send `0`:** the column is *null = unlimited*, and a `0` would
+     cap every NIC at zero — hence the `speedLimitSchema` preprocess (mirroring the existing
+     `vlanTagSchema`) and the `speedLimit: ''` default. Guarded by a new
+     "leaves the speed limit null when none is given" test; the set-a-value direction was already
+     covered by "persists the speed cap and anchors the bandwidth reset day".
+     ⚠️ **Not fully proven:** the field renders blank with its helper text on the real wizard
+     (browser-checked), and the null/uncapped contract is tested server-side, but the **MB/s →
+     bytes/s conversion has not been driven through an actual create POST** — that needs a full
+     wizard run against a real node (use the deferred-OS + `should_create_vm: false` path, as
+     `ServerCreationDiskTest` does, to avoid Proxmox). It's plain arithmetic + JSON, but this repo
+     has **no JS test runner** (no `test` script in package.json), so nothing else covers it.
   2. **Per-server speed cap + overage-penalty override** on an existing server —
      **no "edit build/limits" admin page exists yet** (the `updateBuild` endpoint is
      unwired). Needs that page built first; then add a speed-cap input and reuse

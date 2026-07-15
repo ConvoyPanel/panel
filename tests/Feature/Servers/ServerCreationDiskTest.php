@@ -125,3 +125,13 @@ it('persists the selected network interface and VLAN override on creation', func
     expect($server->network_interface_id)->toBe($interface->id);
     expect($server->vlan_tag)->toBe(123);
 });
+
+it('leaves the speed limit null when none is given', function () {
+    // Null = uncapped. The admin create form omits the key when the field is
+    // blank rather than sending a 0, which would cap every NIC at zero.
+    $server = app(ServerCreationService::class)->handle(
+        creationData($this->user->id, $this->node->id, $this->storage->id),
+    );
+
+    expect($server->speed_limit)->toBeNull();
+});

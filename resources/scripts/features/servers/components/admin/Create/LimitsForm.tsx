@@ -20,6 +20,14 @@ const LimitsForm = () => {
                     type={'number'}
                     description={'Leave blank for unlimited.'}
                 />
+                <InputForm
+                    name={'speedLimit'}
+                    label={'Speed Limit (MB/s)'}
+                    type={'number'}
+                    description={
+                        'Caps every NIC on the server. Leave blank for uncapped.'
+                    }
+                />
             </div>
 
             <Heading as={'h4'} className="pt-4">

@@ -1,6 +1,8 @@
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
+import { BYTES_PER_MB } from '@/features/bandwidth/overage-penalty.ts'
+
 import { rawDataToServer } from '@/lib/transformers/server.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
@@ -17,6 +19,14 @@ const vlanTagSchema = z.preprocess(
     z.coerce.number().int().min(1).max(4094).nullable()
 )
 
+// Entered in decimal MB/s and converted to bytes/s at submit. Blank must stay
+// `undefined` so the key is omitted and the column keeps its null (= unlimited);
+// a plain `z.coerce.number()` would turn '' into a 0 and cap the NIC at zero.
+const speedLimitSchema = z.preprocess(
+    value => (value === '' || value == null ? undefined : value),
+    z.coerce.number().min(1, 'Must be at least 1 MB/s').optional()
+)
+
 export const serverSchema = z
     .object({
         name: z.string().min(1, 'Name is required.').max(191),
@@ -31,6 +41,7 @@ export const serverSchema = z
         memory: z.coerce.number().min(128).max(1048576),
         disk: z.coerce.number().min(1).max(10485760),
         bandwidth: z.coerce.number().min(0).optional(),
+        speedLimit: speedLimitSchema,
 
         // Optional secondary/data disks, each on its own storage. The primary
         // OS disk is `storageId` + `disk` above; these become `limits.disks[]`.
@@ -150,6 +161,7 @@ export const createServer = async ({
     memory,
     disk,
     bandwidth,
+    speedLimit,
     disks,
     backupCount,
     backupSize,
@@ -179,6 +191,10 @@ export const createServer = async ({
                         memory,
                         disk,
                         bandwidth,
+                        speed_limit:
+                            speedLimit != null
+                                ? Math.round(speedLimit * BYTES_PER_MB)
+                                : undefined,
                         disks: disks?.map(d => ({
                             storage_id: Number(d.storageId),
                             size: d.size,
