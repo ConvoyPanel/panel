@@ -29,13 +29,30 @@ and the quota rendered `out of undefined backups` / `out of NaN`. Ten minutes we
 When a browser result contradicts the source you're reading, `grep` the built asset in
 `public/build/assets/*.js` before debugging the source — it settles it instantly.
 
-**Next up after that**, from [frontend-overhaul-audit.md](frontend-overhaul-audit.md) "Server subpage
-consistency" — 2 of 5 done this session (Graphs heading; `gap-5` → `gap-2`/`@md:gap-4`). Remaining:
-consolidate the Backups heading/quota/list controls further, **wire the empty-state `Create Backup` button**
-(⚠️ it is currently dead and there is **no create-backup UI anywhere in the codebase** — this is a new
-feature, not a wiring fix; `StoreBackupRequest` wants `name` + `mode` [snapshot/suspend/kill] +
-`compression_type` [none/lzo/gzip/zstd] + `is_locked`, so it needs a design decision on which fields to
-expose), and review Rebuild's isolated width/spacing model. `RadioGroup` primitive is also still unmigrated.
+**Create Backup dialog — BUILT + BROWSER-VERIFIED (`63dc0c59`).** The empty-state button was dead and there
+was no create-backup UI anywhere, so this was a feature. **Shape decided by the maintainer: name up front,
+`mode`/`compression`/`lock` behind an Advanced disclosure.** `mode` + `compression_type` are both required by
+`StoreBackupRequest` with no config default, so the form always sends them — **snapshot + zstd** are the
+defaults a user who never opens Advanced gets. Mode copy names the consequence (Kill **stops** a running
+guest). Failure toasts now surface the API's **curated message** (the errors are actionable — throttle names
+its window; a node with no backup-capable storage says so) via the existing `NameserversCard` idiom, since
+`handleFormErrors` only maps 422s. Proven in-browser: POST body
+`{name, mode:snapshot, compression_type:zstd, is_locked:false}` with Advanced untouched; exactly one create
+action in each of the empty and populated states; drawer at 390px with no overflow; a real 409 surfaced as
+"No backup-capable storage is configured for this node."
+- ⚠️ **A real create was never completed end-to-end**: every seeded server sits on a fake node with **no
+  backup-capable storage** (`storage_to_node` is empty for them), so the service 409s before touching PVE.
+  Validation, mapping, and the error path are proven; **a successful create + the optimistic list/quota
+  update are not.** Needs a node with a `stores_backups` storage (the real PVE node, or seed
+  `storage_to_node`).
+- **New shared primitive: `components/ui/Collapsible`** (Base UI). Prefer it over the Radix `Accordion` for a
+  single disclosure. See the audit's Base UI section for the **attribute-mapping table** — Radix's
+  `data-state=open` matches nothing on Base UI and fails silently.
+
+**Next up**, from [frontend-overhaul-audit.md](frontend-overhaul-audit.md): "Server subpage consistency" is
+**4 of 5 done** — only **review Rebuild's isolated width/spacing model** remains. Then the last unchecked
+responsive/primitive items: the dormant **`RadioGroup`** (still Radix — the audit says migrate it *before*
+adding consumers) and the remaining browser-check boxes under Textarea/Select.
 
 **Repository removal (`85a6977a`, `84bb7bf8`)** — see the new **Design constraints** entry for the rule and
 its Proxmox carve-out. Deleted 846 lines for 69: `EloquentRepository` (~280 lines re-implementing Eloquent,
