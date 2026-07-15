@@ -1,3 +1,10 @@
+import { deleteToken, tokenQueries, useTokens } from '@/features/tokens/api.ts'
+import CreateTokenModal from '@/features/tokens/components/CreateTokenModal.tsx'
+import {
+    type ApiKey,
+    type PaginatedApiKeys,
+    summarizeAbilities,
+} from '@/features/tokens/types.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { useMutation } from '@tanstack/react-query'
@@ -6,16 +13,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 
-import { deleteToken, tokenQueries, useTokens } from '@/features/tokens/api.ts'
-import {
-    summarizeAbilities,
-    type ApiKey,
-    type PaginatedApiKeys,
-} from '@/features/tokens/types.ts'
-
-import CreateTokenModal from '@/features/tokens/components/CreateTokenModal.tsx'
-
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
@@ -146,7 +144,7 @@ function TokensIndex() {
                                     </Badge>
                                     <span
                                         className={
-                                            'text-xs text-muted-foreground'
+                                            'text-muted-foreground text-xs'
                                         }
                                     >
                                         {token.lastUsedAt

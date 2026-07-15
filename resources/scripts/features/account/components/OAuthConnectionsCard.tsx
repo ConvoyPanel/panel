@@ -1,24 +1,23 @@
-import { useMutation } from '@tanstack/react-query'
 import {
-    IconBrandGithub,
-    IconBrandGitlab,
-    IconBrandGoogle,
-    IconPlugConnected,
-    type Icon,
-} from '@tabler/icons-react'
-import { toast } from 'sonner'
-
-import {
+    type OAuthConnection,
     oauthConnectionQueries,
     unlinkOAuthConnection,
     useOAuthConnections,
-    type OAuthConnection,
 } from '@/features/account/oauth/api.ts'
 import { oauthProviders, oauthRedirectUrl } from '@/features/auth/oauth.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
+import {
+    type Icon,
+    IconBrandGithub,
+    IconBrandGitlab,
+    IconBrandGoogle,
+    IconPlugConnected,
+} from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -90,7 +89,9 @@ const OAuthConnectionsCard = () => {
                 </CardDescription>
             </CardHeader>
             <CardContent
-                className={cn(isLoading && 'grid min-h-[8rem] place-items-center')}
+                className={cn(
+                    isLoading && 'grid min-h-[8rem] place-items-center'
+                )}
             >
                 {isLoading || !connections ? (
                     <Skeleton className={'h-24 w-full'} />

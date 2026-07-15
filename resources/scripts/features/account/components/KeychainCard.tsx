@@ -1,8 +1,5 @@
-import { useMutation } from '@tanstack/react-query'
-import { IconKey } from '@tabler/icons-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-
+import SSHKey from '@/features/account/components/SSHKey.tsx'
+import SSHKeyCreateDialog from '@/features/account/components/SSHKeyCreateDialog.tsx'
 import {
     deleteSSHKey,
     sshKeyQueries,
@@ -11,11 +8,12 @@ import {
 import { SSHKey as SSHKeyType } from '@/features/account/types.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
+import { IconKey } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
-import SSHKey from '@/features/account/components/SSHKey.tsx'
-import SSHKeyCreateDialog from '@/features/account/components/SSHKeyCreateDialog.tsx'
-
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -109,7 +107,10 @@ const KeychainCard = () => {
                 </CardContent>
             </Card>
 
-            <SSHKeyCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
+            <SSHKeyCreateDialog
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+            />
         </>
     )
 }

@@ -1,10 +1,3 @@
-import { AxiosError } from 'axios'
-import byteSize from 'byte-size'
-import { IconDatabaseOff, IconPlus } from '@tabler/icons-react'
-import { ColumnDef } from '@tanstack/react-table'
-import { useState } from 'react'
-import { toast } from 'sonner'
-
 import { useServer } from '@/features/servers/admin/api.ts'
 import AddServerDiskModal from '@/features/servers/components/admin/detail/AddServerDiskModal.tsx'
 import ResizeServerDiskModal from '@/features/servers/components/admin/detail/ResizeServerDiskModal.tsx'
@@ -13,12 +6,19 @@ import {
     useRemoveServerDisk,
     useServerDisks,
 } from '@/features/servers/disks/api.ts'
+import { IconDatabaseOff, IconPlus } from '@tabler/icons-react'
+import { ColumnDef } from '@tanstack/react-table'
+import { AxiosError } from 'axios'
+import byteSize from 'byte-size'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
+import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     Item,
@@ -27,7 +27,6 @@ import {
     ItemDescription,
     ItemTitle,
 } from '@/components/ui/Item'
-import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 import Actions from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -124,7 +123,9 @@ const ServerDisksPanel = ({ serverId }: Props) => {
             size: 40,
             cell: ({ row }) =>
                 row.original.isPrimary ? (
-                    <span className='text-muted-foreground text-xs'>Managed</span>
+                    <span className='text-muted-foreground text-xs'>
+                        Managed
+                    </span>
                 ) : (
                     <Actions>{renderActions(row.original)}</Actions>
                 ),
@@ -171,12 +172,14 @@ const ServerDisksPanel = ({ serverId }: Props) => {
                                         {disk.interface ?? 'Pending'}
                                     </ItemTitle>
                                     <ItemDescription>
-                                        {disk.storageName ?? 'Unknown storage'} ·{' '}
-                                        {formatBytes(disk.size)}
+                                        {disk.storageName ?? 'Unknown storage'}{' '}
+                                        · {formatBytes(disk.size)}
                                     </ItemDescription>
                                     <Badge
                                         variant={
-                                            disk.isPrimary ? 'default' : 'outline'
+                                            disk.isPrimary
+                                                ? 'default'
+                                                : 'outline'
                                         }
                                         className='w-fit'
                                     >

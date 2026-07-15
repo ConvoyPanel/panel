@@ -1,20 +1,19 @@
-import { useMutation } from '@tanstack/react-query'
-import { IconApi } from '@tabler/icons-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-
 import {
+    type ApiKey as ApiKeyType,
     apiKeyQueries,
     deleteApiKey,
     useApiKeys,
-    type ApiKey as ApiKeyType,
 } from '@/features/account/api-keys/api.ts'
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
 import ApiKey from '@/features/account/components/ApiKey.tsx'
 import ApiKeyCreateDialog from '@/features/account/components/ApiKeyCreateDialog.tsx'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { cn } from '@/utils'
+import { IconApi } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -27,7 +26,6 @@ import {
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
-import { cn } from '@/utils'
 
 const ApiKeysCard = () => {
     const confirm = useConfirmationStore(state => state.confirm)

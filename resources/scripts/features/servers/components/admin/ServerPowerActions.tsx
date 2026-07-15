@@ -1,15 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
-
 import {
     type PowerAction,
     serverStateQueries,
     useUpdateServerState,
 } from '@/features/servers/state/api'
-
 import { Server } from '@/types/server.ts'
+import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
 
 const actions: Record<
@@ -89,7 +87,8 @@ const ServerPowerActions = ({ server }: Props) => {
         <>
             {pending && (
                 <DropdownMenuItem disabled>
-                    {actions[pending.command as PowerAction]?.label ?? 'Power action'}{' '}
+                    {actions[pending.command as PowerAction]?.label ??
+                        'Power action'}{' '}
                     in progress…
                 </DropdownMenuItem>
             )}

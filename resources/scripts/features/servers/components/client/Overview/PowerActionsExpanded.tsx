@@ -1,15 +1,13 @@
+import { actions } from '@/features/servers/components/client/Overview/Toolbar.tsx'
+import {
+    type PowerAction,
+    updateState,
+    useServer,
+    useServerState,
+} from '@/features/servers/detail/api.ts'
 import { toast } from 'sonner'
 
-import {
-    updateState,
-    type PowerAction,
-    useServerState,
-    useServer,
-} from '@/features/servers/detail/api.ts'
-
-import { actions } from '@/features/servers/components/client/Overview/Toolbar.tsx'
-
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 
 const PowerActionsExpanded = () => {

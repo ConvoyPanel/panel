@@ -1,15 +1,17 @@
+import {
+    type PowerAction,
+    serverStateQueries,
+} from '@/features/servers/state/api'
+import { Server } from '@/types/server.ts'
+import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
 import { IconChevronDown } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { apiFetch } from '@/lib/api'
-import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
 
-import { type PowerAction, serverStateQueries } from '@/features/servers/state/api'
-import { Server } from '@/types/server.ts'
-
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     DropdownMenu,
@@ -85,10 +87,7 @@ const ServerBulkPowerActions = ({ servers, onDone }: Props) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='start'>
                 {(Object.keys(labels) as PowerAction[]).map(action => (
-                    <DropdownMenuItem
-                        key={action}
-                        onClick={() => run(action)}
-                    >
+                    <DropdownMenuItem key={action} onClick={() => run(action)}>
                         {labels[action]}
                     </DropdownMenuItem>
                 ))}

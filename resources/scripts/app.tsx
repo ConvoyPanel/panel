@@ -11,11 +11,16 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import ErrorComponent from '@/components/ui/Navigation/ErrorPages/ErrorComponent.tsx'
-import NotFoundComponent from '@/components/ui/Navigation/ErrorPages/NotFoundComponent.tsx'
 import { queryClient } from '@/lib/query-client.ts'
 
 import { routeTree } from './routeTree.gen'
+
+const ErrorComponent = React.lazy(
+    () => import('@/components/ui/Navigation/ErrorPages/ErrorComponent.tsx')
+)
+const NotFoundComponent = React.lazy(
+    () => import('@/components/ui/Navigation/ErrorPages/NotFoundComponent.tsx')
+)
 
 const router = createRouter({
     routeTree,
@@ -40,7 +45,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <ThemeProvider storageKey='theme'>
                 <RouterProvider router={router} />
             </ThemeProvider>
-            {import.meta.env.DEV && <ReactQueryDevtools buttonPosition='bottom-left' />}
+            {import.meta.env.DEV && (
+                <ReactQueryDevtools buttonPosition='bottom-left' />
+            )}
         </QueryClientProvider>
     </React.StrictMode>
 )

@@ -1,19 +1,17 @@
-import { useMutation } from '@tanstack/react-query'
-import { IconDevices } from '@tabler/icons-react'
-import { toast } from 'sonner'
-
+import Session from '@/features/account/components/Session.tsx'
 import {
+    type Session as SessionType,
     revokeSession,
     sessionQueries,
     useSessions,
-    type Session as SessionType,
 } from '@/features/account/sessions/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
+import { IconDevices } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
-import Session from '@/features/account/components/Session.tsx'
-
-import { useConfirmationStore } from '@/components/ui/AlertDialog'
+import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import {
     Card,
     CardContent,

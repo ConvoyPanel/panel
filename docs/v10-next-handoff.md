@@ -5,7 +5,11 @@ Living notes for shipping `next` (v10) as the new trunk. This file tracks *what'
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
-Last updated: 2026-07-14 (session: **shared menu/popover and accessibility slice completed** — migrated
+Last updated: 2026-07-15 (session: **dashboard accessibility + second bundle pass completed** — shared
+empty states now render for Needs attention and Backups & ISOs; the global muted token and configurable
+`CardTitle` hierarchy bring throttled login/admin Lighthouse Accessibility to 100; command search,
+error pages, and confirmation UI now load only on demand; main JS is 378.66 kB / 115.88 kB gzip. — prior:
+**shared menu/popover and accessibility slice completed** — migrated
 shared DropdownMenu and Popover from Radix to `@base-ui/react`, ported nova popup/item styling, added and
 applied destructive menu-item treatment, normalized Command/resource-combobox controls, aligned and
 browser-verified the real login OTP flow, fixed form-control semantics and icon-only accessible names, and
@@ -122,8 +126,8 @@ cross-checked with `qm`/`pvesh` over SSH:
   `unusedN` before destroying, because a running VM's `delete=scsiN` schedules the unplug async);
   `DevNodeSeeder` hardcoded `name=dev-node` broke every `/nodes/{name}` call (now derived from the fqdn's
   first DNS label, override `PROXMOX_NODE_NAME`).
-- **Still unproven:** in-browser render of all frontend surfaces (overview dashboard, storage modal,
-  power actions, disks tab) — no browser driver in-sandbox.
+- **Still unproven:** in-browser render of the storage modal, power actions, and disks tab; these
+  specific live interactions still need browser coverage.
 
 ---
 
@@ -131,25 +135,33 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
-- **Initial bundle performance pass — DONE (2026-07-14).** The always-loaded server layout no longer imports
+- **Initial bundle performance passes — DONE (2026-07-15).** The always-loaded server layout no longer imports
   installation, suspended, and deferred-OS workflows synchronously; those branches now load through
   `React.lazy` only when the server status needs them. The avatar's three-option theme picker now reuses the
   already-loaded menu radio/submenu primitives instead of eagerly importing the full Base UI Select/floating
   stack. The unused Geist 800 weight was removed. Main production JS fell from **518.2 kB / 164.7 kB gzip** to
-  **414.0 kB / 128.7 kB gzip** (about 20% smaller; no entry-chunk warning). Browser verification proved theme
-  selection and that the admin dashboard requests none of the status-workflow chunks. Full `tc` and scripted
-  production build pass.
-  - Lighthouse 13.4 production results: login mobile **86/95/96/100** and desktop **99/95/96/100**
-    (Performance/Accessibility/Best Practices/SEO); authenticated admin mobile **83/93/100/100**. Mobile used
-    Lighthouse simulated throttling: 150ms RTT, ~1.47 Mbps download, 675 Kbps upload, and **4x CPU slowdown**.
-    Login mobile FCP/LCP/TBT/CLS: 2.9s/3.5s/50ms/0; admin mobile: 2.8s/4.0s/80ms/0.001. The authenticated desktop
-    audit crashed the sandbox Chromium tab twice; do not infer a score from that.
-  - Remaining performance findings are mainly delivery-level: hashed assets lack long cache lifetimes in the
-    local ddev server, the global CSS/font path is render-blocking, and route-tree/shared providers still leave
-    unused initial JS. Remaining a11y findings include theme color contrast (design input) and the global
-    CardTitle heading order. Dashboard progress meters now have contextual accessible names; that raised the
-    authenticated admin Accessibility score from 89 to 93. The login 401 user probe is expected but costs the
-    Best Practices console audit.
+  **414.0 kB / 128.7 kB gzip** in pass one. Pass two keeps only the command-search trigger and keyboard listener
+  eager; `cmdk`, dialog UI, entity queries, and node/server APIs load on first open. Error/not-found UI and the
+  confirmation dialog also load only when invoked, while confirmation-store consumers import the store directly
+  instead of pulling the dialog barrel into route chunks. Main production JS is now **378.66 kB / 115.88 kB
+  gzip** — about **27% smaller minified / 30% smaller gzip** than the original, with no entry-chunk warning.
+  Browser verification proved theme selection; absence of status/search/error/confirmation chunks before their
+  corresponding interaction; command filtering and keyboard close; a real 404; and confirmation open/cancel.
+  Full `tc` and scripted production build pass.
+  - Lighthouse 13.4 production results on the final build: login mobile **86/100/96/100** and authenticated
+    admin mobile **83/100/100/100** (Performance/Accessibility/Best Practices/SEO). Both used explicit simulated
+    throttling: 150ms RTT, ~1.6 Mbps throughput, and **4x CPU slowdown**. Login FCP/LCP/TBT/CLS:
+    2.8s/3.5s/40ms/0; admin: 2.7s/4.1s/60ms/0.001. The prior authenticated desktop audit crashed the sandbox
+    Chromium tab twice; do not infer a score from that.
+  - Muted/label contrast and heading order now pass on both audited routes. `CardTitle` defaults to `h2` and has
+    explicit `as="h1"` overrides for page/status contexts; the light muted token is `oklch(0.54 0.031 107.3)`.
+    The login 401 user probe remains expected and costs the Best Practices console audit.
+  - Remaining performance findings are mainly delivery-level: local ddev hashed assets lack long cache lifetimes,
+    the global CSS/font path is render-blocking, and shared route/provider code still leaves estimated unused JS
+    (92 KiB login / 158 KiB admin). The largest remaining eager app sources are `tailwind-merge`, Sonner,
+    Base UI menu/tooltip positioning, the generated route tree, and Wayfinder-backed route loaders. Materially
+    reducing those next requires a broader route-loader split or changing shared runtime styling/provider choices,
+    not another isolated feature lazy import.
 
 - **Admin Templates collection — DONE (2026-07-14).** Template groups now use shared muted `ItemGroup` rows
   with icon, description, admin-only state, and existing action menus. Page/create actions use the standard

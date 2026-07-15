@@ -3,7 +3,7 @@ import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
 import { Toaster } from 'sonner'
 
-import { ConfirmDialogProvider } from '@/components/ui/AlertDialog'
+import ConfirmDialogProvider from '@/components/ui/AlertDialog/ConfirmDialogProvider.tsx'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 
 export interface RouterContext {
