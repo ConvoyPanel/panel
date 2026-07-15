@@ -5,7 +5,7 @@ namespace App\Jobs\Node;
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Models\ISO;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -32,13 +32,13 @@ class MonitorIsoDownloadJob implements ShouldQueue
         return [new WithoutOverlapping("node:iso.download#{$this->isoId}")];
     }
 
-    public function handle(ProxmoxActivityRepository $repository): void
+    public function handle(ProxmoxActivityClient $client): void
     {
         $iso = ISO::findOrFail($this->isoId);
         /** @var \App\Models\Node $node */
         $node = $iso->storage->nodes()->firstOrFail();
 
-        $task = $repository->setNode($node)->getStatus($this->upid);
+        $task = $client->setNode($node)->getStatus($this->upid);
 
         if ($task->status === TaskStatus::RUNNING) {
             $this->release(3);

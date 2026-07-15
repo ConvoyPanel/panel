@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Repositories\Proxmox\Node;
+namespace App\Services\Proxmox\Node;
 
 use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\FileMetaData;
 use App\Data\Node\Storage\IsoData;
 use App\Data\Node\Storage\StorageData;
 use App\Enums\Node\Storage\StorageContentType;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
 
-class ProxmoxStorageRepository extends ProxmoxRepository
+class ProxmoxStorageClient extends ProxmoxClient
 {
     /**
      * @return DataCollection<int, StorageData>

@@ -3,10 +3,10 @@
 namespace App\Services\Nodes;
 
 use App\Data\Node\Storage\StorageData;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Storage;
-use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -21,7 +21,7 @@ use function max;
  */
 class LiveStorageService
 {
-    public function __construct(private ProxmoxStorageRepository $repository) {}
+    public function __construct(private ProxmoxStorageClient $client) {}
 
     /**
      * Live status keyed by storage name, cached briefly (the figures move
@@ -34,7 +34,7 @@ class LiveStorageService
     {
         return Cache::remember("node:{$node->id}:live-storages", now()->addSeconds(15), function () use ($node) {
             try {
-                return collect($this->repository->setNode($node)->getStorages()->all())
+                return collect($this->client->setNode($node)->getStorages()->all())
                     ->keyBy(fn (StorageData $storage) => $storage->name);
             } catch (RequestException|ConnectionException) {
                 return collect();

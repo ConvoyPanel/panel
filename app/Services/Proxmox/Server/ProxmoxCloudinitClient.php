@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 
-class ProxmoxCloudinitRepository extends ProxmoxRepository
+class ProxmoxCloudinitClient extends ProxmoxClient
 {
     public function getConfig()
     {

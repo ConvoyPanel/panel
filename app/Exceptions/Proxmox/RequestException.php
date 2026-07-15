@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions\Repository\Proxmox;
+namespace App\Exceptions\Proxmox;
 
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Http\Client\Response;

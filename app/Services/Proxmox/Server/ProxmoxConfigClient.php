@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Config\ServerConfigData;
 use App\Exceptions\Http\Server\ConfigModifiedException;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Str;
 
-class ProxmoxConfigRepository extends ProxmoxRepository
+class ProxmoxConfigClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

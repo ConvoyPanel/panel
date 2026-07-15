@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Node\Access\RealmType;
 use App\Models\Template;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 
-class ProxmoxServerRepository extends ProxmoxRepository
+class ProxmoxServerClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

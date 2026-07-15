@@ -7,8 +7,8 @@ use App\Data\Cluster\ServerResourceData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\ServerStatus;
-use App\Exceptions\Repository\Proxmox\NextVMIDRetrievalException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\NextVMIDRetrievalException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
@@ -16,8 +16,8 @@ use App\Models\Address;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\Template;
-use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
-use App\Repositories\Proxmox\Node\ProxmoxAllocationRepository;
+use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
+use App\Services\Proxmox\Node\ProxmoxAllocationClient;
 use App\Services\Addresses\AddressAllocationService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
@@ -37,8 +37,8 @@ class ServerCreationService
     public function __construct(
         private ServerNetworkService $networkService,
         private BuildServerAction $buildServerAction,
-        private ProxmoxAllocationRepository $allocationRepository,
-        private ProxmoxResourceRepository $resourceRepository,
+        private ProxmoxAllocationClient $allocationClient,
+        private ProxmoxResourceClient $resourceClient,
         private AddressAllocationService $addressAllocationService,
     ) {}
 
@@ -160,7 +160,7 @@ class ServerCreationService
      */
     public function getTemplate(Node $node, string $templateUuid): ?ServerResourceData
     {
-        return $this->resourceRepository->setNode($node)->getResources()
+        return $this->resourceClient->setNode($node)->getResources()
             ->where('vmid', Template::where('uuid', $templateUuid)->value('vmid'))
             ->where('isTemplate', true)
             ->first();
@@ -172,14 +172,14 @@ class ServerCreationService
      */
     public function generateUniqueVmId(Node $node): int
     {
-        $vmid = $this->allocationRepository->setNode($node)->getNextVMID();
+        $vmid = $this->allocationClient->setNode($node)->getNextVMID();
         $attempts = 0;
 
         while (true) {
             // Check uniqueness in our database
             if (Server::isUniqueVmId($node, $vmid)) {
                 // Check uniqueness in Proxmox
-                if ($this->allocationRepository->isVMIDAvailable($vmid)) {
+                if ($this->allocationClient->isVMIDAvailable($vmid)) {
                     break;
                 }
 

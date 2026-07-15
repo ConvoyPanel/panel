@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions\Repository\Proxmox;
+namespace App\Exceptions\Proxmox;
 
 use App\Exceptions\HasErrorCode;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Config\DiskData;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 
-class ProxmoxDiskRepository extends ProxmoxRepository
+class ProxmoxDiskClient extends ProxmoxClient
 {
     public function setDiskSize(DiskData $disk, int $bytes)
     {

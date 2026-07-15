@@ -5,7 +5,7 @@ namespace App\Services\Servers;
 use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\Disk\DiskMediaType;
 use App\Enums\Server\DiskInterface;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\CannotModifyPrimaryDiskException;
 use App\Exceptions\Service\Server\Allocation\CannotShrinkDiskException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
@@ -14,8 +14,8 @@ use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use App\Models\ISO;
 use App\Models\Server;
 use App\Models\ServerDisk;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use App\Repositories\Proxmox\Server\ProxmoxDiskRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
+use App\Services\Proxmox\Server\ProxmoxDiskClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -23,8 +23,8 @@ use Illuminate\Support\Collection;
 class AllocationService
 {
     public function __construct(
-        private ProxmoxConfigRepository $configRepository,
-        private ProxmoxDiskRepository $diskRepository,
+        private ProxmoxConfigClient $configClient,
+        private ProxmoxDiskClient $diskClient,
     ) {}
 
     /**
@@ -33,7 +33,7 @@ class AllocationService
      */
     public function getDisks(Server $server): Collection
     {
-        return $this->configRepository->setServer($server)->getConfig()->disks;
+        return $this->configClient->setServer($server)->getConfig()->disks;
     }
 
     /**
@@ -42,7 +42,7 @@ class AllocationService
      */
     public function getBootOrder(Server $server): Collection
     {
-        return $this->configRepository->setServer($server)->getConfig()->bootOrder;
+        return $this->configClient->setServer($server)->getConfig()->bootOrder;
     }
 
     /**
@@ -51,7 +51,7 @@ class AllocationService
      */
     public function syncSettings(Server $server): void
     {
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         // Only push cores/memory that actually differ, so an unchanged sync doesn't
         // enqueue a redundant Proxmox "Configure" task. $config->memory is in bytes;
@@ -68,7 +68,7 @@ class AllocationService
         }
 
         if ($payload !== []) {
-            $this->configRepository->setServer($server)->update($payload);
+            $this->configClient->setServer($server)->update($payload);
         }
 
         // We're assuming the largest disk is the disk to be resized.
@@ -82,7 +82,7 @@ class AllocationService
         });
 
         if ($disk !== null && $server->disk > $disk->size) {
-            $this->diskRepository->setServer($server)->setDiskSize(
+            $this->diskClient->setServer($server)->setDiskSize(
                 $disk,
                 $server->disk,
             );
@@ -119,7 +119,7 @@ class AllocationService
             return;
         }
 
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         // scsi slot numbers already taken on the VM (the primary may be scsi0, or
         // on another bus entirely — we only ever place secondaries on scsi).
@@ -162,7 +162,7 @@ class AllocationService
         }
 
         if ($payload !== []) {
-            $this->configRepository->setServer($server)->update($payload, $config->digest);
+            $this->configClient->setServer($server)->update($payload, $config->digest);
         }
     }
 
@@ -215,13 +215,13 @@ class AllocationService
         }
 
         if ($disk->interface !== null) {
-            $config = $this->configRepository->setServer($server)->getConfig();
+            $config = $this->configClient->setServer($server)->getConfig();
             $onVm = $config->disks->first(
                 fn (DiskData $d) => $d->interface->value === $disk->interface,
             );
 
             if ($onVm !== null) {
-                $this->diskRepository->setServer($server)->setDiskSize($onVm, $newSizeBytes);
+                $this->diskClient->setServer($server)->setDiskSize($onVm, $newSizeBytes);
             }
         }
 
@@ -265,9 +265,9 @@ class AllocationService
             return;
         }
 
-        $repository = $this->configRepository->setServer($server);
+        $client = $this->configClient->setServer($server);
 
-        $config = $repository->getConfig();
+        $config = $client->getConfig();
         $onVm = $config->disks->first(
             fn (DiskData $d) => $d->interface->value === $disk->interface,
         );
@@ -276,8 +276,8 @@ class AllocationService
             // Detach: the volume becomes an `unusedN` entry (async on a running
             // VM — see the poll constants). Match on the exact volume id, not a
             // before/after count, so a concurrent unused slot can't fool us.
-            $repository->update(['delete' => $disk->interface], $config->digest);
-            $this->purgeDetachedVolume($repository, $onVm->volume);
+            $client->update(['delete' => $disk->interface], $config->digest);
+            $this->purgeDetachedVolume($client, $onVm->volume);
         }
 
         $disk->delete();
@@ -292,14 +292,14 @@ class AllocationService
      * @throws RequestException
      * @throws ConnectionException
      */
-    private function purgeDetachedVolume(ProxmoxConfigRepository $repository, string $volume): void
+    private function purgeDetachedVolume(ProxmoxConfigClient $client, string $volume): void
     {
         for ($attempt = 0; $attempt < self::UNUSED_POLL_ATTEMPTS; ++$attempt) {
-            $raw = $repository->getRawConfig();
+            $raw = $client->getRawConfig();
             $key = $this->findUnusedKeyForVolume($raw, $volume);
 
             if ($key !== null) {
-                $repository->update(['delete' => $key], $raw['digest'] ?? null);
+                $client->update(['delete' => $key], $raw['digest'] ?? null);
 
                 return;
             }
@@ -332,7 +332,7 @@ class AllocationService
 
     public function setBootOrder(Server $server, array $disks)
     {
-        return $this->configRepository->setServer($server)->update([
+        return $this->configClient->setServer($server)->update([
             'boot' => count($disks) > 0 ? 'order='.Arr::join($disks, ';') : '',
         ]);
     }
@@ -342,7 +342,7 @@ class AllocationService
         // One read tells us everything: whether the ISO is already mounted,
         // which IDE slot is free, and the digest to guard the write with (a
         // concurrent mount could otherwise claim the same slot).
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         if ($this->findMountedIsoDisk($config->disks, $iso)) {
             throw new IsoAlreadyMountedException;
@@ -363,7 +363,7 @@ class AllocationService
             }
         }
 
-        $this->configRepository->update([
+        $this->configClient->update([
             "ide$ideIndex" => $this->isoVolume($iso).',media=cdrom',
         ], $config->digest);
     }
@@ -372,7 +372,7 @@ class AllocationService
     {
         // Read the full config (not just the disks) so we can guard the delete
         // with its digest — the interface we delete is derived from this read.
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         $disk = $this->findMountedIsoDisk($config->disks, $iso);
 
@@ -380,7 +380,7 @@ class AllocationService
             throw new IsoAlreadyUnmountedException;
         }
 
-        $this->configRepository->update(['delete' => $disk->interface->value], $config->digest);
+        $this->configClient->update(['delete' => $disk->interface->value], $config->digest);
     }
 
     /**

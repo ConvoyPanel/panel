@@ -4,13 +4,13 @@ namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Exceptions\Http\Server\ConfigModifiedException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 
 class ServerNetworkBandwidthService
 {
-    public function __construct(private ProxmoxConfigRepository $configRepository) {}
+    public function __construct(private ProxmoxConfigClient $configClient) {}
 
     /**
      * Drive every network device on the server to a desired rate limit and,
@@ -28,7 +28,7 @@ class ServerNetworkBandwidthService
      */
     public function apply(Server $server, ?int $rate, ?bool $linkDown = null): void
     {
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         /** @var array<string, string> $networkDevices */
         $networkDevices = $config->networkDevices
@@ -60,7 +60,7 @@ class ServerNetworkBandwidthService
             return;
         }
 
-        $this->configRepository->update($networkDevices, $config->digest);
+        $this->configClient->update($networkDevices, $config->digest);
     }
 
     /**

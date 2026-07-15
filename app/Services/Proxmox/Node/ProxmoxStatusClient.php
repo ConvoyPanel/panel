@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Repositories\Proxmox\Node;
+namespace App\Services\Proxmox\Node;
 
 use App\Data\Node\Status\NodeStatusData;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 
-class ProxmoxStatusRepository extends ProxmoxRepository
+class ProxmoxStatusClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

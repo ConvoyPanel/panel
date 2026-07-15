@@ -3,10 +3,10 @@
 namespace App\Services\Servers;
 
 use App\Enums\Server\PowerCommand;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Servers\Power\ServerPowerLockService;
 use Illuminate\Http\Client\ConnectionException;
 use Throwable;
@@ -22,7 +22,7 @@ use Throwable;
 class SendServerPowerCommand
 {
     public function __construct(
-        private ProxmoxPowerRepository $repository,
+        private ProxmoxPowerClient $client,
         private ServerPowerLockService $lock,
     ) {}
 
@@ -38,7 +38,7 @@ class SendServerPowerCommand
         $this->lock->acquire($server, $command);
 
         try {
-            $this->repository->setServer($server)->send($command);
+            $this->client->setServer($server)->send($command);
         } catch (Throwable $e) {
             // The command never landed — free the lock so the user can retry
             // immediately rather than waiting out the TTL.

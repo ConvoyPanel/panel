@@ -3,9 +3,9 @@
 namespace App\Jobs\Server;
 
 use App\Enums\Server\PowerCommand;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\DeploymentStep;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Traits\HandlesProxmoxErrors;
 use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Batchable;
@@ -45,12 +45,12 @@ class SendPowerCommandJob implements ShouldQueue
     /**
      * @throws RequestException|ConnectionException
      */
-    public function handle(ProxmoxPowerRepository $repository): void
+    public function handle(ProxmoxPowerClient $client): void
     {
         $this->step->start();
 
         try {
-            $repository->setServer($this->step->deployment->server)->send($this->power);
+            $client->setServer($this->step->deployment->server)->send($this->power);
         } catch (RequestException $e) {
             if ($this->isNonexistentVMError($e)) {
                 return;

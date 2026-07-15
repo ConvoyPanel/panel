@@ -8,53 +8,53 @@ use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use App\Data\Server\Proxmox\Console\XTermCredentialsData;
 use App\Enums\Node\Access\RealmType;
 use App\Models\Server;
-use App\Repositories\Proxmox\Node\ProxmoxAccessRepository;
-use App\Repositories\Proxmox\Server\ProxmoxConsoleRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Node\ProxmoxAccessClient;
+use App\Services\Proxmox\Server\ProxmoxConsoleClient;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use Exception;
 
 class ServerConsoleService
 {
-    public function __construct(private ProxmoxServerRepository $serverRepository, private ProxmoxAccessRepository $accessRepository, private ProxmoxConsoleRepository $consoleRepository)
+    public function __construct(private ProxmoxServerClient $serverClient, private ProxmoxAccessClient $accessClient, private ProxmoxConsoleClient $consoleClient)
     {
     }
 
     public function createConsoleUserCredentials(Server $server): UserCredentialsData
     {
-        $this->accessRepository->setServer($server);
-        $this->serverRepository->setServer($server);
+        $this->accessClient->setServer($server);
+        $this->serverClient->setServer($server);
 
-        $user = $this->accessRepository->createUser(CreateUserData::from([
+        $user = $this->accessClient->createUser(CreateUserData::from([
             'realmType' => 'pve',
             'enabled' => true,
             'expiresAt' => now()->addDay(),
         ]));
 
         try {
-            $this->accessRepository->createRole('convoy-console', 'VM.Audit,VM.Console');
+            $this->accessClient->createRole('convoy-console', 'VM.Audit,VM.Console');
         } catch (Exception) {
         }
 
-        $this->serverRepository->addUser(
+        $this->serverClient->addUser(
             RealmType::PVE,
             $user->username,
             'convoy-console'
         );
 
-        return $this->accessRepository->createUserCredentials(RealmType::PVE, $user->username, $user->password);
+        return $this->accessClient->createUserCredentials(RealmType::PVE, $user->username, $user->password);
     }
 
     public function createNoVncCredentials(Server $server): NoVncCredentialsData
     {
         $credentials = $this->createConsoleUserCredentials($server);
 
-        return $this->consoleRepository->setServer($server)->createNoVncCredentials($credentials);
+        return $this->consoleClient->setServer($server)->createNoVncCredentials($credentials);
     }
 
     public function createXTermjsCredentials(Server $server): XTermCredentialsData
     {
         $credentials = $this->createConsoleUserCredentials($server);
 
-        return $this->consoleRepository->setServer($server)->createXTermjsCredentials($credentials);
+        return $this->consoleClient->setServer($server)->createXTermjsCredentials($credentials);
     }
 }

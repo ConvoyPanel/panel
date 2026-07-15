@@ -4,15 +4,15 @@ namespace App\Services\Nodes;
 
 use App\Data\Server\Proxmox\Usages\ServerTimepointData;
 use App\Enums\Server\StatisticTimeRange;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxStatisticsRepository;
+use App\Services\Proxmox\Server\ProxmoxStatisticsClient;
 use Carbon\Carbon;
 
 class ServerUsagesSyncService
 {
-    public function __construct(private ProxmoxStatisticsRepository $repository)
+    public function __construct(private ProxmoxStatisticsClient $client)
     {
     }
 
@@ -22,7 +22,7 @@ class ServerUsagesSyncService
 
         $servers->each(function (Server $server) {
             try {
-                $timepoints = $this->repository->setServer($server)->getStatistics(
+                $timepoints = $this->client->setServer($server)->getStatistics(
                     StatisticTimeRange::HOUR_AGO,
                 );
 

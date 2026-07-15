@@ -7,8 +7,8 @@ use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Enums\Server\Backup\BackupErrorCode;
 use App\Models\Backup;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Services\Proxmox\Server\ProxmoxActivityClient;
+use App\Services\Proxmox\Server\ProxmoxBackupClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -40,9 +40,9 @@ class MonitorBackupJob implements ShouldQueue
         return [new WithoutOverlapping((string) $this->backup->id)];
     }
 
-    public function handle(ProxmoxActivityRepository $repository, ProxmoxBackupRepository $backupRepository): void
+    public function handle(ProxmoxActivityClient $client, ProxmoxBackupClient $backupClient): void
     {
-        $task = $repository->setServer($this->backup->server)->getStatus($this->upid);
+        $task = $client->setServer($this->backup->server)->getStatus($this->upid);
 
         if ($task->status === TaskStatus::RUNNING) {
             $this->release(3);
@@ -50,7 +50,7 @@ class MonitorBackupJob implements ShouldQueue
             return;
         }
 
-        $logs = $repository->setServer($this->backup->server)->getLogsByTask($this->upid);
+        $logs = $client->setServer($this->backup->server)->getLogsByTask($this->upid);
 
         // get the filename of the backup (e.g. vzdump-qemu-101-2021_01_01-00_00_00.vma.zstd)
         $fileName = null;
@@ -61,7 +61,7 @@ class MonitorBackupJob implements ShouldQueue
         }
 
         if ($task->exitStatus === TaskExitStatus::OK) {
-            $archives = $backupRepository->setServer($this->backup->server)->getBackups($this->backup->storage);
+            $archives = $backupClient->setServer($this->backup->server)->getBackups($this->backup->storage);
             $archive = collect($archives)->firstWhere(
                 'volumeId',
                 "{$this->backup->storage->name}:backup/{$fileName}",

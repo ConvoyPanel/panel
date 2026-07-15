@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\Status\NodeStatusData;
 use App\Models\Node;
-use App\Repositories\Proxmox\Node\ProxmoxStatusRepository;
+use App\Services\Proxmox\Node\ProxmoxStatusClient;
 
 class NodeStatusController
 {
-    public function __invoke(Node $node, ProxmoxStatusRepository $repository): NodeStatusData
+    public function __invoke(Node $node, ProxmoxStatusClient $client): NodeStatusData
     {
-        return $repository->setNode($node)->getStatus();
+        return $client->setNode($node)->getStatus();
     }
 }

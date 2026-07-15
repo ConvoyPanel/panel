@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Repositories\Proxmox\Node;
+namespace App\Services\Proxmox\Node;
 
-use App\Exceptions\Repository\Proxmox\NextVMIDRetrievalException;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\NextVMIDRetrievalException;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Exception;
 
 use function str_contains;
 
-class ProxmoxAllocationRepository extends ProxmoxRepository
+class ProxmoxAllocationClient extends ProxmoxClient
 {
     /**
      * @throws NextVMIDRetrievalException

@@ -11,7 +11,7 @@ use App\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
 use App\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
 use App\Models\ISO;
 use App\Models\Node;
-use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use App\Services\Isos\IsoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +21,7 @@ class IsoController
 {
     public function __construct(
         private IsoService $isoService,
-        private ProxmoxStorageRepository $repository,
+        private ProxmoxStorageClient $client,
     ) {}
 
     public function index(Node $node, Request $request)
@@ -92,7 +92,7 @@ class IsoController
             'link' => ['required', 'url'],
         ])->validate();
 
-        $metadata = $this->repository->setNode($node)->getFileMetadata($request->link);
+        $metadata = $this->client->setNode($node)->getFileMetadata($request->link);
 
         return FileMetaData::from($metadata);
     }

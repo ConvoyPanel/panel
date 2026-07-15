@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Server;
 
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
 use App\Services\Servers\ServerNetworkService;
 use Illuminate\Bus\Batchable;

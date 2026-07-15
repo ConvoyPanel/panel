@@ -3,7 +3,7 @@
 namespace App\Services\Nodes;
 
 use App\Exceptions\Http\Server\ConfigModifiedException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Jobs\Server\SyncServerRateLimitJob;
 use App\Models\Server;
 use App\Services\Servers\OveragePenaltyResolver;

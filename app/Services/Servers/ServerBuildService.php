@@ -3,13 +3,13 @@
 namespace App\Services\Servers;
 
 use App\Enums\Server\LockStatus;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\Template;
-use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
+use App\Services\Proxmox\Server\ProxmoxActivityClient;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Support\ByteUnit;
 use App\Traits\HandlesProxmoxErrors;
 use Illuminate\Http\Client\ConnectionException;
@@ -19,9 +19,9 @@ class ServerBuildService
     use HandlesProxmoxErrors;
 
     public function __construct(
-        private ProxmoxServerRepository $serverRepository,
-        private ProxmoxResourceRepository $resourceRepository,
-        private ProxmoxActivityRepository $activityRepository,
+        private ProxmoxServerClient $serverClient,
+        private ProxmoxResourceClient $resourceClient,
+        private ProxmoxActivityClient $activityClient,
     ) {}
 
     /**
@@ -31,7 +31,7 @@ class ServerBuildService
     public function delete(Server $server): void
     {
         try {
-            $this->serverRepository->setServer($server)->delete();
+            $this->serverClient->setServer($server)->delete();
         } catch (RequestException $e) {
             if ($this->isNonexistentVMError($e)) {
                 return;
@@ -49,7 +49,7 @@ class ServerBuildService
      */
     public function build(Server $server, Template $template): string
     {
-        return $this->serverRepository->setServer($server)->create($template);
+        return $this->serverClient->setServer($server)->create($template);
     }
 
     /**
@@ -58,7 +58,7 @@ class ServerBuildService
      */
     public function isVmCreated(Server $server): bool
     {
-        $servers = $this->resourceRepository->setServer($server)->getResources();
+        $servers = $this->resourceClient->setServer($server)->getResources();
 
         $vm = $servers->where('vmid', $server->vmid)
             ->where('lockStatus', '!=', LockStatus::CLONE)
@@ -84,7 +84,7 @@ class ServerBuildService
     public function getCloneProgress(Node $node, string $upid): array
     {
         // Get logs in chronological order to correctly track the context of each clone operation.
-        $logs = $this->activityRepository->setNode($node)->getLogsByTask(upid: $upid, limitLinesTo: 1000);
+        $logs = $this->activityClient->setNode($node)->getLogsByTask(upid: $upid, limitLinesTo: 1000);
 
         $progressPerDisk = [];
         $currentDiskId = null;
@@ -139,7 +139,7 @@ class ServerBuildService
      */
     public function isVmDeleted(Server $server): bool
     {
-        $servers = $this->resourceRepository->setServer($server)->getResources();
+        $servers = $this->resourceClient->setServer($server)->getResources();
 
         $vm = $servers->where('vmid', $server->vmid)->first();
 

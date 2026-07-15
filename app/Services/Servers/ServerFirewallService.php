@@ -4,14 +4,14 @@ namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Network\IpsetData;
 use App\Data\Server\Proxmox\Network\LockedIpData;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxFirewallRepository;
+use App\Services\Proxmox\Server\ProxmoxFirewallClient;
 
 class ServerFirewallService
 {
     public function __construct(
-        private ProxmoxFirewallRepository $firewallRepository,
+        private ProxmoxFirewallClient $firewallClient,
     ) {}
 
     /**
@@ -21,7 +21,7 @@ class ServerFirewallService
      */
     public function configureFirewall(Server $server): void
     {
-        $this->firewallRepository->setServer($server)->updateOptions([
+        $this->firewallClient->setServer($server)->updateOptions([
             'enable' => true,
             'ipfilter' => true,
             'policy_in' => 'ACCEPT',
@@ -36,16 +36,16 @@ class ServerFirewallService
      */
     public function deleteIpset(Server $server, string|IpsetData $ipset): void
     {
-        $this->firewallRepository->setServer($server);
+        $this->firewallClient->setServer($server);
 
         $this
-            ->firewallRepository
+            ->firewallClient
             ->getLockedIps($ipset)
             ->each(function (LockedIpData $lockedIp) use ($ipset) {
-                $this->firewallRepository->unlockIp($ipset, $lockedIp);
+                $this->firewallClient->unlockIp($ipset, $lockedIp);
             });
 
-        $this->firewallRepository->deleteIpset($ipset);
+        $this->firewallClient->deleteIpset($ipset);
     }
 
     /**
@@ -55,10 +55,10 @@ class ServerFirewallService
      */
     public function clearIpsets(Server $server): void
     {
-        $this->firewallRepository->setServer($server);
+        $this->firewallClient->setServer($server);
 
         $this
-            ->firewallRepository
+            ->firewallClient
             ->getIpsets()
             ->each(function (IpsetData $ipset) use ($server) {
                 $this->deleteIpset($server, $ipset);
@@ -76,12 +76,12 @@ class ServerFirewallService
             $ipset = $ipset->name;
         }
 
-        $this->firewallRepository->setServer($server);
+        $this->firewallClient->setServer($server);
 
-        $this->firewallRepository->createIpset($ipset);
+        $this->firewallClient->createIpset($ipset);
 
         foreach ($addresses as $address) {
-            $this->firewallRepository->lockIp($ipset, $address);
+            $this->firewallClient->lockIp($ipset, $address);
         }
     }
 }

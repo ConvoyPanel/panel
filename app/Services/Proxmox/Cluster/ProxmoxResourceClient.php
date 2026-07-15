@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Repositories\Proxmox\Cluster;
+namespace App\Services\Proxmox\Cluster;
 
 use App\Data\Cluster\ServerResourceData;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 use function array_filter;
 
-class ProxmoxResourceRepository extends ProxmoxRepository
+class ProxmoxResourceClient extends ProxmoxClient
 {
     /**
      * @return Collection<int, ServerResourceData>

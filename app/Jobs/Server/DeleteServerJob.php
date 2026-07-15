@@ -17,7 +17,7 @@ use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use function now;
 
 class DeleteServerJob implements ShouldQueue

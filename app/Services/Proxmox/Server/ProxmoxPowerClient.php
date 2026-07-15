@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Enums\Server\PowerCommand;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 
-class ProxmoxPowerRepository extends ProxmoxRepository
+class ProxmoxPowerClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

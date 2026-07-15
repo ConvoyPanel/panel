@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\Storage\StorageData;
 use App\Data\Storage\StorageEloquentData;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
-use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use App\Services\Nodes\LiveStorageService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
@@ -21,7 +21,7 @@ use Throwable;
 class StorageController extends Controller
 {
     public function __construct(
-        private ProxmoxStorageRepository $repository,
+        private ProxmoxStorageClient $client,
         private LiveStorageService $liveStorage,
         private ConnectionInterface $connection,
     ) {}
@@ -40,7 +40,7 @@ class StorageController extends Controller
     public function fetchFromProxmox(Node $node)
     {
         return StorageData::collect(
-            $this->repository->setNode($node)->getStorages(),
+            $this->client->setNode($node)->getStorages(),
             DataCollection::class,
         );
     }

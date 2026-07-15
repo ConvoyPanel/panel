@@ -2,7 +2,7 @@
 
 namespace App\Services\Servers;
 
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
 use Illuminate\Http\Client\ConnectionException;
 

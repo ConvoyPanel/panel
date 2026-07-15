@@ -3,11 +3,11 @@
 namespace App\Services\Servers;
 
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 
 class ServerAuthService
 {
-    public function __construct(private ProxmoxConfigRepository $configRepository)
+    public function __construct(private ProxmoxConfigClient $configClient)
     {
     }
 
@@ -17,12 +17,12 @@ class ServerAuthService
         // single source of truth here. The old QEMU-guest-agent live-set path (v4) was a more
         // fragile duplicate — it needed the agent running and OS-specific usernames — and is
         // deliberately not carried onto next.
-        $this->configRepository->setServer($server)->update(['cipassword' => $password]);
+        $this->configClient->setServer($server)->update(['cipassword' => $password]);
     }
 
     public function getSSHKeys(Server $server): array
     {
-        $raw = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
+        $raw = collect($this->configClient->setServer($server)->getConfig())->where('key', '=', 'sshkeys')->first()['value'] ?? '';
 
         return array_values(array_filter(
             explode("\n", rawurldecode($raw)),
@@ -33,9 +33,9 @@ class ServerAuthService
     public function setSSHKeys(Server $server, ?string $keys): void
     {
         if (! empty($keys)) {
-            $this->configRepository->setServer($server)->update(['sshkeys' => rawurlencode($keys)]);
+            $this->configClient->setServer($server)->update(['sshkeys' => rawurlencode($keys)]);
         } else {
-            $this->configRepository->setServer($server)->update(['delete' => 'sshkeys']);
+            $this->configClient->setServer($server)->update(['delete' => 'sshkeys']);
         }
     }
 }

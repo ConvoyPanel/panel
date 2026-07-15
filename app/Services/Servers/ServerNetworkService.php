@@ -5,11 +5,11 @@ namespace App\Services\Servers;
 use App\Data\Server\Eloquent\PrimaryAddressesData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Enums\Network\AddressState;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Address;
 use App\Models\NetworkInterface;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 
 use function array_unique;
 
@@ -18,7 +18,7 @@ class ServerNetworkService
     public function __construct(
         private ServerFirewallService $firewallService,
         private CloudinitService $cloudinitService,
-        private ProxmoxConfigRepository $configRepository,
+        private ProxmoxConfigClient $configClient,
     ) {}
 
     /**
@@ -58,7 +58,7 @@ class ServerNetworkService
             ? ($server->vlan_tag ?? $networkInterface->vlan_tag)
             : null;
 
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         // Skip NICs already in the desired state so we don't rewrite them.
         // Firewall isn't the only field we set here — a NIC could be firewalled
@@ -98,7 +98,7 @@ class ServerNetworkService
                 return $carry;
             }, []);
 
-        $this->configRepository->update($networkDevices, $config->digest);
+        $this->configClient->update($networkDevices, $config->digest);
     }
 
     /**
@@ -118,7 +118,7 @@ class ServerNetworkService
     {
         $addresses = array_unique($server->addresses()->pluck('ip')->all());
 
-        $this->configRepository
+        $this->configClient
             ->setServer($server)
             ->getConfig()
             ->networkDevices

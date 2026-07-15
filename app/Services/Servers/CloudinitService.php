@@ -4,10 +4,10 @@ namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Config\IpConfigData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Address;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use Illuminate\Support\Arr;
 
 use function collect;
@@ -20,7 +20,7 @@ use function explode;
  */
 class CloudinitService
 {
-    public function __construct(private ProxmoxConfigRepository $configRepository) {}
+    public function __construct(private ProxmoxConfigClient $configClient) {}
 
     /**
      * Sets the hostname and search domain for a server in Proxmox.
@@ -29,7 +29,7 @@ class CloudinitService
      */
     public function setHostname(Server $server, string $hostname): void
     {
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         // Write only what differs, so an unchanged hostname doesn't enqueue a
         // redundant Proxmox "Configure" task.
@@ -45,7 +45,7 @@ class CloudinitService
             return;
         }
 
-        $this->configRepository->setServer($server)->update($payload);
+        $this->configClient->setServer($server)->update($payload);
     }
 
     /**
@@ -55,7 +55,7 @@ class CloudinitService
      */
     public function getNameservers(Server $server): array
     {
-        $nameservers = collect($this->configRepository->setServer($server)->getConfig())->where('key', '=', 'nameserver')->first();
+        $nameservers = collect($this->configClient->setServer($server)->getConfig())->where('key', '=', 'nameserver')->first();
 
         return $nameservers ? explode(' ', $nameservers['value']) : [];
     }
@@ -67,7 +67,7 @@ class CloudinitService
             ...(count($nameservers) === 0 ? ['delete' => 'nameserver'] : []),
         ];
 
-        $this->configRepository->setServer($server)->update($payload);
+        $this->configClient->setServer($server)->update($payload);
     }
 
     /**
@@ -94,7 +94,7 @@ class CloudinitService
 
         // The set of ipconfig keys is derived from the NICs we just read, so
         // guard the write with that read's digest (optimistic concurrency).
-        $config = $this->configRepository->setServer($server)->getConfig();
+        $config = $this->configClient->setServer($server)->getConfig();
 
         // Parse our own desired string through the same codec as the stored config,
         // so the comparison is order/format-insensitive, and skip NICs that are
@@ -115,6 +115,6 @@ class CloudinitService
             return;
         }
 
-        $this->configRepository->update($networkDevices, $config->digest);
+        $this->configClient->update($networkDevices, $config->digest);
     }
 }

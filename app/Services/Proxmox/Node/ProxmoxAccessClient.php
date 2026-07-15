@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Proxmox\Node;
+namespace App\Services\Proxmox\Node;
 
 use Spatie\LaravelData\DataCollection;
 use App\Data\Node\Access\CreateUserData;
@@ -8,11 +8,11 @@ use App\Data\Node\Access\UserCredentialsData;
 use App\Data\Node\Access\UserData;
 use App\Enums\Node\Access\RealmType;
 use App\Models\Node;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Support\Str;
 use Webmozart\Assert\Assert;
 
-class ProxmoxAccessRepository extends ProxmoxRepository
+class ProxmoxAccessClient extends ProxmoxClient
 {
     public function getUsers(): DataCollection
     {

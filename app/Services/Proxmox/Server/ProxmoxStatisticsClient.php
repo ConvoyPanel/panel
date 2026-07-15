@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Usages\ServerDiskData;
 use App\Data\Server\Proxmox\Usages\ServerNetworkData;
 use App\Data\Server\Proxmox\Usages\ServerTimepointData;
 use App\Enums\Server\StatisticConsolidatorFunction;
 use App\Enums\Server\StatisticTimeRange;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 
-class ProxmoxStatisticsRepository extends ProxmoxRepository
+class ProxmoxStatisticsClient extends ProxmoxClient
 {
     public function getStatistics(
         StatisticTimeRange $from,

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Node\Access\UserCredentialsData;
 use App\Data\Server\Proxmox\Console\NoVncCredentialsData;
 use App\Data\Server\Proxmox\Console\XTermCredentialsData;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use GuzzleHttp\Cookie\CookieJar;
 
-class ProxmoxConsoleRepository extends ProxmoxRepository
+class ProxmoxConsoleClient extends ProxmoxClient
 {
     public function createNoVncCredentials(UserCredentialsData $credentials): NoVncCredentialsData
     {

@@ -3,9 +3,9 @@
 namespace App\Jobs\Server;
 
 use App\Enums\Server\State;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\DeploymentStep;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Traits\HandlesProxmoxErrors;
 use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Batchable;
@@ -47,10 +47,10 @@ class MonitorStateJob implements ShouldQueue
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function handle(ProxmoxServerRepository $repository): void
+    public function handle(ProxmoxServerClient $client): void
     {
         try {
-            $stateData = $repository->setServer($this->step->deployment->server)->getState();
+            $stateData = $client->setServer($this->step->deployment->server)->getState();
 
             if ($stateData->state === $this->targetState) {
                 $this->step->complete();

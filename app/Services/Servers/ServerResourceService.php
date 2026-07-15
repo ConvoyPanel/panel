@@ -3,13 +3,13 @@
 namespace App\Services\Servers;
 
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxGuestAgentRepository;
+use App\Services\Proxmox\Server\ProxmoxGuestAgentClient;
 use Illuminate\Support\Facades\Cache;
 
 class ServerResourceService
 {
     public function __construct(
-        private ProxmoxGuestAgentRepository $repository
+        private ProxmoxGuestAgentClient $client
     ) {}
 
     public function getStorageUsage(Server $server): array
@@ -17,7 +17,7 @@ class ServerResourceService
         $cacheKey = "server.{$server->uuid}.storage_usage";
 
         return Cache::remember(key: $cacheKey, ttl: 60, callback: function () use ($server): array {
-            $fsInfo = $this->repository->setServer($server)->getFsInfo();
+            $fsInfo = $this->client->setServer($server)->getFsInfo();
 
             // Calculate total used bytes from all filesystems
             // We sum up all valid filesystems.

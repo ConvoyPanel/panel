@@ -4,7 +4,7 @@ namespace App\Jobs\Server;
 
 use Throwable;
 use App\Enums\Server\DeploymentStatus;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;

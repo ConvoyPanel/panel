@@ -7,8 +7,8 @@ use App\Enums\Server\ServerStatus;
 use App\Jobs\Server\MonitorBackupRestorationJob;
 use App\Models\Backup;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Server\ProxmoxBackupClient;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use Illuminate\Database\ConnectionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -16,8 +16,8 @@ class RestoreFromBackupService
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private ProxmoxServerRepository $serverRepository,
-        private ProxmoxBackupRepository $proxmoxRepository,
+        private ProxmoxServerClient $serverClient,
+        private ProxmoxBackupClient $proxmoxClient,
     ) {
     }
 
@@ -29,7 +29,7 @@ class RestoreFromBackupService
             );
         }
 
-        $stateData = $this->serverRepository->setServer($server)->getState();
+        $stateData = $this->serverClient->setServer($server)->getState();
         if ($stateData->state !== State::STOPPED) {
             throw new BadRequestHttpException(
                 'The server needs to be stopped before a backup can be restored.',
@@ -47,7 +47,7 @@ class RestoreFromBackupService
                 'status' => ServerStatus::RESTORING_BACKUP->value,
             ]);
 
-            $upid = $this->proxmoxRepository->setServer($server)->restore($backup);
+            $upid = $this->proxmoxClient->setServer($server)->restore($backup);
 
             MonitorBackupRestorationJob::dispatch($server, $upid);
         });

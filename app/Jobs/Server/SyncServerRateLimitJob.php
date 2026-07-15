@@ -4,7 +4,7 @@ namespace App\Jobs\Server;
 
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Exceptions\Http\Server\ConfigModifiedException;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
 use App\Services\Nodes\ServerRateLimitsSyncService;
 use Illuminate\Bus\Batchable;

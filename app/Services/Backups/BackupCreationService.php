@@ -8,7 +8,7 @@ use App\Exceptions\Service\Backup\TooManyBackupsException;
 use App\Jobs\Server\MonitorBackupJob;
 use App\Models\Backup;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Services\Proxmox\Server\ProxmoxBackupClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\ConnectionInterface;
 use Ramsey\Uuid\Uuid;
@@ -19,7 +19,7 @@ class BackupCreationService
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private ProxmoxBackupRepository $proxmoxRepository,
+        private ProxmoxBackupClient $proxmoxClient,
     ) {
     }
 
@@ -74,7 +74,7 @@ class BackupCreationService
                     'size' => 0,
                 ]);
 
-                $upid = $this->proxmoxRepository->setServer($server)->backup(
+                $upid = $this->proxmoxClient->setServer($server)->backup(
                     $mode,
                     $compressionType,
                     $storage->name,

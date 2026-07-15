@@ -9,7 +9,7 @@ use App\Jobs\Node\MonitorIsoDownloadJob;
 use App\Models\ISO;
 use App\Models\Node;
 use App\Models\Storage;
-use App\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Database\ConnectionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -17,7 +17,7 @@ class IsoService
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private ProxmoxStorageRepository $repository,
+        private ProxmoxStorageClient $client,
     ) {
     }
 
@@ -36,7 +36,7 @@ class IsoService
             throw new BadRequestHttpException('No ISO-capable storage is configured for this node.');
         }
 
-        $queriedFileMetadata = $this->repository->setNode($node)->getFileMetadata($link);
+        $queriedFileMetadata = $this->client->setNode($node)->getFileMetadata($link);
 
         return $this->connection->transaction(
             function () use (
@@ -57,7 +57,7 @@ class IsoService
                     'size' => $queriedFileMetadata->size,
                 ]);
 
-                $upid = $this->repository->setNode($node)->download(
+                $upid = $this->client->setNode($node)->download(
                     StorageContentType::ISO,
                     $storage->name,
                     $iso->file_name,
@@ -80,7 +80,7 @@ class IsoService
             return null;
         }
 
-        $isos = $this->repository->setNode($node)->getIsos($storage->name);
+        $isos = $this->client->setNode($node)->getIsos($storage->name);
 
         return $isos->where('file_name', '=', $fileName)->first();
     }
@@ -95,7 +95,7 @@ class IsoService
 
         $this->connection->transaction(function () use ($node, $iso) {
             if ($iso->is_successful) {
-                $this->repository->setNode($node)->deleteFile(StorageContentType::ISO, $iso->storage->name, $iso->file_name);
+                $this->client->setNode($node)->deleteFile(StorageContentType::ISO, $iso->storage->name, $iso->file_name);
             }
 
             $iso->delete();

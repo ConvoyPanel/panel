@@ -7,7 +7,7 @@ use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Jobs\Server\BuildServerJob;
 use App\Jobs\Server\ConfigureVmJob;
 use App\Jobs\Server\SendPowerCommandJob;
@@ -15,7 +15,7 @@ use App\Jobs\Server\UpdatePasswordJob;
 use App\Jobs\Server\WaitUntilVmIsCreatedJob;
 use App\Models\Deployment;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxConfigRepository;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
@@ -27,7 +27,7 @@ class BuildServerAction
 {
     use ManagesDeploymentLifecycle;
 
-    public function __construct(private ProxmoxConfigRepository $repository) {}
+    public function __construct(private ProxmoxConfigClient $client) {}
 
     /**
      * @throws RequestException
@@ -75,8 +75,8 @@ class BuildServerAction
             'node_id' => $server->node_id,
             'vmid' => $deployment->template->vmid,
         ]);
-        $configRepository = $this->repository->setServer($template);
-        $templateConfig = $configRepository->getConfig();
+        $configClient = $this->client->setServer($template);
+        $templateConfig = $configClient->getConfig();
         $totalSize = array_reduce(
             $templateConfig->disks->all(), function (int $carry, DiskData $disk) {
                 return $carry + $disk->size;

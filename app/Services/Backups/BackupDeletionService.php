@@ -4,14 +4,14 @@ namespace App\Services\Backups;
 
 use App\Exceptions\Service\Backup\BackupLockedException;
 use App\Models\Backup;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Services\Proxmox\Server\ProxmoxBackupClient;
 use Illuminate\Database\ConnectionInterface;
 
 class BackupDeletionService
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private ProxmoxBackupRepository $proxmoxRepository,
+        private ProxmoxBackupClient $proxmoxClient,
     ) {
     }
 
@@ -22,7 +22,7 @@ class BackupDeletionService
         }
 
         $this->connection->transaction(function () use ($backup) {
-            $this->proxmoxRepository->setServer($backup->server)->delete($backup);
+            $this->proxmoxClient->setServer($backup->server)->delete($backup);
 
             $backup->delete();
         });

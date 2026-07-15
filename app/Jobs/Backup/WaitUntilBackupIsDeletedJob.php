@@ -2,9 +2,9 @@
 
 namespace App\Jobs\Backup;
 
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Backup;
-use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
+use App\Services\Proxmox\Server\ProxmoxBackupClient;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,9 +35,9 @@ class WaitUntilBackupIsDeletedJob implements ShouldQueue
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function handle(ProxmoxBackupRepository $repository): void
+    public function handle(ProxmoxBackupClient $client): void
     {
-        $backups = $repository->setServer($this->backup->server)->getBackups($this->backup->storage);
+        $backups = $client->setServer($this->backup->server)->getBackups($this->backup->storage);
 
         if (filled($backups->where('filename', $this->backup->file_name)->first())) {
             $this->release(3);

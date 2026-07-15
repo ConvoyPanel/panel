@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Snapshot\SnapshotData;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 
-class ProxmoxSnapshotRepository extends ProxmoxRepository
+class ProxmoxSnapshotClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

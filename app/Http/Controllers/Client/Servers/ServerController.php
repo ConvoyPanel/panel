@@ -14,7 +14,7 @@ use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Services\Coterm\CotermJWTService;
 use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
@@ -30,7 +30,7 @@ class ServerController
     public function __construct(
         private CotermJWTService $cotermJWTService,
         private ServerConsoleService $consoleService,
-        private ProxmoxServerRepository $serverRepository,
+        private ProxmoxServerClient $serverClient,
         private SendServerPowerCommand $powerCommand,
         private ServerPowerLockService $powerLock,
     ) {}
@@ -80,7 +80,7 @@ class ServerController
 
     public function getState(Server $server)
     {
-        $state = $this->serverRepository->setServer($server)->getState();
+        $state = $this->serverClient->setServer($server)->getState();
         $state->pendingPowerAction = $this->powerLock->pending($server);
 
         return $state;

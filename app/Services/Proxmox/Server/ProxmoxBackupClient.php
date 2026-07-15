@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Backup\BackupData;
 use App\Enums\Server\BackupCompressionType;
 use App\Enums\Server\BackupMode;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Backup;
 use App\Models\Storage;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 
-class ProxmoxBackupRepository extends ProxmoxRepository
+class ProxmoxBackupClient extends ProxmoxClient
 {
     /**
      * @return Collection<int, BackupData>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\GuestAgent\GuestAgentExecStatusData;
 use App\Data\Server\Proxmox\GuestAgent\GuestAgentFsInfoData;
@@ -9,13 +9,13 @@ use App\Data\Server\Proxmox\GuestAgent\GuestAgentNetworkInterfaceData;
 use App\Data\Server\Proxmox\GuestAgent\GuestAgentOsInfoData;
 use App\Data\Server\Proxmox\GuestAgent\GuestAgentUserData;
 use App\Exceptions\Http\Server\Proxmox\GuestAgentUnavailableException;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-class ProxmoxGuestAgentRepository extends ProxmoxRepository
+class ProxmoxGuestAgentClient extends ProxmoxClient
 {
     /**
      * @throws GuestAgentUnavailableException

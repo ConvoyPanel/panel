@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Proxmox;
+namespace App\Services\Proxmox;
 
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
 use Illuminate\Http\Client\PendingRequest;
@@ -10,7 +10,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Webmozart\Assert\Assert;
 
-abstract class ProxmoxRepository
+abstract class ProxmoxClient
 {
     protected ?Server $server = null;
 

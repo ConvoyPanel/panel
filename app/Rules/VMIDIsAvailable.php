@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use App\Models\Node;
 use App\Models\Server;
-use App\Repositories\Proxmox\Node\ProxmoxAllocationRepository;
+use App\Services\Proxmox\Node\ProxmoxAllocationClient;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -31,8 +31,8 @@ class VMIDIsAvailable implements ValidationRule
             return;
         }
 
-        $repository = app(ProxmoxAllocationRepository::class)->setNode($node);
-        if (!$repository->isVMIDAvailable((int) $value)) {
+        $client = app(ProxmoxAllocationClient::class)->setNode($node);
+        if (!$client->isVMIDAvailable((int) $value)) {
             $fail('The specified VMID is not available for use on Proxmox.');
         }
     }

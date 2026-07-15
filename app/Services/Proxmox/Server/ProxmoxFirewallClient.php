@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Repositories\Proxmox\Server;
+namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Network\IpsetData;
 use App\Data\Server\Proxmox\Network\LockedIpData;
-use App\Exceptions\Repository\Proxmox\RequestException;
-use App\Repositories\Proxmox\ProxmoxRepository;
+use App\Exceptions\Proxmox\RequestException;
+use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use IPLib\Factory;
 use IPLib\Range\RangeInterface;
 
-class ProxmoxFirewallRepository extends ProxmoxRepository
+class ProxmoxFirewallClient extends ProxmoxClient
 {
     /**
      * @throws RequestException

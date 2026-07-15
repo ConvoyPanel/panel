@@ -7,14 +7,14 @@ use App\Data\Server\ServerData;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
 use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Filters\FiltersServerWildcard;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxServerRepository;
+use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
@@ -39,7 +39,7 @@ class ServerController
         private ServerCreationService $creationService,
         private CloudinitService $cloudinitService,
         private VmSyncService $buildModificationService,
-        private ProxmoxServerRepository $serverRepository,
+        private ProxmoxServerClient $serverClient,
         private SendServerPowerCommand $powerCommand,
         private ServerPowerLockService $powerLock,
     ) {}
@@ -140,7 +140,7 @@ class ServerController
 
     public function getState(Server $server)
     {
-        $state = $this->serverRepository->setServer($server)->getState();
+        $state = $this->serverClient->setServer($server)->getState();
         $state->pendingPowerAction = $this->powerLock->pending($server);
 
         return $state;

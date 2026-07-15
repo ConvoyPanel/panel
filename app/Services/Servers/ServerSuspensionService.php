@@ -6,12 +6,12 @@ use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerStatus;
 use App\Enums\Server\SuspensionAction;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use Exception;
 
 class ServerSuspensionService
 {
-    public function __construct(private ProxmoxPowerRepository $powerRepository)
+    public function __construct(private ProxmoxPowerClient $powerClient)
     {
     }
 
@@ -31,7 +31,7 @@ class ServerSuspensionService
         ]);
 
         try {
-            $this->powerRepository->setServer($server)->send($isSuspending ? PowerCommand::KILL : PowerCommand::START);
+            $this->powerClient->setServer($server)->send($isSuspending ? PowerCommand::KILL : PowerCommand::START);
         } catch (Exception $exception) {
             $server->update([
                 'status' => $isSuspending ? null : ServerStatus::SUSPENDED->value,

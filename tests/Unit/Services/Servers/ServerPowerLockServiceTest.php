@@ -3,7 +3,7 @@
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxPowerRepository;
+use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
 use Illuminate\Support\Facades\Cache;
@@ -42,11 +42,11 @@ it('can be re-acquired after release', function () {
 });
 
 it('releases the lock when the Proxmox command fails, so it can be retried', function () {
-    $repository = Mockery::mock(ProxmoxPowerRepository::class);
-    $repository->shouldReceive('setServer')->andReturnSelf();
-    $repository->shouldReceive('send')->once()->andThrow(new RuntimeException('proxmox down'));
+    $client = Mockery::mock(ProxmoxPowerClient::class);
+    $client->shouldReceive('setServer')->andReturnSelf();
+    $client->shouldReceive('send')->once()->andThrow(new RuntimeException('proxmox down'));
 
-    $action = new SendServerPowerCommand($repository, $this->lock);
+    $action = new SendServerPowerCommand($client, $this->lock);
 
     expect(fn () => $action->handle($this->server, PowerCommand::START))
         ->toThrow(RuntimeException::class);

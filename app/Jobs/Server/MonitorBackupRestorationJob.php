@@ -4,7 +4,7 @@ namespace App\Jobs\Server;
 
 use App\Enums\Activity\TaskStatus;
 use App\Models\Server;
-use App\Repositories\Proxmox\Server\ProxmoxActivityRepository;
+use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -36,9 +36,9 @@ class MonitorBackupRestorationJob implements ShouldQueue
         return [new WithoutOverlapping((string) $this->server->id)];
     }
 
-    public function handle(ProxmoxActivityRepository $repository): void
+    public function handle(ProxmoxActivityClient $client): void
     {
-        $task = $repository->setServer($this->server)->getStatus($this->upid);
+        $task = $client->setServer($this->server)->getStatus($this->upid);
 
         if ($task->status === TaskStatus::RUNNING) {
             $this->release(3);

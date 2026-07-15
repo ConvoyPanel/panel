@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 

@@ -3,7 +3,7 @@
 namespace App\Actions\Server;
 
 use App\Enums\Server\ServerStatus;
-use App\Exceptions\Repository\Proxmox\RequestException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Http\Client\ConnectionException;
