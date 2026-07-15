@@ -7,7 +7,7 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
 IPAM mobile rows + live Disks/storage/power/backup verification + collection-state/mobile close-out +
-server-create speed-cap verification**).
+server-create speed-cap verification + application-token network restrictions**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -632,6 +632,21 @@ Researched direction retained for each; none built unless noted.
 
 - **User PATs + token UIs — DONE.** See "API tokens v2" above (account tokens on `auth:web,sanctum`,
   both the client PAT card and the admin `/admin/tokens` screen shipped and browser-verified).
+
+- **Application-token network restrictions (GitHub #58) — DONE (2026-07-15).** Panel-wide application
+  tokens can optionally allow up to 100 individual IPv4/IPv6 addresses and CIDR ranges; an empty list is
+  deliberately unrestricted for existing-token compatibility. `EnforceTokenNetworkRestrictions` runs only
+  on `/api/application`, after Sanctum authentication and before ability checks, so client account PATs and
+  web-session admin requests are unchanged. A valid token outside its allowlist receives a stable 403
+  `token_ip_not_allowed`. Restrictions are editable without rotating the secret and apply on the next request.
+  The token table shows only `Unrestricted`, the single rule, or an `N addresses/ranges` summary; create/edit
+  use one-rule-per-line textareas with line-specific IPv4/IPv6/CIDR validation. There is intentionally **no API
+  throttle** and no denial logging. Forwarded addresses are trusted only from the comma-separated
+  `TRUSTED_PROXIES` IP/CIDR configuration; otherwise matching uses the direct peer address.
+  **Verified:** full Pest **288 / 765 assertions**, PHPStan zero, `tc` + production build, plus authenticated
+  Playwright create/reveal → compact five-rule summary → invalid-line feedback → edit → live bearer 403 →
+  clear to unrestricted → live bearer 200 → 390px mobile row/no overflow → revoke. The disposable token was
+  removed and no unexpected page/API/console errors remained (apart from the documented login user probe).
 
 - **SSH keychain + server auth — DONE.** Keychain: `Client\Account\SSHKeyController` (index/store/destroy)
   on the existing `ssh_keys` table, `SshPublicKey` rule (base64 blob + embedded-algorithm integrity check),

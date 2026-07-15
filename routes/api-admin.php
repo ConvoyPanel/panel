@@ -279,5 +279,5 @@ Route::prefix('/settings')->group(function () {
 |
 */
 Route::resource('tokens', Admin\TokenController::class)
-    ->only(['index', 'store', 'destroy'])
+    ->only(['index', 'store', 'update', 'destroy'])
     ->middleware(DenyApiTokenAccess::class);

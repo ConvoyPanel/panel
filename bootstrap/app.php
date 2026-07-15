@@ -4,7 +4,9 @@ use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\Coterm\CotermAuthenticate;
 use App\Http\Middleware\EnforceTokenAbilities;
+use App\Http\Middleware\EnforceTokenNetworkRestrictions;
 use App\Http\Middleware\RecordSessionActivity;
+use App\Http\Middleware\ValidateCsrfToken;
 use App\Support\Api\AccountTokenAbilities;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -51,7 +53,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 // of truth. Session vs. token access is differentiated at the
                 // guard (auth:sanctum here vs. web session on /api/admin), and
                 // token-forbidden routes opt out via DenyApiTokenAccess.
-                Route::middleware(['auth:sanctum', AdminAuthenticate::class, EnforceTokenAbilities::class])
+                Route::middleware([
+                    'auth:sanctum',
+                    AdminAuthenticate::class,
+                    EnforceTokenNetworkRestrictions::class,
+                    EnforceTokenAbilities::class,
+                ])
                     ->prefix('/api/application')
                     ->as('application.')
                     ->scopeBindings()
@@ -70,8 +77,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // our CSRF middleware exempts genuine token requests (which browsers can't forge) while
         // keeping full CSRF protection for the session-cookie SPA.
         $middleware->replace(
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-            \App\Http\Middleware\ValidateCsrfToken::class,
+            Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            ValidateCsrfToken::class,
         );
 
         // Track active web sessions (for the account "active sessions" list). Appended to the web

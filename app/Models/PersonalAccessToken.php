@@ -9,6 +9,7 @@ use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 /**
  * @property ApiKeyType $type
  * @property ?int $created_by
+ * @property ?array<int, string> $allowed_networks
  * @property ?User $createdBy
  */
 class PersonalAccessToken extends SanctumPersonalAccessToken
@@ -21,6 +22,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'name',
         'token',
         'abilities',
+        'allowed_networks',
         'created_by',
     ];
 
@@ -40,6 +42,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         return [
             'type' => ApiKeyType::class,
             'abilities' => 'json',
+            'allowed_networks' => 'array',
             'last_used_at' => 'datetime',
         ];
     }

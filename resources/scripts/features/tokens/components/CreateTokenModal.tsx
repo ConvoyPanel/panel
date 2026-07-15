@@ -1,21 +1,27 @@
+import {
+    type TokenInput,
+    createToken,
+    tokenSchema,
+} from '@/features/tokens/api.ts'
+import {
+    type PaginatedApiKeys,
+    TOKEN_RESOURCES,
+    resourceLabels,
+} from '@/features/tokens/types.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
+import type { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
 import { IconCheck, IconCopy, IconPlus } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { createToken, tokenSchema, type TokenInput } from '@/features/tokens/api.ts'
-import {
-    resourceLabels,
-    TOKEN_RESOURCES,
-    type PaginatedApiKeys,
-} from '@/features/tokens/types.ts'
-import useClipboard from '@/hooks/use-clipboard.ts'
-import type { Mutator } from '@/types/query.ts'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
+import SelectForm from '@/components/ui/Forms/SelectForm'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -27,9 +33,6 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm, InputForm } from '@/components/ui/Forms'
-import SelectForm from '@/components/ui/Forms/SelectForm'
 
 const scopeItems = [
     { value: 'none', label: 'No access' },
@@ -40,6 +43,7 @@ const scopeItems = [
 const defaultValues: TokenInput = {
     name: '',
     fullAccess: true,
+    allowedNetworks: '',
     scopes: Object.fromEntries(
         TOKEN_RESOURCES.map(resource => [resource, 'none'])
     ) as TokenInput['scopes'],
@@ -102,7 +106,9 @@ const CreateTokenModal = ({ mutate }: Props) => {
                 {plainTextToken ? (
                     <>
                         <ResponsiveDialogHeader>
-                            <ResponsiveDialogTitle>Token created</ResponsiveDialogTitle>
+                            <ResponsiveDialogTitle>
+                                Token created
+                            </ResponsiveDialogTitle>
                             <ResponsiveDialogDescription>
                                 Copy this token now. For security, it won’t be
                                 shown again.
@@ -111,12 +117,12 @@ const CreateTokenModal = ({ mutate }: Props) => {
                         <ResponsiveDialogBody>
                             <div
                                 className={
-                                    'flex items-center gap-2 rounded-md border bg-muted p-3'
+                                    'bg-muted flex items-center gap-2 rounded-md border p-3'
                                 }
                             >
                                 <code
                                     className={
-                                        'grow overflow-x-auto whitespace-nowrap font-mono text-sm'
+                                        'grow overflow-x-auto font-mono text-sm whitespace-nowrap'
                                     }
                                 >
                                     {plainTextToken}
@@ -140,22 +146,26 @@ const CreateTokenModal = ({ mutate }: Props) => {
                         </ResponsiveDialogBody>
                         <ResponsiveDialogFooter>
                             <ResponsiveDialogClose
-                                render={
-                                    <Button>Done</Button>
-                                }
+                                render={<Button>Done</Button>}
                             />
                         </ResponsiveDialogFooter>
                     </>
                 ) : (
                     <>
                         <ResponsiveDialogHeader>
-                            <ResponsiveDialogTitle>Create API token</ResponsiveDialogTitle>
+                            <ResponsiveDialogTitle>
+                                Create API token
+                            </ResponsiveDialogTitle>
                             <ResponsiveDialogDescription>
                                 A panel-wide token for the application API.
                             </ResponsiveDialogDescription>
                         </ResponsiveDialogHeader>
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(data => trigger(data))}>
+                            <form
+                                onSubmit={form.handleSubmit(data =>
+                                    trigger(data)
+                                )}
+                            >
                                 <ResponsiveDialogBody className={'space-y-4'}>
                                     <InputForm
                                         name={'name'}
@@ -178,6 +188,17 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                                 items={scopeItems}
                                             />
                                         ))}
+                                    <TextareaForm
+                                        name={'allowedNetworks'}
+                                        label={'Network access'}
+                                        placeholder={
+                                            '203.0.113.10\n2001:db8::/48'
+                                        }
+                                        rows={5}
+                                        description={
+                                            'Optional. Enter one IPv4 or IPv6 address or CIDR range per line. Leave empty to allow this token from any address.'
+                                        }
+                                    />
                                 </ResponsiveDialogBody>
                                 <ResponsiveDialogFooter className={'mt-4'}>
                                     <ResponsiveDialogClose

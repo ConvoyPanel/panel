@@ -16,20 +16,26 @@ class CreateApplicationTokenService
      * it survives that admin's deletion. The minting admin is recorded in `created_by` for audit.
      *
      * @param  list<string>  $abilities
+     * @param  list<string>  $allowedNetworks
      */
-    public function handle(User $creator, string $name, array $abilities = ['*']): NewAccessToken
-    {
+    public function handle(
+        User $creator,
+        string $name,
+        array $abilities = ['*'],
+        array $allowedNetworks = [],
+    ): NewAccessToken {
         $token = new PersonalAccessToken([
             'type' => ApiKeyType::APPLICATION,
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = Str::random(40)),
             'abilities' => $abilities,
+            'allowed_networks' => $allowedNetworks,
             'created_by' => $creator->getKey(),
         ]);
 
         $token->tokenable()->associate(SystemActor::instance());
         $token->save();
 
-        return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
+        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 }

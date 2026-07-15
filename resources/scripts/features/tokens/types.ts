@@ -27,14 +27,14 @@ export type ResourceAccess = 'none' | 'read' | 'write'
 
 /** Human labels for each resource, for the ability picker. */
 export const resourceLabels: Record<TokenResource, string> = {
-    overview: 'Overview',
-    locations: 'Locations',
-    nodes: 'Nodes',
-    servers: 'Servers',
+    'overview': 'Overview',
+    'locations': 'Locations',
+    'nodes': 'Nodes',
+    'servers': 'Servers',
     'address-block-groups': 'IP address blocks',
     'template-groups': 'Templates',
-    users: 'Users',
-    coterms: 'Coterms',
+    'users': 'Users',
+    'coterms': 'Coterms',
 }
 
 /**
@@ -71,4 +71,17 @@ export const summarizeAbilities = (abilities: string[]): string => {
     }
 
     return `${abilities.length} abilities`
+}
+
+/** A deliberately compact summary; the table never renders an entire long allowlist. */
+export const summarizeAllowedNetworks = (networks: string[]): string => {
+    if (networks.length === 0) {
+        return 'Unrestricted'
+    }
+
+    if (networks.length === 1) {
+        return networks[0]
+    }
+
+    return `${networks.length} addresses/ranges`
 }

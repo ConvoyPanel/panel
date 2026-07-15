@@ -1,9 +1,11 @@
 import { deleteToken, tokenQueries, useTokens } from '@/features/tokens/api.ts'
 import CreateTokenModal from '@/features/tokens/components/CreateTokenModal.tsx'
+import EditTokenNetworksModal from '@/features/tokens/components/EditTokenNetworksModal.tsx'
 import {
     type ApiKey,
     type PaginatedApiKeys,
     summarizeAbilities,
+    summarizeAllowedNetworks,
 } from '@/features/tokens/types.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
@@ -11,6 +13,7 @@ import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
@@ -35,6 +38,7 @@ const formatLastUsed = (value: string | null) =>
     value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : 'Never'
 
 function TokensIndex() {
+    const [editingToken, setEditingToken] = useState<ApiKey | null>(null)
     const confirm = useConfirmationStore(state => state.confirm)
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData, isError, refetch } = useTokens(queryParams)
@@ -69,12 +73,17 @@ function TokensIndex() {
     }
 
     const renderActions = (token: ApiKey) => (
-        <DropdownMenuItem
-            variant={'destructive'}
-            onClick={() => handleDelete(token)}
-        >
-            Revoke
-        </DropdownMenuItem>
+        <>
+            <DropdownMenuItem onClick={() => setEditingToken(token)}>
+                Edit restrictions
+            </DropdownMenuItem>
+            <DropdownMenuItem
+                variant={'destructive'}
+                onClick={() => handleDelete(token)}
+            >
+                Revoke
+            </DropdownMenuItem>
+        </>
     )
 
     const columns: ColumnDef<ApiKey>[] = [
@@ -92,6 +101,16 @@ function TokensIndex() {
                 <Badge variant={'secondary'}>
                     {summarizeAbilities(row.original.abilities)}
                 </Badge>
+            ),
+        },
+        {
+            header: 'Network access',
+            id: 'networkAccess',
+            meta: { skeletonWidth: '8rem' },
+            cell: ({ row }) => (
+                <span className={'whitespace-nowrap'}>
+                    {summarizeAllowedNetworks(row.original.allowedNetworks)}
+                </span>
             ),
         },
         {
@@ -144,6 +163,11 @@ function TokensIndex() {
                                     <Badge variant={'secondary'}>
                                         {summarizeAbilities(token.abilities)}
                                     </Badge>
+                                    <Badge variant={'outline'}>
+                                        {summarizeAllowedNetworks(
+                                            token.allowedNetworks
+                                        )}
+                                    </Badge>
                                     <span
                                         className={
                                             'text-muted-foreground text-xs'
@@ -168,6 +192,11 @@ function TokensIndex() {
                 }}
                 rightActions={<CreateTokenModal mutate={mutate} />}
                 {...tableProps}
+            />
+            <EditTokenNetworksModal
+                token={editingToken}
+                onClose={() => setEditingToken(null)}
+                mutate={mutate}
             />
         </>
     )

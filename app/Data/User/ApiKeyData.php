@@ -20,6 +20,8 @@ class ApiKeyData extends Data
         public string $name,
         /** @var list<string> */
         public array $abilities,
+        /** @var list<string> */
+        public array $allowedNetworks,
         public ?CarbonImmutable $lastUsedAt,
         public Optional|string $plainTextToken,
         // The admin who minted the token (audit). Null once that admin is deleted — the token lives on.
@@ -34,6 +36,7 @@ class ApiKeyData extends Data
             type: $token->type->value,
             name: $token->name,
             abilities: $token->abilities ?? ['*'],
+            allowedNetworks: $token->allowed_networks ?? [],
             lastUsedAt: $token->last_used_at
                 ? CarbonImmutable::parse($token->last_used_at)
                 : null,
