@@ -156,7 +156,13 @@ shared destructive item variant.
 - [x] Move Checkbox off the old primary border, shadow, and one-pixel focus ring.
 - [x] Add nova invalid, disabled, dark-state, and hit-target treatment.
 - [x] Make `CheckboxForm` and `CheckboxItemForm` preserve caller `disabled` state.
-- [ ] Update the dormant RadioGroup primitive before introducing new consumers.
+- [x] Update the dormant RadioGroup primitive before introducing new consumers.
+      Now Base UI, chrome mirroring the shared Checkbox (`border-input`, no
+      shadow, `ring-3` focus, invalid/disabled, `after:` hit target). Verified via
+      a throwaway route since it has no consumer to host it: `role=radiogroup`/
+      `radio`, correct `aria-checked`, `data-checked`/`data-unchecked`, primary
+      fill when checked, click and ArrowDown roving. `@radix-ui/react-radio-group`
+      is uninstalled.
 - [x] Align OTP slots with the current control dimensions and focus treatment.
 - [x] Browser-check login authenticator entry and representative checkbox forms.
 
@@ -237,7 +243,12 @@ patterns:
       The quota was fully mocked; it now reads real limits plus a new `backupSize`
       total. The empty-state action needed a create dialog built from scratch --
       there was no create-backup UI anywhere.
-- [ ] Review Rebuild's isolated width and spacing model against sibling pages.
+- [x] Review Rebuild's isolated width and spacing model against sibling pages.
+      It was the last subpage with its own model: a `flex flex-col gap-y-6`
+      wrapper (which made the page one flex child, defeating AppLayout's
+      `gap-2`/`@md:gap-4`) plus a bespoke `max-w-xl`. Now on the shared
+      one-column-of-two grid — measured identical to a Security card. It was also
+      the only server subpage missing route `meta`.
 
 ## Priority 2: responsive coverage
 
@@ -290,9 +301,9 @@ The rule Base UI follows: its default state→attribute mapping emits a bare
 `data-<key>` only when the state value is boolean `true`, and stringifies
 otherwise (some components override this with a custom mapping — check
 `utils/*StateMapping` in the dist before assuming). **Verify against the DOM,
-not a green build.** The remaining Radix consumers are `Accordion` and the
-dormant `RadioGroup`; Base UI ships equivalents for both when their owning
-screens come up.
+not a green build.** The remaining Radix consumer is `Accordion`; Base UI ships an
+equivalent when its owning screen comes up. (`RadioGroup` is migrated;
+`Radio` uses `data-checked`/`data-unchecked`.)
 
 The `Collapsible` primitive (`components/ui/Collapsible`) was added for the
 backups Advanced disclosure. Prefer it over `Accordion` for a single disclosure —

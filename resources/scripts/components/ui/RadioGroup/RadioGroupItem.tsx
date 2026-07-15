@@ -1,27 +1,40 @@
 import { cn } from '@/utils'
-import { DotFilledIcon } from '@radix-ui/react-icons'
-import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react'
+import { Radio as RadioPrimitive } from '@base-ui/react/radio'
 
-const RadioGroupItem = forwardRef<
-    ElementRef<typeof RadioGroupPrimitive.Item>,
-    ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, ...props }, ref) => {
-    return (
-        <RadioGroupPrimitive.Item
-            ref={ref}
-            className={cn(
-                'aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow-xs focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-                className
-            )}
-            {...props}
+export interface RadioGroupItemProps extends RadioPrimitive.Root.Props {}
+
+/**
+ * Chrome mirrors the shared Checkbox: nova's `border-input` resting state (not
+ * the old `border-primary`), no shadow, a `ring-3` focus ring, invalid/disabled
+ * treatment, and the same `after:` hit-target expansion so the 16px control is
+ * comfortably tappable.
+ *
+ * ⚠️ Base UI state attributes, not Radix's: `data-checked`/`data-unchecked`, not
+ * `data-state=checked`. A ported Radix selector compiles fine and silently never
+ * matches.
+ */
+const RadioGroupItem = ({ className, ...props }: RadioGroupItemProps) => (
+    <RadioPrimitive.Root
+        data-slot='radio-group-item'
+        className={cn(
+            'peer relative flex size-4 shrink-0 items-center justify-center rounded-full border border-input transition-colors outline-none',
+            'after:absolute after:-inset-x-3 after:-inset-y-2',
+            'focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
+            'data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
+            'aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'dark:bg-input/30 dark:data-checked:bg-primary dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
+            className
+        )}
+        {...props}
+    >
+        <RadioPrimitive.Indicator
+            data-slot='radio-group-indicator'
+            className='flex items-center justify-center text-current'
         >
-            <RadioGroupPrimitive.Indicator className='flex items-center justify-center'>
-                <DotFilledIcon className='h-3.5 w-3.5 fill-primary' />
-            </RadioGroupPrimitive.Indicator>
-        </RadioGroupPrimitive.Item>
-    )
-})
-RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
+            <span className='size-1.5 rounded-full bg-current' />
+        </RadioPrimitive.Indicator>
+    </RadioPrimitive.Root>
+)
 
 export default RadioGroupItem
