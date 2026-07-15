@@ -11,7 +11,12 @@ table and carries the create action) from a filtered no-results state (shared `D
 Clear filters action inside the still-usable shell); the toolbar Reset now also tracks the search query, not
 just column filters. The admin dashboard Nodes card and Needs-attention card moved onto shared muted `Item`
 rows + `OverflowItemGroup`, deleting a duplicated Sheet/"Show all" implementation, and the Nodes card gained a
-real contextual empty state with an Add node action. Browser-verified at desktop + 390px. — prior:
+real contextual empty state with an Add node action. Browser-verified at desktop + 390px.
+⚠️ **The Nodes card's dense desktop table is deliberate — do not convert it to Item rows.** This session did,
+on the audit's "bespoke desktop/mobile table split" line, and the maintainer reverted it: the table is part of
+the approved dashboard redesign, and dropping it also dropped the only visible thing naming the meter (the
+`Memory allocated` column header on desktop, an explicit `StatLabel` on mobile), leaving an unlabelled bar. Only
+the mobile rows moved onto shared `Item`/`ItemGroup`, and no `Show all` cap was added. — prior:
 **dashboard accessibility + second bundle pass completed** — shared
 empty states now render for Needs attention and Backups & ISOs; the global muted token and configurable
 `CardTitle` hierarchy bring throttled login/admin Lighthouse Accessibility to 100; command search,

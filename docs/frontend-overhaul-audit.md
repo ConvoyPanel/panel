@@ -193,8 +193,13 @@ patterns:
 - [x] Node Storages: bespoke cards, detached actions, and spacing shims.
 - [x] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
 - [x] Server Addresses: raw desktop table and duplicated overflow handling.
-- [x] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text
-      empty state.
+- [x] Admin dashboard Nodes card: plain-text empty state, and hand-rolled divs for
+      the mobile rows. The desktop/mobile split itself is **intentional and stays** —
+      this line originally read as "convert the whole card to Item rows", which was
+      tried and reverted: the dense table is a deliberate part of the dashboard
+      redesign, and the meter is only legible because a column header (desktop) or
+      an explicit label (mobile) names it. Only the mobile rows moved to shared
+      `Item`/`ItemGroup`. Do not re-flag the split.
 
 ### Server subpage consistency
 
