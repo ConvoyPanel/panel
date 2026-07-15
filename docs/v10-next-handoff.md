@@ -6,7 +6,7 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
-IPAM mobile rows + live Disks verification + collection-state/mobile close-out**).
+IPAM mobile rows + live Disks/storage/power verification + collection-state/mobile close-out**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -178,6 +178,26 @@ and the final app-wide collection-state/mobile sweeps are complete:
    desktop-table/mobile-`Item` split. A real-browser 390 px check forced the Nodes list through four 503s,
    proved the error state replaced its skeletons, then recovered 10 real rows through Try again with no
    horizontal overflow or unexpected console errors. See the audit definition-of-done lines for the sweep.
+3. **Storage modal + power actions — LIVE-VERIFIED 2026-07-15.** At 390 px, the real node Storage UI created
+   a disposable `local` record with 512 MiB reserved headroom, then its Usage dialog reported PVE's live
+   **4.69 GiB used / 100.09 GiB total**, **90.42 GiB free for Convoy**, and the 512 MiB reserve — no offline
+   fallback and no overflow. It exposed two real bugs:
+   - Page-level create-dialog owners on Templates, Network, Storages, and the nested template sheet were
+     mounted during loading but unmounted if the query resolved empty, closing a form opened during that
+     transition. Loading states no longer expose those transient create actions; stable populated and empty
+     states still do. A delayed empty Storage GET proved zero loading actions, exactly one empty-state action,
+     and a drawer that remained open after the query settled.
+   - `StorageController::destroy()` was a five-year-old TODO that returned 204 without deleting anything, so
+     the UI hid the row and toasted success until reload brought it back. It now deletes the storage (the FK
+     cascades its pivot) and first verifies that the nested storage belongs to the requested node. Two focused
+     tests cover deletion and the unrelated-node 404; the real UI then deleted the disposable storage and
+     returned to its contextual empty state.
+   For power, a disposable diskless VM 2694 reused the existing fake server row. The real mobile action menu
+   loaded state on demand, enabled Start only after the query settled, confirmed the action, surfaced its
+   pending lock, and PVE reached `running`; after the lock expired the same UI confirmed Kill, surfaced that
+   pending state, and PVE returned to `stopped`. No unexpected request/console errors or horizontal overflow.
+   VM 2694 was purged, `/var/lib/vz/images` is empty, the disposable storage/pivot are gone, and the original
+   fake fixtures are unchanged. Full Pest **268 / 718 assertions**, PHPStan zero, `tc`, and build pass.
 
 Everything else in the audit is ticked **with how it was verified** — including accessible names, which were
 checked against the **real DOM** (zero unnamed icon-only controls across five pages), not by grep.
@@ -319,7 +339,7 @@ follow-ups** below — all doable in-sandbox, no prod data.
 - **VM power actions (admin + client)** — shared `SendServerPowerCommand` action, admin `getState`/`updateState`
   routes, per-server power lock (`ServerPowerLockService`, `Cache::add` SETNX+TTL, 409
   `power_action_in_progress`), pending action surfaced on `ServerStateData`. Admin server detail page +
-  power dropdown. Backend **live-verified** (below); frontend build/type-verified only.
+  power dropdown. Admin frontend + backend **live-verified** (below).
 - **Storage accounting** — capacity/usage read from **live PVE status** (cached 15s, graceful offline
   fallback), `storages.reserved_bytes` headroom knob, `StorageEloquentData` exposes
   physical/committed/untracked/`freeForConvoy`. `HasSufficientDiskSpace` enforces requested disk ≤
@@ -343,9 +363,9 @@ cross-checked with `qm`/`pvesh` over SSH:
   `unusedN` before destroying, because a running VM's `delete=scsiN` schedules the unplug async);
   `DevNodeSeeder` hardcoded `name=dev-node` broke every `/nodes/{name}` call (now derived from the fqdn's
   first DNS label, override `PROXMOX_NODE_NAME`).
-- **Browser coverage:** the disks tab is now live-verified end-to-end (see the close-out at the top of this
-  handoff). The storage modal and power actions still lack focused in-browser interaction coverage; those
-  are separate product follow-ups, not open frontend-overhaul audit criteria.
+- **Browser coverage:** the disks tab, live-storage Usage dialog/create/delete flow, and admin power actions
+  are now live-verified end-to-end at 390 px; see the close-out at the top of this handoff. The power backend
+  checks above predate and are complemented by the 2026-07-15 browser pass.
 
 ---
 

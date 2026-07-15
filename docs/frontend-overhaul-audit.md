@@ -368,7 +368,10 @@ product/design decisions, not migration defects.
       data. Browser-verified at 390 px by forcing the admin Nodes request to 503
       through all four React Query attempts, then restoring it: the error state
       replaced the skeletons and Try again recovered to 10 real rows with no
-      unexpected console errors.
+      unexpected console errors. A live Storage check also caught and closed a
+      loading race: Templates, Network, Storages, and the nested template sheet
+      no longer expose create actions whose dialog owner would unmount when a
+      loading query resolved to the empty state.
 - [x] Collection screens have deliberate mobile representations rather than
       accidental horizontal overflow. Exhaustively swept 2026-07-15: every
       `DataTable` consumer supplies `mobileRow`; the only raw table outside the

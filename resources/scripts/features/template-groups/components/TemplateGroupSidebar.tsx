@@ -48,7 +48,7 @@ const TemplateGroupSidebar = () => {
                         {modalData?.name}
                     </SheetTitle>
                 </SheetHeader>
-                {(isLoading || Boolean(templates?.length)) && (
+                {Boolean(templates?.length) && (
                     <div className={'mb-4 flex justify-end'}>
                         <Button
                             onClick={() => setIsCreating(true)}

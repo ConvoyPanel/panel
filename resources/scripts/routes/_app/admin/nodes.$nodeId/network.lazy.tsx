@@ -33,9 +33,7 @@ function NodeNetwork() {
                 className={'flex flex-wrap items-center justify-between gap-2'}
             >
                 <Heading>Network</Heading>
-                {(isLoading || Boolean(interfaces?.length)) && (
-                    <CreateNetworkModal />
-                )}
+                {Boolean(interfaces?.length) && <CreateNetworkModal />}
             </div>
             <EditNetworkInterfaceModal />
             <DeleteNetworkInterfaceModal />

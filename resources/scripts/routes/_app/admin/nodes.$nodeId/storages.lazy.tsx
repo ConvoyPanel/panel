@@ -30,7 +30,7 @@ function NodeStorages() {
                 className={'flex flex-wrap items-center justify-between gap-2'}
             >
                 <Heading>Storages</Heading>
-                {(isLoading || Boolean(storages?.length)) && (
+                {Boolean(storages?.length) && (
                     <div className={'flex gap-2'}>
                         <LoadBalancerSidebar />
                         <CreateStorageModal />

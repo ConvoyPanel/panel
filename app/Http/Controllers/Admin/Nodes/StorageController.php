@@ -11,8 +11,8 @@ use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
-use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use App\Services\Nodes\LiveStorageService;
+use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
@@ -103,6 +103,13 @@ class StorageController extends Controller
 
     public function destroy(Node $node, Storage $storage)
     {
+        abort_unless(
+            $node->storages()->whereKey($storage->getKey())->exists(),
+            404,
+        );
+
+        $storage->delete();
+
         return response()->noContent();
     }
 

@@ -29,9 +29,7 @@ function TemplatesIndex() {
                 className={'flex flex-wrap items-center justify-between gap-2'}
             >
                 <Heading>Templates</Heading>
-                {(isLoading || Boolean(groups?.length)) && (
-                    <CreateTemplateGroupModal />
-                )}
+                {Boolean(groups?.length) && <CreateTemplateGroupModal />}
             </div>
 
             <EditTemplateGroupModal />

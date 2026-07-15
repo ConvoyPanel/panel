@@ -4,6 +4,7 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
@@ -66,7 +67,7 @@ it('merges live Proxmox figures and derives untracked + free-for-convoy', functi
 
 it('falls back gracefully when the node is offline', function () {
     // Connection failure on the live lookup must not fail the whole list.
-    Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('node down'));
+    Http::fake(fn () => throw new ConnectionException('node down'));
 
     $response = $this->actingAs($this->user)->getJson(
         "/api/admin/nodes/{$this->node->id}/storages",
@@ -84,4 +85,34 @@ it('falls back gracefully when the node is offline', function () {
     // The Convoy-side record still renders.
     expect($row['name'])->toBe($this->storage->name);
     expect($row['reservedBytes'])->toBe(100 * 1048576);
+});
+
+it('deletes a storage and its node pivot', function () {
+    $this->actingAs($this->user)
+        ->deleteJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}")
+        ->assertNoContent();
+
+    $this->assertDatabaseMissing('storages', [
+        'id' => $this->storage->id,
+    ]);
+    $this->assertDatabaseMissing('storage_to_node', [
+        'node_id' => $this->node->id,
+        'storage_id' => $this->storage->id,
+    ]);
+});
+
+it('does not delete a storage through an unrelated node', function () {
+    $otherNode = Node::factory()->for($this->location)->create();
+
+    $this->actingAs($this->user)
+        ->deleteJson("/api/admin/nodes/{$otherNode->id}/storages/{$this->storage->id}")
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('storages', [
+        'id' => $this->storage->id,
+    ]);
+    $this->assertDatabaseHas('storage_to_node', [
+        'node_id' => $this->node->id,
+        'storage_id' => $this->storage->id,
+    ]);
 });
