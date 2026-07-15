@@ -117,7 +117,14 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 label={`Memory allocated for ${node.displayName}`}
                                             />
                                         </TableCell>
-                                        <TableCell className='pr-0 text-right'>
+                                        {/* `w-px` collapses this column to the
+                                            width of the widest figure. Without
+                                            it the column is `auto` and soaks up
+                                            the table's slack, which `text-right`
+                                            then turns into a wide gap between
+                                            each bar and its figure. The slack
+                                            belongs to the Node column. */}
+                                        <TableCell className='w-px pr-0 text-right whitespace-nowrap'>
                                             <StatLabel
                                                 as='span'
                                                 className='text-xs whitespace-nowrap tabular-nums'
