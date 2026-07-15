@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from '@/utils/http.ts'
 import { startAuthentication } from '@simplewebauthn/browser'
 import {
     AuthenticationResponseJSON,
@@ -21,7 +22,9 @@ const usePasskeyConfirmation = () => {
         } catch (e) {
             setLoading(false)
 
-            throw Error('Failed to get passkey authentication options')
+            throw Error(
+                getApiErrorMessage(e, 'Failed to get passkey authentication options')
+            )
         }
 
         let authResponse: AuthenticationResponseJSON
@@ -38,7 +41,9 @@ const usePasskeyConfirmation = () => {
         } catch (e) {
             setLoading(false)
 
-            throw Error('Invalid passkey. Please try again.')
+            // The server distinguishes an unrecognised passkey from one that
+            // belongs to another account; don't flatten that back to one string.
+            throw Error(getApiErrorMessage(e, 'Invalid passkey. Please try again.'))
         }
 
         setLoading(false)

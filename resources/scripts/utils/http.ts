@@ -124,6 +124,31 @@ interface ErrorWithResponse {
 }
 
 /**
+ * The server's own message for a failed request, or `fallback`.
+ *
+ * Only messages carrying a `code` are used. That code is emitted exclusively for
+ * exceptions that opt into `HasErrorCode` (see bootstrap/app.php), which is the
+ * backend's explicit signal that an error is safe and useful to show — so its
+ * presence is what separates a curated message from an incidental one like a
+ * debug-mode stack message or a bare "Server Error".
+ *
+ * Reach for this instead of hardcoding a string in a catch block: the API
+ * already says why a passkey was rejected, and a blanket "Registration failed"
+ * throws that away and leaves the user with nothing to act on.
+ */
+export const getApiErrorMessage = (error: unknown, fallback: string): string => {
+    const data = (
+        error as { response?: { data?: { message?: unknown; code?: unknown } } }
+    )?.response?.data
+
+    if (typeof data?.code !== 'string' || typeof data.message !== 'string') {
+        return fallback
+    }
+
+    return data.message.trim() === '' ? fallback : data.message
+}
+
+/**
  * Converts snake_case string to camelCase.
  */
 const toCamelCase = (str: string): string =>

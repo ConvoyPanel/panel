@@ -37,3 +37,6 @@ lang/php_*.json
 **/._.DS_Store
 .php-cs-fixer.cache
 .phpunit.cache
+# Scratch files from agent/browser-driven verification runs.
+*.tmp.mjs
+*.tmp.php

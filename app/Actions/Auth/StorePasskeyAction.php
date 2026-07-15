@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Exceptions\HasErrorCode;
 use App\Exceptions\Http\Passkey\InvalidAuthenticatorAttestationResponse;
 use App\Exceptions\Http\Passkey\InvalidPasskeyJson;
 use App\Exceptions\Http\Passkey\InvalidPasskeyPublicKeyCredential;
@@ -21,7 +22,7 @@ use Webauthn\PublicKeyCredentialSource;
  * Extends the package's store action so we inherit its package-default storage
  * (serialized {@see PublicKeyCredentialSource}), the passkey-registered event,
  * and the `additionalProperties` create path — while re-throwing Convoy's
- * curated {@see \App\Exceptions\HasErrorCode} exceptions instead of the package's
+ * curated {@see HasErrorCode} exceptions instead of the package's
  * generic ones, so the client always gets a real status + stable error slug.
  */
 class StorePasskeyAction extends BaseAction

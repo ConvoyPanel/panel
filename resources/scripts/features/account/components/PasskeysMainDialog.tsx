@@ -1,4 +1,5 @@
 import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { getApiErrorMessage } from '@/utils/http.ts'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -46,10 +47,14 @@ const PasskeysMainDialog = () => {
 
             toast.success('Passkey added')
         } catch (e) {
-            let message = 'Registration failed'
-            if (e instanceof Error && e.name === 'InvalidStateError') {
-                message = 'This authenticator is already registered'
-            }
+            // The authenticator's own failures never reach the API, so they keep
+            // a local message; everything else defers to what the server said —
+            // it reports *why* a passkey was rejected, and a blanket
+            // "Registration failed" left the user with nothing to act on.
+            const message =
+                e instanceof Error && e.name === 'InvalidStateError'
+                    ? 'This authenticator is already registered'
+                    : getApiErrorMessage(e, 'Registration failed')
 
             toast.error(message)
             throw e
