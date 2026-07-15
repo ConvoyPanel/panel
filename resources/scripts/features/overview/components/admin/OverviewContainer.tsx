@@ -1,9 +1,11 @@
 import { overviewQueries } from '@/features/overview/api'
 import { cn } from '@/utils'
+import { IconDatabaseOff } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { ReactNode } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Spinner from '@/components/ui/Spinner.tsx'
 import { Heading, Stat, StatLabel } from '@/components/ui/Typography'
@@ -285,13 +287,13 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className='flex flex-col'>
                     <CardHeader className='p-5 pb-2'>
                         <CardTitle className='text-base'>
                             Backups &amp; ISOs
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className='p-5 pt-2'>
+                    <CardContent className='flex flex-1 flex-col p-5 pt-2'>
                         {backups.total > 0 || isos.total > 0 ? (
                             <>
                                 <div className='grid grid-cols-3 gap-4'>
@@ -336,10 +338,12 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                 </div>
                             </>
                         ) : (
-                            <p className='text-muted-foreground py-2 text-sm'>
-                                Nothing backed up yet — backups appear once
-                                servers run.
-                            </p>
+                            <SimpleEmptyState
+                                className='p-0'
+                                icon={IconDatabaseOff}
+                                title='No backups or ISOs'
+                                description='Backups and uploaded ISOs will appear here.'
+                            />
                         )}
                     </CardContent>
                 </Card>

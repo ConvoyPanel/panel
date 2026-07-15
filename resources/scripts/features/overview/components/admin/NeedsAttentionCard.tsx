@@ -15,6 +15,7 @@ import { ReactNode, useState } from 'react'
 import { TablerIcon } from '@/lib/tabler.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     Sheet,
     SheetContent,
@@ -190,16 +191,12 @@ const NeedsAttentionCard = ({ data, isFresh }: Props) => {
             </CardHeader>
             <CardContent className='flex flex-1 flex-col p-5 pt-0'>
                 {items.length === 0 ? (
-                    <div className='flex items-center gap-3 rounded-lg bg-emerald-500/10 p-3 text-emerald-700 dark:text-emerald-400'>
-                        <IconCheck className='size-5 shrink-0' />
-                        <div>
-                            <p className='text-sm font-semibold'>All clear</p>
-                            <p className='text-xs opacity-90'>
-                                No failed servers, backups, or capacity
-                                warnings.
-                            </p>
-                        </div>
-                    </div>
+                    <SimpleEmptyState
+                        className='p-0'
+                        icon={IconCheck}
+                        title='All clear'
+                        description='No failed servers, backups, or capacity warnings.'
+                    />
                 ) : (
                     <>
                         <div className='flex-1'>
