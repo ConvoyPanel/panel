@@ -32,6 +32,11 @@ const speedLimitSchema = z.preprocess(
     z.coerce.number().min(1, 'Must be at least 1 MB/s').optional()
 )
 
+const optionalAccountPasswordSchema = z.preprocess(
+    value => (value === '' || value == null ? undefined : value),
+    z.string().min(8).max(191).optional()
+)
+
 const nullableSpeedLimitSchema = z.preprocess(
     value => (value === '' || value == null ? null : value),
     z.coerce.number().min(1, 'Must be at least 1 MB/s').nullable()
@@ -102,7 +107,7 @@ export const serverSchema = z
         // Server creation options
         deferredOsSelection: z.boolean(),
         shouldCreateVm: z.boolean(),
-        accountPassword: z.string().min(8).max(191).optional(),
+        accountPassword: optionalAccountPasswordSchema,
         templateUuid: z.string().optional(),
         startOnCompletion: z.boolean(),
     })

@@ -6,7 +6,8 @@ doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
 
 Last updated: 2026-07-15 (session: **Base UI dialog migration + repository layer removed + backups quota +
-IPAM mobile rows + live Disks/storage/power verification + collection-state/mobile close-out**).
+IPAM mobile rows + live Disks/storage/power verification + collection-state/mobile close-out + server-create
+speed-cap verification**).
 
 ## ⚠️ READ FIRST — dialogs/drawers/sheets are now Base UI (`aa5cab9c`, 78 files)
 
@@ -538,12 +539,18 @@ Researched direction retained for each; none built unless noted.
      `vlanTagSchema`) and the `speedLimit: ''` default. Guarded by a new
      "leaves the speed limit null when none is given" test; the set-a-value direction was already
      covered by "persists the speed cap and anchors the bandwidth reset day".
-     ⚠️ **Not fully proven:** the field renders blank with its helper text on the real wizard
-     (browser-checked), and the null/uncapped contract is tested server-side, but the **MB/s →
-     bytes/s conversion has not been driven through an actual create POST** — that needs a full
-     wizard run against a real node (use the deferred-OS + `should_create_vm: false` path, as
-     `ServerCreationDiskTest` does, to avoid Proxmox). It's plain arithmetic + JSON, but this repo
-     has **no JS test runner** (no `test` script in package.json), so nothing else covers it.
+     **Fully browser-proven 2026-07-15:** the real wizard accepted decimal `12.5 MB/s`, sent
+     `limits.speed_limit: 12500000`, and the created deferred-OS server rehydrated with
+     `speedLimit: 12500000`; `should_create_vm: false`, zero addresses, and an explicit VMID meant no
+     VM was created on PVE. This closed three latent blockers found by the actual POST: the number input
+     needed `step="any"` to match its decimal schema; hidden `accountPassword: ''` failed `min(8)` even
+     after Deferred OS intentionally cleared/unmounted it (empty now preprocesses to `undefined`, while
+     VM creation still conditionally requires a real password); and `StoreServerRequest` required a
+     non-empty manual `limits.addresses` list when both automatic counts were zero even though the UI has
+     no manual-address field and `ServerCreationService` deliberately supports addressless servers. The
+     request now treats explicit ids as optional; a new endpoint test covers the addressless deferred path.
+     Disposable server/disk/interface/pivot rows were removed and PVE confirmed VM 2700 never existed.
+     Full Pest **269 / 720 assertions**, PHPStan zero, `tc`, and build pass.
   2. **Per-server speed cap + overage-penalty override — DONE.** The admin server
      drill-down now has a **Build & limits** section at `/admin/servers/{id}/settings`,
      backed by the previously unwired `updateBuild` endpoint. The page uses the standard

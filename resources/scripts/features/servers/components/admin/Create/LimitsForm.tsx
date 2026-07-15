@@ -24,6 +24,8 @@ const LimitsForm = () => {
                     name={'speedLimit'}
                     label={'Speed Limit (MB/s)'}
                     type={'number'}
+                    min={1}
+                    step={'any'}
                     description={
                         'Caps every NIC on the server. Leave blank for uncapped.'
                     }

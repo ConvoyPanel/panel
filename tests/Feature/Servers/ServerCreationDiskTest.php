@@ -135,3 +135,32 @@ it('leaves the speed limit null when none is given', function () {
 
     expect($server->speed_limit)->toBeNull();
 });
+
+it('creates an addressless deferred server through the API', function () {
+    Http::fake([
+        '*/api2/json/cluster/nextid*' => Http::response(['data' => 12345]),
+        '*/api2/json/nodes/*/storage' => Http::response(['data' => []]),
+    ]);
+    $this->user->update(['root_admin' => true]);
+    $interface = NetworkInterface::create([
+        'node_id' => $this->node->id,
+        'name' => 'vmbr0',
+        'is_vlan_aware' => false,
+        'vlan_tag' => null,
+    ]);
+
+    $data = creationData($this->user->id, $this->node->id, $this->storage->id);
+    $data['limits']['network_interface_id'] = $interface->id;
+    $data['limits']['speed_limit'] = 12_500_000;
+
+    $this->actingAs($this->user)
+        ->postJson('/api/admin/servers', $data)
+        ->assertCreated();
+
+    $this->assertDatabaseHas('servers', [
+        'name' => 'Test Server',
+        'status' => ServerStatus::DEFERRED_OS_SELECTION->value,
+        'speed_limit' => 12_500_000,
+        'network_interface_id' => $interface->id,
+    ]);
+});

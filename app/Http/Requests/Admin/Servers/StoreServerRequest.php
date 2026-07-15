@@ -71,15 +71,10 @@ class StoreServerRequest extends BaseApiRequest
             'limits.vlan_tag' => 'nullable|integer|min:1|max:4094',
             'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
-            'limits.addresses' => [
-                'array',
-                Rule::requiredIf(function () {
-                    $ipv4Count = $this->input('limits.addresses_ipv4_count');
-                    $ipv6Count = $this->input('limits.addresses_ipv6_count');
-
-                    return (blank($ipv4Count) || $ipv4Count == 0) && (blank($ipv6Count) || $ipv6Count == 0);
-                }),
-            ],
+            // Explicit address ids are optional. With no ids and both counts
+            // at zero, ServerCreationService deliberately creates an
+            // addressless server; positive counts use automatic allocation.
+            'limits.addresses' => 'sometimes|array',
             'limits.addresses.*' => [
                 'integer',
                 function ($attribute, $value, $fail) {
