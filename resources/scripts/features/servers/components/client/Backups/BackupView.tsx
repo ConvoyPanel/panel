@@ -1,13 +1,15 @@
 import usePagination from '@/hooks/use-pagination.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { IconCopy } from '@tabler/icons-react'
 
 import { backupQueries } from '@/features/servers/backups/api.ts'
+import type { PaginatedBackups } from '@/features/servers/types.ts'
 
 import BackupCard from '@/features/servers/components/client/Backups/BackupCard.tsx'
+import CreateBackupModal from '@/features/servers/components/client/Backups/CreateBackupModal.tsx'
 
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { ItemGroup } from '@/components/ui/Item'
@@ -19,6 +21,9 @@ const BackupView = () => {
     const { page, setPage } = usePagination()
     const { serverUuid } = useParams({ strict: false }) as { serverUuid: string }
     const { data, isLoading } = useQuery(backupQueries.list(serverUuid, { page }))
+    const mutate = useQueryMutator<PaginatedBackups>(
+        backupQueries.list(serverUuid, { page }).queryKey
+    )
 
     if (isLoading) {
         return <Skeleton className={'h-96 w-full'} />
@@ -33,7 +38,12 @@ const BackupView = () => {
                     description={
                         'Backups ensure the safety and availability of your server data by creating copies that can be easily restored in case of data loss or system failures.'
                     }
-                    action={<Button>Create Backup</Button>}
+                    action={
+                        <CreateBackupModal
+                            serverUuid={serverUuid}
+                            mutate={mutate}
+                        />
+                    }
                 />
             </Card>
         )
