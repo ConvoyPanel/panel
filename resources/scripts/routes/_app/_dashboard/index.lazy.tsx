@@ -1,4 +1,5 @@
 import usePagination from '@/hooks/use-pagination.ts'
+import { IconServerOff } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
@@ -6,7 +7,11 @@ import { serverQueries } from '@/features/servers/api.ts'
 
 import ServerCard from '@/features/overview/components/client/ServerCard.tsx'
 
+import { Card } from '@/components/ui/Card'
+import { SimpleEmptyState } from '@/components/ui/EmptyStates'
+import { ItemGroup } from '@/components/ui/Item'
 import LengthAwarePaginator from '@/components/ui/Pagination/LengthAwarePaginator.tsx'
+import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/_dashboard/')({
@@ -15,26 +20,42 @@ export const Route = createLazyFileRoute('/_app/_dashboard/')({
 
 function Dashboard() {
     const { page, setPage } = usePagination()
-    const { data } = useQuery(serverQueries.list({ page }))
+    const { data, isLoading } = useQuery(serverQueries.list({ page }))
 
     return (
         <>
             <Heading>My Servers</Heading>
-            <LengthAwarePaginator
-                page={page}
-                data={data}
-                onPageChange={setPage}
-            >
-                {({ items }) => (
-                    <ul className={'space-y-3'}>
-                        {items.map(server => (
-                            <li key={server.id}>
+            {isLoading ? (
+                <ItemGroup className={'gap-3'}>
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <Skeleton key={index} className={'h-24 w-full'} />
+                    ))}
+                </ItemGroup>
+            ) : !data || data.items.length === 0 ? (
+                <Card className={'py-6'}>
+                    <SimpleEmptyState
+                        icon={IconServerOff}
+                        title={'No servers'}
+                        description={
+                            'Servers assigned to your account will appear here.'
+                        }
+                    />
+                </Card>
+            ) : (
+                <LengthAwarePaginator
+                    page={page}
+                    data={data}
+                    onPageChange={setPage}
+                >
+                    {({ items }) => (
+                        <ItemGroup className={'gap-3'}>
+                            {items.map(server => (
                                 <ServerCard key={server.id} server={server} />
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </LengthAwarePaginator>
+                            ))}
+                        </ItemGroup>
+                    )}
+                </LengthAwarePaginator>
+            )}
         </>
     )
 }

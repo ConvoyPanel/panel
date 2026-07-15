@@ -131,6 +131,13 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Client My Servers collection — DONE (2026-07-14).** Replaced the bespoke per-server cards with the
+  shared muted `ItemGroup` row pattern, removed the hardcoded placeholder IP, and packed status plus
+  CPU/memory/disk values into a responsive definition list using `byte-size`. The page now has matching initial
+  loading rows and a contextual no-servers state; empty collections do not render a stray paginator. Browser
+  verification covered a real populated account, delayed loading, an intercepted empty response, the existing
+  action menu, and 390px layout with no console errors or horizontal overflow. `tc` and production build pass.
+
 - **Shared menu/popover and accessibility slice — DONE (2026-07-14).** Shared `DropdownMenu` and
   `Popover` now use `@base-ui/react`; the two superseded Radix packages were removed. Compatibility wrappers
   preserve existing `asChild` consumers through Base UI's `render` API. Menus/popovers now use nova's compact

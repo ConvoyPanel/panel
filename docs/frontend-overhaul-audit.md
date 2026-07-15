@@ -176,7 +176,7 @@ Representative affected shared components:
 These are the clearest screens that still predate the documented Item/DataTable
 patterns:
 
-- [ ] Client My Servers: bespoke cards, no loading skeleton, and no empty state.
+- [x] Client My Servers: bespoke cards, no loading skeleton, and no empty state.
 - [ ] Admin Templates: bespoke cards and detached create/empty-state actions.
 - [ ] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
 - [ ] Node Storages: bespoke cards, detached actions, and spacing shims.

@@ -1,15 +1,10 @@
 import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
-import {
-    IconAirConditioningDisabled,
-    IconCpu,
-    IconDatabase,
-    IconDots,
-} from '@tabler/icons-react'
+import { IconDots } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import byteSize from 'byte-size'
 
+import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,6 +13,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from '@/components/ui/Item'
 
 interface Props {
     server: App.Data.Server.ServerData
@@ -26,63 +28,51 @@ interface Props {
 const ServerCard = ({ server }: Props) => {
     const memory = byteSize(server.memory, { units: 'iec', precision: 0 })
     const disk = byteSize(server.disk, { units: 'iec', precision: 0 })
+    const specs = [
+        { label: 'CPU', value: `${server.cpu} vCPU` },
+        { label: 'Memory', value: `${memory.value} ${memory.unit}` },
+        { label: 'Disk', value: `${disk.value} ${disk.unit}` },
+    ]
 
     return (
-        <Card className={'flex items-center py-2.5 px-5'}>
-            <div
-                className={
-                    'w-0 flex-auto text-ellipsis md:w-1/3 md:flex-initial md:shrink-0'
-                }
-            >
-                <Link
-                    to={ServerIndexRoute.to}
-                    params={{
-                        serverUuid: server.uuidShort,
-                    }}
-                    className={'font-semibold tracking-tight'}
-                >
-                    {server.name}
-                </Link>
-                <p className={'text-sm text-muted-foreground'}>
+        <Item variant={'muted'} size={'sm'}>
+            <ItemContent className={'min-w-0 overflow-x-hidden'}>
+                <ItemTitle className={'max-w-full'}>
+                    <Link
+                        to={ServerIndexRoute.to}
+                        params={{
+                            serverUuid: server.uuidShort,
+                        }}
+                        className={'truncate'}
+                    >
+                        {server.name}
+                    </Link>
+                    <Badge
+                        variant={'secondary'}
+                        className={'shrink-0 capitalize'}
+                    >
+                        {server.status.replace(/_/g, ' ')}
+                    </Badge>
+                </ItemTitle>
+                <ItemDescription className={'truncate'}>
                     {server.hostname}
-                </p>
-            </div>
-            <div className={'hidden md:block md:w-2/4'}>
-                <p>175.45.176.80</p>
-            </div>
-            <div className={'hidden w-1/4 flex-col md:flex lg:w-1/5'}>
-                <div className={'flex items-center text-sm'}>
-                    <IconCpu
-                        className={'mr-1.5 h-5 w-5 text-muted-foreground'}
-                    />{' '}
-                    <span>{server.cpu} vCPU</span>
-                    <span className={'sr-only'}>CPU count</span>
-                </div>
-                <div className={'flex items-center text-sm'}>
-                    <IconAirConditioningDisabled
-                        className={'mr-1.5 h-5 w-5 text-muted-foreground'}
-                    />{' '}
-                    <span>
-                        {memory.value} {memory.unit}
-                    </span>
-                    <span className={'sr-only'}>Memory size</span>
-                </div>
-
-                <div className={'flex items-center text-sm'}>
-                    <IconDatabase
-                        className={'mr-1.5 h-5 w-5 text-muted-foreground'}
-                    />{' '}
-                    <span>
-                        {disk.value} {disk.unit}
-                    </span>
-                    <span className={'sr-only'}>Disk size</span>
-                </div>
-            </div>
-            <div
+                </ItemDescription>
+            </ItemContent>
+            <dl
                 className={
-                    'relative ml-auto flex w-1/6 items-center justify-end justify-items-end md:ml-0 md:items-start lg:flex-auto'
+                    'order-last grid w-full grid-cols-3 gap-2 sm:order-none sm:w-auto sm:min-w-72 sm:gap-4'
                 }
             >
+                {specs.map(spec => (
+                    <div key={spec.label}>
+                        <dt className={'text-xs text-muted-foreground'}>
+                            {spec.label}
+                        </dt>
+                        <dd className={'text-sm'}>{spec.value}</dd>
+                    </div>
+                ))}
+            </dl>
+            <ItemActions className={'ml-auto'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
@@ -109,8 +99,8 @@ const ServerCard = ({ server }: Props) => {
                         <DropdownMenuItem>Rebuild server</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
-        </Card>
+            </ItemActions>
+        </Item>
     )
 }
 
