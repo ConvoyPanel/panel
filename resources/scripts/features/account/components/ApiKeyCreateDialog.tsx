@@ -16,6 +16,8 @@ import {
 } from '@/features/account/api-keys/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+
 import { Button } from '@/components/ui/Button'
 import {
     ResponsiveDialog,
@@ -169,6 +171,12 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                         </Form>
                     </>
                 )}
+                {/* Minting a token now needs a confirmed identity server-side —
+                    the token outlives this session, so a live cookie alone must
+                    not be enough. Nested inside the content on purpose: Base UI
+                    gives it no backdrop of its own, so this dialog stays visible
+                    underneath rather than being torn down behind the gate. */}
+                <AuthDialog onCancel={() => close(false)} />
             </ResponsiveDialogContent>
         </ResponsiveDialog>
     )

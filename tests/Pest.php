@@ -4,9 +4,11 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\User;
+use App\Services\Servers\ServerCreationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +22,7 @@ use Illuminate\Support\Facades\Queue;
 */
 
 uses(
-    Tests\TestCase::class,
+    TestCase::class,
     RefreshDatabase::class,
 )->beforeEach(function () {
     Http::preventStrayRequests();
@@ -38,9 +40,9 @@ uses(
 |
 */
 
-//expect()->extend('toBeOne', function () {
+// expect()->extend('toBeOne', function () {
 //    return $this->toBe(1);
-//});
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,18 @@ uses(
 |
 */
 
+/**
+ * Session state that satisfies RequireIdentityConfirmation (a 300s window).
+ *
+ * Pair with `actingAs()` on any account route that mints or revokes a
+ * credential — passkeys, 2FA, API tokens, SSH keys. A logged-in session alone
+ * is deliberately not enough for those.
+ */
+function confirmedSession(): array
+{
+    return ['auth.identity_confirmed_at' => now()->timestamp];
+}
+
 function createServerModel(): array
 {
     $location = Location::factory()->create();
@@ -60,7 +74,7 @@ function createServerModel(): array
     $user = User::factory()->create();
     /** @var Node $node */
     $node = Node::factory()->for($location)->create();
-    $service = app(App\Services\Servers\ServerCreationService::class);
+    $service = app(ServerCreationService::class);
     /** @var Server $server */
     $server = Server::factory()->create(function () use ($user, $node, $service) {
         $uuid = $service->generateUniqueUuidCombo();

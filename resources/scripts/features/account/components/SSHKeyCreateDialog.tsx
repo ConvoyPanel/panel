@@ -13,6 +13,8 @@ import {
 import { SSHKey } from '@/features/account/types.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+
 import { Button } from '@/components/ui/Button'
 import {
     ResponsiveDialog,
@@ -99,6 +101,11 @@ const SSHKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                         </ResponsiveDialogFooter>
                     </form>
                 </Form>
+                {/* Adding a key now needs a confirmed identity server-side: an
+                    SSH key grants server access and outlives this session, so a
+                    live cookie alone must not be enough. Nested inside the
+                    content so Base UI gives it no backdrop of its own. */}
+                <AuthDialog onCancel={() => close(false)} />
             </ResponsiveDialogContent>
         </ResponsiveDialog>
     )

@@ -18,18 +18,31 @@ Route::get('/user', Client\SessionController::class);
 Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function () {
     Route::put('/password', [Client\PasswordController::class, 'update']);
 
+    // Reads stay ungated: both lists render straight onto the security page, so
+    // requiring confirmation to *see* them would gate the page itself. Writes
+    // mint credentials that outlive the session that created them — an API token
+    // survives logout and a password change, an SSH key grants server access —
+    // so they need the same identity confirmation as passkeys and 2FA. Without
+    // it a live session alone (unattended browser, stolen cookie) could mint a
+    // persistent credential while being unable to so much as view a 2FA QR code.
     Route::prefix('/api-keys')->group(function () {
         Route::get('/', [Client\Account\ApiKeyController::class, 'index']);
-        Route::post('/', [Client\Account\ApiKeyController::class, 'store']);
-        Route::delete('/{apiKey}', [Client\Account\ApiKeyController::class, 'destroy'])
-            ->withoutScopedBindings();
+
+        Route::middleware(RequireIdentityConfirmation::class)->group(function () {
+            Route::post('/', [Client\Account\ApiKeyController::class, 'store']);
+            Route::delete('/{apiKey}', [Client\Account\ApiKeyController::class, 'destroy'])
+                ->withoutScopedBindings();
+        });
     });
 
     Route::prefix('/ssh-keys')->group(function () {
         Route::get('/', [Client\Account\SSHKeyController::class, 'index']);
-        Route::post('/', [Client\Account\SSHKeyController::class, 'store']);
-        Route::delete('/{sshKey}', [Client\Account\SSHKeyController::class, 'destroy'])
-            ->withoutScopedBindings();
+
+        Route::middleware(RequireIdentityConfirmation::class)->group(function () {
+            Route::post('/', [Client\Account\SSHKeyController::class, 'store']);
+            Route::delete('/{sshKey}', [Client\Account\SSHKeyController::class, 'destroy'])
+                ->withoutScopedBindings();
+        });
     });
 
     Route::prefix('/sessions')->group(function () {
@@ -65,7 +78,7 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
         ->group(function () {
             Route::post('/enable', [TwoFactorAuthenticationController::class, 'store']);
             Route::post('/disable', [TwoFactorAuthenticationController::class, 'destroy']);
-            //Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
+            // Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
             Route::get('/qr-code', [TwoFactorQrCodeController::class, 'show']);
             Route::get('/secret-key', [TwoFactorSecretKeyController::class, 'show']);
             Route::get('/recovery-codes', [RecoveryCodeController::class, 'index']);

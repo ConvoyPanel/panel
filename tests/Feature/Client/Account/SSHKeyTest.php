@@ -10,6 +10,7 @@ it('adds a key to the keychain', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->postJson('/api/client/account/ssh-keys', [
             'name' => 'laptop',
             'public_key' => VALID_KEY,
@@ -24,6 +25,7 @@ it('rejects a malformed public key', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->postJson('/api/client/account/ssh-keys', [
             'name' => 'bad',
             'public_key' => 'ssh-ed25519 not-base64!!!',
@@ -38,6 +40,7 @@ it('rejects a key whose embedded algorithm is mismatched', function () {
     $body = explode(' ', VALID_KEY)[1];
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->postJson('/api/client/account/ssh-keys', [
             'name' => 'spoofed',
             'public_key' => "ssh-rsa {$body}",
@@ -64,6 +67,7 @@ it('only lets a user delete their own key', function () {
     $victim = $other->sshKeys()->create(['name' => 'victim', 'public_key' => VALID_KEY]);
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->deleteJson("/api/client/account/ssh-keys/{$victim->id}")
         ->assertNotFound();
 
@@ -75,8 +79,26 @@ it('deletes the user\'s own key', function () {
     $key = $user->sshKeys()->create(['name' => 'temp', 'public_key' => VALID_KEY]);
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->deleteJson("/api/client/account/ssh-keys/{$key->id}")
         ->assertNoContent();
 
     expect(SSHKey::query()->whereKey($key->id)->exists())->toBeFalse();
+});
+
+/**
+ * An SSH key grants server access and outlives the session that added it, so a
+ * live session alone must not be enough — same rule as API tokens and passkeys.
+ */
+it('refuses to add a key without a confirmed identity', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson('/api/client/account/ssh-keys', [
+            'name' => 'unconfirmed',
+            'public_key' => VALID_KEY,
+        ])
+        ->assertForbidden();
+
+    expect($user->sshKeys()->count())->toBe(0);
 });

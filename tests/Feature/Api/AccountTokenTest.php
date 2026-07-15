@@ -19,6 +19,7 @@ it('mints an account token owned by the user', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->postJson('/api/client/account/api-keys', ['name' => 'cli'])
         ->assertSuccessful()
         ->assertJsonPath('data.name', 'cli')
@@ -85,6 +86,7 @@ it('only lets a token delete its owner\'s tokens', function () {
     $victim = PersonalAccessToken::query()->latest('id')->firstOrFail();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->deleteJson("/api/client/account/api-keys/{$victim->id}")
         ->assertNotFound();
 
@@ -97,6 +99,7 @@ it('deletes the current user\'s own token', function () {
     $token = PersonalAccessToken::query()->latest('id')->firstOrFail();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->deleteJson("/api/client/account/api-keys/{$token->id}")
         ->assertNoContent();
 
@@ -107,6 +110,53 @@ it('rejects an unknown ability at mint time', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
+        ->withSession(confirmedSession())
         ->postJson('/api/client/account/api-keys', ['name' => 'bad', 'abilities' => ['nodes:read']])
         ->assertJsonValidationErrors('abilities.0');
+});
+
+/**
+ * An account token outlives the session that minted it — it survives logout and
+ * a password change — so a live session on its own must not be enough to create
+ * one. Without this the security surface was inconsistent: the same session that
+ * could not view a 2FA QR code could mint a full-access bearer token.
+ */
+it('refuses to mint a token without a confirmed identity', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson('/api/client/account/api-keys', ['name' => 'unconfirmed'])
+        ->assertForbidden();
+
+    expect(PersonalAccessToken::query()->where('name', 'unconfirmed')->exists())->toBeFalse();
+});
+
+it('refuses to revoke a token without a confirmed identity', function () {
+    $user = User::factory()->create();
+    $token = app(CreateAccountTokenService::class)->handle($user, 'existing')->accessToken;
+
+    $this->actingAs($user)
+        ->deleteJson("/api/client/account/api-keys/{$token->id}")
+        ->assertForbidden();
+
+    expect(PersonalAccessToken::query()->whereKey($token->id)->exists())->toBeTrue();
+});
+
+it('still lists tokens without a confirmed identity, so the page renders', function () {
+    $user = User::factory()->create();
+    app(CreateAccountTokenService::class)->handle($user, 'existing');
+
+    $this->actingAs($user)
+        ->getJson('/api/client/account/api-keys')
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data');
+});
+
+it('lets identity confirmation expire after the 300s window', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(301)->timestamp])
+        ->postJson('/api/client/account/api-keys', ['name' => 'stale'])
+        ->assertForbidden();
 });

@@ -35,12 +35,6 @@ function makeStoredPasskey(User $user, string $name = 'Test Key'): Passkey
     return $passkey;
 }
 
-/** RequireIdentityConfirmation gates the passkey routes (300s window). */
-function confirmedSession(): array
-{
-    return ['auth.identity_confirmed_at' => now()->timestamp];
-}
-
 it('resolves the {passkey} route binding and renames the passkey', function () {
     $user = User::factory()->create();
     $passkey = makeStoredPasskey($user);
