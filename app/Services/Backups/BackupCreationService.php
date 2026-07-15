@@ -8,7 +8,6 @@ use App\Exceptions\Service\Backup\TooManyBackupsException;
 use App\Jobs\Server\MonitorBackupJob;
 use App\Models\Backup;
 use App\Models\Server;
-use App\Repositories\Eloquent\BackupRepository;
 use App\Repositories\Proxmox\Server\ProxmoxBackupRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\ConnectionInterface;
@@ -21,7 +20,6 @@ class BackupCreationService
     public function __construct(
         private ConnectionInterface $connection,
         private ProxmoxBackupRepository $proxmoxRepository,
-        private BackupRepository $eloquentRepository,
     ) {
     }
 
@@ -35,10 +33,10 @@ class BackupCreationService
         $limit = config('backups.throttles.limit');
         $period = config('backups.throttles.period');
         if ($period > 0) {
-            $previous = $this->eloquentRepository->getBackupsGeneratedDuringTimespan(
-                $server->id,
-                $period,
-            )->latest('created_at')->get();
+            $previous = $server->backups()
+                ->createdWithinSeconds($period)
+                ->latest('created_at')
+                ->get();
             if ($previous->count() >= $limit) {
                 $message = sprintf(
                     'Only %d backups may be generated within a %d second span of time.',
@@ -55,7 +53,7 @@ class BackupCreationService
             }
         }
 
-        $successful = $this->eloquentRepository->getNonFailedBackups($server);
+        $successful = $server->backups()->nonFailed();
         if ($server->backup_count_limit >= 0 && $successful->count() >= $server->backup_count_limit) {
             throw new TooManyBackupsException($server->backup_count_limit);
         }
@@ -67,7 +65,7 @@ class BackupCreationService
 
         return $this->connection->transaction(
             function () use ($server, $name, $mode, $compressionType, $isLocked, $storage) {
-                $backup = $this->eloquentRepository->create([
+                $backup = Backup::create([
                     'uuid' => Uuid::uuid4()->toString(),
                     'server_id' => $server->id,
                     'storage_id' => $storage->id,

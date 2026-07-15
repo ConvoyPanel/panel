@@ -6,6 +6,7 @@ use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
 use App\Enums\Server\ServerStatus;
+use App\Support\ByteUnit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -257,5 +258,41 @@ class Server extends Model
     public function isReady(): bool
     {
         return $this->status->isReady();
+    }
+
+    /**
+     * Total bytes consumed by this server's non-failed backups.
+     *
+     * `backups.size` is persisted in MiB (StorageSizeCast) but read back as
+     * bytes, and a SQL aggregate bypasses the cast entirely — so the sum has to
+     * be scaled the same way the cast's read direction does.
+     */
+    public function nonFailedBackupSize(): int
+    {
+        return ByteUnit::Mebibytes->toBytes(
+            (int) $this->backups()->nonFailed()->sum('size'),
+        );
+    }
+
+    /**
+     * Whether no server on the node already holds this VMID.
+     */
+    public static function isUniqueVmId(Node $node, int $vmid): bool
+    {
+        return ! static::query()
+            ->where('node_id', $node->id)
+            ->where('vmid', $vmid)
+            ->exists();
+    }
+
+    /**
+     * Whether a given UUID and UUID-Short string are unique to a server.
+     */
+    public static function isUniqueUuidCombo(string $uuid, string $short): bool
+    {
+        return ! static::query()
+            ->where('uuid', $uuid)
+            ->orWhere('uuid_short', $short)
+            ->exists();
     }
 }

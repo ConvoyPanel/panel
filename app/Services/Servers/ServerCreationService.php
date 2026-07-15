@@ -16,7 +16,6 @@ use App\Models\Address;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\Template;
-use App\Repositories\Eloquent\ServerRepository;
 use App\Repositories\Proxmox\Cluster\ProxmoxResourceRepository;
 use App\Repositories\Proxmox\Node\ProxmoxAllocationRepository;
 use App\Services\Addresses\AddressAllocationService;
@@ -37,7 +36,6 @@ class ServerCreationService
 {
     public function __construct(
         private ServerNetworkService $networkService,
-        private ServerRepository $repository,
         private BuildServerAction $buildServerAction,
         private ProxmoxAllocationRepository $allocationRepository,
         private ProxmoxResourceRepository $resourceRepository,
@@ -179,7 +177,7 @@ class ServerCreationService
 
         while (true) {
             // Check uniqueness in our database
-            if ($this->repository->isUniqueVmId($node, $vmid)) {
+            if (Server::isUniqueVmId($node, $vmid)) {
                 // Check uniqueness in Proxmox
                 if ($this->allocationRepository->isVMIDAvailable($vmid)) {
                     break;
@@ -207,7 +205,7 @@ class ServerCreationService
         $short = substr($uuid, 0, 8);
         $attempts = 0;
 
-        while (! $this->repository->isUniqueUuidCombo($uuid, $short)) {
+        while (! Server::isUniqueUuidCombo($uuid, $short)) {
             $uuid = Str::uuid()->toString();
             $short = substr($uuid, 0, 8);
 

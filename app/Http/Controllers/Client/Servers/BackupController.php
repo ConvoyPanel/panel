@@ -11,7 +11,6 @@ use App\Http\Requests\Client\Servers\Backups\RestoreBackupRequest;
 use App\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use App\Models\Backup;
 use App\Models\Server;
-use App\Repositories\Eloquent\BackupRepository;
 use App\Services\Backups\BackupCreationService;
 use App\Services\Backups\BackupDeletionService;
 use App\Services\Backups\RestoreFromBackupService;
@@ -24,7 +23,6 @@ class BackupController
         private BackupCreationService $backupCreationService,
         private BackupDeletionService $backupDeletionService,
         private RestoreFromBackupService $restoreFromBackupService,
-        private BackupRepository $backupRepository,
     ) {}
 
     public function index(Request $request, Server $server)
@@ -40,8 +38,8 @@ class BackupController
         // page, so they are aggregated separately from the paginator.
         return [
             ...PaginationMeta::paginate($backups, BackupEloquentData::class),
-            'backupCount' => $this->backupRepository->getNonFailedBackups($server)->count(),
-            'backupSize' => $this->backupRepository->getNonFailedBackupSize($server),
+            'backupCount' => $server->backups()->nonFailed()->count(),
+            'backupSize' => $server->nonFailedBackupSize(),
         ];
     }
 

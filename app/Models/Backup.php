@@ -79,4 +79,25 @@ class Backup extends Model
     {
         $query->whereNull('completed_at');
     }
+
+    /**
+     * Backups that have not failed: still running, or finished without an error.
+     *
+     * Grouped so the OR cannot leak out and widen a caller's other constraints.
+     */
+    public function scopeNonFailed(Builder $query): void
+    {
+        $query->where(function (Builder $query) {
+            $query->whereNull('completed_at')
+                ->orWhereNull('error_code');
+        });
+    }
+
+    /**
+     * Backups created within the last $seconds (creation throttling).
+     */
+    public function scopeCreatedWithinSeconds(Builder $query, int $seconds): void
+    {
+        $query->where('created_at', '>=', now()->subSeconds($seconds));
+    }
 }
