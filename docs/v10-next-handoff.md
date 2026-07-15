@@ -109,8 +109,10 @@ the Sheet renders `3 backups / out of 16 backups` + `7.5 GiB used / out of 100 G
 path** renders `of unlimited backups` / `of unlimited storage` with no NaN; **exactly one** backups API
 request per load (the quota shares `BackupView`'s cached query rather than double-fetching); the heading row
 holds up at desktop + 390px with no overflow and no console errors beyond the documented login 401 probe.
-Still unverified in-browser: the Graphs page's new `Resource usage` heading (which **also removes the power
-Toolbar from Graphs** — intentional, matches Networking/Storage/Security, but eyeball it).
+The Graphs page is also browser-verified at desktop + 390px with deterministic state/statistics responses:
+`Resource usage` is the page H1, all live/historical cards render, Hourly → Daily refetches, and the intentionally
+removed power Toolbar stays absent (matching Networking/Storage/Security). No horizontal overflow or unexpected
+console/API errors.
 
 ⚠️ **`npm run build` does NOT typecheck — and that burned a whole verification pass.** Vite happily emitted
 type-broken code (`server.backupCountLimit` when the field is `server.backup.countLimit`); `tc` caught it
