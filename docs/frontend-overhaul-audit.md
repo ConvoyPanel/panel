@@ -181,7 +181,7 @@ patterns:
 - [x] Node Network: bespoke cards and an empty CardHeader used as a spacing shim.
 - [x] Node Storages: bespoke cards, detached actions, and spacing shims.
 - [ ] Server Boot Order: hand-built bordered list instead of Item/ItemGroup.
-- [ ] Server Addresses: raw desktop table and duplicated overflow handling.
+- [x] Server Addresses: raw desktop table and duplicated overflow handling.
 - [ ] Admin dashboard Nodes card: bespoke desktop/mobile table split and plain-text
       empty state.
 
@@ -205,7 +205,7 @@ scrolling desktop tables on small screens.
 - [ ] IPAM attached-nodes list.
 - [ ] Address list within a block.
 - [x] Admin server Disks.
-- [ ] Server Addresses.
+- [x] Server Addresses.
 
 Every converted page should be checked at desktop width and approximately 390px,
 including long names, empty data, loading data, pagination, filters, and row

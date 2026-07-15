@@ -131,6 +131,13 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Client server Addresses collection — DONE (2026-07-14).** Overview IPAM and the Networking page now
+  share one `AddressList` instead of maintaining separate renderers. Networking's raw horizontally scrolling
+  table and duplicate overflow wrapper were replaced with the established compact `OverflowItemGroup` rows;
+  address, gateway, and MAC remain keyboard-accessible copy targets through `useClipboard`. Browser verification
+  covered long IPv6 plus IPv4 values, populated and contextual empty states, copy semantics, and 390px layout
+  with no console/API errors or horizontal overflow. `tc` and production build pass.
+
 - **Node Network and Storages collections — DONE (2026-07-14).** Both node subpages now use shared muted
   `ItemGroup` rows instead of bespoke mini-cards, with compact descriptions, VLAN/storage metadata, badges, and
   existing action menus preserved. Page actions share a responsive heading row; the create action moves into
