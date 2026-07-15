@@ -1,15 +1,13 @@
+import { login } from '@/features/auth/api.ts'
+import LoginWithPasskeyButton from '@/features/auth/components/LoginWithPasskeyButton.tsx'
+import OAuthProviderButtons from '@/features/auth/components/OAuthProviderButtons.tsx'
+import { oauthErrorMessage } from '@/features/auth/oauth.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-
-import { login } from '@/features/auth/api.ts'
-import { oauthErrorMessage } from '@/features/auth/oauth.ts'
-
-import LoginWithPasskeyButton from '@/features/auth/components/LoginWithPasskeyButton.tsx'
-import OAuthProviderButtons from '@/features/auth/components/OAuthProviderButtons.tsx'
 
 import {
     CardContent,
@@ -84,7 +82,9 @@ function Login() {
     return (
         <>
             <CardHeader className='space-y-2'>
-                <CardTitle className='text-3xl'>Sign in</CardTitle>
+                <CardTitle as='h1' className='text-3xl'>
+                    Sign in
+                </CardTitle>
                 <CardDescription>
                     Enter your credentials to continue
                 </CardDescription>
@@ -110,7 +110,7 @@ function Login() {
                                 <span className='w-full border-t' />
                             </div>
                             <div className='relative flex justify-center text-xs uppercase'>
-                                <span className='bg-background px-2 text-muted-foreground'>
+                                <span className='bg-background text-muted-foreground px-2'>
                                     Or continue with
                                 </span>
                             </div>

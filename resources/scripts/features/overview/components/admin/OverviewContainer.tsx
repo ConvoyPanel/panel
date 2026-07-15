@@ -64,7 +64,7 @@ const MetricTile = ({
             {trend.series.length >= 2 && (
                 <Sparkline
                     series={trend.series}
-                    className='mt-3 -mb-4 -mx-4 h-8 w-[calc(100%+2rem)]'
+                    className='-mx-4 mt-3 -mb-4 h-8 w-[calc(100%+2rem)]'
                 />
             )}
         </Card>
@@ -160,13 +160,13 @@ const StatusRow = ({
                     zero ? 'bg-border' : barClass
                 )}
             />
-            <span className={cn('text-sm', zero && 'text-muted-foreground/60')}>
+            <span className={cn('text-sm', zero && 'text-muted-foreground')}>
                 {label}
             </span>
             <span
                 className={cn(
                     'ml-auto text-[15px] font-semibold tabular-nums',
-                    zero && 'text-muted-foreground/60 font-normal'
+                    zero && 'text-muted-foreground font-normal'
                 )}
             >
                 {num(count)}

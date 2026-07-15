@@ -1,3 +1,4 @@
+import { verifyAuthenticatorChallenge } from '@/features/auth/api.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLazyFileRoute } from '@tanstack/react-router'
@@ -5,8 +6,6 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-
-import { verifyAuthenticatorChallenge } from '@/features/auth/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -99,7 +98,9 @@ function Authenticator() {
     return (
         <>
             <CardHeader className={'space-y-2'}>
-                <CardTitle className='text-3xl'>2FA Required</CardTitle>
+                <CardTitle as='h1' className='text-3xl'>
+                    2FA Required
+                </CardTitle>
                 <CardDescription>
                     Enter the 6-digit code from your authenticator app to verify
                     your identity.
@@ -118,7 +119,9 @@ function Authenticator() {
                                     return (
                                         <FormItem>
                                             <div
-                                                className={'flex justify-center'}
+                                                className={
+                                                    'flex justify-center'
+                                                }
                                             >
                                                 <FormControl>
                                                     <InputOTP

@@ -1,16 +1,14 @@
+import {
+    retryInstallation,
+    serverQueries,
+    useServerDeployment,
+} from '@/features/servers/detail/api.ts'
 import { DeploymentStatus, DeploymentStep } from '@/features/servers/types'
 import { Server } from '@/types/server'
 import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-
-import { useQueryClient } from '@tanstack/react-query'
-
-import {
-    retryInstallation,
-    useServerDeployment,
-    serverQueries,
-} from '@/features/servers/detail/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -36,7 +34,9 @@ export default function InstallingServer({ server }: InstallingServerProps) {
 
     const refetchServer = () => {
         if (server?.uuid) {
-            queryClient.invalidateQueries({ queryKey: serverQueries.detail(server.uuid).queryKey })
+            queryClient.invalidateQueries({
+                queryKey: serverQueries.detail(server.uuid).queryKey,
+            })
         }
     }
 
@@ -103,7 +103,10 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                             </div>
                         )}
                         <div>
-                            <CardTitle className={'text-xl font-normal'}>
+                            <CardTitle
+                                as={'h1'}
+                                className={'text-xl font-normal'}
+                            >
                                 {getTitle()}
                             </CardTitle>
                         </div>
@@ -117,7 +120,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
                             ))}
                         </ItemGroup>
                     ) : (
-                        <p className='text-center text-sm text-muted-foreground'>
+                        <p className='text-muted-foreground text-center text-sm'>
                             {getLoadingText()}
                         </p>
                     )}
