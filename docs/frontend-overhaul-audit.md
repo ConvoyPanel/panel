@@ -137,7 +137,13 @@ shared destructive item variant.
 - [x] Add matching invalid, disabled, and dark-state treatment.
 - [x] Make `TextareaForm` combine caller-provided `disabled` with form submission
       state instead of overwriting it.
-- [ ] Browser-check the SSH key, IPAM, template, and network dialogs.
+- [x] Browser-check the SSH key, IPAM, template, and network dialogs. Done
+      2026-07-15 across all four (each now renders through the migrated
+      `ResponsiveDialog`): dialog opens, multiline entry works, radius 10px
+      (`rounded-lg`) and padding 10px (`px-2.5`), no console errors, and the
+      390px drawer has no overflow. Resting `box-shadow` is `none`; it only
+      appears on focus because Tailwind implements `ring-3` AS a box-shadow —
+      measure unfocused or it reads as a false positive.
 
 ### Select
 
