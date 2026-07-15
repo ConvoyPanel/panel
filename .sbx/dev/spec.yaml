@@ -11,8 +11,17 @@ description: Provision ddev inside a Docker Sandbox for working on Convoy.
 agentContext: |
   # Convoy dev sandbox
 
-  ddev is installed and started for you (Laravel + Postgres), isolated from your
-  host ddev — its database is this sandbox's own.
+  ddev is installed and started for you (Laravel + Postgres). Its **database** is
+  this sandbox's own, and the install step below proxy-isolates `*.ddev.site`
+  (adds it to NO_PROXY) so `curl`/Playwright hitting https://convoy.ddev.site stay
+  on THIS sandbox's ddev instead of being resolved by the proxy on the host and
+  driving your real host app. Sanity check after a rebuild:
+  `curl -sk https://convoy.ddev.site/ -o /dev/null -w '%{remote_ip}\n'` must print
+  `127.0.0.1` (not a proxy address). Background + the host-side
+  `sbx policy deny network '*.ddev.site'` backstop: docs/docker-sandbox.md.
+
+  Playwright + Chromium are pre-installed (in ~/.cache/ms-playwright) for visual
+  and e2e checks — no need to download them again.
 
   Finish provisioning once:
 
@@ -30,14 +39,41 @@ agentContext: |
   workspace, so composer/npm installs here also land in your host checkout.
 
 commands:
-  # Runs ONCE at creation (as root). Slow the first time (installs ddev). Bake it
-  # into a template so it isn't repeated:  sbx template save convoy-dev
+  # Runs ONCE at creation (as root unless a user is set). Slow the first time
+  # (installs ddev + Chromium). Bake it into a template so it isn't repeated:
+  #   sbx template save convoy-dev
   install:
     # ddev's installer refuses to run as root and uses sudo itself, so run it as
     # the agent user (uid 1000, which is in the sudo group).
     - command: "command -v ddev >/dev/null 2>&1 || curl -fsSL https://ddev.com/install.sh | bash"
       user: "1000"
       description: install ddev
+
+    # Keep *.ddev.site resolving to THIS sandbox's ddev (127.0.0.1) instead of the
+    # host's. The sandbox proxy otherwise resolves the hostname on the host side, so
+    # curl/Playwright silently drive your real host app (leaking e2e sessions,
+    # mutating host data). Marker-guarded because CLAUDE_ENV_FILE is sourced before
+    # every command — a plain append would grow NO_PROXY without bound.
+    - command: |
+        cat >> "${CLAUDE_ENV_FILE:-/etc/sandbox-persistent.sh}" <<'SBXEOF'
+        if [ -z "${SBX_DDEV_NOPROXY_DONE:-}" ]; then
+          export NO_PROXY="${NO_PROXY:+$NO_PROXY,}.ddev.site,ddev.site"
+          export no_proxy="$NO_PROXY"
+          export SBX_DDEV_NOPROXY_DONE=1
+        fi
+        SBXEOF
+      description: proxy-isolate *.ddev.site from the host dev server
+
+    # Chromium's shared libraries via apt (needs root — the default here; verified
+    # node is system-wide at /usr/bin/node, so root has npx).
+    - command: "npx --yes playwright@latest install-deps chromium || echo 'convoy-dev: playwright install-deps failed; agent can rerun on demand'"
+      description: install Chromium OS dependencies
+
+    # The Chromium browser itself, as the agent user so it lands in the home cache
+    # the agent actually uses. Non-fatal so a download hiccup can't block creation.
+    - command: "npx --yes playwright@latest install chromium || echo 'convoy-dev: playwright chromium preinstall skipped'"
+      user: "1000"
+      description: pre-install Playwright + Chromium for visual/e2e checks
 
   # Runs on EVERY start (as the agent user). Fast once ddev's images are baked
   # into a template.

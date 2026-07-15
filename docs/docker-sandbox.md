@@ -14,6 +14,64 @@ need to ask before installing dev/test dependencies here, and such installs are 
 sandbox** — do not commit them to the repo (no new runtime deps in `composer.json` / `package.json`
 just to satisfy a one-off local probe).
 
+## Keep sandbox web traffic off your **host's** dev services
+
+The sandbox reaches the network through an HTTP(S) proxy
+(`HTTPS_PROXY=http://gateway.docker.internal:3128`). HTTP clients — `curl`, and crucially
+**Playwright/Chromium** — hand the *hostname* to that proxy instead of consulting `/etc/hosts`,
+and the proxy resolves it **on the host side**. So a request to `https://convoy.ddev.site` from
+inside the sandbox does **not** hit the sandbox's own ddev on `127.0.0.1` — it lands on **your
+host's** ddev and drives your real app. Symptoms this produced: headless-Chromium e2e logins
+showing up as `Chrome on Linux` sessions in the *host* DB, `test@test.com`'s password appearing
+to "change" (the tests reset it on your DB), and create/delete-node tests mutating real data —
+all while the sandbox's own DB stayed empty (`select count(*) from session_records` = 0). Confirm
+which app answers with `curl -sk https://convoy.ddev.site/ -o /dev/null -w '%{remote_ip}\n'`:
+`127.0.0.1` is the sandbox; anything else is the proxy → your host.
+
+Defense in depth — the leak should be blocked at all three layers so no single miss re-opens it:
+
+1. **Proxy-bypass local dev TLDs** so the hostname resolves to the sandbox's own loopback.
+   Append to `/etc/sandbox-persistent.sh` (sandbox-local, sourced before every command, never
+   committed — do **not** put this in `.ddev/config.yaml`, which is shared with the host):
+
+   ```bash
+   if [ -z "${SBX_DDEV_NOPROXY_DONE:-}" ]; then
+     export NO_PROXY="${NO_PROXY:+$NO_PROXY,}.ddev.site,ddev.site"
+     export no_proxy="$NO_PROXY"
+     export SBX_DDEV_NOPROXY_DONE=1
+   fi
+   ```
+
+   Wiped on sandbox **recreate**, so re-apply it at the start of a fresh sandbox (verify with the
+   `remote_ip` curl above).
+
+2. **Deny `*.ddev.site` at the proxy** so that even if the bypass is missing (fresh sandbox) or a
+   tool ignores `NO_PROXY`, a proxied request to your host's ddev is *blocked* rather than
+   silently forwarded. Run from the **host** (the allow-side syntax is
+   `sbx policy allow network <domain>`; confirm the deny subcommand with `sbx policy --help`):
+
+   ```bash
+   sbx policy deny network '*.ddev.site'
+   ```
+
+   Bypass **+** deny means the only reachable `*.ddev.site` is the sandbox's own loopback — the
+   deny is the backstop for the window before layer 1 is applied on a new sandbox.
+
+3. **Guard the e2e scripts.** When launching Playwright, force Chromium to bypass the proxy for
+   ddev hosts, and assert you're on the sandbox before any login/mutation — abort otherwise:
+
+   ```js
+   const browser = await chromium.launch({
+     proxy: { server: 'http://gateway.docker.internal:3128',
+              bypass: '.ddev.site,localhost,127.0.0.1' },   // never proxy the app under test
+   })
+   // preflight: refuse to run mutations unless the app is the sandbox's own loopback instance
+   const ip = execSync(`curl -sk ${BASE}/up -o /dev/null -w '%{remote_ip}'`).toString()
+   if (ip !== '127.0.0.1') throw new Error(`refusing to run against non-sandbox app (${ip})`)
+   ```
+
+   A test that can tell it's pointed at the host and stops is the last line of defense.
+
 ## `php artisan tinker` segfaults (SIGSEGV / exit 139) — fix
 
 **Symptom:** `php artisan tinker` (especially the interactive REPL) intermittently dies with a
