@@ -83,7 +83,16 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                     <TableHead className='w-24 text-center'>
                                         Servers
                                     </TableHead>
-                                    <TableHead className='w-[46%] pr-0'>
+                                    {/* The meter and its figure are separate
+                                        columns so the table sizes the figure
+                                        once for every row and all the bars end
+                                        on the same edge. Sharing one cell makes
+                                        each bar's width depend on how long its
+                                        own figure happens to be. The width
+                                        lives on the meter cell, not here — a
+                                        width on a colSpan'd header is split
+                                        across both columns. */}
+                                    <TableHead colSpan={2}>
                                         Memory allocated
                                     </TableHead>
                                 </TableRow>
@@ -102,21 +111,19 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                         <TableCell className='text-center tabular-nums'>
                                             {num(node.servers)}
                                         </TableCell>
-                                        <TableCell className='pr-0'>
-                                            <div className='grid grid-cols-[1fr_auto] items-center gap-3'>
-                                                <Meter
-                                                    percent={
-                                                        node.memory.percent
-                                                    }
-                                                    label={`Memory allocated for ${node.displayName}`}
-                                                />
-                                                <StatLabel
-                                                    as='span'
-                                                    className='text-xs whitespace-nowrap tabular-nums'
-                                                >
-                                                    {memoryFigure(node)}
-                                                </StatLabel>
-                                            </div>
+                                        <TableCell className='w-[36%]'>
+                                            <Meter
+                                                percent={node.memory.percent}
+                                                label={`Memory allocated for ${node.displayName}`}
+                                            />
+                                        </TableCell>
+                                        <TableCell className='pr-0 text-right'>
+                                            <StatLabel
+                                                as='span'
+                                                className='text-xs whitespace-nowrap tabular-nums'
+                                            >
+                                                {memoryFigure(node)}
+                                            </StatLabel>
                                         </TableCell>
                                     </TableRow>
                                 ))}
