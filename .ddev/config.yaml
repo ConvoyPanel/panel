@@ -8,6 +8,10 @@ database:
   type: postgres
   version: "17"
 
+# Without this DDEV assigns a random ephemeral host port on every start, which
+# breaks saved connections in GUI clients (TablePlus, DataGrip, psql aliases).
+host_db_port: "5432"
+
 nodejs_version: "22"
 corepack_enable: false
 
