@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { StoreApi, UseBoundStore, create } from 'zustand'
 
 /**
@@ -43,16 +43,56 @@ export interface ModalState<TData, TId extends string> {
     modalData: TData | null
     openModal: OpenModal<TData, TId>
     closeModal: (modal: TId) => void
+    /**
+     * Internal, for `useModal` only. A store is a module singleton, so it
+     * outlives the tree that renders its modals — see `retain`.
+     */
+    retain: () => () => void
 }
 
 export type ModalStore<TData, TId extends string> = UseBoundStore<
     StoreApi<ModalState<TData, TId>>
 >
 
-const createModalStore = <TData = void, TId extends string = string>() =>
-    create<ModalState<TData, TId>>((set, get) => ({
+const createModalStore = <TData = void, TId extends string = string>() => {
+    // How many modals of this family are currently mounted. Not in the store's
+    // state: nothing renders off it, and a re-render per mount would be noise.
+    let mounted = 0
+
+    return create<ModalState<TData, TId>>((set, get) => ({
         activeModal: null,
         modalData: null,
+        /**
+         * Called by every mounted `useModal`. When the last one goes, the family
+         * is reset.
+         *
+         * The store is created at import time and never torn down, but the tree
+         * that renders its modals is. Without this, leaving a page with a modal
+         * open and coming back re-opened it on its own — `activeModal` had
+         * simply never been cleared, so the popup remounted already-open (and,
+         * because Base UI seeds `mounted` from `open`, without its enter
+         * transition) holding whichever row was selected minutes earlier.
+         *
+         * No modal of the family mounted means none can be showing, so this is
+         * the invariant rather than a guess about who "owns" the family.
+         */
+        retain: () => {
+            mounted++
+
+            return () => {
+                mounted--
+
+                // Deferred: React StrictMode runs effect cleanups and re-runs
+                // them within the same commit, and a route swap can unmount one
+                // modal a tick before mounting the next. Both dip to zero
+                // without the family actually going away.
+                queueMicrotask(() => {
+                    if (mounted === 0) {
+                        set({ activeModal: null, modalData: null })
+                    }
+                })
+            }
+        },
         // The cast is the price of the conditional signature above; the public
         // surface is exact, and this is the only place that widens it.
         openModal: ((modal: TId, data?: TData) => {
@@ -72,6 +112,7 @@ const createModalStore = <TData = void, TId extends string = string>() =>
             set({ activeModal: null })
         },
     }))
+}
 
 /**
  * One modal's handle: whether it is open, the row it was opened for, and a close
@@ -102,6 +143,10 @@ export const useModal = <TData, TId extends string>(
     const open = store(state => state.activeModal === modal)
     const data = store(state => state.modalData)
     const closeModal = store(state => state.closeModal)
+    const retain = store(state => state.retain)
+
+    // Ties the family's lifetime to the tree rendering it; see `retain`.
+    useEffect(() => retain(), [retain])
 
     const close = useCallback(() => closeModal(modal), [closeModal, modal])
 
