@@ -63,7 +63,7 @@ const SessionListCard = () => {
             <CardContent
                 className={cn(
                     (isLoading || isError || sessions?.length === 0) &&
-                        'grid min-h-[12rem] place-items-center'
+                        'grid min-h-[12rem] flex-1 place-items-center'
                 )}
             >
                 {isError && !sessions ? (

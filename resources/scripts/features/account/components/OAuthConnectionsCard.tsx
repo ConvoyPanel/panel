@@ -97,7 +97,7 @@ const OAuthConnectionsCard = () => {
             <CardContent
                 className={cn(
                     (isLoading || isError) &&
-                        'grid min-h-[8rem] place-items-center'
+                        'grid min-h-[8rem] flex-1 place-items-center'
                 )}
             >
                 {isError && !connections ? (

@@ -44,9 +44,9 @@ Good demo cards to read when building a **form inside a card** (our most common 
 
 | Component | File | Base classes |
 | --- | --- | --- |
-| `Card` | `components/ui/Card/Card.tsx` | `rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10` |
+| `Card` | `components/ui/Card/Card.tsx` | `flex flex-col rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10` |
 | `CardHeader` | `.../CardHeader.tsx` | `flex flex-col space-y-1 p-4` (switches to a `grid-cols-[1fr_auto]` layout when a `CardAction` child is present) |
-| `CardTitle` | `.../CardTitle.tsx` | `text-base font-medium leading-snug` (renders `<h3>`) |
+| `CardTitle` | `.../CardTitle.tsx` | `text-base font-medium leading-snug` (renders `<h2>`; override with `as`) |
 | `CardDescription` | `.../CardDescription.tsx` | `text-sm text-muted-foreground` |
 | `CardAction` | `.../CardAction.tsx` | top-right slot in the header; needs `CardHeader`'s grid mode |
 | `CardContent` | `.../CardContent.tsx` | `p-4 pt-0` |
@@ -57,6 +57,16 @@ Good demo cards to read when building a **form inside a card** (our most common 
 
 The flat `ring-1 ring-foreground/10` (instead of `border` + `shadow`) is the defining look
 of the `nova` base — cards read as quiet, inset surfaces rather than raised panels.
+
+`flex flex-col` is upstream's too. We dropped it originally because we swapped its `gap-6`
+for per-part padding and the column looked incidental — it is not. A card in a grid row is
+stretched to the height of the tallest card beside it, and a plain block card leaves that
+extra height at the bottom: `CardContent` keeps its own height, so anything centred inside
+it centres against the header rather than the card. That is what made every empty state on
+`/security` sit high with dead space under it. **A card whose content should fill the
+stretched height gives `CardContent` `flex-1`** — see the four `/security` cards, which pair
+it with `grid min-h-[12rem] place-items-center` so the empty state has a floor when the card
+is *not* the tall one.
 
 ### Where we diverge from nova: field backgrounds
 
