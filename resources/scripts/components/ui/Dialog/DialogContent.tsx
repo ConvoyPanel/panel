@@ -102,7 +102,14 @@ const DialogContent = ({
                     // of border+shadow, and `p-4` rather than shadcn's older `p-6`.
                     // Upstream caps at `sm:max-w-sm`; ours stay `sm:max-w-lg` because
                     // these hold lists and forms, not just a confirm prompt.
-                    'dialog-popup bg-popover text-popover-foreground ring-foreground/10 fixed left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 text-sm ring-1 outline-none sm:max-w-lg',
+                    // `grid-cols-[minmax(0,1fr)]` rather than the implicit `auto`
+                    // column: a grid item's automatic minimum size is its
+                    // min-content, so one unbreakable string (an SSH key, a
+                    // token) sized the column past `max-w-lg` and the header,
+                    // fields and footer rendered wider than the popup they sit
+                    // in. The `minmax(0, …)` floor lets the column shrink and
+                    // the content wrap instead.
+                    'dialog-popup bg-popover text-popover-foreground ring-foreground/10 fixed left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] grid-cols-[minmax(0,1fr)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 text-sm ring-1 outline-none sm:max-w-lg',
                     // A nested dialog has no backdrop of its own, so tint the
                     // measured and offset parent to make the stack legible.
                     'after:bg-foreground/5 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-100 data-nested-dialog-open:after:opacity-100',
