@@ -3,6 +3,7 @@ import useIdentityConfirmationStore, {
     ConfirmationType,
 } from '@/stores/identity-confirmation-store.ts'
 import { handleFormErrors } from '@/utils/http.ts'
+import { useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconFingerprint } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
@@ -11,7 +12,11 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useShallow } from 'zustand/react/shallow'
 
-import { confirmIdentity } from '@/features/auth/identity/api.ts'
+import {
+    confirmIdentity,
+    identityQueries,
+    useIdentityUnconfirmed,
+} from '@/features/auth/identity/api.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -52,16 +57,18 @@ interface Props {
  * flash.
  */
 const AuthDialog = ({ onCancel }: Props) => {
-    const [confirmationType, dispatchIdentityConfirmed] =
-        useIdentityConfirmationStore(
-            useShallow(state => [state.confirmationType, state.confirmIdentity])
-        )
+    const [confirmationType, setConfirmationType] = useIdentityConfirmationStore(
+        useShallow(state => [state.confirmationType, state.setConfirmationType])
+    )
     const { confirm: confirmWithPasskey } = usePasskeyConfirmation()
+    const queryClient = useQueryClient()
     // The gate belongs open precisely while identity is unconfirmed; confirming
     // flips this false and reveals the parent underneath. No imperative close.
-    const needsConfirmation = useIdentityConfirmationStore(state =>
-        !state.isIdentityValid()
-    )
+    //
+    // The server owns this fact, so this is only true once it has actually said
+    // so — never merely because the answer has not arrived yet, which would
+    // flash the gate open on every mount.
+    const needsConfirmation = useIdentityUnconfirmed()
 
     // Base UI only plays the enter transition on a false -> true change of
     // `open`: useTransitionStatus seeds `mounted` from `open`, so a popup that
@@ -120,13 +127,15 @@ const AuthDialog = ({ onCancel }: Props) => {
     const submit = async (_data: any) => {
         const data = _data as z.infer<typeof schema>
         try {
-            if (data.type === ConfirmationType.Password) {
-                await confirmIdentity({ password: data.password })
-            } else {
-                await confirmWithPasskey()
-            }
+            const status =
+                data.type === ConfirmationType.Password
+                    ? await confirmIdentity({ password: data.password })
+                    : await confirmWithPasskey()
 
-            dispatchIdentityConfirmed(data.type)
+            // The confirm response *is* the new status, so seed it rather than
+            // refetching just to learn what we were already told.
+            queryClient.setQueryData(identityQueries.all(), status)
+            setConfirmationType(data.type)
         } catch (e) {
             if (handleFormErrors(e, form.setError)) return
 

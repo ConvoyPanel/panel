@@ -1,12 +1,13 @@
 import { rawDataToPasskey } from '@/features/account/transforms.ts'
 import { Passkey } from '@/features/account/types.ts'
-import useIdentityConfirmed from '@/hooks/use-identity-confirmed.ts'
 import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'
 import type {
     PublicKeyCredentialCreationOptionsJSON,
     RegistrationResponseJSON,
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
+
+import { useIdentityConfirmed } from '@/features/auth/identity/api.ts'
 
 import { type DataResponse, apiFetch } from '@/lib/api'
 
@@ -61,8 +62,7 @@ export const passkeyQueries = {
 
 /**
  * The list is behind RequireIdentityConfirmation, so it must not be fetched
- * until the gate is satisfied — see useIdentityConfirmed for why an early 403
- * cost seconds of skeleton rather than one wasted request.
+ * until the server says the gate is satisfied — see useIdentityConfirmed.
  */
 export const usePasskeys = () =>
     useQuery({ ...passkeyQueries.list(), enabled: useIdentityConfirmed() })

@@ -7,6 +7,7 @@ import {
 import { useState } from 'react'
 
 import {
+    type IdentityStatus,
     confirmIdentity,
     getPasskeyAuthenticationOptions,
 } from '@/features/auth/identity/api.ts'
@@ -14,7 +15,9 @@ import {
 
 const usePasskeyConfirmation = () => {
     const [loading, setLoading] = useState(false)
-    const confirm = async () => {
+    // Returns the confirmation status so the caller can seed it, exactly as the
+    // password branch does.
+    const confirm = async (): Promise<IdentityStatus> => {
         setLoading(true)
         let optionsJSON: PublicKeyCredentialRequestOptionsJSON
         try {
@@ -36,8 +39,9 @@ const usePasskeyConfirmation = () => {
             throw Error('Authentication failed')
         }
 
+        let status: IdentityStatus
         try {
-            await confirmIdentity({ passkey: authResponse })
+            status = await confirmIdentity({ passkey: authResponse })
         } catch (e) {
             setLoading(false)
 
@@ -47,6 +51,8 @@ const usePasskeyConfirmation = () => {
         }
 
         setLoading(false)
+
+        return status
     }
 
     return { loading, confirm }

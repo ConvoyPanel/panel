@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\GeneratePasskeyAuthenticationOptionsAction;
+use App\Auth\IdentityConfirmation;
 use App\Exceptions\Http\Auth\InvalidAuthenticationMethodException;
 use App\Exceptions\Http\Auth\InvalidPasskeyException;
 use App\Http\Requests\Auth\ConfirmIdentityRequest;
@@ -23,6 +24,24 @@ class ConfirmableIdentityController
         private GeneratePasskeyAuthenticationOptionsAction $generateOptionsAction,
         private FindPasskeyToAuthenticateAction $findPasskeyAction,
     ) {}
+
+    /**
+     * Whether this session's identity is currently confirmed, and for how much
+     * longer.
+     *
+     * `expiresIn` is a duration, not an instant, on purpose: the client only has
+     * to measure elapsed time from receipt, so the two never have to agree on
+     * what the clock says.
+     */
+    public function show(Request $request)
+    {
+        $expiresIn = IdentityConfirmation::expiresIn($request->session());
+
+        return response()->json([
+            'confirmed' => $expiresIn > 0,
+            'expires_in' => $expiresIn > 0 ? $expiresIn : null,
+        ]);
+    }
 
     public function generatePasskeyAuthOptions(Request $request)
     {
@@ -76,9 +95,8 @@ class ConfirmableIdentityController
             throw new InvalidAuthenticationMethodException;
         }
 
-        // Store the confirmation timestamp in the session
-        $request->session()->put('auth.identity_confirmed_at', now()->timestamp);
+        IdentityConfirmation::confirm($request->session());
 
-        return response()->noContent();
+        return $this->show($request);
     }
 }

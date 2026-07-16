@@ -59,7 +59,8 @@ it('consumes the identity confirmation challenge so presence cannot be replayed'
     $this->actingAs($user)
         ->withSession(['passkeys.identity-options' => '{}'])
         ->postJson('/api/auth/identity/confirm', ['passkey' => '{"id":"credential"}'])
-        ->assertNoContent()
+        ->assertSuccessful()
+        ->assertJson(['confirmed' => true])
         ->assertSessionHas('auth.identity_confirmed_at');
 
     // Same assertion, second time: the challenge is gone, so re-confirming
@@ -94,4 +95,49 @@ it('does not let a login challenge satisfy an identity confirmation', function (
         ->postJson('/api/auth/identity/confirm', ['passkey' => '{"id":"credential"}'])
         ->assertBadRequest()
         ->assertJsonPath('code', 'invalid_passkey');
+});
+
+/**
+ * The client used to keep its own copy of the confirmation window and decide the
+ * gate for itself. It asks now, so the answer has to come from the same place
+ * RequireIdentityConfirmation reads — one fact, one owner.
+ */
+it('reports identity as unconfirmed with no confirmation on the session', function () {
+    $this->actingAs(User::factory()->create())
+        ->getJson('/api/auth/identity')
+        ->assertExactJson(['confirmed' => false, 'expires_in' => null]);
+});
+
+it('reports identity as confirmed with the time remaining', function () {
+    $this->actingAs(User::factory()->create())
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(60)->timestamp])
+        ->getJson('/api/auth/identity')
+        ->assertSuccessful()
+        ->assertJson(['confirmed' => true, 'expires_in' => 240]);
+});
+
+it('agrees with the middleware at the edge of the window', function () {
+    $user = User::factory()->create();
+
+    // One second inside: reported confirmed, and the gated route lets it through.
+    $this->actingAs($user)
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(299)->timestamp])
+        ->getJson('/api/auth/identity')
+        ->assertJson(['confirmed' => true, 'expires_in' => 1]);
+
+    $this->actingAs($user)
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(299)->timestamp])
+        ->getJson('/api/client/account/recovery-codes')
+        ->assertSuccessful();
+
+    // One second past: reported unconfirmed, and the gated route refuses.
+    $this->actingAs($user)
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(301)->timestamp])
+        ->getJson('/api/auth/identity')
+        ->assertJson(['confirmed' => false, 'expires_in' => null]);
+
+    $this->actingAs($user)
+        ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(301)->timestamp])
+        ->getJson('/api/client/account/recovery-codes')
+        ->assertForbidden();
 });

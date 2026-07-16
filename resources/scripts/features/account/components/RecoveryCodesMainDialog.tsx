@@ -6,9 +6,9 @@ import {
     recoveryCodeQueries,
     useHasRecoveryCodes,
 } from '@/features/account/recovery-codes/api.ts'
+import { useIdentityConfirmed } from '@/features/auth/identity/api.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
-import useIdentityConfirmed from '@/hooks/use-identity-confirmed.ts'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -49,9 +49,9 @@ const RecoveryCodesMainDialog = () => {
     })
 
     // Two gates, both required: the endpoint is behind
-    // RequireIdentityConfirmation (see useIdentityConfirmed), and codes are a
-    // secret worth not holding in memory until the user actually asks to see
-    // them.
+    // RequireIdentityConfirmation (the server answers useIdentityConfirmed), and
+    // codes are a secret worth not holding in memory until the user actually
+    // asks to see them.
     const isIdentityConfirmed = useIdentityConfirmed()
     const {
         data: codes,

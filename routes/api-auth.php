@@ -53,6 +53,10 @@ Route::middleware('auth')->group(function () {
 
     /* Confirmable Identity Routes */
     Route::prefix('/identity')->group(function () {
+        // The client asks rather than keeping its own copy of the window; the
+        // answer comes from the same place the middleware reads. See
+        // App\Auth\IdentityConfirmation.
+        Route::get('/', [Auth\ConfirmableIdentityController::class, 'show']);
         Route::get('/passkey-authentication-options', [Auth\ConfirmableIdentityController::class, 'generatePasskeyAuthOptions']);
         Route::post('/confirm', [Auth\ConfirmableIdentityController::class, 'store']);
     });

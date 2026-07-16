@@ -1,11 +1,10 @@
 import { logout } from '@/features/auth/api.ts'
 import { currentUserQueries, useUser } from '@/features/auth/api.ts'
+import { identityQueries } from '@/features/auth/identity/api.ts'
 import { useTheme } from '@/providers/theme-provider.tsx'
-import useIdentityConfirmationStore from '@/stores/identity-confirmation-store.ts'
 import { cn } from '@/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation, useRouter } from '@tanstack/react-router'
-import { useShallow } from 'zustand/react/shallow'
 
 import Logo from '@/components/ui/Branding/Logo.tsx'
 import { Button } from '@/components/ui/Button'
@@ -28,7 +27,6 @@ const Avatar = () => {
     const { theme, setTheme } = useTheme()
     const { data: user } = useUser()
     const queryClient = useQueryClient()
-    const reset = useIdentityConfirmationStore(useShallow(state => state.reset))
 
     const { navigate } = useRouter()
     const pathname = useLocation({ select: location => location.pathname })
@@ -36,7 +34,9 @@ const Avatar = () => {
 
     const signout = async () => {
         await logout()
-        reset()
+        // Identity confirmation lives in the session the logout just destroyed;
+        // drop the cached answer with the rest of the session's state.
+        queryClient.removeQueries({ queryKey: identityQueries.all() })
         queryClient.removeQueries({ queryKey: currentUserQueries.all() })
         await navigate({ to: '/auth/login' })
     }
