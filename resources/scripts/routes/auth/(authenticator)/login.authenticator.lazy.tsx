@@ -1,6 +1,14 @@
-import { verifyAuthenticatorChallenge } from '@/features/auth/api.ts'
+import {
+    getSecondFactorPasskeyOptions,
+    useSecondFactorMethods,
+    verifyAuthenticatorChallenge,
+    verifySecondFactorPasskey,
+} from '@/features/auth/api.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { startAuthentication } from '@simplewebauthn/browser'
+import { IconFingerprint } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -47,11 +55,18 @@ const recoverySchema = z.object({
     recoveryCode: z.string().length(21, 'Invalid recovery code'),
 })
 
-const schema = z.discriminatedUnion('type', [otpSchema, recoverySchema])
+const passkeySchema = z.object({ type: z.literal('passkey') })
+
+const schema = z.discriminatedUnion('type', [
+    otpSchema,
+    recoverySchema,
+    passkeySchema,
+])
 
 function Authenticator() {
     const { redirect } = Route.useSearch()
     const navigate = Route.useNavigate()
+    const { data: methods } = useSecondFactorMethods()
     const form = useForm<z.input<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -64,6 +79,24 @@ function Authenticator() {
     const type = form.watch('type')
     const code = form.watch('code')
 
+    const finishLogin = async () => {
+        await navigate({
+            to: redirect ? `/${redirect.slice(1)}` : '/',
+        })
+    }
+
+    const { mutate: authenticateWithPasskey, isPending: isPasskeyPending } =
+        useMutation({
+            mutationFn: async () => {
+                const optionsJSON = await getSecondFactorPasskeyOptions()
+                const response = await startAuthentication({ optionsJSON })
+
+                await verifySecondFactorPasskey(response)
+            },
+            onSuccess: finishLogin,
+            onError: () => toast.error('Failed to verify passkey'),
+        })
+
     const submit = async (_data: any) => {
         const data = _data as z.infer<typeof schema>
         try {
@@ -71,15 +104,15 @@ function Authenticator() {
                 await verifyAuthenticatorChallenge({
                     code: data.code,
                 })
-            } else {
+            } else if (data.type === 'recovery') {
                 await verifyAuthenticatorChallenge({
                     recoveryCode: data.recoveryCode,
                 })
+            } else {
+                return
             }
 
-            await navigate({
-                to: redirect ? `/${redirect.slice(1)}` : '/',
-            })
+            await finishLogin()
         } catch (e) {
             if (handleFormErrors(e, form.setError)) return
 
@@ -90,20 +123,30 @@ function Authenticator() {
     }
 
     useEffect(() => {
-        if (code.length === 6) {
+        if (type === 'code' && code.length === 6) {
             form.handleSubmit(submit)()
         }
-    }, [code])
+    }, [code, type])
+
+    useEffect(() => {
+        if (!methods || methods.authenticator) return
+
+        form.setValue('type', methods.passkey ? 'passkey' : 'recovery')
+    }, [methods])
 
     return (
         <>
             <CardHeader className={'space-y-2'}>
                 <CardTitle as='h1' className='text-3xl'>
-                    2FA Required
+                    Second factor required
                 </CardTitle>
                 <CardDescription>
-                    Enter the 6-digit code from your authenticator app to verify
-                    your identity.
+                    {type === 'code' &&
+                        'Enter the 6-digit code from your authenticator app.'}
+                    {type === 'recovery' &&
+                        'Enter one of your one-time recovery codes.'}
+                    {type === 'passkey' &&
+                        'Verify your identity with a passkey.'}
                 </CardDescription>
             </CardHeader>
             <Form {...form}>
@@ -169,13 +212,29 @@ function Authenticator() {
                                     )
                                 }}
                             />
-                        ) : (
+                        ) : type === 'recovery' ? (
                             <>
                                 <InputForm
                                     name={'recoveryCode'}
                                     label={'Recovery Code'}
                                 />
                             </>
+                        ) : (
+                            <div
+                                className={
+                                    'bg-muted/50 flex items-center gap-3 rounded-lg p-3'
+                                }
+                            >
+                                <IconFingerprint
+                                    className={
+                                        'text-muted-foreground size-5 shrink-0'
+                                    }
+                                />
+                                <p className={'text-muted-foreground text-sm'}>
+                                    Your browser will ask for your fingerprint,
+                                    face, screen lock, or security key.
+                                </p>
+                            </div>
                         )}
                     </CardContent>
 
@@ -184,7 +243,7 @@ function Authenticator() {
                             'flex flex-col justify-end gap-2 sm:flex-row'
                         }
                     >
-                        {type === 'code' ? (
+                        {type !== 'recovery' && methods?.recovery && (
                             <Button
                                 type={'button'}
                                 className={'max-sm:w-full'}
@@ -195,20 +254,41 @@ function Authenticator() {
                             >
                                 I have a recovery code
                             </Button>
-                        ) : (
+                        )}
+                        {type !== 'code' && methods?.authenticator && (
                             <Button
                                 type={'button'}
                                 className={'max-sm:w-full'}
                                 variant={'ghost'}
                                 onClick={() => form.setValue('type', 'code')}
                             >
-                                Use OTP instead
+                                Use authenticator instead
+                            </Button>
+                        )}
+                        {type !== 'passkey' && methods?.passkey && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                variant={'ghost'}
+                                onClick={() => form.setValue('type', 'passkey')}
+                            >
+                                Use a passkey
                             </Button>
                         )}
                         {type === 'recovery' && (
                             <FormButton className={'max-sm:w-full'}>
                                 Continue
                             </FormButton>
+                        )}
+                        {type === 'passkey' && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                loading={isPasskeyPending}
+                                onClick={() => authenticateWithPasskey()}
+                            >
+                                Verify with passkey
+                            </Button>
                         )}
                     </CardFooter>
                 </form>

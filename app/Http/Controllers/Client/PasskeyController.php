@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Actions\Auth\GeneratePasskeyRegisterOptionsAction;
 use App\Actions\Auth\StorePasskeyAction;
 use App\Data\User\PasskeyData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
 use App\Models\Passkey;
 use Illuminate\Http\Request;
+use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
+use Laravel\Fortify\Fortify;
 use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelPasskeys\Actions\GeneratePasskeyRegisterOptionsAction;
 
 class PasskeyController extends Controller
 {
@@ -32,8 +34,9 @@ class PasskeyController extends Controller
         return $options;
     }
 
-    public function store(Request $request)
+    public function store(Request $request, GenerateNewRecoveryCodes $generateRecoveryCodes)
     {
+        $recoveryCodesCreated = empty($request->user()->two_factor_recovery_codes);
         $passkey = $this->storeAction->execute(
             authenticatable: $request->user(),
             passkeyJson: $request->getContent(),
@@ -42,7 +45,18 @@ class PasskeyController extends Controller
             additionalProperties: ['name' => 'Passkey '.now()->format('Y-m-d')],
         );
 
-        return PasskeyData::from($passkey);
+        if ($recoveryCodesCreated) {
+            $generateRecoveryCodes($request->user());
+        }
+
+        return response()->json([
+            'data' => PasskeyData::from($passkey),
+            'recovery_codes' => $recoveryCodesCreated
+                ? json_decode(Fortify::currentEncrypter()->decrypt(
+                    $request->user()->fresh()->two_factor_recovery_codes,
+                ), true)
+                : null,
+        ]);
     }
 
     public function rename(RenamePasskeyRequest $request, Passkey $passkey)
@@ -54,7 +68,12 @@ class PasskeyController extends Controller
 
     public function destroy(Passkey $passkey)
     {
+        $user = $passkey->user;
         $passkey->delete();
+
+        if (! $user->passkeys()->exists() && empty($user->two_factor_secret)) {
+            $user->forceFill(['two_factor_recovery_codes' => null])->save();
+        }
 
         return response()->noContent();
     }

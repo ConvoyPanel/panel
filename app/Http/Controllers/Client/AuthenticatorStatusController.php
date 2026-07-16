@@ -12,9 +12,9 @@ class AuthenticatorStatusController extends Controller
         return response()->json([
             // Defer to Fortify rather than reading `two_factor_secret` here:
             // with confirmation enabled a secret alone is not enabled, and
-            // Fortify is what the login challenge consults. Checking the column
-            // directly reported an abandoned setup as enabled, disagreeing with
-            // the thing that actually gates login.
+            // Keep this authenticator-specific even though the account-level
+            // second-factor check also accepts a passkey. Checking the secret
+            // directly would still report an abandoned setup as enabled.
             'enabled' => $request->user()->hasEnabledTwoFactorAuthentication(),
         ]);
     }

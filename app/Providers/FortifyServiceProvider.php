@@ -2,10 +2,20 @@
 
 namespace App\Providers;
 
+use App\Actions\Auth\DisableAuthenticator;
+use App\Actions\Auth\EnableAuthenticator;
+use App\Actions\Auth\RedirectIfSecondFactorAuthenticatable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
+use Laravel\Fortify\Actions\CanonicalizeUsername;
+use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
+use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -15,7 +25,8 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(EnableTwoFactorAuthentication::class, EnableAuthenticator::class);
+        $this->app->bind(DisableTwoFactorAuthentication::class, DisableAuthenticator::class);
     }
 
     /**
@@ -24,6 +35,16 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Fortify::ignoreRoutes();
+
+        Fortify::authenticateThrough(fn () => array_filter([
+            config('fortify.limiters.login') ? null : EnsureLoginIsNotThrottled::class,
+            config('fortify.lowercase_usernames') ? CanonicalizeUsername::class : null,
+            Features::enabled(Features::twoFactorAuthentication())
+                ? RedirectIfSecondFactorAuthenticatable::class
+                : null,
+            AttemptToAuthenticate::class,
+            PrepareAuthenticatedSession::class,
+        ]));
 
         RateLimiter::for('login', function (Request $request) {
             $email = (string) $request->email;

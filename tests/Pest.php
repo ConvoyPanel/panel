@@ -2,13 +2,18 @@
 
 use App\Models\Location;
 use App\Models\Node;
+use App\Models\Passkey;
 use App\Models\Server;
 use App\Models\User;
 use App\Services\Servers\ServerCreationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Spatie\LaravelPasskeys\Support\CredentialRecordConverter;
+use Symfony\Component\Uid\Uuid;
 use Tests\TestCase;
+use Webauthn\CredentialRecord;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +70,30 @@ uses(
 function confirmedSession(): array
 {
     return ['auth.identity_confirmed_at' => now()->timestamp];
+}
+
+/** Persist a valid passkey record for auth and account feature tests. */
+function secondFactorPasskey(User $user): Passkey
+{
+    $source = CredentialRecordConverter::toPublicKeyCredentialSource(
+        CredentialRecord::create(
+            publicKeyCredentialId: random_bytes(16),
+            type: 'public-key',
+            transports: ['internal'],
+            attestationType: 'none',
+            trustPath: new EmptyTrustPath,
+            aaguid: Uuid::fromString('00000000-0000-0000-0000-000000000000'),
+            credentialPublicKey: 'pubkey-bytes',
+            userHandle: $user->uuid,
+            counter: 0,
+        ),
+    );
+
+    $passkey = new Passkey(['name' => 'Test passkey']);
+    $passkey->data = $source;
+    $user->passkeys()->save($passkey);
+
+    return $passkey;
 }
 
 function createServerModel(): array

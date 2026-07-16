@@ -7,7 +7,6 @@ use App\Http\Middleware\DenyApiTokenAccess;
 use App\Http\Middleware\RequireIdentityConfirmation;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\ConfirmedTwoFactorAuthenticationController;
-use Laravel\Fortify\Http\Controllers\RecoveryCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
@@ -84,8 +83,8 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
             Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
             Route::get('/qr-code', [TwoFactorQrCodeController::class, 'show']);
             Route::get('/secret-key', [TwoFactorSecretKeyController::class, 'show']);
-            Route::get('/recovery-codes', [RecoveryCodeController::class, 'index']);
-            Route::post('/recovery-codes/regenerate', [RecoveryCodeController::class, 'store']);
+            Route::get('/recovery-codes', [Client\RecoveryCodeController::class, 'index']);
+            Route::post('/recovery-codes/regenerate', [Client\RecoveryCodeController::class, 'store']);
         });
 });
 

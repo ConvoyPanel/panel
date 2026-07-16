@@ -135,6 +135,30 @@
 }
 
 @layer utilities {
+    /*
+     * Base UI exposes only the number of open descendant dialogs. Measure the
+     * popup heights in DialogContent and cancel the height-dependent part of a
+     * centred stack, leaving a constant 1rem ledge below the frontmost dialog.
+     */
+    .dialog-popup {
+        --dialog-stack-scale: calc(1 - 0.05 * var(--nested-dialogs, 0));
+        --dialog-stack-shift: calc(
+            1rem * var(--nested-dialogs, 0) + var(--dialog-has-nested, 0) *
+                (
+                    var(--frontmost-dialog-height, 0px) -
+                        var(--dialog-stack-scale) * var(--dialog-height, 0px)
+                ) /
+                2
+        );
+
+        top: calc(50% + var(--dialog-stack-shift));
+        scale: var(--dialog-stack-scale);
+    }
+
+    .dialog-popup[data-nested-dialog-open] {
+        --dialog-has-nested: 1;
+    }
+
     /* Hide scrollbar for Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {
         display: none;

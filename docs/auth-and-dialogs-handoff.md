@@ -1,7 +1,33 @@
 # Handoff — account security + the dialog family
 
 Written 2026-07-16. Covers two threads: the Dialog/nova work (landed) and an
-auth overhaul (designed, decided, **not started**).
+auth overhaul (designed in the original session and completed in the follow-up).
+
+## Completion update
+
+The follow-up completed every item this handoff called out:
+
+- Nested dialogs now measure their unscaled border boxes and keep a constant
+  `1rem` parent ledge. Browser measurements for the four cases below were all
+  15.99px at 1280×900.
+- Passkey registration and authentication require WebAuthn user verification.
+- Password login challenges accounts with either a confirmed authenticator or
+  a passkey; the guest passkey challenge is bound to Fortify's pending
+  `login.id`. Direct passkey login remains a complete login method.
+- Recovery codes are account-level: first-passkey registration issues and shows
+  them, existing passkey users are backfilled, and adding/removing an
+  authenticator preserves them while another factor remains.
+- The challenge screen offers authenticator, passkey, and recovery methods based
+  on the pending account.
+- `Select alignItemWithTrigger` was browser-verified on the global bandwidth
+  form and inside the API-token dialog (`data-side="none"`, no animation, popup
+  within the viewport). The dialog-family conventions are now recorded in
+  `docs/card-design.md`.
+
+Verification: full PHP suite (315 tests / 845 assertions), frontend
+typecheck and production build, plus a complete virtual-authenticator browser
+flow (register passkey → receive eight recovery codes → password login → passkey
+second-factor challenge → authenticated).
 
 Commits this session, oldest first:
 
@@ -15,7 +41,7 @@ Commits this session, oldest first:
 
 ---
 
-## 1. The nested-dialog peek — UNRESOLVED, decided, do this next
+## 1. The nested-dialog peek — RESOLVED
 
 ### The problem, stated exactly
 
@@ -138,7 +164,7 @@ Authenticator + Passkey  tab   parentH=287 gateH=261  peek=?
 
 ---
 
-## 2. Auth overhaul — designed and decided, NOT started
+## 2. Auth overhaul — IMPLEMENTED
 
 ### The problem
 

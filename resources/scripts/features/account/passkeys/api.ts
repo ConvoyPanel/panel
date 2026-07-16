@@ -1,13 +1,13 @@
+import { rawDataToPasskey } from '@/features/account/transforms.ts'
+import { Passkey } from '@/features/account/types.ts'
+import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'
 import type {
     PublicKeyCredentialCreationOptionsJSON,
     RegistrationResponseJSON,
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { rawDataToPasskey } from '@/features/account/transforms.ts'
-import { apiFetch, type DataResponse } from '@/lib/api'
-import { Passkey } from '@/features/account/types.ts'
-import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'
+import { type DataResponse, apiFetch } from '@/lib/api'
 
 export const getPasskeys = async (): Promise<Passkey[]> => {
     const { data } = await apiFetch<DataResponse<any[]>>(
@@ -23,21 +23,28 @@ export const getRegistrationOptions =
             PasskeyController.create()
         )
 
-export const verifyRegistration = async (passkey: RegistrationResponseJSON) =>
-    rawDataToPasskey(
-        (
-            await apiFetch<DataResponse<unknown>>(PasskeyController.store(), {
-                body: { ...passkey },
-            })
-        ).data
-    )
+export const verifyRegistration = async (passkey: RegistrationResponseJSON) => {
+    const response = await apiFetch<
+        DataResponse<unknown> & { recovery_codes: string[] | null }
+    >(PasskeyController.store(), {
+        body: { ...passkey },
+    })
+
+    return {
+        passkey: rawDataToPasskey(response.data),
+        recoveryCodes: response.recovery_codes,
+    }
+}
 
 export const renamePasskey = async (id: number, name: string) =>
     rawDataToPasskey(
         (
-            await apiFetch<DataResponse<unknown>>(PasskeyController.rename(id), {
-                body: { name },
-            })
+            await apiFetch<DataResponse<unknown>>(
+                PasskeyController.rename(id),
+                {
+                    body: { name },
+                }
+            )
         ).data
     )
 

@@ -1,6 +1,6 @@
 import AuthenticatorStatusController from '@/wayfinder/actions/App/Http/Controllers/Client/AuthenticatorStatusController'
+import RecoveryCodeController from '@/wayfinder/actions/App/Http/Controllers/Client/RecoveryCodeController'
 import ConfirmedTwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/ConfirmedTwoFactorAuthenticationController'
-import RecoveryCodeController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/RecoveryCodeController'
 import TwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticationController'
 import TwoFactorQrCodeController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorQrCodeController'
 import TwoFactorSecretKeyController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorSecretKeyController'
@@ -22,14 +22,8 @@ const secretKeyRoute =
     TwoFactorSecretKeyController.show[
         '/api/client/account/authenticator/secret-key'
     ]
-const recoveryCodesRoute =
-    RecoveryCodeController.index[
-        '/api/client/account/authenticator/recovery-codes'
-    ]
-const regenerateRecoveryCodesRoute =
-    RecoveryCodeController.store[
-        '/api/client/account/authenticator/recovery-codes/regenerate'
-    ]
+const recoveryCodesRoute = RecoveryCodeController.index
+const regenerateRecoveryCodesRoute = RecoveryCodeController.store
 const enableRoute =
     TwoFactorAuthenticationController.store[
         '/api/client/account/authenticator/enable'

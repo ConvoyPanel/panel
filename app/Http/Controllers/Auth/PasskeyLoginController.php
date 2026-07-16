@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\GeneratePasskeyAuthenticationOptionsAction;
 use App\Exceptions\Http\Auth\InvalidPasskeyException;
+use App\Models\Passkey;
 use Illuminate\Http\Request;
 use Spatie\LaravelPasskeys\Actions\FindPasskeyToAuthenticateAction;
-use Spatie\LaravelPasskeys\Actions\GeneratePasskeyAuthenticationOptionsAction;
 
 class PasskeyLoginController
 {
@@ -34,7 +35,7 @@ class PasskeyLoginController
             throw new InvalidPasskeyException;
         }
 
-        /** @var \App\Models\Passkey $passkey (config binds passkeys.models.passkey to our subclass) */
+        /** @var Passkey $passkey (config binds passkeys.models.passkey to our subclass) */
         $user = $passkey->user;
 
         auth()->login($user);

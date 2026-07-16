@@ -1,16 +1,17 @@
+import { rawDataToAuthenticatedUser } from '@/features/auth/transforms.ts'
+import PasskeyLoginController from '@/wayfinder/actions/App/Http/Controllers/Auth/PasskeyLoginController'
+import SecondFactorChallengeController from '@/wayfinder/actions/App/Http/Controllers/Auth/SecondFactorChallengeController'
+import SessionController from '@/wayfinder/actions/App/Http/Controllers/Client/SessionController'
+import AuthenticatedSessionController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController'
+import TwoFactorAuthenticatedSessionController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticatedSessionController'
 import type {
     AuthenticationResponseJSON,
     PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/browser'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { rawDataToAuthenticatedUser } from '@/features/auth/transforms.ts'
-import { apiFetch, type DataResponse } from '@/lib/api'
+import { type DataResponse, apiFetch } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
-import AuthenticatedSessionController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController'
-import PasskeyLoginController from '@/wayfinder/actions/App/Http/Controllers/Auth/PasskeyLoginController'
-import SessionController from '@/wayfinder/actions/App/Http/Controllers/Client/SessionController'
-import TwoFactorAuthenticatedSessionController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticatedSessionController'
 
 // The Fortify session controllers also expose the stock `/login`, `/logout`, and
 // `/two-factor-challenge` routes, so Wayfinder emits URI-keyed dictionaries —
@@ -29,6 +30,12 @@ interface LoginParams {
 
 interface LoginResponse {
     twoFactor: boolean
+}
+
+export interface SecondFactorMethods {
+    authenticator: boolean
+    passkey: boolean
+    recovery: boolean
 }
 
 export const getUser = async () => {
@@ -94,5 +101,35 @@ export const verifyAuthenticatorChallenge = async ({
 }): Promise<void> => {
     await apiFetch(verifyChallengeRoute(), {
         body: { code, recovery_code: recoveryCode },
+    })
+}
+
+export const secondFactorQueries = {
+    all: () => ['auth', 'second-factor'] as const,
+    methods: () =>
+        queryOptions({
+            queryKey: [...secondFactorQueries.all(), 'methods'] as const,
+            queryFn: () =>
+                apiFetch<SecondFactorMethods>(
+                    SecondFactorChallengeController.show()
+                ),
+            retry: false,
+        }),
+}
+
+export const useSecondFactorMethods = () =>
+    useQuery(secondFactorQueries.methods())
+
+export const getSecondFactorPasskeyOptions =
+    (): Promise<PublicKeyCredentialRequestOptionsJSON> =>
+        apiFetch<PublicKeyCredentialRequestOptionsJSON>(
+            SecondFactorChallengeController.create()
+        )
+
+export const verifySecondFactorPasskey = async (
+    authResponse: AuthenticationResponseJSON
+): Promise<void> => {
+    await apiFetch(SecondFactorChallengeController.store(), {
+        body: { ...authResponse },
     })
 }

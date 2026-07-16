@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\GeneratePasskeyAuthenticationOptionsAction;
 use App\Exceptions\Http\Auth\InvalidAuthenticationMethodException;
 use App\Exceptions\Http\Auth\InvalidPasskeyException;
 use App\Http\Requests\Auth\ConfirmIdentityRequest;
+use App\Models\Passkey;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Http\Responses\FailedPasswordConfirmationResponse;
 use Spatie\LaravelPasskeys\Actions\FindPasskeyToAuthenticateAction;
-use Spatie\LaravelPasskeys\Actions\GeneratePasskeyAuthenticationOptionsAction;
 
 /**
  * Controller responsible for handling identity reconfirmation
@@ -41,7 +42,7 @@ class ConfirmableIdentityController
 
         if ($request->filled('passkey')) {
             // Handle passkey authentication
-            /** @var \App\Models\Passkey|null $passkey (config binds passkeys.models.passkey to our subclass) */
+            /** @var Passkey|null $passkey (config binds passkeys.models.passkey to our subclass) */
             $passkey = $this->findPasskeyAction->execute(
                 $request->input('passkey'),
                 $request->session()->get('passkeys.authentication-options')

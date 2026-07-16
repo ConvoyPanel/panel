@@ -49,6 +49,18 @@ it('reports a confirmed secret as enabled', function () {
         ->assertExactJson(['enabled' => true]);
 });
 
+it('keeps authenticator status method-specific for a passkey-only account', function () {
+    $user = User::factory()->create();
+    secondFactorPasskey($user);
+
+    $this->actingAs($user)
+        ->getJson('/api/client/account/authenticator/status')
+        ->assertSuccessful()
+        ->assertExactJson(['enabled' => false]);
+
+    expect($user->fresh()->hasEnabledSecondFactor())->toBeTrue();
+});
+
 it('enables two factor once a generated code is confirmed', function () {
     $user = User::factory()->create();
     $secret = enableTwoFactorFor($user, confirmed: false);

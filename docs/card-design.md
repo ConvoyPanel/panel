@@ -148,3 +148,35 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
 - The node **create** screen (`routes/_app/admin/(fullscreen)/nodes.create.lazy.tsx` +
   `features/nodes/components/Create/*`) predates this pattern and is the next thing to
   bring in line — see the redesign directions discussed in the v10 handoff.
+
+## Dialog family, Tabs, and Select
+
+These primitives use the same `base` + `nova` source as Card, but a few deliberate
+local choices are easy to mistake for drift:
+
+- `DialogContent` keeps `sm:max-w-lg` rather than nova's `sm:max-w-sm`; our dialogs
+  routinely hold lists and forms. Its `p-4`, rounded popover, and flat ring still come
+  from nova, so consumers should not add their own shell padding, radius, or shadow.
+- Dialog enter/exit uses Base UI's `data-starting-style` / `data-ending-style`
+  transitions, not nova's `animate-in` transform keyframes. Nested dialogs also scale
+  and move their parent; a transform keyframe would compete for those same properties.
+- Nested desktop dialogs stay centred. `DialogContent` measures each popup's unscaled
+  border-box height and publishes it through the dialog stack so the visible parent
+  ledge remains exactly `1rem` regardless of either dialog's content height.
+- `ResponsiveDialog` resolves the `md` breakpoint synchronously and once at its root.
+  Mantine's default effect-time initial value briefly mounts a desktop Dialog as a
+  Drawer, then remounts the entire subtree. Do not change
+  `getInitialValueInEffect: false` or call the media query independently in each part.
+- `TabsList` leaves Base UI's `activateOnFocus` at `false`: arrow keys move focus and
+  Enter/Space activates. Automatic activation can trigger side effects merely while a
+  keyboard user moves past a tab (the passkey tab starts a WebAuthn ceremony).
+- `SelectContent` follows nova's native-select-like `alignItemWithTrigger=true`. Base UI
+  reports `data-side="none"` in that mode, and we intentionally disable its open/close
+  animation. Pass `false` only when the popup must behave as a menu below the trigger.
+- Select row padding lives on `Select.List`, not only on nova's `SelectGroup`, because
+  every current consumer places `SelectItem` directly in the list. `SelectGroup` keeps
+  its own padding for future grouped content; do not nest both padded paths unchanged.
+
+For mobile composition, use `ResponsiveDialogBody` and `ResponsiveDialogFooter` rather
+than branching classes at the call site. The Drawer owns no popup padding while the
+desktop Dialog does; those shared parts already reconcile the difference.

@@ -111,6 +111,12 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->hasMany(Passkey::class);
     }
 
+    /** A password login needs either supported second-factor method. */
+    public function hasEnabledSecondFactor(): bool
+    {
+        return $this->hasEnabledTwoFactorAuthentication() || $this->passkeys()->exists();
+    }
+
     public function getPassKeyName(): string
     {
         return $this->email;

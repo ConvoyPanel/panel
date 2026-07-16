@@ -40,6 +40,12 @@ Route::middleware('guest')->group(function () {
     $twoFactorLimiter = config('fortify.limiters.two-factor');
     Route::post('/authenticator/verify-challenge', [TwoFactorAuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:'.$twoFactorLimiter);
+
+    Route::prefix('/second-factor')->middleware('throttle:'.$twoFactorLimiter)->group(function () {
+        Route::get('/', [Auth\SecondFactorChallengeController::class, 'show']);
+        Route::get('/passkey-options', [Auth\SecondFactorChallengeController::class, 'create']);
+        Route::post('/verify-passkey', [Auth\SecondFactorChallengeController::class, 'store']);
+    });
 });
 
 Route::middleware('auth')->group(function () {

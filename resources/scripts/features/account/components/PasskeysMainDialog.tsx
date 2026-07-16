@@ -1,24 +1,26 @@
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { getApiErrorMessage } from '@/utils/http.ts'
-import { startRegistration } from '@simplewebauthn/browser'
-import { useState } from 'react'
-import { toast } from 'sonner'
-
-import {
-    getRegistrationOptions,
-    verifyRegistration,
-} from '@/features/account/passkeys/api.ts'
-
+import { getRecoveryCodes } from '@/features/account/authenticator/api.ts'
 import AuthSetting from '@/features/account/components/AuthSetting.tsx'
 import PasskeyDeleteDialog from '@/features/account/components/PasskeyDeleteDialog.tsx'
 import PasskeyList from '@/features/account/components/PasskeyList.tsx'
+import PasskeyRecoveryCodesDialog from '@/features/account/components/PasskeyRecoveryCodesDialog.tsx'
 import PasskeyRenameDialog from '@/features/account/components/PasskeyRenameDialog.tsx'
 import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
-
-import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+import {
+    getRegistrationOptions,
+    passkeyQueries,
+    usePasskeys,
+    verifyRegistration,
+} from '@/features/account/passkeys/api.ts'
+import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { getApiErrorMessage } from '@/utils/http.ts'
+import { startRegistration } from '@simplewebauthn/browser'
+import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -32,7 +34,13 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 
 const PasskeysMainDialog = () => {
+    const queryClient = useQueryClient()
+    const { data: passkeys } = usePasskeys()
     const [isMainDialogOpen, setMainDialogOpen] = useState(false)
+    const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
+    const [registeredPasskey, setRegisteredPasskey] = useState<
+        Awaited<ReturnType<typeof verifyRegistration>>['passkey'] | null
+    >(null)
     const openModal = usePasskeysModalStore(state => state.openModal)
 
     const [state, register] = useAsyncFunction(async () => {
@@ -41,9 +49,18 @@ const PasskeysMainDialog = () => {
 
             const registrationData = await startRegistration({ optionsJSON })
 
-            const passkey = await verifyRegistration(registrationData)
+            const result = await verifyRegistration(registrationData)
 
-            openModal('rename', passkey)
+            await queryClient.invalidateQueries({
+                queryKey: passkeyQueries.all(),
+            })
+
+            if (result.recoveryCodes) {
+                setRegisteredPasskey(result.passkey)
+                setRecoveryCodes(result.recoveryCodes)
+            } else {
+                openModal('rename', result.passkey)
+            }
 
             toast.success('Passkey added')
         } catch (e) {
@@ -60,6 +77,24 @@ const PasskeysMainDialog = () => {
             throw e
         }
     })
+
+    const [recoveryState, showRecoveryCodes] = useAsyncFunction(async () => {
+        try {
+            setRecoveryCodes(await getRecoveryCodes())
+        } catch (e) {
+            toast.error('Failed to load recovery codes')
+            throw e
+        }
+    })
+
+    const closeRecoveryCodes = () => {
+        setRecoveryCodes(null)
+
+        if (registeredPasskey) {
+            openModal('rename', registeredPasskey)
+            setRegisteredPasskey(null)
+        }
+    }
 
     return (
         <ResponsiveDialog
@@ -99,17 +134,25 @@ const PasskeysMainDialog = () => {
 
                 <ResponsiveDialogBody
                     className={
-                        'relative h-full max-h-[50vh] overflow-y-auto overflow-x-visible'
+                        'relative h-full max-h-[50vh] overflow-x-visible overflow-y-auto'
                     }
                 >
                     <PasskeyList />
                 </ResponsiveDialogBody>
                 <ResponsiveDialogFooter>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Close</Button>
-                        }
+                        render={<Button variant={'outline'}>Close</Button>}
                     />
+
+                    {passkeys && passkeys.length > 0 && (
+                        <Button
+                            variant={'outline'}
+                            loading={recoveryState.loading}
+                            onClick={showRecoveryCodes}
+                        >
+                            Recovery codes
+                        </Button>
+                    )}
 
                     <Button
                         loading={state.loading}
@@ -125,6 +168,10 @@ const PasskeysMainDialog = () => {
                 <AuthDialog onCancel={() => setMainDialogOpen(false)} />
                 <PasskeyRenameDialog />
                 <PasskeyDeleteDialog />
+                <PasskeyRecoveryCodesDialog
+                    codes={recoveryCodes}
+                    onClose={closeRecoveryCodes}
+                />
             </ResponsiveDialogContent>
         </ResponsiveDialog>
     )
