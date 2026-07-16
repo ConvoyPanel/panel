@@ -336,28 +336,7 @@ against multiple seconds before. Note `features/auth/api.ts` had already set
 `retry: false` on `secondFactorQueries.methods()` for the same reason; the
 general lesson is that a query behind an identity gate must not fire before it.
 
-## 4. Outstanding
-
-- **`Select alignItemWithTrigger` was flipped to nova's `true` but never verified
-  in a browser.** It changes positioning for all 6 selects; `PenaltyActionFields`
-  (admin bandwidth rules) was never reached. Selects inside scrolling dialogs are
-  where item-alignment misbehaves. Note `data-side` becomes `"none"` in that mode,
-  so the `data-[side=…]` slide classes never match and
-  `data-[align-trigger=true]:animate-none` cancels the rest — nova's intended
-  behaviour, but it means selects open with no animation.
-- **`docs/card-design.md` covers Card/Field/Input/InputGroup and says nothing
-  about Dialog/Drawer/ResponsiveDialog/Tabs/Select.** Nearly every UI bug this
-  session was an *undocumented* divergence from an upstream default —
-  `activateOnFocus`, `alignItemWithTrigger`, Select's padding living on
-  `SelectGroup`, and a comment citing `initializeWithValue` (a **usehooks-ts**
-  option mantine does not have). Divergence is often right; unrecorded divergence
-  is indistinguishable from an accident. Extend that doc to the dialog family.
-- Deliberate divergences to record: Base UI transitions over nova's `animate-in`
-  keyframes (a keyframed transform fights the nesting scale/offset for the same
-  properties); `sm:max-w-lg` over nova's `sm:max-w-sm`; Select padding on `List`
-  rather than `SelectGroup` (no consumer uses `SelectGroup`).
-
-## 5. Environment
+## 4. Environment
 
 - `visual-admin@example.test` has password `Password123!`, set for browser
   verification. Its 2FA/passkeys were reset repeatedly via SQL:
