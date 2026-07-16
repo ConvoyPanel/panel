@@ -45,7 +45,9 @@ const SwitchForm = ({
                     <FormControl>
                         <Switch
                             {...props}
-                            checked={field.value}
+                            // See CheckboxForm: `undefined` here latches the
+                            // switch uncontrolled for its whole lifetime.
+                            checked={field.value ?? false}
                             onCheckedChange={field.onChange}
                             disabled={disabled || formState.isSubmitting}
                         />

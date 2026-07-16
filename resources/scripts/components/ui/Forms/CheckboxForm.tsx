@@ -42,7 +42,11 @@ const CheckboxForm = ({
                     <FormControl>
                         <Checkbox
                             {...props}
-                            checked={field.value}
+                            // Never pass `undefined`: Base UI latches
+                            // controlled-ness on the first render, so a field
+                            // whose form has no `defaultValues` would stay
+                            // uncontrolled and ignore every later value.
+                            checked={field.value ?? false}
                             onCheckedChange={field.onChange}
                             disabled={disabled || formState.isSubmitting}
                         />

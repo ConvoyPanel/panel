@@ -159,6 +159,32 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
   `features/nodes/components/Create/*`) predates this pattern and is the next thing to
   bring in line — see the redesign directions discussed in the v10 handoff.
 
+## Boolean form fields must never be handed `undefined`
+
+`CheckboxForm`, `CheckboxItemForm` and `SwitchForm` all pass `field.value ?? false` to the
+Base UI primitive. The `?? false` is load-bearing, not defensive noise.
+
+Base UI decides once, on the **first render**, whether a component is controlled, and
+remembers that for the component's whole life (`useControlled.mjs`:
+`const { current: isControlled } = React.useRef(controlled !== undefined)`). A form built
+as `useForm({ resolver })` with **no `defaultValues`** yields `field.value === undefined`
+on that first render, so the primitive latches *uncontrolled* and then ignores every value
+it is given afterwards — including everything a later `form.reset(...)` supplies.
+
+This is worse than a stale display. The box renders from Base UI's own internal state, so
+it starts unchecked no matter what the record says, and the first click toggles that
+internal state `false → true` and reports `onCheckedChange(true)` — meaning a user who
+clicks once to "turn the thing off" submits it **on**. It shipped in the node settings page,
+where `verify_tls` was stuck on and could not be turned off through the UI at all; every
+Proxmox call failed TLS verification and the node's live cards never loaded.
+
+It is silent in production: Base UI's controlled/uncontrolled warning is behind
+`NODE_ENV !== 'production'`, and text inputs in the same form populate normally from
+`reset()`, so the form looks like it works.
+
+Prefer giving `useForm` real `defaultValues` as well — but the `?? false` in the primitives
+is what makes every consumer safe by default.
+
 ## Dialog family, Tabs, and Select
 
 These primitives use the same `base` + `nova` source as Card, but a few deliberate

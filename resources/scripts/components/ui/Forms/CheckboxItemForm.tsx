@@ -36,7 +36,9 @@ const CheckboxItemForm = ({
                     <FormControl>
                         <Checkbox
                             {...props}
-                            checked={field.value}
+                            // See CheckboxForm: `undefined` here latches the
+                            // checkbox uncontrolled for its whole lifetime.
+                            checked={field.value ?? false}
                             onCheckedChange={field.onChange}
                             disabled={disabled || formState.isSubmitting}
                         />
