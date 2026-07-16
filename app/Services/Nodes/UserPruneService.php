@@ -8,9 +8,7 @@ use App\Services\Proxmox\Node\ProxmoxAccessClient;
 
 class UserPruneService
 {
-    public function __construct(private ProxmoxAccessClient $client)
-    {
-    }
+    public function __construct(private ProxmoxAccessClient $client) {}
 
     public function handle(Node $node): void
     {

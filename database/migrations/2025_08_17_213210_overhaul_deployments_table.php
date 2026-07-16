@@ -18,7 +18,7 @@ return new class extends Migration
                 'built_vm_at',
                 'sync_successful',
                 'synced_vm_at',
-                'created_at'
+                'created_at',
             ]);
 
             $table->after('template_id', function (Blueprint $table) {

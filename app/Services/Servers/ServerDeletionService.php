@@ -11,9 +11,7 @@ use App\Models\Server;
 
 class ServerDeletionService
 {
-    public function __construct(private DeleteServerAction $deleteServerAction)
-    {
-    }
+    public function __construct(private DeleteServerAction $deleteServerAction) {}
 
     public function handle(Server $server, bool $noPurge = false): void
     {

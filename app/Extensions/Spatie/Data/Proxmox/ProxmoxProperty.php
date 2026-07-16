@@ -23,8 +23,8 @@ class ProxmoxProperty
     /**
      * @param  string  $key  The PVE property-list key (e.g. "firewall", "tag", "rate").
      * @param  class-string<ProxmoxPropertyCast>|null  $cast  Explicit cast for
-     *         values that are not a plain int, string, or backed enum. int,
-     *         string, and backed-enum properties are handled automatically.
+     *                                                        values that are not a plain int, string, or backed enum. int,
+     *                                                        string, and backed-enum properties are handled automatically.
      */
     public function __construct(
         public string $key,

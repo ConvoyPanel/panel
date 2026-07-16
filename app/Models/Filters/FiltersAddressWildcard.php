@@ -15,17 +15,17 @@ class FiltersAddressWildcard implements Filter
             'address' => true, // true = convert to lowercase
             'mac_address' => true,
         ];
-        
+
         $query->where(function (Builder $subQuery) use ($fields, $value) {
             $first = true;
-            
+
             foreach ($fields as $field => $convertCase) {
                 $method = $first ? 'where' : 'orWhere';
                 $first = false;
-                
+
                 if (is_array($value)) {
-                    $values = $convertCase 
-                        ? Arr::map($value, fn($v) => strtolower($v)) 
+                    $values = $convertCase
+                        ? Arr::map($value, fn ($v) => strtolower($v))
                         : $value;
                     $whereInMethod = "{$method}In";
                     $subQuery->{$whereInMethod}($field, $values);

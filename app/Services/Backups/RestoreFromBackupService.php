@@ -2,8 +2,8 @@
 
 namespace App\Services\Backups;
 
-use App\Enums\Server\State;
 use App\Enums\Server\ServerStatus;
+use App\Enums\Server\State;
 use App\Jobs\Server\MonitorBackupRestorationJob;
 use App\Models\Backup;
 use App\Models\Server;
@@ -18,8 +18,7 @@ class RestoreFromBackupService
         private ConnectionInterface $connection,
         private ProxmoxServerClient $serverClient,
         private ProxmoxBackupClient $proxmoxClient,
-    ) {
-    }
+    ) {}
 
     public function handle(Server $server, Backup $backup)
     {

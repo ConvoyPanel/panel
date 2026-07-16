@@ -3,9 +3,9 @@
 namespace App\Services\Proxmox\Node;
 
 use App\Data\Node\Status\NodeStatusData;
+use App\Exceptions\Proxmox\RequestException;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Proxmox\RequestException;
 
 class ProxmoxStatusClient extends ProxmoxClient
 {

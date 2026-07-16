@@ -10,10 +10,6 @@ trait HandlesProxmoxErrors
 {
     /**
      * Determine if a "does not exist" error should be ignored.
-     *
-     * @param  RequestException  $e
-     * @param  string  $message
-     * @return bool
      */
     protected function isNonexistentVMError(RequestException $e, string $message = 'does not exist'): bool
     {

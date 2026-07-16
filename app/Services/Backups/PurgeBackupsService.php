@@ -9,8 +9,7 @@ class PurgeBackupsService
 {
     public function __construct(
         private BackupDeletionService $backupDeletionService,
-    ) {
-    }
+    ) {}
 
     public function handle(Server $server)
     {

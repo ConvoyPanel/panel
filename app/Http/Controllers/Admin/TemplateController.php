@@ -18,7 +18,7 @@ class TemplateController
         $templates = QueryBuilder::for($templateGroup->templates())
             ->allowedFilters([
                 'name',
-                AllowedFilter::exact('is_admin_only')
+                AllowedFilter::exact('is_admin_only'),
             ])
             ->defaultSort('name')
             ->get();

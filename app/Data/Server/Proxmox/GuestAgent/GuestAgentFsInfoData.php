@@ -2,8 +2,8 @@
 
 namespace App\Data\Server\Proxmox\GuestAgent;
 
-use Spatie\LaravelData\Data;
 use Illuminate\Support\Arr;
+use Spatie\LaravelData\Data;
 
 class GuestAgentFsInfoData extends Data
 {

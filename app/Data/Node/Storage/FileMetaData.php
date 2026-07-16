@@ -9,7 +9,6 @@ class FileMetaData extends Data
     public function __construct(
         public string $fileName,
         public string $mimeType,
-        public int    $size,
-    ) {
-    }
+        public int $size,
+    ) {}
 }

@@ -3,9 +3,9 @@
 namespace App\Services\Proxmox\Server;
 
 use App\Enums\Server\PowerCommand;
+use App\Exceptions\Proxmox\RequestException;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Proxmox\RequestException;
 
 class ProxmoxPowerClient extends ProxmoxClient
 {

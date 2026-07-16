@@ -16,9 +16,7 @@ class SyncServerUsagesJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(protected int $nodeId)
-    {
-    }
+    public function __construct(protected int $nodeId) {}
 
     public function handle(ServerUsagesSyncService $service): void
     {

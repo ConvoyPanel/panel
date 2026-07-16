@@ -294,7 +294,7 @@ class AllocationService
      */
     private function purgeDetachedVolume(ProxmoxConfigClient $client, string $volume): void
     {
-        for ($attempt = 0; $attempt < self::UNUSED_POLL_ATTEMPTS; ++$attempt) {
+        for ($attempt = 0; $attempt < self::UNUSED_POLL_ATTEMPTS; $attempt++) {
             $raw = $client->getRawConfig();
             $key = $this->findUnusedKeyForVolume($raw, $volume);
 
@@ -397,7 +397,7 @@ class AllocationService
      * backing volume (not a non-existent "media_name"), so it correctly
      * identifies the mount instead of never matching.
      *
-     * @param  \Illuminate\Support\Collection<int, DiskData>  $disks
+     * @param  Collection<int, DiskData>  $disks
      */
     private function findMountedIsoDisk(Collection $disks, ISO $iso): ?DiskData
     {

@@ -7,4 +7,3 @@ enum TaskExitStatus: string
     case OK = 'OK';
     case WARNINGS = 'WARNINGS';
 }
-

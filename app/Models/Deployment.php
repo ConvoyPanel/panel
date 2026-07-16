@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Enums\Server\DeploymentType;
 use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Deployment extends Model
 {
     const UPDATED_AT = null;
+
     const CREATED_AT = null;
 
     /**

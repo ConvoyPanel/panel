@@ -6,7 +6,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -33,6 +34,7 @@ return new class extends Migration {
 
         /**
          * The key is the node id and the value is the address pool id
+         *
          * @var array<int, int> $pools
          */
         $pools = [];

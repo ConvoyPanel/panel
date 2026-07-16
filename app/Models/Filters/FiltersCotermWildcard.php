@@ -10,6 +10,6 @@ class FiltersCotermWildcard implements Filter
     public function __invoke(Builder $query, $value, string $property): void
     {
         $query->where('id', $value)
-              ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
+            ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
     }
 }

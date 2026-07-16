@@ -2,12 +2,13 @@
 
 namespace App\Actions\Ipam;
 
-use App\Models\AddressBlock;
+use App\Data\Ipam\GeneratedAddressesData;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
-use App\Data\Ipam\GeneratedAddressesData;
+use App\Models\AddressBlock;
 
-class GenerateAddressesAction {
+class GenerateAddressesAction
+{
     private const BATCH_SIZE = 300;
 
     public function execute(AddressBlock $addressBlock): GeneratedAddressesData
@@ -52,7 +53,7 @@ class GenerateAddressesAction {
             ];
         }
 
-        if (!empty($insertData)) {
+        if (! empty($insertData)) {
             $addressBlock->addresses()->insert($insertData);
         }
 
@@ -80,6 +81,7 @@ class GenerateAddressesAction {
             $subnetAddr = $networkAddr + ($i * $subnetIncrement);
             $addresses[] = long2ip($subnetAddr);
         }
+
         return $addresses;
     }
 
@@ -108,6 +110,7 @@ class GenerateAddressesAction {
             }
             $addresses[] = inet_ntop($newBinaryIp);
         }
+
         return $addresses;
     }
 
@@ -124,6 +127,7 @@ class GenerateAddressesAction {
                 $result[$i] = chr(ord($result[$i]) & $mask);
             }
         }
+
         return $result;
     }
 }

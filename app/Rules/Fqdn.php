@@ -30,7 +30,7 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class Fqdn implements ValidationRule, DataAwareRule
+class Fqdn implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -82,7 +82,7 @@ class Fqdn implements ValidationRule, DataAwareRule
      */
     public static function make(?string $schemeField = null): self
     {
-        return tap(new self(), function ($fqdn) use ($schemeField) {
+        return tap(new self, function ($fqdn) use ($schemeField) {
             $fqdn->schemeField = $schemeField;
         });
     }

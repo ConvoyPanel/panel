@@ -15,9 +15,7 @@ use Exception;
 
 class ServerConsoleService
 {
-    public function __construct(private ProxmoxServerClient $serverClient, private ProxmoxAccessClient $accessClient, private ProxmoxConsoleClient $consoleClient)
-    {
-    }
+    public function __construct(private ProxmoxServerClient $serverClient, private ProxmoxAccessClient $accessClient, private ProxmoxConsoleClient $consoleClient) {}
 
     public function createConsoleUserCredentials(Server $server): UserCredentialsData
     {

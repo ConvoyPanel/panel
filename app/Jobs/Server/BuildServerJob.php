@@ -2,12 +2,10 @@
 
 namespace App\Jobs\Server;
 
-use Throwable;
-use App\Enums\Server\DeploymentStatus;
 use App\Exceptions\Proxmox\RequestException;
-use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;
+use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

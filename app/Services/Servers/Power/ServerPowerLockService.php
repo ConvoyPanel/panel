@@ -44,7 +44,7 @@ class ServerPowerLockService
         $acquired = Cache::add($this->key($server), $pending->toArray(), self::TTL_SECONDS);
 
         if (! $acquired) {
-            throw new PowerActionInProgressException();
+            throw new PowerActionInProgressException;
         }
 
         return $pending;

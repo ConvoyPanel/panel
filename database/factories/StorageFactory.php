@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Storage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 use function rand;

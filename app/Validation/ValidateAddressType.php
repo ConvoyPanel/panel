@@ -7,9 +7,7 @@ use Illuminate\Validation\Validator;
 
 class ValidateAddressType
 {
-    public function __construct(private AddressVersion $addressType, private array $fields)
-    {
-    }
+    public function __construct(private AddressVersion $addressType, private array $fields) {}
 
     public function __invoke(Validator $validator)
     {

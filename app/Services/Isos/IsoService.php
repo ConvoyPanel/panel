@@ -18,8 +18,7 @@ class IsoService
     public function __construct(
         private ConnectionInterface $connection,
         private ProxmoxStorageClient $client,
-    ) {
-    }
+    ) {}
 
     public function download(
         Node $node,

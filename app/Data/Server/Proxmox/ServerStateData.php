@@ -11,14 +11,13 @@ class ServerStateData extends Data
     public function __construct(
         public State $state,
         public float $cpuUsed,
-        public int   $memoryTotal,
-        public int   $memoryUsed,
-        public int   $uptime,
+        public int $memoryTotal,
+        public int $memoryUsed,
+        public int $uptime,
         // Populated by the controller from ServerPowerLockService — not part of
         // the raw Proxmox status, so fromRaw() leaves it null.
         public ?PendingPowerActionData $pendingPowerAction = null,
-    ) {
-    }
+    ) {}
 
     public static function fromRaw(array $raw): self
     {

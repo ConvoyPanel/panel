@@ -8,8 +8,8 @@ use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Attributes\WithoutRelations;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
@@ -27,9 +27,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
         #[WithoutRelations]
         public Server $server,
         public string $upid
-    )
-    {
-    }
+    ) {}
 
     public function middleware(): array
     {

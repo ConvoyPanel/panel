@@ -3,17 +3,15 @@
 namespace App\Rules;
 
 use App\Services\Addresses\AddressAvailabilityService;
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Closure;
 
 class HasSufficientAddresses implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
-    public function __construct(protected AddressAvailabilityService $service)
-    {
-    }
+    public function __construct(protected AddressAvailabilityService $service) {}
 
     public function setData($data): self
     {
@@ -31,7 +29,7 @@ class HasSufficientAddresses implements DataAwareRule, ValidationRule
             return;
         }
 
-        if (!$this->service->hasSufficientAddresses($value, $ipv4Count, $ipv6Count)) {
+        if (! $this->service->hasSufficientAddresses($value, $ipv4Count, $ipv6Count)) {
             $fail('The selected network interface does not have enough available IP addresses.');
         }
     }

@@ -9,7 +9,6 @@ use App\Extensions\Spatie\Data\Proxmox\PropertyList;
  * emit (NetworkDeviceData, TpmStateDiskData): parsing a real PVE string,
  * re-emitting it, and parsing again must not silently drop fields.
  */
-
 it('round-trips real PVE net device strings without dropping fields', function (string $raw) {
     $emit = fn (string $line) => NetworkDeviceData::fromRaw(['net0' => $line])->first()->toProxmoxString()[1];
 

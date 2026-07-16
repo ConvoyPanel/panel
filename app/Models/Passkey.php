@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\LaravelPasskeys\Models\Passkey as SpatiePasskey;
 use Webauthn\PublicKeyCredentialSource;
@@ -33,7 +34,7 @@ class Passkey extends SpatiePasskey
     ];
 
     /**
-     * Kept for {@see \App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest}.
+     * Kept for {@see RenamePasskeyRequest}.
      */
     public static array $validationRules = [
         'name' => 'required|string|max:40',

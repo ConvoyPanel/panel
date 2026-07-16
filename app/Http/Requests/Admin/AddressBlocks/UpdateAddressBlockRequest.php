@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\Admin\AddressBlocks;
 
-use IPLib\Factory as IPFactory;
 use App\Enums\Network\AddressVersion;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\AddressBlock;
 use Illuminate\Support\Arr;
+use IPLib\Factory as IPFactory;
 
 class UpdateAddressBlockRequest extends BaseApiRequest
 {

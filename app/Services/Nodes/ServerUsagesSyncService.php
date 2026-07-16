@@ -12,9 +12,7 @@ use Carbon\Carbon;
 
 class ServerUsagesSyncService
 {
-    public function __construct(private ProxmoxStatisticsClient $client)
-    {
-    }
+    public function __construct(private ProxmoxStatisticsClient $client) {}
 
     public function handle(Node $node): void
     {

@@ -9,11 +9,11 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Throwable;
-use Illuminate\Queue\Attributes\WithoutRelations;
 
 class BatchSyncNetworkSettingsJob implements ShouldQueue
 {
@@ -54,7 +54,7 @@ class BatchSyncNetworkSettingsJob implements ShouldQueue
         $jobs = $servers->map(fn (Server $server) => new SyncNetworkSettingsJob($server))->toArray();
 
         Bus::batch($jobs)
-            ->name('Sync network settings for address block #' . $this->addressBlock->id)
+            ->name('Sync network settings for address block #'.$this->addressBlock->id)
             ->allowFailures()
             ->dispatch();
     }

@@ -8,6 +8,7 @@ use Ramsey\Uuid\Uuid;
 class TemplateGroup extends Model
 {
     const UPDATED_AT = null;
+
     const CREATED_AT = null;
 
     public static array $validationRules = [

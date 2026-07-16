@@ -39,7 +39,7 @@ return new class extends Migration
 
                 // Process VM storage
                 $vmPath = $node->vm_storage;
-                if (!isset($storagePathMap[$vmPath])) {
+                if (! isset($storagePathMap[$vmPath])) {
                     $vmStorageId = DB::table('storages')->insertGetId([
                         'nickname' => 'VM Storage',
                         'description' => 'Migrated from node settings',
@@ -76,7 +76,7 @@ return new class extends Migration
 
                 // Process Backup storage
                 $backupPath = $node->backup_storage;
-                if (!isset($storagePathMap[$backupPath])) {
+                if (! isset($storagePathMap[$backupPath])) {
                     $backupStorageId = DB::table('storages')->insertGetId([
                         'nickname' => 'Backup Storage',
                         'description' => 'Migrated from node settings',
@@ -113,7 +113,7 @@ return new class extends Migration
 
                 // Process ISO storage
                 $isoPath = $node->iso_storage;
-                if (!isset($storagePathMap[$isoPath])) {
+                if (! isset($storagePathMap[$isoPath])) {
                     $isoStorageId = DB::table('storages')->insertGetId([
                         'nickname' => 'ISO Storage',
                         'description' => 'Migrated from node settings',
@@ -151,11 +151,17 @@ return new class extends Migration
                 // Update nicknames based on combined capabilities
                 foreach ($storagePathMap as $path => $storage) {
                     $capabilities = [];
-                    if ($storage['has_kvm']) $capabilities[] = 'VM';
-                    if ($storage['has_backups']) $capabilities[] = 'Backup';
-                    if ($storage['has_iso']) $capabilities[] = 'ISO';
+                    if ($storage['has_kvm']) {
+                        $capabilities[] = 'VM';
+                    }
+                    if ($storage['has_backups']) {
+                        $capabilities[] = 'Backup';
+                    }
+                    if ($storage['has_iso']) {
+                        $capabilities[] = 'ISO';
+                    }
 
-                    $nickname = implode('/', $capabilities) . ' Storage';
+                    $nickname = implode('/', $capabilities).' Storage';
 
                     DB::table('storages')
                         ->where('id', $storage['id'])
@@ -164,7 +170,7 @@ return new class extends Migration
                     // Link storage to the node
                     DB::table('storage_to_node')->insert([
                         'storage_id' => $storage['id'],
-                        'node_id' => $node->id
+                        'node_id' => $node->id,
                     ]);
                 }
             }

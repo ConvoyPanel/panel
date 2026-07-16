@@ -20,7 +20,7 @@ class ProxmoxConfigClient extends ProxmoxClient
         $response = $this->getHttpClientWithParams()
             ->get('/api2/json/nodes/{node}/qemu/{server}/config')
             ->json();
-        
+
         return ServerConfigData::fromRaw($this->getData($response));
     }
 

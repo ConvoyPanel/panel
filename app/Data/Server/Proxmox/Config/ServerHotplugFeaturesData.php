@@ -2,8 +2,8 @@
 
 namespace App\Data\Server\Proxmox\Config;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Spatie\LaravelData\Data;
 
 class ServerHotplugFeaturesData extends Data
@@ -30,7 +30,7 @@ class ServerHotplugFeaturesData extends Data
             );
         }
 
-        if (!Arr::exists($raw, 'hotplug') || Arr::get($raw, 'hotplug') === '1') {
+        if (! Arr::exists($raw, 'hotplug') || Arr::get($raw, 'hotplug') === '1') {
             return new self(
                 isCpuEnabled: false,
                 isMemoryEnabled: false,

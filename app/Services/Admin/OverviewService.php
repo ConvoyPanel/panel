@@ -12,7 +12,6 @@ use App\Data\Admin\Overview\OverviewData;
 use App\Data\Admin\Overview\OverviewTrendsData;
 use App\Data\Admin\Overview\ResourceAllocationData;
 use App\Data\Admin\Overview\ServerStatusBreakdownData;
-use App\Services\Metrics\VictoriaMetrics;
 use App\Enums\Server\ServerStatus;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
@@ -23,6 +22,7 @@ use App\Models\Node;
 use App\Models\Server;
 use App\Models\Storage;
 use App\Models\User;
+use App\Services\Metrics\VictoriaMetrics;
 use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -155,7 +155,7 @@ class OverviewService
      * Per-node committed memory/disk. These are raw aggregates over the (MiB) DB columns —
      * StorageSizeCast is not applied to the SUM alias — so callers convert to bytes.
      *
-     * @return Collection<int|string, \stdClass>  keyed by node_id
+     * @return Collection<int|string, \stdClass> keyed by node_id
      */
     private function loadServerAllocations(): Collection
     {

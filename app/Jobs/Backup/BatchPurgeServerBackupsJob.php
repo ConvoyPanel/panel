@@ -2,7 +2,6 @@
 
 namespace App\Jobs\Backup;
 
-use App\Jobs\Backup\DeleteBackupJob;
 use App\Models\Backup;
 use App\Models\Server;
 use Illuminate\Bus\Batchable;

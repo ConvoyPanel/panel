@@ -7,9 +7,7 @@ use App\Services\Proxmox\Server\ProxmoxConfigClient;
 
 class ServerAuthService
 {
-    public function __construct(private ProxmoxConfigClient $configClient)
-    {
-    }
+    public function __construct(private ProxmoxConfigClient $configClient) {}
 
     public function setPassword(Server $server, string $password): void
     {

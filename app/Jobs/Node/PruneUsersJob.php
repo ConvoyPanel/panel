@@ -18,9 +18,7 @@ class PruneUsersJob implements ShouldQueue
 
     public int $timeout = 120;
 
-    public function __construct(protected int $nodeId)
-    {
-    }
+    public function __construct(protected int $nodeId) {}
 
     public function handle(UserPruneService $service): void
     {

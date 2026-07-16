@@ -5,6 +5,7 @@ namespace App\Jobs\Node;
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Models\ISO;
+use App\Models\Node;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,9 +24,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
         return now()->addDay();
     }
 
-    public function __construct(protected int $isoId, protected string $upid)
-    {
-    }
+    public function __construct(protected int $isoId, protected string $upid) {}
 
     public function middleware()
     {
@@ -35,7 +34,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
     public function handle(ProxmoxActivityClient $client): void
     {
         $iso = ISO::findOrFail($this->isoId);
-        /** @var \App\Models\Node $node */
+        /** @var Node $node */
         $node = $iso->storage->nodes()->firstOrFail();
 
         $task = $client->setNode($node)->getStatus($this->upid);

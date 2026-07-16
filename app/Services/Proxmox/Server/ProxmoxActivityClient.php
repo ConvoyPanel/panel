@@ -12,9 +12,10 @@ use Illuminate\Support\Collection;
 class ProxmoxActivityClient extends ProxmoxClient
 {
     /**
+     * @return Collection<int, TaskData>
+     *
      * @throws RequestException
      * @throws ConnectionException
-     * @return Collection<int, TaskData>
      */
     public function getTasks(int $startAt = 0, int $limitRows = 500): Collection
     {
@@ -30,7 +31,7 @@ class ProxmoxActivityClient extends ProxmoxClient
             ->json();
 
         return collect($this->getData($response))->map(
-            fn(array $task) => TaskData::fromRaw($task)
+            fn (array $task) => TaskData::fromRaw($task)
         );
     }
 
@@ -50,10 +51,10 @@ class ProxmoxActivityClient extends ProxmoxClient
     }
 
     /**
+     * @return Collection<int, TaskLogData>
+     *
      * @throws RequestException
      * @throws ConnectionException
-     *
-     * @return Collection<int, TaskLogData>
      */
     public function getLogsByTask(string $upid, int $startAt = 0, int $limitLinesTo = 100): Collection
     {
@@ -67,7 +68,7 @@ class ProxmoxActivityClient extends ProxmoxClient
             ->json();
 
         return collect($this->getData($response))->map(
-            fn(array $log) => TaskLogData::fromRaw($log)
+            fn (array $log) => TaskLogData::fromRaw($log)
         );
     }
 

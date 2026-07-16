@@ -4,6 +4,7 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Rules\HasSufficientDiskSpace;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
@@ -104,7 +105,7 @@ it('checks a secondary disk against its own (different) storage', function () {
 });
 
 it('fails open when the node is offline', function () {
-    Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('node down'));
+    Http::fake(fn () => throw new ConnectionException('node down'));
 
     $data = [
         'node_id' => $this->node->id,

@@ -8,7 +8,6 @@ use App\Models\User;
  * same route definitions as the admin panel (/api/admin, web session). These
  * tests lock in the two guarantees that make that sharing safe.
  */
-
 function applicationToken(bool $admin = true): string
 {
     $user = User::factory()->create(['root_admin' => $admin]);

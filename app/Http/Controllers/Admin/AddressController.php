@@ -93,7 +93,7 @@ class AddressController
     public function reserve(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address)
     {
         if ($address->state !== AddressState::Available) {
-            throw new AddressNotAvailableException();
+            throw new AddressNotAvailableException;
         }
 
         $address->update(['state' => AddressState::Reserved]);
@@ -105,7 +105,7 @@ class AddressController
     public function unreserve(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address)
     {
         if ($address->state !== AddressState::Reserved) {
-            throw new AddressNotReservedException();
+            throw new AddressNotReservedException;
         }
 
         $address->update(['state' => AddressState::Available]);

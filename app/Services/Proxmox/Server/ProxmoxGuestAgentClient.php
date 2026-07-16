@@ -13,7 +13,6 @@ use App\Exceptions\Proxmox\RequestException;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 
 class ProxmoxGuestAgentClient extends ProxmoxClient
 {
@@ -51,6 +50,7 @@ class ProxmoxGuestAgentClient extends ProxmoxClient
 
     /**
      * @return Collection<int, GuestAgentNetworkInterfaceData>
+     *
      * @throws GuestAgentUnavailableException
      * @throws RequestException
      * @throws ConnectionException
@@ -71,6 +71,7 @@ class ProxmoxGuestAgentClient extends ProxmoxClient
 
     /**
      * @return Collection<int, GuestAgentFsInfoData>
+     *
      * @throws GuestAgentUnavailableException
      * @throws RequestException
      * @throws ConnectionException
@@ -90,6 +91,7 @@ class ProxmoxGuestAgentClient extends ProxmoxClient
 
     /**
      * @return Collection<int, GuestAgentUserData>
+     *
      * @throws GuestAgentUnavailableException
      * @throws RequestException
      * @throws ConnectionException
@@ -273,14 +275,17 @@ class ProxmoxGuestAgentClient extends ProxmoxClient
 
             // get-timezone returns { "zone": "UTC", "offset": 0 }
             $data = $this->getData($response)['result'] ?? [];
+
             return $data['zone'] ?? '';
         });
     }
 
     /**
      * @template T
-     * @param callable(): T $callback
+     *
+     * @param  callable(): T  $callback
      * @return T
+     *
      * @throws GuestAgentUnavailableException
      * @throws RequestException
      * @throws ConnectionException

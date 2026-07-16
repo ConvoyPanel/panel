@@ -17,7 +17,7 @@ class RenameServerRequest extends BaseApiRequest
     {
         return [
             'name' => Server::getRules()['name'],
-            'hostname' => [...Server::getRules()['hostname'], ...[new Hostname()]],
+            'hostname' => [...Server::getRules()['hostname'], ...[new Hostname]],
         ];
     }
 }

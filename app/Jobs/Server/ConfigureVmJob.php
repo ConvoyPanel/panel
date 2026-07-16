@@ -2,16 +2,14 @@
 
 namespace App\Jobs\Server;
 
-use Throwable;
-use App\Enums\Server\DeploymentStatus;
-use Illuminate\Http\Client\ConnectionException;
 use App\Exceptions\Proxmox\RequestException;
-use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\VmSyncService;
+use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;

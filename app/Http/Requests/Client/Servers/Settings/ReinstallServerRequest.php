@@ -4,10 +4,10 @@ namespace App\Http\Requests\Client\Servers\Settings;
 
 use App\Enums\Server\ServerStatus;
 use App\Http\Requests\BaseApiRequest;
-use App\Rules\TemplateIsAvailable;
-use App\Rules\TemplateFitsStorage;
 use App\Models\Server;
 use App\Models\Template;
+use App\Rules\TemplateFitsStorage;
+use App\Rules\TemplateIsAvailable;
 use Illuminate\Validation\Validator;
 
 class ReinstallServerRequest extends BaseApiRequest
@@ -34,8 +34,8 @@ class ReinstallServerRequest extends BaseApiRequest
                 'required',
                 'string',
                 'exists:templates,uuid',
-                new TemplateIsAvailable(),
-                new TemplateFitsStorage(),
+                new TemplateIsAvailable,
+                new TemplateFitsStorage,
             ],
             'account_password' => ['required', 'string', 'min:8', 'max:191'],
             'start_on_completion' => 'present|boolean',

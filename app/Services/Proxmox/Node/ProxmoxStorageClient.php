@@ -54,11 +54,11 @@ class ProxmoxStorageClient extends ProxmoxClient
 
     public function download(
         StorageContentType $contentType,
-        string             $storage,
-        string             $fileName,
-        string             $link,
-        ?bool              $verifyCertificates = true,
-        ?ChecksumData      $checksumData = null,
+        string $storage,
+        string $fileName,
+        string $link,
+        ?bool $verifyCertificates = true,
+        ?ChecksumData $checksumData = null,
     ) {
         Assert::regex($link, '/^(http|https):\/\//', 'Invalid URL provided');
 

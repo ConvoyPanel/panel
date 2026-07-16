@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Addresses;
 
+use App\Enums\Network\AddressState;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
 use App\Models\Server;
@@ -23,7 +24,7 @@ class UpdateAddressRequest extends BaseApiRequest
 
                     // A reserved address is fully locked — it must be unreserved before it can be
                     // assigned to a server.
-                    if ($address->state === \App\Enums\Network\AddressState::Reserved) {
+                    if ($address->state === AddressState::Reserved) {
                         $fail('This address is reserved. Unreserve it before assigning it to a server.');
 
                         return;

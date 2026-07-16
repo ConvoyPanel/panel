@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Admin\Nodes\Templates;
 
-use App\Models\Template;
 use App\Http\Requests\BaseApiRequest;
+use App\Models\Template;
 use Illuminate\Support\Arr;
 
 class TemplateRequest extends BaseApiRequest

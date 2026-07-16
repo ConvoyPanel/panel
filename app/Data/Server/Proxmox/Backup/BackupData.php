@@ -20,8 +20,7 @@ class BackupData extends Data
         public ?bool $isProtected,
         public ?int $used,
         public ?string $encrypted,
-    ) {
-    }
+    ) {}
 
     public static function fromRaw(array $raw): self
     {

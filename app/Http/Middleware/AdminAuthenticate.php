@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\SystemActor;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +26,7 @@ class AdminAuthenticate
     {
         // Sanctum resolves an application token to its tokenable, which for panel-wide tokens is the
         // SystemActor — not the User that the app's typed user() implies.
-        /** @var \App\Models\User|SystemActor|null $actor */
+        /** @var User|SystemActor|null $actor */
         $actor = $request->user();
 
         if ($actor instanceof SystemActor) {
@@ -33,7 +34,7 @@ class AdminAuthenticate
         }
 
         if (! $actor || ! $actor->root_admin) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         return $next($request);

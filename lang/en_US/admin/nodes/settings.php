@@ -13,12 +13,12 @@ return [
             'title' => 'Token Created',
             'description' => 'Here is your newly created token. Please take note of the token\'s value as this is the only and
             last time you will see it.',
-            'action' => 'Okay, I got it'
+            'action' => 'Okay, I got it',
         ],
         'reset' => [
             'title' => 'Reset Token?',
             'description' => 'Are you sure you want to reset this node\'s Coterm token? Any Coterm instances that are relying on this token will fail.',
             'action' => 'Reset Token',
-        ]
-    ]
+        ],
+    ],
 ];

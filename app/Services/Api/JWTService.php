@@ -92,6 +92,6 @@ class JWTService
 
     private function configFor(string $signingKey): Configuration
     {
-        return Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($signingKey));
+        return Configuration::forSymmetricSigner(new Sha256, InMemory::plainText($signingKey));
     }
 }

@@ -20,8 +20,7 @@ class BackupCreationService
     public function __construct(
         private ConnectionInterface $connection,
         private ProxmoxBackupClient $proxmoxClient,
-    ) {
-    }
+    ) {}
 
     public function create(
         Server $server,

@@ -15,6 +15,5 @@ class PendingPowerActionData extends Data
     public function __construct(
         public PowerCommand $command,
         public string $requestedAt,
-    ) {
-    }
+    ) {}
 }

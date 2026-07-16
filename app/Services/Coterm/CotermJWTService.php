@@ -13,9 +13,7 @@ use Webmozart\Assert\Assert;
 
 class CotermJWTService
 {
-    public function __construct(private JWTService $JWTService)
-    {
-    }
+    public function __construct(private JWTService $JWTService) {}
 
     public function handle(Server $server, User $user, ConsoleType $consoleType): Plain
     {

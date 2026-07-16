@@ -1,9 +1,15 @@
 <?php
 
+use App\Providers\ActivityLogServiceProvider;
+use App\Providers\AppServiceProvider;
+use App\Providers\FortifyServiceProvider;
+use App\Providers\HorizonServiceProvider;
+use App\Providers\TypeScriptTransformerServiceProvider;
+
 return [
-    App\Providers\ActivityLogServiceProvider::class,
-    App\Providers\AppServiceProvider::class,
-    App\Providers\TypeScriptTransformerServiceProvider::class,
-    App\Providers\HorizonServiceProvider::class,
-    App\Providers\FortifyServiceProvider::class,
+    ActivityLogServiceProvider::class,
+    AppServiceProvider::class,
+    TypeScriptTransformerServiceProvider::class,
+    HorizonServiceProvider::class,
+    FortifyServiceProvider::class,
 ];

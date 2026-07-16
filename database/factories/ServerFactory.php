@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Node;
-use App\Models\Server;
 use App\Models\Storage;
 use App\Models\User;
 use App\Services\Servers\ServerCreationService;

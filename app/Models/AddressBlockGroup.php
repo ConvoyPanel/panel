@@ -39,12 +39,12 @@ class AddressBlockGroup extends Model
             [
                 'address_block_group_id', // Foreign key on the pivot table
                 'id',                     // Foreign key on the network_interfaces table
-                'id'                      // Local key on the nodes table
+                'id',                      // Local key on the nodes table
             ],
             [
                 'id',                     // Local key on the address_block_groups table
                 'network_interface_id',   // Foreign key on the pivot table
-                'node_id'                 // Foreign key on the network_interfaces table
+                'node_id',                 // Foreign key on the network_interfaces table
             ]
         );
     }

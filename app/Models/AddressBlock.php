@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
 use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use IPLib\Factory as IPFactory;
 
 /**
@@ -112,7 +112,7 @@ class AddressBlock extends Model
     /** The last address of the block's overall range (its broadcast for v4), the ceiling for minting. */
     public function lastAllocatableAddress(): string
     {
-        return IPFactory::parseRangeString($this->base_ip . '/' . $this->prefix_length_from)
+        return IPFactory::parseRangeString($this->base_ip.'/'.$this->prefix_length_from)
             ->getEndAddress()
             ->toString();
     }

@@ -19,7 +19,7 @@ class AuthenticateServerAccess
         'client.servers.show.deployment',
         'client.servers.show.retry-installation',
         'client.servers.template-groups.index',
-        'client.servers.show.reinstall'
+        'client.servers.show.reinstall',
     ];
 
     /**

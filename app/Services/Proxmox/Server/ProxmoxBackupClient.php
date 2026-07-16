@@ -32,16 +32,16 @@ class ProxmoxBackupClient extends ProxmoxClient
             ->json();
 
         return BackupData::collect(
-            array_map(fn(array $backup) => BackupData::fromRaw($backup), $this->getData($response)),
+            array_map(fn (array $backup) => BackupData::fromRaw($backup), $this->getData($response)),
             Collection::class
         );
     }
 
     /**
+     * @return string UPID
+     *
      * @throws RequestException
      * @throws ConnectionException
-     *
-     * @return string UPID
      */
     public function backup(BackupMode $mode, BackupCompressionType $compressionType, string $storage): string
     {
@@ -63,10 +63,10 @@ class ProxmoxBackupClient extends ProxmoxClient
     }
 
     /**
+     * @return string UPID
+     *
      * @throws RequestException
      * @throws ConnectionException
-     *
-     * @return string UPID
      */
     public function restore(Backup $backup): string
     {
@@ -82,10 +82,10 @@ class ProxmoxBackupClient extends ProxmoxClient
     }
 
     /**
+     * @return string UPID
+     *
      * @throws RequestException
      * @throws ConnectionException
-     *
-     * @return string UPID
      */
     public function delete(Backup $backup): string
     {

@@ -8,7 +8,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class TemplateIsAvailable implements ValidationRule, DataAwareRule
+class TemplateIsAvailable implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -27,11 +27,11 @@ class TemplateIsAvailable implements ValidationRule, DataAwareRule
         }
 
         $node = Node::find($nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
-        if (!app(ServerCreationService::class)->isTemplateAvailable($node, $value)) {
+        if (! app(ServerCreationService::class)->isTemplateAvailable($node, $value)) {
             $fail('The selected template is not available on the target node.');
         }
     }

@@ -10,6 +10,5 @@ class ChecksumData extends Data
     public function __construct(
         public string $checksum,
         public ChecksumAlgorithm $algorithm,
-    ) {
-    }
+    ) {}
 }

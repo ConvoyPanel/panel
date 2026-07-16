@@ -90,7 +90,7 @@ abstract class BaseApiRequest extends FormRequest
      *
      * @template T of Model
      *
-     * @param class-string<T> $expect
+     * @param  class-string<T>  $expect
      * @return T
      *
      * @noinspection PhpDocSignatureInspection

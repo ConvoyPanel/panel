@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\OAuthConnection;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
@@ -30,11 +30,11 @@ function socialiteUser(string $id = '1001', string $email = 'jane@example.com', 
 }
 
 /** Stub Socialite's driver so `->user()` returns our fake (or throws). */
-function fakeSocialiteCallback(SocialiteUser|\Throwable $result, string $provider = 'google'): void
+function fakeSocialiteCallback(SocialiteUser|Throwable $result, string $provider = 'google'): void
 {
-    $driver = Mockery::mock(\Laravel\Socialite\Two\AbstractProvider::class);
+    $driver = Mockery::mock(AbstractProvider::class);
 
-    if ($result instanceof \Throwable) {
+    if ($result instanceof Throwable) {
         $driver->shouldReceive('user')->andThrow($result);
     } else {
         $driver->shouldReceive('user')->andReturn($result);
@@ -51,7 +51,7 @@ it('redirects an unknown/disabled provider to a 404', function () {
 it('starts the provider handshake and remembers the intended path', function () {
     enableProvider();
 
-    $driver = Mockery::mock(\Laravel\Socialite\Two\AbstractProvider::class);
+    $driver = Mockery::mock(AbstractProvider::class);
     $driver->shouldReceive('redirect')->andReturn(redirect('https://accounts.example.test/authorize'));
     Socialite::shouldReceive('driver')->with('google')->andReturn($driver);
 
@@ -64,7 +64,7 @@ it('starts the provider handshake and remembers the intended path', function () 
 it('ignores an absolute intended URL (open-redirect guard)', function () {
     enableProvider();
 
-    $driver = Mockery::mock(\Laravel\Socialite\Two\AbstractProvider::class);
+    $driver = Mockery::mock(AbstractProvider::class);
     $driver->shouldReceive('redirect')->andReturn(redirect('https://accounts.example.test/authorize'));
     Socialite::shouldReceive('driver')->with('google')->andReturn($driver);
 

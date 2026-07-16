@@ -2,10 +2,10 @@
 
 namespace App\Traits\Actions;
 
-use App\Models\Server;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\ServerStatus;
 use App\Models\Deployment;
+
 use function now;
 
 trait ManagesDeploymentLifecycle

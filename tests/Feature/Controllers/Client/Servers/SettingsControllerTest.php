@@ -16,8 +16,8 @@ it('can rename servers', function () {
     );
 
     $response->assertCreated()
-             ->assertJsonPath('data.name', 'advinservers is king')
-             ->assertJsonPath('data.hostname', 'advinservers.com');
+        ->assertJsonPath('data.name', 'advinservers is king')
+        ->assertJsonPath('data.hostname', 'advinservers.com');
 });
 
 it('can change nameservers', function () {

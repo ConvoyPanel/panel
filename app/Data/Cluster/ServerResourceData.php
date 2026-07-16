@@ -12,26 +12,26 @@ class ServerResourceData extends Data
         // General
         public readonly string $id,
         public readonly ?string $name,
-        public readonly string  $status,
-        public readonly bool    $isTemplate,
-        public readonly int    $vmid,
+        public readonly string $status,
+        public readonly bool $isTemplate,
+        public readonly int $vmid,
         public readonly ?string $nodeName,
         public readonly ?string $poolName,
-        public readonly array   $tags,
+        public readonly array $tags,
 
         // CPU
-        public readonly int    $maxCpuCount,
-        public readonly float  $cpuUsed,
+        public readonly int $maxCpuCount,
+        public readonly float $cpuUsed,
 
         // Memory
-        public readonly int    $maxMemory,
-        public readonly int    $memoryUsed,
-        public readonly int    $memoryUsedByHost,
+        public readonly int $maxMemory,
+        public readonly int $memoryUsed,
+        public readonly int $memoryUsedByHost,
 
         // Disk
-        public readonly int    $maxDiskSpace,
-        public readonly int    $diskSpaceUsed,
-        public readonly int    $diskRead,
+        public readonly int $maxDiskSpace,
+        public readonly int $diskSpaceUsed,
+        public readonly int $diskRead,
         public readonly int $diskWrite,
 
         // Network
@@ -42,8 +42,7 @@ class ServerResourceData extends Data
         public readonly int $uptimeInSeconds,
         public readonly ?LockStatus $lockStatus,
         public readonly ?string $haState,
-    ) {
-    }
+    ) {}
 
     public static function fromRaw(array $raw): self
     {

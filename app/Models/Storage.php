@@ -126,8 +126,7 @@ class Storage extends Model
     {
         $query->withSum('serverDisks as servers_sum_disk', 'size')
             ->withSum('backups as backups_sum_size', 'size')
-            ->withSum('isos as isos_sum_size', 'size')
-;
+            ->withSum('isos as isos_sum_size', 'size');
     }
 
     /**

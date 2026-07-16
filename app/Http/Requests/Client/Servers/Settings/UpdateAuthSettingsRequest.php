@@ -24,8 +24,7 @@ class UpdateAuthSettingsRequest extends BaseApiRequest
         return [
             'type' => [new Enum(AuthenticationType::class), 'required'],
             'ssh_keys' => ['nullable', 'string', 'exclude_unless:type,ssh_keys'],
-            'password' => ['string', 'min:8', 'max:191', new Password(), new USKeyboardCharacters(
-            ), 'exclude_unless:type,password'],
+            'password' => ['string', 'min:8', 'max:191', new Password, new USKeyboardCharacters, 'exclude_unless:type,password'],
         ];
     }
 

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Base;
 
 use App\Services\Auth\OAuthAuthenticationService;
-use Illuminate\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
+use Illuminate\View\Factory as ViewFactory;
 
 class IndexController
 {

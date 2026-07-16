@@ -20,4 +20,3 @@ class TaskLogData extends Data
         );
     }
 }
-

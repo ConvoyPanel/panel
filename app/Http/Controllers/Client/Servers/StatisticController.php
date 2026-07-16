@@ -7,7 +7,6 @@ use App\Enums\Server\StatisticTimeRange;
 use App\Http\Requests\Client\Servers\GetStatisticRequest;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxStatisticsClient;
-use Spatie\LaravelData\DataCollection;
 
 class StatisticController
 {

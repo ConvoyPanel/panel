@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Admin\Nodes;
 
-use App\Rules\Fqdn;
-use App\Models\Node;
 use App\Http\Requests\BaseApiRequest;
+use App\Models\Node;
 
 class TestNodeConnectionRequest extends BaseApiRequest
 {

@@ -8,12 +8,11 @@ use Spatie\LaravelData\Data;
 class UserCredentialsData extends Data
 {
     public function __construct(
-        public string    $username,
+        public string $username,
         public RealmType $realmType,
-        public string    $ticket,
-        public string    $csrfToken,
-    ) {
-    }
+        public string $ticket,
+        public string $csrfToken,
+    ) {}
 
     public static function fromRaw(array $raw): self
     {

@@ -11,9 +11,7 @@ use Exception;
 
 class ServerSuspensionService
 {
-    public function __construct(private ProxmoxPowerClient $powerClient)
-    {
-    }
+    public function __construct(private ProxmoxPowerClient $powerClient) {}
 
     public function toggle(Server $server, SuspensionAction $action = SuspensionAction::SUSPEND)
     {

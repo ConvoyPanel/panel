@@ -3,8 +3,8 @@
 namespace App\Services\Servers;
 
 use App\Enums\Server\PowerCommand;
-use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Servers\Power\ServerPowerLockService;

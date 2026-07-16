@@ -9,9 +9,9 @@ use Spatie\LaravelData\Data;
 class ConnectionResultData extends Data
 {
     public function __construct(
-        public bool                 $success,
-        public ?string              $errorMessage = null,
+        public bool $success,
+        public ?string $errorMessage = null,
         public ?ConnectionErrorCode $errorCode = null,
-        public ?NodeStatusData      $data = null,
+        public ?NodeStatusData $data = null,
     ) {}
 }

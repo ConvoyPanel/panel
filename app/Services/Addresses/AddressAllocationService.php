@@ -62,14 +62,14 @@ class AddressAllocationService
     private function allocateForVersion(Collection $blocksByVersion, AddressVersion $version, int $count): Collection
     {
         if ($count <= 0) {
-            return new Collection();
+            return new Collection;
         }
 
         /** @var Collection<int, AddressBlock> $blocks */
-        $blocks = $blocksByVersion->get($version->value) ?? new Collection();
+        $blocks = $blocksByVersion->get($version->value) ?? new Collection;
 
         if ($blocks->isEmpty()) {
-            throw new InsufficientAddressesException();
+            throw new InsufficientAddressesException;
         }
 
         // 1. Reclaim existing available rows across every block of this version. Reserved rows
@@ -101,7 +101,7 @@ class AddressAllocationService
         }
 
         if ($needed > 0) {
-            throw new InsufficientAddressesException();
+            throw new InsufficientAddressesException;
         }
 
         return $result;

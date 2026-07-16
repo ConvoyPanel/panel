@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -12,7 +13,7 @@ return new class extends Migration {
     {
         Schema::table('ip_addresses', function (Blueprint $table) {
             $table->dropForeign(['server_id']);
-            //$table->foreignId('server_id')->after('id')->nullable()->change()->constrained()->nullOnDelete();
+            // $table->foreignId('server_id')->after('id')->nullable()->change()->constrained()->nullOnDelete();
             $table->foreign('server_id')
                 ->references('id')
                 ->on('servers')
@@ -25,7 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('ip_addresses', function (Blueprint $table) {
-        });
+        Schema::table('ip_addresses', function (Blueprint $table) {});
     }
 };

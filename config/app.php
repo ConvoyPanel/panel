@@ -1,5 +1,8 @@
 <?php
 
+use App\Facades\Activity;
+use App\Facades\LogBatch;
+use App\Facades\LogTarget;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -7,8 +10,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // Custom Facades
-        'Activity' => App\Facades\Activity::class,
-        'LogBatch' => App\Facades\LogBatch::class,
-        'LogTarget' => App\Facades\LogTarget::class,
+        'Activity' => Activity::class,
+        'LogBatch' => LogBatch::class,
+        'LogTarget' => LogTarget::class,
     ])->toArray(),
 ];

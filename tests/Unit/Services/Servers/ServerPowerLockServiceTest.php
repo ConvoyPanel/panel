@@ -12,8 +12,8 @@ beforeEach(function () {
     Cache::flush();
 
     // A bare model is enough — the lock keys only off $server->id, no DB needed.
-    $this->server = tap(new Server(), fn (Server $s) => $s->id = 4242);
-    $this->lock = new ServerPowerLockService();
+    $this->server = tap(new Server, fn (Server $s) => $s->id = 4242);
+    $this->lock = new ServerPowerLockService;
 });
 
 it('records the pending action when the lock is acquired', function () {

@@ -4,9 +4,9 @@ namespace App\Jobs\Server;
 
 use App\Enums\Server\DeploymentStatus;
 use App\Exceptions\Proxmox\RequestException;
-use App\Traits\Jobs\FailsWithStep;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;
+use App\Traits\Jobs\FailsWithStep;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +19,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Throwable;
 
 use function now;
 

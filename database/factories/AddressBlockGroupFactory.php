@@ -2,9 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\AddressBlockGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
 class AddressBlockGroupFactory extends Factory
 {

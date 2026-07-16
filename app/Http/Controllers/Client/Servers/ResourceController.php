@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Client\Servers;
 
-use App\Exceptions\Http\Server\Proxmox\GuestAgentUnavailableException;
 use App\Models\Server;
 use App\Services\Servers\ServerResourceService;
 use Illuminate\Http\Request;

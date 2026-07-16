@@ -2,11 +2,9 @@
 
 namespace App\Jobs\Server;
 
-use Throwable;
 use App\Models\DeploymentStep;
-use App\Enums\Server\DeploymentStatus;
-use App\Traits\Jobs\FailsWithStep;
 use App\Services\Servers\ServerAuthService;
+use App\Traits\Jobs\FailsWithStep;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

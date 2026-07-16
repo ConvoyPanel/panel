@@ -11,9 +11,10 @@ use Illuminate\Support\Collection;
 class ProxmoxSnapshotClient extends ProxmoxClient
 {
     /**
+     * @return Collection<int, SnapshotData>
+     *
      * @throws RequestException
      * @throws ConnectionException
-     * @return Collection<int, SnapshotData>
      */
     public function getSnapshots(): Collection
     {

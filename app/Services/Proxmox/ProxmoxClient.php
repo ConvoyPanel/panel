@@ -63,6 +63,7 @@ abstract class ProxmoxClient
      * a RequestException on HTTP request failures.
      *
      * @noinspection PhpDocRedundantThrowsInspection PhpStorm might flag this as redundant because the method itself doesn't throw.
+     *
      * @throws RequestException
      */
     public function getHttpClient(

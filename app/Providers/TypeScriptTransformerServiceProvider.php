@@ -14,7 +14,7 @@ class TypeScriptTransformerServiceProvider extends BaseTypeScriptTransformerServ
     protected function configure(TypeScriptTransformerConfigFactory $config): void
     {
         $config
-            ->extension(new LaravelDataTypeScriptTransformerExtension())
+            ->extension(new LaravelDataTypeScriptTransformerExtension)
             ->transformer(EnumTransformer::class)
             ->transformDirectories(
                 app_path('Data'),

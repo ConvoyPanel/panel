@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Ipam\GenerateAddressesAction;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressVersion;
 use App\Models\Address;
@@ -26,7 +27,7 @@ beforeEach(function () {
 function reserveUrl(Address $address): string
 {
     return "/api/admin/address-block-groups/{$address->addressBlock->address_block_group_id}"
-        . "/address-blocks/{$address->address_block_id}/addresses/{$address->id}/reserve";
+        ."/address-blocks/{$address->address_block_id}/addresses/{$address->id}/reserve";
 }
 
 it('reserves and unreserves an available address', function () {
@@ -83,7 +84,7 @@ it('auto-reserves the network, broadcast and gateway addresses when generating a
         'prefix_length_to' => 32,
     ]);
 
-    app(\App\Actions\Ipam\GenerateAddressesAction::class)->execute($block);
+    app(GenerateAddressesAction::class)->execute($block);
 
     $reserved = Address::where('address_block_id', $block->id)
         ->where('state', AddressState::Reserved)

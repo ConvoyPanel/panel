@@ -29,6 +29,6 @@ class CreateAccountTokenService
         $token->tokenable()->associate($user);
         $token->save();
 
-        return new NewAccessToken($token, $token->getKey() . '|' . $plainTextToken);
+        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
     }
 }

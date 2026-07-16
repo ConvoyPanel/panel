@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Admin\Nodes;
 
+use App\Http\Requests\BaseApiRequest;
 use App\Models\NetworkInterface;
 use Illuminate\Validation\Validator;
-use App\Http\Requests\BaseApiRequest;
 
 class DeleteNetworkInterfaceRequest extends BaseApiRequest
 {

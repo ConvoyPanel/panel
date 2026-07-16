@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\Models\AddressBlockGroup;
+use App\Models\Node;
+use App\Models\Server;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -21,17 +23,17 @@ class AddressBlockGroupPolicy
 
     public function detachNode(User $user, AddressBlockGroup $addressBlockGroup): Response
     {
-        if (!$user->root_admin) {
-             return $this->deny('Only root admins can detach nodes.');
+        if (! $user->root_admin) {
+            return $this->deny('Only root admins can detach nodes.');
         }
 
         $nodeId = request()->route('node');
 
-        if (!$nodeId) {
-             // Fallback if node isn't resolved yet or passed differently, but usually it's in the route.
-             // If we can't find the node, we might allow (controller handles 404) or deny.
-             // However, for the specific check:
-             return $this->allow();
+        if (! $nodeId) {
+            // Fallback if node isn't resolved yet or passed differently, but usually it's in the route.
+            // If we can't find the node, we might allow (controller handles 404) or deny.
+            // However, for the specific check:
+            return $this->allow();
         }
 
         // We need to check if any server on this node is using an IP from this block group.
@@ -43,17 +45,17 @@ class AddressBlockGroupPolicy
 
         // Let's resolve the node from the route if possible.
         $node = request()->route('node');
-        if (!($node instanceof \App\Models\Node)) {
-             // If implicit binding hasn't happened yet or it's just an ID
-             $node = \App\Models\Node::find($node);
+        if (! ($node instanceof Node)) {
+            // If implicit binding hasn't happened yet or it's just an ID
+            $node = Node::find($node);
         }
 
-        if (!$node) {
+        if (! $node) {
             return $this->allow(); // Let controller handle 404
         }
 
         // Check if any server on this node has an IP address that belongs to any block in this group.
-        $hasUsedIps = \App\Models\Server::where('node_id', $node->id)
+        $hasUsedIps = Server::where('node_id', $node->id)
             ->whereHas('addresses.addressBlock', function ($query) use ($addressBlockGroup) {
                 $query->where('address_block_group_id', $addressBlockGroup->id);
             })

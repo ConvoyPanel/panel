@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use IPLib\Factory as IPFactory;
@@ -32,14 +33,14 @@ return new class extends Migration
          */
         DB::table('address_block_group_to_network_interface')
             ->select('address_block_group_to_network_interface.address_block_group_id',
-                    'address_block_group_to_network_interface.node_id',
-                    'network_interfaces.id as interface_id')
+                'address_block_group_to_network_interface.node_id',
+                'network_interfaces.id as interface_id')
             ->join('network_interfaces', 'address_block_group_to_network_interface.node_id', '=', 'network_interfaces.node_id')
             ->whereNull('address_block_group_to_network_interface.network_interface_id')
             ->orderBy('network_interfaces.id')
             ->get()
             ->groupBy(function ($item) {
-                return $item->address_block_group_id . '-' . $item->node_id;
+                return $item->address_block_group_id.'-'.$item->node_id;
             })
             ->each(function ($records) {
                 $first = $records->first();
@@ -121,7 +122,7 @@ return new class extends Migration
              * Iterate through the groups (key is the composite string, value is the collection)
              */
             foreach ($potentialBlocks as $compositeKey => $addressesInBlock) {
-                /** @var \Illuminate\Support\Collection<int, \stdClass> $addressesInBlock */
+                /** @var Collection<int, stdClass> $addressesInBlock */
                 // $addressesInBlock is now the final collection for this group
                 $firstAddress = $addressesInBlock->first();
                 if (! $firstAddress) {
@@ -138,7 +139,7 @@ return new class extends Migration
 
                 $group = $addressBlockGroups->get($oldPoolId);
                 if (! $group) {
-                    throw new \RuntimeException("Migration Error: Address Block Group (formerly Pool) with ID {$oldPoolId} not found during migration (composite key: {$compositeKey}). Cannot migrate addresses associated with it.");
+                    throw new RuntimeException("Migration Error: Address Block Group (formerly Pool) with ID {$oldPoolId} not found during migration (composite key: {$compositeKey}). Cannot migrate addresses associated with it.");
                 }
 
                 // Create a new address_block record
@@ -151,10 +152,10 @@ return new class extends Migration
                         $baseIp = $range->getStartAddress()->toString();
                         $blockName = "Migrated Block ({$baseIp}/{$prefixLength})";
                     } else {
-                        throw new \RuntimeException("Migration Error: Failed to parse range for {$firstIp}/{$prefixLength} using ip-lib (composite key: {$compositeKey}).");
+                        throw new RuntimeException("Migration Error: Failed to parse range for {$firstIp}/{$prefixLength} using ip-lib (composite key: {$compositeKey}).");
                     }
-                } catch (\Exception $e) {
-                    throw new \RuntimeException("Migration Error: Could not calculate base IP for {$firstIp}/{$prefixLength} during migration (composite key: {$compositeKey}): ".$e->getMessage());
+                } catch (Exception $e) {
+                    throw new RuntimeException("Migration Error: Could not calculate base IP for {$firstIp}/{$prefixLength} during migration (composite key: {$compositeKey}): ".$e->getMessage());
                 }
 
                 $newBlockId = DB::table('address_blocks')->insertGetId([
@@ -182,7 +183,7 @@ return new class extends Migration
 
         Schema::table('addresses', function (Blueprint $table) {
             if (DB::table('addresses')->whereNull('address_block_id')->exists()) {
-                throw new \RuntimeException('Migration Error: Not all addresses could be assigned to an address block. Cannot make address_block_id non-nullable..');
+                throw new RuntimeException('Migration Error: Not all addresses could be assigned to an address block. Cannot make address_block_id non-nullable..');
             }
 
             $table->dropForeign('ip_addresses_address_pool_id_foreign'); // some shenanigans because Laravel can't predict the name as we fucked it all up.

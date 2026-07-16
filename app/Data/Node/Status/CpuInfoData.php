@@ -12,7 +12,5 @@ class CpuInfoData extends Data
         public int $cpuCount,
         public string $model,
         public string $flags,
-    ) {
-
-    }
+    ) {}
 }

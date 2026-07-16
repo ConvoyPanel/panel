@@ -32,7 +32,7 @@ class ProxmoxPropertySpec
         $type = $parameter->getType();
         $typeName = $type instanceof ReflectionNamedType ? $type->getName() : 'string';
 
-        $cast = $meta->cast !== null ? new $meta->cast() : null;
+        $cast = $meta->cast !== null ? new $meta->cast : null;
         $enumClass = null;
 
         if ($cast === null) {

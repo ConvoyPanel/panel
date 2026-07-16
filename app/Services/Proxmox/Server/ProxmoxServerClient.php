@@ -4,10 +4,10 @@ namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Node\Access\RealmType;
+use App\Exceptions\Proxmox\RequestException;
 use App\Models\Template;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
-use App\Exceptions\Proxmox\RequestException;
 
 class ProxmoxServerClient extends ProxmoxClient
 {
@@ -25,10 +25,10 @@ class ProxmoxServerClient extends ProxmoxClient
     }
 
     /**
+     * @return string Job UPID
+     *
      * @throws RequestException
      * @throws ConnectionException
-     *
-     * @return string Job UPID
      */
     public function create(Template $template): string
     {

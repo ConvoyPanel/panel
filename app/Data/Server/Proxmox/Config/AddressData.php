@@ -10,6 +10,5 @@ class AddressData extends Data
         public string $address,
         public int $cidr,
         public string $gateway,
-    ) {
-    }
+    ) {}
 }

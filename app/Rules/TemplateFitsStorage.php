@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class TemplateFitsStorage implements ValidationRule, DataAwareRule
+class TemplateFitsStorage implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
@@ -30,13 +30,13 @@ class TemplateFitsStorage implements ValidationRule, DataAwareRule
         }
 
         $node = Node::find($nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
         $template = app(ServerCreationService::class)->getTemplate($node, $value);
 
-        if (!$template) {
+        if (! $template) {
             return;
         }
 

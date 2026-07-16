@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\Network\AddressState;
-use App\Models\AddressBlock;
 use App\Models\Address;
+use App\Models\AddressBlock;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

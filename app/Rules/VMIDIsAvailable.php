@@ -10,9 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class VMIDIsAvailable implements ValidationRule
 {
-    public function __construct(protected ?int $nodeId)
-    {
-    }
+    public function __construct(protected ?int $nodeId) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -27,12 +25,12 @@ class VMIDIsAvailable implements ValidationRule
         }
 
         $node = Node::find($this->nodeId);
-        if (!$node) {
+        if (! $node) {
             return;
         }
 
         $client = app(ProxmoxAllocationClient::class)->setNode($node);
-        if (!$client->isVMIDAvailable((int) $value)) {
+        if (! $client->isVMIDAvailable((int) $value)) {
             $fail('The specified VMID is not available for use on Proxmox.');
         }
     }

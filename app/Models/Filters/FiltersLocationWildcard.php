@@ -10,6 +10,6 @@ class FiltersLocationWildcard implements Filter
     public function __invoke(Builder $query, $value, string $property): void
     {
         $query->where('id', $value)
-              ->orWhereRaw('LOWER(short_code) LIKE ?', ["%$value%"]);
+            ->orWhereRaw('LOWER(short_code) LIKE ?', ["%$value%"]);
     }
 }

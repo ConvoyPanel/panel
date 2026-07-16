@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property ?string $ip_address
  * @property ?string $user_agent
- * @property \Illuminate\Support\Carbon $last_active_at
+ * @property Carbon $last_active_at
  */
 class SessionRecord extends Model
 {

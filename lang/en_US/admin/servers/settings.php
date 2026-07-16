@@ -10,14 +10,14 @@ return [
             'suspended' => 'Suspended',
             'restoring_backup' => 'Restoring From a Backup',
             'restoring_snapshot' => 'Restoring From a Snapshot',
-        ]
+        ],
     ],
     'suspension' => [
         'title' => 'Suspension',
         'description' => 'Toggle the suspension status of the server.',
         'statuses' => [
             'suspended' => 'This server is suspended.',
-            'not_suspended' => 'This server isn\'t suspended.'
+            'not_suspended' => 'This server isn\'t suspended.',
         ],
         'suspend' => 'Suspend',
         'unsuspend' => 'Unsuspend',
@@ -31,11 +31,11 @@ return [
         'no_purge' => 'Do not purge VM and related files',
         'confirmation' => [
             'title' => 'Delete :name',
-            'description' => 'Are you sure you want to delete :name?'
-        ]
+            'description' => 'Are you sure you want to delete :name?',
+        ],
     ],
     'build' => [
         'title' => 'Server Build',
 
-    ]
+    ],
 ];

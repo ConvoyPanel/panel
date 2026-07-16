@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $provider_id
  * @property string|null $name
  * @property string|null $email
- * @property \Illuminate\Support\Carbon|null $last_used_at
+ * @property Carbon|null $last_used_at
  */
 class OAuthConnection extends Model
 {
