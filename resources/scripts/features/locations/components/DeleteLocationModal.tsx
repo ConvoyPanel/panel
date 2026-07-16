@@ -1,12 +1,11 @@
+import { deleteLocation } from '@/features/locations/api.ts'
+import { Location, PaginatedLocations } from '@/features/locations/types.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
-import { Location, PaginatedLocations } from '@/features/locations/types.ts'
+import { Mutator } from '@/types/query.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
 import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
-import { useShallow } from 'zustand/react/shallow'
-
-import { deleteLocation } from '@/features/locations/api.ts'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -26,13 +25,11 @@ interface Props {
 }
 
 const DeleteLocationModal = ({ mutate }: Props) => {
-    const [location, open, closeModal] = useLocationsModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: location,
+        close,
+    } = useModal(useLocationsModalStore, 'delete')
 
     const [state, submit] = useAsyncFunction(
         async (currentLocation: Location) => {
@@ -52,7 +49,7 @@ const DeleteLocationModal = ({ mutate }: Props) => {
 
                 toast.success('Location deleted')
 
-                closeModal('delete')
+                close()
             } catch (e) {
                 toast.error('Deletion failed')
                 throw e
@@ -61,13 +58,12 @@ const DeleteLocationModal = ({ mutate }: Props) => {
     )
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && closeModal('delete')}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Delete {location?.shortCode}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Delete {location?.shortCode}
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to delete this location?
                     </ResponsiveDialogDescription>
@@ -88,15 +84,13 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                 </ResponsiveDialogBody>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         autoFocus
                         loading={state.loading}
                         variant={'destructive'}
-                        onClick={() => submit(location!)}
+                        onClick={() => location && submit(location)}
                         disabled={Boolean(
                             location?.nodesCount && location.nodesCount > 0
                         )}

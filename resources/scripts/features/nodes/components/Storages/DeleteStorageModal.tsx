@@ -1,14 +1,12 @@
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { NodeStorage } from '@/features/nodes/types.ts'
-import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
-import { storageQueries } from '@/features/nodes/storages/api.ts'
-
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
+import { storageQueries } from '@/features/nodes/storages/api.ts'
+import { deleteStorage } from '@/features/nodes/storages/api.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useAsyncFunction from '@/hooks/use-async-function.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -20,20 +18,17 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { deleteStorage } from '@/features/nodes/storages/api.ts'
 
 const DeleteStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
         storageQueries.all(Number(nodeId))
     )
-    const [storage, open, close] = useStoragesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: storage,
+        close,
+    } = useModal(useStoragesModalStore, 'delete')
 
     const [state, submit] = useAsyncFunction(
         async (currentStorage: NodeStorage) => {
@@ -43,22 +38,20 @@ const DeleteStorageModal = () => {
                 await mutate(data => {
                     if (!data) return data
 
-                    return data.filter(
-                        item => item.id !== currentStorage.id
-                    )
+                    return data.filter(item => item.id !== currentStorage.id)
                 }, false)
 
                 toast.success('Storage deleted')
-                close('delete')
+                close()
             } catch (e) {
                 toast.error('Deletion failed')
                 throw e
             }
-         }
+        }
     )
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('delete')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>
@@ -71,15 +64,13 @@ const DeleteStorageModal = () => {
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         autoFocus
                         loading={state.loading}
                         variant={'destructive'}
-                        onClick={() => submit(storage!)}
+                        onClick={() => storage && submit(storage)}
                     >
                         Delete
                     </Button>

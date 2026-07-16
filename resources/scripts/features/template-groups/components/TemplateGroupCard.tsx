@@ -1,9 +1,8 @@
-import { TemplateGroup } from '@/types/template-group.ts'
-import { IconCopy, IconDots } from '@tabler/icons-react'
-import { useShallow } from 'zustand/react/shallow'
-
 import TemplateIconDisplay from '@/features/template-groups/components/TemplateIconDisplay.tsx'
 import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
+import { TemplateGroup } from '@/types/template-group.ts'
+import { IconCopy, IconDots } from '@tabler/icons-react'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -27,9 +26,7 @@ interface Props {
 }
 
 const TemplateGroupCard = ({ group }: Props) => {
-    const openModal = useTemplateGroupsModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(useTemplateGroupsModalStore)
 
     return (
         <Item variant={'muted'} size={'sm'}>

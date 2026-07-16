@@ -1,3 +1,4 @@
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import {
     addressBlockGroupQueries,
     useAddressBlockGroups,
@@ -15,7 +16,6 @@ import {
 import { cn } from '@/utils'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import { useShallow } from 'zustand/react/shallow'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -45,9 +45,7 @@ function IpamIndex() {
     const mutate = useQueryMutator<PaginatedAddressBlockGroups>(
         addressBlockGroupQueries.list(queryParams).queryKey
     )
-    const openModal = useBlockGroupModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(useBlockGroupModalStore)
 
     const renderActions = (group: AddressBlockGroup) => (
         <>

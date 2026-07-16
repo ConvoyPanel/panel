@@ -1,16 +1,20 @@
+import { updateLocation } from '@/features/locations/api.ts'
+import {
+    PaginatedLocations,
+    locationSchema,
+} from '@/features/locations/types.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
-import { PaginatedLocations, locationSchema } from '@/features/locations/types.ts'
+import { Mutator } from '@/types/query.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
-import { updateLocation } from '@/features/locations/api.ts'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -20,21 +24,17 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
 
 interface Props {
     mutate: Mutator<PaginatedLocations>
 }
 
 const EditLocationModal = ({ mutate }: Props) => {
-    const [location, open, closeModal] = useLocationsModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: location,
+        close,
+    } = useModal(useLocationsModalStore, 'edit')
 
     const form = useForm({
         resolver: zodResolver(locationSchema),
@@ -54,8 +54,10 @@ const EditLocationModal = ({ mutate }: Props) => {
     }, [location])
 
     const submit = async (data: z.infer<typeof locationSchema>) => {
+        if (!location) return
+
         try {
-            const updatedLocation = await updateLocation(location!.id, data)
+            const updatedLocation = await updateLocation(location.id, data)
 
             await mutate(data => {
                 if (!data) return
@@ -70,7 +72,7 @@ const EditLocationModal = ({ mutate }: Props) => {
 
             toast.success('Location updated')
 
-            closeModal('edit')
+            close()
         } catch (e) {
             toast.error('Failed to save changes')
             throw e
@@ -78,13 +80,12 @@ const EditLocationModal = ({ mutate }: Props) => {
     }
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && closeModal('edit')}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Editing {location?.shortCode}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Editing {location?.shortCode}
+                    </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>

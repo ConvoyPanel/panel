@@ -1,9 +1,9 @@
+import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import byteSize from 'byte-size'
 import { useMemo } from 'react'
-import { useShallow } from 'zustand/react/shallow'
 
-import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
-
+import { type Segment, SegmentedProgressBar } from '@/components/ui/Progress'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -11,7 +11,6 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { SegmentedProgressBar, type Segment } from '@/components/ui/Progress'
 
 const fmt = (bytes: number) => {
     const { value, unit } = byteSize(bytes, { units: 'iec', precision: 2 })
@@ -20,13 +19,11 @@ const fmt = (bytes: number) => {
 }
 
 const ShowStorageModal = () => {
-    const [storage, open, close] = useStoragesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'show',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: storage,
+        close,
+    } = useModal(useStoragesModalStore, 'show')
 
     // Prefer live Proxmox capacity (the truth — includes the base system and any
     // non-Convoy consumers). Fall back to Convoy's own allocation against the
@@ -47,11 +44,31 @@ const ShowStorageModal = () => {
             const reservedShown = Math.max(0, free - freeForConvoy)
 
             const segments: Segment[] = [
-                { label: 'KVM', value: pct(storage.usages.server, total), color: 'var(--chart-1)' },
-                { label: 'Backups', value: pct(storage.usages.backup, total), color: 'var(--chart-2)' },
-                { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'var(--chart-3)' },
-                { label: 'Untracked (base system + other)', value: pct(untracked, total), color: 'var(--chart-4)' },
-                { label: 'Reserved (headroom)', value: pct(reservedShown, total), color: 'color-mix(in oklab, var(--muted-foreground) 35%, transparent)' },
+                {
+                    label: 'KVM',
+                    value: pct(storage.usages.server, total),
+                    color: 'var(--chart-1)',
+                },
+                {
+                    label: 'Backups',
+                    value: pct(storage.usages.backup, total),
+                    color: 'var(--chart-2)',
+                },
+                {
+                    label: 'ISO Images',
+                    value: pct(storage.usages.iso, total),
+                    color: 'var(--chart-3)',
+                },
+                {
+                    label: 'Untracked (base system + other)',
+                    value: pct(untracked, total),
+                    color: 'var(--chart-4)',
+                },
+                {
+                    label: 'Reserved (headroom)',
+                    value: pct(reservedShown, total),
+                    color: 'color-mix(in oklab, var(--muted-foreground) 35%, transparent)',
+                },
             ]
 
             return {
@@ -67,9 +84,21 @@ const ShowStorageModal = () => {
         // Offline fallback: Convoy's bookkeeping against the configured size.
         const total = storage.size
         const segments: Segment[] = [
-            { label: 'KVM', value: pct(storage.usages.server, total), color: 'var(--chart-1)' },
-            { label: 'Backups', value: pct(storage.usages.backup, total), color: 'var(--chart-2)' },
-            { label: 'ISO Images', value: pct(storage.usages.iso, total), color: 'var(--chart-3)' },
+            {
+                label: 'KVM',
+                value: pct(storage.usages.server, total),
+                color: 'var(--chart-1)',
+            },
+            {
+                label: 'Backups',
+                value: pct(storage.usages.backup, total),
+                color: 'var(--chart-2)',
+            },
+            {
+                label: 'ISO Images',
+                value: pct(storage.usages.iso, total),
+                color: 'var(--chart-3)',
+            },
         ]
 
         return {
@@ -87,7 +116,7 @@ const ShowStorageModal = () => {
     const usedPercent = view.total ? (view.used / view.total) * 100 : 0
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('show')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent className={'gap-0'}>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>
@@ -98,17 +127,17 @@ const ShowStorageModal = () => {
                     {!view.online && (
                         <p
                             className={
-                                'mb-2 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground'
+                                'bg-muted text-muted-foreground mb-2 rounded-md px-3 py-2 text-sm'
                             }
                         >
-                            Live usage unavailable — the node is offline. Showing
-                            Convoy&rsquo;s own allocation against the configured
-                            size.
+                            Live usage unavailable — the node is offline.
+                            Showing Convoy&rsquo;s own allocation against the
+                            configured size.
                         </p>
                     )}
                     <p
                         className={
-                            'mb-1 text-right text-sm text-muted-foreground'
+                            'text-muted-foreground mb-1 text-right text-sm'
                         }
                     >
                         {fmt(view.used)} used out of {fmt(view.total)} &#x2022;{' '}
@@ -131,7 +160,9 @@ const ShowStorageModal = () => {
                                 >
                                     <span
                                         className={'mr-1 size-2 rounded-full'}
-                                        style={{ backgroundColor: segment.color }}
+                                        style={{
+                                            backgroundColor: segment.color,
+                                        }}
                                     />
                                     {segment.label}
                                 </li>

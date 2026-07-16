@@ -1,3 +1,11 @@
+import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
+import {
+    networkInterfaceQueries,
+    networkInterfaceSchema,
+    updateNetworkInterface,
+} from '@/features/nodes/network-interfaces/api.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route as NetworkRoute } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
 import { NetworkInterface } from '@/types/network-interface.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -6,19 +14,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
-import {
-    networkInterfaceSchema,
-    updateNetworkInterface,
-    networkInterfaceQueries,
-} from '@/features/nodes/network-interfaces/api.ts'
-
-import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -28,21 +27,17 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm, InputForm, TextareaForm } from '@/components/ui/Forms'
 
 const EditNetworkInterfaceModal = () => {
     const { nodeId } = NetworkRoute.useParams()
     const mutate = useQueryMutator<NetworkInterface[]>(
         networkInterfaceQueries.all(Number(nodeId))
     )
-    const [networkInterface, open, close] = useNetworkInterfacesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: networkInterface,
+        close,
+    } = useModal(useNetworkInterfacesModalStore, 'edit')
 
     const form = useForm({
         resolver: zodResolver(networkInterfaceSchema),
@@ -73,10 +68,12 @@ const EditNetworkInterfaceModal = () => {
     }, [form, isVlanAware])
 
     const submit = async (data: z.infer<typeof networkInterfaceSchema>) => {
+        if (!networkInterface) return
+
         try {
             const updatedInterface = await updateNetworkInterface(
                 Number(nodeId),
-                networkInterface!.id,
+                networkInterface.id,
                 data
             )
 
@@ -91,7 +88,7 @@ const EditNetworkInterfaceModal = () => {
                 })
             }, false)
 
-            close('edit')
+            close()
             toast.success('Network interface updated')
         } catch (e) {
             handleFormErrors(e, form.setError)
@@ -101,7 +98,7 @@ const EditNetworkInterfaceModal = () => {
     }
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>

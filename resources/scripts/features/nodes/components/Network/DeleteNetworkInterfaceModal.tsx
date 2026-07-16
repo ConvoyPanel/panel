@@ -1,18 +1,15 @@
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { Route } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
-import { NetworkInterface } from '@/types/network-interface.ts'
-import { AxiosError } from 'axios'
-import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
+import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
 import {
     deleteNetworkInterface,
     networkInterfaceQueries,
 } from '@/features/nodes/network-interfaces/api.ts'
-
-import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useAsyncFunction from '@/hooks/use-async-function.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { Route } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
+import { NetworkInterface } from '@/types/network-interface.ts'
+import { AxiosError } from 'axios'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -30,13 +27,11 @@ const DeleteNetworkInterfaceModal = () => {
     const mutate = useQueryMutator<NetworkInterface[]>(
         networkInterfaceQueries.all(Number(nodeId))
     )
-    const [networkInterface, open, close] = useNetworkInterfacesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: networkInterface,
+        close,
+    } = useModal(useNetworkInterfacesModalStore, 'delete')
 
     const [state, submit] = useAsyncFunction(
         async (currentNetworkInterface: NetworkInterface) => {
@@ -54,7 +49,7 @@ const DeleteNetworkInterfaceModal = () => {
                 }, false)
 
                 toast.success('Network interface deleted')
-                close('delete')
+                close()
             } catch (e) {
                 let message = 'Deletion failed'
 
@@ -70,7 +65,7 @@ const DeleteNetworkInterfaceModal = () => {
     )
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('delete')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>
@@ -82,15 +77,15 @@ const DeleteNetworkInterfaceModal = () => {
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         autoFocus
                         loading={state.loading}
                         variant={'destructive'}
-                        onClick={() => submit(networkInterface!)}
+                        onClick={() =>
+                            networkInterface && submit(networkInterface)
+                        }
                     >
                         Delete
                     </Button>

@@ -1,3 +1,4 @@
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { PaginatedAddresses } from '@/types/address.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,7 +8,6 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
 
 import { updateAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
@@ -38,13 +38,7 @@ const EditAddressModal = ({ mutate }: Props) => {
     const { addressBlockGroupId, addressBlockId } = useParams({
         strict: false,
     }) as { addressBlockGroupId: string; addressBlockId: string }
-    const [address, open, close] = useAddressModal(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const { open, data: address, close } = useModal(useAddressModal, 'edit')
 
     const form = useForm({
         resolver: zodResolver(addressSchema),
@@ -85,7 +79,7 @@ const EditAddressModal = ({ mutate }: Props) => {
                 }
             }, false)
 
-            close('edit')
+            close()
             toast.success('Address updated')
         } catch (e) {
             handleFormErrors(e, form.setError)
@@ -95,7 +89,7 @@ const EditAddressModal = ({ mutate }: Props) => {
     }
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>Editing Address {address?.ip}</ResponsiveDialogTitle>

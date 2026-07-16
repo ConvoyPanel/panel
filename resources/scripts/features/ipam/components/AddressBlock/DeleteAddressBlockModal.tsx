@@ -1,8 +1,8 @@
+import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlocks } from '@/types/address-block.ts'
 import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
-import { useShallow } from 'zustand/react/shallow'
 
 import { deleteAddressBlock } from '@/features/ipam/blocks/api.ts'
 
@@ -25,13 +25,7 @@ interface Props {
 }
 
 const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
-    const [addressBlock, open, close] = useAddressBlockModal(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const { open, data: addressBlock, close } = useModal(useAddressBlockModal, 'delete')
 
     const [state, submit] = useAsyncFunction(async () => {
         try {
@@ -49,7 +43,7 @@ const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
             }, false)
 
             toast.success('Address block deleted')
-            close('delete')
+            close()
         } catch (e) {
             toast.error('Deletion failed')
             throw e
@@ -57,7 +51,7 @@ const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
     })
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('delete')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>Delete {addressBlock?.name || 'Address Block'}</ResponsiveDialogTitle>

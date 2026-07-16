@@ -1,13 +1,11 @@
+import { deleteAddressBlockGroup } from '@/features/ipam/api.ts'
+import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
+import { Mutator } from '@/types/query.ts'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
-import { useShallow } from 'zustand/react/shallow'
-
-import { deleteAddressBlockGroup } from '@/features/ipam/api.ts'
-
-import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -25,13 +23,11 @@ interface Props {
 }
 
 const DeleteBlockGroupModal = ({ mutate }: Props) => {
-    const [blockGroup, open, close] = useBlockGroupModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: blockGroup,
+        close,
+    } = useModal(useBlockGroupModalStore, 'delete')
 
     const [state, submit] = useAsyncFunction(async () => {
         try {
@@ -49,7 +45,7 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
             }, false)
 
             toast.success('Block group deleted')
-            close('delete')
+            close()
         } catch (e) {
             // Check if it's an Axios error with a response
             if (e instanceof AxiosError && e.response) {
@@ -65,16 +61,18 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
             } else {
                 toast.error('Deletion failed')
             }
-            
+
             throw e
         }
     })
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('delete')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Delete {blockGroup?.name}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Delete {blockGroup?.name}
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to delete this block group? This
                         action cannot be undone.
@@ -82,9 +80,7 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         autoFocus

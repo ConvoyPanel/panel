@@ -1,21 +1,21 @@
+import {
+    addressBlockGroupSchema,
+    updateAddressBlockGroup,
+} from '@/features/ipam/api.ts'
+import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
+import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
-import {
-    addressBlockGroupSchema,
-    updateAddressBlockGroup,
-} from '@/features/ipam/api.ts'
-
-import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm, TextareaForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -25,21 +25,17 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
 
 interface Props {
     mutate: Mutator<PaginatedAddressBlockGroups>
 }
 
 const EditBlockGroupModal = ({ mutate }: Props) => {
-    const [blockGroup, open, close] = useBlockGroupModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: blockGroup,
+        close,
+    } = useModal(useBlockGroupModalStore, 'edit')
 
     const form = useForm({
         resolver: zodResolver(addressBlockGroupSchema),
@@ -59,9 +55,11 @@ const EditBlockGroupModal = ({ mutate }: Props) => {
     }, [blockGroup])
 
     const submit = async (data: z.infer<typeof addressBlockGroupSchema>) => {
+        if (!blockGroup) return
+
         try {
             const updatedBlockGroup = await updateAddressBlockGroup(
-                blockGroup!.id,
+                blockGroup.id,
                 data
             )
 
@@ -79,7 +77,7 @@ const EditBlockGroupModal = ({ mutate }: Props) => {
                 }
             }, false)
 
-            close('edit')
+            close()
             toast.success('Block group updated')
         } catch (e) {
             handleFormErrors(e, form.setError)
@@ -89,10 +87,12 @@ const EditBlockGroupModal = ({ mutate }: Props) => {
     }
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Editing {blockGroup?.name}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Editing {blockGroup?.name}
+                    </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>

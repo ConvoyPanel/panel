@@ -5,13 +5,13 @@ import EditLocationModal from '@/features/locations/components/EditLocationModal
 import ShowLocationModal from '@/features/locations/components/ShowLocationModal.tsx'
 import { Location } from '@/features/locations/types.ts'
 import { PaginatedLocations } from '@/features/locations/types.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import createModalStore from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import { useShallow } from 'zustand/react/shallow'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -40,9 +40,7 @@ export const useLocationsModalStore = createModalStore<
 >()
 
 function LocationsIndex() {
-    const openModal = useLocationsModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(useLocationsModalStore)
     const { queryParams, tableProps } = useDataTable()
     const { data, isPlaceholderData, isError, refetch } =
         useLocations(queryParams)

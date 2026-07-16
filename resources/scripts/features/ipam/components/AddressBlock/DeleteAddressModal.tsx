@@ -1,9 +1,9 @@
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { PaginatedAddresses } from '@/types/address.ts'
 import { useParams } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
-import { useShallow } from 'zustand/react/shallow'
 
 import { deleteAddress } from '@/features/ipam/blocks/addresses/api.ts'
 
@@ -29,13 +29,7 @@ const DeleteAddressModal = ({ mutate }: Props) => {
         strict: false,
     }) as { addressBlockGroupId: string; addressBlockId: string }
 
-    const [address, open, closeModal] = useAddressModal(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const { open, data: address, close } = useModal(useAddressModal, 'delete')
 
     const { mutate: deleteAddressTrigger, isPending: isMutating } = useMutation(
         {
@@ -58,7 +52,7 @@ const DeleteAddressModal = ({ mutate }: Props) => {
                     }
                 }, false)
 
-                closeModal('delete')
+                close()
                 toast.success('Address deleted')
             },
             onError: () => {
@@ -70,7 +64,7 @@ const DeleteAddressModal = ({ mutate }: Props) => {
     return (
         <ResponsiveDialog
             open={open}
-            onOpenChange={open => !open && closeModal('delete')}
+            onOpenChange={open => !open && close()}
         >
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>

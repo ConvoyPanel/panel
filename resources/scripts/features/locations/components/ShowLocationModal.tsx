@@ -1,7 +1,6 @@
-import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
-import { useShallow } from 'zustand/react/shallow'
-
 import AttachedNodesList from '@/features/locations/components/AttachedNodesList.tsx'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
 
 import {
     ResponsiveDialog,
@@ -13,29 +12,26 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 
 const ShowLocationModal = () => {
-    const [location, open, closeModal] = useLocationsModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'show',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: location,
+        close,
+    } = useModal(useLocationsModalStore, 'show')
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && closeModal('show')}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>{location?.shortCode}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        {location?.shortCode}
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Nodes attached to this location
                     </ResponsiveDialogDescription>
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogBody
                     className={
-                        'h-full max-h-[50vh] overflow-y-auto overflow-x-visible'
+                        'h-full max-h-[50vh] overflow-x-visible overflow-y-auto'
                     }
                 >
                     <AttachedNodesList location={location} />

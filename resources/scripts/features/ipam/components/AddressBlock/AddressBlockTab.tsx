@@ -6,6 +6,7 @@ import CreateAddressBlockModal from '@/features/ipam/components/AddressBlock/Cre
 import DeleteAddressBlockModal from '@/features/ipam/components/AddressBlock/DeleteAddressBlockModal.tsx'
 import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
 import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/index.lazy.tsx'
@@ -41,7 +42,7 @@ const AddressBlockTab = () => {
     const mutate = useQueryMutator<PaginatedAddressBlocks>(
         addressBlockQueries.list(groupId, queryParams).queryKey
     )
-    const openModal = useAddressBlockModal(state => state.openModal)
+    const openModal = useOpenModal(useAddressBlockModal)
 
     const renderActions = (block: AddressBlock) => (
         <>

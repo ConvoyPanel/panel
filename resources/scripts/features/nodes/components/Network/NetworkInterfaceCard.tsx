@@ -1,4 +1,7 @@
+import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import { NetworkInterface } from '@/types/network-interface.ts'
+import { IconDots } from '@tabler/icons-react'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -14,18 +17,13 @@ import {
     ItemDescription,
     ItemTitle,
 } from '@/components/ui/Item'
-import useNetworkInterfacesModalStore from '@/features/nodes/hooks/use-network-interfaces-modal-store.ts'
-import { IconDots } from '@tabler/icons-react'
-import { useShallow } from 'zustand/react/shallow'
 
 interface Props {
     interface: NetworkInterface
 }
 
 const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
-    const openModal = useNetworkInterfacesModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(useNetworkInterfacesModalStore)
 
     const vlanLabel = networkInterface.vlanTag
         ? `VLAN ${networkInterface.vlanTag}`
@@ -52,7 +50,7 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
                 )}
                 <dl>
                     <div>
-                        <dt className={'text-xs text-muted-foreground'}>
+                        <dt className={'text-muted-foreground text-xs'}>
                             VLAN
                         </dt>
                         <dd className={'text-sm'}>{vlanLabel}</dd>
@@ -78,7 +76,9 @@ const NetworkInterfaceCard = ({ interface: networkInterface }: Props) => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             variant={'destructive'}
-                            onClick={() => openModal('delete', networkInterface)}
+                            onClick={() =>
+                                openModal('delete', networkInterface)
+                            }
                         >
                             Delete
                         </DropdownMenuItem>

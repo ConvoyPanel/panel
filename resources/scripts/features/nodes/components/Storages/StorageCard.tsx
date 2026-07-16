@@ -1,8 +1,7 @@
-import { NodeStorage } from '@/features/nodes/types.ts'
-import { IconDots } from '@tabler/icons-react'
-import { useShallow } from 'zustand/react/shallow'
-
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
+import { IconDots } from '@tabler/icons-react'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
@@ -25,9 +24,7 @@ interface Props {
 }
 
 const StorageCard = ({ storage }: Props) => {
-    const openModal = useStoragesModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(useStoragesModalStore)
 
     return (
         <Item variant={'muted'} size={'sm'}>

@@ -9,6 +9,7 @@ import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAd
 import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
 import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/GenerateAddressesButton.tsx'
 import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
@@ -58,7 +59,7 @@ function BlockIndex() {
             ['server']
         ).queryKey
     )
-    const openModal = useAddressModal(state => state.openModal)
+    const openModal = useOpenModal(useAddressModal)
 
     const { mutate: toggleReservation } = useMutation({
         mutationFn: async (address: Address) => {

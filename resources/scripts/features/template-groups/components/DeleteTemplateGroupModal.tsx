@@ -1,15 +1,13 @@
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
-
 import {
     deleteTemplateGroup,
     templateGroupQueries,
 } from '@/features/template-groups/api.ts'
-import { TemplateGroup } from '@/types/template-group.ts'
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
 import useTemplateGroupsModalStore from '@/features/template-groups/hooks/use-template-groups-modal-store.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { TemplateGroup } from '@/types/template-group.ts'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -23,14 +21,14 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 
 const DeleteTemplateGroupModal = () => {
-    const mutate = useQueryMutator<TemplateGroup[]>(templateGroupQueries.list({}).queryKey)
-    const { isOpen, modalData, closeModal } = useTemplateGroupsModalStore(
-        useShallow(state => ({
-            isOpen: state.activeModal === 'delete',
-            modalData: state.modalData,
-            closeModal: state.closeModal,
-        }))
+    const mutate = useQueryMutator<TemplateGroup[]>(
+        templateGroupQueries.list({}).queryKey
     )
+    const {
+        open: isOpen,
+        data: modalData,
+        close,
+    } = useModal(useTemplateGroupsModalStore, 'delete')
 
     const { mutate: trigger, isPending: isMutating } = useMutation({
         mutationFn: (uuid: string) => deleteTemplateGroup(uuid),
@@ -41,7 +39,7 @@ const DeleteTemplateGroupModal = () => {
                     group => group.uuid !== modalData.uuid
                 )
             }, false)
-            closeModal('delete')
+            close()
             toast.success('Template group deleted')
         },
         onError: () => {
@@ -55,10 +53,12 @@ const DeleteTemplateGroupModal = () => {
     }
 
     return (
-        <ResponsiveDialog open={isOpen} onOpenChange={() => closeModal('delete')}>
+        <ResponsiveDialog open={isOpen} onOpenChange={() => close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Delete Template Group</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Delete Template Group
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to delete this template group?
                         This action cannot be undone.

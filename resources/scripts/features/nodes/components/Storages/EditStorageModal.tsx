@@ -1,3 +1,12 @@
+import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
+import {
+    storageQueries,
+    storageSchema,
+    updateStorage,
+} from '@/features/nodes/storages/api.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -5,20 +14,11 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { NodeStorage } from '@/features/nodes/types.ts'
-
-import {
-    storageSchema,
-    updateStorage,
-    storageQueries,
-} from '@/features/nodes/storages/api.ts'
-
-import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -28,22 +28,17 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
-import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 
 const EditStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
         storageQueries.all(Number(nodeId))
     )
-    const [storage, open, close] = useStoragesModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'edit',
-            state.closeModal,
-        ])
-    )
+    const {
+        open,
+        data: storage,
+        close,
+    } = useModal(useStoragesModalStore, 'edit')
 
     const form = useForm({
         resolver: zodResolver(storageSchema),
@@ -90,12 +85,20 @@ const EditStorageModal = () => {
         reservedBytes,
         ...data
     }: z.infer<typeof storageSchema>) => {
+        if (!storage) return
+
         try {
-            const updatedStorage = await updateStorage(Number(nodeId), storage!.id, {
-                size: size * 1024 * 1024,
-                reservedBytes: reservedBytes ? reservedBytes * 1024 * 1024 : null,
-                ...data,
-            })
+            const updatedStorage = await updateStorage(
+                Number(nodeId),
+                storage.id,
+                {
+                    size: size * 1024 * 1024,
+                    reservedBytes: reservedBytes
+                        ? reservedBytes * 1024 * 1024
+                        : null,
+                    ...data,
+                }
+            )
 
             await mutate(data => {
                 if (!data) return
@@ -108,7 +111,7 @@ const EditStorageModal = () => {
                 })
             }, false)
 
-            close('edit')
+            close()
 
             toast.success('Storage updated')
         } catch (e) {
@@ -119,7 +122,7 @@ const EditStorageModal = () => {
     }
 
     return (
-        <ResponsiveDialog open={open} onOpenChange={open => !open && close('edit')}>
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
                     <ResponsiveDialogTitle>
@@ -137,7 +140,11 @@ const EditStorageModal = () => {
                                 name={'description'}
                                 label={'Description'}
                             />
-                            <InputForm name={'name'} label={'Name'} autoComplete={'off'} />
+                            <InputForm
+                                name={'name'}
+                                label={'Name'}
+                                autoComplete={'off'}
+                            />
                             <InputForm name={'size'} label={'Size (MiB)'} />
                             <InputForm
                                 name={'reservedBytes'}
@@ -152,7 +159,7 @@ const EditStorageModal = () => {
                                 </h3>
                                 <p
                                     className={
-                                        'text-[0.8rem] text-muted-foreground'
+                                        'text-muted-foreground text-[0.8rem]'
                                     }
                                 >
                                     Select which content types this storage
