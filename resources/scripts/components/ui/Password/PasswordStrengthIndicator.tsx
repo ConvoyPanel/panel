@@ -1,5 +1,5 @@
 import { cn } from '@/utils'
-import { calculatePasswordStrength } from '@/utils/password.ts'
+import { evaluatePassword } from '@/utils/password.ts'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { useMemo } from 'react'
 
@@ -20,7 +20,7 @@ const Indicator = ({
         <div className={'flex items-center'}>
             <Icon
                 className={cn(
-                    'mr-2 h-4 w-4',
+                    'mr-2 h-4 w-4 shrink-0',
                     isFulfilled ? 'text-primary' : 'text-destructive'
                 )}
             />
@@ -30,45 +30,24 @@ const Indicator = ({
 }
 
 const PasswordStrengthIndicator = ({ password }: Props) => {
-    const calculation = useMemo(
-        () => calculatePasswordStrength(password),
-        [password]
-    )
+    const criteria = useMemo(() => evaluatePassword(password), [password])
 
     return (
-        <div className={'bg-accent-muted p-2'}>
+        <div className={'bg-accent-muted space-y-2 p-2'}>
             <ul>
-                <li>
-                    <Indicator
-                        criterion={'Uses at least 12 characters'}
-                        isFulfilled={calculation.criteria.minLength}
-                    />
-                </li>
-                <li>
-                    <Indicator
-                        criterion={'Uses uppercase characters'}
-                        isFulfilled={calculation.criteria.uppercase}
-                    />
-                </li>
-                <li>
-                    <Indicator
-                        criterion={'Uses lowercase characters'}
-                        isFulfilled={calculation.criteria.lowercase}
-                    />
-                </li>
-                <li>
-                    <Indicator
-                        criterion={'Uses numbers'}
-                        isFulfilled={calculation.criteria.number}
-                    />
-                </li>
-                <li>
-                    <Indicator
-                        criterion={'Uses special characters'}
-                        isFulfilled={calculation.criteria.specialChar}
-                    />
-                </li>
+                {criteria.map(({ label, isFulfilled }) => (
+                    <li key={label}>
+                        <Indicator
+                            criterion={label}
+                            isFulfilled={isFulfilled}
+                        />
+                    </li>
+                ))}
             </ul>
+            <p className={'text-muted-foreground text-sm'}>
+                Length is what matters. Several unrelated words you can remember
+                make a stronger password than a short one with substitutions.
+            </p>
         </div>
     )
 }

@@ -1,15 +1,17 @@
+import AuthSetting from '@/features/account/components/AuthSetting.tsx'
+import { updatePassword } from '@/features/account/password/api.ts'
 import { handleFormErrors } from '@/utils/http.ts'
+import { PASSWORD_MAX_BYTES, PASSWORD_MIN_LENGTH } from '@/utils/password.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { updatePassword } from '@/features/account/password/api.ts'
-
-import AuthSetting from '@/features/account/components/AuthSetting.tsx'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -20,14 +22,21 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
-import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
 
 const schema = z
     .object({
         currentPassword: z.string().min(1, 'Current password is required'),
-        password: z.string().min(12, 'Password must be at least 12 characters'),
+        password: z
+            .string()
+            .min(
+                PASSWORD_MIN_LENGTH,
+                `Password must be at least ${PASSWORD_MIN_LENGTH} characters`
+            )
+            .refine(
+                pwd =>
+                    new TextEncoder().encode(pwd).length <= PASSWORD_MAX_BYTES,
+                `Password must be at most ${PASSWORD_MAX_BYTES} bytes`
+            ),
         passwordConfirmation: z
             .string()
             .min(1, 'Password confirmation is required'),
@@ -77,7 +86,9 @@ const PasswordChangeDialog = () => {
             />
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Change Your Password</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Change Your Password
+                    </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>

@@ -25,8 +25,23 @@ class SessionRevocationService
      */
     public function revokeAllForUser(User $user): void
     {
+        $this->revokeForUser($user);
+    }
+
+    /**
+     * Revoke every session belonging to a user except the one making the request, so an action can
+     * evict every other device without logging the actor out of the tab they are performing it in.
+     */
+    public function revokeOtherSessionsForUser(User $user, string $exceptSessionId): void
+    {
+        $this->revokeForUser($user, $exceptSessionId);
+    }
+
+    private function revokeForUser(User $user, ?string $exceptSessionId = null): void
+    {
         SessionRecord::query()
             ->where('user_id', $user->getKey())
+            ->when($exceptSessionId !== null, fn ($query) => $query->where('session_id', '!=', $exceptSessionId))
             ->get()
             ->each(fn (SessionRecord $record) => $this->revoke($record));
     }

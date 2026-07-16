@@ -1,46 +1,43 @@
-export enum StrengthEnum {
-    WEAK = 'Weak',
-    MEDIUM = 'Medium',
-    STRONG = 'Strong',
+/**
+ * Mirrors the server rules in UpdatePasswordRequest: length only, no character composition.
+ *
+ * There are deliberately no uppercase/number/symbol criteria. NIST SP 800-63B says verifiers
+ * SHOULD NOT impose composition rules — they push people toward `Password1!` and discourage the
+ * passphrases that are actually strong — and the server does not enforce them, so showing them
+ * would advertise requirements that do not exist.
+ *
+ * The breach check (HIBP) is server-side only; it needs the network and cannot be mirrored here,
+ * so it surfaces as a validation error on submit rather than as a live criterion.
+ */
+
+export const PASSWORD_MIN_LENGTH = 12
+
+/** bcrypt hashes at most 72 bytes and ignores the rest — see UpdatePasswordRequest. */
+export const PASSWORD_MAX_BYTES = 72
+
+export interface PasswordCriterion {
+    label: string
+    isFulfilled: boolean
 }
 
-export interface StrengthResult {
-    criteria: {
-        minLength: boolean
-        uppercase: boolean
-        lowercase: boolean
-        number: boolean
-        specialChar: boolean
-    }
-    strength: StrengthEnum
-}
+const byteLength = (pwd: string): number => new TextEncoder().encode(pwd).length
 
-export const calculatePasswordStrength = (pwd: string): StrengthResult => {
-    const strengthCriteria = {
-        minLength: /.{12,}/,
-        uppercase: /[A-Z]/,
-        lowercase: /[a-z]/,
-        number: /\d/,
-        specialChar: /[!@#$%^&*(),.?":{}|<>]/,
-    }
+export const evaluatePassword = (pwd: string): PasswordCriterion[] => {
+    const criteria: PasswordCriterion[] = [
+        {
+            label: `Uses at least ${PASSWORD_MIN_LENGTH} characters`,
+            isFulfilled: pwd.length >= PASSWORD_MIN_LENGTH,
+        },
+    ]
 
-    const result = {
-        minLength: strengthCriteria.minLength.test(pwd),
-        uppercase: strengthCriteria.uppercase.test(pwd),
-        lowercase: strengthCriteria.lowercase.test(pwd),
-        number: strengthCriteria.number.test(pwd),
-        specialChar: strengthCriteria.specialChar.test(pwd),
+    // Only worth showing once it is in play: it is a ceiling almost nobody meets, and listing it
+    // up front reads as a target rather than a limit.
+    if (byteLength(pwd) > PASSWORD_MAX_BYTES) {
+        criteria.push({
+            label: `Uses at most ${PASSWORD_MAX_BYTES} bytes`,
+            isFulfilled: false,
+        })
     }
 
-    const passedCount = Object.values(result).filter(Boolean).length
-
-    let strength: StrengthEnum
-    if (passedCount <= 2) strength = StrengthEnum.WEAK
-    else if (passedCount === 3) strength = StrengthEnum.MEDIUM
-    else strength = StrengthEnum.STRONG
-
-    return {
-        criteria: result,
-        strength,
-    }
+    return criteria
 }
