@@ -28,7 +28,11 @@ class ConfirmableIdentityController
     {
         $options = $this->generateOptionsAction->execute();
 
-        $request->session()->put('passkeys.authentication-options', $options);
+        // Its own key, not the guest login flow's `passkeys.authentication-options`:
+        // these are separate ceremonies with separate lifetimes, and a challenge
+        // minted to prove presence now must never be satisfiable by one minted
+        // to log in.
+        $request->session()->put('passkeys.identity-options', $options);
 
         return $options;
     }
@@ -41,12 +45,19 @@ class ConfirmableIdentityController
         }
 
         if ($request->filled('passkey')) {
-            // Handle passkey authentication
+            // pull, not get: identity confirmation exists to prove someone is
+            // present *now*, so its challenge is strictly single use. Left in the
+            // session it stayed valid, and the same assertion could re-confirm
+            // identity after the 5-minute window lapsed — replaying presence is
+            // exactly what the gate is meant to prevent.
+            $options = $request->session()->pull('passkeys.identity-options');
+
+            if (! is_string($options)) {
+                throw new InvalidPasskeyException;
+            }
+
             /** @var Passkey|null $passkey (config binds passkeys.models.passkey to our subclass) */
-            $passkey = $this->findPasskeyAction->execute(
-                $request->input('passkey'),
-                $request->session()->get('passkeys.authentication-options')
-            );
+            $passkey = $this->findPasskeyAction->execute($request->input('passkey'), $options);
 
             if (! $passkey || $passkey->user->id !== $user->id) {
                 throw new InvalidPasskeyException;

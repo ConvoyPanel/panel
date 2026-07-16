@@ -26,10 +26,19 @@ class PasskeyLoginController
 
     public function store(Request $request)
     {
-        $passkey = $this->findPasskeyAction->execute(
-            $request->getContent(),
-            $request->session()->get('passkeys.authentication-options'),
-        );
+        // pull, not get: a challenge is single use. Leaving it in the session
+        // kept it valid indefinitely, so a captured assertion stayed replayable
+        // against the same session — the one thing the challenge exists to stop.
+        // The is_string guard covers a verify with no create before it;
+        // execute() types the options non-nullable, so null was a TypeError and
+        // a 500 rather than a rejected attempt.
+        $options = $request->session()->pull('passkeys.authentication-options');
+
+        if (! is_string($options)) {
+            throw new InvalidPasskeyException;
+        }
+
+        $passkey = $this->findPasskeyAction->execute($request->getContent(), $options);
 
         if (! $passkey) {
             throw new InvalidPasskeyException;

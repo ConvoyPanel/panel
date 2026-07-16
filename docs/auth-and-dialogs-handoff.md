@@ -306,14 +306,25 @@ Two bugs found reviewing the overhaul, one fixed:
   the field (`authenticator: false`), but the endpoint does not care what the UI
   offers. `SecondFactorLoginRequest` guards it; bound in `FortifyServiceProvider`
   because the controller type-hints the parent.
-- **Open — `PasskeyLoginController::store` never consumes its challenge.** It
-  `get`s `passkeys.authentication-options` where `SecondFactorChallengeController`
-  correctly `pull`s, so the challenge survives and the assertion replays. The same
-  line can also pass null into `FindPasskeyToAuthenticateAction::execute()`, whose
-  `$passkeyOptionsJson` is typed non-nullable → TypeError. Pre-dates the overhaul.
-- Cosmetic: `GeneratePasskeyAuthenticationOptionsAction` still inherits Spatie's
-  `Session::put('passkey-authentication-options', …)`, a fourth key nothing reads,
-  in exactly the area where key confusion would be a security bug.
+- **Fixed — two flows never consumed their challenge, and shared a key.** Both
+  `PasskeyLoginController::store` and `ConfirmableIdentityController::store`
+  `get` their options where `SecondFactorChallengeController` correctly `pull`s,
+  so the challenge stayed valid indefinitely and a captured assertion remained
+  replayable against the same session. That is worst for identity confirmation,
+  whose entire job is proving presence *now*: a replay could re-confirm after the
+  5-minute window lapsed. Both `pull` now, and both guard `is_string` — the
+  options are typed non-nullable on `FindPasskeyToAuthenticateAction::execute()`,
+  so a verify with no create before it was a TypeError and a 500 rather than a
+  rejected attempt. They also both wrote `passkeys.authentication-options`;
+  identity confirmation now owns `passkeys.identity-options`, so a challenge
+  minted to log in can never satisfy one minted to prove presence.
+  `tests/Feature/Auth/PasskeyChallengeTest.php` covers all three, and every case
+  was confirmed to fail against the old code first.
+- Fixed — `GeneratePasskeyAuthenticationOptionsAction` no longer inherits Spatie's
+  `Session::put('passkey-authentication-options', …)`. Nothing read it: its only
+  reader is the package's own `AuthenticateUsingPasskeyController`, reachable only
+  through the `Route::passkeys()` macro, which this app never calls. Each of the
+  three callers stashes under its own key instead.
 
 **The skeleton delay** on the passkey list was React Query retrying the identity
 403. The list fetched on page mount, 403'd behind `RequireIdentityConfirmation`,
