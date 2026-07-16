@@ -167,6 +167,13 @@ local choices are easy to mistake for drift:
 - `DialogContent` keeps `sm:max-w-lg` rather than nova's `sm:max-w-sm`; our dialogs
   routinely hold lists and forms. Its `p-4`, rounded popover, and flat ring still come
   from nova, so consumers should not add their own shell padding, radius, or shadow.
+- `DialogContent`'s grid is `grid-cols-[minmax(0,1fr)]`, not the implicit `auto` column.
+  A grid item's automatic minimum size is its min-content, so a track can never be
+  narrower than the longest unbreakable string inside it: one pasted SSH key sized the
+  column past `sm:max-w-lg` while the popup's own background stayed capped, and the
+  header, fields and footer rendered *outside* the popup they belong to. The
+  `minmax(0, …)` floor lets the column shrink so the content wraps instead. **Any long
+  opaque value — a key, token, or ID — needs this**; `max-w-*` alone does not contain it.
 - Dialog enter/exit uses Base UI's `data-starting-style` / `data-ending-style`
   transitions, not nova's `animate-in` transform keyframes. Nested dialogs also scale
   and move their parent; a transform keyframe would compete for those same properties.
