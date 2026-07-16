@@ -1,5 +1,6 @@
 import { rawDataToPasskey } from '@/features/account/transforms.ts'
 import { Passkey } from '@/features/account/types.ts'
+import useIdentityConfirmed from '@/hooks/use-identity-confirmed.ts'
 import PasskeyController from '@/wayfinder/actions/App/Http/Controllers/Client/PasskeyController'
 import type {
     PublicKeyCredentialCreationOptionsJSON,
@@ -58,4 +59,10 @@ export const passkeyQueries = {
         queryOptions({ queryKey: passkeyQueries.all(), queryFn: getPasskeys }),
 }
 
-export const usePasskeys = () => useQuery(passkeyQueries.list())
+/**
+ * The list is behind RequireIdentityConfirmation, so it must not be fetched
+ * until the gate is satisfied — see useIdentityConfirmed for why an early 403
+ * cost seconds of skeleton rather than one wasted request.
+ */
+export const usePasskeys = () =>
+    useQuery({ ...passkeyQueries.list(), enabled: useIdentityConfirmed() })

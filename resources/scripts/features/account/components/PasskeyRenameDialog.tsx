@@ -1,19 +1,19 @@
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
+import {
+    passkeyQueries,
+    renamePasskey,
+} from '@/features/account/passkeys/api.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
-import {
-    renamePasskey,
-    passkeyQueries,
-} from '@/features/account/passkeys/api.ts'
-
-import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -24,8 +24,6 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
 
 const schema = z.object({
     name: z.string().min(1).max(40),
@@ -33,13 +31,11 @@ const schema = z.object({
 
 const PasskeyRenameDialog = () => {
     const queryClient = useQueryClient()
-    const [passkey, isRenameDialogOpen, closeModal] = usePasskeysModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'rename',
-            state.closeModal,
-        ])
-    )
+    const {
+        open: isRenameDialogOpen,
+        data: passkey,
+        close,
+    } = useModal(usePasskeysModalStore, 'rename')
 
     const form = useForm({
         resolver: zodResolver(schema),
@@ -53,19 +49,21 @@ const PasskeyRenameDialog = () => {
     }, [passkey])
 
     const submit = async (data: z.infer<typeof schema>) => {
-        await renamePasskey(passkey!.id, data.name)
+        if (!passkey) return
+
+        await renamePasskey(passkey.id, data.name)
 
         toast.success('Passkey renamed')
 
         await queryClient.invalidateQueries({ queryKey: passkeyQueries.all() })
 
-        closeModal('rename')
+        close()
     }
 
     return (
         <ResponsiveDialog
             open={isRenameDialogOpen}
-            onOpenChange={open => !open && closeModal('rename')}
+            onOpenChange={open => !open && close()}
         >
             <ResponsiveDialogContent className={'max-h-[50vh]'}>
                 <ResponsiveDialogHeader className={'overflow-x-hidden'}>

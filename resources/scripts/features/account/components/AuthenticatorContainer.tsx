@@ -1,6 +1,5 @@
-import createModalStore from '@/hooks/create-modal-store.ts'
-
 import AuthenticatorMainDialog from '@/features/account/components/AuthenticatorMainDialog.tsx'
+import createModalStore from '@/hooks/create-modal-store.ts'
 
 /**
  * Tracks which step of the authenticator flow is open. The steps are nested
@@ -9,8 +8,8 @@ import AuthenticatorMainDialog from '@/features/account/components/Authenticator
  * <AuthDialog> that opens itself while identity is unconfirmed.
  */
 export const useAuthenticatorModalStore = createModalStore<
-    any,
-    'enable' | 'disable' | 'reset-recovery-codes' | 'recovery-codes'
+    void,
+    'enable' | 'disable'
 >()
 
 const AuthenticatorContainer = () => <AuthenticatorMainDialog />

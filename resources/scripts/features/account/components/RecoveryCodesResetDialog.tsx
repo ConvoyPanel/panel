@@ -1,10 +1,12 @@
+import { useRecoveryCodesModalStore } from '@/features/account/components/RecoveryCodesContainer.tsx'
+import {
+    recoveryCodeQueries,
+    regenerateRecoveryCodes,
+} from '@/features/account/recovery-codes/api.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
-
-import { regenerateRecoveryCodes } from '@/features/account/authenticator/api.ts'
-
-import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -17,24 +19,23 @@ import {
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
 
-const AuthenticatorResetRecoveryCodesDialog = () => {
-    const [open, closeModal, openModal] = useAuthenticatorModalStore(
-        useShallow(state => [
-            state.activeModal === 'reset-recovery-codes',
-            state.closeModal,
-            state.openModal,
-        ])
-    )
+const RecoveryCodesResetDialog = () => {
+    const queryClient = useQueryClient()
+    const { open, close } = useModal(useRecoveryCodesModalStore, 'reset')
 
     const [state, reset] = useAsyncFunction(async () => {
         try {
             await regenerateRecoveryCodes()
 
+            await queryClient.invalidateQueries({
+                queryKey: recoveryCodeQueries.codes().queryKey,
+            })
+
             toast.success('Recovery codes reset')
 
-            // openModal replaces the active step, so this both closes this
-            // dialog and reveals the freshly generated codes.
-            openModal('recovery-codes')
+            // Closing this step reveals the parent, which is already showing the
+            // codes — now the fresh ones. No separate reveal to queue up.
+            close()
         } catch (e) {
             toast.error('Failed to reset recovery codes')
             throw e
@@ -42,23 +43,21 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
     })
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && closeModal('reset-recovery-codes')}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Reset Recovery Codes</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Reset recovery codes
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
-                        Are you sure you want to reset your recovery codes? This
-                        will invalidate all existing codes.
+                        This replaces all eight codes with new ones. Any code
+                        you have written down or saved will stop working,
+                        whichever method you saved it for.
                     </ResponsiveDialogDescription>
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         loading={state.loading}
@@ -73,4 +72,4 @@ const AuthenticatorResetRecoveryCodesDialog = () => {
     )
 }
 
-export default AuthenticatorResetRecoveryCodesDialog
+export default RecoveryCodesResetDialog

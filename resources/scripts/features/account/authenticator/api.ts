@@ -1,5 +1,4 @@
 import AuthenticatorStatusController from '@/wayfinder/actions/App/Http/Controllers/Client/AuthenticatorStatusController'
-import RecoveryCodeController from '@/wayfinder/actions/App/Http/Controllers/Client/RecoveryCodeController'
 import ConfirmedTwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/ConfirmedTwoFactorAuthenticationController'
 import TwoFactorAuthenticationController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticationController'
 import TwoFactorQrCodeController from '@/wayfinder/actions/Laravel/Fortify/Http/Controllers/TwoFactorQrCodeController'
@@ -22,8 +21,6 @@ const secretKeyRoute =
     TwoFactorSecretKeyController.show[
         '/api/client/account/authenticator/secret-key'
     ]
-const recoveryCodesRoute = RecoveryCodeController.index
-const regenerateRecoveryCodesRoute = RecoveryCodeController.store
 const enableRoute =
     TwoFactorAuthenticationController.store[
         '/api/client/account/authenticator/enable'
@@ -54,9 +51,6 @@ export const getSecretKey = async (): Promise<string> => {
 export const getQrCode = (): Promise<AuthenticatorQrCode> =>
     apiFetch<AuthenticatorQrCode>(qrCodeRoute())
 
-export const getRecoveryCodes = (): Promise<string[]> =>
-    apiFetch<string[]>(recoveryCodesRoute())
-
 /**
  * The QR code and secret key are deliberately absent here. They describe one
  * setup attempt, not durable server state: `enable` mints a fresh secret
@@ -74,21 +68,10 @@ export const authenticatorQueries = {
             queryKey: [...authenticatorQueries.all(), 'enabled'] as const,
             queryFn: isAuthenticatorEnabled,
         }),
-    recoveryCodes: () =>
-        queryOptions({
-            queryKey: [
-                ...authenticatorQueries.all(),
-                'recovery-codes',
-            ] as const,
-            queryFn: getRecoveryCodes,
-        }),
 }
 
 export const useIsAuthenticatorEnabled = () =>
     useQuery(authenticatorQueries.enabled())
-
-export const useRecoveryCodes = (enabled = true) =>
-    useQuery({ ...authenticatorQueries.recoveryCodes(), enabled })
 
 export const enableAuthenticator = async (force?: boolean): Promise<void> => {
     await apiFetch(enableRoute(), { body: { force } })
@@ -104,8 +87,4 @@ export const confirmAuthenticator = async (code: string): Promise<void> => {
 
 export const disableAuthenticator = async (): Promise<void> => {
     await apiFetch(disableRoute())
-}
-
-export const regenerateRecoveryCodes = async (): Promise<void> => {
-    await apiFetch(regenerateRecoveryCodesRoute())
 }

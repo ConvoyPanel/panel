@@ -1,9 +1,9 @@
 import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 import { Passkey as PasskeyType } from '@/features/account/types.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import { IconKeyFilled, IconPencil, IconTrash } from '@tabler/icons-react'
 import { format } from 'date-fns'
 import { useMemo } from 'react'
-import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -20,9 +20,7 @@ interface Props {
 }
 
 const Passkey = ({ passkey }: Props) => {
-    const openModal = usePasskeysModalStore(
-        useShallow(state => state.openModal)
-    )
+    const openModal = useOpenModal(usePasskeysModalStore)
     const formattedDate = useMemo(
         () => format(passkey.createdAt, 'MMMM do, yyyy h:mm a'),
         [passkey.createdAt]

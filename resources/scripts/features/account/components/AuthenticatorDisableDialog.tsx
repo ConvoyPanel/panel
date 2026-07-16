@@ -1,14 +1,13 @@
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
-import { useShallow } from 'zustand/react/shallow'
-
 import {
-    disableAuthenticator,
     authenticatorQueries,
+    disableAuthenticator,
 } from '@/features/account/authenticator/api.ts'
-
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import { recoveryCodeQueries } from '@/features/account/recovery-codes/api.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -23,9 +22,7 @@ import {
 
 const AuthenticatorDisableDialog = () => {
     const queryClient = useQueryClient()
-    const [open, closeModal] = useAuthenticatorModalStore(
-        useShallow(state => [state.activeModal === 'disable', state.closeModal])
-    )
+    const { open, close } = useModal(useAuthenticatorModalStore, 'disable')
 
     const [state, disable] = useAsyncFunction(async () => {
         try {
@@ -34,10 +31,15 @@ const AuthenticatorDisableDialog = () => {
             await queryClient.invalidateQueries({
                 queryKey: authenticatorQueries.enabled().queryKey,
             })
+            // Dropping the last second factor clears the account's recovery
+            // codes, which retires the Recovery codes row.
+            await queryClient.invalidateQueries({
+                queryKey: recoveryCodeQueries.all(),
+            })
 
             toast.success('Authenticator disabled')
 
-            closeModal('disable')
+            close()
         } catch (e) {
             toast.error('Failed to disable authenticator')
             throw e
@@ -45,13 +47,12 @@ const AuthenticatorDisableDialog = () => {
     })
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && closeModal('disable')}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Disable Authenticator</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Disable Authenticator
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to disable the authenticator for
                         your account?
@@ -59,9 +60,7 @@ const AuthenticatorDisableDialog = () => {
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         loading={state.loading}

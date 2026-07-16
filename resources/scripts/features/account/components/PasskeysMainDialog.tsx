@@ -1,16 +1,16 @@
-import { getRecoveryCodes } from '@/features/account/authenticator/api.ts'
 import AuthSetting from '@/features/account/components/AuthSetting.tsx'
 import PasskeyDeleteDialog from '@/features/account/components/PasskeyDeleteDialog.tsx'
 import PasskeyList from '@/features/account/components/PasskeyList.tsx'
-import PasskeyRecoveryCodesDialog from '@/features/account/components/PasskeyRecoveryCodesDialog.tsx'
 import PasskeyRenameDialog from '@/features/account/components/PasskeyRenameDialog.tsx'
 import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
+import RecoveryCodesRevealDialog from '@/features/account/components/RecoveryCodesRevealDialog.tsx'
 import {
     getRegistrationOptions,
     passkeyQueries,
-    usePasskeys,
     verifyRegistration,
 } from '@/features/account/passkeys/api.ts'
+import { recoveryCodeQueries } from '@/features/account/recovery-codes/api.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { getApiErrorMessage } from '@/utils/http.ts'
 import { startRegistration } from '@simplewebauthn/browser'
@@ -35,13 +35,12 @@ import {
 
 const PasskeysMainDialog = () => {
     const queryClient = useQueryClient()
-    const { data: passkeys } = usePasskeys()
     const [isMainDialogOpen, setMainDialogOpen] = useState(false)
     const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
     const [registeredPasskey, setRegisteredPasskey] = useState<
         Awaited<ReturnType<typeof verifyRegistration>>['passkey'] | null
     >(null)
-    const openModal = usePasskeysModalStore(state => state.openModal)
+    const openModal = useOpenModal(usePasskeysModalStore)
 
     const [state, register] = useAsyncFunction(async () => {
         try {
@@ -55,7 +54,14 @@ const PasskeysMainDialog = () => {
                 queryKey: passkeyQueries.all(),
             })
 
+            // Only the first passkey mints codes, and only then does the
+            // Recovery codes row become available — its status query is what
+            // decides whether that row renders at all.
             if (result.recoveryCodes) {
+                await queryClient.invalidateQueries({
+                    queryKey: recoveryCodeQueries.all(),
+                })
+
                 setRegisteredPasskey(result.passkey)
                 setRecoveryCodes(result.recoveryCodes)
             } else {
@@ -74,15 +80,6 @@ const PasskeysMainDialog = () => {
                     : getApiErrorMessage(e, 'Registration failed')
 
             toast.error(message)
-            throw e
-        }
-    })
-
-    const [recoveryState, showRecoveryCodes] = useAsyncFunction(async () => {
-        try {
-            setRecoveryCodes(await getRecoveryCodes())
-        } catch (e) {
-            toast.error('Failed to load recovery codes')
             throw e
         }
     })
@@ -144,16 +141,10 @@ const PasskeysMainDialog = () => {
                         render={<Button variant={'outline'}>Close</Button>}
                     />
 
-                    {passkeys && passkeys.length > 0 && (
-                        <Button
-                            variant={'outline'}
-                            loading={recoveryState.loading}
-                            onClick={showRecoveryCodes}
-                        >
-                            Recovery codes
-                        </Button>
-                    )}
-
+                    {/* No "Recovery codes" button here any more: they are not a
+                        passkey thing. They have their own row on the security
+                        page — see RecoveryCodesMainDialog. What stays is the
+                        one-time reveal of the codes the first passkey minted. */}
                     <Button
                         loading={state.loading}
                         onClick={register}
@@ -168,7 +159,7 @@ const PasskeysMainDialog = () => {
                 <AuthDialog onCancel={() => setMainDialogOpen(false)} />
                 <PasskeyRenameDialog />
                 <PasskeyDeleteDialog />
-                <PasskeyRecoveryCodesDialog
+                <RecoveryCodesRevealDialog
                     codes={recoveryCodes}
                     onClose={closeRecoveryCodes}
                 />

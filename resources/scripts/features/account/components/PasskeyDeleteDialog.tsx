@@ -1,15 +1,14 @@
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { Passkey } from '@/features/account/types.ts'
-import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
-import { useShallow } from 'zustand/react/shallow'
-
+import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
 import {
     deletePasskey,
     passkeyQueries,
 } from '@/features/account/passkeys/api.ts'
-
-import { usePasskeysModalStore } from '@/features/account/components/PasskeysContainer.tsx'
+import { recoveryCodeQueries } from '@/features/account/recovery-codes/api.ts'
+import { Passkey } from '@/features/account/types.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import useAsyncFunction from '@/hooks/use-async-function.ts'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -24,13 +23,11 @@ import {
 
 const PasskeyDeleteDialog = () => {
     const queryClient = useQueryClient()
-    const [passkey, isDeleteDialogOpen, closeModal] = usePasskeysModalStore(
-        useShallow(state => [
-            state.modalData,
-            state.activeModal === 'delete',
-            state.closeModal,
-        ])
-    )
+    const {
+        open: isDeleteDialogOpen,
+        data: passkey,
+        close,
+    } = useModal(usePasskeysModalStore, 'delete')
 
     const [state, submit] = useAsyncFunction(
         async (currentPasskey: Passkey) => {
@@ -42,8 +39,13 @@ const PasskeyDeleteDialog = () => {
                 await queryClient.invalidateQueries({
                     queryKey: passkeyQueries.all(),
                 })
+                // Deleting the last passkey of an account with no authenticator
+                // clears the recovery codes, which retires their row.
+                await queryClient.invalidateQueries({
+                    queryKey: recoveryCodeQueries.all(),
+                })
 
-                closeModal('delete')
+                close()
             } catch (e) {
                 toast.error('Deletion failed')
                 throw e
@@ -54,7 +56,7 @@ const PasskeyDeleteDialog = () => {
     return (
         <ResponsiveDialog
             open={isDeleteDialogOpen}
-            onOpenChange={open => !open && closeModal('delete')}
+            onOpenChange={open => !open && close()}
         >
             <ResponsiveDialogContent className={'max-h-[50vh]'}>
                 <ResponsiveDialogHeader className={'overflow-x-hidden'}>
@@ -70,14 +72,12 @@ const PasskeyDeleteDialog = () => {
 
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogTrigger
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         loading={state.loading}
                         variant={'destructive'}
-                        onClick={() => submit(passkey!)}
+                        onClick={() => passkey && submit(passkey)}
                     >
                         Delete
                     </Button>

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Auth\DisableAuthenticator;
 use App\Actions\Auth\EnableAuthenticator;
 use App\Actions\Auth\RedirectIfSecondFactorAuthenticatable;
+use App\Http\Requests\Auth\SecondFactorLoginRequest;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -17,6 +18,7 @@ use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Requests\TwoFactorLoginRequest;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,9 @@ class FortifyServiceProvider extends ServiceProvider
     {
         $this->app->bind(EnableTwoFactorAuthentication::class, EnableAuthenticator::class);
         $this->app->bind(DisableTwoFactorAuthentication::class, DisableAuthenticator::class);
+        // Fortify's challenge controller type-hints the parent, so the binding is
+        // what gets our subclass injected. See SecondFactorLoginRequest.
+        $this->app->bind(TwoFactorLoginRequest::class, SecondFactorLoginRequest::class);
     }
 
     /**

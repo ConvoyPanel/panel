@@ -273,6 +273,58 @@ already points at swappable action classes, so this is a small subclass.
 
 ---
 
+## 3b. Follow-up — recovery codes got one home (and a review pass)
+
+The auth overhaul made recovery codes account-level in the *data* but left the
+*UI* presenting them per-factor, so one set read as two:
+
+- Both buttons hit the same `users.two_factor_recovery_codes`;
+  `PasskeysMainDialog` even imported `getRecoveryCodes` from
+  `authenticator/api.ts`. The two dialogs then described the same eight codes as
+  "if you lose your authenticator app" and "if you lose your passkey", and
+  "Reset recovery codes" in one silently invalidated what the other had just told
+  the user to save.
+- Fixed by giving them their own `AuthSetting` row beside Authenticator and
+  Passkeys (`RecoveryCodesMainDialog`), which renders only once the account has
+  codes. The routes moved off the TOTP-shaped `/account/authenticator/recovery-codes`
+  to `/account/recovery-codes`, plus an ungated `/status` — codes exist exactly
+  when a second factor does, so their presence *is* the account-level signal and
+  the security page can read it before identity is confirmed.
+- Each enable flow keeps only the one-time reveal of what it minted, through a
+  shared `RecoveryCodesRevealDialog` with factor-agnostic copy. Enabling an
+  authenticator on an account that already has a passkey mints nothing, so it
+  reveals nothing — `AuthenticatorEnableDialog` reads the status *before*
+  `enable`, the only moment that is knowable.
+
+Two bugs found reviewing the overhaul, one fixed:
+
+- **Fixed — the TOTP challenge 500'd for passkey-only accounts.** Since password
+  logins are challenged on either factor, such an account reaches
+  `/auth/authenticator/verify-challenge` with `two_factor_secret` null, and
+  Fortify's `TwoFactorLoginRequest::hasValidCode()` decrypts that column guarded
+  only by `$this->code &&` — `decrypt(null)` throws. The challenge screen hides
+  the field (`authenticator: false`), but the endpoint does not care what the UI
+  offers. `SecondFactorLoginRequest` guards it; bound in `FortifyServiceProvider`
+  because the controller type-hints the parent.
+- **Open — `PasskeyLoginController::store` never consumes its challenge.** It
+  `get`s `passkeys.authentication-options` where `SecondFactorChallengeController`
+  correctly `pull`s, so the challenge survives and the assertion replays. The same
+  line can also pass null into `FindPasskeyToAuthenticateAction::execute()`, whose
+  `$passkeyOptionsJson` is typed non-nullable → TypeError. Pre-dates the overhaul.
+- Cosmetic: `GeneratePasskeyAuthenticationOptionsAction` still inherits Spatie's
+  `Session::put('passkey-authentication-options', …)`, a fourth key nothing reads,
+  in exactly the area where key confusion would be a security bug.
+
+**The skeleton delay** on the passkey list was React Query retrying the identity
+403. The list fetched on page mount, 403'd behind `RequireIdentityConfirmation`,
+and the default `retry: 3` with exponential backoff (1s/2s/4s) kept it pending;
+whichever retry landed after the user confirmed is what painted. Queries behind
+that middleware now gate on `useIdentityConfirmed()` — confirming re-renders the
+subscriber, which is the fetch trigger. Measured 311ms from confirm to list,
+against multiple seconds before. Note `features/auth/api.ts` had already set
+`retry: false` on `secondFactorQueries.methods()` for the same reason; the
+general lesson is that a query behind an identity gate must not fire before it.
+
 ## 4. Outstanding
 
 - **`Select alignItemWithTrigger` was flipped to nova's `true` but never verified

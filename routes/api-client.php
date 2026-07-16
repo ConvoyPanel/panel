@@ -83,8 +83,16 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
             Route::post('/confirm', [ConfirmedTwoFactorAuthenticationController::class, 'store']);
             Route::get('/qr-code', [TwoFactorQrCodeController::class, 'show']);
             Route::get('/secret-key', [TwoFactorSecretKeyController::class, 'show']);
-            Route::get('/recovery-codes', [Client\RecoveryCodeController::class, 'index']);
-            Route::post('/recovery-codes/regenerate', [Client\RecoveryCodeController::class, 'store']);
+        });
+
+    // Not nested under /authenticator: one set of codes backs every second
+    // factor, so a TOTP-shaped URL misdescribes them. See RecoveryCodeController.
+    Route::get('/recovery-codes/status', [Client\RecoveryCodeController::class, 'status']);
+    Route::prefix('/recovery-codes')
+        ->middleware(RequireIdentityConfirmation::class)
+        ->group(function () {
+            Route::get('/', [Client\RecoveryCodeController::class, 'index']);
+            Route::post('/regenerate', [Client\RecoveryCodeController::class, 'store']);
         });
 });
 

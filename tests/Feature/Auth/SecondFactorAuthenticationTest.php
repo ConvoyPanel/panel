@@ -86,6 +86,40 @@ it('rejects a valid passkey belonging to another account', function () {
     $this->assertGuest();
 });
 
+/**
+ * A passkey-only account now reaches the TOTP challenge (a password login is
+ * challenged on either factor), but has no `two_factor_secret`. Fortify's
+ * request decrypts that column whenever a `code` is present, so this posted
+ * straight through a DecryptException and 500'd before the guard existed.
+ */
+it('rejects a code on the authenticator challenge for a passkey-only account', function () {
+    $user = User::factory()->create();
+    secondFactorPasskey($user);
+    $user->forceFill([
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code'])),
+    ])->save();
+
+    $this->withSession(['login.id' => $user->id])
+        ->postJson('/api/auth/authenticator/verify-challenge', ['code' => '123456'])
+        ->assertStatus(422);
+
+    $this->assertGuest();
+});
+
+it('still accepts a recovery code on the challenge for a passkey-only account', function () {
+    $user = User::factory()->create();
+    secondFactorPasskey($user);
+    $user->forceFill([
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code'])),
+    ])->save();
+
+    $this->withSession(['login.id' => $user->id])
+        ->postJson('/api/auth/authenticator/verify-challenge', ['recovery_code' => 'recovery-code'])
+        ->assertSuccessful();
+
+    $this->assertAuthenticatedAs($user);
+});
+
 it('issues recovery codes with the first passkey', function () {
     $user = User::factory()->create();
     $passkey = secondFactorPasskey($user);

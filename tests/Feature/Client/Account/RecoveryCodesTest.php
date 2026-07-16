@@ -13,8 +13,37 @@ it('returns account recovery codes without requiring an authenticator secret', f
 
     $this->actingAs($user)
         ->withSession(confirmedSession())
-        ->getJson('/api/client/account/authenticator/recovery-codes')
+        ->getJson('/api/client/account/recovery-codes')
         ->assertExactJson(['passkey-code']);
+});
+
+it('refuses to hand out recovery codes without a confirmed identity', function () {
+    $user = User::factory()->create();
+    $user->forceFill([
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['passkey-code'])),
+    ])->save();
+
+    $this->actingAs($user)
+        ->getJson('/api/client/account/recovery-codes')
+        ->assertForbidden();
+});
+
+// The security page reads this before identity is confirmed, to decide whether
+// the account has any second factor to offer recovery codes for at all.
+it('reports recovery-code status for a passkey-only account without confirmation', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->getJson('/api/client/account/recovery-codes/status')
+        ->assertExactJson(['enabled' => false]);
+
+    $user->forceFill([
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['passkey-code'])),
+    ])->save();
+
+    $this->actingAs($user)
+        ->getJson('/api/client/account/recovery-codes/status')
+        ->assertExactJson(['enabled' => true]);
 });
 
 it('preserves existing recovery codes when adding an authenticator', function () {

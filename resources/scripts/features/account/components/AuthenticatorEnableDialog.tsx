@@ -1,12 +1,18 @@
 import {
+    type AuthenticatorQrCode,
     authenticatorQueries,
     confirmAuthenticator,
     enableAuthenticator,
     getQrCode,
     getSecretKey,
-    type AuthenticatorQrCode,
 } from '@/features/account/authenticator/api.ts'
 import { useAuthenticatorModalStore } from '@/features/account/components/AuthenticatorContainer.tsx'
+import {
+    getRecoveryCodes,
+    hasRecoveryCodes,
+    recoveryCodeQueries,
+} from '@/features/account/recovery-codes/api.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
 import { getApiErrorMessage, handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -14,7 +20,6 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -47,14 +52,19 @@ const schema = z.object({
     code: z.string().length(6, 'Enter the 6-digit code from your app'),
 })
 
-const AuthenticatorEnableDialog = () => {
-    const [open, openModal, closeModal] = useAuthenticatorModalStore(
-        useShallow(state => [
-            state.activeModal === 'enable',
-            state.openModal,
-            state.closeModal,
-        ])
-    )
+interface Props {
+    /**
+     * Hands back the recovery codes this flow minted, or null if the account
+     * already had a set. Enabling an authenticator alongside an existing passkey
+     * mints nothing — the codes are account-level and shared — so revealing the
+     * old set here would present codes the user has already saved as if they
+     * were new.
+     */
+    onEnabled: (codes: string[] | null) => void
+}
+
+const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
+    const { open, close } = useModal(useAuthenticatorModalStore, 'enable')
     const queryClient = useQueryClient()
     // Setup material is fetched straight into state rather than through the
     // query cache. It belongs to ONE setup attempt: `enable` mints a new secret
@@ -66,6 +76,10 @@ const AuthenticatorEnableDialog = () => {
     const [setup, setSetup] = useState<{
         qrCode: AuthenticatorQrCode
         secretKey: string
+        // Whether `enable` was what minted the account's recovery codes. Read
+        // before enabling, because that is the only moment the answer is
+        // knowable — afterwards the account has codes either way.
+        codesAreNew: boolean
     } | null>(null)
 
     const form = useForm({
@@ -86,6 +100,8 @@ const AuthenticatorEnableDialog = () => {
             form.reset({ code: '' })
 
             try {
+                const codesExisted = await hasRecoveryCodes()
+
                 await enableAuthenticator()
 
                 const [qrCode, secretKey] = await Promise.all([
@@ -97,7 +113,7 @@ const AuthenticatorEnableDialog = () => {
                     return
                 }
 
-                setSetup({ qrCode, secretKey })
+                setSetup({ qrCode, secretKey, codesAreNew: !codesExisted })
             } catch (e) {
                 if (cancelled) {
                     return
@@ -128,14 +144,21 @@ const AuthenticatorEnableDialog = () => {
             await queryClient.invalidateQueries({
                 queryKey: authenticatorQueries.enabled().queryKey,
             })
+            // The account may have gained its first recovery codes, which is
+            // what decides whether the Recovery codes row renders at all.
             await queryClient.invalidateQueries({
-                queryKey: authenticatorQueries.recoveryCodes().queryKey,
+                queryKey: recoveryCodeQueries.all(),
             })
 
             toast.success('Authenticator enabled')
-            // openModal replaces the active step, so this both closes 'enable'
-            // and reveals the codes — no queue involved.
-            openModal('recovery-codes')
+
+            // Reveal the codes only if this flow is what created them; an
+            // account that already had a passkey already has (and has saved)
+            // the same set.
+            const codes = setup?.codesAreNew ? await getRecoveryCodes() : null
+
+            close()
+            onEnabled(codes)
         },
         onError: e => {
             // A wrong code is a 422 and handleFormErrors surfaces Fortify's own
@@ -145,7 +168,10 @@ const AuthenticatorEnableDialog = () => {
             if (handleFormErrors(e, form.setError)) return
 
             toast.error(
-                getApiErrorMessage(e, 'Could not verify that code. Please try again.')
+                getApiErrorMessage(
+                    e,
+                    'Could not verify that code. Please try again.'
+                )
             )
         },
     })
@@ -154,7 +180,7 @@ const AuthenticatorEnableDialog = () => {
     // account but unconfirmed, so it gates nothing and the next attempt simply
     // mints a fresh one.
     const handleOpenChange = (next: boolean) => {
-        if (!next) closeModal('enable')
+        if (!next) close()
     }
 
     const isSetupVisible = setup !== null
@@ -187,7 +213,8 @@ const AuthenticatorEnableDialog = () => {
                                         }}
                                     />
                                     <p className={'text-center'}>
-                                        <strong>Secret Key:</strong> {setup!.secretKey}
+                                        <strong>Secret Key:</strong>{' '}
+                                        {setup!.secretKey}
                                     </p>
                                     <FormField
                                         control={form.control}

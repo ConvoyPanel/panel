@@ -10,9 +10,14 @@ import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const PasskeyList = () => {
-    const { data, isLoading, isError, refetch } = usePasskeys()
+    const { data, isPending, isError, refetch } = usePasskeys()
 
-    if (isLoading) {
+    // isPending, not isLoading: the query is disabled until identity is
+    // confirmed, and a disabled query is pending-but-not-fetching. isLoading is
+    // false there, which dropped straight through to the "No passkeys" empty
+    // state — rendered behind the identity gate, since a nested dialog leaves
+    // its parent visible. The skeleton is the honest thing to show while gated.
+    if (isPending) {
         return <Skeleton className={'h-24 w-full'} />
     }
 
