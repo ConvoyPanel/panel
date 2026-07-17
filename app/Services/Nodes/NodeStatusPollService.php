@@ -2,13 +2,15 @@
 
 namespace App\Services\Nodes;
 
+use App\Data\Cluster\ServerResourceData;
 use App\Enums\Node\NodeStatus;
 use App\Enums\Node\Testing\ConnectionErrorCode;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
 use App\Models\Node;
-use App\Services\Proxmox\Node\ProxmoxStatusClient;
+use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Collection;
 
 /**
  * Records whether Convoy can currently reach a node.
@@ -23,21 +25,52 @@ use Illuminate\Http\Client\ConnectionException;
  * token is still valid, or the certificate is trusted. A host that pings while
  * answering `token_invalid` is down as far as Convoy is concerned.
  *
+ * The call is `/cluster/resources`, which answers both questions Convoy has
+ * about a node in one response: can we reach it, and what is each of its guests
+ * doing. That is why it is this endpoint rather than `/nodes/{node}/status` --
+ * the guest states come free, and a second endpoint would mean a second timeout
+ * to sit through on a node that is down.
+ *
  * See docs/node-status-plan.md.
  */
 class NodeStatusPollService
 {
-    public function __construct(private ProxmoxStatusClient $client) {}
+    public function __construct(
+        private ProxmoxResourceClient $client,
+        private GuestStateCache $guestStates,
+    ) {}
 
     public function handle(Node $node): NodeStatus
     {
         try {
-            $this->client->setNode($node)->getStatus();
+            $guests = $this->client->setNode($node)->getResources();
         } catch (ConvoyRequestException|GuzzleRequestException|ConnectionException $e) {
+            // The guest map is deliberately left to expire on its own rather
+            // than being forgotten here. Until it lapses it is still the last
+            // thing we actually observed, and a single failed poll is not
+            // evidence that anything changed state.
             return $this->markUnreachable($node, $e->getMessage());
         }
 
+        $this->guestStates->put($node, $this->mapGuestStates($node, $guests));
+
         return $this->markOnline($node);
+    }
+
+    /**
+     * @param  Collection<int, ServerResourceData>  $guests
+     * @return array<int, string> vmid => PVE status string
+     */
+    private function mapGuestStates(Node $node, Collection $guests): array
+    {
+        return $guests
+            // On a real cluster this endpoint answers for every member, not
+            // just the host we asked. Without this filter another node's guests
+            // would be recorded against this one -- and vmids are only unique
+            // per cluster, so the collision is silent.
+            ->filter(fn (ServerResourceData $guest) => $guest->nodeName === $node->name)
+            ->mapWithKeys(fn (ServerResourceData $guest) => [$guest->vmid => $guest->status])
+            ->all();
     }
 
     private function markOnline(Node $node): NodeStatus

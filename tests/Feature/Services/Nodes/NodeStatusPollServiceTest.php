@@ -2,35 +2,62 @@
 
 use App\Enums\Node\NodeStatus;
 use App\Enums\Node\Testing\ConnectionErrorCode;
+use App\Enums\Server\State;
 use App\Models\Location;
 use App\Models\Node;
+use App\Models\Server;
+use App\Services\Nodes\GuestStateCache;
 use App\Services\Nodes\NodeStatusPollService;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
+    // The array cache is not torn down between tests, but the database is --
+    // so node ids restart and a previous test's `node:1:vm-states` is still
+    // sitting there under the new node's key. Without this flush, a test that
+    // never polls anything reads the last test's guests.
+    Cache::flush();
+
     $this->node = Node::factory()->for(Location::factory())->create();
     $this->service = app(NodeStatusPollService::class);
 });
 
-function pollStatusPayload(): array
+/** One `type=qemu` row as /cluster/resources returns it. */
+function guestRow(int $vmid, string $status, string $nodeName): array
 {
     return [
-        'current-kernel' => ['version' => '#1', 'release' => '6.14.8-2-pve', 'sysname' => 'Linux', 'machine' => 'x86_64'],
-        'cpuinfo' => ['cpus' => 32, 'sockets' => 1, 'cores' => 16, 'model' => 'AMD EPYC', 'flags' => ''],
+        'type' => 'qemu',
+        'id' => "qemu/{$vmid}",
+        'name' => "vm-{$vmid}",
+        'status' => $status,
+        'vmid' => $vmid,
+        'node' => $nodeName,
+        'maxcpu' => 2,
         'cpu' => 0.1,
-        'loadavg' => ['0.5', '0.5', '0.5'],
-        'memory' => ['used' => 1, 'free' => 1, 'available' => 1, 'total' => 2],
-        'swap' => ['used' => 0, 'free' => 0, 'total' => 0],
-        'rootfs' => ['used' => 1, 'free' => 1, 'avail' => 1, 'total' => 2],
-        'boot-info' => ['mode' => 'efi', 'secureboot' => true],
-        'pveversion' => 'pve-manager/9.2.2',
+        'maxmem' => 2048,
+        'mem' => 1024,
+        'maxdisk' => 100,
+        'disk' => 50,
         'uptime' => 10,
     ];
 }
 
+/**
+ * A /cluster/resources body. The node/storage rows are included because the
+ * real endpoint returns them and the poller has to tolerate them.
+ */
+function pollStatusPayload(array $guests = []): array
+{
+    return [
+        ['type' => 'node', 'id' => 'node/pve', 'node' => 'pve', 'status' => 'online'],
+        ['type' => 'storage', 'id' => 'storage/pve/local', 'node' => 'pve', 'status' => 'available'],
+        ...$guests,
+    ];
+}
+
 it('records a reachable node as online', function () {
-    Http::fake(['*/api2/json/nodes/*/status' => Http::response(['data' => pollStatusPayload()], 200)]);
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
 
     expect($this->service->handle($this->node))->toBe(NodeStatus::ONLINE);
 
@@ -42,7 +69,7 @@ it('records a reachable node as online', function () {
 });
 
 it('records why an unreachable node failed', function () {
-    Http::fake(['*/api2/json/nodes/*/status' => fn () => throw new ConnectionException(
+    Http::fake(['*/api2/json/cluster/resources' => fn () => throw new ConnectionException(
         'cURL error 60: SSL certificate problem: unable to get local issuer certificate',
     )]);
 
@@ -59,7 +86,7 @@ it('counts consecutive failures and resets them on recovery', function () {
     // and a recovery must. `Http::fake` merges stubs rather than replacing them,
     // so the node's health is flipped through a closure instead.
     $reachable = false;
-    Http::fake(['*/api2/json/nodes/*/status' => function () use (&$reachable) {
+    Http::fake(['*/api2/json/cluster/resources' => function () use (&$reachable) {
         if (! $reachable) {
             throw new ConnectionException('Connection refused');
         }
@@ -80,7 +107,7 @@ it('counts consecutive failures and resets them on recovery', function () {
 
 it('keeps last_seen_at pointing at the last successful contact', function () {
     $reachable = true;
-    Http::fake(['*/api2/json/nodes/*/status' => function () use (&$reachable) {
+    Http::fake(['*/api2/json/cluster/resources' => function () use (&$reachable) {
         if (! $reachable) {
             throw new ConnectionException('Connection refused');
         }
@@ -103,7 +130,7 @@ it('keeps last_seen_at pointing at the last successful contact', function () {
 });
 
 it('degrades a remembered status to unknown once it goes stale', function () {
-    Http::fake(['*/api2/json/nodes/*/status' => Http::response(['data' => pollStatusPayload()], 200)]);
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
     $this->service->handle($this->node);
 
     expect($this->node->refresh()->currentStatus())->toBe(NodeStatus::ONLINE);
@@ -118,4 +145,95 @@ it('degrades a remembered status to unknown once it goes stale', function () {
 
 it('reads unknown before it has ever been polled', function () {
     expect($this->node->currentStatus())->toBe(NodeStatus::UNKNOWN);
+});
+
+it('records each guest power state from the same response', function () {
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload([
+        guestRow(100, 'running', $this->node->name),
+        guestRow(101, 'stopped', $this->node->name),
+    ])], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect(app(GuestStateCache::class)->for($this->node))
+        ->toBe([100 => 'running', 101 => 'stopped']);
+});
+
+it('ignores guests belonging to another node in the cluster', function () {
+    // /cluster/resources answers for every member. vmids are unique per cluster,
+    // not per node, so an unfiltered map silently attributes a neighbour's guest
+    // to this node -- and the number looks perfectly plausible.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload([
+        guestRow(100, 'running', $this->node->name),
+        guestRow(200, 'running', 'some-other-node'),
+    ])], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect(app(GuestStateCache::class)->for($this->node))->toBe([100 => 'running']);
+});
+
+it('leaves the last known guest states alone when a poll fails', function () {
+    $reachable = true;
+    Http::fake(['*/api2/json/cluster/resources' => function () use (&$reachable) {
+        if (! $reachable) {
+            throw new ConnectionException('Connection refused');
+        }
+
+        return Http::response(['data' => pollStatusPayload([
+            guestRow(100, 'running', $this->node->name),
+        ])], 200);
+    }]);
+
+    $this->service->handle($this->node);
+
+    $reachable = false;
+    $this->service->handle($this->node->refresh());
+
+    // One failed poll is not evidence a guest changed state. The map stands
+    // until it expires on its own.
+    expect(app(GuestStateCache::class)->for($this->node))->toBe([100 => 'running']);
+});
+
+it('says unknown rather than stopped for a guest it cannot vouch for', function () {
+    $server = Server::factory()->for($this->node)->create(['vmid' => 100]);
+    $cache = app(GuestStateCache::class);
+
+    // Never polled.
+    expect($cache->stateFor($server))->toBeNull();
+
+    // Polled, but PVE did not mention this guest -- usually removed outside
+    // Convoy. Answering `stopped` would invite someone to press Start on it.
+    $cache->put($this->node, [999 => 'running']);
+    expect($cache->stateFor($server))->toBeNull();
+
+    $cache->put($this->node, [100 => 'running']);
+    expect($cache->stateFor($server))->toBe(State::RUNNING);
+});
+
+it('expires the guest map with the node status it was observed alongside', function () {
+    // Asserted on the expiry handed to the cache rather than by travelling past
+    // it: `ArrayStore` (the test driver) expires entries against `microtime()`,
+    // so `$this->travel()` -- which only moves Carbon's clock -- never ages a
+    // cache entry out. The node-status assertions above work because those read
+    // `status_checked_at` through Carbon.
+    //
+    // Time is frozen so the expiry the service computes and the one asserted
+    // here are the same instant rather than microseconds apart.
+    $this->freezeTime();
+    Cache::spy();
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload([
+        guestRow(100, 'running', $this->node->name),
+    ])], 200)]);
+
+    $this->service->handle($this->node);
+
+    // Both facts come from one response, so neither may outlive the other: a
+    // node reading `online` beside guests reading `unknown` is unreadable.
+    Cache::shouldHaveReceived('put')->once()->withArgs(
+        fn (string $key, array $value, $expiry) => $key === "node:{$this->node->id}:vm-states"
+            && $value === [100 => 'running']
+            && $expiry->equalTo(now()->addMinutes(Node::STATUS_TTL_MINUTES))
+    );
 });
