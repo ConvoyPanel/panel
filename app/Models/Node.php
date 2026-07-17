@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
+use App\Enums\Node\NodeStatus;
+use App\Enums\Node\Testing\ConnectionErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
@@ -18,6 +21,12 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property string $display_name
  * @property string $name
  * @property bool $verify_tls
+ * @property NodeStatus $status
+ * @property ConnectionErrorCode|null $status_code
+ * @property string|null $status_message
+ * @property Carbon|null $last_seen_at
+ * @property Carbon|null $status_checked_at
+ * @property int $consecutive_failures
  * @property string $fqdn
  * @property string $cluster
  * @property int $port
@@ -89,7 +98,42 @@ class Node extends Model
             'memory' => StorageSizeCast::class,
             'token_secret' => 'encrypted',
             'overage_penalty' => OveragePenaltyCast::class,
+            'status' => NodeStatus::class,
+            'status_code' => ConnectionErrorCode::class,
+            'last_seen_at' => 'datetime',
+            'status_checked_at' => 'datetime',
+            'consecutive_failures' => 'integer',
         ];
+    }
+
+    /**
+     * How long a recorded status stays trustworthy.
+     *
+     * `nodes:poll` runs every minute, so this is generous enough to survive a
+     * skipped pass or a briefly backed-up queue.
+     */
+    public const STATUS_TTL_MINUTES = 5;
+
+    /**
+     * The stored status, degraded to `unknown` once the last check is too old
+     * to stand behind.
+     *
+     * Without this, an install whose scheduler or queue worker has stopped
+     * would keep reporting whatever was true when it last ran — a node could
+     * read `online` for weeks after it burned down. A remembered answer is not
+     * an observation, and the difference matters most exactly when the
+     * monitoring itself is broken.
+     */
+    public function currentStatus(): NodeStatus
+    {
+        if (
+            $this->status_checked_at === null
+            || $this->status_checked_at->lt(now()->subMinutes(self::STATUS_TTL_MINUTES))
+        ) {
+            return NodeStatus::UNKNOWN;
+        }
+
+        return $this->status;
     }
 
     /**

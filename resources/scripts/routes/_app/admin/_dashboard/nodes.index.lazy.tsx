@@ -8,6 +8,8 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
 
+import NodeStatusIndicator from '@/features/nodes/components/NodeStatusIndicator.tsx'
+
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
@@ -76,6 +78,16 @@ function NodesIndex() {
             },
         },
         {
+            header: 'Status',
+            accessorKey: 'status',
+            // Written by `nodes:poll`, so this costs no PVE call per row — see
+            // docs/node-status-plan.md.
+            meta: {
+                skeletonWidth: '4rem',
+            },
+            cell: ({ row }) => <NodeStatusIndicator node={row.original} />,
+        },
+        {
             header: 'Memory',
             accessorKey: 'memory',
             meta: {
@@ -129,8 +141,12 @@ function NodesIndex() {
                                 >
                                     {node.fqdn}
                                 </ItemDescription>
-                                <ItemDescription>
-                                    {formatMemory(node.memory)} memory
+                                <ItemDescription className={'flex gap-2'}>
+                                    <NodeStatusIndicator node={node} />
+                                    <span aria-hidden>·</span>
+                                    <span>
+                                        {formatMemory(node.memory)} memory
+                                    </span>
                                 </ItemDescription>
                             </ItemContent>
                             <ItemActions>

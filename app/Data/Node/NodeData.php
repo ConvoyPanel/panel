@@ -3,6 +3,8 @@
 namespace App\Data\Node;
 
 use App\Data\Server\OveragePenaltyData;
+use App\Enums\Node\NodeStatus;
+use App\Enums\Node\Testing\ConnectionErrorCode;
 use App\Models\Node;
 use App\Services\Servers\OveragePenaltyResolver;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -28,6 +30,17 @@ class NodeData extends Data
         public int $memoryAllocated,
         public ?int $cotermId,
         public int $serversCount,
+        /**
+         * Reachability as of {@see $statusCheckedAt}, written by `nodes:poll`
+         * and degraded to `unknown` once too stale to trust. Never read live
+         * per request: see docs/node-status-plan.md.
+         */
+        public NodeStatus $status = NodeStatus::UNKNOWN,
+        /** Why it is unreachable, in the connection test's vocabulary. */
+        public ?ConnectionErrorCode $statusCode = null,
+        /** Last *successful* contact, so the UI can say how stale this is. */
+        public ?string $lastSeenAt = null,
+        public ?string $statusCheckedAt = null,
         /**
          * This node's override of the quota-overage penalty. Null = inherit the
          * global tier, which is what {@see $defaultOveragePenalty} carries.
@@ -60,6 +73,15 @@ class NodeData extends Data
             memoryAllocated: (int) ($node->memory_allocated ?? 0),
             cotermId: $node->coterm_id,
             serversCount: (int) ($node->servers_count ?? 0),
+            status: $node->currentStatus(),
+            // Only meaningful alongside a live `unreachable`; a stale row keeps
+            // its last code in the database, but sending it with an `unknown`
+            // status would invite the UI to explain a failure it cannot vouch for.
+            statusCode: $node->currentStatus() === NodeStatus::UNREACHABLE
+                ? $node->status_code
+                : null,
+            lastSeenAt: $node->last_seen_at?->toIso8601String(),
+            statusCheckedAt: $node->status_checked_at?->toIso8601String(),
             overagePenalty: $node->overage_penalty,
             defaultOveragePenalty: app(OveragePenaltyResolver::class)->global(),
         );

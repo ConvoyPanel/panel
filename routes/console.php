@@ -3,6 +3,7 @@
 use App\Console\Commands\Maintenance\PruneDeploymentsCommand;
 use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
+use App\Console\Commands\Node\PollNodeStatusesCommand;
 use App\Console\Commands\Server\ResetUsagesCommand;
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
@@ -36,6 +37,12 @@ if (config('backups.prune_age')) {
 if (config('activity.prune_days')) {
     Schedule::command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
 }
+
+// Node reachability (see docs/node-status-plan.md). The panel reads only what this
+// writes -- checking live state per request costs one PVE call per row, and an
+// unreachable node burns the whole connect timeout rather than failing fast.
+// `withoutOverlapping` so a fleet that is slow to answer never piles passes up.
+Schedule::command(PollNodeStatusesCommand::class)->everyMinute()->withoutOverlapping();
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

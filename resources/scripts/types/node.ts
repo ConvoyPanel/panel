@@ -16,6 +16,18 @@ export interface Node {
     memoryAllocated: number
     cotermId: number | null
     serversCount: number
+    /**
+     * Reachability as of `statusCheckedAt`, written by the `nodes:poll`
+     * scheduler rather than read live — see docs/node-status-plan.md. Already
+     * degraded to `unknown` server-side when the last check is too stale to
+     * stand behind, so this can be rendered as-is.
+     */
+    status: App.Enums.Node.NodeStatus
+    /** Why it is unreachable. Only sent alongside an `unreachable` status. */
+    statusCode: App.Enums.Node.Testing.ConnectionErrorCode | null
+    /** ISO-8601. Last *successful* contact, so the UI can say how stale this is. */
+    lastSeenAt: string | null
+    statusCheckedAt: string | null
     /** This node's override of the quota-overage penalty; null = inherit global. */
     overagePenalty: App.Data.Server.OveragePenaltyData | null
     /** Read-only global-tier fallback, for showing the effective value. */
