@@ -1,4 +1,4 @@
-import PowerStateBadge from '@/features/servers/components/PowerStateBadge.tsx'
+import PowerStateRail from '@/features/servers/components/PowerStateRail.tsx'
 import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
 import { IconDots } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
@@ -36,15 +36,26 @@ const ServerCard = ({ server }: Props) => {
     ]
 
     return (
-        <Item variant={'muted'} size={'sm'}>
+        <Item
+            variant={'muted'}
+            size={'sm'}
+            className={'hover:bg-accent/50 relative pl-5 transition-colors'}
+        >
+            <PowerStateRail state={server.powerState} />
             <ItemContent className={'min-w-0 overflow-x-hidden'}>
                 <ItemTitle className={'max-w-full'}>
+                    {/* The `after` overlay stretches this one link across the
+                        whole row, rather than wrapping the row in an anchor --
+                        the row holds a menu button, and interactive content
+                        nested inside a link is invalid and unreachable by
+                        keyboard. Anything else clickable in the row needs to sit
+                        above the overlay (see ItemActions below). */}
                     <Link
                         to={ServerIndexRoute.to}
                         params={{
                             serverUuid: server.uuidShort,
                         }}
-                        className={'truncate'}
+                        className={'truncate after:absolute after:inset-0'}
                     >
                         {server.name}
                     </Link>
@@ -59,7 +70,6 @@ const ServerCard = ({ server }: Props) => {
                             {server.status.replace(/_/g, ' ')}
                         </Badge>
                     )}
-                    <PowerStateBadge state={server.powerState} />
                 </ItemTitle>
                 <ItemDescription className={'truncate'}>
                     {server.hostname}
@@ -79,7 +89,9 @@ const ServerCard = ({ server }: Props) => {
                     </div>
                 ))}
             </dl>
-            <ItemActions className={'ml-auto'}>
+            {/* z-10 lifts the menu above the stretched link's overlay; without
+                it the trigger is covered and opening the menu navigates. */}
+            <ItemActions className={'relative z-10 ml-auto'}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
