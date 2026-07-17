@@ -77,14 +77,20 @@ it('can generate noVNC authorization token', function () {
     $response->assertCreated()
         ->assertJsonPath('data.url', 'wss://agent.example.com/anchor/api/v1/console')
         ->assertJsonPath('data.protocol', Anchor::PROTOCOL_VERSION)
-        ->assertJsonPath('data.type', 'novnc');
+        ->assertJsonPath('data.type', 'novnc')
+        ->assertJson(fn ($json) => $json
+            ->whereType('data.password', 'string')
+            ->etc());
 
     $token = app(JWTService::class)->decode($anchor->secret, $response->json('data.token'));
+    $password = $response->json('data.password');
     expect($token->isPermittedFor($anchor->uuid))->toBeTrue()
         ->and($token->isRelatedTo($user->uuid))->toBeTrue()
+        ->and($password)->toHaveLength(8)
         ->and($token->claims()->get('console'))->toBe([
             'type' => 'qemu_vnc',
             'vm_id' => $server->vmid,
+            'password' => $password,
         ]);
 
     Http::assertNothingSent();
@@ -109,7 +115,8 @@ it('nests the agent session inside a relay session', function () {
     );
 
     $response->assertCreated()
-        ->assertJsonPath('data.url', 'wss://relay.example.com/api/v1/console');
+        ->assertJsonPath('data.url', 'wss://relay.example.com/api/v1/console')
+        ->assertJsonPath('data.password', null);
 
     $outer = app(JWTService::class)->decode($relay->secret, $response->json('data.token'));
     $relayClaim = $outer->claims()->get('relay');

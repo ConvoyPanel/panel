@@ -32,9 +32,11 @@ class AnchorSessionService
 
         $agent->loadMissing('relay');
         $this->ensureCompatible($agent);
+        $password = $type === ConsoleType::NOVNC ? Str::random(8) : null;
         $console = [
             'type' => $type === ConsoleType::NOVNC ? 'qemu_vnc' : 'qemu_terminal',
             'vm_id' => $server->vmid,
+            ...($password !== null ? ['password' => $password] : []),
         ];
         $expiresAt = CarbonImmutable::now()->addMinute();
         $agentToken = $this->issue(
@@ -69,6 +71,7 @@ class AnchorSessionService
             token: $token,
             protocol: Anchor::PROTOCOL_VERSION,
             type: $type,
+            password: $password,
         );
     }
 

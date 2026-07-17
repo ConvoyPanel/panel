@@ -1,3 +1,9 @@
+import type { ConsoleType } from '@/features/servers/console/api'
+import { useServer } from '@/features/servers/detail/api.ts'
+import { IconExternalLink } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+
 import { Button } from '@/components/ui/Button'
 import {
     ResponsiveDialog,
@@ -9,60 +15,72 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 
 const ConsoleButton = () => {
+    const [type, setType] = useState<ConsoleType>('novnc')
+    const { data: server } = useServer()
+    const navigate = useNavigate()
+    const openNewWindow = () => {
+        if (!server) return
+        window.open(
+            `/servers/${server.uuid}/console?type=${type}`,
+            '_blank',
+            'noopener,noreferrer'
+        )
+    }
+    const open = () =>
+        server &&
+        navigate({
+            to: '/servers/$serverUuid/console',
+            params: { serverUuid: server.uuid },
+            search: { type },
+        })
     return (
         <ResponsiveDialog>
             <ResponsiveDialogTrigger
-                render={
-                    <Button variant={'outline'}>Console</Button>
-                }
+                render={<Button variant='outline'>Console</Button>}
             />
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle className={'text-sm font-normal'}>
-                        Select a Console
-                    </ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>Open console</ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogBody>
-                    <div className={'-mx-2 flex flex-col'}>
-                        <button
-                            className={
-                                'py-2 px-2 text-left hover:bg-accent hover:text-accent-foreground'
-                            }
-                        >
-                            <span className={'block text-lg font-bold'}>
-                                NoVNC
-                            </span>
-                            <span className={'text-sm text-muted-foreground'}>
-                                NoVNC offers the most compatibility across all
-                                systems, making it an ideal choice for diverse
-                                environments.
-                            </span>
-                        </button>
-                        <button
-                            className={
-                                'py-2 px-2 text-left hover:bg-accent hover:text-accent-foreground'
-                            }
-                        >
-                            <span className={'block text-lg font-bold'}>
-                                XTerm.js
-                            </span>
-                            <span className={'text-sm text-muted-foreground'}>
-                                XTerm.js provides faster performance and more
-                                seamless native integration, though it may not
-                                be compatible with certain systems (e.g.,
-                                non-command line oriented systems).
-                            </span>
-                        </button>
-                    </div>
+                    <Tabs
+                        value={type}
+                        onValueChange={value => setType(value as ConsoleType)}
+                    >
+                        <TabsList className='w-full'>
+                            <TabsTrigger value='novnc'>Display</TabsTrigger>
+                            <TabsTrigger value='xtermjs'>Terminal</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                 </ResponsiveDialogBody>
                 <ResponsiveDialogFooter>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Close</Button>
-                        }
+                        render={<Button variant='outline'>Cancel</Button>}
                     />
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant='outline'
+                                size='icon'
+                                disabled={!server}
+                                onClick={openNewWindow}
+                            >
+                                <IconExternalLink />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Open in new window</TooltipContent>
+                    </Tooltip>
+                    <Button disabled={!server} onClick={open}>
+                        Open console
+                    </Button>
                 </ResponsiveDialogFooter>
             </ResponsiveDialogContent>
         </ResponsiveDialog>

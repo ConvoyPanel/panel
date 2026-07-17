@@ -12,5 +12,6 @@ class ConsoleSessionData extends Data
         public string $token,
         public int $protocol,
         public ConsoleType $type,
+        public ?string $password,
     ) {}
 }
