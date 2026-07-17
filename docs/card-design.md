@@ -153,8 +153,17 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
 
 ## In this codebase
 
-- **Reference layout:** `routes/_app/admin/nodes.$nodeId/settings.lazy.tsx` — General /
-  Connection / Specifications as a responsive card grid.
+- **Reference layout:** `routes/_app/admin/servers.$serverId/settings.lazy.tsx` — Resources
+  / Backups as a responsive card grid, with Bandwidth spanning both columns beneath.
+
+  This citation used to point at `nodes.$nodeId/settings.lazy.tsx`, which is a worse
+  example of the same pattern and is why the two were once read as contradicting each
+  other. Put two cards side by side only when they hold **comparable amounts of field**;
+  a grid row stretches every card to the tallest one, so pairing a two-field card with a
+  six-field card buys nothing but dead space in the short one. Node settings had exactly
+  that (General beside Connection) and now stacks full-width sections instead, letting
+  each card's own internal grid supply the horizontal density. Neither shape is more
+  correct than the other — the field counts decide.
 - The node **create** screen (`routes/_app/admin/(fullscreen)/nodes.create.lazy.tsx` +
   `features/nodes/components/Create/*`) predates this pattern and is the next thing to
   bring in line — see the redesign directions discussed in the v10 handoff.

@@ -113,7 +113,7 @@ function NodeSettings() {
             <Heading>Settings</Heading>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit as any)}>
-                    <div className={'grid grid-cols-1 gap-4 @xl:grid-cols-2'}>
+                    <div className={'space-y-4'}>
                         <Card>
                             <CardHeader>
                                 <CardTitle>General</CardTitle>
@@ -122,7 +122,9 @@ function NodeSettings() {
                                     locations.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className={'space-y-4'}>
+                            <CardContent
+                                className={'grid grid-cols-1 gap-3 @md:grid-cols-2'}
+                            >
                                 <InputForm
                                     name={'displayName'}
                                     label={'Display Name'}
@@ -142,7 +144,7 @@ function NodeSettings() {
                             <CardContent className={'space-y-4'}>
                                 <div
                                     className={
-                                        'grid grid-cols-[1fr_6rem] gap-3'
+                                        'grid grid-cols-1 gap-3 @md:grid-cols-[1fr_6rem_1fr]'
                                     }
                                 >
                                     <InputForm name={'fqdn'} label={'FQDN'} />
@@ -151,22 +153,28 @@ function NodeSettings() {
                                         label={'Port'}
                                         type={'number'}
                                     />
+                                    <InputForm
+                                        name={'name'}
+                                        label={'Proxmox Node Name'}
+                                    />
                                 </div>
-                                <InputForm
-                                    name={'name'}
-                                    label={'Proxmox Node Name'}
-                                />
-                                <InputForm
-                                    name={'tokenId'}
-                                    label={'Token ID'}
-                                    autoComplete={'off'}
-                                />
-                                <InputForm
-                                    name={'tokenSecret'}
-                                    label={'Token Secret'}
-                                    type={'password'}
-                                    autoComplete={'off'}
-                                />
+                                <div
+                                    className={
+                                        'grid grid-cols-1 gap-3 @md:grid-cols-2'
+                                    }
+                                >
+                                    <InputForm
+                                        name={'tokenId'}
+                                        label={'Token ID'}
+                                        autoComplete={'off'}
+                                    />
+                                    <InputForm
+                                        name={'tokenSecret'}
+                                        label={'Token Secret'}
+                                        type={'password'}
+                                        autoComplete={'off'}
+                                    />
+                                </div>
                                 <CheckboxForm
                                     name={'verifyTls'}
                                     label={'Verify TLS Certificate'}
@@ -177,7 +185,7 @@ function NodeSettings() {
                             </CardContent>
                         </Card>
 
-                        <Card className={'@xl:col-span-2'}>
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Specifications</CardTitle>
                                 <CardDescription>
@@ -226,7 +234,7 @@ function NodeSettings() {
                             </CardContent>
                         </Card>
 
-                        <Card className={'@xl:col-span-2'}>
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Bandwidth</CardTitle>
                                 <CardDescription>

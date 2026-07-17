@@ -52,19 +52,9 @@ trade-offs if either is ever revisited).
 
 ## 3. Outstanding
 
-Two of these are UI complaints with screenshots the maintainer raised directly;
-neither has been touched.
+The node settings layout is **done** — see §5. The remaining UI complaint below
+has a screenshot the maintainer raised directly and has not been touched.
 
-- **The node settings page layout (`nodes.$nodeId/settings.lazy.tsx`).** The
-  maintainer's words: "needs to be redesigned with the nova cards in mind, the
-  layout looks ugly". Currently General / Connection side by side with
-  Specifications and Bandwidth full-width beneath; General is mostly empty
-  space next to a much taller Connection card.
-  **Note the contradiction before starting:** `docs/card-design.md` §"In this
-  codebase" cites *this exact file* as the **reference layout** for the card
-  grid. One of the two is wrong — either the page is fine and the complaint is
-  about something narrower (the ragged card heights?), or the reference needs
-  to move. Settle that first, and update `card-design.md` either way.
 - **The client server overview cards (`/servers/{id}`).** "These cards look like
   shit" — specifically the Bandwidth Allowance / Storage Usage / System
   Specifications row: mismatched heights, progress bars stranded at the card
@@ -107,3 +97,39 @@ neither has been touched.
   Set it back to `false` to restore.
 - `php artisan tinker <script>` hangs; bootstrap Laravel in a plain script and
   run it with `ddev exec php` instead.
+- **`ddev start` fails in a Docker Sandbox**: `/etc/hosts` is read-only even
+  under sudo, and `ddev-hostname` treats that as fatal. `/usr/local/bin` is not
+  writable either, so shadow it on `PATH` instead — a `~/bin/ddev-hostname` that
+  is just `#!/bin/sh` + `exit 0`, then `PATH="$HOME/bin:$PATH" ddev start`. The
+  entry is not actually needed: nothing in the sandbox resolves `*.ddev.site` by
+  name. Reach it with `curl --resolve convoy.ddev.site:443:127.0.0.1` and launch
+  chromium with `--host-resolver-rules=MAP convoy.ddev.site 127.0.0.1`. Still run
+  the kit's sanity check (`remote_ip` must be `127.0.0.1`) — the point of the
+  NO_PROXY entry is that you never drive the *host's* app by accident.
+- Playwright's browsers are cached in `~/.cache/ms-playwright`, but the
+  `playwright` **module** lived in a previous session's scratchpad and is gone;
+  `npm i playwright` into the current one. It resolves the cached browsers, so
+  nothing re-downloads.
+- The `CheckboxForm` boolean renders a Base UI **button**, not an `input`, so
+  `input[name="verifyTls"]` never matches. Use `getByRole('checkbox')`.
+
+## 5. Node settings layout — settled
+
+The contradiction the last handoff flagged was a false one: both statements were
+partly right. The **card grid pattern is fine** and stays the documented default;
+what was ugly was the *content split* — a two-field General card sharing a grid
+row with a six-field Connection card, where the row stretches both to the taller
+one and pads General with dead space.
+
+So the pattern kept its place and the page changed: the four cards now stack
+full-width, each using its own internal responsive grid for horizontal density
+(General puts Display Name beside Location; Connection runs FQDN / Port / Node
+Name, then Token ID / Token Secret). `card-design.md`'s "reference layout"
+citation moved to `admin/servers.$serverId/settings.lazy.tsx`, which demonstrates
+the same grid with *balanced* cards, and now states the rule the old citation
+left implicit: pair cards side by side only when they hold comparable amounts of
+field.
+
+Verified in the browser at 1440px and 820px, and with a real save round-trip —
+display name, CPU count and a `verifyTls` off→on click all persisted correctly
+(node 12 was restored to its seeded values afterwards).
