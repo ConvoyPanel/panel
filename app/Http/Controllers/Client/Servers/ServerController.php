@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Data\PaginationMeta;
 use App\Data\Server\Deployments\DeploymentData;
 use App\Data\Server\ServerData;
-use App\Data\Server\ServerTerminalData;
 use App\Enums\Server\ConsoleType;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
@@ -14,12 +13,10 @@ use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Servers\SendPowerCommandRequest;
 use App\Models\Server;
-use App\Services\Coterm\CotermJWTService;
+use App\Services\Anchor\AnchorSessionService;
 use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
-use App\Services\Servers\ServerConsoleService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -28,8 +25,7 @@ use function min;
 class ServerController
 {
     public function __construct(
-        private CotermJWTService $cotermJWTService,
-        private ServerConsoleService $consoleService,
+        private AnchorSessionService $anchorSession,
         private ProxmoxServerClient $serverClient,
         private SendServerPowerCommand $powerCommand,
         private ServerPowerLockService $powerLock,
@@ -95,29 +91,12 @@ class ServerController
 
     public function createConsoleSession(CreateConsoleSessionRequest $request, Server $server)
     {
-        $server->node->loadMissing('coterm');
+        $server->node->loadMissing('anchor.relay');
 
-        if ($coterm = $server->node->coterm) {
-            return new JsonResponse([
-                'isTlsEnabled' => $coterm->is_tls_enabled,
-                'fqdn' => $coterm->fqdn,
-                'port' => $coterm->port,
-                'token' => $this->cotermJWTService->handle(
-                    $server,
-                    $request->user(),
-                    $request->enum('type', ConsoleType::class),
-                )->toString(),
-            ]);
-        }
-
-        $data = $this->consoleService->createConsoleUserCredentials($server);
-
-        return new ServerTerminalData(
-            ticket: $data->ticket,
-            node: $server->node->name,
-            vmid: $server->vmid,
-            fqdn: $server->node->fqdn,
-            port: $server->node->port,
+        return $this->anchorSession->create(
+            server: $server,
+            user: $request->user(),
+            type: $request->enum('type', ConsoleType::class),
         );
     }
 }

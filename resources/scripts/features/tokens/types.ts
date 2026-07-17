@@ -17,7 +17,7 @@ export const TOKEN_RESOURCES = [
     'address-block-groups',
     'template-groups',
     'users',
-    'coterms',
+    'anchors',
 ] as const
 
 export type TokenResource = (typeof TOKEN_RESOURCES)[number]
@@ -34,7 +34,7 @@ export const resourceLabels: Record<TokenResource, string> = {
     'address-block-groups': 'IP address blocks',
     'template-groups': 'Templates',
     'users': 'Users',
-    'coterms': 'Coterms',
+    'anchors': 'Anchors',
 }
 
 /**

@@ -17,7 +17,7 @@ final class TokenAbilities extends ScopedTokenAbilities
         'address-block-groups',
         'template-groups',
         'users',
-        'coterms',
+        'anchors',
     ];
 
     protected const PATH_PREFIX = 'api/application/';

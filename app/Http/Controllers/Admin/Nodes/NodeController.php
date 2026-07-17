@@ -25,7 +25,7 @@ class NodeController
                 'display_name',
                 'fqdn',
                 AllowedFilter::exact('location_id'),
-                AllowedFilter::exact('coterm_id')->nullable(),
+                AllowedFilter::exact('anchor_id')->nullable(),
             ])
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

@@ -14,7 +14,7 @@ export interface Node {
     memory: number
     memoryOverallocate: number
     memoryAllocated: number
-    cotermId: number | null
+    anchorId: number | null
     serversCount: number
     /**
      * Reachability as of `statusCheckedAt`, written by the `nodes:poll`

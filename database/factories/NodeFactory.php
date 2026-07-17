@@ -23,7 +23,7 @@ class NodeFactory extends Factory
             'cpu_count' => 32,
             'memory' => 68719476736, // 64 gb
             'memory_overallocate' => 0,
-            'coterm_id' => null,
+            'anchor_id' => null,
         ];
     }
 }

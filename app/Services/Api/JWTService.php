@@ -34,6 +34,7 @@ class JWTService
         string $identifier,
         array $claims = [],
         ?DateTimeImmutable $expiresAt = null,
+        ?string $subject = null,
     ): Plain {
         $config = $this->configFor($signingKey);
         $now = CarbonImmutable::now();
@@ -50,6 +51,10 @@ class JWTService
 
         if ($expiresAt !== null) {
             $builder = $builder->expiresAt($expiresAt);
+        }
+
+        if ($subject !== null) {
+            $builder = $builder->relatedTo($subject);
         }
 
         foreach ($claims as $name => $value) {

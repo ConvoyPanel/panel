@@ -28,7 +28,7 @@ class NodeData extends Data
         public int $memory,
         public int $memoryOverallocate,
         public int $memoryAllocated,
-        public ?int $cotermId,
+        public ?int $anchorId,
         public int $serversCount,
         /**
          * Reachability as of {@see $statusCheckedAt}, written by `nodes:poll`
@@ -71,7 +71,7 @@ class NodeData extends Data
             memory: (int) $node->memory,
             memoryOverallocate: $node->memory_overallocate,
             memoryAllocated: (int) ($node->memory_allocated ?? 0),
-            cotermId: $node->coterm_id,
+            anchorId: $node->anchor_id,
             serversCount: (int) ($node->servers_count ?? 0),
             status: $node->currentStatus(),
             // Only meaningful alongside a live `unreachable`; a stale row keeps

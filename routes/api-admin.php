@@ -214,33 +214,22 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Coterm Controller Routes
+| Anchor Controller Routes
 |--------------------------------------------------------------------------
 |
-| Endpoint: /api/admin/coterms
+| Endpoint: /api/admin/anchors
 |
 */
 
-Route::prefix('/coterms')->group(function () {
-    Route::get('/', [Admin\CotermController::class, 'index']);
-    Route::post('/', [Admin\CotermController::class, 'store']);
+Route::prefix('/anchors')->group(function () {
+    Route::get('/', [Admin\AnchorController::class, 'index']);
+    Route::post('/', [Admin\AnchorController::class, 'store']);
 
-    Route::prefix('/{coterm}')->group(function () {
-        Route::get('/', [Admin\CotermController::class, 'show']);
-        Route::put('/', [Admin\CotermController::class, 'update']);
-        Route::post(
-            '/reset-coterm-token',
-            [Admin\CotermController::class, 'resetCotermToken'],
-        );
-        Route::delete('/', [Admin\CotermController::class, 'destroy']);
-        Route::get(
-            '/nodes',
-            [Admin\CotermController::class, 'getAttachedNodes'],
-        );
-        Route::put(
-            '/nodes',
-            [Admin\CotermController::class, 'updateAttachedNodes'],
-        );
+    Route::prefix('/{anchor}')->group(function () {
+        Route::get('/', [Admin\AnchorController::class, 'show']);
+        Route::put('/', [Admin\AnchorController::class, 'update']);
+        Route::delete('/', [Admin\AnchorController::class, 'destroy']);
+        Route::post('/enrollment', [Admin\AnchorController::class, 'enrollment']);
     });
 });
 

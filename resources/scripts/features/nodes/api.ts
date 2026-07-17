@@ -25,7 +25,7 @@ import {
 } from '@/lib/transformers/node.ts'
 
 export type NodeQueryParams = QueryBuilderParams<
-    '*' | 'id' | 'display_name' | 'fqdn' | 'location_id' | 'coterm_id'
+    '*' | 'id' | 'display_name' | 'fqdn' | 'location_id' | 'anchor_id'
 >
 
 export const nodeSchema = z.object({

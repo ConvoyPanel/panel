@@ -39,12 +39,9 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int $disk
  * @property int $disk_allocated
  * @property int $disk_overallocate
- * @property bool $coterm_enabled
- * @property bool $coterm_tls_enabled
- * @property string $coterm_fqdn
- * @property int $coterm_port
+ * @property int|null $anchor_id
  * @property ?OveragePenaltyData $overage_penalty
- * @property ?Coterm $coterm
+ * @property ?Anchor $anchor
  */
 class Node extends Model
 {
@@ -78,7 +75,7 @@ class Node extends Model
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
         // 'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'coterm_id' => 'sometimes|nullable|integer|exists:coterms,id',
+        'anchor_id' => 'sometimes|nullable|integer|exists:anchors,id',
         // Per-node override of the quota-overage penalty; null = inherit the global
         // BandwidthSettings default. See docs/bandwidth-rate-limiting-plan.md §5.
         'overage_penalty' => 'sometimes|nullable|array',
@@ -134,19 +131,6 @@ class Node extends Model
         }
 
         return $this->status;
-    }
-
-    /**
-     * Get the connection address to use when making calls to this node's assigned Coterm endpoint.
-     */
-    public function getCotermConnectionAddress(): string
-    {
-        return sprintf(
-            '%s://%s:%s',
-            $this->coterm_tls_enabled ? 'https' : 'http',
-            $this->coterm_fqdn,
-            $this->coterm_port,
-        );
     }
 
     /**
@@ -227,14 +211,14 @@ class Node extends Model
     }
 
     /**
-     * Gets the instance of Coterm that's connected with this node.
+     * Gets the Anchor agent connected with this node.
      */
     /**
-     * @return BelongsTo<Coterm, $this>
+     * @return BelongsTo<Anchor, $this>
      */
-    public function coterm(): BelongsTo
+    public function anchor(): BelongsTo
     {
-        return $this->belongsTo(Coterm::class);
+        return $this->belongsTo(Anchor::class);
     }
 
     /**

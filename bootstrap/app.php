@@ -2,7 +2,6 @@
 
 use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
-use App\Http\Middleware\Coterm\CotermAuthenticate;
 use App\Http\Middleware\EnforceTokenAbilities;
 use App\Http\Middleware\EnforceTokenNetworkRestrictions;
 use App\Http\Middleware\RecordSessionActivity;
@@ -64,11 +63,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->scopeBindings()
                     ->group(base_path('routes/api-admin.php'));
 
-                Route::middleware([CotermAuthenticate::class])
-                    ->prefix('/api/coterm')
-                    ->as('coterm.')
-                    ->scopeBindings()
-                    ->group(base_path('routes/api-coterm.php'));
+                Route::prefix('/api/anchor')
+                    ->as('anchor.')
+                    ->group(base_path('routes/api-anchor.php'));
             });
         }
     )

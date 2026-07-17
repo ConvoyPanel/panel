@@ -19,12 +19,8 @@ class CreateConsoleSessionRequest extends BaseApiRequest
 
     public function rules(): array
     {
-        $server = $this->parameter('server', Server::class);
-
         return [
-            'type' => [$server->node->coterm_enabled ? 'required' : 'exclude', new Enum(
-                ConsoleType::class,
-            )],
+            'type' => ['required', new Enum(ConsoleType::class)],
         ];
     }
 }
