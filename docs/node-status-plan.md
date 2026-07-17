@@ -4,7 +4,9 @@ Covers GitHub #104 (node resource overview on the admin dashboard, plus
 monitoring with email alerts) and the reachability/power indicators wanted on
 the Nodes table and the server lists. Written 2026-07-17.
 
-Slice 1 is implemented; slices 2–4 are designed, not built.
+Slices 1 and 2 are implemented (slice 2 on the client list only); slices 3–4 are
+designed, not built. Slice 3 (email alerting) is deliberately parked — the
+maintainer does not want it yet.
 
 ## The problem
 
@@ -65,8 +67,10 @@ Columns also make status sortable and filterable in the table for free.
 | `consecutive_failures` | debounce counter for alerting (slice 3) |
 
 **Guest power state → cache, one key per node.** `node:{id}:vm-states`, a
-vmid→status map, TTL ≈ 2× the poll interval. High-churn, non-critical, and one
-key per node beats a row write per server every 30s.
+vmid→status map (`GuestStateCache`). High-churn, non-critical, and one key per
+node beats a row write per server every 30s. TTL is `Node::STATUS_TTL_MINUTES`,
+matching the node status it was observed alongside — this originally said "≈ 2×
+the poll interval"; see slice 2 below for why it changed.
 
 ## Unknown is not stopped
 
@@ -96,8 +100,26 @@ and `nodes:poll` scheduled every minute. One queued job per node so a dead node'
 timeout never serialises behind a healthy one. Nodes table shows the state with
 the cause behind it.
 
-**2 — guest power state.** Same response, no new call: cache the vmid→status map
-per node, and read it from the admin/client server lists. Reuses slice 1's poll.
+**2 — guest power state (DONE, client list only).** `GuestStateCache` (vmid→status
+per node), written by the poll, read into `ServerData::$powerState` and rendered by
+`PowerStateBadge` on the client server list. **The admin server list still shows
+none** — same badge, not yet wired.
+
+Correcting this section's own claim of "same response, no new call": slice 1
+shipped against `/nodes/{node}/status`, which does not return guests, so slice 2
+had to **switch the poll to `/cluster/resources`** — the endpoint the lever above
+always assumed. Reachability now means "that call answered". Adding it as a second
+call was the alternative, and was rejected: a second endpoint is a second timeout
+to sit through on exactly the nodes that are down.
+
+Two deviations from what this document specified, both deliberate:
+
+- **TTL is `Node::STATUS_TTL_MINUTES` (5), not "2× the poll interval" (2).** Both
+  facts come from one response, so they have to lapse together — a node still
+  reading `online` beside guests already `unknown` is an inconsistency a viewer
+  can only read as a bug.
+- **A failed poll leaves the map alone** rather than clearing it. One failure is
+  not evidence a guest changed state; the map stands until it expires on its own.
 
 **3 — alerting (#104's second half).** Notify on the `online → unreachable`
 transition only, debounced behind `consecutive_failures >= N` so a flap does not
