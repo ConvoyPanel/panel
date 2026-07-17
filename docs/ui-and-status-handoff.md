@@ -52,13 +52,9 @@ trade-offs if either is ever revisited).
 
 ## 3. Outstanding
 
-The node settings layout is **done** — see §5. The remaining UI complaint below
-has a screenshot the maintainer raised directly and has not been touched.
+The node settings layout is **done** — see §5. The client server overview row is
+**done** — see §6.
 
-- **The client server overview cards (`/servers/{id}`).** "These cards look like
-  shit" — specifically the Bandwidth Allowance / Storage Usage / System
-  Specifications row: mismatched heights, progress bars stranded at the card
-  bottom, and "Usage unavailable" sitting where a number should be.
 - **Test connection on the settings page.** `POST /api/admin/nodes/test-connection`
   and `TestConnectionButton` already exist and are used by the create flow;
   settings rolls its own connection card without one. The catch: the endpoint
@@ -133,3 +129,38 @@ field.
 Verified in the browser at 1440px and 820px, and with a real save round-trip —
 display name, CPU count and a `verifyTls` off→on click all persisted correctly
 (node 12 was restored to its seeded values afterwards).
+
+## 6. Client server overview row — settled
+
+All three of the maintainer's complaints about the Bandwidth / Storage / System
+Specifications row had a single cause each, and all three are fixed. The rules
+they generalise into are now in `docs/card-design.md` ("Statistic cards: a meter
+is not a footer"); the short version:
+
+- **Mismatched heights** — Specifications was a plain `Card` (`text-base` header,
+  no footer) between two `StatisticCard`s (`text-xs` compact header). It now uses
+  `StatisticCard` like its neighbours, with its three specs in an internal
+  `grid-cols-1 @xl:grid-cols-3` (3-up needs `@xl`; at `@lg` the page container is
+  still only ~540px and "39.04 GiB" wrapped mid-value).
+- **Stranded progress bars** — `StatisticCard`'s bar lived in a `CardFooter`
+  (`border-t bg-muted/50`) with `grow justify-end`, pinning it to the bottom of a
+  stretched card. The `footer` prop is now `meter`, rendered inside `CardContent`
+  under the value.
+- **"Usage unavailable"** — that string sat in the value slot while a `0%` bar
+  rendered below it, reading as an empty disk. Storage now shows the disk limit as
+  a real number with the subline `Disk limit • guest agent offline` and no bar; the
+  warning-triangle tooltip is unchanged. A loading skeleton was also added — the
+  card previously showed the unavailable state while the request was still in
+  flight, which on an unreachable node is ~20s of lying.
+
+Verified in the browser at 1440px and 820px. Every dev server sits on an
+unreachable seeded node, so the *unavailable* branch is what the database gives
+you for free; the *available* branch was rendered by stubbing the resources
+endpoint with a Playwright `page.route` (`used_bytes`/`total_bytes` are
+snake_case — `ResourceController` returns a raw array, not a laravel-data DTO).
+It read `13.4 GiB / used of 20 GiB • 67%` with the bar filled to 67% and level
+with Bandwidth's.
+
+While here: the Do/don't list still cited `nodes.$nodeId/settings.lazy.tsx` as the
+reference layout, which §5 had already moved to `servers.$serverId`. Stale citation
+removed — it now points at the one place that names the file.

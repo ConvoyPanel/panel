@@ -1,12 +1,9 @@
+import { useServer, useServerResources } from '@/features/servers/detail/api.ts'
 import { IconAlertTriangle, IconDatabase } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import {
-    useServerResources,
-    useServer,
-} from '@/features/servers/detail/api.ts'
-
 import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
+import Skeleton from '@/components/ui/Skeleton.tsx'
 import {
     Tooltip,
     TooltipContent,
@@ -20,11 +17,10 @@ const StorageUsageCard = () => {
     const { data: server } = useServer()
     const { data: resources, error, isLoading } = useServerResources()
 
-    // If there's an error (e.g. 409 conflict from guest agent unavailable), we consider it unavailable.
-    // Also if resources aren't loaded yet, it's not "available" in the sense of showing valid data,
-    // but we might want to differentiate loading state.
-    // Here, if we have data, we assume it's valid. If we have an error, it's unavailable.
-    const isAvailable = !error && resources
+    // Usage comes from the guest agent, which answers 409 when it isn't running.
+    // Without it we still know the disk limit from the server record, so the card
+    // falls back to showing that rather than blanking out.
+    const isAvailable = !error && !!resources
     const limitBytes = server?.disk ?? 0
 
     const usedBytes = isAvailable ? (resources?.usedBytes ?? 0) : 0
@@ -64,29 +60,40 @@ const StorageUsageCard = () => {
             }
             icon={IconDatabase}
             className={'col-span-2 @sm:col-span-1'}
-            footer={
-                <LinearProgressBar
-                    className={'bottom-0'}
-                    value={isAvailable ? usedPercent : 0}
-                    aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
-                />
+            meter={
+                isAvailable && (
+                    <LinearProgressBar
+                        value={usedPercent}
+                        aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
+                    />
+                )
             }
         >
-            <p>
-                <span
-                    className={
-                        'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
-                    }
-                >
-                    {isAvailable
-                        ? `${used.value} ${used.unit} used`
-                        : 'Usage unavailable'}
-                </span>
-                <span className={'block text-sm text-muted-foreground'}>
-                    {isAvailable ? 'out of' : 'Limit:'} {total.value} {total.unit}
-                    {isAvailable && ` • ${usedPercent.toFixed(2)}%`}
-                </span>
-            </p>
+            {isLoading ? (
+                <Skeleton className={'h-7 w-full @sm:h-8'} />
+            ) : (
+                <p>
+                    <span
+                        className={
+                            'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                        }
+                    >
+                        {isAvailable
+                            ? `${used.value} ${used.unit}`
+                            : `${total.value} ${total.unit}`}
+                    </span>
+                    <span className={'text-muted-foreground block text-sm'}>
+                        {isAvailable ? (
+                            <>
+                                used of {total.value} {total.unit} &#x2022;{' '}
+                                {usedPercent.toFixed(0)}%
+                            </>
+                        ) : (
+                            'Disk limit • guest agent offline'
+                        )}
+                    </span>
+                </p>
+            )}
         </StatisticCard>
     )
 }

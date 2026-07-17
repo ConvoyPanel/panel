@@ -141,8 +141,7 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
 ## Do / don't
 
 - **Do** let a page be a grid of cards (`grid gap-4 @xl:grid-cols-2`), sizing a wide card
-  with `@xl:col-span-2`. See `routes/_app/admin/nodes.$nodeId/settings.lazy.tsx` for the
-  reference layout.
+  with `@xl:col-span-2`. See the reference layout cited under *In this codebase* below.
 - **Do** keep body text at `text-sm` (the Card sets it) and descriptions
   `text-muted-foreground`.
 - **Don't** wrap checkboxes in their own bordered boxes inside a card — inside a settings
@@ -167,6 +166,32 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
 - The node **create** screen (`routes/_app/admin/(fullscreen)/nodes.create.lazy.tsx` +
   `features/nodes/components/Create/*`) predates this pattern and is the next thing to
   bring in line — see the redesign directions discussed in the v10 handoff.
+
+## Statistic cards: a meter is not a footer
+
+`StatisticCard` (`features/servers/components/client/Overview/`) is the compact
+number-and-label tile used across the server overview. Three rules, each learned from the
+way the overview row looked before 2026-07-17:
+
+1. **A progress bar goes in the `meter` slot, not a `CardFooter`.** `CardFooter` is
+   `border-t bg-muted/50`, so a bar placed there is ruled off and tinted like an action
+   bar. Worse, the old card gave it `grow justify-end`, which in a stretched grid row pins
+   the bar to the card's bottom edge — metres away from the number it measures. `meter`
+   renders inside `CardContent`, directly under the value.
+2. **Only render a meter when there is a real ratio.** A bar hard-coded to `0` because the
+   data is missing does not read as "unknown", it reads as "empty" — the storage card drew
+   an empty disk whenever the guest agent was down. No ratio, no bar.
+3. **The value slot holds a number.** When the preferred figure is unavailable, fall back
+   to one you *do* have and say so in the muted subline (storage shows the disk limit from
+   the server record, sublined `Disk limit • guest agent offline`, plus a warning icon in
+   the title). The old card put the string `Usage unavailable` where the number goes, which
+   both broke the row's alignment and buried the limit it was already showing.
+
+The corollary for the row as a whole: **every card in a statistic row uses `StatisticCard`.**
+System Specifications was a plain `Card` with a `text-base` `CardHeader` sitting between two
+tiles with `text-xs` compact headers, so the row read as two different designs colliding.
+A card that opts out of the shared shell will not line up with its neighbours, no matter how
+the grid is tuned.
 
 ## Boolean form fields must never be handed `undefined`
 

@@ -1,9 +1,7 @@
-import byteSize from 'byte-size'
-
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 import { useServer } from '@/features/servers/detail/api.ts'
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-
+import { IconServerCog } from '@tabler/icons-react'
+import byteSize from 'byte-size'
 
 const SpecificationsCard = () => {
     const { data: server } = useServer()
@@ -33,23 +31,30 @@ const SpecificationsCard = () => {
     ]
 
     return (
-        <Card className={'col-span-2'}>
-            <CardHeader>
-                <CardTitle>System Specifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <dl className={'flex space-x-8'}>
-                    {specs.map(spec => (
-                        <div key={spec.title}>
-                            <dt className={'text-xs text-muted-foreground'}>
-                                {spec.title}
-                            </dt>
-                            <dd className={'text-sm'}>{spec.value}</dd>
-                        </div>
-                    ))}
-                </dl>
-            </CardContent>
-        </Card>
+        <StatisticCard
+            title={'System Specifications'}
+            icon={IconServerCog}
+            className={'col-span-2'}
+        >
+            <dl className={'grid grid-cols-1 gap-3 @xl:grid-cols-3 @xl:gap-4'}>
+                {/* col-reverse: the spec reads value-first, but a `dl` requires
+                    its `dt` to precede the `dd` it labels. */}
+                {specs.map(spec => (
+                    <div key={spec.title} className={'flex flex-col-reverse'}>
+                        <dt className={'text-muted-foreground text-sm'}>
+                            {spec.title}
+                        </dt>
+                        <dd
+                            className={
+                                'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                            }
+                        >
+                            {spec.value}
+                        </dd>
+                    </div>
+                ))}
+            </dl>
+        </StatisticCard>
     )
 }
 

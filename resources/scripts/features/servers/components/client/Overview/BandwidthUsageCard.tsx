@@ -1,12 +1,9 @@
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
+import { useServer } from '@/features/servers/detail/api.ts'
 import { IconWifi } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import { useServer } from '@/features/servers/detail/api.ts'
-
-import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
-
 import LinearProgressBar from '@/components/ui/Progress/LinearProgressBar.tsx'
-
 
 const BandwidthUsageCard = () => {
     const { data: server } = useServer()
@@ -30,7 +27,7 @@ const BandwidthUsageCard = () => {
             title={'Bandwidth Allowance'}
             icon={IconWifi}
             className={'col-span-2 @sm:col-span-1'}
-            footer={
+            meter={
                 !isUnlimited && (
                     <LinearProgressBar
                         value={bandwidthUsedPercent}
@@ -40,16 +37,20 @@ const BandwidthUsageCard = () => {
             }
         >
             <p>
-                <span className={'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'}>
-                    {used.value} {used.unit} used
+                <span
+                    className={
+                        'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                    }
+                >
+                    {used.value} {used.unit}
                 </span>
-                <span className={'block text-sm text-muted-foreground'}>
+                <span className={'text-muted-foreground block text-sm'}>
                     {isUnlimited ? (
-                        'Unlimited'
+                        'used of an unlimited allowance'
                     ) : (
                         <>
-                            out of {limit.value} {limit.unit} &#x2022;{' '}
-                            {bandwidthUsedPercent.toFixed(2)}%
+                            used of {limit.value} {limit.unit} &#x2022;{' '}
+                            {bandwidthUsedPercent.toFixed(0)}%
                         </>
                     )}
                 </span>
