@@ -6,13 +6,13 @@ use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerCommand;
+use App\Enums\Server\ProgressMode;
 use App\Enums\Server\ServerStatus;
 use App\Exceptions\Proxmox\RequestException;
-use App\Jobs\Server\BuildServerJob;
+use App\Jobs\Server\CloneVmJob;
 use App\Jobs\Server\ConfigureVmJob;
 use App\Jobs\Server\SendPowerCommandJob;
 use App\Jobs\Server\UpdatePasswordJob;
-use App\Jobs\Server\WaitUntilVmIsCreatedJob;
 use App\Models\Deployment;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxConfigClient;
@@ -83,33 +83,35 @@ class BuildServerAction
             }, 0,
         );
 
-        $steps = $deployment->steps()->createMany([
+        $steps = $deployment->addSteps([
             [
                 'name' => 'clone',
                 'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::DETERMINATE,
                 'progress_total' => $totalSize,
             ],
             [
                 'name' => 'configure',
                 'status' => DeploymentStatus::PENDING,
-                'progress_total' => 3,
+                'progress_mode' => ProgressMode::INDETERMINATE,
             ],
         ]);
 
         return [
-            new BuildServerJob($steps[0]),
-            new WaitUntilVmIsCreatedJob($steps[0]),
+            new CloneVmJob($steps[0]),
             new ConfigureVmJob($steps[1]),
         ];
     }
 
     private function createConfigureStepsAndJobs(Deployment $deployment): array
     {
-        $step = $deployment->steps()->create([
-            'name' => 'configure',
-            'status' => DeploymentStatus::PENDING,
-            'progress_total' => 99,
-        ]);
+        $step = $deployment->addSteps([
+            [
+                'name' => 'configure',
+                'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::INDETERMINATE,
+            ],
+        ])[0];
 
         return [
             new ConfigureVmJob($step),
@@ -122,19 +124,25 @@ class BuildServerAction
         array $jobs,
     ): array {
         if (filled($accountPassword)) {
-            $step = $deployment->steps()->create([
-                'name' => 'update-password',
-                'status' => DeploymentStatus::PENDING,
-            ]);
+            $step = $deployment->addSteps([
+                [
+                    'name' => 'update-password',
+                    'status' => DeploymentStatus::PENDING,
+                    'progress_mode' => ProgressMode::INDETERMINATE,
+                ],
+            ])[0];
             $jobs[] = new UpdatePasswordJob($step, $accountPassword);
         }
 
         if ($deployment->start_on_completion) {
-            $step = $deployment->steps()->create([
-                'name' => 'start-vm',
-                'status' => DeploymentStatus::PENDING,
-            ]);
-            $jobs[] = new SendPowerCommandJob($step, PowerCommand::START, markComplete: true);
+            $step = $deployment->addSteps([
+                [
+                    'name' => 'start-vm',
+                    'status' => DeploymentStatus::PENDING,
+                    'progress_mode' => ProgressMode::INDETERMINATE,
+                ],
+            ])[0];
+            $jobs[] = new SendPowerCommandJob($step, PowerCommand::START);
         }
 
         return $jobs;

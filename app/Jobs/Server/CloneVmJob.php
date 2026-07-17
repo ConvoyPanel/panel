@@ -2,7 +2,6 @@
 
 namespace App\Jobs\Server;
 
-use App\Enums\Server\DeploymentStatus;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerBuildService;
@@ -22,7 +21,13 @@ use Psr\Container\NotFoundExceptionInterface;
 
 use function now;
 
-class WaitUntilVmIsCreatedJob implements ShouldQueue
+/**
+ * Owns the `clone` step end to end: it starts the Proxmox clone exactly once and
+ * then polls the same task to completion, releasing itself between checks. The
+ * clone's UPID is recorded on the step (via kickOnce), so a released or retried
+ * run resumes polling instead of starting a second clone.
+ */
+class CloneVmJob implements ShouldQueue
 {
     use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -50,28 +55,26 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
         $deployment = $this->step->deployment;
         $server = $deployment->server;
 
-        try {
-            /** @var string $upid */
-            $upid = cache()->get("server:$server->id:build-upid");
-            [$current, $total] = $service->getCloneProgress(
-                $this->step->deployment->server->node,
-                $upid
-            );
+        $this->step->kickOnce(fn () => $service->build($server, $deployment->template));
 
+        try {
+            [$current, $total] = $service->getCloneProgress($server->node, $this->step->task_upid);
+
+            // Proxmox's reported total is authoritative and stable across polls,
+            // so adopt it and clamp current to it — letting the total grow made
+            // the percentage jump backwards. The step's seeded disk-size
+            // estimate only gives the bar a scale before the first poll lands.
             $this->step->update([
-                'progress_current' => $current,
-                'progress_total' => $this->step->progress_total < $total ?
-                    $total : $this->step->progress_total,
+                'progress_current' => min($current, $total),
+                'progress_total' => $total,
             ]);
         } catch (Exception|NotFoundExceptionInterface|ContainerExceptionInterface) {
-            // Fail silently
+            // The clone task status is not always readable immediately; a failed
+            // read just means we poll again rather than fail the step.
         }
 
         if ($service->isVmCreated($server)) {
-            $this->step->update([
-                'status' => DeploymentStatus::COMPLETED,
-                'completed_at' => now(),
-            ]);
+            $this->step->markCompleted();
         } else {
             $this->release(now()->addMilliseconds(250));
         }

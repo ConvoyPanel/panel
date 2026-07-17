@@ -11,13 +11,10 @@ use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Support\ByteUnit;
-use App\Traits\HandlesProxmoxErrors;
 use Illuminate\Http\Client\ConnectionException;
 
 class ServerBuildService
 {
-    use HandlesProxmoxErrors;
-
     public function __construct(
         private ProxmoxServerClient $serverClient,
         private ProxmoxResourceClient $resourceClient,
@@ -25,20 +22,18 @@ class ServerBuildService
     ) {}
 
     /**
+     * @return string Task UPID
+     *
+     * A VM that is already gone surfaces as a RequestException the caller
+     * recognises via HandlesProxmoxErrors and treats as an already-complete
+     * delete, so this no longer swallows that case itself.
+     *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function delete(Server $server): void
+    public function delete(Server $server): string
     {
-        try {
-            $this->serverClient->setServer($server)->delete();
-        } catch (RequestException $e) {
-            if ($this->isNonexistentVMError($e)) {
-                return;
-            }
-
-            throw $e;
-        }
+        return $this->serverClient->setServer($server)->delete();
     }
 
     /**

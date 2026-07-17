@@ -32,9 +32,13 @@ class PruneDeploymentsCommand extends Command
         $stuckAge = (int) $stuckAge;
         $threshold = now()->subMinutes($stuckAge);
 
+        // Measure staleness from when the deployment actually started running,
+        // not when it was requested — a queue backlog should not trip the
+        // timeout before the work has had a chance to begin. Older rows without
+        // a started_at fall back to requested_at.
         $stuckDeploymentsQuery = Deployment::query()
             ->where('status', DeploymentStatus::RUNNING)
-            ->where('requested_at', '<=', $threshold);
+            ->whereRaw('COALESCE(started_at, requested_at) <= ?', [$threshold]);
 
         $count = $stuckDeploymentsQuery->count();
 

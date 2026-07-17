@@ -31,7 +31,6 @@ class SendPowerCommandJob implements ShouldQueue
         #[WithoutRelations]
         public DeploymentStep $step,
         public PowerCommand $power,
-        public bool $markComplete = false,
     ) {}
 
     public function middleware(): array
@@ -47,20 +46,19 @@ class SendPowerCommandJob implements ShouldQueue
      */
     public function handle(ProxmoxPowerClient $client): void
     {
-        $this->step->start();
+        $this->step->markRunning();
 
         try {
             $client->setServer($this->step->deployment->server)->send($this->power);
         } catch (RequestException $e) {
-            if ($this->isNonexistentVMError($e)) {
-                return;
-            }
-
-            throw $e;
-        } finally {
-            if ($this->markComplete) {
-                $this->step->complete();
+            // A VM that is already gone is a success for our purposes; any other
+            // provider error must propagate so the step is not marked complete.
+            if (! $this->isNonexistentVMError($e)) {
+                throw $e;
             }
         }
+
+        // Reached only when the command succeeded (or the VM was already gone).
+        $this->step->markCompleted();
     }
 }

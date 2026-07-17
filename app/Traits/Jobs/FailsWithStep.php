@@ -2,7 +2,6 @@
 
 namespace App\Traits\Jobs;
 
-use App\Enums\Server\DeploymentStatus;
 use App\Models\DeploymentStep;
 use Throwable;
 
@@ -11,12 +10,13 @@ use Throwable;
  */
 trait FailsWithStep
 {
+    /**
+     * Laravel calls this once, after a job's retries are exhausted. The step's
+     * own guarded transition decides what that means: a step that already
+     * completed on a successful attempt stays completed.
+     */
     public function failed(?Throwable $exception): void
     {
-        $this->step->update([
-            'status' => DeploymentStatus::FAILED,
-            'completed_at' => now(),
-            'error_message' => $exception?->getMessage() ?? 'Unknown error',
-        ]);
+        $this->step->markFailed($exception);
     }
 }

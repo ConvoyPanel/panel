@@ -43,12 +43,8 @@ class ConfigureVmJob implements ShouldQueue
      */
     public function handle(VmSyncService $service): void
     {
-        $this->step->start();
-
-        $service->handle($this->step->deployment->server, function () {
-            $this->step->increment('progress_current');
-        });
-
-        $this->step->complete();
+        $this->step->run(
+            fn () => $service->handle($this->step->deployment->server),
+        );
     }
 }

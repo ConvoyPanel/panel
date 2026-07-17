@@ -3,14 +3,11 @@
 namespace App\Actions\Server;
 
 use App\Enums\Server\DeploymentStatus;
-use App\Enums\Server\PowerCommand;
+use App\Enums\Server\ProgressMode;
 use App\Enums\Server\ServerStatus;
-use App\Enums\Server\State;
 use App\Jobs\Backup\BatchPurgeServerBackupsJob;
-use App\Jobs\Server\DeleteServerJob;
-use App\Jobs\Server\MonitorStateJob;
-use App\Jobs\Server\SendPowerCommandJob;
-use App\Jobs\Server\WaitUntilVmIsDeletedJob;
+use App\Jobs\Server\DeleteVmJob;
+use App\Jobs\Server\StopVmJob;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Bus\Batch;
@@ -24,32 +21,31 @@ class DeleteServerAction
 
     public function execute(Deployment $deployment): void
     {
-        $step = $deployment->steps()->create([
-            'name' => 'delete-backups',
-            'status' => DeploymentStatus::PENDING,
-            'progress_total' => $deployment->server->backups()
-                ->whereNull('error_code')
-                ->whereNotNull('completed_at')
-                ->count() * 2, // 2 jobs for each backup: purge and monitor
-        ]);
+        $step = $deployment->addSteps([
+            [
+                'name' => 'delete-backups',
+                'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::DETERMINATE,
+                'progress_total' => $deployment->server->backups()
+                    ->whereNull('error_code')
+                    ->whereNotNull('completed_at')
+                    ->count() * 2, // 2 jobs for each backup: purge and monitor
+            ],
+        ])[0];
 
         $jobs = Arr::flatten([
             Bus::batch(new BatchPurgeServerBackupsJob($deployment->server))
                 ->before(function () use ($step) {
-                    $step->start();
+                    $step->markRunning();
                 })
                 ->progress(function (Batch $batch) use ($step) {
                     $step->update(['progress_current' => max($batch->processedJobs() - 1, 0)]);
                 })
                 ->then(function () use ($step) {
-                    $step->complete();
+                    $step->markCompleted();
                 })
                 ->catch(function (Batch $_, Throwable $e) use ($step) {
-                    $step->update([
-                        'status' => DeploymentStatus::FAILED,
-                        'completed_at' => now(),
-                        'error_message' => $e->getMessage(),
-                    ]);
+                    $step->markFailed($e);
                 }),
             $this->getJobs($deployment),
             function () use ($deployment) {
@@ -67,22 +63,22 @@ class DeleteServerAction
 
     public function getJobs(Deployment $deployment): array
     {
-        $steps = $deployment->steps()->createMany([
+        $steps = $deployment->addSteps([
             [
                 'name' => 'stop-vm',
                 'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::INDETERMINATE,
             ],
             [
                 'name' => 'delete-vm',
                 'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::INDETERMINATE,
             ],
         ]);
 
         return [
-            new SendPowerCommandJob($steps[0], PowerCommand::KILL),
-            new MonitorStateJob($steps[0], State::STOPPED),
-            new DeleteServerJob($steps[1]),
-            new WaitUntilVmIsDeletedJob($steps[1]),
+            new StopVmJob($steps[0]),
+            new DeleteVmJob($steps[1]),
         ];
     }
 }

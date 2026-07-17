@@ -1,4 +1,8 @@
-import { DeploymentStatus, DeploymentStep } from '@/features/servers/types'
+import {
+    DeploymentStatus,
+    DeploymentStep,
+    ProgressMode,
+} from '@/features/servers/types'
 import { cn } from '@/utils'
 import { IconCheck, IconLoader, IconX } from '@tabler/icons-react'
 import byteSize from 'byte-size'
@@ -19,25 +23,17 @@ interface DeploymentStepRowProps {
     className?: string
 }
 
-const STEP_MAPPINGS: Record<
-    string,
-    { label: string; showProgress?: boolean; isBytes?: boolean }
-> = {
-    'clone': { label: 'Cloning template', showProgress: true, isBytes: true },
-    'configure': {
-        label: 'Configuring VM',
-        showProgress: true,
-        isBytes: false,
-    },
-    'update-password': { label: 'Updating password', showProgress: false },
-    'delete-backups': {
-        label: 'Deleting backups',
-        showProgress: true,
-        isBytes: false,
-    },
-    'stop-vm': { label: 'Stopping VM', showProgress: false },
-    'delete-vm': { label: 'Deleting VM', showProgress: false },
-    'start-vm': { label: 'Starting VM', showProgress: false },
+// Whether a running step draws a determinate bar is decided by the backend
+// (step.progressMode); the map only carries the display label and, for byte
+// progress, how to format it.
+const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
+    'clone': { label: 'Cloning template', isBytes: true },
+    'configure': { label: 'Configuring VM' },
+    'update-password': { label: 'Updating password' },
+    'delete-backups': { label: 'Deleting backups' },
+    'stop-vm': { label: 'Stopping VM' },
+    'delete-vm': { label: 'Deleting VM' },
+    'start-vm': { label: 'Starting VM' },
 }
 
 export default function DeploymentStepRow({
@@ -50,6 +46,7 @@ export default function DeploymentStepRow({
     const isRunning = step.status === DeploymentStatus.Running
     const isCompleted = step.status === DeploymentStatus.Completed
     const isFailed = step.status === DeploymentStatus.Failed
+    const isDeterminate = step.progressMode === ProgressMode.Determinate
 
     const [now, setNow] = useState(new Date())
 
@@ -115,7 +112,7 @@ export default function DeploymentStepRow({
             </ItemMedia>
             <ItemContent className={'min-w-0'}>
                 <ItemTitle>{mapping.label}</ItemTitle>
-                {mapping.showProgress && isRunning && (
+                {isDeterminate && isRunning && (
                     <LinearProgressBar
                         value={progressPercent}
                         className='h-1.5'
@@ -144,7 +141,7 @@ export default function DeploymentStepRow({
                             )}
                     </span>
                 )}
-                {mapping.showProgress && isRunning && (
+                {isDeterminate && isRunning && (
                     <span className='text-right font-mono text-xs text-muted-foreground'>
                         {formatProgress()}
                     </span>

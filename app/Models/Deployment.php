@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -43,6 +44,7 @@ class Deployment extends Model
         'status' => 'required|string|in:pending,running,completed,failed',
         'start_on_completion' => 'required|boolean',
         'requested_at' => 'required|date',
+        'started_at' => 'nullable|date',
         'completed_at' => 'nullable|date',
     ];
 
@@ -54,6 +56,7 @@ class Deployment extends Model
             'should_create_vm' => 'boolean',
             'start_on_completion' => 'boolean',
             'requested_at' => 'datetime',
+            'started_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }
@@ -79,7 +82,29 @@ class Deployment extends Model
      */
     public function steps(): HasMany
     {
-        return $this->hasMany(DeploymentStep::class);
+        return $this->hasMany(DeploymentStep::class)
+            ->orderBy('sequence')
+            ->orderBy('id');
+    }
+
+    /**
+     * Create steps, stamping each with the next sequence number so their display
+     * order is explicit and stays correct even when steps are added by more than
+     * one action (a reinstall appends build steps after delete steps).
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return Collection<int, DeploymentStep>
+     */
+    public function addSteps(array $rows): Collection
+    {
+        $rows = array_values($rows);
+        $next = (int) $this->steps()->max('sequence');
+
+        foreach ($rows as $i => $row) {
+            $rows[$i]['sequence'] = $next + $i + 1;
+        }
+
+        return $this->steps()->createMany($rows);
     }
 
     public function scopeNonCompleted(Builder $query): void

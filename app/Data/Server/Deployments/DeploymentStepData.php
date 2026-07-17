@@ -3,6 +3,7 @@
 namespace App\Data\Server\Deployments;
 
 use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\ProgressMode;
 use App\Models\DeploymentStep;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ class DeploymentStepData extends Data
         public int $id,
         public string $name,
         public DeploymentStatus $status,
+        public ProgressMode $progressMode,
+        public int $sequence,
         public ?int $progressCurrent,
         public ?int $progressTotal,
         public ?CarbonImmutable $startedAt,
@@ -33,6 +36,8 @@ class DeploymentStepData extends Data
             id: $step->id,
             name: $step->name,
             status: $step->status,
+            progressMode: $step->progress_mode,
+            sequence: $step->sequence,
             progressCurrent: $step->progress_current,
             progressTotal: $step->progress_total,
             startedAt: $step->started_at

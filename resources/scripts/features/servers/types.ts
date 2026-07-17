@@ -15,10 +15,17 @@ export enum DeploymentType {
     Import = 'import',
 }
 
+export enum ProgressMode {
+    Determinate = 'determinate',
+    Indeterminate = 'indeterminate',
+}
+
 export interface DeploymentStep {
     id: number
     name: string
     status: DeploymentStatus
+    progressMode: ProgressMode
+    sequence: number
     progressCurrent: number
     progressTotal: number
     startedAt: Date | null
