@@ -4,7 +4,9 @@ namespace App\Data\Server;
 
 use App\Data\Node\NodeData;
 use App\Enums\Server\ServerStatus;
+use App\Enums\Server\State;
 use App\Models\Server;
+use App\Services\Nodes\GuestStateCache;
 use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -27,6 +29,15 @@ class ServerData extends Data
         public string $name,
         public ?string $description,
         public ServerStatus $status,
+        /**
+         * Power state as of the last poll, or null for "we cannot say".
+         *
+         * Distinct from `$status`, which is Convoy's lifecycle (is it built,
+         * suspended, installing) and says nothing about whether the guest is
+         * currently running. Read from the poller's cache -- never from PVE, so
+         * a list of servers on a dead node costs nothing to draw.
+         */
+        public ?State $powerState,
         public int $cpu,
         public int $memory,
         public int $disk,
@@ -56,6 +67,7 @@ class ServerData extends Data
             name: $server->name,
             description: $server->description,
             status: $server->status,
+            powerState: app(GuestStateCache::class)->stateFor($server),
             cpu: $server->cpu,
             memory: (int) $server->memory,
             disk: (int) $server->disk,

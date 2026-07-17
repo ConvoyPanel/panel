@@ -1,3 +1,4 @@
+import PowerStateBadge from '@/features/servers/components/PowerStateBadge.tsx'
 import { Route as ServerIndexRoute } from '@/routes/_app/servers.$serverUuid.tsx'
 import { IconDots } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
@@ -47,12 +48,18 @@ const ServerCard = ({ server }: Props) => {
                     >
                         {server.name}
                     </Link>
-                    <Badge
-                        variant={'secondary'}
-                        className={'shrink-0 capitalize'}
-                    >
-                        {server.status.replace(/_/g, ' ')}
-                    </Badge>
+                    {/* `ready` is the resting state of every healthy server, so
+                        badging it says nothing -- a badge here means "this one
+                        needs your attention". */}
+                    {server.status !== 'ready' && (
+                        <Badge
+                            variant={'secondary'}
+                            className={'shrink-0 capitalize'}
+                        >
+                            {server.status.replace(/_/g, ' ')}
+                        </Badge>
+                    )}
+                    <PowerStateBadge state={server.powerState} />
                 </ItemTitle>
                 <ItemDescription className={'truncate'}>
                     {server.hostname}
@@ -65,7 +72,7 @@ const ServerCard = ({ server }: Props) => {
             >
                 {specs.map(spec => (
                     <div key={spec.label}>
-                        <dt className={'text-xs text-muted-foreground'}>
+                        <dt className={'text-muted-foreground text-xs'}>
                             {spec.label}
                         </dt>
                         <dd className={'text-sm'}>{spec.value}</dd>

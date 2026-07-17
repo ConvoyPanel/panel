@@ -35,7 +35,12 @@ class GuestStateCache
 
     public static function key(Node $node): string
     {
-        return "node:{$node->id}:vm-states";
+        return self::keyForNodeId($node->id);
+    }
+
+    public static function keyForNodeId(int $nodeId): string
+    {
+        return "node:{$nodeId}:vm-states";
     }
 
     /**
@@ -52,7 +57,15 @@ class GuestStateCache
      */
     public function for(Node $node): ?array
     {
-        return Cache::get(self::key($node));
+        return $this->forNodeId($node->id);
+    }
+
+    /**
+     * @return array<int, string>|null
+     */
+    public function forNodeId(int $nodeId): ?array
+    {
+        return Cache::get(self::keyForNodeId($nodeId));
     }
 
     public function forget(Node $node): void
@@ -70,7 +83,10 @@ class GuestStateCache
      */
     public function stateFor(Server $server): ?State
     {
-        $states = $this->for($server->node);
+        // Keyed off `node_id` rather than the `node` relation on purpose: a
+        // server list resolves this once per row, and touching the relation
+        // would load a node per row to build a key it already has.
+        $states = $this->forNodeId($server->node_id);
 
         if ($states === null || ! array_key_exists($server->vmid, $states)) {
             return null;
