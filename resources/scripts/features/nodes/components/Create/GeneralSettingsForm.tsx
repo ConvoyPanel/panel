@@ -1,3 +1,4 @@
+import AnchorPicker from '@/features/anchors/components/AnchorPicker.tsx'
 import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
 import SectionRow from '@/features/nodes/components/Create/SectionRow.tsx'
 
@@ -12,6 +13,7 @@ const GeneralSettingsForm = () => {
             <div className={'grid gap-4 sm:grid-cols-2'}>
                 <InputForm name={'displayName'} label={'Display Name'} />
                 <LocationPicker />
+                <AnchorPicker />
             </div>
         </SectionRow>
     )

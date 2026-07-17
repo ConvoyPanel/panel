@@ -1,3 +1,7 @@
+import { createNode, nodeSchema } from '@/features/nodes/api.ts'
+import ConnectionSettingsForm from '@/features/nodes/components/Create/ConnectionSettingsForm.tsx'
+import GeneralSettingsForm from '@/features/nodes/components/Create/GeneralSettingsForm.tsx'
+import SpecificationsSettingsForm from '@/features/nodes/components/Create/SpecificationsSettingsForm.tsx'
 import { cn } from '@/utils'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,12 +11,6 @@ import { Link, createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-
-import { createNode, nodeSchema } from '@/features/nodes/api.ts'
-
-import ConnectionSettingsForm from '@/features/nodes/components/Create/ConnectionSettingsForm.tsx'
-import GeneralSettingsForm from '@/features/nodes/components/Create/GeneralSettingsForm.tsx'
-import SpecificationsSettingsForm from '@/features/nodes/components/Create/SpecificationsSettingsForm.tsx'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
@@ -50,6 +48,7 @@ function CreateNodePage() {
             cpuCount: '',
             memory: '',
             memoryOverallocate: '',
+            anchorId: 'none',
         } as unknown as z.input<typeof nodeSchema>,
     })
 
@@ -106,11 +105,7 @@ function CreateNodePage() {
                         crushing the title — one row on a phone, two on a 320px
                         screen, without a breakpoint guess. */}
                     <div className={'min-w-0 grow basis-36'}>
-                        <h1
-                            className={
-                                'text-lg font-semibold tracking-tight'
-                            }
-                        >
+                        <h1 className={'text-lg font-semibold tracking-tight'}>
                             Add a new node
                         </h1>
                         {/* Hidden below sm: on a phone this orienting line just
@@ -118,7 +113,7 @@ function CreateNodePage() {
                             sticky, so every row it costs is permanent. */}
                         <p
                             className={
-                                'hidden text-sm text-muted-foreground sm:block'
+                                'text-muted-foreground hidden text-sm sm:block'
                             }
                         >
                             Connect a Proxmox host and describe its capacity.

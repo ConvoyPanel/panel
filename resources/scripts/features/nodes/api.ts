@@ -1,3 +1,8 @@
+import {
+    overagePenaltyFields,
+    overagePenaltyPayload,
+    refineOveragePenalty,
+} from '@/features/bandwidth/overage-penalty.ts'
 import type { Node, NodeStatus, PaginatedNodes } from '@/types/node.ts'
 import {
     type QueryBuilderParams,
@@ -10,12 +15,6 @@ import NodeStatusController from '@/wayfinder/actions/App/Http/Controllers/Admin
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { z } from 'zod'
-
-import {
-    overagePenaltyFields,
-    overagePenaltyPayload,
-    refineOveragePenalty,
-} from '@/features/bandwidth/overage-penalty.ts'
 
 import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
@@ -47,6 +46,7 @@ export const nodeSchema = z.object({
     cpuCount: z.coerce.number().int().min(1, 'Invalid'),
     memory: z.coerce.number().int().min(1, 'Invalid'),
     memoryOverallocate: z.coerce.number().int().min(0, 'Invalid'),
+    anchorId: z.string().default('none'),
 })
 
 // NodeController is served under both the panel (`/api/admin`) and Application
@@ -165,6 +165,7 @@ export const createNode = async (
         cpuCount,
         memory,
         memoryOverallocate,
+        anchorId,
     } = payload
 
     const res = await apiFetch<DataResponse<Node>>(storeRoute(), {
@@ -182,6 +183,7 @@ export const createNode = async (
             cpu_count: cpuCount,
             memory,
             memory_overallocate: memoryOverallocate,
+            anchor_id: anchorId === 'none' ? null : Number(anchorId),
         },
     })
 
@@ -206,6 +208,7 @@ export const updateNode = async (
         cpuCount,
         memory,
         memoryOverallocate,
+        anchorId,
     } = payload
 
     const body: Record<string, unknown> = {
@@ -220,6 +223,7 @@ export const updateNode = async (
         cpu_count: cpuCount,
         memory,
         memory_overallocate: memoryOverallocate,
+        anchor_id: anchorId === 'none' ? null : Number(anchorId),
         // Always sent: null is meaningful here (it clears the override back to
         // "inherit"), so this must not be omitted the way the token fields are.
         overage_penalty: overagePenaltyPayload(payload),

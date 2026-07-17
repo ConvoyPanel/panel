@@ -15,6 +15,7 @@ import {
     IconPlus,
     IconSearch,
     IconServer,
+    IconTransform,
 } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useRouter } from '@tanstack/react-router'
@@ -92,6 +93,11 @@ const adminGroups: NavGroup[] = [
                 icon: IconServer,
                 label: 'Nodes',
                 path: '/admin/nodes',
+            },
+            {
+                icon: IconTransform,
+                label: 'Anchors',
+                path: '/admin/anchors',
             },
             {
                 icon: IconServer,

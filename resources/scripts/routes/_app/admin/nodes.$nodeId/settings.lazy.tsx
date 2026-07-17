@@ -1,3 +1,13 @@
+import AnchorPicker from '@/features/anchors/components/AnchorPicker.tsx'
+import OveragePenaltyFields from '@/features/bandwidth/components/OveragePenaltyFields.tsx'
+import { overagePenaltyDefaults } from '@/features/bandwidth/overage-penalty.ts'
+import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
+import {
+    nodeQueries,
+    nodeUpdateSchema,
+    updateNode,
+    useNode,
+} from '@/features/nodes/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Node } from '@/types/node.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -10,16 +20,6 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { overagePenaltyDefaults } from '@/features/bandwidth/overage-penalty.ts'
-import OveragePenaltyFields from '@/features/bandwidth/components/OveragePenaltyFields.tsx'
-import {
-    nodeQueries,
-    nodeUpdateSchema,
-    updateNode,
-    useNode,
-} from '@/features/nodes/api.ts'
-import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
-
 import {
     Card,
     CardContent,
@@ -27,8 +27,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import { Form, FormButton } from '@/components/ui/Form'
+import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -54,6 +54,7 @@ const defaultsFromNode = (node: Node): z.input<typeof nodeUpdateSchema> =>
         memory: String(Math.round(node.memory / mebibytes)),
         memoryOverallocate: String(node.memoryOverallocate),
         ...overagePenaltyDefaults(node.overagePenalty),
+        anchorId: node.anchorId?.toString() ?? 'none',
     }) as unknown as z.input<typeof nodeUpdateSchema>
 
 function NodeSettings() {
@@ -123,7 +124,9 @@ function NodeSettings() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent
-                                className={'grid grid-cols-1 gap-3 @md:grid-cols-2'}
+                                className={
+                                    'grid grid-cols-1 gap-3 @md:grid-cols-2'
+                                }
                             >
                                 <InputForm
                                     name={'displayName'}
@@ -138,7 +141,8 @@ function NodeSettings() {
                                 <CardTitle>Connection</CardTitle>
                                 <CardDescription>
                                     Update Proxmox API connection details. Leave
-                                    token fields blank to keep the existing token.
+                                    token fields blank to keep the existing
+                                    token.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className={'space-y-4'}>
@@ -182,6 +186,7 @@ function NodeSettings() {
                                         'Only disable TLS verification when this node is reachable through a trusted private path.'
                                     }
                                 />
+                                <AnchorPicker />
                             </CardContent>
                         </Card>
 
@@ -189,8 +194,8 @@ function NodeSettings() {
                             <CardHeader>
                                 <CardTitle>Specifications</CardTitle>
                                 <CardDescription>
-                                    These values drive Convoy capacity checks and
-                                    placement decisions.
+                                    These values drive Convoy capacity checks
+                                    and placement decisions.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className={'space-y-4'}>
@@ -238,9 +243,9 @@ function NodeSettings() {
                             <CardHeader>
                                 <CardTitle>Bandwidth</CardTitle>
                                 <CardDescription>
-                                    What happens to a server on this node once it
-                                    exceeds its monthly bandwidth quota. Servers
-                                    can override this individually.
+                                    What happens to a server on this node once
+                                    it exceeds its monthly bandwidth quota.
+                                    Servers can override this individually.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>

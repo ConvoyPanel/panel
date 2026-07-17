@@ -7,6 +7,7 @@ import {
     IconMapPins,
     IconServer,
     IconSettings,
+    IconTransform,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -56,6 +57,11 @@ const nav: SidebarNav = {
                     icon: IconServer,
                     label: 'Nodes',
                     path: '/admin/nodes',
+                },
+                {
+                    icon: IconTransform,
+                    label: 'Anchors',
+                    path: '/admin/anchors',
                 },
                 {
                     icon: IconServer,
