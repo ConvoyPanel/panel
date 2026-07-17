@@ -59,7 +59,7 @@ const StorageUsageCard = () => {
                 </div>
             }
             icon={IconDatabase}
-            className={'col-span-2 @sm:col-span-1'}
+            className={'col-span-2 @md:col-span-1'}
             meter={
                 isAvailable && (
                     <LinearProgressBar

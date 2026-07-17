@@ -26,7 +26,7 @@ const BandwidthUsageCard = () => {
         <StatisticCard
             title={'Bandwidth Allowance'}
             icon={IconWifi}
-            className={'col-span-2 @sm:col-span-1'}
+            className={'col-span-2 @md:col-span-1'}
             meter={
                 !isUnlimited && (
                     <LinearProgressBar

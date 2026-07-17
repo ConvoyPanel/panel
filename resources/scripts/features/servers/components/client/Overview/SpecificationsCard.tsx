@@ -36,7 +36,7 @@ const SpecificationsCard = () => {
             icon={IconServerCog}
             className={'col-span-2'}
         >
-            <dl className={'grid grid-cols-1 gap-3 @xl:grid-cols-3 @xl:gap-4'}>
+            <dl className={'grid grid-cols-1 gap-3 @lg:grid-cols-3 @lg:gap-4'}>
                 {/* col-reverse: the spec reads value-first, but a `dl` requires
                     its `dt` to precede the `dd` it labels. */}
                 {specs.map(spec => (
