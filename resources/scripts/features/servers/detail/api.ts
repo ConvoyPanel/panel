@@ -1,18 +1,6 @@
-import { useParams } from '@tanstack/react-router'
-import {
-    queryOptions,
-    useQuery,
-    type UseQueryOptions,
-} from '@tanstack/react-query'
-
-import { rawDataToAddress } from '@/lib/transformers/address.ts'
 import { rawDataToServerResources } from '@/features/servers/transforms'
-import { rawDataToServerTimepointData } from '@/lib/transformers/server.ts'
-import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
-import { apiFetch, type DataResponse } from '@/lib/api'
-import { queryClient } from '@/lib/query-client.ts'
-import { Address } from '@/types/address.ts'
 import type { Deployment, DeploymentStep } from '@/features/servers/types'
+import { Address } from '@/types/address.ts'
 import type {
     Server,
     ServerResources,
@@ -21,11 +9,24 @@ import type {
 } from '@/types/server'
 import type { Template } from '@/types/template'
 import { TemplateGroup } from '@/types/template-group.ts'
-import ServerController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ServerController'
-import ResourceController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ResourceController'
-import StatisticController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/StatisticController'
 import AddressController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/AddressController'
+import ResourceController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ResourceController'
+import ServerController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ServerController'
 import SettingsController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/SettingsController'
+import StatisticController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/StatisticController'
+import {
+    type UseQueryOptions,
+    queryOptions,
+    useQuery,
+} from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+
+import { type DataResponse, apiFetch } from '@/lib/api'
+import { queryClient } from '@/lib/query-client.ts'
+import { rawDataToAddress } from '@/lib/transformers/address.ts'
+import { rawDataToServerTimepointData } from '@/lib/transformers/server.ts'
+import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
 
 export type TimeRange = 'hour' | 'day' | 'week' | 'month' | 'year'
 export type ConsolidatorFn = 'AVERAGE' | 'MAX'
@@ -110,7 +111,9 @@ export const getStatistics = async (
 }
 
 export const getAddresses = async (uuid: string): Promise<Address[]> => {
-    const { data } = await apiFetch<DataResponse<any[]>>(AddressController(uuid))
+    const { data } = await apiFetch<DataResponse<any[]>>(
+        AddressController(uuid)
+    )
 
     return data.map(rawDataToAddress)
 }
@@ -241,11 +244,34 @@ export const useServer = (
     } as UseQueryOptions<Server>)
 }
 
+/**
+ * Live guest state, plus `isUnknown` — "we have asked and cannot answer".
+ *
+ * Consumers must not key an error state off `isError` here. This query carries
+ * `refetchInterval: 50`, so a new fetch starts ~immediately after each one
+ * settles, and every fetch restarts the retry cycle — which means `isError` is
+ * only true for the sliver between one cycle failing and the next beginning. A
+ * tile keyed on it flickers skeleton → Unknown → skeleton, and at a 50ms
+ * interval the window is too short to paint at all: the four overview tiles sat
+ * on their loading skeleton *forever* against an unreachable node, which reads
+ * as "still loading" for something that is never going to arrive.
+ *
+ * So the failure is latched. It clears on the first success, so a node that
+ * comes back repaints on its own.
+ */
 export const useServerState = (uuid?: string) => {
     const params = useParams({ strict: false }) as { serverUuid: string }
     const serverUuid = uuid ?? params.serverUuid
 
-    return useQuery(serverQueries.state(serverUuid))
+    const query = useQuery(serverQueries.state(serverUuid))
+    const [hasFailed, setHasFailed] = useState(false)
+
+    useEffect(() => {
+        if (query.isError) setHasFailed(true)
+        if (query.isSuccess) setHasFailed(false)
+    }, [query.isError, query.isSuccess])
+
+    return { ...query, isUnknown: hasFailed && query.data === undefined }
 }
 
 export const useServerResources = (uuid?: string) => {

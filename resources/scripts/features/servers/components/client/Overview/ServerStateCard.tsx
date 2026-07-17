@@ -1,25 +1,25 @@
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
+import UnknownStat from '@/features/servers/components/client/Overview/UnknownStat.tsx'
+import { useServerState } from '@/features/servers/detail/api.ts'
 import { cn } from '@/utils'
 import { IconPlaystationCircle } from '@tabler/icons-react'
 
-import { useServerState } from '@/features/servers/detail/api.ts'
-
-import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
-
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-
 const ServerStateCard = () => {
-    const { data: state } = useServerState()
+    const { data: state, isUnknown } = useServerState()
 
     return (
         <StatisticCard title={'Server State'} icon={IconPlaystationCircle}>
-            {state ? (
+            {isUnknown ? (
+                <UnknownStat />
+            ) : state ? (
                 <p
                     className={
-                        '@sm:text-2xl flex items-center text-lg font-semibold tracking-tight'
+                        'flex items-center text-lg font-semibold tracking-tight @sm:text-2xl'
                     }
                 >
-                    <span className='@sm:mr-4 relative mx-1 mr-2 flex h-2 w-2'>
+                    <span className='relative mx-1 mr-2 flex h-2 w-2 @sm:mr-4'>
                         {state.state === 'running' && (
                             <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-green-600 opacity-75' />
                         )}
@@ -35,7 +35,7 @@ const ServerStateCard = () => {
                     {state.state === 'running' ? 'Running' : 'Stopped'}
                 </p>
             ) : (
-                <Skeleton className={'@sm:h-8 h-7 w-full'} />
+                <Skeleton className={'h-7 w-full @sm:h-8'} />
             )}
         </StatisticCard>
     )

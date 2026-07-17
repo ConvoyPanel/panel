@@ -1,15 +1,13 @@
+import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
+import UnknownStat from '@/features/servers/components/client/Overview/UnknownStat.tsx'
+import { useServerState } from '@/features/servers/detail/api.ts'
 import { IconAirConditioningDisabled } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
-import { useServerState } from '@/features/servers/detail/api.ts'
-
-import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
-
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-
 const MemoryUsageCard = () => {
-    const { data: state } = useServerState()
+    const { data: state, isUnknown } = useServerState()
 
     const used = byteSize(state?.memoryUsed ?? 0, {
         units: 'iec',
@@ -25,7 +23,9 @@ const MemoryUsageCard = () => {
             title={'Memory Usage'}
             icon={IconAirConditioningDisabled}
         >
-            {state ? (
+            {isUnknown ? (
+                <UnknownStat />
+            ) : state ? (
                 <p className={'relative'}>
                     <span
                         className={
@@ -36,7 +36,7 @@ const MemoryUsageCard = () => {
                     </span>
                     <span
                         className={
-                            'absolute -bottom-2.5 right-0 ml-1.5 text-xs text-muted-foreground @sm:bottom-auto @sm:right-auto @sm:mt-1'
+                            'text-muted-foreground absolute right-0 -bottom-2.5 ml-1.5 text-xs @sm:right-auto @sm:bottom-auto @sm:mt-1'
                         }
                     >
                         / {total.value} {total.unit}
