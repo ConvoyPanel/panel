@@ -5,6 +5,7 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 
 beforeEach(function () {
     $this->user = User::factory()->create([
@@ -117,6 +118,37 @@ it('handles optional live node status fields', function () {
         ->assertJsonPath('data.memory.available', null)
         ->assertJsonPath('data.swap.total', 0)
         ->assertJsonPath('data.boot.secureBoot', null);
+});
+
+it('reports why live node status could not be read', function () {
+    // The overview can only name a cause if the endpoint sends one, so an
+    // unreachable node must classify rather than 500 anonymously.
+    Http::fake([
+        '*/api2/json/nodes/*/status' => fn () => throw new ConnectionException(
+            'cURL error 60: SSL certificate problem: unable to get local issuer certificate',
+        ),
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}/status",
+    );
+
+    $response->assertStatus(503)->assertJsonPath('code', 'tls_error');
+});
+
+it('classifies a rejected token separately from an unreachable host', function () {
+    Http::fake([
+        '*/api2/json/nodes/*/status' => Http::response(
+            ['data' => null, 'errors' => ['authentication failure: no such token']],
+            401,
+        ),
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(
+        "/api/admin/nodes/{$this->node->id}/status",
+    );
+
+    $response->assertStatus(503)->assertJsonPath('code', 'token_invalid');
 });
 
 it('can create a node', function () {

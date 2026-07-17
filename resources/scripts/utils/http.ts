@@ -149,6 +149,21 @@ export const getApiErrorMessage = (error: unknown, fallback: string): string => 
 }
 
 /**
+ * The server's machine-readable error code, or `null`.
+ *
+ * Same contract as `getApiErrorMessage` — only `HasErrorCode` exceptions emit a
+ * `code` — but for callers that branch on the classification rather than print
+ * the sentence. Use it when the UI has better copy for a known failure than the
+ * API's own message, as the node overview does for a connection failure.
+ */
+export const getApiErrorCode = (error: unknown): string | null => {
+    const data = (error as { response?: { data?: { code?: unknown } } })
+        ?.response?.data
+
+    return typeof data?.code === 'string' && data.code !== '' ? data.code : null
+}
+
+/**
  * Converts snake_case string to camelCase.
  */
 const toCamelCase = (str: string): string =>

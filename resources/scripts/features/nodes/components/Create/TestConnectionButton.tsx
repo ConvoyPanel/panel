@@ -11,7 +11,7 @@ import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { testConnection } from '@/features/nodes/api.ts'
-import { connectionErrorCopy } from '@/features/nodes/components/Create/connection-errors.ts'
+import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
 
 import { Button } from '@/components/ui/Button'
 import {

@@ -1,5 +1,9 @@
 import { useNode, useNodeStatus } from '@/features/nodes/api.ts'
+import { getApiErrorCode } from '@/utils/http.ts'
 import byteSize from 'byte-size'
+
+import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
+import { mapConnectionErrorType } from '@/lib/transformers/node.ts'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -38,9 +42,20 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
     const {
         data: status,
         isError: isStatusError,
+        error: statusError,
+        isFetching: isStatusFetching,
         refetch: refetchStatus,
     } = useNodeStatus(nodeId)
     const liveStatus = isStatusError ? undefined : status
+
+    // The endpoint classifies the failure (`NodeUnreachableException`), so the
+    // overview can name the cause and the fix instead of announcing that
+    // something, somewhere, did not work.
+    const failure = isStatusError
+        ? connectionErrorCopy(
+              mapConnectionErrorType(getApiErrorCode(statusError) ?? '')
+          )
+        : null
 
     const allocationLimit = node
         ? node.memory * (1 + node.memoryOverallocate / 100)
@@ -56,8 +71,16 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                     <>
                         <div className='flex flex-wrap items-center gap-3'>
                             <Heading>{node.displayName}</Heading>
+                            {/*
+                             * The node's reachability lives here, in space the
+                             * header already reserves, rather than in a banner
+                             * that shoves the whole page down when it arrives.
+                             */}
                             {liveStatus && (
                                 <Badge variant='outline'>Online</Badge>
+                            )}
+                            {isStatusError && (
+                                <Badge variant='destructive'>Unreachable</Badge>
                             )}
                         </div>
                         <p className='text-muted-foreground text-sm'>
@@ -68,24 +91,6 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                     <Skeleton className='h-8 w-48' />
                 )}
             </div>
-
-            {isStatusError && (
-                <Card>
-                    <CardContent className='flex flex-wrap items-center justify-between gap-3'>
-                        <p className='text-muted-foreground text-sm'>
-                            Live status is unavailable. Configuration details
-                            are still shown below.
-                        </p>
-                        <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() => refetchStatus()}
-                        >
-                            Retry
-                        </Button>
-                    </CardContent>
-                </Card>
-            )}
 
             <div className='grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-3'>
                 <Card>
@@ -157,9 +162,29 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                         ) : !isStatusError ? (
                             <Skeleton className='h-36 w-full' />
                         ) : (
-                            <p className='text-muted-foreground text-sm'>
-                                No live data
-                            </p>
+                            /*
+                             * The card that lost its data is the one that
+                             * explains why, in the space it already occupies.
+                             * The copy is the connection test's, so a node whose
+                             * certificate is untrusted reads the same here as it
+                             * did when the node was added.
+                             */
+                            <div className='flex flex-col items-start gap-2'>
+                                <p className='text-sm font-medium'>
+                                    {failure!.title}
+                                </p>
+                                <p className='text-muted-foreground text-sm'>
+                                    {failure!.description}
+                                </p>
+                                <Button
+                                    variant='outline'
+                                    size='sm'
+                                    loading={isStatusFetching}
+                                    onClick={() => refetchStatus()}
+                                >
+                                    Retry
+                                </Button>
+                            </div>
                         )}
                     </CardContent>
                 </Card>

@@ -120,6 +120,11 @@ export const nodeQueries = {
             queryFn: () => getNodeStatus(id as number),
             enabled: typeof id === 'number',
             refetchInterval: 30_000,
+            // An unreachable node is a settled answer, not a blip: the endpoint
+            // has already classified why. Retrying a 503 three times with
+            // backoff only holds the cards on skeletons for seconds before
+            // showing the same cause, and the refetch interval covers recovery.
+            retry: false,
         }),
 }
 

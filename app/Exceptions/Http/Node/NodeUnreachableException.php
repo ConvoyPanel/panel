@@ -19,7 +19,9 @@ use Throwable;
 class NodeUnreachableException extends ServiceUnavailableHttpException implements HasErrorCode
 {
     public function __construct(
-        private readonly ConnectionErrorCode $code,
+        // Not `$code`: Exception already declares that property, and redeclaring
+        // it readonly is a fatal error.
+        private readonly ConnectionErrorCode $connectionError,
         string $message = 'Convoy could not reach this node.',
         ?Throwable $previous = null,
     ) {
@@ -28,6 +30,6 @@ class NodeUnreachableException extends ServiceUnavailableHttpException implement
 
     public function errorCode(): string
     {
-        return $this->code->value;
+        return $this->connectionError->value;
     }
 }

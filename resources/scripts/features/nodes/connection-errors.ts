@@ -10,15 +10,20 @@ interface ConnectionErrorCopy {
 /**
  * The API already classifies failures (see `App\Enums\Node\Testing\
  * ConnectionErrorCode`), so the UI's job is to turn that classification into
- * something actionable. Each message names the control on this page that fixes
- * it where one exists; the raw cURL text stays available behind the details
- * disclosure for the cases where it genuinely helps.
+ * something actionable. Each message names the control that fixes it where one
+ * exists; the raw cURL text stays available behind the details disclosure for
+ * the cases where it genuinely helps.
+ *
+ * Shared by the create screen's connection test and the node overview, which is
+ * why it lives at the feature root: both turn the same `ConnectionErrorCode`
+ * into the same sentence, and a node whose certificate is untrusted should read
+ * identically whether you meet it while adding the node or a month later.
  */
 const CONNECTION_ERROR_COPY: Record<ConnectionErrorType, ConnectionErrorCopy> = {
     [ConnectionErrorType.TlsError]: {
         title: "Couldn't verify the TLS certificate",
         description:
-            'Convoy reached the host but could not verify its certificate. Proxmox generates a self-signed certificate when it installs, which is normal on a private network — switch off “Verify TLS certificate” above and test again. On a host that faces the internet, install a trusted certificate instead.',
+            'Convoy reached the host but could not verify its certificate. Proxmox generates a self-signed certificate when it installs, which is normal on a private network — switch off “Verify TLS certificate” and try again. On a host that faces the internet, install a trusted certificate instead.',
     },
     [ConnectionErrorType.ConnectionRefused]: {
         title: 'The host refused the connection',
@@ -38,12 +43,12 @@ const CONNECTION_ERROR_COPY: Record<ConnectionErrorType, ConnectionErrorCopy> = 
     [ConnectionErrorType.TokenInvalid]: {
         title: 'Proxmox rejected the API token',
         description:
-            'The host answered, but it does not recognise this token. Check the Token ID and Token Secret above. Proxmox shows the secret only once, when the token is created, so if it was not saved you will need to generate a new one.',
+            'The host answered, but it does not recognise this token. Check the Token ID and Token Secret. Proxmox shows the secret only once, when the token is created, so if it was not saved you will need to generate a new one.',
     },
     [ConnectionErrorType.TokenMissingPermissions]: {
         title: 'The token lacks the required permissions',
         description:
-            'The token is valid, but Proxmox will not let it manage this node. Convoy needs a token with root privileges and privilege separation disabled — set that on the token in Proxmox, then match the switches above.',
+            'The token is valid, but Proxmox will not let it manage this node. Convoy needs a token with root privileges and privilege separation disabled — set that on the token in Proxmox, then try again.',
     },
     [ConnectionErrorType.Other]: {
         title: 'Convoy could not connect to this host',
