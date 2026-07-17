@@ -2,6 +2,7 @@ import { useControllableState } from '@/hooks/use-controllable-state.ts'
 import { DataTableProps } from '@/types/data-table.ts'
 import { cn } from '@/utils'
 import { getCommonPinningStyles } from '@/utils/data-table.ts'
+import { IconX } from '@tabler/icons-react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -190,6 +191,18 @@ const DataTable = <TData,>({
         columns: resolvedColumns,
         data: resolvedData,
         pageCount,
+        defaultColumn: {
+            /*
+             * react-table's column-sizing feature merges `size: 150` into every
+             * column's def, so a column cannot otherwise be asked whether it
+             * actually declared a width. Blanking it here means `columnDef.size`
+             * is set only where a column really asked for one, which is what
+             * `getCommonPinningStyles` emits a CSS width from. `getSize()` still
+             * falls back to 150 for the pinning offsets that need a number.
+             */
+            size: undefined,
+            ...props.defaultColumn,
+        },
         getRowId: enableRowSelection
             ? row => String((row as { id?: string | number }).id)
             : undefined,
@@ -276,22 +289,59 @@ const DataTable = <TData,>({
                     table={table}
                 />
             )}
-            {showBulkBar && (
-                <div className='bg-muted/40 flex items-center gap-2 rounded-md border px-3 py-2'>
-                    <span className='text-muted-foreground text-sm'>
-                        {selectedRows.length} selected
-                    </span>
-                    <div className='flex items-center gap-2'>
-                        {bulkActions(selectedRows.map(row => row.original))}
-                    </div>
-                    <Button
-                        variant='ghost'
-                        size='sm'
-                        className='ml-auto h-8'
-                        onClick={() => table.resetRowSelection()}
+            {enableRowSelection && !!bulkActions && (
+                /*
+                 * The selection bar floats rather than sitting in the flow: as a
+                 * flow child it pushed the table (and the whole page under it)
+                 * down by its own height the instant a row was ticked. Fixed to
+                 * the viewport also keeps it reachable on a long table, where a
+                 * bar pinned above the rows would have scrolled out of sight
+                 * while the selection was still live.
+                 *
+                 * Kept mounted and faded so it has an exit transition as well as
+                 * an enter one; `pointer-events-none` on the wrapper means the
+                 * idle state never swallows clicks meant for the page.
+                 */
+                <div
+                    aria-hidden={!showBulkBar}
+                    className={cn(
+                        'pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4',
+                        'transition-[opacity,translate] duration-150 ease-out',
+                        showBulkBar
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-2 opacity-0'
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'bg-popover flex max-w-full items-center gap-2 rounded-full border py-1.5 pr-1.5 pl-4 shadow-lg',
+                            showBulkBar && 'pointer-events-auto'
+                        )}
                     >
-                        Clear
-                    </Button>
+                        <span className='text-sm font-medium tabular-nums whitespace-nowrap'>
+                            {selectedRows.length} selected
+                        </span>
+                        <span
+                            aria-hidden
+                            className='bg-border h-5 w-px shrink-0'
+                        />
+                        <div className='flex items-center gap-2'>
+                            {bulkActions(selectedRows.map(row => row.original))}
+                        </div>
+                        <span
+                            aria-hidden
+                            className='bg-border h-5 w-px shrink-0'
+                        />
+                        <Button
+                            variant='ghost'
+                            size='icon'
+                            className='size-8 shrink-0 rounded-full'
+                            onClick={() => table.resetRowSelection()}
+                            aria-label='Clear selection'
+                        >
+                            <IconX className='size-4' />
+                        </Button>
+                    </div>
                 </div>
             )}
             <div

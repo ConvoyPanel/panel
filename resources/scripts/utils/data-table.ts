@@ -33,7 +33,13 @@ export function getCommonPinningStyles<TData>({
         // background: isPinned
         //     ? 'var(--background)'
         //     : 'var(--background)',
-        width: column.getSize(),
+        // Only emit a width the column actually asked for. `getSize()` falls back
+        // to react-table's default 150, and under `table-layout: auto` a declared
+        // width is merely a suggestion that the browser tops up with a share of the
+        // table's leftover space, proportional to the declared widths. Handing every
+        // column a 150 therefore inflated the 32px select column to ~92px. Columns
+        // that declare no size are left to size to their content instead.
+        width: column.columnDef.size,
         zIndex: isPinned ? 1 : 0,
     }
 }
