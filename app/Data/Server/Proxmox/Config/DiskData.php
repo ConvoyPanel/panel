@@ -151,7 +151,8 @@ class DiskData extends Data
 
         $get = fn (string $k, $default = null) => data_get($pairs, $k, $default);
 
-        // media is an unbacked enum defaulting to DISK, so it stays a match.
+        // Proxmox's raw `media` value maps onto the enum; anything but cdrom is a
+        // regular disk.
         $diskMediaType = match ($get('media')) {
             'cdrom' => DiskMediaType::CDROM,
             default => DiskMediaType::DISK,
