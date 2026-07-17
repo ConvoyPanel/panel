@@ -149,6 +149,13 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
   boxed `CheckboxForm`.
 - **Don't** stack sections with giant `space-y-16` gaps (the old create-node page). Card
   padding + `FieldGroup` gaps already provide the rhythm.
+- **Don't** read a `@sm:`/`@md:` in a card as a statement about *the card*. The
+  `@container` is almost always `AppLayout`'s content wrapper (`AppLayout.tsx:42`), so
+  these queries measure the **whole content area** — a card in a 4-col row is a quarter of
+  what its own `@md:` is testing. Worse, a card's width need not be monotonic in the page
+  width: if its `col-span` changes at a breakpoint it can get *narrower* as the page grows
+  (see the overview's Specifications card). Pick these thresholds by measuring the rendered
+  page, not by arithmetic, and put the measurement in the commit message.
 
 ## In this codebase
 

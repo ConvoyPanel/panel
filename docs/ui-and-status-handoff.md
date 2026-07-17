@@ -3,17 +3,24 @@
 Written 2026-07-17. Everything below is either landed on `next` or listed in
 §3 as not started. Nothing here is "in progress" — the tree is clean.
 
-`next` is **17 commits ahead of `origin/next`** and has never been pushed.
+`next` **has since been rebased and pushed** — as of 2026-07-17 it is one commit
+ahead of `origin/next`. Every SHA this file originally cited was rewritten by
+that rebase; the hashes below are the current ones. If a hash here does not
+resolve, assume another rewrite and search by subject line rather than trusting
+the table.
 
-## 1. Landed this session
+## 1. Landed
 
 | SHA | What |
 | --- | --- |
-| `5e9a34f5` | dropped the auth handoff's stale outstanding list |
-| `9d507610` | boolean form fields no longer latch themselves uncontrolled |
-| `0077faea` | data table: floating selection bar; select column stops bloating |
-| `ffd81c50` | node overview names *why* a node is unreachable |
-| `eef42e24` | node reachability polled by the scheduler (slice 1) |
+| `f8caf887` | dropped the auth handoff's stale outstanding list |
+| `edfa75a5` | boolean form fields no longer latch themselves uncontrolled |
+| `852a50bc` | data table: floating selection bar; select column stops bloating |
+| `3c4a3bad` | node overview names *why* a node is unreachable |
+| `da028fa3` | node reachability polled by the scheduler (slice 1) |
+| `f587f044` | node settings stops pairing a two-field card with a six-field one |
+| `11f9358c` | server overview stat row reads as one design (§6) |
+| `bfe9f66f` | overview rows stop going 4-up before they fit (§6) |
 
 The design options these were picked from are published at
 <https://claude.ai/code/artifact/bcc1335b-c91a-4e2a-afcc-4e4cd749602f> (the
@@ -140,8 +147,7 @@ is not a footer"); the short version:
 - **Mismatched heights** — Specifications was a plain `Card` (`text-base` header,
   no footer) between two `StatisticCard`s (`text-xs` compact header). It now uses
   `StatisticCard` like its neighbours, with its three specs in an internal
-  `grid-cols-1 @xl:grid-cols-3` (3-up needs `@xl`; at `@lg` the page container is
-  still only ~540px and "39.04 GiB" wrapped mid-value).
+  `grid-cols-1 @lg:grid-cols-3`.
 - **Stranded progress bars** — `StatisticCard`'s bar lived in a `CardFooter`
   (`border-t bg-muted/50`) with `grow justify-end`, pinning it to the bottom of a
   stretched card. The `footer` prop is now `meter`, rendered inside `CardContent`
@@ -160,6 +166,37 @@ endpoint with a Playwright `page.route` (`used_bytes`/`total_bytes` are
 snake_case — `ResourceController` returns a raw array, not a laravel-data DTO).
 It read `13.4 GiB / used of 20 GiB • 67%` with the bar filled to 67% and level
 with Bandwidth's.
+
+### The rows went 4-up before they fit
+
+A follow-up (`bfe9f66f`) that turned out to be most of the remaining "mismatched
+heights": both rows broke to four columns as soon as the content area cleared
+~450–510px, so at laptop width each tile was ~130px and its title wrapped to two
+lines — and a wrapped title pushes that card's value down past its neighbours'.
+The two rows also disagreed with each other (`@md` vs `@lg`) about the same
+decision. Both are now `@5xl` and break together.
+
+**These container queries resolve against `AppLayout`'s `@container` — the whole
+content area (`AppLayout.tsx:42`), not the card.** Every `@md`/`@lg` in these
+files is therefore a statement about the *page*, which is why thresholds here
+cannot be reasoned about from the card's own appearance. Corollary worth knowing
+before touching this row again: **Specifications' width is not monotonic in the
+page width.** It spans the full row in the 2-col band and half of it in the
+4-col band, so it gets *narrower* as the page gets wider — 596px at a 644px
+container, 330px at a 724px one. Any threshold picked by arithmetic will be
+wrong; measure it (`page.evaluate` comparing each element's height against its
+`line-height` catches wrapping directly).
+
+Measured, at 12 widths from 480px to 1600px — no title wraps, no value wraps, no
+horizontal overflow, and 1440px unchanged:
+
+| container | tiles | specs columns |
+| --- | --- | --- |
+| 724 | 169px — "Memory Usage" wraps | 83px — "39.04 GiB" wraps |
+| 1024 | 244px — clears | 133px — clears |
+
+`IpamCard`'s `col-span` has to move with the grid: a `col-span-4` left behind in
+a 2-col grid adds implicit columns and overflows the row.
 
 While here: the Do/don't list still cited `nodes.$nodeId/settings.lazy.tsx` as the
 reference layout, which §5 had already moved to `servers.$serverId`. Stale citation

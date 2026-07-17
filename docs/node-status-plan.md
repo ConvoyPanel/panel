@@ -80,7 +80,7 @@ and it is off" from "we have not asked lately".
 
 #104 proposes monitoring "via ping test". ICMP proves a NIC answered. It does
 not prove Proxmox is running, the token is still valid, or the certificate is
-trusted — the TLS bug fixed in `9d507610` would have sailed through a ping test
+trusted — the TLS bug fixed in `edfa75a5` would have sailed through a ping test
 while every API call failed. A host that pings but answers `token_invalid` is
 **down** as far as Convoy is concerned.
 
