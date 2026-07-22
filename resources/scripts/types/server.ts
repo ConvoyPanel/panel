@@ -25,6 +25,7 @@ export interface Server {
     name: string
     description: string | null
     status: ServerLifecycleStatus
+    powerState: App.Enums.Server.State | null
     cpu: number
     memory: number
     disk: number

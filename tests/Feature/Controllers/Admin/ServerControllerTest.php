@@ -2,7 +2,24 @@
 
 use App\Enums\Server\State;
 use App\Models\User;
+use App\Services\Nodes\GuestStateCache;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+
+beforeEach(fn () => Cache::flush());
+
+it('returns cached guest power state in the admin server list', function () {
+    [$_owner, $_location, $node, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    app(GuestStateCache::class)->put($node, [$server->vmid => State::RUNNING->value]);
+
+    $this->actingAs($admin)
+        ->getJson('/api/admin/servers')
+        ->assertOk()
+        ->assertJsonPath('items.0.id', $server->id)
+        ->assertJsonPath('items.0.powerState', State::RUNNING->value);
+});
 
 it('lets a root admin send a power command to any server', function () {
     fakeProxmox();

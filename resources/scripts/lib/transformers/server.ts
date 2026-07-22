@@ -14,6 +14,7 @@ export const rawDataToServer = (data: any): Server => ({
     name: data.name,
     description: data.description,
     status: data.status,
+    powerState: data.powerState ?? null,
     cpu: data.cpu,
     memory: data.memory,
     disk: data.disk,

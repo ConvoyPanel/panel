@@ -1,6 +1,7 @@
 import { useServers } from '@/features/servers/admin/api.ts'
 import ServerBulkPowerActions from '@/features/servers/components/admin/ServerBulkPowerActions.tsx'
 import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
+import PowerStateBadge from '@/features/servers/components/PowerStateBadge.tsx'
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
@@ -56,6 +57,16 @@ function ServersIndex() {
         {
             header: 'Hostname',
             accessorKey: 'hostname',
+            meta: {
+                skeletonWidth: '4rem',
+            },
+        },
+        {
+            header: 'Power',
+            accessorKey: 'powerState',
+            cell: ({ row }) => (
+                <PowerStateBadge state={row.original.powerState} />
+            ),
             meta: {
                 skeletonWidth: '4rem',
             },
@@ -144,6 +155,9 @@ function ServersIndex() {
                                             {server.name}
                                         </span>
                                     </Link>
+                                    <PowerStateBadge
+                                        state={server.powerState}
+                                    />
                                 </ItemTitle>
                                 <ItemDescription
                                     className={'block truncate text-nowrap'}
