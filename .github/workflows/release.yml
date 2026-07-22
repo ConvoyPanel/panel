@@ -12,6 +12,13 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gmp, pcntl, redis, pdo_pgsql, pgsql, bcmath, intl
+          coverage: none
+          tools: composer:v2
 
       - name: Update Embedded Version String
         env:
@@ -21,8 +28,14 @@ jobs:
 
       - name: Build Assets
         run: |
+          cp .env.example .env
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          php artisan key:generate
           npm ci
+          npm run types:generate
+          npm run tc
           npm run build
+          git diff --exit-code -- . ':(exclude)config/app.php'
 
       - name: Create Release Archive
         run: |
