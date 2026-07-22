@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\GeneratePasskeyAuthenticationOptionsAction;
 use App\Exceptions\Http\Auth\InvalidPasskeyException;
+use App\Models\Passkey;
 use App\Models\User;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
@@ -52,6 +53,7 @@ class SecondFactorChallengeController
             throw new InvalidPasskeyException;
         }
 
+        /** @var Passkey|null $passkey Config binds the package action to our model subclass. */
         $passkey = $this->findPasskeyAction->execute($request->getContent(), $options);
 
         // The challenge is for the password-validated login.id, not whichever
@@ -72,8 +74,7 @@ class SecondFactorChallengeController
     private function challengedUser(Request $request): User
     {
         $id = $request->session()->get('login.id');
-        $model = $this->guard->getProvider()->getModel();
-        $user = $id ? $model::find($id) : null;
+        $user = $id ? $this->guard->getProvider()->retrieveById($id) : null;
 
         abort_unless($user instanceof User, 403);
 
