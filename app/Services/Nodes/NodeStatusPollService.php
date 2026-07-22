@@ -2,6 +2,8 @@
 
 namespace App\Services\Nodes;
 
+use App\Data\Cluster\ClusterResourceSnapshot;
+use App\Data\Cluster\NodeResourceData;
 use App\Data\Cluster\ServerResourceData;
 use App\Enums\Node\NodeStatus;
 use App\Enums\Node\Testing\ConnectionErrorCode;
@@ -38,12 +40,13 @@ class NodeStatusPollService
     public function __construct(
         private ProxmoxResourceClient $client,
         private GuestStateCache $guestStates,
+        private NodeResourceSnapshotCache $resourceSnapshots,
     ) {}
 
     public function handle(Node $node): NodeStatus
     {
         try {
-            $guests = $this->client->setNode($node)->getResources();
+            $resources = $this->client->setNode($node)->getResourceSnapshot();
         } catch (ConvoyRequestException|GuzzleRequestException|ConnectionException $e) {
             // The guest map is deliberately left to expire on its own rather
             // than being forgotten here. Until it lapses it is still the last
@@ -52,9 +55,21 @@ class NodeStatusPollService
             return $this->markUnreachable($node, $e->getMessage());
         }
 
-        $this->guestStates->put($node, $this->mapGuestStates($node, $guests));
+        $this->guestStates->put($node, $this->mapGuestStates($node, $resources->servers));
+
+        $resource = $this->findNodeResource($node, $resources);
+        if ($resource !== null) {
+            $this->resourceSnapshots->put($node, $resource);
+        }
 
         return $this->markOnline($node);
+    }
+
+    private function findNodeResource(Node $node, ClusterResourceSnapshot $resources): ?NodeResourceData
+    {
+        return $resources->nodes->first(
+            fn (NodeResourceData $resource) => $resource->nodeName === $node->name,
+        );
     }
 
     /**

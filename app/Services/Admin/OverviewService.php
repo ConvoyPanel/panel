@@ -23,6 +23,7 @@ use App\Models\Server;
 use App\Models\Storage;
 use App\Models\User;
 use App\Services\Metrics\VictoriaMetrics;
+use App\Services\Nodes\NodeResourceSnapshotCache;
 use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -35,7 +36,10 @@ class OverviewService
 
     private const CACHE_SECONDS = 15;
 
-    public function __construct(private readonly VictoriaMetrics $metrics) {}
+    public function __construct(
+        private readonly VictoriaMetrics $metrics,
+        private readonly NodeResourceSnapshotCache $resourceSnapshots,
+    ) {}
 
     public function metrics(): OverviewData
     {
@@ -145,7 +149,7 @@ class OverviewService
     private function loadNodes(): Collection
     {
         return Node::query()
-            ->select(['id', 'display_name', 'name', 'fqdn', 'memory'])
+            ->select(['id', 'display_name', 'name', 'fqdn', 'memory', 'status', 'status_checked_at'])
             ->withCount('servers')
             ->orderBy('display_name')
             ->get();
@@ -287,7 +291,9 @@ class OverviewService
             name: $node->name,
             fqdn: $node->fqdn,
             servers: (int) $node->servers_count,
+            status: $node->currentStatus(),
             memory: $this->allocation($allocated, (int) $node->memory),
+            resources: $this->resourceSnapshots->for($node),
         );
     }
 

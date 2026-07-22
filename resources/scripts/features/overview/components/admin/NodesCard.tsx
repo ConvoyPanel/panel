@@ -1,6 +1,8 @@
 import { IconServerBolt } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import { formatDistanceToNow } from 'date-fns'
 
+import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -30,9 +32,7 @@ import {
 } from './overview-helpers'
 
 type NodeSummary = App.Data.Admin.Overview.NodeSummaryData
-
-const memoryFigure = (node: NodeSummary) =>
-    `${bytes(node.memory.allocated)} / ${bytes(node.memory.total)} · ${node.memory.percent}%`
+type ResourceUsage = App.Data.Admin.Overview.ResourceUsageData
 
 const Meter = ({ percent, label }: { percent: number; label: string }) => (
     <LinearProgressBar
@@ -41,6 +41,49 @@ const Meter = ({ percent, label }: { percent: number; label: string }) => (
         indicatorClassName={meterIndicatorClass[capacityTone(percent)]}
     />
 )
+
+const Usage = ({
+    usage,
+    label,
+    sub,
+}: {
+    usage: ResourceUsage
+    label: string
+    sub?: string
+}) => (
+    <div className='min-w-32'>
+        <div className='mb-1.5 flex items-baseline justify-between gap-2'>
+            <span className='text-sm font-semibold tabular-nums'>
+                {usage.percent}%
+            </span>
+            <StatLabel as='span' className='text-xs whitespace-nowrap tabular-nums'>
+                {bytes(usage.used)} / {bytes(usage.total)}
+            </StatLabel>
+        </div>
+        <Meter percent={usage.percent} label={label} />
+        {sub && <StatLabel className='mt-1.5 text-xs'>{sub}</StatLabel>}
+    </div>
+)
+
+const statusClasses: Record<NodeSummary['status'], string> = {
+    online: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+    unreachable: 'bg-destructive/15 text-destructive',
+    unknown: 'bg-muted text-muted-foreground',
+}
+
+const StatusBadge = ({ node }: { node: NodeSummary }) => (
+    <Badge
+        variant='secondary'
+        className={`${statusClasses[node.status]} shrink-0 capitalize`}
+    >
+        {node.status}
+    </Badge>
+)
+
+const snapshotAge = (node: NodeSummary) =>
+    node.resources
+        ? `Observed ${formatDistanceToNow(new Date(node.resources.observedAt), { addSuffix: true })}`
+        : 'No recent poll data'
 
 const ServerCount = ({ node }: { node: NodeSummary }) => (
     <>
@@ -80,57 +123,74 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className='pl-0'>Node</TableHead>
-                                    <TableHead className='w-24 text-center'>
+                                    <TableHead className='w-20 text-center'>
                                         Servers
                                     </TableHead>
-                                    {/* The meter and its figure are separate
-                                        columns so the table sizes the figure
-                                        once for every row and all the bars end
-                                        on the same edge. Sharing one cell makes
-                                        each bar's width depend on how long its
-                                        own figure happens to be. The width
-                                        lives on the meter cell, not here — a
-                                        width on a colSpan'd header is split
-                                        across both columns. */}
-                                    <TableHead colSpan={2}>
-                                        Memory allocated
-                                    </TableHead>
+                                    <TableHead className='w-32'>CPU</TableHead>
+                                    <TableHead className='w-[28%]'>Memory</TableHead>
+                                    <TableHead className='w-[28%]'>Root disk</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {nodes.map(node => (
                                     <TableRow key={node.id}>
                                         <TableCell className='pl-0'>
-                                            <div className='font-semibold'>
-                                                {node.displayName}
+                                            <div className='flex items-center gap-2'>
+                                                <div className='font-semibold'>
+                                                    {node.displayName}
+                                                </div>
+                                                <StatusBadge node={node} />
                                             </div>
                                             <div className='text-muted-foreground font-mono text-xs'>
                                                 {node.fqdn}
                                             </div>
+                                            <StatLabel className='mt-1 text-xs'>
+                                                {snapshotAge(node)}
+                                            </StatLabel>
                                         </TableCell>
                                         <TableCell className='text-center tabular-nums'>
                                             {num(node.servers)}
                                         </TableCell>
-                                        <TableCell className='w-[36%]'>
-                                            <Meter
-                                                percent={node.memory.percent}
-                                                label={`Memory allocated for ${node.displayName}`}
-                                            />
+                                        <TableCell>
+                                            {node.resources ? (
+                                                <div>
+                                                    <div className='text-sm font-semibold tabular-nums'>
+                                                        {node.resources.cpu.percent}%
+                                                    </div>
+                                                    <StatLabel className='text-xs'>
+                                                        {num(node.resources.cpu.count)} CPUs
+                                                    </StatLabel>
+                                                </div>
+                                            ) : (
+                                                <span className='text-muted-foreground text-sm'>
+                                                    Unknown
+                                                </span>
+                                            )}
                                         </TableCell>
-                                        {/* `w-px` collapses this column to the
-                                            width of the widest figure. Without
-                                            it the column is `auto` and soaks up
-                                            the table's slack, which `text-right`
-                                            then turns into a wide gap between
-                                            each bar and its figure. The slack
-                                            belongs to the Node column. */}
-                                        <TableCell className='w-px pr-0 text-right whitespace-nowrap'>
-                                            <StatLabel
-                                                as='span'
-                                                className='text-xs whitespace-nowrap tabular-nums'
-                                            >
-                                                {memoryFigure(node)}
-                                            </StatLabel>
+                                        <TableCell>
+                                            {node.resources ? (
+                                                <Usage
+                                                    usage={node.resources.memory}
+                                                    label={`Memory used on ${node.displayName}`}
+                                                    sub={`${bytes(node.memory.allocated)} committed`}
+                                                />
+                                            ) : (
+                                                <span className='text-muted-foreground text-sm'>
+                                                    Unknown · {bytes(node.memory.allocated)} committed
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className='pr-0'>
+                                            {node.resources ? (
+                                                <Usage
+                                                    usage={node.resources.disk}
+                                                    label={`Root disk used on ${node.displayName}`}
+                                                />
+                                            ) : (
+                                                <span className='text-muted-foreground text-sm'>
+                                                    Unknown
+                                                </span>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -155,6 +215,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 <span className='truncate'>
                                                     {node.displayName}
                                                 </span>
+                                                <StatusBadge node={node} />
                                             </ItemTitle>
                                             {/* `block`/`text-nowrap` beat
                                                 ItemDescription's default
@@ -170,15 +231,44 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                         </div>
                                     </div>
                                     <StatLabel className='mt-2.5 mb-1.5 text-xs'>
-                                        Memory allocated
+                                        {snapshotAge(node)}
                                     </StatLabel>
-                                    <Meter
-                                        percent={node.memory.percent}
-                                        label={`Memory allocated for ${node.displayName}`}
-                                    />
-                                    <StatLabel className='mt-1.5 text-xs tabular-nums'>
-                                        {memoryFigure(node)}
-                                    </StatLabel>
+                                    {node.resources ? (
+                                        <div className='grid grid-cols-1 gap-3 @lg:grid-cols-2'>
+                                            <div>
+                                                <StatLabel className='mb-1.5 text-xs'>
+                                                    CPU
+                                                </StatLabel>
+                                                <div className='text-sm font-semibold tabular-nums'>
+                                                    {node.resources.cpu.percent}% ·{' '}
+                                                    {num(node.resources.cpu.count)} CPUs
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <StatLabel className='mb-1.5 text-xs'>
+                                                    Memory
+                                                </StatLabel>
+                                                <Usage
+                                                    usage={node.resources.memory}
+                                                    label={`Memory used on ${node.displayName}`}
+                                                    sub={`${bytes(node.memory.allocated)} committed`}
+                                                />
+                                            </div>
+                                            <div className='@lg:col-span-2'>
+                                                <StatLabel className='mb-1.5 text-xs'>
+                                                    Root disk
+                                                </StatLabel>
+                                                <Usage
+                                                    usage={node.resources.disk}
+                                                    label={`Root disk used on ${node.displayName}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className='text-muted-foreground text-sm'>
+                                            Resource usage unknown · {bytes(node.memory.allocated)} memory committed
+                                        </div>
+                                    )}
                                 </ItemContent>
                             </Item>
                         ))}

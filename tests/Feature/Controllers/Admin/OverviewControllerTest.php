@@ -1,5 +1,6 @@
 <?php
 
+use App\Data\Cluster\NodeResourceData;
 use App\Enums\Server\Backup\BackupErrorCode;
 use App\Enums\Server\ServerStatus;
 use App\Models\Address;
@@ -11,6 +12,7 @@ use App\Models\Node;
 use App\Models\Server;
 use App\Models\Storage;
 use App\Models\User;
+use App\Services\Nodes\NodeResourceSnapshotCache;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
@@ -22,6 +24,17 @@ it('returns overview metrics for admins', function () {
     $admin = User::factory()->create(['root_admin' => true]);
     $location = Location::factory()->create();
     $node = Node::factory()->for($location)->create(['memory' => 64 * 1024 * 1024 * 1024]);
+    app(NodeResourceSnapshotCache::class)->put($node, new NodeResourceData(
+        nodeName: $node->name,
+        status: 'online',
+        cpuCount: 16,
+        cpuUsed: 0.25,
+        memoryTotal: 64 * 1024 * 1024 * 1024,
+        memoryUsed: 16 * 1024 * 1024 * 1024,
+        diskTotal: 256 * 1024 * 1024 * 1024,
+        diskUsed: 64 * 1024 * 1024 * 1024,
+        uptimeInSeconds: 86400,
+    ));
 
     // One VM-disk storage with a known size, attached to the node; both servers live on
     // it, so the fleet storage total is deterministic. (Incidental storages the backup/ISO
@@ -86,7 +99,12 @@ it('returns overview metrics for admins', function () {
         ->assertJsonPath('data.isos.pending', 1)
         ->assertJsonPath('data.nodes.0.servers', 2)
         ->assertJsonPath('data.nodes.0.memory.allocated', 12 * 1024 * 1024 * 1024)
-        ->assertJsonPath('data.nodes.0.memory.total', 64 * 1024 * 1024 * 1024);
+        ->assertJsonPath('data.nodes.0.memory.total', 64 * 1024 * 1024 * 1024)
+        ->assertJsonPath('data.nodes.0.resources.cpu.percent', 25)
+        ->assertJsonPath('data.nodes.0.resources.memory.used', 16 * 1024 * 1024 * 1024)
+        ->assertJsonPath('data.nodes.0.resources.memory.percent', 25)
+        ->assertJsonPath('data.nodes.0.resources.disk.used', 64 * 1024 * 1024 * 1024)
+        ->assertJsonPath('data.nodes.0.resources.disk.percent', 25);
 
     // The endpoint caches OverviewData; node rows must remain a plain array after cache hydration.
     $this->actingAs($admin)->getJson('/api/admin/overview')

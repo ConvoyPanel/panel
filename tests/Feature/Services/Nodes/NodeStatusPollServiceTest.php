@@ -1,5 +1,6 @@
 <?php
 
+use App\Data\Admin\Overview\NodeResourceSnapshotData;
 use App\Enums\Node\NodeStatus;
 use App\Enums\Node\Testing\ConnectionErrorCode;
 use App\Enums\Server\State;
@@ -7,6 +8,7 @@ use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Services\Nodes\GuestStateCache;
+use App\Services\Nodes\NodeResourceSnapshotCache;
 use App\Services\Nodes\NodeStatusPollService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
@@ -47,12 +49,30 @@ function guestRow(int $vmid, string $status, string $nodeName): array
  * A /cluster/resources body. The node/storage rows are included because the
  * real endpoint returns them and the poller has to tolerate them.
  */
-function pollStatusPayload(array $guests = []): array
+function pollStatusPayload(array $guests = [], array $nodes = []): array
 {
     return [
-        ['type' => 'node', 'id' => 'node/pve', 'node' => 'pve', 'status' => 'online'],
+        ...($nodes ?: [['type' => 'node', 'id' => 'node/pve', 'node' => 'pve', 'status' => 'online']]),
         ['type' => 'storage', 'id' => 'storage/pve/local', 'node' => 'pve', 'status' => 'available'],
         ...$guests,
+    ];
+}
+
+function nodeResourceRow(string $nodeName, array $overrides = []): array
+{
+    return [
+        'type' => 'node',
+        'id' => "node/{$nodeName}",
+        'node' => $nodeName,
+        'status' => 'online',
+        'maxcpu' => 16,
+        'cpu' => 0.25,
+        'maxmem' => 16 * 1024 * 1024 * 1024,
+        'mem' => 4 * 1024 * 1024 * 1024,
+        'maxdisk' => 256 * 1024 * 1024 * 1024,
+        'disk' => 64 * 1024 * 1024 * 1024,
+        'uptime' => 86400,
+        ...$overrides,
     ];
 }
 
@@ -157,6 +177,51 @@ it('records each guest power state from the same response', function () {
 
     expect(app(GuestStateCache::class)->for($this->node))
         ->toBe([100 => 'running', 101 => 'stopped']);
+});
+
+it('records current resources for this node from the same response', function () {
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        guests: [],
+        nodes: [
+            nodeResourceRow('some-other-node', ['cpu' => 0.9]),
+            nodeResourceRow($this->node->name),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    $snapshot = app(NodeResourceSnapshotCache::class)->for($this->node);
+
+    expect($snapshot)->toBeInstanceOf(NodeResourceSnapshotData::class)
+        ->and($snapshot->cpu->count)->toBe(16)
+        ->and($snapshot->cpu->percent)->toBe(25.0)
+        ->and($snapshot->memory->used)->toBe(4 * 1024 * 1024 * 1024)
+        ->and($snapshot->memory->percent)->toBe(25.0)
+        ->and($snapshot->disk->used)->toBe(64 * 1024 * 1024 * 1024)
+        ->and($snapshot->disk->percent)->toBe(25.0)
+        ->and($snapshot->uptimeInSeconds)->toBe(86400);
+});
+
+it('leaves the last resource snapshot alone when a poll fails', function () {
+    $reachable = true;
+    Http::fake(['*/api2/json/cluster/resources' => function () use (&$reachable) {
+        if (! $reachable) {
+            throw new ConnectionException('Connection refused');
+        }
+
+        return Http::response(['data' => pollStatusPayload(
+            nodes: [nodeResourceRow($this->node->name)],
+        )], 200);
+    }]);
+
+    $this->service->handle($this->node);
+    $observedAt = app(NodeResourceSnapshotCache::class)->for($this->node)->observedAt;
+
+    $reachable = false;
+    $this->service->handle($this->node->refresh());
+
+    expect(app(NodeResourceSnapshotCache::class)->for($this->node)->observedAt)
+        ->toEqual($observedAt);
 });
 
 it('ignores guests belonging to another node in the cluster', function () {
