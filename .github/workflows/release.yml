@@ -32,9 +32,8 @@ jobs:
           composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
           php artisan key:generate
           npm ci
-          npm run types:generate
-          npm run tc
           npm run build
+          npm run tc
           git diff --exit-code -- . ':(exclude)config/app.php'
 
       - name: Create Release Archive
