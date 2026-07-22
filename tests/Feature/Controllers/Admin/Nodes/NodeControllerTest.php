@@ -6,6 +6,7 @@ use App\Models\Node;
 use App\Models\Server;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
 
 beforeEach(function () {
     $this->user = User::factory()->create([
@@ -149,6 +150,71 @@ it('classifies a rejected token separately from an unreachable host', function (
     );
 
     $response->assertStatus(503)->assertJsonPath('code', 'token_invalid');
+});
+
+it('tests edited connection settings with the saved credentials without persisting them', function () {
+    $this->node->update([
+        'name' => 'stored-node',
+        'fqdn' => 'stored.example.test',
+        'port' => 8006,
+        'verify_tls' => true,
+        'token_id' => 'stored-token-id',
+        'token_secret' => 'stored-token-secret',
+    ]);
+
+    Http::fake([
+        '*' => Http::response(['data' => liveNodeStatusPayload()], 200),
+    ]);
+
+    $response = $this->actingAs($this->user)->postJson(
+        "/api/admin/nodes/{$this->node->id}/test-connection",
+        [
+            'name' => 'edited-node',
+            'fqdn' => 'edited.example.test',
+            'port' => 9443,
+            'verify_tls' => false,
+            'token_id' => '',
+            'token_secret' => null,
+        ],
+    );
+
+    $response->assertCreated()->assertJsonPath('data.success', true);
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://edited.example.test:9443/api2/json/nodes/edited-node/status'
+        && $request->hasHeader('Authorization', 'PVEAPIToken=stored-token-id=stored-token-secret')
+    );
+
+    $this->node->refresh();
+
+    expect($this->node->name)->toBe('stored-node')
+        ->and($this->node->fqdn)->toBe('stored.example.test')
+        ->and($this->node->port)->toBe(8006)
+        ->and($this->node->verify_tls)->toBeTrue();
+});
+
+it('tests a saved node with replacement credentials when supplied', function () {
+    Http::fake([
+        '*' => Http::response(['data' => liveNodeStatusPayload()], 200),
+    ]);
+
+    $response = $this->actingAs($this->user)->postJson(
+        "/api/admin/nodes/{$this->node->id}/test-connection",
+        [
+            'name' => $this->node->name,
+            'fqdn' => $this->node->fqdn,
+            'port' => $this->node->port,
+            'verify_tls' => $this->node->verify_tls,
+            'token_id' => 'replacement-token-id',
+            'token_secret' => 'replacement-token-secret',
+        ],
+    );
+
+    $response->assertCreated()->assertJsonPath('data.success', true);
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader(
+        'Authorization',
+        'PVEAPIToken=replacement-token-id=replacement-token-secret',
+    ));
 });
 
 it('can create a node', function () {

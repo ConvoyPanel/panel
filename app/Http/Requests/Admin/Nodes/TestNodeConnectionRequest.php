@@ -9,12 +9,16 @@ class TestNodeConnectionRequest extends BaseApiRequest
 {
     public function rules(): array
     {
+        $credentialRules = $this->route('node') instanceof Node
+            ? 'sometimes|nullable|string|max:191'
+            : Node::$validationRules['token_id'];
+
         return [
             'name' => Node::$validationRules['name'],
             'verify_tls' => 'required|boolean',
             'fqdn' => 'required|string',
-            'token_id' => Node::$validationRules['token_id'],
-            'token_secret' => Node::$validationRules['token_secret'],
+            'token_id' => $credentialRules,
+            'token_secret' => $credentialRules,
             'port' => Node::$validationRules['port'],
         ];
     }

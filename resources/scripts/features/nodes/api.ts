@@ -59,6 +59,8 @@ const storeRoute = NodeController.store['/api/admin/nodes']
 const updateRoute = NodeController.update['/api/admin/nodes/{node}']
 const testConnectionRoute =
     NodeConnectionTestController['/api/admin/nodes/test-connection']
+const testSavedConnectionRoute =
+    NodeConnectionTestController['/api/admin/nodes/{node}/test-connection']
 
 const optionalCredential = z.preprocess(
     value => (value === '' || value == null ? undefined : value),
@@ -237,33 +239,48 @@ export const updateNode = async (
     return res.data
 }
 
-const connectionTestSchema = nodeSchema.pick({
-    name: true,
-    fqdn: true,
-    port: true,
-    verifyTls: true,
-    tokenId: true,
-    tokenSecret: true,
-})
+const connectionTestSchema = nodeSchema
+    .pick({
+        name: true,
+        fqdn: true,
+        port: true,
+        verifyTls: true,
+    })
+    .extend({
+        tokenId: optionalCredential,
+        tokenSecret: optionalCredential,
+    })
 
-export const testConnection = async ({
-    name,
-    fqdn,
-    port,
-    verifyTls,
-    tokenId,
-    tokenSecret,
-}: z.infer<typeof connectionTestSchema>) => {
+export type ConnectionTestInput = z.input<typeof connectionTestSchema>
+export type ConnectionTestForm = ConnectionTestInput &
+    Pick<
+        z.input<typeof nodeSchema>,
+        'socketCount' | 'coreCount' | 'cpuCount' | 'memory'
+    >
+
+export const testConnection = async (
+    {
+        name,
+        fqdn,
+        port,
+        verifyTls,
+        tokenId,
+        tokenSecret,
+    }: ConnectionTestInput,
+    nodeId?: number
+) => {
     const { data } = await apiFetch<DataResponse<unknown>>(
-        testConnectionRoute(),
+        nodeId === undefined
+            ? testConnectionRoute()
+            : testSavedConnectionRoute(nodeId),
         {
             body: {
                 name,
                 fqdn,
                 port,
                 verify_tls: verifyTls,
-                token_id: tokenId,
-                token_secret: tokenSecret,
+                token_id: tokenId || undefined,
+                token_secret: tokenSecret || undefined,
             },
         }
     )

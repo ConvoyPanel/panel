@@ -10,7 +10,10 @@ import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { testConnection } from '@/features/nodes/api.ts'
+import {
+    type ConnectionTestForm,
+    testConnection,
+} from '@/features/nodes/api.ts'
 import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
 
 import { Button } from '@/components/ui/Button'
@@ -25,16 +28,15 @@ import {
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
 
-const TestConnectionButton = () => {
-    const form = useFormContext()
+const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
+    const form = useFormContext<ConnectionTestForm>()
     const [result, setResult] = useState<ConnectionResult | null>(null)
     const [open, setOpen] = useState(false)
 
     const [state, handle] = useAsyncFunction(async () => {
         try {
             setResult(null)
-            // @ts-expect-error
-            const result = await testConnection(form.getValues())
+            const result = await testConnection(form.getValues(), nodeId)
             setResult(result)
             if (!result.success) {
                 setOpen(true)

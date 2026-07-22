@@ -2,6 +2,7 @@ import AnchorPicker from '@/features/anchors/components/AnchorPicker.tsx'
 import OveragePenaltyFields from '@/features/bandwidth/components/OveragePenaltyFields.tsx'
 import { overagePenaltyDefaults } from '@/features/bandwidth/overage-penalty.ts'
 import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
+import TestConnectionButton from '@/features/nodes/components/Create/TestConnectionButton.tsx'
 import {
     nodeQueries,
     nodeUpdateSchema,
@@ -187,6 +188,7 @@ function NodeSettings() {
                                     }
                                 />
                                 <AnchorPicker />
+                                <TestConnectionButton nodeId={numericNodeId} />
                             </CardContent>
                         </Card>
 
