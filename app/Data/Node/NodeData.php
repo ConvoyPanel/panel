@@ -3,8 +3,8 @@
 namespace App\Data\Node;
 
 use App\Data\Server\OveragePenaltyData;
+use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
-use App\Enums\Node\Testing\ConnectionErrorCode;
 use App\Models\Node;
 use App\Services\Servers\OveragePenaltyResolver;
 use Spatie\LaravelData\Attributes\MapInputName;

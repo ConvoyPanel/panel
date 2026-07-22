@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Node\Testing;
+namespace App\Enums\Node;
 
 use Illuminate\Support\Str;
 

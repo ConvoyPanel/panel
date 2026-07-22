@@ -24,7 +24,7 @@ export interface Node {
      */
     status: App.Enums.Node.NodeStatus
     /** Why it is unreachable. Only sent alongside an `unreachable` status. */
-    statusCode: App.Enums.Node.Testing.ConnectionErrorCode | null
+    statusCode: App.Enums.Node.ConnectionErrorCode | null
     /** ISO-8601. Last *successful* contact, so the UI can say how stale this is. */
     lastSeenAt: string | null
     statusCheckedAt: string | null

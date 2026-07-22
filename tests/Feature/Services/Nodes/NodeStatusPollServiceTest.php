@@ -1,8 +1,8 @@
 <?php
 
 use App\Data\Admin\Overview\NodeResourceSnapshotData;
+use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
-use App\Enums\Node\Testing\ConnectionErrorCode;
 use App\Enums\Server\State;
 use App\Models\Location;
 use App\Models\Node;

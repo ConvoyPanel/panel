@@ -3,7 +3,7 @@
 namespace App\Services\Nodes;
 
 use App\Data\Node\Testing\ConnectionResultData;
-use App\Enums\Node\Testing\ConnectionErrorCode as Error;
+use App\Enums\Node\ConnectionErrorCode as Error;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
 use App\Models\Node;
 use App\Services\Proxmox\Node\ProxmoxStatusClient;

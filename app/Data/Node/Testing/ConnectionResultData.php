@@ -3,7 +3,7 @@
 namespace App\Data\Node\Testing;
 
 use App\Data\Node\Status\NodeStatusData;
-use App\Enums\Node\Testing\ConnectionErrorCode;
+use App\Enums\Node\ConnectionErrorCode;
 use Spatie\LaravelData\Data;
 
 class ConnectionResultData extends Data

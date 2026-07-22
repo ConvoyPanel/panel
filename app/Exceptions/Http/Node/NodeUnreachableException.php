@@ -2,7 +2,7 @@
 
 namespace App\Exceptions\Http\Node;
 
-use App\Enums\Node\Testing\ConnectionErrorCode;
+use App\Enums\Node\ConnectionErrorCode;
 use App\Exceptions\HasErrorCode;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Throwable;

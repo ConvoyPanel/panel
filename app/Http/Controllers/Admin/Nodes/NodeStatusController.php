@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\Status\NodeStatusData;
-use App\Enums\Node\Testing\ConnectionErrorCode;
+use App\Enums\Node\ConnectionErrorCode;
 use App\Exceptions\Http\Node\NodeUnreachableException;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
 use App\Models\Node;
