@@ -107,7 +107,6 @@ const IsoLibraryCard = ({ uuid }: Props) => {
                                                     ? 'outline'
                                                     : 'default'
                                             }
-                                            size={'sm'}
                                             disabled={isPending}
                                             onClick={() => toggle(iso)}
                                         >

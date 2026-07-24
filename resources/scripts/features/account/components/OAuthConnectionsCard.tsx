@@ -134,7 +134,6 @@ const OAuthConnectionsCard = () => {
                                         {connection ? (
                                             <Button
                                                 variant={'outline'}
-                                                size={'sm'}
                                                 onClick={() =>
                                                     handleDisconnect(connection)
                                                 }
@@ -144,7 +143,6 @@ const OAuthConnectionsCard = () => {
                                         ) : (
                                             <Button
                                                 variant={'outline'}
-                                                size={'sm'}
                                                 onClick={() => {
                                                     window.location.href =
                                                         oauthRedirectUrl(

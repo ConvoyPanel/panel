@@ -247,7 +247,6 @@ function ServerBuildSettings() {
 
                     <div className={'mt-4 flex justify-end'}>
                         <FormButton
-                            size={'sm'}
                             className={'flex'}
                             disabled={!form.formState.isDirty}
                         >

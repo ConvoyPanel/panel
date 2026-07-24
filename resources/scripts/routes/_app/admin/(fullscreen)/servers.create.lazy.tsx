@@ -129,7 +129,7 @@ function CreateServerPage() {
                     backLink={'/admin/servers'}
                     title={'Add a new server'}
                     headerActions={
-                        <FormButton size={'sm'} className={'flex'}>
+                        <FormButton className={'flex'}>
                             Add server <IconCheck className={'size-4'} />
                         </FormButton>
                     }

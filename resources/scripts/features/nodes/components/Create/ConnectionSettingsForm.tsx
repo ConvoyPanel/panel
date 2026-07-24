@@ -12,7 +12,6 @@ const HintPopover = ({ children }: { children: React.ReactNode }) => (
         <PopoverTrigger asChild>
             <Button
                 variant={'link'}
-                size={'sm'}
                 type={'button'}
                 className={'h-auto px-0 py-0 text-xs'}
             >

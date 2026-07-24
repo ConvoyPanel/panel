@@ -25,7 +25,6 @@ const SecondaryDisksForm = () => {
                 <Button
                     type={'button'}
                     variant={'outline'}
-                    size={'sm'}
                     disabled={!nodeId}
                     onClick={() => append({ storageId: '', size: 10 })}
                 >

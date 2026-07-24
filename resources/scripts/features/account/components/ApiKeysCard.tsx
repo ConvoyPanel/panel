@@ -69,7 +69,6 @@ const ApiKeysCard = () => {
                         <CardAction>
                             <Button
                                 variant={'outline'}
-                                size={'sm'}
                                 onClick={() => setCreateOpen(true)}
                             >
                                 Create token

@@ -80,12 +80,11 @@ const CreateTemplateCard = ({ templateGroup, onClose }: Props) => {
                         <Button
                             variant={'secondary'}
                             onClick={() => onClose()}
-                            size={'sm'}
                             type={'button'}
                         >
                             Cancel
                         </Button>
-                        <FormButton size={'sm'}>Create template</FormButton>
+                        <FormButton>Create template</FormButton>
                     </div>
                 </form>
             </Form>

@@ -123,12 +123,11 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                                     setIsEditing(false)
                                     form.reset()
                                 }}
-                                size={'sm'}
                                 type={'button'}
                             >
                                 Cancel
                             </Button>
-                            <FormButton size={'sm'}>Save</FormButton>
+                            <FormButton>Save</FormButton>
                         </div>
                     </form>
                 </Form>
@@ -167,7 +166,6 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                         <div className={'mt-2 flex justify-end gap-2'}>
                             <Button
                                 variant={'secondary'}
-                                size={'sm'}
                                 onClick={() => setIsDeleting(false)}
                                 disabled={deleteTemplateMutation.isMutating}
                             >
@@ -175,7 +173,6 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                             </Button>
                             <Button
                                 variant={'destructive'}
-                                size={'sm'}
                                 onClick={del}
                                 loading={deleteTemplateMutation.isMutating}
                             >

@@ -114,7 +114,6 @@ const NameserversCard = ({ uuid }: Props) => {
                         ))}
                         <Button
                             variant={'outline'}
-                            size={'sm'}
                             onClick={() => setValues(prev => [...prev, ''])}
                         >
                             <IconPlus className={'size-4'} />

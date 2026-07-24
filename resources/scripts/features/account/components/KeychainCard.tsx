@@ -68,7 +68,6 @@ const KeychainCard = () => {
                         <CardAction>
                             <Button
                                 variant={'outline'}
-                                size={'sm'}
                                 onClick={() => setCreateOpen(true)}
                             >
                                 Add Key

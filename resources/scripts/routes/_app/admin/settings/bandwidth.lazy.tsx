@@ -101,7 +101,7 @@ function BandwidthSettingsPage() {
                     </Card>
 
                     <div className={'mt-4 flex justify-end'}>
-                        <FormButton size={'sm'} className={'flex'}>
+                        <FormButton className={'flex'}>
                             Save changes <IconCheck className={'size-4'} />
                         </FormButton>
                     </div>

@@ -122,14 +122,11 @@ function CreateNodePage() {
                     <div className={'ml-auto flex shrink-0 items-center gap-2'}>
                         <Link
                             to={'/admin/nodes'}
-                            className={buttonVariants({
-                                variant: 'ghost',
-                                size: 'sm',
-                            })}
+                            className={buttonVariants({ variant: 'ghost' })}
                         >
                             Cancel
                         </Link>
-                        <FormButton size={'sm'} className={'flex'}>
+                        <FormButton className={'flex'}>
                             Add node <IconCheck className={'size-4'} />
                         </FormButton>
                     </div>

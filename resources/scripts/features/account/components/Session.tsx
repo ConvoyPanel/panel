@@ -46,7 +46,6 @@ const Session = ({ session, onRevoke }: Props) => {
                 <ItemActions>
                     <Button
                         variant={'ghost'}
-                        size={'sm'}
                         onClick={() => onRevoke(session)}
                     >
                         Revoke

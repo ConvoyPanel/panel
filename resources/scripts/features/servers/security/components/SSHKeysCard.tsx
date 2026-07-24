@@ -208,7 +208,6 @@ const SSHKeysCard = ({ uuid }: Props) => {
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant={'outline'}
-                                    size={'sm'}
                                     disabled={available.length === 0}
                                 >
                                     <IconPlus className={'size-4'} />
@@ -236,7 +235,6 @@ const SSHKeysCard = ({ uuid }: Props) => {
 
                         <Button
                             variant={'outline'}
-                            size={'sm'}
                             onClick={() => setPasteOpen(true)}
                         >
                             <IconClipboard className={'size-4'} />
