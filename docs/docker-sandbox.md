@@ -57,20 +57,48 @@ Defense in depth — the leak should be blocked at all three layers so no single
    Bypass **+** deny means the only reachable `*.ddev.site` is the sandbox's own loopback — the
    deny is the backstop for the window before layer 1 is applied on a new sandbox.
 
-3. **Guard the e2e scripts.** When launching Playwright, force Chromium to bypass the proxy for
-   ddev hosts, and assert you're on the sandbox before any login/mutation — abort otherwise:
+3. **Guard the e2e scripts.** Don't hand-roll this per session — the `dev` kit ships
+   `.sbx/dev/browser.mjs` and publishes it to `/opt/sbx-e2e/browser.mjs` on every start. It bypasses
+   the proxy for ddev hosts and refuses to launch unless the app answers from `127.0.0.1`:
 
    ```js
-   const browser = await chromium.launch({
-     proxy: { server: 'http://gateway.docker.internal:3128',
-              bypass: '.ddev.site,localhost,127.0.0.1' },   // never proxy the app under test
-   })
-   // preflight: refuse to run mutations unless the app is the sandbox's own loopback instance
-   const ip = execSync(`curl -sk ${BASE}/up -o /dev/null -w '%{remote_ip}'`).toString()
-   if (ip !== '127.0.0.1') throw new Error(`refusing to run against non-sandbox app (${ip})`)
+   import { BASE, launch, newContext, login, capture } from '/opt/sbx-e2e/browser.mjs'
+
+   const browser = await launch()          // proxy-bypassed + preflighted
+   const ctx = await newContext(browser)   // ignores the mkcert cert
+   const page = await login(ctx, { email: '…', password: '…' })
+   const overflow = await capture(ctx, { url: '/admin/nodes', width: 768, path: '/tmp/nodes.png' })
+   await browser.close()
    ```
 
    A test that can tell it's pointed at the host and stops is the last line of defense.
+
+Playwright itself lives in `/opt/sbx-e2e`, **not** the repo, and scripts reach it by importing the
+helper's absolute path (Node resolves `playwright` by walking up from `/opt/sbx-e2e`). Never
+`npm install playwright` in the project — that puts sandbox-only tooling in `package.json` and
+`package-lock.json`. The version is pinned in the kit because the Chromium build id is tied to it;
+a floating `playwright@latest` installed mid-session gives you `Executable doesn't exist at
+…/chromium-<id>`, and the fix is to use the pinned copy, not to re-download browsers.
+
+## `ddev start` fails: "Failed to add hosts entry … read-only file system"
+
+`/etc/hosts` is a read-only bind mount from the host, and `*.ddev.site` has no DNS answer reachable
+from in here — so ddev's hostname step can neither resolve `convoy.ddev.site` nor add it, and
+`ddev start` aborts. With no local app running it is very tempting to tunnel to the **host's** ddev
+instead. Don't: that is exactly the leak the section above is about, dressed up as a fix.
+
+The `dev` kit handles it on every start by overmounting a writable copy, after which ddev registers
+its own hostnames normally:
+
+```bash
+tmp=$(mktemp); { cat /etc/hosts; echo '# sbx: writable hosts overmount'; } > "$tmp"
+sudo install -m 0644 -o root -g root "$tmp" /var/lib/sbx-hosts
+sudo mount --bind /var/lib/sbx-hosts /etc/hosts
+```
+
+Nothing is written to the workspace and the overmount dies with the sandbox, so this stays
+sandbox-local. In a sandbox that predates the kit change, run it by hand, then `ddev start` and
+confirm with the `remote_ip` curl above.
 
 ## `php artisan tinker` segfaults (SIGSEGV / exit 139) — fix
 

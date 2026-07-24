@@ -20,8 +20,25 @@ agentContext: |
   `127.0.0.1` (not a proxy address). Background + the host-side
   `sbx policy deny network '*.ddev.site'` backstop: docs/docker-sandbox.md.
 
-  Playwright + Chromium are pre-installed (in ~/.cache/ms-playwright) for visual
-  and e2e checks — no need to download them again.
+  Playwright + Chromium are pre-installed for visual and e2e checks — but NOT in
+  the repo. They live in `/opt/sbx-e2e` (pinned version, browsers in
+  ~/.cache/ms-playwright), so **do not `npm install playwright` in the project**;
+  that would put sandbox-only tooling in package.json. Write throwaway scripts
+  wherever you like and import the helpers by absolute path:
+
+      import { BASE, launch, newContext, login, capture } from '/opt/sbx-e2e/browser.mjs'
+
+      const browser = await launch()          // proxy-bypassed + preflighted
+      const ctx = await newContext(browser)   // ignores the mkcert cert
+      const page = await login(ctx, { email: '…', password: '…' })
+      await capture(ctx, { url: '/admin/nodes', width: 768, path: '/tmp/nodes.png' })
+      await browser.close()
+
+  `launch()` refuses to run unless the app answers from 127.0.0.1, so a
+  misconfigured sandbox fails loudly instead of driving your host app. Source:
+  `.sbx/dev/browser.mjs` (copied into place on every start — edit it there).
+
+  If ddev is unreachable, fix ddev; never tunnel to the host's instance.
 
   Finish provisioning once:
 
@@ -64,19 +81,75 @@ commands:
         SBXEOF
       description: proxy-isolate *.ddev.site from the host dev server
 
-    # Chromium's shared libraries via apt (needs root — the default here; verified
-    # node is system-wide at /usr/bin/node, so root has npx).
-    - command: "npx --yes playwright@latest install-deps chromium || echo 'convoy-dev: playwright install-deps failed; agent can rerun on demand'"
+    # Playwright lives OUTSIDE the repo so a visual check never adds a devDependency
+    # to package.json. Scripts import /opt/sbx-e2e/browser.mjs by absolute path, and
+    # Node resolves `playwright` by walking up from there to /opt/sbx-e2e/node_modules.
+    - command: "install -d -o 1000 -g 1000 /opt/sbx-e2e"
+      description: create the sandbox-local e2e prefix
+
+    # Pinned, not @latest: the browser build id is tied to the playwright version, so
+    # a floating version installed later in a session no longer matches the browsers
+    # baked in here and dies with "Executable doesn't exist at .../chromium-<id>".
+    # A real package.json (rather than --no-save) is what keeps it installed — with
+    # nothing declared, the next npm command in this prefix prunes node_modules.
+    - command:
+          - "bash"
+          - "-lc"
+          - |
+            set -euo pipefail
+            cat > /opt/sbx-e2e/package.json <<'PKGEOF'
+            {
+              "name": "sbx-e2e",
+              "private": true,
+              "type": "module",
+              "dependencies": { "playwright": "1.62.0" }
+            }
+            PKGEOF
+            npm --prefix /opt/sbx-e2e install --loglevel=error
+      user: "1000"
+      description: install Playwright (pinned)
+
+    # Chromium's shared libraries via apt (needs root — the default here).
+    - command: "/opt/sbx-e2e/node_modules/.bin/playwright install-deps chromium || echo 'convoy-dev: playwright install-deps failed; agent can rerun on demand'"
       description: install Chromium OS dependencies
 
-    # The Chromium browser itself, as the agent user so it lands in the home cache
-    # the agent actually uses. Non-fatal so a download hiccup can't block creation.
-    - command: "npx --yes playwright@latest install chromium || echo 'convoy-dev: playwright chromium preinstall skipped'"
+    # The browser itself, as the agent user so it lands in the home cache the agent
+    # actually uses. Non-fatal so a download hiccup can't block creation.
+    - command: "/opt/sbx-e2e/node_modules/.bin/playwright install chromium || echo 'convoy-dev: playwright chromium preinstall skipped'"
       user: "1000"
-      description: pre-install Playwright + Chromium for visual/e2e checks
+      description: pre-install Chromium for visual/e2e checks
 
   # Runs on EVERY start (as the agent user). Fast once ddev's images are baked
   # into a template.
   startup:
+    # /etc/hosts is a read-only bind mount from the host, so ddev's hostname step
+    # ("Failed to add hosts entry … read-only file system") aborts `ddev start` —
+    # and *.ddev.site has no public DNS answer in here to fall back on. Overmount a
+    # writable copy so ddev can register its own names; the marker line makes it
+    # idempotent across restarts. Sandbox-local by construction: nothing is written
+    # to the workspace, and the overmount dies with the sandbox.
+    - command:
+          - "bash"
+          - "-lc"
+          - |
+            set -euo pipefail
+            mark='# sbx: writable hosts overmount'
+            if grep -qxF "$mark" /etc/hosts 2>/dev/null; then
+              echo 'convoy-dev: /etc/hosts already writable'
+              exit 0
+            fi
+            tmp=$(mktemp)
+            { cat /etc/hosts; echo "$mark"; } > "$tmp"
+            sudo install -m 0644 -o root -g root "$tmp" /var/lib/sbx-hosts
+            rm -f "$tmp"
+            sudo mount --bind /var/lib/sbx-hosts /etc/hosts
+            echo 'convoy-dev: overmounted /etc/hosts (writable copy at /var/lib/sbx-hosts)'
+      description: make /etc/hosts writable so ddev can register *.ddev.site
+
+    # Copied rather than symlinked: Node resolves a symlinked module to its realpath,
+    # which would send the `playwright` lookup into the repo instead of /opt/sbx-e2e.
+    - command: ["bash", "-lc", "install -m 0644 \"${WORKSPACE_DIR:-.}/.sbx/dev/browser.mjs\" /opt/sbx-e2e/browser.mjs"]
+      description: publish the Playwright helpers to /opt/sbx-e2e
+
     - command: ["bash", "-lc", "cd \"${WORKSPACE_DIR:-.}\" && ddev start -y"]
       description: boot the ddev stack

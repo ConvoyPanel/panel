@@ -7,7 +7,12 @@ is just a committed directory you reference explicitly with `--kit`.
 ## `dev/` — Convoy dev environment
 
 Installs ddev and starts the stack inside the sandbox (its Docker daemon, DB, and
-volumes are isolated from your host ddev).
+volumes are isolated from your host ddev). It also sets up headless browsing:
+Playwright is pinned and installed to `/opt/sbx-e2e` (never the repo), and
+`dev/browser.mjs` is published to `/opt/sbx-e2e/browser.mjs` for scripts to import.
+Because `/etc/hosts` is a read-only mount in a sandbox — which otherwise makes
+`ddev start` fail outright — a startup step overmounts a writable copy so ddev can
+register `*.ddev.site`. See `docs/docker-sandbox.md`.
 
 ```sh
 sbx run --kit .sbx/dev claude
