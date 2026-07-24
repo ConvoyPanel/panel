@@ -33,11 +33,18 @@ const SSHKey = ({ publicKey: key, onDelete }: Props) => {
             </ItemMedia>
             <ItemContent className={'overflow-x-hidden'}>
                 <ItemTitle className={'truncate'}>{key.name}</ItemTitle>
-                <div className={'flex items-center gap-2'}>
-                    <Badge variant={'secondary'} className={'font-mono'}>
+                <div className={'flex flex-wrap items-center gap-x-2 gap-y-1'}>
+                    <Badge
+                        variant={'secondary'}
+                        className={'shrink-0 whitespace-nowrap font-mono'}
+                    >
                         {sshKeyAlgorithm(key.publicKey)}
                     </Badge>
-                    <span className={'text-xs text-muted-foreground'}>
+                    <span
+                        className={
+                            'whitespace-nowrap text-xs text-muted-foreground'
+                        }
+                    >
                         Added {formattedDate}
                     </span>
                 </div>
