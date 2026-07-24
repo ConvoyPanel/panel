@@ -34,18 +34,28 @@ const OverflowItemGroup = ({ rows, max = 3, title, className }: Props) => {
 
     return (
         <>
-            <ItemGroup className={cn('gap-3', className)}>{visible}</ItemGroup>
-            {/* Kept outside ItemGroup: a trigger isn't a list item, so it must
-                not be a child of the group's role="list". */}
-            {hasOverflow && (
-                <Button
-                    variant='outline'
-                    className='mt-3 w-full'
-                    onClick={() => setOpen(true)}
-                >
-                    Show all {rows.length} &rarr;
-                </Button>
-            )}
+            {/* Fill the (possibly grid-stretched) parent as a column so the
+                overflow trigger anchors to the bottom edge. `gap-3` sets the
+                minimum list-to-button spacing; `mt-auto` on the button eats any
+                surplus height, pinning it down instead of leaving a gap beneath
+                it. With no explicit parent height this collapses to content
+                height and behaves exactly as a plain stack. */}
+            <div className='flex h-full flex-col gap-3'>
+                <ItemGroup className={cn('gap-3', className)}>
+                    {visible}
+                </ItemGroup>
+                {/* Kept outside ItemGroup: a trigger isn't a list item, so it
+                    must not be a child of the group's role="list". */}
+                {hasOverflow && (
+                    <Button
+                        variant='outline'
+                        className='mt-auto w-full'
+                        onClick={() => setOpen(true)}
+                    >
+                        Show all {rows.length} &rarr;
+                    </Button>
+                )}
+            </div>
 
             <Sheet open={open} onOpenChange={setOpen}>
                 {/* Keep the fixed sheet element itself non-scrolling and scroll

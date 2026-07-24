@@ -78,8 +78,10 @@ const KeychainCard = () => {
                 </CardHeader>
                 <CardContent
                     className={cn(
-                        (isLoading || isError || keys?.length === 0) &&
-                            'grid min-h-[12rem] flex-1 place-items-center'
+                        'flex-1',
+                        isLoading || isError || keys?.length === 0
+                            ? 'grid min-h-[12rem] place-items-center'
+                            : 'flex flex-col'
                     )}
                 >
                     {isError && !keys ? (
