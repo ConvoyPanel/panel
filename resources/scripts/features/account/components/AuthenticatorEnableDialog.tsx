@@ -204,14 +204,32 @@ const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
                         onSubmit={form.handleSubmit(data => confirm(data.code))}
                     >
                         <ResponsiveDialogBody className={'space-y-4'}>
-                            {isSetupVisible ? (
-                                <>
+                            {/*
+                             * This box owns the QR dimensions in both states, so
+                             * the skeleton cannot drift out of sync with the
+                             * real code and the dialog never resizes when the
+                             * setup material lands. The SVG is stretched to fill
+                             * rather than trusted at its intrinsic size — that
+                             * size is set server-side by Fortify and is free to
+                             * change without this file knowing.
+                             */}
+                            <div
+                                className={'mx-auto size-48 [&_svg]:size-full'}
+                            >
+                                {isSetupVisible ? (
                                     <div
-                                        className={'grid place-items-center'}
+                                        className={'size-full'}
                                         dangerouslySetInnerHTML={{
                                             __html: setup!.qrCode.svg,
                                         }}
                                     />
+                                ) : (
+                                    <Skeleton className={'size-full'} />
+                                )}
+                            </div>
+
+                            {isSetupVisible ? (
+                                <>
                                     <p className={'text-center'}>
                                         <strong>Secret Key:</strong>{' '}
                                         {setup!.secretKey}
@@ -275,7 +293,23 @@ const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
                                     />
                                 </>
                             ) : (
-                                <Skeleton className={'h-24 w-full'} />
+                                // Sized to match what replaces them: the OTP row
+                                // is six 32px slots either side of a 16px
+                                // separator, and the secret key placeholder sits
+                                // inside a real paragraph so it inherits that
+                                // line's height instead of dictating it.
+                                <>
+                                    <p className={'text-center'}>
+                                        <Skeleton
+                                            className={
+                                                'inline-block h-4 w-56 align-middle'
+                                            }
+                                        />
+                                    </p>
+                                    <div className={'flex justify-center'}>
+                                        <Skeleton className={'h-8 w-52'} />
+                                    </div>
+                                </>
                             )}
                         </ResponsiveDialogBody>
 
