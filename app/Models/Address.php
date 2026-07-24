@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int $address_block_id
  * @property ?int $server_id
  * @property AddressState $state
+ * @property ?AddressStateReason $state_reason
  * @property AddressVersion $version
  * @property string $ip
  * @property int $prefix_length
@@ -43,6 +45,7 @@ class Address extends Model
     {
         return [
             'state' => AddressState::class,
+            'state_reason' => AddressStateReason::class,
         ];
     }
 
@@ -95,6 +98,13 @@ class Address extends Model
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
+    }
+
+    /** Reserved by the panel because allocating it would break the subnet; operators can't free it. */
+    public function isSystemReserved(): bool
+    {
+        return $this->state === AddressState::Reserved
+            && $this->state_reason === AddressStateReason::System;
     }
 
     public function scopeWithIPv4(Builder $query): Builder

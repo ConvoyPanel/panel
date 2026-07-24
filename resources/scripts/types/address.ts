@@ -1,5 +1,5 @@
-import { Server } from '@/types/server.ts'
 import { AddressBlock } from '@/types/address-block.ts'
+import { Server } from '@/types/server.ts'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export enum AddressVersion {
@@ -13,11 +13,19 @@ export enum AddressState {
     Reserved = 'reserved',
 }
 
+export enum AddressStateReason {
+    /** Reserved by the panel (network, broadcast, gateway) — cannot be unreserved. */
+    System = 'system',
+    /** Reserved by an operator to hold it out of the pool. */
+    Admin = 'admin',
+}
+
 export interface Address {
     id: number
     addressBlockId: number
     serverId: number | null
     state: AddressState
+    stateReason: AddressStateReason | null
     version: AddressVersion
     ip: string
     prefixLength: number

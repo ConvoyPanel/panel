@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,7 +31,8 @@ class AddressFactory extends Factory
 
     /**
      * Keep state consistent with server_id: an address created with a server attached is 'assigned'
-     * unless a state was set explicitly.
+     * unless a state was set explicitly. A reserved address defaults to an operator hold, since
+     * system reservations are only ever created by the generator/allocator.
      */
     public function configure(): static
     {
@@ -38,7 +40,20 @@ class AddressFactory extends Factory
             if ($address->server_id !== null && $address->state === AddressState::Available) {
                 $address->state = AddressState::Assigned;
             }
+
+            if ($address->state === AddressState::Reserved && $address->state_reason === null) {
+                $address->state_reason = AddressStateReason::Admin;
+            }
         });
+    }
+
+    /** A structural address the panel reserved itself (network, broadcast, gateway). */
+    public function systemReserved(): self
+    {
+        return $this->state(fn () => [
+            'state' => AddressState::Reserved,
+            'state_reason' => AddressStateReason::System,
+        ]);
     }
 
     public function ipv6(): self

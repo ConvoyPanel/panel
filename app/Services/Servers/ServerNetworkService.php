@@ -174,7 +174,7 @@ class ServerNetworkService
             Address::query()
                 ->where('state', AddressState::Available)
                 ->whereIn('id', $addressesToAdd)
-                ->update(['server_id' => $server->id, 'state' => AddressState::Assigned]);
+                ->update(['server_id' => $server->id, 'state' => AddressState::Assigned, 'state_reason' => null]);
         }
 
         // Detach addresses no longer associated (assigned -> available).
@@ -182,7 +182,7 @@ class ServerNetworkService
             Address::query()
                 ->where('server_id', $server->id)
                 ->whereIn('id', $addressesToRemove)
-                ->update(['server_id' => null, 'state' => AddressState::Available]);
+                ->update(['server_id' => null, 'state' => AddressState::Available, 'state_reason' => null]);
         }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Actions\Ipam;
 
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
 use App\Models\AddressBlock;
 
@@ -50,6 +51,9 @@ class GenerateAddressesAction
                 'state' => isset($systemReserved[$ip])
                     ? AddressState::Reserved->value
                     : AddressState::Available->value,
+                'state_reason' => isset($systemReserved[$ip])
+                    ? AddressStateReason::System->value
+                    : null,
             ];
         }
 

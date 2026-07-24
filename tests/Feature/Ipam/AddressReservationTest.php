@@ -2,6 +2,7 @@
 
 use App\Actions\Ipam\GenerateAddressesAction;
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\AddressBlock;
@@ -34,10 +35,23 @@ it('reserves and unreserves an available address', function () {
     $address = Address::factory()->for($this->block)->create(['ip' => '192.0.2.50', 'state' => AddressState::Available]);
 
     $this->actingAs($this->admin)->postJson(reserveUrl($address))->assertSuccessful();
-    expect($address->refresh()->state)->toBe(AddressState::Reserved);
+    expect($address->refresh()->state)->toBe(AddressState::Reserved)
+        ->and($address->state_reason)->toBe(AddressStateReason::Admin);
 
     $this->actingAs($this->admin)->deleteJson(reserveUrl($address))->assertSuccessful();
-    expect($address->refresh()->state)->toBe(AddressState::Available);
+    expect($address->refresh()->state)->toBe(AddressState::Available)
+        ->and($address->state_reason)->toBeNull();
+});
+
+it('refuses to unreserve a system-reserved address', function () {
+    $address = Address::factory()->for($this->block)->systemReserved()->create(['ip' => '192.0.2.0']);
+
+    $this->actingAs($this->admin)->deleteJson(reserveUrl($address))
+        ->assertStatus(409)
+        ->assertJsonPath('code', 'address_reserved_by_system');
+
+    expect($address->refresh()->state)->toBe(AddressState::Reserved)
+        ->and($address->state_reason)->toBe(AddressStateReason::System);
 });
 
 it('refuses to reserve an assigned address', function () {
@@ -94,4 +108,10 @@ it('auto-reserves the network, broadcast and gateway addresses when generating a
         ->all();
 
     expect($reserved)->toBe(['198.51.100.0', '198.51.100.1', '198.51.100.255']); // network, gateway, broadcast
+
+    // ...and marks them as the panel's own reservations, so they can't be unreserved into the pool.
+    expect(Address::where('address_block_id', $block->id)
+        ->where('state', AddressState::Reserved)
+        ->where('state_reason', AddressStateReason::System)
+        ->count())->toBe(3);
 });

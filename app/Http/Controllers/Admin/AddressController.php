@@ -7,8 +7,10 @@ use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
 use App\Data\PaginationMeta;
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Exceptions\Service\Address\AddressNotAvailableException;
 use App\Exceptions\Service\Address\AddressNotReservedException;
+use App\Exceptions\Service\Address\AddressReservedBySystemException;
 use App\Http\Requests\Admin\Addresses\UpdateAddressRequest;
 use App\Jobs\Server\SyncNetworkSettingsJob;
 use App\Models\Address;
@@ -64,6 +66,7 @@ class AddressController
                 $validated['state'] = filled($validated['server_id'])
                     ? AddressState::Assigned
                     : AddressState::Available;
+                $validated['state_reason'] = null;
             }
 
             $address->update($validated);
@@ -96,7 +99,10 @@ class AddressController
             throw new AddressNotAvailableException;
         }
 
-        $address->update(['state' => AddressState::Reserved]);
+        $address->update([
+            'state' => AddressState::Reserved,
+            'state_reason' => AddressStateReason::Admin,
+        ]);
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);
@@ -108,7 +114,13 @@ class AddressController
             throw new AddressNotReservedException;
         }
 
-        $address->update(['state' => AddressState::Available]);
+        // Network / broadcast / gateway are reserved by the panel, not by an operator — freeing them
+        // would let the allocator hand a structural address to a VM.
+        if ($address->isSystemReserved()) {
+            throw new AddressReservedBySystemException;
+        }
+
+        $address->update(['state' => AddressState::Available, 'state_reason' => null]);
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);

@@ -12,7 +12,12 @@ import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
+import {
+    Address,
+    AddressState,
+    AddressStateReason,
+    PaginatedAddresses,
+} from '@/types/address.ts'
 import { Server } from '@/types/server.ts'
 import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute, useParams } from '@tanstack/react-router'
@@ -31,6 +36,28 @@ import {
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
+
+const isSystemReserved = (address: Address) =>
+    address.state === AddressState.Reserved &&
+    address.stateReason === AddressStateReason.System
+
+/**
+ * Spell out *why* an address is reserved. A system reservation (network, broadcast, gateway) can't
+ * be freed, so saying only "reserved" leaves an operator hunting for a missing Unreserve action.
+ */
+const stateLabel = (address: Address) =>
+    isSystemReserved(address) ? 'reserved · system' : address.state
+
+const AddressStateBadge = ({ address }: { address: Address }) => (
+    <Badge
+        variant={
+            address.state === AddressState.Reserved ? 'outline' : 'secondary'
+        }
+        className={'capitalize'}
+    >
+        {stateLabel(address)}
+    </Badge>
+)
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'
@@ -105,11 +132,14 @@ function BlockIndex() {
                     Reserve
                 </DropdownMenuItem>
             )}
-            {address.state === AddressState.Reserved && (
-                <DropdownMenuItem onClick={() => toggleReservation(address)}>
-                    Unreserve
-                </DropdownMenuItem>
-            )}
+            {address.state === AddressState.Reserved &&
+                !isSystemReserved(address) && (
+                    <DropdownMenuItem
+                        onClick={() => toggleReservation(address)}
+                    >
+                        Unreserve
+                    </DropdownMenuItem>
+                )}
             <DropdownMenuItem
                 variant={'destructive'}
                 onClick={() => openModal('delete', address)}
@@ -157,21 +187,7 @@ function BlockIndex() {
             meta: {
                 skeletonWidth: '5rem',
             },
-            cell: ({ cell }) => {
-                const state = cell.getValue<AddressState>()
-                return (
-                    <Badge
-                        variant={
-                            state === AddressState.Reserved
-                                ? 'outline'
-                                : 'secondary'
-                        }
-                        className={'capitalize'}
-                    >
-                        {state}
-                    </Badge>
-                )
-            },
+            cell: ({ row }) => <AddressStateBadge address={row.original} />,
         },
         {
             header: 'Server',
@@ -232,17 +248,7 @@ function BlockIndex() {
                                     </ItemDescription>
                                 )}
                                 <div className={'flex flex-wrap gap-2'}>
-                                    <Badge
-                                        variant={
-                                            address.state ===
-                                            AddressState.Reserved
-                                                ? 'outline'
-                                                : 'secondary'
-                                        }
-                                        className={'capitalize'}
-                                    >
-                                        {address.state}
-                                    </Badge>
+                                    <AddressStateBadge address={address} />
                                     {address.server && (
                                         <Badge
                                             variant={'secondary'}

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Models\Address;
@@ -192,7 +193,9 @@ it('mints fresh addresses from a sparse IPv4 block instead of pre-materializing 
     expect($allocated->pluck('ip')->all())->toBe(['10.0.0.1', '10.0.0.2', '10.0.0.3']);
     // 3 minted + the reserved network row.
     expect(Address::where('address_block_id', $block->id)->count())->toBe(4);
-    expect(Address::where('ip', '10.0.0.0')->first()->state)->toBe(AddressState::Reserved);
+    $network = Address::where('ip', '10.0.0.0')->first();
+    expect($network->state)->toBe(AddressState::Reserved)
+        ->and($network->state_reason)->toBe(AddressStateReason::System);
 });
 
 it('mints from a sparse IPv6 block without materializing the address space', function () {

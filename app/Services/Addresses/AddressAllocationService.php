@@ -3,6 +3,7 @@
 namespace App\Services\Addresses;
 
 use App\Enums\Network\AddressState;
+use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Models\Address;
@@ -187,9 +188,9 @@ class AddressAllocationService
             }
 
             DB::insert(
-                'INSERT INTO addresses (address_block_id, ip, prefix_length, server_id, state)
-                 VALUES (?, ?::inet, ?, NULL, ?) ON CONFLICT (address_block_id, ip) DO NOTHING',
-                [$block->id, $ip, $block->prefix_length_to, AddressState::Reserved->value],
+                'INSERT INTO addresses (address_block_id, ip, prefix_length, server_id, state, state_reason)
+                 VALUES (?, ?::inet, ?, NULL, ?, ?) ON CONFLICT (address_block_id, ip) DO NOTHING',
+                [$block->id, $ip, $block->prefix_length_to, AddressState::Reserved->value, AddressStateReason::System->value],
             );
         }
     }
