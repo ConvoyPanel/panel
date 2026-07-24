@@ -1,12 +1,15 @@
-import { nodeSchema } from '@/features/nodes/api.ts'
-import SectionRow from '@/features/nodes/components/Create/SectionRow.tsx'
 import { IconCpu, IconDeviceSdCard } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 import { ReactNode, useState } from 'react'
 import { useWatch } from 'react-hook-form'
-import { z } from 'zod'
 
-import { Card } from '@/components/ui/Card'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/Card'
 import {
     FormControl,
     FormField,
@@ -90,14 +93,14 @@ const MemoryAmountField = () => {
                             />
                         </FormControl>
                         {/* py-0 overrides the addon's default py-1.5, which
-                                would make this 36px tall inside the h-8 group. */}
+                            would make this 36px tall inside the h-8 group. */}
                         <InputGroupAddon
                             align={'inline-end'}
                             className={'py-0'}
                         >
                             {/* nova's smallest toggle size is h-7, still too
-                                    tall for an addon in an h-8 group, so the item
-                                    height/padding is overridden down to h-5. */}
+                                tall for an addon in an h-8 group, so the item
+                                height/padding is overridden down to h-5. */}
                             <ToggleGroup
                                 spacing={0}
                                 multiple={false}
@@ -130,9 +133,11 @@ const MemoryAmountField = () => {
 }
 
 const MemoryResult = () => {
-    const values = useWatch<z.infer<typeof nodeSchema>>()
-    const memBytes = Number(values.memory) * 1024 * 1024
-    const over = Number(values.memoryOverallocate)
+    const memory = useWatch({ name: 'memory' })
+    const memoryOverallocate = useWatch({ name: 'memoryOverallocate' })
+
+    const memBytes = Number(memory) * 1024 * 1024
+    const over = Number(memoryOverallocate)
 
     const hasMemory = Number.isFinite(memBytes) && memBytes > 0
     const overPct = Number.isFinite(over) ? over : 0
@@ -205,12 +210,19 @@ const ProcessorTag = () => {
     )
 }
 
-const SpecificationsSettingsForm = () => {
-    return (
-        <SectionRow
-            title={'Capacity'}
-            description={'Drives Convoy’s placement and overcommit checks.'}
-        >
+/**
+ * The node's declared capacity. Identical on create and edit — a saved node's
+ * numbers mean exactly what a new node's do — so this section takes no mode.
+ */
+const SpecificationsSection = () => (
+    <Card className={'@container'}>
+        <CardHeader>
+            <CardTitle>Capacity</CardTitle>
+            <CardDescription>
+                Drives Convoy’s placement and overcommit checks.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
             <div>
                 <GroupHeader
                     icon={<IconCpu className={'size-4'} />}
@@ -221,7 +233,7 @@ const SpecificationsSettingsForm = () => {
                     sockets and cores are recorded for reference. The
                     descriptions say so, since three peer number boxes otherwise
                     imply all three carry equal weight. */}
-                <div className={'grid grid-cols-3 gap-3'}>
+                <div className={'grid grid-cols-1 gap-3 @lg:grid-cols-3'}>
                     <InputForm
                         name={'socketCount'}
                         label={'Sockets'}
@@ -245,12 +257,16 @@ const SpecificationsSettingsForm = () => {
                 </div>
             </div>
 
-            <div className={'mt-3'}>
+            <div className={'mt-5'}>
                 <GroupHeader
                     icon={<IconDeviceSdCard className={'size-4'} />}
                     title={'Memory'}
                 />
-                <div className={'grid gap-3 sm:grid-cols-[1fr_10rem]'}>
+                <div
+                    className={
+                        'grid grid-cols-1 gap-3 @lg:grid-cols-[1fr_10rem]'
+                    }
+                >
                     <MemoryAmountField />
                     <InputForm
                         name={'memoryOverallocate'}
@@ -260,8 +276,8 @@ const SpecificationsSettingsForm = () => {
                 </div>
                 <MemoryResult />
             </div>
-        </SectionRow>
-    )
-}
+        </CardContent>
+    </Card>
+)
 
-export default SpecificationsSettingsForm
+export default SpecificationsSection

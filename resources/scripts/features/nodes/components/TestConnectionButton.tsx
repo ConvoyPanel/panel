@@ -1,3 +1,8 @@
+import {
+    type ConnectionTestForm,
+    testConnection,
+} from '@/features/nodes/api.ts'
+import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { ConnectionResult } from '@/types/node.ts'
 import {
@@ -9,12 +14,6 @@ import {
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
-
-import {
-    type ConnectionTestForm,
-    testConnection,
-} from '@/features/nodes/api.ts'
-import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -71,17 +70,17 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
                         {result.success ? (
                             <>
                                 <IconCheck
-                                    className={'size-5 text-muted-foreground'}
+                                    className={'text-muted-foreground size-5'}
                                 />
 
-                                <p className={'text-sm text-muted-foreground'}>
+                                <p className={'text-muted-foreground text-sm'}>
                                     Connection succeeded
                                 </p>
                             </>
                         ) : (
                             <>
-                                <IconX className={'size-5 text-destructive'} />
-                                <p className={'text-sm text-destructive'}>
+                                <IconX className={'text-destructive size-5'} />
+                                <p className={'text-destructive text-sm'}>
                                     Connection failed
                                 </p>
                             </>
@@ -103,7 +102,9 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
             <ResponsiveDialog open={open} onOpenChange={setOpen}>
                 <ResponsiveDialogContent>
                     <ResponsiveDialogHeader>
-                        <ResponsiveDialogTitle>{errorCopy.title}</ResponsiveDialogTitle>
+                        <ResponsiveDialogTitle>
+                            {errorCopy.title}
+                        </ResponsiveDialogTitle>
                         <ResponsiveDialogDescription>
                             {errorCopy.description}
                         </ResponsiveDialogDescription>
@@ -112,7 +113,7 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
                         <details className={'group/details'}>
                             <summary
                                 className={
-                                    'flex cursor-pointer list-none items-center gap-1 text-sm text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden'
+                                    'text-muted-foreground hover:text-foreground flex cursor-pointer list-none items-center gap-1 text-sm [&::-webkit-details-marker]:hidden'
                                 }
                             >
                                 <IconChevronRight
@@ -124,7 +125,7 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
                             </summary>
                             <p
                                 className={
-                                    'mt-2 font-mono text-xs leading-relaxed break-words text-muted-foreground'
+                                    'text-muted-foreground mt-2 font-mono text-xs leading-relaxed break-words'
                                 }
                             >
                                 {result?.errorMessage}
@@ -133,9 +134,7 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
                     </ResponsiveDialogBody>
                     <ResponsiveDialogFooter>
                         <ResponsiveDialogClose
-                            render={
-                                <Button variant={'outline'}>Close</Button>
-                            }
+                            render={<Button variant={'outline'}>Close</Button>}
                         />
                         <Button onClick={askChatGPT}>Ask ChatGPT</Button>
                     </ResponsiveDialogFooter>

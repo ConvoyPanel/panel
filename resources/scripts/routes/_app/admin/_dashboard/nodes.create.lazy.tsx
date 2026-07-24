@@ -1,11 +1,10 @@
 import { createNode, nodeSchema } from '@/features/nodes/api.ts'
-import ConnectionSettingsForm from '@/features/nodes/components/Create/ConnectionSettingsForm.tsx'
-import GeneralSettingsForm from '@/features/nodes/components/Create/GeneralSettingsForm.tsx'
-import SpecificationsSettingsForm from '@/features/nodes/components/Create/SpecificationsSettingsForm.tsx'
-import { cn } from '@/utils'
+import NodeFormToolbar from '@/features/nodes/components/NodeFormToolbar.tsx'
+import ConnectionSection from '@/features/nodes/components/sections/ConnectionSection.tsx'
+import GeneralSection from '@/features/nodes/components/sections/GeneralSection.tsx'
+import SpecificationsSection from '@/features/nodes/components/sections/SpecificationsSection.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useHeadroom } from '@mantine/hooks'
 import { IconCheck } from '@tabler/icons-react'
 import { Link, createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
@@ -23,12 +22,6 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes/create')(
 
 function CreateNodePage() {
     const navigate = useNavigate()
-
-    // Headroom: the toolbar gets out of the way on the way down and comes back
-    // the moment you scroll up, so the actions are always a flick away without
-    // permanently eating vertical space. fixedAt keeps it put near the top,
-    // where it has not started overlapping anything yet.
-    const pinned = useHeadroom({ fixedAt: 120 })
 
     const form = useForm<z.input<typeof nodeSchema>>({
         resolver: zodResolver(nodeSchema),
@@ -75,67 +68,38 @@ function CreateNodePage() {
 
     return (
         <Form {...form}>
-            <form
-                onSubmit={form.handleSubmit(submit as any)}
-                className={'w-full'}
-            >
-                {/*
-                 * Opaque so rows can't show through while scrolling, and mixed
-                 * to AppLayout's page tint (bg-muted/40 over bg-background)
-                 * rather than bg-background — a plain `bg-muted/40` here would
-                 * composite over the page's own tint and read as a darker band.
-                 * `in srgb` because that is where the browser alpha-composites
-                 * the page's own bg-muted/40; mixing in oklab lands elsewhere.
-                 *
-                 * top-14 clears the global Header, which is `sticky top-0 h-14`
-                 * below sm; from sm up it is `static`, so we pin to 0 there.
-                 */}
-                <div
-                    className={cn(
-                        'sticky top-14 z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b bg-[color-mix(in_srgb,var(--muted)_40%,var(--background))] py-4 transition-transform duration-200 ease-out motion-reduce:transition-none sm:top-0',
-                        // Unpinned it slides up by exactly its own height, which
-                        // parks it behind the (opaque, z-30) header on mobile and
-                        // off the top of the viewport on desktop.
-                        pinned ? 'translate-y-0' : '-translate-y-full'
-                    )}
-                >
-                    {/* basis-36 is the title's floor, not its width: it still
-                        grows to fill the row. Below that the flex line can't fit
-                        the actions, so they wrap to their own row instead of
-                        crushing the title — one row on a phone, two on a 320px
-                        screen, without a breakpoint guess. */}
-                    <div className={'min-w-0 grow basis-36'}>
-                        <h1 className={'text-lg font-semibold tracking-tight'}>
-                            Add a new node
-                        </h1>
-                        {/* Hidden below sm: on a phone this orienting line just
-                            squeezes the title against the actions, and the bar is
-                            sticky, so every row it costs is permanent. */}
-                        <p
-                            className={
-                                'text-muted-foreground hidden text-sm sm:block'
-                            }
-                        >
-                            Connect a Proxmox host and describe its capacity.
-                        </p>
-                    </div>
-                    <div className={'ml-auto flex shrink-0 items-center gap-2'}>
-                        <Link
-                            to={'/admin/nodes'}
-                            className={buttonVariants({ variant: 'ghost' })}
-                        >
-                            Cancel
-                        </Link>
-                        <FormButton className={'flex'}>
-                            Add node <IconCheck className={'size-4'} />
-                        </FormButton>
-                    </div>
-                </div>
+            <form onSubmit={form.handleSubmit(submit as any)}>
+                {/* Capped so the fields keep a readable measure: AppLayout gives
+                    the page up to 1600px, and a form stretched that far pulls
+                    each label away from its own control. */}
+                <div className={'mx-auto w-full max-w-4xl'}>
+                    <NodeFormToolbar
+                        title={'Add a new node'}
+                        subtitle={
+                            'Connect a Proxmox host and describe its capacity.'
+                        }
+                        actions={
+                            <>
+                                <Link
+                                    to={'/admin/nodes'}
+                                    className={buttonVariants({
+                                        variant: 'ghost',
+                                    })}
+                                >
+                                    Cancel
+                                </Link>
+                                <FormButton className={'flex'}>
+                                    Add node <IconCheck className={'size-4'} />
+                                </FormButton>
+                            </>
+                        }
+                    />
 
-                <div className={'divide-y'}>
-                    <GeneralSettingsForm />
-                    <ConnectionSettingsForm />
-                    <SpecificationsSettingsForm />
+                    <div className={'space-y-4 pt-4'}>
+                        <GeneralSection />
+                        <ConnectionSection mode={'create'} />
+                        <SpecificationsSection />
+                    </div>
                 </div>
             </form>
         </Form>

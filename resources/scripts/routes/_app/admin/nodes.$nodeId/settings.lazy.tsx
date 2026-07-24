@@ -1,14 +1,16 @@
-import AnchorPicker from '@/features/anchors/components/AnchorPicker.tsx'
 import OveragePenaltyFields from '@/features/bandwidth/components/OveragePenaltyFields.tsx'
 import { overagePenaltyDefaults } from '@/features/bandwidth/overage-penalty.ts'
-import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
-import TestConnectionButton from '@/features/nodes/components/Create/TestConnectionButton.tsx'
 import {
     nodeQueries,
     nodeUpdateSchema,
     updateNode,
     useNode,
 } from '@/features/nodes/api.ts'
+import NodeFormToolbar from '@/features/nodes/components/NodeFormToolbar.tsx'
+import NodeStatusIndicator from '@/features/nodes/components/NodeStatusIndicator.tsx'
+import ConnectionSection from '@/features/nodes/components/sections/ConnectionSection.tsx'
+import GeneralSection from '@/features/nodes/components/sections/GeneralSection.tsx'
+import SpecificationsSection from '@/features/nodes/components/sections/SpecificationsSection.tsx'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Node } from '@/types/node.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -21,6 +23,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { Button } from '@/components/ui/Button'
 import {
     Card,
     CardContent,
@@ -29,9 +32,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
-import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/settings')({
     component: NodeSettings,
@@ -103,151 +104,79 @@ function NodeSettings() {
 
     if (isLoading || !node) {
         return (
-            <>
-                <Heading>Settings</Heading>
+            <div className={'mx-auto w-full max-w-4xl space-y-4'}>
+                <Skeleton className={'h-14'} />
                 <Skeleton className={'h-96'} />
-            </>
+            </div>
         )
     }
 
+    const { isDirty } = form.formState
+
     return (
-        <div className={'@container space-y-4'}>
-            <Heading>Settings</Heading>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(submit as any)}>
-                    <div className={'space-y-4'}>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>General</CardTitle>
-                                <CardDescription>
-                                    Rename the node and move it between
-                                    locations.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent
-                                className={
-                                    'grid grid-cols-1 gap-3 @md:grid-cols-2'
-                                }
-                            >
-                                <InputForm
-                                    name={'displayName'}
-                                    label={'Display Name'}
-                                />
-                                <LocationPicker />
-                            </CardContent>
-                        </Card>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(submit as any)}>
+                {/* Capped so the fields keep a readable measure: AppLayout gives
+                    the page up to 1600px, and a form stretched that far pulls
+                    each label away from its own control. */}
+                <div className={'mx-auto w-full max-w-4xl'}>
+                    <NodeFormToolbar
+                        title={'Settings'}
+                        subtitle={
+                            <span className={'flex items-center gap-2'}>
+                                <span className={'truncate'}>
+                                    {node.fqdn}:{node.port}
+                                </span>
+                                <span aria-hidden className={'opacity-40'}>
+                                    •
+                                </span>
+                                {/* Reads `node.status`, already on the record
+                                    this page loads — no extra request — so the
+                                    connection test below reads as confirmation
+                                    rather than the only signal on the page. */}
+                                <NodeStatusIndicator node={node} />
+                            </span>
+                        }
+                        actions={
+                            <>
+                                {/* Only offered once there is something to
+                                    discard, so the bar stays quiet at rest. */}
+                                {isDirty && (
+                                    <Button
+                                        type={'button'}
+                                        variant={'ghost'}
+                                        onClick={() =>
+                                            form.reset(defaultsFromNode(node))
+                                        }
+                                    >
+                                        Discard
+                                    </Button>
+                                )}
+                                <FormButton
+                                    className={'flex'}
+                                    disabled={!isDirty}
+                                >
+                                    Save changes{' '}
+                                    <IconCheck className={'size-4'} />
+                                </FormButton>
+                            </>
+                        }
+                    />
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Connection</CardTitle>
-                                <CardDescription>
-                                    Update Proxmox API connection details. Leave
-                                    token fields blank to keep the existing
-                                    token.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className={'space-y-4'}>
-                                <div
-                                    className={
-                                        'grid grid-cols-1 gap-3 @md:grid-cols-[1fr_6rem_1fr]'
-                                    }
-                                >
-                                    <InputForm name={'fqdn'} label={'FQDN'} />
-                                    <InputForm
-                                        name={'port'}
-                                        label={'Port'}
-                                        type={'number'}
-                                    />
-                                    <InputForm
-                                        name={'name'}
-                                        label={'Proxmox Node Name'}
-                                    />
-                                </div>
-                                <div
-                                    className={
-                                        'grid grid-cols-1 gap-3 @md:grid-cols-2'
-                                    }
-                                >
-                                    <InputForm
-                                        name={'tokenId'}
-                                        label={'Token ID'}
-                                        autoComplete={'off'}
-                                    />
-                                    <InputForm
-                                        name={'tokenSecret'}
-                                        label={'Token Secret'}
-                                        type={'password'}
-                                        autoComplete={'off'}
-                                    />
-                                </div>
-                                <CheckboxForm
-                                    name={'verifyTls'}
-                                    label={'Verify TLS Certificate'}
-                                    description={
-                                        'Only disable TLS verification when this node is reachable through a trusted private path.'
-                                    }
-                                />
-                                <AnchorPicker />
-                                <TestConnectionButton nodeId={numericNodeId} />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Specifications</CardTitle>
-                                <CardDescription>
-                                    These values drive Convoy capacity checks
-                                    and placement decisions.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className={'space-y-4'}>
-                                <div
-                                    className={
-                                        'grid grid-cols-1 gap-3 @md:grid-cols-3'
-                                    }
-                                >
-                                    <InputForm
-                                        name={'socketCount'}
-                                        label={'Sockets'}
-                                        type={'number'}
-                                    />
-                                    <InputForm
-                                        name={'coreCount'}
-                                        label={'Cores'}
-                                        type={'number'}
-                                    />
-                                    <InputForm
-                                        name={'cpuCount'}
-                                        label={'CPUs'}
-                                        type={'number'}
-                                    />
-                                </div>
-                                <div
-                                    className={
-                                        'grid grid-cols-1 gap-3 @md:grid-cols-2'
-                                    }
-                                >
-                                    <InputForm
-                                        name={'memory'}
-                                        label={'Memory (MiB)'}
-                                        type={'number'}
-                                    />
-                                    <InputForm
-                                        name={'memoryOverallocate'}
-                                        label={'Memory Overallocate (%)'}
-                                        type={'number'}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
+                    <div className={'space-y-4 pt-4'}>
+                        <GeneralSection />
+                        <ConnectionSection
+                            mode={'edit'}
+                            nodeId={numericNodeId}
+                        />
+                        <SpecificationsSection />
 
                         <Card>
                             <CardHeader>
                                 <CardTitle>Bandwidth</CardTitle>
                                 <CardDescription>
-                                    What happens to a server on this node once
-                                    it exceeds its monthly bandwidth quota.
-                                    Servers can override this individually.
+                                    Applied when a server on this node passes
+                                    its monthly quota. A server can override it.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -258,14 +187,8 @@ function NodeSettings() {
                             </CardContent>
                         </Card>
                     </div>
-
-                    <div className={'mt-4 flex justify-end'}>
-                        <FormButton className={'flex'}>
-                            Save changes <IconCheck className={'size-4'} />
-                        </FormButton>
-                    </div>
-                </form>
-            </Form>
-        </div>
+                </div>
+            </form>
+        </Form>
     )
 }
