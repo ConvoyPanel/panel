@@ -19,6 +19,7 @@ yarn-error.log
 # explicit list rather than ignoring /.claude wholesale.
 /.claude/settings.local.json
 /.claude/projects
+/.claude/memory
 /.claude/worktrees
 /.claude/*.lock
 /supervisord.log
