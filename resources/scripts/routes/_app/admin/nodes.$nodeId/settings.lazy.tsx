@@ -123,12 +123,9 @@ function NodeSettings() {
                     <NodeFormToolbar
                         title={'Settings'}
                         subtitle={
-                            <span className={'flex items-center gap-2'}>
+                            <span className={'flex items-center gap-3'}>
                                 <span className={'truncate'}>
                                     {node.fqdn}:{node.port}
-                                </span>
-                                <span aria-hidden className={'opacity-40'}>
-                                    •
                                 </span>
                                 {/* Reads `node.status`, already on the record
                                     this page loads — no extra request — so the
