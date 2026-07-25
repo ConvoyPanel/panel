@@ -40,12 +40,24 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
             if (!result.success) {
                 setOpen(true)
             } else {
-                form.setValue('socketCount', result.data!.cpu.socketCount)
-                form.setValue('coreCount', result.data!.cpu.coreCount)
-                form.setValue('cpuCount', result.data!.cpu.cpuCount)
+                /* shouldDirty because the settings page gates Save on the form
+                   being dirty: without it the test writes the host's real
+                   numbers into the fields while Save stays disabled and no
+                   Discard appears, so what is on screen can neither be saved
+                   nor reverted. */
+                const filled = { shouldDirty: true }
+
+                form.setValue(
+                    'socketCount',
+                    result.data!.cpu.socketCount,
+                    filled
+                )
+                form.setValue('coreCount', result.data!.cpu.coreCount, filled)
+                form.setValue('cpuCount', result.data!.cpu.cpuCount, filled)
                 form.setValue(
                     'memory',
-                    Math.floor(result.data!.memory.total / (1024 * 1024))
+                    Math.floor(result.data!.memory.total / (1024 * 1024)),
+                    filled
                 )
             }
         } catch (e) {
