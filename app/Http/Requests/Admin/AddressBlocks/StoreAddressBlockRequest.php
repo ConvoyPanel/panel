@@ -2,13 +2,27 @@
 
 namespace App\Http\Requests\Admin\AddressBlocks;
 
+use App\Enums\Network\AddressVersion;
+use App\Http\Requests\Admin\AddressBlocks\Concerns\ValidatesBlockGeometry;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\AddressBlock;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
 use IPLib\Factory as IPFactory;
 
 class StoreAddressBlockRequest extends BaseApiRequest
 {
+    use ValidatesBlockGeometry;
+
+    public function withValidator(Validator $validator): void
+    {
+        $version = AddressVersion::tryFrom($this->string('version')->toString());
+
+        if ($version !== null) {
+            $this->validateBlockGeometry($validator, $version);
+        }
+    }
+
     protected function prepareForValidation(): void
     {
         $baseIp = $this->string('base_ip')->toString();

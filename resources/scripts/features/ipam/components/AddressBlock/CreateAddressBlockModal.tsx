@@ -48,7 +48,10 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
             gateway: '',
             macAddress: '',
             prefixLengthFrom: 24,
-            prefixLengthTo: 24,
+            // Hand out individual addresses by default. Defaulting the output prefix to the source
+            // prefix builds a block with exactly one unit — the whole /24 delegated at once — which
+            // is a real configuration but not the one most operators are reaching for.
+            prefixLengthTo: 32,
         },
     })
 

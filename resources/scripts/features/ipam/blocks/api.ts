@@ -83,6 +83,36 @@ export const addressBlockSchema = z
                 })
             }
         }
+
+        // Prefix geometry. The per-field bounds only cap each value at 128 in isolation, which
+        // lets through an IPv4 /64 and an inverted range — both of which reach a negative bit
+        // shift in GenerateAddressesAction and 500 rather than failing validation.
+        const maxPrefix = data.version === AddressVersion.IPv4 ? 32 : 128
+
+        if (data.prefixLengthFrom > maxPrefix) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Source prefix length cannot exceed ${maxPrefix} for ${data.version}`,
+                path: ['prefixLengthFrom'],
+            })
+        }
+
+        if (data.prefixLengthTo > maxPrefix) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Output prefix length cannot exceed ${maxPrefix} for ${data.version}`,
+                path: ['prefixLengthTo'],
+            })
+        }
+
+        if (data.prefixLengthTo < data.prefixLengthFrom) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                    'Output prefix length must be at least the source prefix length',
+                path: ['prefixLengthTo'],
+            })
+        }
     })
 
 // AddressBlockController is served under both the panel (`/api/admin`) and

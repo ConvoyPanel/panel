@@ -3,13 +3,26 @@
 namespace App\Http\Requests\Admin\AddressBlocks;
 
 use App\Enums\Network\AddressVersion;
+use App\Http\Requests\Admin\AddressBlocks\Concerns\ValidatesBlockGeometry;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\AddressBlock;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
 use IPLib\Factory as IPFactory;
 
 class UpdateAddressBlockRequest extends BaseApiRequest
 {
+    use ValidatesBlockGeometry;
+
+    public function withValidator(Validator $validator): void
+    {
+        /** @var AddressBlock $addressBlock */
+        $addressBlock = $this->parameter('address_block', AddressBlock::class);
+
+        // Version is immutable on update, so the block's own value is authoritative.
+        $this->validateBlockGeometry($validator, $addressBlock->version);
+    }
+
     protected function prepareForValidation(): void
     {
         $baseIp = $this->string('base_ip')->toString();

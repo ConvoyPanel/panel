@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use IPLib\Factory as IPFactory;
+use IPLib\Range\RangeInterface;
 
 /**
  * @property int $id
@@ -109,18 +110,53 @@ class AddressBlock extends Model
         return 1 << $exponent;
     }
 
+    /** The first address of the block's overall range — its network address for v4. */
+    public function firstAllocatableAddress(): string
+    {
+        return $this->blockRange()->getStartAddress()->toString();
+    }
+
     /** The last address of the block's overall range (its broadcast for v4), the ceiling for minting. */
     public function lastAllocatableAddress(): string
     {
-        return IPFactory::parseRangeString($this->base_ip.'/'.$this->prefix_length_from)
-            ->getEndAddress()
-            ->toString();
+        return $this->blockRange()->getEndAddress()->toString();
     }
 
     /**
-     * Addresses that must never be handed to a VM and are auto-reserved: the network and broadcast
-     * addresses (IPv4 blocks larger than a point-to-point /31, per RFC 3021), the subnet-router
-     * anycast (IPv6 base), and the configured gateway.
+     * The allocatable unit containing $ip — that is, $ip masked down to the block's output prefix.
+     * When the block hands out individual addresses (/32, /128) every unit is one address and this
+     * is the identity; when it delegates sub-blocks it answers "which sub-block owns this address".
+     */
+    public function unitContaining(string $ip): ?string
+    {
+        return IPFactory::parseRangeString($ip.'/'.$this->prefix_length_to)
+            ?->getStartAddress()
+            ->toString();
+    }
+
+    public function containsAddress(string $ip): bool
+    {
+        $address = IPFactory::parseAddressString($ip);
+
+        return $address !== null && $this->blockRange()->contains($address);
+    }
+
+    /**
+     * Addresses that must never be handed to a VM and are auto-reserved. Returned at *unit*
+     * granularity — generation and minting only ever materialize unit boundaries, so a reservation
+     * that isn't itself a unit address silently matches nothing.
+     *
+     * Which addresses qualify depends on what a unit means for this block:
+     *
+     *  - **Host allocation** (output prefix /32 or /128): units are individual addresses on a
+     *    shared segment, so that segment's network, broadcast and subnet-router anycast are real
+     *    hazards and are withheld.
+     *  - **Subnet delegation** (output prefix shorter than a single address): each unit is a routed
+     *    prefix whose holder manages its own network and broadcast internally, so the parent's are
+     *    not ours to withhold — withholding them would lock a /24 → /24 block entirely.
+     *
+     * The gateway is a hazard under both: it lives inside exactly one unit, and handing that unit
+     * over hands over the gateway with it.
      *
      * @return list<string>
      */
@@ -128,20 +164,40 @@ class AddressBlock extends Model
     {
         $reserved = [];
 
-        if ($this->version === AddressVersion::IPv4) {
-            if ($this->prefix_length_from <= 30) {
-                $reserved[] = $this->base_ip;                  // network
-                $reserved[] = $this->lastAllocatableAddress(); // broadcast
+        if ($this->prefix_length_to === $this->maxPrefixLength()) {
+            if ($this->version === AddressVersion::IPv4) {
+                // RFC 3021: a /31 point-to-point link has neither a network nor a broadcast address.
+                if ($this->prefix_length_from <= 30) {
+                    $reserved[] = $this->firstAllocatableAddress(); // network
+                    $reserved[] = $this->lastAllocatableAddress();  // broadcast
+                }
+            } else {
+                $reserved[] = $this->firstAllocatableAddress();     // subnet-router anycast
             }
-        } else {
-            $reserved[] = $this->base_ip;                      // IPv6 subnet-router anycast
         }
 
-        if ($this->gateway) {
-            $reserved[] = $this->gateway;
+        // A gateway outside the block (an upstream router on a different prefix) owns no unit here,
+        // so masking it would invent a reservation for an address this block never hands out.
+        if ($this->gateway && $this->containsAddress($this->gateway)) {
+            $gatewayUnit = $this->unitContaining($this->gateway);
+
+            if ($gatewayUnit !== null) {
+                $reserved[] = $gatewayUnit;
+            }
         }
 
         return array_values(array_unique($reserved));
+    }
+
+    private function blockRange(): RangeInterface
+    {
+        $range = IPFactory::parseRangeString($this->base_ip.'/'.$this->prefix_length_from);
+
+        if ($range === null) {
+            throw new \RuntimeException("Address block {$this->id} has an unparseable range ({$this->base_ip}/{$this->prefix_length_from}).");
+        }
+
+        return $range;
     }
 
     protected function macAddress(): Attribute

@@ -126,11 +126,15 @@ class AddressAllocationService
         // Serialize cursor advancement for this block (held until the outer transaction commits).
         DB::table('address_blocks')->where('id', $block->id)->lockForUpdate()->first();
 
-        // Materialize the low system-reserved addresses (network / gateway) as reserved rows so
-        // minting — which appends after MAX(ip) — starts above them and never hands them out. The
+        // Materialize the low system-reserved units (network / the gateway's unit) as reserved rows
+        // so minting — which appends after MAX(ip) — starts above them and never hands them out. The
         // broadcast (block ceiling) is intentionally not materialized: it sits at the very top, so a
         // reserved row there would make MAX(ip) the ceiling and stall minting. At sparse-block scale
         // (2^16+ addresses) minting never climbs near the broadcast anyway.
+        //
+        // Caveat, unchanged from when this only handled the raw gateway: a gateway high up in a
+        // sparse block pushes MAX(ip) up with it, so the units below it are skipped rather than
+        // minted. Gateways sit at the bottom of a prefix in practice (.1, ::1).
         $this->reserveLowSystemAddresses($block);
 
         $stride = $block->unitStride();
