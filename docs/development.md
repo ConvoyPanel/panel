@@ -69,17 +69,13 @@ feature branch, then `ddev snapshot restore` when you switch to a bug fix.
 
 Run an agent against Convoy in a throwaway Linux microVM — its own Docker daemon,
 database, and volumes, isolated from your host ddev. A mistake costs only `sbx rm`.
-Two committed kits (full details in [`.sbx/README.md`](../.sbx/README.md)):
-`.sbx/dev` boots the ddev stack, `.sbx/tailscale` joins your tailnet.
+One committed kit (full details in [`.sbx/README.md`](../.sbx/README.md)):
+`.sbx/dev` boots the ddev stack.
 
 ### 1. Start it
 
 ```sh
-# ddev only
 sbx run --kit .sbx/dev claude
-
-# ddev + Tailscale — list tailscale FIRST so it isn't stuck behind ddev's image pull
-sbx run --kit .sbx/tailscale --kit .sbx/dev claude
 ```
 
 Any agent works in place of `claude`. The first run installs ddev (slow once);
@@ -103,7 +99,7 @@ ddev exec php artisan test
 Add to your **gitignored `.env`**, then seed:
 
 ```dotenv
-PROXMOX_FQDN=10.0.0.10          # a tailnet IP (100.x) if you're using the tailscale kit
+PROXMOX_FQDN=10.0.0.10          # an address the sandbox can reach
 PROXMOX_TOKEN_ID=root@pam!convoy
 PROXMOX_TOKEN_SECRET=xxxxxxxx
 # PROXMOX_PORT=8006
@@ -117,21 +113,11 @@ ddev exec php artisan db:seed --class=DevNodeSeeder
 `.env` is mounted in, so it's already there. **Use a scoped API token, not full
 `root@pam`** — the sandbox protects your machine, not your hypervisor.
 
-### Tailscale auth key (only for the tailscale kit)
+### Reaching the Proxmox node
 
-Do **one** of these — the key is never committed:
-
-```sh
-cp .sbx/tailscale.env.example .sbx/tailscale.env   # then paste your key into it (gitignored)
-```
-
-- …or `export TS_AUTHKEY=tskey-...` before `sbx run`.
-- …or skip both and run `sudo tailscale up --accept-routes --ssh` inside the
-  sandbox, then open the printed URL in your browser.
-
-Check it with `tailscale status` inside the sandbox. **Reach tailnet hosts by IP,
-not hostname** (MagicDNS is off). For hands-off 1Password auto-injection and the
-networking details, see [`.sbx/README.md`](../.sbx/README.md).
+The sandbox has no route to a private node on its own. If yours isn't publicly
+reachable, arrange network access on the host side before `sbx run`, and set
+`PROXMOX_FQDN` to an address the sandbox can actually reach.
 
 ### Notes
 
