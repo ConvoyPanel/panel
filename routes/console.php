@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\Anchor\PollAnchorLivenessCommand;
 use App\Console\Commands\Maintenance\PruneDeploymentsCommand;
 use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
@@ -43,6 +44,12 @@ if (config('activity.prune_days')) {
 // unreachable node burns the whole connect timeout rather than failing fast.
 // `withoutOverlapping` so a fleet that is slow to answer never piles passes up.
 Schedule::command(PollNodeStatusesCommand::class)->everyMinute()->withoutOverlapping();
+
+// Anchors normally push heartbeats, so this only picks up the ones that have gone
+// quiet -- an Anchor that cannot reach the panel but is reachable *from* it would
+// otherwise sit at "Offline" forever. Same reasoning as node polling: the admin
+// list must never probe per row, so a background pass keeps it truthful instead.
+Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverlapping();
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

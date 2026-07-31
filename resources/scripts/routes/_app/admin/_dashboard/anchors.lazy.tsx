@@ -143,9 +143,7 @@ function AnchorsPage() {
             cell: ({ cell }) =>
                 cell.getValue<string | null>() ?? 'Not enrolled',
         },
-        actionsColumn<Anchor>(({ row }) => (
-            <Actions>{actions(row.original)}</Actions>
-        )),
+        actionsColumn<Anchor>(({ row }) => actions(row.original)),
     ]
     return (
         <>

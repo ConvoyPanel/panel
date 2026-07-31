@@ -136,3 +136,69 @@ it('fails clearly when no Anchor agent is configured', function () {
     )->assertConflict()
         ->assertJsonPath('message', 'This server does not have an Anchor agent configured.');
 });
+
+it('probes a stale Anchor before refusing the session', function () {
+    // The Anchor is enrolled but its heartbeat has not landed in a while --
+    // which can mean it cannot reach us, not that it is down. It must still be
+    // reachable the other way round.
+    [$user, $_, $node, $server] = createServerModel();
+    $anchor = Anchor::factory()->enrolled()->create([
+        'public_url' => 'https://agent.example.com',
+        'last_seen_at' => now()->subHour(),
+        'version' => '0.0.1-stale',
+    ]);
+    $node->update(['anchor_id' => $anchor->id]);
+
+    Http::fake(['agent.example.com/api/v1/info' => Http::response([
+        'version' => '0.1.0-alpha.1',
+        'mode' => 'agent',
+        'protocol' => ['min' => Anchor::PROTOCOL_VERSION, 'max' => Anchor::PROTOCOL_VERSION],
+        'capabilities' => ['console.qemu.vnc'],
+    ])]);
+
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/create-console-session",
+        ['type' => 'novnc'],
+    )->assertCreated();
+
+    // The probe stands in for a heartbeat, so the reported build and
+    // capabilities are refreshed too.
+    $anchor->refresh();
+    expect($anchor->version)->toBe('0.1.0-alpha.1')
+        ->and($anchor->capabilities)->toBe(['console.qemu.vnc'])
+        ->and($anchor->last_seen_at->isAfter(now()->subMinute()))->toBeTrue();
+});
+
+it('still refuses the session when a stale Anchor cannot be reached either', function () {
+    [$user, $_, $node, $server] = createServerModel();
+    $anchor = Anchor::factory()->enrolled()->create([
+        'public_url' => 'https://agent.example.com',
+        'last_seen_at' => now()->subHour(),
+    ]);
+    $node->update(['anchor_id' => $anchor->id]);
+
+    Http::fake(['agent.example.com/api/v1/info' => Http::response(status: 502)]);
+
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/create-console-session",
+        ['type' => 'novnc'],
+    )->assertConflict()
+        ->assertJsonPath('message', "Anchor {$anchor->name} is not online with a compatible protocol version.");
+});
+
+it('does not probe an Anchor that was never enrolled', function () {
+    // An unenrolled Anchor has no shared secret we could trust, so reaching
+    // something at its URL proves nothing. Only a stale heartbeat is probed.
+    [$user, $_, $node, $server] = createServerModel();
+    $anchor = Anchor::factory()->create(['public_url' => 'https://agent.example.com']);
+    $node->update(['anchor_id' => $anchor->id]);
+
+    Http::fake();
+
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/create-console-session",
+        ['type' => 'novnc'],
+    )->assertConflict();
+
+    Http::assertNothingSent();
+});

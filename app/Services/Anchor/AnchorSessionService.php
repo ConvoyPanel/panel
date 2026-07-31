@@ -16,7 +16,10 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class AnchorSessionService
 {
-    public function __construct(private JWTService $jwt) {}
+    public function __construct(
+        private JWTService $jwt,
+        private AnchorLivenessService $liveness,
+    ) {}
 
     public function create(Server $server, User $user, ConsoleType $type): ConsoleSessionData
     {
@@ -100,6 +103,17 @@ class AnchorSessionService
 
     private function ensureCompatible(Anchor $anchor): void
     {
+        if ($anchor->compatibility() === AnchorCompatibility::COMPATIBLE) {
+            return;
+        }
+
+        // A stale heartbeat does not prove the Anchor is down — it may just be
+        // unable to reach us. Before refusing the session, try reaching it the
+        // other way round; a successful probe records a heartbeat of its own.
+        if ($anchor->compatibility() === AnchorCompatibility::OFFLINE) {
+            $this->liveness->refresh($anchor);
+        }
+
         if ($anchor->compatibility() !== AnchorCompatibility::COMPATIBLE) {
             throw new ConflictHttpException(
                 "Anchor {$anchor->name} is not online with a compatible protocol version.",
