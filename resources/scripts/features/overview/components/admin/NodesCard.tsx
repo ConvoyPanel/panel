@@ -1,4 +1,4 @@
-import { IconServerBolt } from '@tabler/icons-react'
+import { IconAlertTriangle, IconServerBolt } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -22,6 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
 import { StatLabel } from '@/components/ui/Typography'
 
 import {
@@ -65,6 +66,22 @@ const Usage = ({
     </div>
 )
 
+/**
+ * A metric we couldn't poll gets the conventional table dash rather than an
+ * empty meter — a zeroed bar reads as "nothing is in use", which is a very
+ * different claim from "we don't know". The row's single warning marker
+ * carries the explanation, so the cells themselves stay quiet.
+ */
+const NoMetric = ({ sub }: { sub?: string }) => (
+    <div className='min-w-32'>
+        <span className='text-muted-foreground text-sm' aria-hidden>
+            —
+        </span>
+        <span className='sr-only'>Unavailable</span>
+        {sub && <StatLabel className='mt-1.5 text-xs'>{sub}</StatLabel>}
+    </div>
+)
+
 const statusClasses: Record<NodeSummary['status'], string> = {
     online: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
     unreachable: 'bg-destructive/15 text-destructive',
@@ -80,10 +97,37 @@ const StatusBadge = ({ node }: { node: NodeSummary }) => (
     </Badge>
 )
 
-const snapshotAge = (node: NodeSummary) =>
-    node.resources
-        ? `Observed ${formatDistanceToNow(new Date(node.resources.observedAt), { addSuffix: true })}`
-        : 'No recent poll data'
+/**
+ * One line of provenance per node: how fresh the numbers are, or — when the
+ * poll failed — a single warning that explains every dash in the row at once,
+ * instead of repeating a marker in each metric cell.
+ */
+const SnapshotMeta = ({ node }: { node: NodeSummary }) =>
+    node.resources ? (
+        <StatLabel className='text-xs'>
+            Observed{' '}
+            {formatDistanceToNow(new Date(node.resources.observedAt), {
+                addSuffix: true,
+            })}
+        </StatLabel>
+    ) : (
+        <Tooltip>
+            {/* A real trigger element (not `asChild` over a span) so the
+                explanation is reachable by keyboard, matching
+                NodeStatusIndicator. */}
+            <TooltipTrigger className='text-muted-foreground flex cursor-help items-center gap-1 text-xs'>
+                <IconAlertTriangle
+                    className='size-3.5 shrink-0 text-amber-600 dark:text-amber-400'
+                    aria-hidden
+                />
+                Metrics unavailable
+            </TooltipTrigger>
+            <TooltipContent className='max-w-64'>
+                Couldn&apos;t fetch resource usage from this node. CPU, memory
+                and disk figures are unknown until it reports again.
+            </TooltipContent>
+        </Tooltip>
+    )
 
 const ServerCount = ({ node }: { node: NodeSummary }) => (
     <>
@@ -134,7 +178,13 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                             <TableBody>
                                 {nodes.map(node => (
                                     <TableRow key={node.id}>
-                                        <TableCell className='pl-0'>
+                                        {/* Cells align to the top so every
+                                            meter in the row shares a baseline:
+                                            the memory cell is a line taller
+                                            than the others, and `align-middle`
+                                            would push its neighbours' bars out
+                                            of step with it. */}
+                                        <TableCell className='pl-0 align-top'>
                                             <div className='flex items-center gap-2'>
                                                 <div className='font-semibold'>
                                                     {node.displayName}
@@ -144,14 +194,14 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                             <div className='text-muted-foreground font-mono text-xs'>
                                                 {node.fqdn}
                                             </div>
-                                            <StatLabel className='mt-1 text-xs'>
-                                                {snapshotAge(node)}
-                                            </StatLabel>
+                                            <div className='mt-1'>
+                                                <SnapshotMeta node={node} />
+                                            </div>
                                         </TableCell>
-                                        <TableCell className='text-center tabular-nums'>
+                                        <TableCell className='align-top text-center tabular-nums'>
                                             {num(node.servers)}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className='align-top'>
                                             {node.resources ? (
                                                 <div>
                                                     <div className='text-sm font-semibold tabular-nums'>
@@ -162,12 +212,10 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     </StatLabel>
                                                 </div>
                                             ) : (
-                                                <span className='text-muted-foreground text-sm'>
-                                                    Unknown
-                                                </span>
+                                                <NoMetric />
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className='align-top'>
                                             {node.resources ? (
                                                 <Usage
                                                     usage={node.resources.memory}
@@ -175,21 +223,19 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     sub={`${bytes(node.memory.allocated)} committed`}
                                                 />
                                             ) : (
-                                                <span className='text-muted-foreground text-sm'>
-                                                    Unknown · {bytes(node.memory.allocated)} committed
-                                                </span>
+                                                <NoMetric
+                                                    sub={`${bytes(node.memory.allocated)} committed`}
+                                                />
                                             )}
                                         </TableCell>
-                                        <TableCell className='pr-0'>
+                                        <TableCell className='pr-0 align-top'>
                                             {node.resources ? (
                                                 <Usage
                                                     usage={node.resources.disk}
                                                     label={`Root disk used on ${node.displayName}`}
                                                 />
                                             ) : (
-                                                <span className='text-muted-foreground text-sm'>
-                                                    Unknown
-                                                </span>
+                                                <NoMetric />
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -230,9 +276,9 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                             <ServerCount node={node} />
                                         </div>
                                     </div>
-                                    <StatLabel className='mt-2.5 mb-1.5 text-xs'>
-                                        {snapshotAge(node)}
-                                    </StatLabel>
+                                    <div className='mt-2.5 mb-1.5'>
+                                        <SnapshotMeta node={node} />
+                                    </div>
                                     {node.resources ? (
                                         <div className='grid grid-cols-1 gap-3 @lg:grid-cols-2'>
                                             <div>
@@ -265,9 +311,10 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className='text-muted-foreground text-sm'>
-                                            Resource usage unknown · {bytes(node.memory.allocated)} memory committed
-                                        </div>
+                                        <StatLabel className='text-xs'>
+                                            {bytes(node.memory.allocated)} memory
+                                            committed
+                                        </StatLabel>
                                     )}
                                 </ItemContent>
                             </Item>
