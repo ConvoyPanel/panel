@@ -39,6 +39,11 @@ class StoreAddressBlockRequest extends BaseApiRequest
     {
         $rules = Arr::except(AddressBlock::getRules(), ['address_block_group_id']);
 
+        // The block's version is derived from base_ip and never stored, but it stays a required
+        // input: it is what the caller *meant* to create, and the rules below reject a base IP or
+        // gateway of the other family rather than silently building a block of the wrong version.
+        $rules['version'] = ['required', 'in:ipv4,ipv6'];
+
         // Override base_ip validation to ensure it matches the version (IPv4 or IPv6)
         $rules['base_ip'] = [
             'required',

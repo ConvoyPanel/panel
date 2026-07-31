@@ -47,7 +47,7 @@ trait ValidatesBlockGeometry
                 return;
             }
 
-            $this->validateGatewayLeavesCapacity($validator, $version, $from, $to);
+            $this->validateGatewayLeavesCapacity($validator, $from, $to);
         });
     }
 
@@ -56,7 +56,7 @@ trait ValidatesBlockGeometry
      * is auto-reserved, so generation produces one locked row and nothing else. Surface it here
      * rather than letting an operator discover it after hitting Generate.
      */
-    private function validateGatewayLeavesCapacity(Validator $validator, AddressVersion $version, int $from, int $to): void
+    private function validateGatewayLeavesCapacity(Validator $validator, int $from, int $to): void
     {
         /** @var ?string $gateway */
         $gateway = $this->input('gateway');
@@ -66,8 +66,8 @@ trait ValidatesBlockGeometry
             return;
         }
 
+        // No version to set — the block reads it back off base_ip.
         $block = new AddressBlock([
-            'version' => $version,
             'base_ip' => $this->string('base_ip')->toString(),
             'gateway' => $gateway,
             'prefix_length_from' => $from,

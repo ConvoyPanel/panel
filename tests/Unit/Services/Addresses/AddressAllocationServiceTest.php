@@ -172,7 +172,6 @@ function interfaceWithSparseBlock(AddressVersion $version, string $baseIp, int $
         'network_interface_id' => $interface->id,
     ]);
     $block = AddressBlock::factory()->for($group)->create([
-        'version' => $version->value,
         'base_ip' => $baseIp,
         // No gateway so system-reservations are just the network/anycast address (deterministic).
         'gateway' => null,

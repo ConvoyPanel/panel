@@ -2,14 +2,12 @@
 
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
-use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use Illuminate\Support\Facades\Schema;
 
 it('backfills system vs admin reasons from existing reserved rows', function () {
     $v4 = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '192.0.2.0',
         'gateway' => '192.0.2.1',
         'prefix_length_from' => 24,
@@ -18,7 +16,6 @@ it('backfills system vs admin reasons from existing reserved rows', function () 
 
     // /31 has no network or broadcast (RFC 3021), so only the gateway is structural.
     $p2p = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '203.0.113.0',
         'gateway' => '203.0.113.1',
         'prefix_length_from' => 31,

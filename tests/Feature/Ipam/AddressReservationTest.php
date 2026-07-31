@@ -3,7 +3,6 @@
 use App\Actions\Ipam\GenerateAddressesAction;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
-use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
@@ -17,7 +16,6 @@ beforeEach(function () {
     $this->admin = User::factory()->create(['root_admin' => true]);
     $this->group = AddressBlockGroup::factory()->create();
     $this->block = AddressBlock::factory()->for($this->group)->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '192.0.2.0',
         'gateway' => null,
         'prefix_length_from' => 24,
@@ -91,7 +89,6 @@ it('rejects assigning a reserved address to a server', function () {
 
 it('auto-reserves the network, broadcast and gateway addresses when generating a dense block', function () {
     $block = AddressBlock::factory()->for($this->group)->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '198.51.100.0',
         'gateway' => '198.51.100.1',
         'prefix_length_from' => 24,

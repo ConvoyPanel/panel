@@ -2,7 +2,6 @@
 
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
-use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use App\Models\Location;
@@ -14,7 +13,6 @@ it('requalifies system reservations on blocks that delegate sub-blocks', functio
     // Delegating block whose gateway is *not* in the base unit, so the old and new reservations
     // land on different rows.
     $delegating = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '192.0.2.0',
         'gateway' => '192.0.2.100',
         'prefix_length_from' => 24,
@@ -23,7 +21,6 @@ it('requalifies system reservations on blocks that delegate sub-blocks', functio
 
     // Single-unit block: the whole /24 delegated as one routed prefix.
     $singleUnit = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '198.51.100.0',
         'gateway' => null,
         'prefix_length_from' => 24,
@@ -32,7 +29,6 @@ it('requalifies system reservations on blocks that delegate sub-blocks', functio
 
     // Host allocation — must come through the migration untouched.
     $hostBlock = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '203.0.113.0',
         'gateway' => '203.0.113.1',
         'prefix_length_from' => 24,
@@ -75,7 +71,6 @@ it('requalifies system reservations on blocks that delegate sub-blocks', functio
 
 it('leaves an assigned address alone even if it should now be system-reserved', function () {
     $block = AddressBlock::factory()->create([
-        'version' => AddressVersion::IPv4,
         'base_ip' => '192.0.2.0',
         'gateway' => '192.0.2.100',
         'prefix_length_from' => 24,

@@ -37,7 +37,7 @@ class UpdateAddressBlockRequest extends BaseApiRequest
 
     public function rules(): array
     {
-        $rules = Arr::except(AddressBlock::getRules(), ['address_block_group_id', 'version']);
+        $rules = Arr::except(AddressBlock::getRules(), ['address_block_group_id']);
 
         // Get the address block from the route
         /** @var AddressBlock $addressBlock */

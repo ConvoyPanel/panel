@@ -30,13 +30,13 @@ class AddressBlock extends Model
 {
     public $timestamps = false;
 
-    protected $guarded = ['id'];
+    /** `version` is derived from base_ip — a database-generated column that cannot be written to. */
+    protected $guarded = ['id', 'version'];
 
     public static array $validationRules = [
         'address_block_group_id' => 'required|integer|exists:address_block_groups,id',
         'name' => 'nullable|string|max:40',
         'description' => 'nullable|string|max:191',
-        'version' => 'in:ipv4,ipv6|required',
         'base_ip' => 'required|ip',
         'gateway' => 'nullable|ip',
         'mac_address' => 'nullable|mac_address',
@@ -44,11 +44,23 @@ class AddressBlock extends Model
         'prefix_length_to' => 'required|integer|min:0|max:128',
     ];
 
-    public function casts(): array
+    /**
+     * Read from base_ip rather than the column so an unsaved block — the geometry validator builds
+     * one to test a submitted block before it exists — answers the same as a persisted one. The
+     * column is the database's own copy of this derivation and is only there for SQL filters.
+     */
+    protected function version(): Attribute
     {
-        return [
-            'version' => AddressVersion::class,
-        ];
+        return Attribute::get(function (?string $stored): AddressVersion {
+            $baseIp = $this->attributes['base_ip'] ?? null;
+
+            // base_ip wasn't selected; fall back to the generated column, which cannot disagree.
+            if ($baseIp === null) {
+                return AddressVersion::from((string) $stored);
+            }
+
+            return str_contains($baseIp, ':') ? AddressVersion::IPv6 : AddressVersion::IPv4;
+        });
     }
 
     /**

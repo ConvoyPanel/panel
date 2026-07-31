@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\Network\AddressVersion;
 use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,7 +20,6 @@ class AddressBlockFactory extends Factory
             'address_block_group_id' => AddressBlockGroup::factory(),
             'name' => $this->faker->word(),
             'description' => null,
-            'version' => AddressVersion::IPv4,
             'base_ip' => $this->faker->ipv4(),
             'gateway' => $this->faker->ipv4(),
             'mac_address' => null,
@@ -30,10 +28,10 @@ class AddressBlockFactory extends Factory
         ];
     }
 
+    /** The version follows base_ip — it is derived, not stored. */
     public function ipv6(): self
     {
         return $this->state(fn () => [
-            'version' => AddressVersion::IPv6,
             'base_ip' => $this->faker->ipv6(),
             'gateway' => $this->faker->ipv6(),
             'prefix_length_from' => 48,

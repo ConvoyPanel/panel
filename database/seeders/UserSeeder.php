@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\Api\ApiKeyType;
-use App\Enums\Network\AddressVersion;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use App\Models\PersonalAccessToken;
@@ -100,7 +99,6 @@ class UserSeeder extends Seeder
         // TEST-NET-3 (203.0.113.0/24) — a documentation range, safe for fixtures.
         $block = AddressBlock::factory()->create([
             'name' => 'Public IPv4',
-            'version' => AddressVersion::IPv4,
             'base_ip' => '203.0.113.0',
             'gateway' => '203.0.113.1',
             'prefix_length_from' => 24,
