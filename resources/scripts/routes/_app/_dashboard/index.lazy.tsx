@@ -34,8 +34,10 @@ function Dashboard() {
                 </Card>
             ) : isLoading ? (
                 <ItemGroup className={'gap-3'}>
+                    {/* Sized to the real row (py-3 around a title + hostname),
+                        so the list doesn't jump when the data lands. */}
                     {Array.from({ length: 4 }).map((_, index) => (
-                        <Skeleton key={index} className={'h-24 w-full'} />
+                        <Skeleton key={index} className={'h-[4.25rem] w-full'} />
                     ))}
                 </ItemGroup>
             ) : !data || data.items.length === 0 ? (
