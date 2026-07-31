@@ -298,7 +298,8 @@ it('expires the guest map with the node status it was observed alongside', funct
     // node reading `online` beside guests reading `unknown` is unreadable.
     Cache::shouldHaveReceived('put')->once()->withArgs(
         fn (string $key, array $value, $expiry) => $key === "node:{$this->node->id}:vm-states"
-            && $value === [100 => 'running']
+            && $value['states'] === [100 => 'running']
+            && $value['observed_at'] === now()->getTimestampMs()
             && $expiry->equalTo(now()->addMinutes(Node::STATUS_TTL_MINUTES))
     );
 });

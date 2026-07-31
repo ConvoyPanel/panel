@@ -1,10 +1,15 @@
 <?php
 
 use App\Enums\Anchor\AnchorMode;
+use App\Enums\Server\State;
 use App\Models\Anchor;
 use App\Models\User;
 use App\Services\Api\JWTService;
+use App\Services\Nodes\GuestStateCache;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+
+beforeEach(fn () => Cache::flush());
 
 it('only lists servers the authenticated user owns', function () {
     [$owner, $_, $_, $server] = createServerModel();
@@ -46,6 +51,36 @@ it('lets a server owner send a power command', function () {
         ->assertNoContent();
 
     Http::assertSent(fn ($request) => str_contains($request->url(), '/status/shutdown'));
+});
+
+it('writes a live state read back into the guest state cache', function () {
+    // The server list reads the cache and never PVE, so without this the badge
+    // there stays stale for up to a poll interval after a power action. The
+    // detail page has just paid for a live read; recording it is free.
+    [$owner, $_, $node, $server] = createServerModel();
+
+    app(GuestStateCache::class)->put($node, [$server->vmid => State::STOPPED->value]);
+    $this->travel(1)->seconds();
+
+    Http::fake(['*/status/current' => Http::response(['data' => [
+        'status' => State::RUNNING->value,
+        'uptime' => 120,
+        'cpu' => 0.1,
+        'maxmem' => 1024,
+        'mem' => 512,
+    ]], 200)]);
+
+    $this->actingAs($owner)
+        ->getJson("/api/client/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.state', State::RUNNING->value);
+
+    expect(app(GuestStateCache::class)->stateFor($server->fresh()))->toBe(State::RUNNING);
+
+    $this->actingAs($owner)
+        ->getJson('/api/client/servers')
+        ->assertOk()
+        ->assertJsonPath('items.0.powerState', State::RUNNING->value);
 });
 
 it('does not let a non-owner send a power command', function () {

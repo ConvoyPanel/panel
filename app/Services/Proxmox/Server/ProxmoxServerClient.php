@@ -6,11 +6,14 @@ use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Node\Access\RealmType;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\Template;
+use App\Services\Nodes\GuestStateCache;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 
 class ProxmoxServerClient extends ProxmoxClient
 {
+    public function __construct(private GuestStateCache $guestStates) {}
+
     /**
      * @throws RequestException
      * @throws ConnectionException
@@ -21,7 +24,17 @@ class ProxmoxServerClient extends ProxmoxClient
             ->get('/api2/json/nodes/{node}/qemu/{server}/status/current')
             ->json();
 
-        return ServerStateData::fromRaw($this->getData($response));
+        $state = ServerStateData::fromRaw($this->getData($response));
+
+        // Write-through: this is the only place in the app that reads one
+        // guest's status live, so recording it here means no caller can forget
+        // to. It is what keeps a server list -- which reads the cache and never
+        // PVE -- from showing a stale badge in the minute after a power action,
+        // and it costs one cache write on a request that just paid for a round
+        // trip to Proxmox.
+        $this->guestStates->observe($this->getServer(), $state->state);
+
+        return $state;
     }
 
     /**

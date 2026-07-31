@@ -37,6 +37,14 @@ export const serverQueries = {
                 return toPaginatedResult(res)
             },
             placeholderData: keepPreviousData,
+            // Each row carries a power badge, and the panel's default
+            // `staleTime` alone would leave one wrong indefinitely: nothing
+            // refetches while the dashboard sits open, and `refetchOnWindowFocus`
+            // is off globally. Paced against the every-minute node poll that
+            // feeds `powerState` -- the endpoint reads the database and the
+            // guest-state cache and never touches PVE, so this costs a query,
+            // not a round trip per server.
+            refetchInterval: 30_000,
         }),
 
     detail: (uuid: string) =>
