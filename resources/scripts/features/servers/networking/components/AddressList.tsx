@@ -1,27 +1,28 @@
 import useClipboard from '@/hooks/use-clipboard.ts'
-import { Address } from '@/types/address.ts'
+import { Address, AddressVersion } from '@/types/address.ts'
 import { cn } from '@/utils'
-import { IconNetwork, IconWifiOff } from '@tabler/icons-react'
-import { KeyboardEvent } from 'react'
+import { IconWifiOff } from '@tabler/icons-react'
+import { KeyboardEvent, ReactNode } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
-import {
-    Item,
-    ItemContent,
-    ItemMedia,
-    ItemTitle,
-    OverflowItemGroup,
-} from '@/components/ui/Item'
+import { Item, OverflowItemGroup } from '@/components/ui/Item'
+
+const versionLabels: Record<AddressVersion, string> = {
+    [AddressVersion.IPv4]: 'IPv4',
+    [AddressVersion.IPv6]: 'IPv6',
+}
 
 const CopyValue = ({
     label,
     value,
     className,
+    children,
 }: {
     label: string
     value: string
     className?: string
+    children?: ReactNode
 }) => {
     const { copy } = useClipboard({ successMessage: 'Copied to clipboard' })
 
@@ -40,20 +41,71 @@ const CopyValue = ({
             onClick={() => copy(value)}
             onKeyDown={handleKeyDown}
             className={cn(
-                'hover:text-primary focus-visible:ring-ring/50 cursor-pointer truncate rounded-sm font-mono outline-none select-none focus-visible:ring-[3px]',
+                'hover:text-primary focus-visible:ring-ring/50 cursor-pointer rounded-sm font-mono outline-none select-none focus-visible:ring-[3px]',
                 className
             )}
         >
-            {value}
+            {children ?? value}
         </span>
     )
 }
 
-const Field = ({ label, value }: { label: string; value: string }) => (
-    <div className={'min-w-0'}>
-        <CopyValue label={label} value={value} className={'block text-xs'} />
-        <p className={'text-xs text-muted-foreground'}>{label}</p>
+const Field = ({ label, value }: { label: string; value: string | null }) => (
+    <div className={'flex min-w-0 flex-col gap-1'}>
+        <span className={'text-label text-xs font-medium'}>{label}</span>
+        {value ? (
+            <CopyValue
+                label={label}
+                value={value}
+                className={'block truncate text-sm font-medium'}
+            />
+        ) : (
+            <span
+                className={'text-muted-foreground truncate font-mono text-sm'}
+            >
+                N/A
+            </span>
+        )}
     </div>
+)
+
+const AddressRow = ({ address }: { address: Address }) => (
+    <Item variant={'muted'} className={'flex-col items-stretch gap-3 p-4'}>
+        <div className={'flex items-start justify-between gap-3'}>
+            <div
+                className={
+                    'flex min-w-0 items-baseline font-mono tracking-tight tabular-nums'
+                }
+            >
+                <CopyValue
+                    label={'Address'}
+                    value={`${address.ip}/${address.prefixLength}`}
+                    /* Semibold gives the address its scannability; on the dark
+                       card near-pure-white bloom reads as heavy, so soften the
+                       IP's white there while keeping full-contrast bold on light. */
+                    className={
+                        'text-foreground dark:hover:text-primary text-[21px] leading-tight font-semibold break-all dark:text-[oklch(0.9_0.004_106.5)]'
+                    }
+                >
+                    {address.ip}
+                </CopyValue>
+                <span
+                    className={
+                        'text-muted-foreground text-[21px] leading-tight font-medium'
+                    }
+                >
+                    /{address.prefixLength}
+                </span>
+            </div>
+            <Badge variant={'secondary'} className={'shrink-0'}>
+                {versionLabels[address.version]}
+            </Badge>
+        </div>
+        <div className={'grid grid-cols-2 gap-x-4 gap-y-2 border-t pt-3'}>
+            <Field label={'Gateway'} value={address.gateway} />
+            <Field label={'MAC address'} value={address.macAddress} />
+        </div>
+    </Item>
 )
 
 interface Props {
@@ -78,30 +130,7 @@ const AddressList = ({ addresses }: Props) => {
             max={4}
             title={'IP Addresses'}
             rows={addresses.map(address => (
-                <Item key={address.id} variant={'muted'} size={'sm'}>
-                    <ItemMedia variant={'icon'}>
-                        <IconNetwork />
-                    </ItemMedia>
-                    <ItemContent className={'min-w-0 overflow-x-hidden'}>
-                        <ItemTitle className={'max-w-full'}>
-                            <CopyValue
-                                label={'Address'}
-                                value={`${address.ip}/${address.prefixLength}`}
-                                className={'truncate text-sm'}
-                            />
-                            <Badge variant={'secondary'} className={'shrink-0'}>
-                                {address.version}
-                            </Badge>
-                        </ItemTitle>
-                        <div className={'flex flex-wrap gap-x-6 gap-y-1'}>
-                            <Field label={'Gateway'} value={address.gateway} />
-                            <Field
-                                label={'MAC'}
-                                value={address.macAddress ?? 'N/A'}
-                            />
-                        </div>
-                    </ItemContent>
-                </Item>
+                <AddressRow key={address.id} address={address} />
             ))}
         />
     )
