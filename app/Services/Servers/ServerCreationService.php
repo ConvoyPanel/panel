@@ -4,6 +4,7 @@ namespace App\Services\Servers;
 
 use App\Actions\Server\BuildServerAction;
 use App\Data\Cluster\ServerResourceData;
+use App\Enums\Network\AddressVersion;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\ServerStatus;
@@ -87,8 +88,8 @@ class ServerCreationService
                 'cpu' => $data['limits']['cpu'],
                 'memory' => $data['limits']['memory'],
                 'disk' => $data['limits']['disk'],
-                'primary_ipv4_address_id' => $addresses->firstWhere('version', 'IPv4')?->id,
-                'primary_ipv6_address_id' => $addresses->firstWhere('version', 'IPv6')?->id,
+                'primary_ipv4_address_id' => $addresses->firstWhere('version', AddressVersion::IPv4)?->id,
+                'primary_ipv6_address_id' => $addresses->firstWhere('version', AddressVersion::IPv6)?->id,
                 'backup_count_limit' => Arr::get($data, 'limits.backups.count'),
                 'backup_size_limit' => Arr::get($data, 'limits.backups.size'),
                 'bandwidth_limit' => Arr::get($data, 'limits.bandwidth'),
