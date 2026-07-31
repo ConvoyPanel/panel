@@ -3,7 +3,7 @@
 use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Exceptions\Proxmox\RequestException;
 use App\Jobs\Server\CloneVmJob;
 use App\Jobs\Server\DeleteVmJob;
@@ -94,8 +94,8 @@ it('kills the guest once, then completes when it reports stopped', function () {
     $client = Mockery::mock(ProxmoxServerClient::class);
     $client->shouldReceive('setServer')->andReturnSelf();
     $client->shouldReceive('getState')->andReturn(
-        new ServerStateData(State::RUNNING, 0.0, 0, 0, 0),
-        new ServerStateData(State::STOPPED, 0.0, 0, 0, 0),
+        new ServerStateData(PowerState::RUNNING, 0.0, 0, 0, 0),
+        new ServerStateData(PowerState::STOPPED, 0.0, 0, 0, 0),
     );
 
     $job = (new StopVmJob($step))->setJob(fakeQueueJob());

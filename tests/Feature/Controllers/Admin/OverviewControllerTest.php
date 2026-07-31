@@ -2,7 +2,7 @@
 
 use App\Data\Cluster\NodeResourceData;
 use App\Enums\Server\Backup\BackupErrorCode;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use App\Models\Backup;
@@ -47,13 +47,13 @@ it('returns overview metrics for admins', function () {
 
     $ready = Server::factory()->for($node)->for($admin)->create([
         'storage_id' => $storage->id,
-        'status' => ServerStatus::READY->value,
+        'lifecycle' => ServerLifecycle::READY->value,
         'memory' => 8 * 1024 * 1024 * 1024,
         'disk' => 32 * 1024 * 1024 * 1024,
     ]);
     Server::factory()->for($node)->for($admin)->create([
         'storage_id' => $storage->id,
-        'status' => ServerStatus::INSTALL_FAILED->value,
+        'lifecycle' => ServerLifecycle::INSTALL_FAILED->value,
         'memory' => 4 * 1024 * 1024 * 1024,
         'disk' => 16 * 1024 * 1024 * 1024,
     ]);
@@ -117,7 +117,7 @@ it('counts servers restoring from a backup', function () {
     $node = Node::factory()->for(Location::factory())->create();
 
     Server::factory()->for($node)->for($admin)->create([
-        'status' => ServerStatus::RESTORING_BACKUP->value,
+        'lifecycle' => ServerLifecycle::RESTORING_BACKUP->value,
     ]);
 
     $this->actingAs($admin)->getJson('/api/admin/overview')

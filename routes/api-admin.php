@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
-use App\Http\Middleware\Admin\Server\ValidateServerStatusMiddleware;
+use App\Http\Middleware\Admin\Server\ValidateServerLifecycleMiddleware;
 use App\Http\Middleware\DenyApiTokenAccess;
 use Illuminate\Support\Facades\Route;
 
@@ -127,20 +127,23 @@ Route::prefix('/servers')->group(function () {
     Route::post('/', [Admin\ServerController::class, 'store']);
 
     Route::prefix('/{server}')
-        ->middleware(ValidateServerStatusMiddleware::class)
+        ->middleware(ValidateServerLifecycleMiddleware::class)
         ->group(function () {
             Route::get('/', [Admin\ServerController::class, 'show'])
                 ->withoutMiddleware(
-                    ValidateServerStatusMiddleware::class,
+                    ValidateServerLifecycleMiddleware::class,
                 );
             Route::patch('/', [Admin\ServerController::class, 'update'])
                 ->withoutMiddleware(
-                    ValidateServerStatusMiddleware::class,
+                    ValidateServerLifecycleMiddleware::class,
                 );
             Route::delete('/', [Admin\ServerController::class, 'destroy']);
 
+            // GET /state reads the guest's live condition; POST /power sends a command. They
+            // were the same path with opposite meanings, which is what made `{state: 'start'}`
+            // look reasonable.
             Route::get('/state', [Admin\ServerController::class, 'getState']);
-            Route::patch('/state', [Admin\ServerController::class, 'updateState']);
+            Route::post('/power', [Admin\ServerController::class, 'sendPowerCommand']);
 
             Route::prefix('/disks')->scopeBindings()->group(function () {
                 Route::get('/', [Admin\ServerDiskController::class, 'index']);

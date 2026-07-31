@@ -330,7 +330,7 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
                         server.hostname,
                         server.uuid,
                         server.uuidShort,
-                        server.status,
+                        server.lifecycle,
                     ],
                 })),
             })
@@ -349,7 +349,7 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
                         server.hostname,
                         server.uuid,
                         server.uuidShort,
-                        server.status,
+                        server.lifecycle,
                     ],
                 })),
             })

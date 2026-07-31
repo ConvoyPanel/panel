@@ -19,21 +19,20 @@ import {
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
-import { ServerLifecycleStatus } from '@/types/server.ts'
+import { ServerLifecycle } from '@/types/server.ts'
 
 interface Props {
     serverId: number
 }
 
-const STATUS_LABELS: Record<ServerLifecycleStatus, string> = {
-    [ServerLifecycleStatus.Ready]: 'Ready',
-    [ServerLifecycleStatus.DeferredOsSelection]: 'Awaiting OS selection',
-    [ServerLifecycleStatus.Installing]: 'Installing',
-    [ServerLifecycleStatus.InstallFailed]: 'Install failed',
-    [ServerLifecycleStatus.Suspended]: 'Suspended',
-    [ServerLifecycleStatus.RestoringBackup]: 'Restoring backup',
-    [ServerLifecycleStatus.Deleting]: 'Deleting',
-    [ServerLifecycleStatus.DeletionFailed]: 'Deletion failed',
+const LIFECYCLE_LABELS: Record<ServerLifecycle, string> = {
+    [ServerLifecycle.Ready]: 'Ready',
+    [ServerLifecycle.DeferredOsSelection]: 'Awaiting OS selection',
+    [ServerLifecycle.Installing]: 'Installing',
+    [ServerLifecycle.InstallFailed]: 'Install failed',
+    [ServerLifecycle.RestoringBackup]: 'Restoring backup',
+    [ServerLifecycle.Deleting]: 'Deleting',
+    [ServerLifecycle.DeletionFailed]: 'Deletion failed',
 }
 
 const formatBytes = (bytes: number) => {
@@ -105,10 +104,17 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                         ) : (
                             <Skeleton className='h-8 w-48' />
                         )}
+                        {/* Two badges, never one: suspension sits alongside the
+                            lifecycle rather than replacing it, so a suspended
+                            server still shows the stage it is actually in. */}
                         {server && (
                             <Badge variant='outline'>
-                                {STATUS_LABELS[server.status] ?? server.status}
+                                {LIFECYCLE_LABELS[server.lifecycle] ??
+                                    server.lifecycle}
                             </Badge>
+                        )}
+                        {server?.suspendedAt && (
+                            <Badge variant='destructive'>Suspended</Badge>
                         )}
                     </div>
                     {server && (
@@ -143,7 +149,7 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                             <dl className='grid grid-cols-2 gap-y-3 text-sm'>
                                 <dt className='text-muted-foreground'>Power</dt>
                                 <dd className='text-right font-medium'>
-                                    {state.state === 'running'
+                                    {state.powerState === 'running'
                                         ? 'Running'
                                         : 'Stopped'}
                                 </dd>

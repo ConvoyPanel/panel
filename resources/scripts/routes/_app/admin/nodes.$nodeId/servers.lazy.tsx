@@ -26,7 +26,8 @@ export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/servers')({
     component: NodeServers,
 })
 
-const statusLabel = (status: Server['status']) => status.replace(/_/g, ' ')
+const lifecycleLabel = (lifecycle: Server['lifecycle']) =>
+    lifecycle.replace(/_/g, ' ')
 
 function NodeServers() {
     const { nodeId } = Route.useParams()
@@ -134,12 +135,24 @@ function NodeServers() {
                                 >
                                     {server.hostname}
                                 </ItemDescription>
-                                <Badge
-                                    variant={'secondary'}
-                                    className={'w-fit capitalize'}
-                                >
-                                    {statusLabel(server.status)}
-                                </Badge>
+                                <div className={'flex flex-wrap gap-1'}>
+                                    <Badge
+                                        variant={'secondary'}
+                                        className={'w-fit capitalize'}
+                                    >
+                                        {lifecycleLabel(server.lifecycle)}
+                                    </Badge>
+                                    {/* Separate badge, not a lifecycle value --
+                                        both can be true of the same server. */}
+                                    {server.suspendedAt && (
+                                        <Badge
+                                            variant={'destructive'}
+                                            className={'w-fit'}
+                                        >
+                                            Suspended
+                                        </Badge>
+                                    )}
+                                </div>
                             </ItemContent>
                             <ItemActions>
                                 <Actions>

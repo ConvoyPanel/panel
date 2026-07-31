@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Models\User;
 use App\Services\Nodes\GuestStateCache;
 use Illuminate\Support\Facades\Cache;
@@ -12,13 +12,13 @@ it('returns cached guest power state in the admin server list', function () {
     [$_owner, $_location, $node, $server] = createServerModel();
     $admin = User::factory()->create(['root_admin' => true]);
 
-    app(GuestStateCache::class)->put($node, [$server->vmid => State::RUNNING->value]);
+    app(GuestStateCache::class)->put($node, [$server->vmid => PowerState::RUNNING->value]);
 
     $this->actingAs($admin)
         ->getJson('/api/admin/servers')
         ->assertOk()
         ->assertJsonPath('items.0.id', $server->id)
-        ->assertJsonPath('items.0.powerState', State::RUNNING->value);
+        ->assertJsonPath('items.0.powerState', PowerState::RUNNING->value);
 });
 
 it('lets a root admin send a power command to any server', function () {
@@ -30,7 +30,7 @@ it('lets a root admin send a power command to any server', function () {
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     Http::assertSent(
@@ -56,7 +56,7 @@ it('lets a root admin read any server state', function () {
     $this->actingAs($admin)
         ->getJson("/api/admin/servers/{$server->uuid}/state")
         ->assertOk()
-        ->assertJsonPath('data.state', State::RUNNING->value);
+        ->assertJsonPath('data.powerState', PowerState::RUNNING->value);
 });
 
 it('rejects a non-admin from the admin power endpoint', function () {
@@ -67,7 +67,7 @@ it('rejects a non-admin from the admin power endpoint', function () {
     [$owner, $_, $_, $server] = createServerModel();
 
     $this->actingAs($owner)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertForbidden();
 
     Http::assertNothingSent();
@@ -80,7 +80,7 @@ it('validates the power command', function () {
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'explode'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'explode'])
         ->assertUnprocessable();
 
     Http::assertNothingSent();

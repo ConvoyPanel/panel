@@ -3,6 +3,7 @@
 namespace App\Jobs\Server;
 
 use App\Enums\Activity\TaskStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
@@ -45,7 +46,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
         }
 
         $this->server->update([
-            'status' => null,
+            'lifecycle' => ServerLifecycle::READY,
         ]);
     }
 }

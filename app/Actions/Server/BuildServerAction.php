@@ -7,7 +7,7 @@ use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ProgressMode;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Exceptions\Proxmox\RequestException;
 use App\Jobs\Server\CloneVmJob;
 use App\Jobs\Server\ConfigureVmJob;
@@ -41,7 +41,7 @@ class BuildServerAction
             $this->onComplete($deployment),
         ]);
 
-        $deployment->server->update(['status' => ServerStatus::INSTALLING]);
+        $deployment->server->update(['lifecycle' => ServerLifecycle::INSTALLING]);
 
         Bus::chain($jobs)
             ->catch($this->onFail($deployment))

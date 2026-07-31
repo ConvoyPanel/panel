@@ -2,7 +2,7 @@
 
 namespace App\Services\Nodes;
 
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Models\Node;
 use App\Models\Server;
 use Illuminate\Support\Facades\Cache;
@@ -88,7 +88,7 @@ class GuestStateCache
      * -- it is the only thing that says "nobody has polled this node lately".
      * A power action must not be able to make a stale map look freshly polled.
      */
-    public function observe(Server $server, State $state): void
+    public function observe(Server $server, PowerState $state): void
     {
         Cache::put(self::guestKeyForServerId($server->id), [
             'observed_at' => $this->nowMs(),
@@ -134,7 +134,7 @@ class GuestStateCache
      * superseded. Whichever fact was recorded later is the one that describes
      * the present.
      */
-    public function stateFor(Server $server): ?State
+    public function stateFor(Server $server): ?PowerState
     {
         // Keyed off `node_id` rather than the `node` relation on purpose: a
         // server list resolves this once per row, and touching the relation
@@ -152,7 +152,7 @@ class GuestStateCache
         // Ties go to the single-guest read: it looked at this one guest
         // directly, where the poll answered for the whole node at once.
         if ($snapshot === null || $observation['observed_at'] >= $snapshot['observed_at']) {
-            return State::tryFrom($observation['state']);
+            return PowerState::tryFrom($observation['state']);
         }
 
         return $this->stateFromSnapshot($snapshot, $server->vmid);
@@ -161,13 +161,13 @@ class GuestStateCache
     /**
      * @param  array{observed_at: int, states: array<int, string>}|null  $snapshot
      */
-    private function stateFromSnapshot(?array $snapshot, int $vmid): ?State
+    private function stateFromSnapshot(?array $snapshot, int $vmid): ?PowerState
     {
         if ($snapshot === null || ! array_key_exists($vmid, $snapshot['states'])) {
             return null;
         }
 
-        return State::tryFrom($snapshot['states'][$vmid]);
+        return PowerState::tryFrom($snapshot['states'][$vmid]);
     }
 
     /**

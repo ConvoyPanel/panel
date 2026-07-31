@@ -5,8 +5,9 @@ namespace App\Models;
 use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Support\ByteUnit;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,7 +27,8 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property string $hostname
  * @property string $name
  * @property ?string $description
- * @property ServerStatus $status
+ * @property ServerLifecycle $lifecycle
+ * @property ?CarbonImmutable $suspended_at
  * @property int $cpu
  * @property int $memory
  * @property int $disk
@@ -67,7 +69,8 @@ class Server extends Model
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'status' => ['sometimes', 'nullable', 'string', 'in:ready,deferred_os_selection,installing,install_failed,suspended,restoring_backup,deleting,deletion_failed'],
+        'lifecycle' => ['sometimes', 'string', 'in:ready,deferred_os_selection,installing,install_failed,restoring_backup,deleting,deletion_failed'],
+        'suspended_at' => ['sometimes', 'nullable', 'date'],
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
         'disk' => 'required|numeric|min:1',
@@ -91,7 +94,8 @@ class Server extends Model
     protected function casts(): array
     {
         return [
-            'status' => ServerStatus::class,
+            'lifecycle' => ServerLifecycle::class,
+            'suspended_at' => 'immutable_datetime',
             'memory' => StorageSizeCast::class,
             'disk' => StorageSizeCast::class,
             'bandwidth_usage' => StorageSizeCast::class,
@@ -242,22 +246,34 @@ class Server extends Model
 
     public function isInstalled(): bool
     {
-        return $this->status->isInstalled();
+        return $this->lifecycle->isInstalled();
     }
 
     public function isInstalling(): bool
     {
-        return $this->status->isInstalling();
+        return $this->lifecycle->isInstalling();
     }
 
+    /**
+     * Whether the server is administratively suspended.
+     *
+     * Read off its own column rather than the lifecycle: suspension coexists with whatever
+     * stage the server is in, so a suspended server can also be `installing` or `ready`.
+     * Callers that want "usable right now" need both this and {@see isReady()}.
+     */
     public function isSuspended(): bool
     {
-        return $this->status->isSuspended();
+        return $this->suspended_at !== null;
     }
 
+    /**
+     * Whether the server has finished provisioning with nothing in flight.
+     *
+     * Says nothing about suspension -- see {@see isSuspended()}.
+     */
     public function isReady(): bool
     {
-        return $this->status->isReady();
+        return $this->lifecycle->isReady();
     }
 
     /**

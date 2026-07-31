@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\Anchor\AnchorMode;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Models\Anchor;
 use App\Models\User;
 use App\Services\Api\JWTService;
@@ -47,7 +47,7 @@ it('lets a server owner send a power command', function () {
     [$owner, $_, $_, $server] = createServerModel();
 
     $this->actingAs($owner)
-        ->patchJson("/api/client/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->postJson("/api/client/servers/{$server->uuid}/power", ['command' => 'shutdown'])
         ->assertNoContent();
 
     Http::assertSent(fn ($request) => str_contains($request->url(), '/status/shutdown'));
@@ -59,11 +59,11 @@ it('writes a live state read back into the guest state cache', function () {
     // detail page has just paid for a live read; recording it is free.
     [$owner, $_, $node, $server] = createServerModel();
 
-    app(GuestStateCache::class)->put($node, [$server->vmid => State::STOPPED->value]);
+    app(GuestStateCache::class)->put($node, [$server->vmid => PowerState::STOPPED->value]);
     $this->travel(1)->seconds();
 
     Http::fake(['*/status/current' => Http::response(['data' => [
-        'status' => State::RUNNING->value,
+        'status' => PowerState::RUNNING->value,
         'uptime' => 120,
         'cpu' => 0.1,
         'maxmem' => 1024,
@@ -73,14 +73,14 @@ it('writes a live state read back into the guest state cache', function () {
     $this->actingAs($owner)
         ->getJson("/api/client/servers/{$server->uuid}/state")
         ->assertOk()
-        ->assertJsonPath('data.state', State::RUNNING->value);
+        ->assertJsonPath('data.powerState', PowerState::RUNNING->value);
 
-    expect(app(GuestStateCache::class)->stateFor($server->fresh()))->toBe(State::RUNNING);
+    expect(app(GuestStateCache::class)->stateFor($server->fresh()))->toBe(PowerState::RUNNING);
 
     $this->actingAs($owner)
         ->getJson('/api/client/servers')
         ->assertOk()
-        ->assertJsonPath('items.0.powerState', State::RUNNING->value);
+        ->assertJsonPath('items.0.powerState', PowerState::RUNNING->value);
 });
 
 it('does not let a non-owner send a power command', function () {
@@ -90,7 +90,7 @@ it('does not let a non-owner send a power command', function () {
     $other = User::factory()->create();
 
     $this->actingAs($other)
-        ->patchJson("/api/client/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->postJson("/api/client/servers/{$server->uuid}/power", ['command' => 'shutdown'])
         ->assertNotFound();
 
     Http::assertNothingSent();

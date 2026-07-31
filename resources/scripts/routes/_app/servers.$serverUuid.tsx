@@ -121,12 +121,14 @@ function ServerLayout() {
     }
 
     const isInstalling =
-        server?.status === 'installing' ||
-        server?.status === 'install_failed' ||
-        server?.status === 'restoring_backup' ||
-        server?.status === 'deleting'
-    const isDeferred = server?.status === 'deferred_os_selection'
-    const isSuspended = server?.status === 'suspended'
+        server?.lifecycle === 'installing' ||
+        server?.lifecycle === 'install_failed' ||
+        server?.lifecycle === 'restoring_backup' ||
+        server?.lifecycle === 'deleting'
+    const isDeferred = server?.lifecycle === 'deferred_os_selection'
+    // Its own axis, read from its own field -- a suspended server also has a
+    // lifecycle, and the two can be true at once.
+    const isSuspended = server?.suspendedAt != null
 
     return (
         <AppLayout routes={nav}>
@@ -137,12 +139,16 @@ function ServerLayout() {
                     </div>
                 }
             >
-                {isDeferred ? (
+                {/* Suspension wins over the lifecycle screens, matching the
+                    API: a suspended server refuses every request regardless of
+                    the stage it is in, so showing install progress it cannot
+                    act on would just be a dead end. */}
+                {isSuspended ? (
+                    <SuspendedServer />
+                ) : isDeferred ? (
                     <DeferredOSSelection server={server} />
                 ) : isInstalling ? (
                     <InstallingServer server={server} />
-                ) : isSuspended ? (
-                    <SuspendedServer />
                 ) : (
                     <Outlet />
                 )}

@@ -4,13 +4,13 @@ namespace App\Data\Server\Proxmox;
 
 use App\Data\Server\Power\PendingPowerActionData;
 use App\Data\Server\Power\PowerActionResultData;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use Spatie\LaravelData\Data;
 
 class ServerStateData extends Data
 {
     public function __construct(
-        public State $state,
+        public PowerState $powerState,
         public float $cpuUsed,
         public int $memoryTotal,
         public int $memoryUsed,
@@ -24,7 +24,7 @@ class ServerStateData extends Data
     public static function fromRaw(array $raw): self
     {
         return new self(...[
-            'state' => State::from($raw['status']),
+            'powerState' => PowerState::from($raw['status']),
             'uptime' => $raw['uptime'],
             'cpuUsed' => $raw['cpu'],
             'memoryTotal' => $raw['maxmem'],

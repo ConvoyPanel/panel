@@ -2,13 +2,22 @@
 
 namespace App\Enums\Server;
 
-enum ServerStatus: string
+/**
+ * Where a server sits in its provisioning lifecycle, as recorded by Convoy.
+ *
+ * Owned by us: nothing outside Convoy writes it, and it never changes on its own. Distinct
+ * from {@see PowerState}, which is the guest's live power state as reported by Proxmox.
+ *
+ * Suspension is deliberately *not* a case here. It is an administrative decision that
+ * coexists with any lifecycle stage rather than replacing one -- it lives on
+ * `servers.suspended_at`, and neither axis is derived from the other.
+ */
+enum ServerLifecycle: string
 {
     case READY = 'ready';
     case DEFERRED_OS_SELECTION = 'deferred_os_selection';
     case INSTALLING = 'installing';
     case INSTALL_FAILED = 'install_failed';
-    case SUSPENDED = 'suspended';
     case RESTORING_BACKUP = 'restoring_backup';
     case DELETING = 'deleting';
     case DELETION_FAILED = 'deletion_failed';
@@ -16,11 +25,6 @@ enum ServerStatus: string
     public function isReady(): bool
     {
         return $this === self::READY;
-    }
-
-    public function isSuspended(): bool
-    {
-        return $this === self::SUSPENDED;
     }
 
     public function isInstalling(): bool

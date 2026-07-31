@@ -22,7 +22,7 @@ import {
 } from './overview-helpers'
 
 type OverviewData = App.Data.Admin.Overview.OverviewData
-type Breakdown = App.Data.Admin.Overview.ServerStatusBreakdownData
+type Breakdown = App.Data.Admin.Overview.ServerBreakdownData
 type MetricTrend = App.Data.Admin.Overview.MetricTrendData
 
 /** Top-line count with a label, a week-over-week delta, and a trend sparkline. */
@@ -131,13 +131,19 @@ const CapacityMeter = ({
     )
 }
 
-const STATUS_META: ReadonlyArray<
-    [keyof Omit<Breakdown, 'total' | 'statuses'>, string, string]
+// Lifecycle buckets only -- these partition the fleet and add up to the total. Suspension is
+// a separate axis that overlaps every one of them, so it is rendered below the list rather
+// than as another row that would appear to be competing for the same servers.
+const LIFECYCLE_META: ReadonlyArray<
+    [
+        keyof Omit<Breakdown, 'total' | 'lifecycles' | 'suspended'>,
+        string,
+        string,
+    ]
 > = [
     ['ready', 'Ready', 'bg-emerald-500'],
     ['installing', 'Installing', 'bg-amber-500'],
     ['restoring', 'Restoring', 'bg-amber-500'],
-    ['suspended', 'Suspended', 'bg-muted-foreground/60'],
     ['deleting', 'Deleting', 'bg-muted-foreground/60'],
     ['failed', 'Failed', 'bg-destructive'],
 ]
@@ -270,14 +276,14 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                 <Card>
                     <CardHeader className='flex flex-row items-center justify-between space-y-0 p-5 pb-2'>
                         <CardTitle className='text-base'>
-                            Servers by status
+                            Servers by lifecycle
                         </CardTitle>
                         <StatLabel as='span' className='text-xs tabular-nums'>
                             {num(servers.total)} total
                         </StatLabel>
                     </CardHeader>
                     <CardContent className='p-5 pt-2'>
-                        {STATUS_META.map(([key, label, barClass]) => (
+                        {LIFECYCLE_META.map(([key, label, barClass]) => (
                             <StatusRow
                                 key={key}
                                 label={label}
@@ -285,6 +291,37 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                 barClass={barClass}
                             />
                         ))}
+                        <div className='mt-3 flex items-center gap-3 border-t pt-3'>
+                            <span
+                                className={cn(
+                                    'h-4 w-[3px] shrink-0 rounded-full',
+                                    servers.suspended === 0
+                                        ? 'bg-border'
+                                        : 'bg-destructive'
+                                )}
+                            />
+                            <span
+                                className={cn(
+                                    'text-sm',
+                                    servers.suspended === 0 &&
+                                        'text-muted-foreground'
+                                )}
+                            >
+                                Suspended
+                            </span>
+                            <span className='text-label text-xs'>
+                                also counted above
+                            </span>
+                            <span
+                                className={cn(
+                                    'ml-auto text-[15px] font-semibold tabular-nums',
+                                    servers.suspended === 0 &&
+                                        'text-muted-foreground font-normal'
+                                )}
+                            >
+                                {num(servers.suspended)}
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
 

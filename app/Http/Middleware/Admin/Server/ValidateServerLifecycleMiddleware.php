@@ -2,15 +2,15 @@
 
 namespace App\Http\Middleware\Admin\Server;
 
-use App\Enums\Server\ServerStatus;
-use App\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Enums\Server\ServerLifecycle;
+use App\Exceptions\Http\Server\ServerUnavailableException;
 use App\Models\Server;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class ValidateServerStatusMiddleware
+class ValidateServerLifecycleMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
@@ -20,8 +20,8 @@ class ValidateServerStatusMiddleware
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($server->status === ServerStatus::DELETING || $server->status === ServerStatus::DELETION_FAILED) {
-            throw new ServerStatusConflictException($server);
+        if ($server->lifecycle === ServerLifecycle::DELETING || $server->lifecycle === ServerLifecycle::DELETION_FAILED) {
+            throw new ServerUnavailableException($server);
         }
 
         return $next($request);

@@ -97,13 +97,13 @@ it('rejects a second power command while one is already in flight', function () 
 
     // First command claims the lock and reaches Proxmox.
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     // Second, while the lock is held, is rejected with the curated 409 code and
     // never touches Proxmox.
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'shutdown'])
         ->assertConflict()
         ->assertJsonPath('code', 'power_action_in_progress');
 
@@ -125,7 +125,7 @@ it('surfaces the pending power action on the server state', function () {
         ->assertJsonPath('data.pendingPowerAction', null);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     // Now the state echoes which command is holding the lock.
@@ -143,7 +143,7 @@ it('clears the pending action once the Proxmox task finishes', function () {
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'kill'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'kill'])
         ->assertNoContent();
 
     // Task still running, so the action is still pending and the UI keeps the
@@ -164,7 +164,7 @@ it('clears the pending action once the Proxmox task finishes', function () {
 
     // And the next command is accepted rather than 409'd.
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 });
 
@@ -175,7 +175,7 @@ it('surfaces a successful outcome once the task finishes, tied to the action tha
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     // While running there is no result yet — just the pending action, whose
@@ -203,7 +203,7 @@ it('surfaces a failed outcome with the Proxmox exit string', function () {
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'shutdown'])
         ->assertNoContent();
 
     // Running poll — still pending, no outcome.
@@ -234,7 +234,7 @@ it('clears a reboot as soon as its task finishes, even if the guest never appear
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'restart'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'restart'])
         ->assertNoContent();
 
     // Task running — still pending.
@@ -269,7 +269,7 @@ it('keeps the lock in place when Proxmox cannot report on the task', function ()
     $admin = User::factory()->create(['root_admin' => true]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->postJson("/api/admin/servers/{$server->uuid}/power", ['command' => 'shutdown'])
         ->assertNoContent();
 
     $this->actingAs($admin)
@@ -287,11 +287,11 @@ it('lets a different server be powered while another holds its lock', function (
 
     // Lock is per-server, so B is unaffected by A's in-flight action.
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$serverA->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$serverA->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     $this->actingAs($admin)
-        ->patchJson("/api/admin/servers/{$serverB->uuid}/state", ['state' => 'start'])
+        ->postJson("/api/admin/servers/{$serverB->uuid}/power", ['command' => 'start'])
         ->assertNoContent();
 
     Http::assertSentCount(2);

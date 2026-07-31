@@ -1,7 +1,7 @@
 import { actions } from '@/features/servers/components/client/Overview/Toolbar.tsx'
 import {
     type PowerAction,
-    updateState,
+    sendPowerCommand,
     useServer,
     useServerState,
 } from '@/features/servers/detail/api.ts'
@@ -35,7 +35,7 @@ const PowerActionsDropdown = () => {
             }, 1000)
             if (!confirmed) return
 
-            await updateState(server!.uuid, action)
+            await sendPowerCommand(server!.uuid, action)
         } catch (e) {
             toast.error('Power action failed')
             throw e
@@ -49,26 +49,34 @@ const PowerActionsDropdown = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem
-                    disabled={!data || pending || data?.state === 'running'}
+                    disabled={
+                        !data || pending || data?.powerState === 'running'
+                    }
                     onClick={() => handlePowerAction('start')}
                 >
                     Start
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    disabled={!data || pending || data?.state === 'stopped'}
+                    disabled={
+                        !data || pending || data?.powerState === 'stopped'
+                    }
                     onClick={() => handlePowerAction('restart')}
                 >
                     Restart
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     variant={'destructive'}
-                    disabled={!data || pending || data?.state === 'stopped'}
+                    disabled={
+                        !data || pending || data?.powerState === 'stopped'
+                    }
                     onClick={() => handlePowerAction('kill')}
                 >
                     Kill
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    disabled={!data || pending || data?.state === 'stopped'}
+                    disabled={
+                        !data || pending || data?.powerState === 'stopped'
+                    }
                     onClick={() => handlePowerAction('shutdown')}
                 >
                     Shutdown

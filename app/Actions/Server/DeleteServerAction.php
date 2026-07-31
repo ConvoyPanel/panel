@@ -4,7 +4,7 @@ namespace App\Actions\Server;
 
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\ProgressMode;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Jobs\Backup\BatchPurgeServerBackupsJob;
 use App\Jobs\Server\DeleteVmJob;
 use App\Jobs\Server\StopVmJob;
@@ -53,10 +53,10 @@ class DeleteServerAction
             },
         ]);
 
-        $deployment->server->update(['status' => ServerStatus::DELETING]);
+        $deployment->server->update(['lifecycle' => ServerLifecycle::DELETING]);
 
         Bus::chain($jobs)
-            ->catch($this->onFail($deployment, ServerStatus::DELETION_FAILED))
+            ->catch($this->onFail($deployment, ServerLifecycle::DELETION_FAILED))
             ->dispatch();
 
     }

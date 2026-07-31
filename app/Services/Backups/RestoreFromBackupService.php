@@ -2,8 +2,8 @@
 
 namespace App\Services\Backups;
 
-use App\Enums\Server\ServerStatus;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
+use App\Enums\Server\ServerLifecycle;
 use App\Jobs\Server\MonitorBackupRestorationJob;
 use App\Models\Backup;
 use App\Models\Server;
@@ -22,14 +22,14 @@ class RestoreFromBackupService
 
     public function handle(Server $server, Backup $backup)
     {
-        if (! $server->status->isReady()) {
+        if ($server->isSuspended() || ! $server->lifecycle->isReady()) {
             throw new BadRequestHttpException(
                 'This server is not currently in a state that allows for a backup to be restored.',
             );
         }
 
         $stateData = $this->serverClient->setServer($server)->getState();
-        if ($stateData->state !== State::STOPPED) {
+        if ($stateData->powerState !== PowerState::STOPPED) {
             throw new BadRequestHttpException(
                 'The server needs to be stopped before a backup can be restored.',
             );
@@ -43,7 +43,7 @@ class RestoreFromBackupService
 
         $this->connection->transaction(function () use ($server, $backup) {
             $server->update([
-                'status' => ServerStatus::RESTORING_BACKUP->value,
+                'lifecycle' => ServerLifecycle::RESTORING_BACKUP->value,
             ]);
 
             $upid = $this->proxmoxClient->setServer($server)->restore($backup);

@@ -28,7 +28,7 @@ interface InstallingServerProps {
 
 export default function InstallingServer({ server }: InstallingServerProps) {
     const { data: deployment } = useServerDeployment(server?.uuid, {
-        refetchInterval: server?.status === 'install_failed' ? false : 250,
+        refetchInterval: server?.lifecycle === 'install_failed' ? false : 250,
     })
     const queryClient = useQueryClient()
 
@@ -43,31 +43,32 @@ export default function InstallingServer({ server }: InstallingServerProps) {
     useEffect(() => {
         // If deployment is null and we are not failed, maybe it finished?
         // But if failed, we should still have deployment data (from backend change).
-        if (deployment === null && server?.status !== 'install_failed') {
+        if (deployment === null && server?.lifecycle !== 'install_failed') {
             refetchServer()
         }
 
         if (
             deployment?.status === DeploymentStatus.Failed &&
-            server?.status !== 'install_failed'
+            server?.lifecycle !== 'install_failed'
         ) {
             refetchServer()
         }
-    }, [deployment, server?.status])
+    }, [deployment, server?.lifecycle])
 
-    const isFailed = server?.status === 'install_failed'
+    const isFailed = server?.lifecycle === 'install_failed'
 
     const getTitle = () => {
         if (isFailed) return 'Installation Failed'
-        if (server?.status === 'deleting') return 'Deleting Server'
-        if (server?.status === 'restoring_backup') return 'Restoring Backup'
+        if (server?.lifecycle === 'deleting') return 'Deleting Server'
+        if (server?.lifecycle === 'restoring_backup') return 'Restoring Backup'
         return 'Server Installing'
     }
 
     const getLoadingText = () => {
         if (isFailed) return 'No deployment details available.'
-        if (server?.status === 'deleting') return 'Loading deletion progress...'
-        if (server?.status === 'restoring_backup')
+        if (server?.lifecycle === 'deleting')
+            return 'Loading deletion progress...'
+        if (server?.lifecycle === 'restoring_backup')
             return 'Loading restore progress...'
         return 'Loading installation progress...'
     }

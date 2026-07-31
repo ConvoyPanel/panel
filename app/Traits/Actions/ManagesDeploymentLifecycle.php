@@ -3,7 +3,7 @@
 namespace App\Traits\Actions;
 
 use App\Enums\Server\DeploymentStatus;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Deployment;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +21,7 @@ trait ManagesDeploymentLifecycle
 
     private function onComplete(Deployment $deployment): callable
     {
-        // The deployment's terminal status and the server status it implies are
+        // The deployment's terminal status and the server lifecycle it implies are
         // one fact written to two rows. Committing them together keeps the UI's
         // two sources of truth from disagreeing if a write is interrupted.
         return function () use ($deployment) {
@@ -30,12 +30,12 @@ trait ManagesDeploymentLifecycle
                     'status' => DeploymentStatus::COMPLETED,
                     'completed_at' => now(),
                 ]);
-                $deployment->server->update(['status' => ServerStatus::READY]);
+                $deployment->server->update(['lifecycle' => ServerLifecycle::READY]);
             });
         };
     }
 
-    private function onFail(Deployment $deployment, ServerStatus $serverStatus = ServerStatus::INSTALL_FAILED): callable
+    private function onFail(Deployment $deployment, ServerLifecycle $serverStatus = ServerLifecycle::INSTALL_FAILED): callable
     {
         return function () use ($deployment, $serverStatus) {
             DB::transaction(function () use ($deployment, $serverStatus) {

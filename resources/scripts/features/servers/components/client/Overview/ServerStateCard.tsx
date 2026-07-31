@@ -20,19 +20,19 @@ const ServerStateCard = () => {
                     }
                 >
                     <span className='relative mx-1 mr-2 flex h-2 w-2 @sm:mr-4'>
-                        {state.state === 'running' && (
+                        {state.powerState === 'running' && (
                             <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-green-600 opacity-75' />
                         )}
                         <span
                             className={cn(
                                 'relative inline-flex h-2 w-2 rounded-full',
-                                state.state === 'running'
+                                state.powerState === 'running'
                                     ? 'bg-green-600'
                                     : 'bg-destructive'
                             )}
                         />
                     </span>
-                    {state.state === 'running' ? 'Running' : 'Stopped'}
+                    {state.powerState === 'running' ? 'Running' : 'Stopped'}
                 </p>
             ) : (
                 <Skeleton className={'h-7 w-full @sm:h-8'} />

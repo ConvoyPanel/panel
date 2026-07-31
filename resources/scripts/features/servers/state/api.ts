@@ -15,8 +15,8 @@ export type PowerAction = 'start' | 'shutdown' | 'kill' | 'restart'
 // Wayfinder emits a URI-keyed dictionary rather than a callable — the panel
 // uses the /api/admin route.
 const getStateRoute = ServerController.getState['/api/admin/servers/{server}/state']
-const updateStateRoute =
-    ServerController.updateState['/api/admin/servers/{server}/state']
+const sendPowerCommandRoute =
+    ServerController.sendPowerCommand['/api/admin/servers/{server}/power']
 
 export const serverStateQueries = {
     all: (uuid: string) => ['admin', 'servers', uuid, 'state'] as const,
@@ -33,12 +33,12 @@ export const serverStateQueries = {
         }),
 }
 
-export const useUpdateServerState = (uuid: string) => {
+export const useSendPowerCommand = (uuid: string) => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (action: PowerAction) =>
-            apiFetch(updateStateRoute(uuid), { body: { state: action } }),
+        mutationFn: (command: PowerAction) =>
+            apiFetch(sendPowerCommandRoute(uuid), { body: { command } }),
         onSuccess: () =>
             queryClient.invalidateQueries({
                 queryKey: serverStateQueries.all(uuid),

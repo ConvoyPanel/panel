@@ -20,8 +20,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 
-const updateStateRoute =
-    ServerController.updateState['/api/admin/servers/{server}/state']
+const sendPowerCommandRoute =
+    ServerController.sendPowerCommand['/api/admin/servers/{server}/power']
 
 const labels: Record<PowerAction, string> = {
     start: 'Start',
@@ -55,8 +55,8 @@ const ServerBulkPowerActions = ({ servers, onDone }: Props) => {
         setPending(true)
         const results = await Promise.allSettled(
             servers.map(server =>
-                apiFetch(updateStateRoute(server.uuid), {
-                    body: { state: action },
+                apiFetch(sendPowerCommandRoute(server.uuid), {
+                    body: { command: action },
                 })
             )
         )

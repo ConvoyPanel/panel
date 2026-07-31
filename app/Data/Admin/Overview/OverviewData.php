@@ -11,7 +11,7 @@ class OverviewData extends Data
     public function __construct(
         public CarbonImmutable $generatedAt,
         public FleetSummaryData $summary,
-        public ServerStatusBreakdownData $servers,
+        public ServerBreakdownData $servers,
         /** Fleet memory: committed VM memory vs. node capacity. */
         public ResourceAllocationData $memory,
         /** Fleet storage: committed VM disk vs. VM-disk storage capacity. */

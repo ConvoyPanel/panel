@@ -5,8 +5,8 @@ namespace App\Services\Servers;
 use App\Actions\Server\DeleteServerAction;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
-use App\Enums\Server\ServerStatus;
-use App\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Enums\Server\ServerLifecycle;
+use App\Exceptions\Http\Server\ServerUnavailableException;
 use App\Models\Server;
 
 class ServerDeletionService
@@ -35,13 +35,13 @@ class ServerDeletionService
 
     public function validateStatus(Server $server, bool $verifyStatusOnly = false): void
     {
-        if ($server->status !== ServerStatus::DELETING) {
-            throw new ServerStatusConflictException($server);
+        if ($server->lifecycle !== ServerLifecycle::DELETING) {
+            throw new ServerUnavailableException($server);
         }
 
         if (! $verifyStatusOnly) {
             if ($server->backups()->whereNull('completed_at')->exists()) {
-                throw new ServerStatusConflictException($server);
+                throw new ServerUnavailableException($server);
             }
         }
     }

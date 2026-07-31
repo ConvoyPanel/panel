@@ -62,12 +62,19 @@ const ServerCard = ({ server }: Props) => {
                     {/* `ready` is the resting state of every healthy server, so
                         badging it says nothing -- a badge here means "this one
                         needs your attention". */}
-                    {server.status !== 'ready' && (
+                    {server.lifecycle !== 'ready' && (
                         <Badge
                             variant={'secondary'}
                             className={'shrink-0 capitalize'}
                         >
-                            {server.status.replace(/_/g, ' ')}
+                            {server.lifecycle.replace(/_/g, ' ')}
+                        </Badge>
+                    )}
+                    {/* Its own badge rather than a lifecycle value, so a suspended
+                        server that is also mid-install shows both facts. */}
+                    {server.suspendedAt && (
+                        <Badge variant={'destructive'} className={'shrink-0'}>
+                            Suspended
                         </Badge>
                     )}
                 </ItemTitle>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Data\PaginationMeta;
 use App\Data\Server\ServerData;
 use App\Enums\Server\PowerCommand;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Enums\Server\SuspensionAction;
 use App\Exceptions\Proxmox\RequestException;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
@@ -147,9 +147,9 @@ class ServerController
         return $state;
     }
 
-    public function updateState(SendPowerCommandRequest $request, Server $server)
+    public function sendPowerCommand(SendPowerCommandRequest $request, Server $server)
     {
-        $this->powerCommand->handle($server, $request->enum('state', PowerCommand::class));
+        $this->powerCommand->handle($server, $request->enum('command', PowerCommand::class));
 
         return response()->noContent();
     }
@@ -157,7 +157,7 @@ class ServerController
     public function destroy(Request $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $server->update(['status' => ServerStatus::DELETING->value]);
+            $server->update(['lifecycle' => ServerLifecycle::DELETING->value]);
 
             $this->deletionService->handle($server, $request->input('no_purge', false));
         });

@@ -22,7 +22,9 @@ class SendPowerCommandRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'state' => ['required', new Enum(PowerCommand::class)],
+            // A command, not a state: `start` is an instruction to the hypervisor, and the
+            // state it produces (`running`) has a different name. See PowerCommand.
+            'command' => ['required', new Enum(PowerCommand::class)],
         ];
     }
 }

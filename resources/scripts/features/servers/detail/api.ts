@@ -55,7 +55,8 @@ export const getServer = async (uuid: string): Promise<Server> => {
         hostname: data.hostname,
         name: data.name,
         description: data.description,
-        status: data.status,
+        lifecycle: data.lifecycle,
+        suspendedAt: data.suspendedAt ?? null,
         powerState: data.powerState ?? null,
         cpu: data.cpu,
         memory: data.memory,
@@ -81,7 +82,7 @@ export const getState = async (uuid: string): Promise<ServerStateData> => {
     )
 
     return {
-        state: data.state,
+        powerState: data.powerState,
         cpuUsed: data.cpuUsed,
         memoryTotal: data.memoryTotal,
         memoryUsed: data.memoryUsed,
@@ -319,11 +320,11 @@ export const useServerStatistics = (args: {
     )
 }
 
-export const updateState = async (
+export const sendPowerCommand = async (
     uuid: string,
-    state: PowerAction
+    command: PowerAction
 ): Promise<void> => {
-    await apiFetch(ServerController.updateState(uuid), { body: { state } })
+    await apiFetch(ServerController.sendPowerCommand(uuid), { body: { command } })
 }
 
 export const reinstallServer = async (

@@ -3,7 +3,7 @@
 namespace App\Console\Commands\Maintenance;
 
 use App\Enums\Server\DeploymentStatus;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Deployment;
 use App\Models\DeploymentStep;
 use App\Models\Server;
@@ -70,9 +70,9 @@ class PruneDeploymentsCommand extends Command
                 // Mark servers that are stuck in installing as install_failed
                 Server::query()
                     ->whereIn('id', $serverIds)
-                    ->where('status', ServerStatus::INSTALLING)
+                    ->where('lifecycle', ServerLifecycle::INSTALLING)
                     ->update([
-                        'status' => ServerStatus::INSTALL_FAILED,
+                        'lifecycle' => ServerLifecycle::INSTALL_FAILED,
                     ]);
             });
         } else {

@@ -114,14 +114,16 @@ Route::prefix('/servers/{server}')->middleware(
         [Client\Servers\ServerController::class, 'retryInstallation'],
     )->name('servers.show.retry-installation');
 
+    // GET /state reads the guest's live condition; POST /power sends a command. They were the
+    // same path with opposite meanings, which is what made `{state: 'start'}` look reasonable.
     Route::get(
         '/state',
         [Client\Servers\ServerController::class, 'getState'],
     )->name('servers.show.state');
-    Route::patch(
-        '/state',
-        [Client\Servers\ServerController::class, 'updateState'],
-    );
+    Route::post(
+        '/power',
+        [Client\Servers\ServerController::class, 'sendPowerCommand'],
+    )->name('servers.show.power');
 
     Route::post(
         '/create-console-session',

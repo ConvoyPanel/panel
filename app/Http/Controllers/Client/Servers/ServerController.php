@@ -8,7 +8,7 @@ use App\Data\Server\ServerData;
 use App\Enums\Server\ConsoleType;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Servers\SendPowerCommandRequest;
@@ -50,7 +50,7 @@ class ServerController
     {
         $query = $server->deployments()->latest('requested_at');
 
-        if ($server->status === ServerStatus::INSTALL_FAILED) {
+        if ($server->lifecycle === ServerLifecycle::INSTALL_FAILED) {
             $query->where('status', DeploymentStatus::FAILED);
         } else {
             $query->nonCompleted();
@@ -68,7 +68,7 @@ class ServerController
     public function retryInstallation(RetryInstallationRequest $request, Server $server)
     {
         $server->update([
-            'status' => ServerStatus::DEFERRED_OS_SELECTION,
+            'lifecycle' => ServerLifecycle::DEFERRED_OS_SELECTION,
         ]);
 
         return response()->noContent();
@@ -83,9 +83,9 @@ class ServerController
         return $state;
     }
 
-    public function updateState(Server $server, SendPowerCommandRequest $request)
+    public function sendPowerCommand(Server $server, SendPowerCommandRequest $request)
     {
-        $this->powerCommand->handle($server, $request->enum('state', PowerCommand::class));
+        $this->powerCommand->handle($server, $request->enum('command', PowerCommand::class));
 
         return response()->noContent();
     }

@@ -3,7 +3,7 @@
 use App\Data\Admin\Overview\NodeResourceSnapshotData;
 use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
@@ -273,7 +273,7 @@ it('says unknown rather than stopped for a guest it cannot vouch for', function 
     expect($cache->stateFor($server))->toBeNull();
 
     $cache->put($this->node, [100 => 'running']);
-    expect($cache->stateFor($server))->toBe(State::RUNNING);
+    expect($cache->stateFor($server))->toBe(PowerState::RUNNING);
 });
 
 it('expires the guest map with the node status it was observed alongside', function () {

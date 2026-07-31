@@ -1,6 +1,6 @@
 import { cn } from '@/utils'
 
-type State = App.Enums.Server.State
+type State = App.Enums.Server.PowerState
 
 const labels: Record<State, string> = {
     running: 'Running',

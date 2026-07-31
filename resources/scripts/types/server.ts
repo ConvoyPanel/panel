@@ -1,12 +1,20 @@
 import { Node } from '@/types/node'
 import { PaginatedResult } from '@/utils/http.ts'
 
-export enum ServerLifecycleStatus {
+/**
+ * Where Convoy has a server in its provisioning lifecycle.
+ *
+ * A runtime mirror of `App.Enums.Server.ServerLifecycle`, which the generator emits as a
+ * type-only union — this exists so the value can be used in label maps and comparisons.
+ *
+ * Suspension is deliberately absent: it is an independent axis carried by `suspendedAt`,
+ * and a suspended server still reports whatever lifecycle it was in.
+ */
+export enum ServerLifecycle {
     Ready = 'ready',
     DeferredOsSelection = 'deferred_os_selection',
     Installing = 'installing',
     InstallFailed = 'install_failed',
-    Suspended = 'suspended',
     RestoringBackup = 'restoring_backup',
     Deleting = 'deleting',
     DeletionFailed = 'deletion_failed',
@@ -24,8 +32,12 @@ export interface Server {
     hostname: string
     name: string
     description: string | null
-    status: ServerLifecycleStatus
-    powerState: App.Enums.Server.State | null
+    /** Convoy's provisioning stage. Says nothing about suspension or power. */
+    lifecycle: ServerLifecycle
+    /** ISO timestamp of an administrative suspension, or null if not suspended. */
+    suspendedAt: string | null
+    /** The guest's live power state per the last poll, or null for "we cannot say". */
+    powerState: App.Enums.Server.PowerState | null
     cpu: number
     memory: number
     disk: number
@@ -45,7 +57,11 @@ export interface Server {
 
 export type PaginatedServers = PaginatedResult<Server>
 
-export type ServerState = 'running' | 'stopped'
+/**
+ * The subset of `PowerState` the live status endpoint reports — Proxmox only ever answers
+ * running or stopped there; the synthetic transition states are Convoy's own.
+ */
+export type ObservedPowerState = 'running' | 'stopped'
 
 export interface PendingPowerAction {
     command:
@@ -70,7 +86,7 @@ export interface PowerActionResult {
 }
 
 export interface ServerStateData {
-    state: ServerState
+    powerState: ObservedPowerState
     cpuUsed: number
     memoryTotal: number
     memoryUsed: number

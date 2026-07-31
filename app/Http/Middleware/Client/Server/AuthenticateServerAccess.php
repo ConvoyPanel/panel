@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware\Client\Server;
 
-use App\Exceptions\Http\Server\ServerStatusConflictException;
+use App\Exceptions\Http\Server\ServerUnavailableException;
 use App\Models\Server;
 use Closure;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AuthenticateServerAccess
 {
     /**
-     * Routes that this middleware should not apply to regardless of the status.
+     * Routes that this middleware should not apply to regardless of the server's condition.
      */
     protected array $except = [
         'client.servers.show',
@@ -38,8 +38,11 @@ class AuthenticateServerAccess
             throw new NotFoundHttpException('Server not found');
         }
 
-        if (! $server->isReady() && ! $request->routeIs($this->except)) {
-            throw new ServerStatusConflictException($server);
+        // Both axes, spelled out. Suspension used to be a lifecycle value, so `isReady()`
+        // alone happened to cover it; now that they are separate columns, dropping either
+        // check silently opens the API up to one of the two conditions.
+        if (($server->isSuspended() || ! $server->isReady()) && ! $request->routeIs($this->except)) {
+            throw new ServerUnavailableException($server);
         }
 
         return $next($request);

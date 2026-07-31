@@ -3,8 +3,8 @@
 namespace App\Data\Server;
 
 use App\Data\Node\NodeData;
-use App\Enums\Server\ServerStatus;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Server;
 use App\Services\Nodes\GuestStateCache;
 use Carbon\CarbonImmutable;
@@ -28,16 +28,30 @@ class ServerData extends Data
         public string $hostname,
         public string $name,
         public ?string $description,
-        public ServerStatus $status,
+        /**
+         * Where Convoy has this server in its provisioning lifecycle.
+         *
+         * One of three independent facts about a server's condition, none of which is
+         * derived from the others -- see `$suspendedAt` and `$powerState`.
+         */
+        public ServerLifecycle $lifecycle,
+        /**
+         * When the server was administratively suspended, or null if it isn't.
+         *
+         * Kept apart from `$lifecycle` on purpose: suspension coexists with any stage, so a
+         * suspended server still reports the lifecycle it was in. Consumers deciding whether
+         * a server is usable have to check both.
+         */
+        public ?CarbonImmutable $suspendedAt,
         /**
          * Power state as of the last poll, or null for "we cannot say".
          *
-         * Distinct from `$status`, which is Convoy's lifecycle (is it built,
-         * suspended, installing) and says nothing about whether the guest is
-         * currently running. Read from the poller's cache -- never from PVE, so
-         * a list of servers on a dead node costs nothing to draw.
+         * The hypervisor's fact, not Convoy's: it says whether the guest is running right
+         * now and nothing about whether the server is built or suspended. Read from the
+         * poller's cache -- never from PVE, so a list of servers on a dead node costs
+         * nothing to draw.
          */
-        public ?State $powerState,
+        public ?PowerState $powerState,
         public int $cpu,
         public int $memory,
         public int $disk,
@@ -66,7 +80,8 @@ class ServerData extends Data
             hostname: $server->hostname,
             name: $server->name,
             description: $server->description,
-            status: $server->status,
+            lifecycle: $server->lifecycle,
+            suspendedAt: $server->suspended_at,
             powerState: app(GuestStateCache::class)->stateFor($server),
             cpu: $server->cpu,
             memory: (int) $server->memory,

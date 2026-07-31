@@ -2,7 +2,7 @@
 
 namespace App\Actions\Server;
 
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
@@ -32,7 +32,7 @@ class RebuildServerAction
             $this->onComplete($deployment),
         ]);
 
-        $deployment->server->update(['status' => ServerStatus::INSTALLING]);
+        $deployment->server->update(['lifecycle' => ServerLifecycle::INSTALLING]);
 
         Bus::chain($jobs)
             ->catch($this->onFail($deployment))

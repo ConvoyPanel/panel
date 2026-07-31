@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Client\Servers\Settings;
 
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Server;
 use App\Models\Template;
@@ -19,7 +19,13 @@ class ReinstallServerRequest extends BaseApiRequest
     {
         $server = $this->parameter('server', Server::class);
 
-        return $server->isReady() || $server->status === ServerStatus::DEFERRED_OS_SELECTION;
+        // This route is exempt from AuthenticateServerAccess (a server awaiting OS selection
+        // has to reach it), so the suspension check has to happen here or not at all.
+        if ($server->isSuspended()) {
+            return false;
+        }
+
+        return $server->isReady() || $server->lifecycle === ServerLifecycle::DEFERRED_OS_SELECTION;
     }
 
     /**

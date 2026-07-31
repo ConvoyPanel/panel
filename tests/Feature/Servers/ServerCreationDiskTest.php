@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Location;
 use App\Models\NetworkInterface;
 use App\Models\Node;
@@ -54,7 +54,7 @@ it('creates a server with its uuid populated (guarded-field regression)', functi
 
     expect($server->uuid)->not->toBeNull();
     expect($server->uuid_short)->toBe(substr($server->uuid, 0, 8));
-    expect($server->status)->toBe(ServerStatus::DEFERRED_OS_SELECTION);
+    expect($server->lifecycle)->toBe(ServerLifecycle::DEFERRED_OS_SELECTION);
 });
 
 it('persists the speed cap and anchors the bandwidth reset day', function () {
@@ -159,7 +159,7 @@ it('creates an addressless deferred server through the API', function () {
 
     $this->assertDatabaseHas('servers', [
         'name' => 'Test Server',
-        'status' => ServerStatus::DEFERRED_OS_SELECTION->value,
+        'lifecycle' => ServerLifecycle::DEFERRED_OS_SELECTION->value,
         'speed_limit' => 12_500_000,
         'network_interface_id' => $interface->id,
     ]);

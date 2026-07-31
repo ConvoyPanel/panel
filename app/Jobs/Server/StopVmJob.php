@@ -3,7 +3,7 @@
 namespace App\Jobs\Server;
 
 use App\Enums\Server\PowerCommand;
-use App\Enums\Server\State;
+use App\Enums\Server\PowerState;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\DeploymentStep;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
@@ -69,7 +69,7 @@ class StopVmJob implements ShouldQueue
             return;
         }
 
-        if ($state->state === State::STOPPED) {
+        if ($state->powerState === PowerState::STOPPED) {
             $this->step->markCompleted();
         } else {
             $this->release(1);

@@ -1,7 +1,7 @@
 import {
     type PowerAction,
     serverStateQueries,
-    useUpdateServerState,
+    useSendPowerCommand,
 } from '@/features/servers/state/api'
 import { Server } from '@/types/server.ts'
 import { useQuery } from '@tanstack/react-query'
@@ -53,10 +53,10 @@ interface Props {
 const ServerPowerActions = ({ server }: Props) => {
     const confirm = useConfirmationStore(state => state.confirm)
     const { data: state } = useQuery(serverStateQueries.detail(server.uuid))
-    const { mutateAsync } = useUpdateServerState(server.uuid)
+    const { mutateAsync } = useSendPowerCommand(server.uuid)
 
-    const isRunning = state?.state === 'running'
-    const isStopped = state?.state === 'stopped'
+    const isRunning = state?.powerState === 'running'
+    const isStopped = state?.powerState === 'stopped'
     const pending = state?.pendingPowerAction ?? null
     // Undefined (still loading), a transitional state, or a power action already
     // in flight disables everything.

@@ -2,7 +2,7 @@
 
 namespace App\Services\Servers;
 
-use App\Enums\Server\LockStatus;
+use App\Enums\Server\ProxmoxLock;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\Node;
 use App\Models\Server;
@@ -56,7 +56,7 @@ class ServerBuildService
         $servers = $this->resourceClient->setServer($server)->getResources();
 
         $vm = $servers->where('vmid', $server->vmid)
-            ->where('lockStatus', '!=', LockStatus::CLONE)
+            ->where('lockStatus', '!=', ProxmoxLock::CLONE)
             ->first();
 
         if ($vm) {

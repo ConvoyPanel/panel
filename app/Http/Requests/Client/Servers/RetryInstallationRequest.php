@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Client\Servers;
 
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Server;
 
@@ -15,7 +15,9 @@ class RetryInstallationRequest extends BaseApiRequest
     {
         $server = $this->parameter('server', Server::class);
 
-        return $server->status === ServerStatus::INSTALL_FAILED;
+        // Exempt from AuthenticateServerAccess (a failed install is by definition not ready),
+        // so suspension is only enforced here.
+        return ! $server->isSuspended() && $server->lifecycle === ServerLifecycle::INSTALL_FAILED;
     }
 
     /**

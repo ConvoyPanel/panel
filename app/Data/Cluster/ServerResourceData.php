@@ -2,7 +2,7 @@
 
 namespace App\Data\Cluster;
 
-use App\Enums\Server\LockStatus;
+use App\Enums\Server\ProxmoxLock;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\Data;
 
@@ -40,7 +40,7 @@ class ServerResourceData extends Data
 
         // Other
         public readonly int $uptimeInSeconds,
-        public readonly ?LockStatus $lockStatus,
+        public readonly ?ProxmoxLock $lockStatus,
         public readonly ?string $haState,
     ) {}
 
@@ -70,7 +70,7 @@ class ServerResourceData extends Data
             networkIn       : Arr::get($raw, 'netin', 0),
             networkOut      : Arr::get($raw, 'netout', 0),
             uptimeInSeconds : Arr::get($raw, 'uptime', 0),
-            lockStatus      : filled($lockStatus) ? LockStatus::tryFrom(Arr::get($raw, 'lock')) : null,
+            lockStatus      : filled($lockStatus) ? ProxmoxLock::tryFrom(Arr::get($raw, 'lock')) : null,
             haState         : Arr::get($raw, 'hastate'),
         );
     }

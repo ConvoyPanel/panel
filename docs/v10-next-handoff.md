@@ -330,6 +330,31 @@ follow-ups** below — all doable in-sandbox, no prod data.
   removed. Reference impls: `features/servers/api.ts`, `features/overview/api.ts`.
 
 ### Shipped feature work (all on `next`, tests green)
+- **Server condition split into three named axes — naming convention, read before adding a fourth.**
+  A server's condition used to be `status` (Convoy's) vs `state` (Proxmox's) — synonyms in English, so
+  nobody could remember which was which. The distinction is now carried by the *subject*, not the noun:
+  `ServerLifecycle` (Convoy's provisioning stage, `servers.lifecycle`), `PowerState` (the guest's live
+  power state, polled, never ours), `ProxmoxLock` (PVE's own `lock` field, was `LockStatus`). Rule for
+  new cases: **state** = observed from outside and changes without us, **status** = we record it and only
+  we write it — but the class name must still name its subject.
+  **`suspended` is no longer a lifecycle value.** It was orthogonal all along (a server is suspended *and*
+  installed, not instead of), so suspending overwrote the stage and unsuspending had to guess `ready` —
+  by writing NULL, which had been a not-null violation since `2025_07_22_183612`. It now lives on
+  `servers.suspended_at` and nothing derives one axis from the other.
+  ⚠️ **The gotcha this creates:** `isReady()` used to be false for suspended servers as a side effect.
+  It isn't any more, so every "is this usable" check must test **both** axes explicitly —
+  `AuthenticateServerAccess`, `ReinstallServerRequest`/`RetryInstallationRequest` (both exempt from that
+  middleware, so they carry their own check), and `RestoreFromBackupService`. Dropping either half
+  silently reopens access. Covered by `tests/Feature/Servers/SuspensionSeparateFromLifecycleTest.php`.
+  Admin overview counts suspended servers with a separate query — the count **overlaps** the lifecycle
+  buckets rather than partitioning them, so it must never be summed into a total or charted as a
+  competing slice.
+  **Power endpoint moved: `PATCH /servers/{server}/state {state: 'start'}` → `POST
+  /servers/{server}/power {command: 'start'}`** (client + admin + application). `start` is a command;
+  the state it produces is called `running`. `GET /state` is unchanged and still reads the guest's live
+  condition — the two used to share a path with opposite meanings, which is what made the old body look
+  reasonable. Controller methods are now `sendPowerCommand`; frontend helpers are `sendPowerCommand` /
+  `useSendPowerCommand`. POST (not PATCH) matches the neighbouring `/suspend` + `/unsuspend` actions.
 - **IPAM allocator rewrite** — all 4 slices done. Allocation is one indexed `FOR UPDATE SKIP LOCKED`
   query (O(log N + n), race-free); IPs stored as Postgres `inet` with a partial index; sparse
   materialization for large/v6 blocks (no address-space-sized generation); `AddressState` enum

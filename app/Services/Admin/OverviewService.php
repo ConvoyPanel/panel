@@ -11,8 +11,8 @@ use App\Data\Admin\Overview\NodeSummaryData;
 use App\Data\Admin\Overview\OverviewData;
 use App\Data\Admin\Overview\OverviewTrendsData;
 use App\Data\Admin\Overview\ResourceAllocationData;
-use App\Data\Admin\Overview\ServerStatusBreakdownData;
-use App\Enums\Server\ServerStatus;
+use App\Data\Admin\Overview\ServerBreakdownData;
+use App\Enums\Server\ServerLifecycle;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
 use App\Models\Backup;
@@ -82,12 +82,13 @@ class OverviewService
     {
         $nodes = $this->loadNodes();
         $allocations = $this->loadServerAllocations();
-        $statuses = $this->loadServerStatuses();
+        $lifecycles = $this->loadServerLifecycles();
+        $suspended = $this->countSuspendedServers();
 
         return new OverviewData(
             generatedAt: CarbonImmutable::now(),
-            summary: $this->summary($nodes, $statuses),
-            servers: $this->servers($statuses),
+            summary: $this->summary($nodes, $lifecycles),
+            servers: $this->servers($lifecycles, $suspended),
             memory: $this->memory($nodes, $allocations),
             storage: $this->storage($allocations),
             addresses: $this->addresses(),
@@ -173,49 +174,61 @@ class OverviewService
             ->keyBy('node_id');
     }
 
-    /** @return Collection<string, int>  status value => count */
-    private function loadServerStatuses(): Collection
+    /** @return Collection<string, int>  lifecycle value => count */
+    private function loadServerLifecycles(): Collection
     {
         return Server::query()
             ->toBase()
-            ->select('status')
+            ->select('lifecycle')
             ->selectRaw('COUNT(*) as total')
-            ->groupBy('status')
+            ->groupBy('lifecycle')
             ->get()
-            ->mapWithKeys(fn (object $row) => [(string) $row->status => (int) $row->total]);
+            ->mapWithKeys(fn (object $row) => [(string) $row->lifecycle => (int) $row->total]);
+    }
+
+    /**
+     * Suspended servers, counted separately because suspension is not a lifecycle bucket.
+     *
+     * These rows are *also* counted under whatever lifecycle they're in, so this figure
+     * overlaps the breakdown rather than partitioning it -- it must never be summed with
+     * the lifecycle counts to get a total.
+     */
+    private function countSuspendedServers(): int
+    {
+        return Server::query()->whereNotNull('suspended_at')->count();
     }
 
     /** @param  Collection<int, Node>  $nodes */
-    private function summary(Collection $nodes, Collection $statuses): FleetSummaryData
+    private function summary(Collection $nodes, Collection $lifecycles): FleetSummaryData
     {
         return new FleetSummaryData(
-            servers: (int) $statuses->sum(),
+            servers: (int) $lifecycles->sum(),
             nodes: $nodes->count(),
             users: User::query()->count(),
             locations: Location::query()->count(),
-            failedServers: $this->failedServers($statuses),
+            failedServers: $this->failedServers($lifecycles),
         );
     }
 
-    private function servers(Collection $statuses): ServerStatusBreakdownData
+    private function servers(Collection $lifecycles, int $suspended): ServerBreakdownData
     {
-        return new ServerStatusBreakdownData(
-            total: (int) $statuses->sum(),
-            ready: (int) ($statuses[ServerStatus::READY->value] ?? 0),
-            installing: (int) ($statuses[ServerStatus::INSTALLING->value] ?? 0),
-            suspended: (int) ($statuses[ServerStatus::SUSPENDED->value] ?? 0),
-            restoring: (int) ($statuses[ServerStatus::RESTORING_BACKUP->value] ?? 0),
-            deleting: (int) ($statuses[ServerStatus::DELETING->value] ?? 0),
-            failed: $this->failedServers($statuses),
-            statuses: $statuses->all(),
+        return new ServerBreakdownData(
+            total: (int) $lifecycles->sum(),
+            ready: (int) ($lifecycles[ServerLifecycle::READY->value] ?? 0),
+            installing: (int) ($lifecycles[ServerLifecycle::INSTALLING->value] ?? 0),
+            restoring: (int) ($lifecycles[ServerLifecycle::RESTORING_BACKUP->value] ?? 0),
+            deleting: (int) ($lifecycles[ServerLifecycle::DELETING->value] ?? 0),
+            failed: $this->failedServers($lifecycles),
+            suspended: $suspended,
+            lifecycles: $lifecycles->all(),
         );
     }
 
-    private function failedServers(Collection $statuses): int
+    private function failedServers(Collection $lifecycles): int
     {
         return (int) (
-            ($statuses[ServerStatus::INSTALL_FAILED->value] ?? 0)
-            + ($statuses[ServerStatus::DELETION_FAILED->value] ?? 0)
+            ($lifecycles[ServerLifecycle::INSTALL_FAILED->value] ?? 0)
+            + ($lifecycles[ServerLifecycle::DELETION_FAILED->value] ?? 0)
         );
     }
 

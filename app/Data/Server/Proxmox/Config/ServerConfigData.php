@@ -4,8 +4,8 @@ namespace App\Data\Server\Proxmox\Config;
 
 use App\Enums\Server\BiosType;
 use App\Enums\Server\HugePagesSetting;
-use App\Enums\Server\LockStatus;
 use App\Enums\Server\OperatingSystemType;
+use App\Enums\Server\ProxmoxLock;
 use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
@@ -131,7 +131,7 @@ class ServerConfigData extends Data
 
         public ?CarbonImmutable $rtcStartDate,
 
-        public ?LockStatus $lockStatus,
+        public ?ProxmoxLock $lockStatus,
 
         public ?string $qemuConfig,
         /**
@@ -332,7 +332,7 @@ class ServerConfigData extends Data
             rtcStartDate                      : $exists('startdate') ? CarbonImmutable::parse(
                 $get('startdate'),
             ) : null,
-            lockStatus                        : LockStatus::tryFrom(
+            lockStatus                        : ProxmoxLock::tryFrom(
                 $get('lock', ''),
             ),
             qemuConfig                        : $get('machine'),

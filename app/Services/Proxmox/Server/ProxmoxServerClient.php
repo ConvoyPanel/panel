@@ -32,7 +32,7 @@ class ProxmoxServerClient extends ProxmoxClient
         // PVE -- from showing a stale badge in the minute after a power action,
         // and it costs one cache write on a request that just paid for a round
         // trip to Proxmox.
-        $this->guestStates->observe($this->getServer(), $state->state);
+        $this->guestStates->observe($this->getServer(), $state->powerState);
 
         return $state;
     }

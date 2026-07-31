@@ -7,7 +7,7 @@ use App\Data\Cluster\ServerResourceData;
 use App\Enums\Network\AddressVersion;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
-use App\Enums\Server\ServerStatus;
+use App\Enums\Server\ServerLifecycle;
 use App\Exceptions\Proxmox\NextVMIDRetrievalException;
 use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
@@ -84,7 +84,7 @@ class ServerCreationService
                 'hostname' => $data['hostname'],
                 'name' => $data['name'],
                 'description' => Arr::get($data, 'description'),
-                'status' => $data['deferred_os_selection'] ? ServerStatus::DEFERRED_OS_SELECTION : ServerStatus::INSTALLING,
+                'lifecycle' => $data['deferred_os_selection'] ? ServerLifecycle::DEFERRED_OS_SELECTION : ServerLifecycle::INSTALLING,
                 'cpu' => $data['limits']['cpu'],
                 'memory' => $data['limits']['memory'],
                 'disk' => $data['limits']['disk'],
