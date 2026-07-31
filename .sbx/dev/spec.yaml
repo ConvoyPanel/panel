@@ -92,20 +92,17 @@ commands:
     # baked in here and dies with "Executable doesn't exist at .../chromium-<id>".
     # A real package.json (rather than --no-save) is what keeps it installed — with
     # nothing declared, the next npm command in this prefix prunes node_modules.
-    - command:
-          - "bash"
-          - "-lc"
-          - |
-            set -euo pipefail
-            cat > /opt/sbx-e2e/package.json <<'PKGEOF'
-            {
-              "name": "sbx-e2e",
-              "private": true,
-              "type": "module",
-              "dependencies": { "playwright": "1.62.0" }
-            }
-            PKGEOF
-            npm --prefix /opt/sbx-e2e install --loglevel=error
+    - command: |
+        set -eu
+        cat > /opt/sbx-e2e/package.json <<'PKGEOF'
+        {
+          "name": "sbx-e2e",
+          "private": true,
+          "type": "module",
+          "dependencies": { "playwright": "1.62.0" }
+        }
+        PKGEOF
+        npm --prefix /opt/sbx-e2e install --loglevel=error
       user: "1000"
       description: install Playwright (pinned)
 
