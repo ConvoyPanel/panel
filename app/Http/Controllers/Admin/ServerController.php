@@ -141,7 +141,7 @@ class ServerController
     public function getState(Server $server)
     {
         $state = $this->serverClient->setServer($server)->getState();
-        $state->pendingPowerAction = $this->powerLock->pending($server);
+        $state->pendingPowerAction = $this->powerLock->resolve($server);
 
         return $state;
     }

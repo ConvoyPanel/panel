@@ -10,10 +10,13 @@ use Illuminate\Http\Client\ConnectionException;
 class ProxmoxPowerClient extends ProxmoxClient
 {
     /**
+     * Issue the command and return the UPID of the Proxmox task it spawned, so
+     * the caller can track the action to completion.
+     *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function send(PowerCommand $action)
+    public function send(PowerCommand $action): ?string
     {
         // I added this because I don't like the naming scheme Proxmox has
         $parsedAction = match ($action) {
@@ -34,6 +37,8 @@ class ProxmoxPowerClient extends ProxmoxClient
             ])
             ->json();
 
-        return $this->getData($response);
+        $upid = $this->getData($response);
+
+        return is_string($upid) ? $upid : null;
     }
 }

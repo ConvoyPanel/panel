@@ -44,8 +44,10 @@ class TaskData extends Data
             type: $get('type'),
             targetId: $get('id'),
             user: $get('user'),
-            status: TaskStatus::tryFrom($get('status')),
-            exitStatus: TaskExitStatus::tryFrom($exitStatus) ?? $exitStatus,
+            // A running task reports neither field yet; guard the nulls rather
+            // than pass them to tryFrom(), which only accepts string|int.
+            status: $get('status') !== null ? TaskStatus::tryFrom($get('status')) : null,
+            exitStatus: $exitStatus !== null ? (TaskExitStatus::tryFrom($exitStatus) ?? $exitStatus) : null,
         );
     }
 }

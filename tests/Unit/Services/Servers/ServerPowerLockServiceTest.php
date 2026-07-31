@@ -3,6 +3,7 @@
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
 use App\Models\Server;
+use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Servers\Power\ServerPowerLockService;
 use App\Services\Servers\SendServerPowerCommand;
@@ -13,7 +14,11 @@ beforeEach(function () {
 
     // A bare model is enough — the lock keys only off $server->id, no DB needed.
     $this->server = tap(new Server, fn (Server $s) => $s->id = 4242);
-    $this->lock = new ServerPowerLockService;
+    // These cases exercise acquire/pending/release/resolve's no-task branch and
+    // never reach Proxmox, so a bare mock is enough to construct the service.
+    // Task-status polling is covered end-to-end in the feature test.
+    $this->activity = Mockery::mock(ProxmoxActivityClient::class);
+    $this->lock = new ServerPowerLockService($this->activity);
 });
 
 it('records the pending action when the lock is acquired', function () {
@@ -23,6 +28,15 @@ it('records the pending action when the lock is acquired', function () {
 
     expect($pending->command)->toBe(PowerCommand::RESTART)
         ->and($this->lock->pending($this->server)->command)->toBe(PowerCommand::RESTART);
+});
+
+it('keeps the action pending until a task has been attached', function () {
+    // Between acquire() and attachTask() there is no UPID to poll, so resolve()
+    // must leave the lock in place — never clear it — until the command's task
+    // is on record. The activity client is never touched in this window.
+    $this->lock->acquire($this->server, PowerCommand::RESTART);
+
+    expect($this->lock->resolve($this->server)?->command)->toBe(PowerCommand::RESTART);
 });
 
 it('rejects a second acquire while the lock is held', function () {

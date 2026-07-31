@@ -38,7 +38,7 @@ class SendServerPowerCommand
         $this->lock->acquire($server, $command);
 
         try {
-            $this->client->setServer($server)->send($command);
+            $upid = $this->client->setServer($server)->send($command);
         } catch (Throwable $e) {
             // The command never landed — free the lock so the user can retry
             // immediately rather than waiting out the TTL.
@@ -46,5 +46,9 @@ class SendServerPowerCommand
 
             throw $e;
         }
+
+        // Record the task the command spawned so the lock clears when Proxmox
+        // reports it finished, rather than only when the TTL fires.
+        $this->lock->attachTask($server, is_string($upid) ? $upid : null);
     }
 }

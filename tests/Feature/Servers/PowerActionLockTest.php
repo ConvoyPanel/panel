@@ -11,6 +11,48 @@ beforeEach(function () {
     Cache::flush();
 });
 
+/**
+ * Fakes Proxmox with a task-status endpoint that walks the given statuses, one
+ * per read, holding on the last — so a test can play out an action completing
+ * the way the dashboard's polling would see it. 'running' means the task is
+ * still working; 'stopped' means it has finished.
+ *
+ * The guest `status/current` read (which the state endpoint still makes to build
+ * its response) is held at a constant 'running' on purpose: the lock no longer
+ * looks at guest state at all, and pinning it lets the fast-reboot case assert
+ * exactly that.
+ */
+function fakeProxmoxTask(string ...$statuses): void
+{
+    $reads = 0;
+
+    fakeProxmox([
+        '*/tasks/*/status' => function () use ($statuses, &$reads) {
+            $status = $statuses[min($reads++, count($statuses) - 1)];
+
+            return Http::response(['data' => [
+                'upid' => 'UPID:pve:00001:00000001:00000001:qmreboot:100:root@pam:',
+                'node' => 'pve',
+                'pid' => 1,
+                'pstart' => 1,
+                'starttime' => 1700000000,
+                'type' => 'qmreboot',
+                'id' => '100',
+                'user' => 'root@pam',
+                'status' => $status,
+                'exitstatus' => $status === 'stopped' ? 'OK' : null,
+            ]], 200);
+        },
+        '*/status/current' => Http::response(['data' => [
+            'status' => 'running',
+            'uptime' => 60,
+            'cpu' => 0,
+            'maxmem' => 2147483648,
+            'mem' => 0,
+        ]], 200),
+    ]);
+}
+
 it('rejects a second power command while one is already in flight', function () {
     fakeProxmox();
 
@@ -34,15 +76,8 @@ it('rejects a second power command while one is already in flight', function () 
 });
 
 it('surfaces the pending power action on the server state', function () {
-    fakeProxmox([
-        '*/status/current' => Http::response(['data' => [
-            'status' => 'stopped',
-            'uptime' => 0,
-            'cpu' => 0,
-            'maxmem' => 2147483648,
-            'mem' => 0,
-        ]], 200),
-    ]);
+    // Task still running, so the lock is held across the poll.
+    fakeProxmoxTask('running');
 
     [$_owner, $_, $_, $server] = createServerModel();
     $admin = User::factory()->create(['root_admin' => true]);
@@ -62,6 +97,95 @@ it('surfaces the pending power action on the server state', function () {
         ->getJson("/api/admin/servers/{$server->uuid}/state")
         ->assertOk()
         ->assertJsonPath('data.pendingPowerAction.command', 'start');
+});
+
+it('clears the pending action once the Proxmox task finishes', function () {
+    // The task is still running on the first poll, finished on the next.
+    fakeProxmoxTask('running', 'stopped');
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'kill'])
+        ->assertNoContent();
+
+    // Task still running, so the action is still pending and the UI keeps the
+    // controls locked out.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.pendingPowerAction.command', 'kill');
+
+    // Task finished: the lock is gone and the user can act again without waiting
+    // out the TTL.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.pendingPowerAction', null);
+
+    expect(app(ServerPowerLockService::class)->pending($server))->toBeNull();
+
+    // And the next command is accepted rather than 409'd.
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->assertNoContent();
+});
+
+it('clears a reboot as soon as its task finishes, even if the guest never appears to leave running', function () {
+    // The whole point of tracking the task instead of guest state: a reboot
+    // begins and ends on 'running', and here the guest is pinned to 'running'
+    // for every poll — the cycle is never visible in guest state. State-based
+    // resolution could only clear this on the TTL; task-based resolution clears
+    // it the instant Proxmox reports the reboot task done.
+    fakeProxmoxTask('running', 'stopped');
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'restart'])
+        ->assertNoContent();
+
+    // Task running — still pending.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertJsonPath('data.pendingPowerAction.command', 'restart');
+
+    // Task done — cleared, despite the guest reading 'running' throughout.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertJsonPath('data.pendingPowerAction', null);
+});
+
+it('keeps the lock in place when Proxmox cannot report on the task', function () {
+    // The task-status probe fails (Proxmox unreachable, or the task has rotated
+    // out of its log). The state read must not fail with it — the lock simply
+    // stays until the TTL clears it.
+    fakeProxmox([
+        '*/tasks/*/status' => Http::response('gateway timeout', 504),
+        // getState still needs the guest read to succeed; only the task probe
+        // is broken here.
+        '*/status/current' => Http::response(['data' => [
+            'status' => 'running',
+            'uptime' => 60,
+            'cpu' => 0,
+            'maxmem' => 2147483648,
+            'mem' => 0,
+        ]], 200),
+    ]);
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->assertNoContent();
+
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.pendingPowerAction.command', 'shutdown');
 });
 
 it('lets a different server be powered while another holds its lock', function () {
