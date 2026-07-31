@@ -13,7 +13,6 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -23,6 +22,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import ConfirmWithAuthDialog from '@/components/ui/Dialog/ConfirmWithAuthDialog.tsx'
 import {
     CollectionErrorState,
     SimpleEmptyState,
@@ -31,13 +31,13 @@ import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const ApiKeysCard = () => {
-    const confirm = useConfirmationStore(state => state.confirm)
     const mutate = useQueryMutator<ApiKeyType[]>(apiKeyQueries.all())
     const [createOpen, setCreateOpen] = useState(false)
+    const [keyToRevoke, setKeyToRevoke] = useState<ApiKeyType | null>(null)
 
     const { data: keys, isLoading, isError, refetch } = useApiKeys()
 
-    const { mutate: revoke } = useMutation({
+    const { mutateAsync: revoke } = useMutation({
         mutationFn: (apiKey: ApiKeyType) => deleteApiKey(apiKey.id),
         onSuccess: (_, apiKey) => {
             mutate(keys => keys?.filter(k => k.id !== apiKey.id))
@@ -45,16 +45,6 @@ const ApiKeysCard = () => {
         },
         onError: () => toast.error('Failed to revoke token'),
     })
-
-    const handleDelete = async (apiKey: ApiKeyType) => {
-        const confirmed = await confirm({
-            title: 'Revoke API token',
-            description: `Any application using “${apiKey.name}” will immediately lose access. This cannot be undone.`,
-        })
-        if (!confirmed) return
-
-        revoke(apiKey)
-    }
 
     return (
         <>
@@ -93,7 +83,7 @@ const ApiKeysCard = () => {
                                 <ApiKey
                                     key={key.id}
                                     apiKey={key}
-                                    onDelete={handleDelete}
+                                    onDelete={setKeyToRevoke}
                                 />
                             ))}
                         />
@@ -117,6 +107,19 @@ const ApiKeysCard = () => {
             <ApiKeyCreateDialog
                 open={createOpen}
                 onOpenChange={setCreateOpen}
+            />
+
+            {/* Revoking is behind RequireIdentityConfirmation too, so it needs
+                the gate the plain confirm() alert could not carry. */}
+            <ConfirmWithAuthDialog
+                subject={keyToRevoke}
+                onClose={() => setKeyToRevoke(null)}
+                title={'Revoke API token'}
+                description={apiKey =>
+                    `Any application using “${apiKey.name}” will immediately lose access. This cannot be undone.`
+                }
+                confirmText={'Revoke'}
+                onConfirm={revoke}
             />
         </>
     )

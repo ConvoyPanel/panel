@@ -13,7 +13,6 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
 import {
     Card,
@@ -23,6 +22,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import ConfirmWithAuthDialog from '@/components/ui/Dialog/ConfirmWithAuthDialog.tsx'
 import {
     CollectionErrorState,
     SimpleEmptyState,
@@ -31,13 +31,13 @@ import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const KeychainCard = () => {
-    const confirm = useConfirmationStore(state => state.confirm)
     const mutate = useQueryMutator<SSHKeyType[]>(sshKeyQueries.all())
     const [createOpen, setCreateOpen] = useState(false)
+    const [keyToRemove, setKeyToRemove] = useState<SSHKeyType | null>(null)
 
     const { data: keys, isLoading, isError, refetch } = useSSHKeys()
 
-    const { mutate: remove } = useMutation({
+    const { mutateAsync: remove } = useMutation({
         mutationFn: (key: SSHKeyType) => deleteSSHKey(key.id),
         onSuccess: (_, key) => {
             mutate(keys => keys?.filter(k => k.id !== key.id))
@@ -45,16 +45,6 @@ const KeychainCard = () => {
         },
         onError: () => toast.error('Failed to remove key'),
     })
-
-    const handleDelete = async (key: SSHKeyType) => {
-        const confirmed = await confirm({
-            title: 'Remove SSH key',
-            description: `“${key.name}” will be removed from your keychain. Servers it was already added to are unaffected.`,
-        })
-        if (!confirmed) return
-
-        remove(key)
-    }
 
     return (
         <>
@@ -94,7 +84,7 @@ const KeychainCard = () => {
                                 <SSHKey
                                     key={key.id}
                                     publicKey={key}
-                                    onDelete={handleDelete}
+                                    onDelete={setKeyToRemove}
                                 />
                             ))}
                         />
@@ -116,6 +106,19 @@ const KeychainCard = () => {
             <SSHKeyCreateDialog
                 open={createOpen}
                 onOpenChange={setCreateOpen}
+            />
+
+            {/* Removal is behind RequireIdentityConfirmation too, so it needs
+                the gate the plain confirm() alert could not carry. */}
+            <ConfirmWithAuthDialog
+                subject={keyToRemove}
+                onClose={() => setKeyToRemove(null)}
+                title={'Remove SSH key'}
+                description={key =>
+                    `“${key.name}” will be removed from your keychain. Servers it was already added to are unaffected.`
+                }
+                confirmText={'Remove'}
+                onConfirm={remove}
             />
         </>
     )
