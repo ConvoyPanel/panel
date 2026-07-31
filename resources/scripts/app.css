@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* Vendored copy of shadcn's scroll-fade utilities; swap for
+   `@import 'shadcn/tailwind.css'` when we take the dependency. */
+@import './lib/scroll-fade.css';
 
 @config '../../tailwind.config.cjs';
 

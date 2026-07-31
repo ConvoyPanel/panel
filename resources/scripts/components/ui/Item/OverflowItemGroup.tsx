@@ -73,7 +73,14 @@ const OverflowItemGroup = ({ rows, max = 3, title, className }: Props) => {
                     <SheetHeader className='border-b px-6 py-4'>
                         <SheetTitle>{title}</SheetTitle>
                     </SheetHeader>
-                    <div className='flex-1 overflow-y-auto overscroll-contain px-6 py-4 mask-[linear-gradient(to_bottom,transparent,black_1rem,black_calc(100%-1rem),transparent)]'>
+                    {/* `scroll-fade` masks the list's own edges rather than
+                        overlaying a colour, and tracks scroll position: crisp
+                        at the top until you scroll, crisp at the bottom once
+                        you reach the end, and inert entirely when the list
+                        doesn't overflow. Firefox hasn't shipped scroll-driven
+                        animations, so it takes the utility's static both-edge
+                        fallback. */}
+                    <div className='scroll-fade flex-1 overflow-y-auto overscroll-contain px-6 py-4'>
                         <ItemGroup className='gap-3'>{rows}</ItemGroup>
                     </div>
                 </SheetContent>

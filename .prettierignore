@@ -2,3 +2,6 @@
 public
 node_modules
 resources/views
+
+# Vendored verbatim from the shadcn package — must stay diffable upstream.
+resources/scripts/lib/scroll-fade.css
