@@ -1,5 +1,6 @@
 <?php
 
+use App\Data\Server\Power\PowerActionResultData;
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
 use App\Models\Server;
@@ -53,6 +54,19 @@ it('can be re-acquired after release', function () {
     expect($this->lock->pending($this->server))->toBeNull()
         ->and($this->lock->acquire($this->server, PowerCommand::SHUTDOWN)->command)
         ->toBe(PowerCommand::SHUTDOWN);
+});
+
+it('drops a previous action result when a new action is acquired', function () {
+    // A finished action left its outcome behind; starting a fresh action must
+    // clear it so a stale result can't sit alongside the one now in flight.
+    $stale = new PowerActionResultData(PowerCommand::SHUTDOWN, now()->toIso8601String(), true, 'OK');
+    Cache::put($this->lock->resultKey($this->server), $stale->toArray(), 30);
+
+    expect($this->lock->result($this->server))->not->toBeNull();
+
+    $this->lock->acquire($this->server, PowerCommand::START);
+
+    expect($this->lock->result($this->server))->toBeNull();
 });
 
 it('releases the lock when the Proxmox command fails, so it can be retried', function () {

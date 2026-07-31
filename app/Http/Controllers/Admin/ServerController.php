@@ -142,6 +142,7 @@ class ServerController
     {
         $state = $this->serverClient->setServer($server)->getState();
         $state->pendingPowerAction = $this->powerLock->resolve($server);
+        $state->lastPowerAction = $this->powerLock->result($server);
 
         return $state;
     }

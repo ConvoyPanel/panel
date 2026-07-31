@@ -1,5 +1,6 @@
-import { rawDataToNode } from '@/lib/transformers/node'
 import { Server, ServerStateData, ServerTimepointData } from '@/types/server.ts'
+
+import { rawDataToNode } from '@/lib/transformers/node'
 
 export const rawDataToServer = (data: any): Server => ({
     id: data.id,
@@ -39,6 +40,7 @@ export const rawDataToServerStateData = (data: any): ServerStateData => ({
     memoryUsed: data.memoryUsed,
     uptime: data.uptime,
     pendingPowerAction: data.pendingPowerAction ?? null,
+    lastPowerAction: data.lastPowerAction ?? null,
 })
 
 export const rawDataToServerTimepointData = (

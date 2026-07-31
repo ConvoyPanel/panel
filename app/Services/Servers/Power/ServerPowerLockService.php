@@ -3,6 +3,9 @@
 namespace App\Services\Servers\Power;
 
 use App\Data\Server\Power\PendingPowerActionData;
+use App\Data\Server\Power\PowerActionResultData;
+use App\Data\Server\Proxmox\Activity\TaskData;
+use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
@@ -34,11 +37,24 @@ class ServerPowerLockService
      */
     public const TTL_SECONDS = 60;
 
+    /**
+     * How long a finished action's outcome lingers so the UI can turn its
+     * in-progress toast into a success/failure message. Long enough to survive
+     * the poll that observes the release (and a quick page reload right after),
+     * short enough that a stale result never resurfaces on a later visit.
+     */
+    public const RESULT_TTL_SECONDS = 30;
+
     public function __construct(private ProxmoxActivityClient $activity) {}
 
     public function key(Server $server): string
     {
         return "server:{$server->id}:power-action";
+    }
+
+    public function resultKey(Server $server): string
+    {
+        return "server:{$server->id}:power-action:result";
     }
 
     /**
@@ -63,6 +79,10 @@ class ServerPowerLockService
         if (! $acquired) {
             throw new PowerActionInProgressException;
         }
+
+        // A new action supersedes the previous one's outcome; drop it so a stale
+        // success/failure can't sit alongside the action now in flight.
+        Cache::forget($this->resultKey($server));
 
         return $pending;
     }
@@ -135,14 +155,53 @@ class ServerPowerLockService
             return $pending;
         }
 
+        // Finished (succeeded or failed): record the outcome for the UI to pick
+        // up, then release so the controls unlock on the next poll.
+        $this->recordResult($server, $pending, $task);
         $this->release($server);
 
         return null;
     }
 
+    /**
+     * The outcome of the most recently finished action, or null once it has
+     * expired (or none has completed since the last acquire()).
+     */
+    public function result(Server $server): ?PowerActionResultData
+    {
+        $record = Cache::get($this->resultKey($server));
+
+        return $record ? PowerActionResultData::from($record) : null;
+    }
+
     public function release(Server $server): void
     {
         Cache::forget($this->key($server));
+    }
+
+    /**
+     * Persist a finished task's outcome under the result key. `exitStatus` is
+     * "OK"/"WARNINGS" on success and Proxmox's raw error string on failure; a
+     * task that reports no exit status at all is treated as a plain success.
+     */
+    private function recordResult(Server $server, PendingPowerActionData $pending, TaskData $task): void
+    {
+        $exit = $task->exitStatus;
+
+        $ok = $exit === null
+            || $exit === TaskExitStatus::OK
+            || $exit === TaskExitStatus::WARNINGS;
+
+        $exitStatus = $exit instanceof TaskExitStatus ? $exit->value : $exit;
+
+        $result = new PowerActionResultData(
+            command: $pending->command,
+            requestedAt: $pending->requestedAt,
+            ok: $ok,
+            exitStatus: $exitStatus,
+        );
+
+        Cache::put($this->resultKey($server), $result->toArray(), self::RESULT_TTL_SECONDS);
     }
 
     /**

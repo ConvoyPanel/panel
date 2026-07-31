@@ -53,6 +53,42 @@ function fakeProxmoxTask(string ...$statuses): void
     ]);
 }
 
+/**
+ * Like fakeProxmoxTask, but the task finishes with the given non-OK exit string
+ * — a Proxmox error such as a shutdown the guest refused — so a test can play
+ * out an action that fails rather than one that succeeds.
+ */
+function fakeProxmoxTaskFailing(string $exit, string ...$statuses): void
+{
+    $reads = 0;
+
+    fakeProxmox([
+        '*/tasks/*/status' => function () use ($exit, $statuses, &$reads) {
+            $status = $statuses[min($reads++, count($statuses) - 1)];
+
+            return Http::response(['data' => [
+                'upid' => 'UPID:pve:00001:00000001:00000001:qmshutdown:100:root@pam:',
+                'node' => 'pve',
+                'pid' => 1,
+                'pstart' => 1,
+                'starttime' => 1700000000,
+                'type' => 'qmshutdown',
+                'id' => '100',
+                'user' => 'root@pam',
+                'status' => $status,
+                'exitstatus' => $status === 'stopped' ? $exit : null,
+            ]], 200);
+        },
+        '*/status/current' => Http::response(['data' => [
+            'status' => 'running',
+            'uptime' => 60,
+            'cpu' => 0,
+            'maxmem' => 2147483648,
+            'mem' => 0,
+        ]], 200),
+    ]);
+}
+
 it('rejects a second power command while one is already in flight', function () {
     fakeProxmox();
 
@@ -130,6 +166,60 @@ it('clears the pending action once the Proxmox task finishes', function () {
     $this->actingAs($admin)
         ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
         ->assertNoContent();
+});
+
+it('surfaces a successful outcome once the task finishes, tied to the action that ran', function () {
+    fakeProxmoxTask('running', 'stopped');
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'start'])
+        ->assertNoContent();
+
+    // While running there is no result yet — just the pending action, whose
+    // requestedAt the outcome must later carry so the UI can correlate them.
+    $requestedAt = $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertJsonPath('data.lastPowerAction', null)
+        ->json('data.pendingPowerAction.requestedAt');
+
+    // Task done: the outcome appears alongside the now-cleared pending action.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.pendingPowerAction', null)
+        ->assertJsonPath('data.lastPowerAction.command', 'start')
+        ->assertJsonPath('data.lastPowerAction.ok', true)
+        ->assertJsonPath('data.lastPowerAction.exitStatus', 'OK')
+        ->assertJsonPath('data.lastPowerAction.requestedAt', $requestedAt);
+});
+
+it('surfaces a failed outcome with the Proxmox exit string', function () {
+    fakeProxmoxTaskFailing("command 'qm shutdown 100' failed: got timeout", 'running', 'stopped');
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/admin/servers/{$server->uuid}/state", ['state' => 'shutdown'])
+        ->assertNoContent();
+
+    // Running poll — still pending, no outcome.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertJsonPath('data.pendingPowerAction.command', 'shutdown');
+
+    // Finished-but-failed: the lock clears and the failure is reported with the
+    // raw exit string for the UI to show as detail.
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}/state")
+        ->assertOk()
+        ->assertJsonPath('data.pendingPowerAction', null)
+        ->assertJsonPath('data.lastPowerAction.command', 'shutdown')
+        ->assertJsonPath('data.lastPowerAction.ok', false)
+        ->assertJsonPath('data.lastPowerAction.exitStatus', "command 'qm shutdown 100' failed: got timeout");
 });
 
 it('clears a reboot as soon as its task finishes, even if the guest never appears to leave running', function () {

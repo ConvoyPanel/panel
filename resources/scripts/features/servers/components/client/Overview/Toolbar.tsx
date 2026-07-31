@@ -1,9 +1,8 @@
-import { cn } from '@/utils'
-
 import ConsoleButton from '@/features/servers/components/client/Overview/ConsoleButton.tsx'
 import PowerActionsDropdown from '@/features/servers/components/client/Overview/PowerActionsDropdown.tsx'
 import PowerActionsExpanded from '@/features/servers/components/client/Overview/PowerActionsExpanded.tsx'
-
+import { usePowerActionToast } from '@/features/servers/detail/use-power-action-toast.ts'
+import { cn } from '@/utils'
 
 export const actions = {
     start: {
@@ -40,6 +39,10 @@ interface Props {
 }
 
 const Toolbar = ({ className }: Props) => {
+    // Surfaces the in-progress / success / failure toast for power actions on
+    // this server; dismissed automatically when the overview unmounts.
+    usePowerActionToast()
+
     return (
         <>
             <div

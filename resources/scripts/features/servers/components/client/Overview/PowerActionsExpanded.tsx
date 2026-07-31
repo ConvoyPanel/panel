@@ -27,7 +27,6 @@ const PowerActionsExpanded = () => {
             if (!confirmed) return
 
             await updateState(server!.uuid, action)
-            toast.success(actions[action].toastText)
         } catch (e) {
             toast.error('Power action failed')
             throw e

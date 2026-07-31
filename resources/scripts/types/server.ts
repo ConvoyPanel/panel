@@ -48,8 +48,25 @@ export type PaginatedServers = PaginatedResult<Server>
 export type ServerState = 'running' | 'stopped'
 
 export interface PendingPowerAction {
-    command: 'start' | 'restart' | 'shutdown' | 'kill' | 'reset' | 'resume' | 'suspend'
+    command:
+        | 'start'
+        | 'restart'
+        | 'shutdown'
+        | 'kill'
+        | 'reset'
+        | 'resume'
+        | 'suspend'
     requestedAt: string
+}
+
+export interface PowerActionResult {
+    command: PendingPowerAction['command']
+    // Mirrors the pending action's requestedAt, so a result can be matched to
+    // the specific action the UI was showing as in progress.
+    requestedAt: string
+    ok: boolean
+    // Proxmox's raw task exit string on failure; "OK"/"WARNINGS" on success.
+    exitStatus: string | null
 }
 
 export interface ServerStateData {
@@ -59,6 +76,7 @@ export interface ServerStateData {
     memoryUsed: number
     uptime: number
     pendingPowerAction: PendingPowerAction | null
+    lastPowerAction: PowerActionResult | null
 }
 
 export interface ServerTimepointData {
