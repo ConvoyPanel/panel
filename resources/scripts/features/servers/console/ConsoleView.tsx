@@ -14,7 +14,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/Tooltip'
 
-import { type ConsoleType, useCreateConsoleSession } from './api'
+import { type ConsoleType, createConsoleSession } from './api'
 
 const protocols = (token: string) => ['anchor.v1', `anchor.session.${token}`]
 
@@ -29,7 +29,6 @@ export default function ConsoleView({
     const connection = useRef<RFB | WebSocket | null>(null)
     const [attempt, setAttempt] = useState(0)
     const [connected, setConnected] = useState(false)
-    const { mutateAsync: createSession } = useCreateConsoleSession()
 
     useEffect(() => {
         let disposed = false
@@ -38,7 +37,7 @@ export default function ConsoleView({
 
         const connect = async () => {
             setConnected(false)
-            const session = await createSession({ server: serverUuid, type })
+            const session = await createConsoleSession(serverUuid, type)
             if (disposed || !target.current) return
             target.current.replaceChildren()
 
@@ -113,7 +112,11 @@ export default function ConsoleView({
             terminal?.dispose()
             connection.current = null
         }
-    }, [attempt, createSession, serverUuid, type])
+        // Deliberately depends only on what should actually re-open the console.
+        // A mutation hook's mutateAsync is not referentially stable across the
+        // idle -> pending -> success transitions it triggers itself, so having it
+        // here tore the socket down and reconnected in a loop.
+    }, [attempt, serverUuid, type])
 
     const sendCtrlAltDel = useCallback(() => {
         if (!(connection.current instanceof WebSocket))
