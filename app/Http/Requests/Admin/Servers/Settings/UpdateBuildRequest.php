@@ -4,10 +4,10 @@ namespace App\Http\Requests\Admin\Servers\Settings;
 
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Models\NetworkInterface;
 use App\Models\Node;
 use App\Models\Server;
 use App\Rules\NetworkInterfaceBelongsToNode;
+use App\Rules\VlanIsDeclaredOnInterface;
 use Illuminate\Validation\Validator;
 
 class UpdateBuildRequest extends BaseApiRequest
@@ -66,17 +66,20 @@ class UpdateBuildRequest extends BaseApiRequest
                     }
                 }
 
+                // Checked here rather than as a rule on `vlan_tag`: the tag can
+                // stay untouched while the interface moves under it, which
+                // still has to be caught.
                 $vlanTag = $this->has('vlan_tag') ? $this->input('vlan_tag') : $server->vlan_tag;
                 if (filled($vlanTag)) {
-                    $networkInterfaceId = $this->input('network_interface_id', $server->network_interface_id);
-                    $networkInterface = $networkInterfaceId ? NetworkInterface::find($networkInterfaceId) : null;
+                    $rule = new VlanIsDeclaredOnInterface(
+                        $this->input('network_interface_id', $server->network_interface_id),
+                    );
 
-                    if (! $networkInterface?->is_vlan_aware) {
-                        $validator->errors()->add(
-                            'vlan_tag',
-                            'The selected network interface must be VLAN-aware before assigning a VLAN tag.',
-                        );
-                    }
+                    $rule->validate(
+                        'vlan_tag',
+                        $vlanTag,
+                        fn (string $message) => $validator->errors()->add('vlan_tag', $message),
+                    );
                 }
 
                 // check if the memory and disk isn't exceeding the node limits

@@ -5,7 +5,6 @@ namespace App\Http\Requests\Admin\Servers;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
-use App\Models\NetworkInterface;
 use App\Models\Server;
 use App\Rules\HasSufficientAddresses;
 use App\Rules\HasSufficientCPU;
@@ -15,10 +14,10 @@ use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\StorageAllows;
 use App\Rules\TemplateFitsStorage;
 use App\Rules\TemplateIsAvailable;
+use App\Rules\VlanIsDeclaredOnInterface;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 class StoreServerRequest extends BaseApiRequest
 {
@@ -68,7 +67,13 @@ class StoreServerRequest extends BaseApiRequest
                 new NetworkInterfaceBelongsToNode($this->input('node_id')),
                 new HasSufficientAddresses($addressAvailabilityService),
             ],
-            'limits.vlan_tag' => 'nullable|integer|min:1|max:4094',
+            'limits.vlan_tag' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:4094',
+                new VlanIsDeclaredOnInterface($this->input('limits.network_interface_id')),
+            ],
             'limits.addresses_ipv4_count' => 'nullable|integer|min:0|max:100',
             'limits.addresses_ipv6_count' => 'nullable|integer|min:0|max:100',
             // Explicit address ids are optional. With no ids and both counts
@@ -116,25 +121,6 @@ class StoreServerRequest extends BaseApiRequest
                 new TemplateFitsStorage,
             ],
             'start_on_completion' => 'required|boolean',
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                if (! filled($this->input('limits.vlan_tag'))) {
-                    return;
-                }
-
-                $networkInterface = NetworkInterface::find($this->input('limits.network_interface_id'));
-                if ($networkInterface && ! $networkInterface->is_vlan_aware) {
-                    $validator->errors()->add(
-                        'limits.vlan_tag',
-                        'The selected network interface must be VLAN-aware before assigning a VLAN tag.',
-                    );
-                }
-            },
         ];
     }
 

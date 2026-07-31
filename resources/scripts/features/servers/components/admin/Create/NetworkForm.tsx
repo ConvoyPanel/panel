@@ -1,8 +1,9 @@
-import { useFormContext } from 'react-hook-form'
-import { useEffect } from 'react'
-
-import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker'
 import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
+import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker'
+import VlanPicker from '@/features/servers/components/admin/Create/pickers/VlanPicker'
+import { useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
+
 import { InputForm } from '@/components/ui/Forms'
 import { Heading } from '@/components/ui/Typography'
 
@@ -10,17 +11,18 @@ const NetworkForm = () => {
     const { setValue, watch } = useFormContext()
     const nodeId = watch('nodeId')
     const networkInterfaceId = watch('networkInterfaceId')
-    const { data: interfaces } = useNetworkInterfaces(nodeId ? Number(nodeId) : null)
+    const { data: interfaces } = useNetworkInterfaces(
+        nodeId ? Number(nodeId) : null
+    )
     const selectedInterface = interfaces?.find(
         item => item.id.toString() === networkInterfaceId
     )
-    const canOverrideVlan = selectedInterface?.isVlanAware ?? false
-
+    // Clear a stale tag whenever the bridge under it changes: a VLAN is
+    // declared per interface, so a tag valid on one is meaningless on another
+    // and would be rejected server-side.
     useEffect(() => {
-        if (!canOverrideVlan) {
-            setValue('vlanTag', '')
-        }
-    }, [canOverrideVlan, setValue])
+        setValue('vlanTag', '')
+    }, [networkInterfaceId, setValue])
 
     return (
         <div className={'flex flex-col space-y-4'}>
@@ -28,19 +30,7 @@ const NetworkForm = () => {
 
             <NetworkInterfacePicker nodeId={nodeId ? Number(nodeId) : null} />
 
-            <InputForm
-                name={'vlanTag'}
-                label={'VLAN tag override'}
-                type={'number'}
-                min={1}
-                max={4094}
-                disabled={!canOverrideVlan}
-                description={
-                    canOverrideVlan
-                        ? 'Optional. Leave blank to inherit the selected network interface default.'
-                        : 'Select a VLAN-aware network interface to set an override.'
-                }
-            />
+            <VlanPicker networkInterface={selectedInterface} />
 
             <InputForm
                 name={'addressesIpv4Count'}

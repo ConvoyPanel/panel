@@ -1,7 +1,9 @@
 import CreateNetworkModal from '@/features/nodes/components/Network/CreateNetworkModal.tsx'
 import DeleteNetworkInterfaceModal from '@/features/nodes/components/Network/DeleteNetworkInterfaceModal.tsx'
+import DeleteVlanModal from '@/features/nodes/components/Network/DeleteVlanModal.tsx'
 import EditNetworkInterfaceModal from '@/features/nodes/components/Network/EditNetworkInterfaceModal.tsx'
 import NetworkInterfaceCard from '@/features/nodes/components/Network/NetworkInterfaceCard.tsx'
+import VlanFormModal from '@/features/nodes/components/Network/VlanFormModal.tsx'
 import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
 import { IconWifiOff } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
@@ -11,7 +13,6 @@ import {
     CollectionErrorState,
     SimpleEmptyState,
 } from '@/components/ui/EmptyStates'
-import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -37,6 +38,9 @@ function NodeNetwork() {
             </div>
             <EditNetworkInterfaceModal />
             <DeleteNetworkInterfaceModal />
+            <VlanFormModal mode={'create'} />
+            <VlanFormModal mode={'edit'} />
+            <DeleteVlanModal />
             {isError && !interfaces ? (
                 <Card className={'py-6'}>
                     <CollectionErrorState onRetry={refetch} />
@@ -59,14 +63,18 @@ function NodeNetwork() {
                     />
                 </Card>
             ) : (
-                <ItemGroup className={'gap-3'}>
+                // Framed rather than a stack of cards: a node usually has one
+                // or two interfaces, and one card per interface makes a page of
+                // mostly padding. The frame owns the rows, so the list reads as
+                // one object whether it holds one bridge or fifteen.
+                <Card className={'divide-y py-0'}>
                     {interfaces?.map(networkInterface => (
                         <NetworkInterfaceCard
                             key={networkInterface.id}
                             interface={networkInterface}
                         />
                     ))}
-                </ItemGroup>
+                </Card>
             )}
         </>
     )

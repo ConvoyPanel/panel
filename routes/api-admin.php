@@ -70,6 +70,20 @@ Route::prefix('/nodes')->group(function () {
             Route::post('/', [Admin\Nodes\NetworkInterfaceController::class, 'store']);
             Route::put('/{network_interface}', [Admin\Nodes\NetworkInterfaceController::class, 'update']);
             Route::delete('/{network_interface}', [Admin\Nodes\NetworkInterfaceController::class, 'destroy']);
+
+            /*
+             * Endpoint: /api/admin/nodes/{node}/network-interfaces/{network_interface}/vlans
+             *
+             * A VLAN is only meaningful within its bridge, so it is nested
+             * rather than addressed globally — `scopeBindings()` on the group
+             * then keeps a VLAN from being reached through another interface.
+             */
+            Route::prefix('/{network_interface}/vlans')->group(function () {
+                Route::get('/', [Admin\Nodes\VlanController::class, 'index']);
+                Route::post('/', [Admin\Nodes\VlanController::class, 'store']);
+                Route::put('/{vlan}', [Admin\Nodes\VlanController::class, 'update']);
+                Route::delete('/{vlan}', [Admin\Nodes\VlanController::class, 'destroy']);
+            });
         });
 
         Route::resource('/isos', Admin\Nodes\IsoController::class)
