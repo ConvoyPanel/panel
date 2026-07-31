@@ -16,7 +16,6 @@ import { getApiErrorMessage } from '@/utils/http.ts'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -32,6 +31,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const PasskeysMainDialog = () => {
     const queryClient = useQueryClient()
@@ -68,7 +68,7 @@ const PasskeysMainDialog = () => {
                 openModal('rename', result.passkey)
             }
 
-            toast.success('Passkey added')
+            toast.add({ title: 'Passkey added', type: 'success' })
         } catch (e) {
             // The authenticator's own failures never reach the API, so they keep
             // a local message; everything else defers to what the server said —
@@ -79,7 +79,7 @@ const PasskeysMainDialog = () => {
                     ? 'This authenticator is already registered'
                     : getApiErrorMessage(e, 'Registration failed')
 
-            toast.error(message)
+            toast.add({ title: message, type: 'error' })
             throw e
         }
     })

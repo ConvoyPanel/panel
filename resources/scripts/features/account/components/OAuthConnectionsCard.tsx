@@ -15,7 +15,6 @@ import {
     IconPlugConnected,
 } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
@@ -37,6 +36,7 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const ICONS: Record<string, Icon> = {
     google: IconBrandGoogle,
@@ -63,9 +63,16 @@ const OAuthConnectionsCard = () => {
             unlinkOAuthConnection(connection.id),
         onSuccess: (_, connection) => {
             mutate(list => list?.filter(c => c.id !== connection.id))
-            toast.success(`Disconnected ${connection.label}`)
+            toast.add({
+                title: `Disconnected ${connection.label}`,
+                type: 'success',
+            })
         },
-        onError: () => toast.error('Failed to disconnect provider'),
+        onError: () =>
+            toast.add({
+                title: 'Failed to disconnect provider',
+                type: 'error',
+            }),
     })
 
     // No providers configured on this install — don't render an empty card.

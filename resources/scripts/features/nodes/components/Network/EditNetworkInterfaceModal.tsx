@@ -12,7 +12,6 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -27,6 +26,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const EditNetworkInterfaceModal = () => {
     const { nodeId } = NetworkRoute.useParams()
@@ -89,10 +89,10 @@ const EditNetworkInterfaceModal = () => {
             }, false)
 
             close()
-            toast.success('Network interface updated')
+            toast.add({ title: 'Network interface updated', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }

@@ -5,10 +5,10 @@ import {
 } from '@/features/servers/state/api'
 import { Server } from '@/types/server.ts'
 import { useQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
+import { toast } from '@/components/ui/Toast'
 
 const actions: Record<
     PowerAction,
@@ -76,9 +76,9 @@ const ServerPowerActions = ({ server }: Props) => {
 
         try {
             await mutateAsync(action)
-            toast.success(actions[action].toastText)
+            toast.add({ title: actions[action].toastText, type: 'success' })
         } catch (e) {
-            toast.error('Power action failed')
+            toast.add({ title: 'Power action failed', type: 'error' })
             throw e
         }
     }

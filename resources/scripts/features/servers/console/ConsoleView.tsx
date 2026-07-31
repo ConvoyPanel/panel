@@ -4,10 +4,10 @@ import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner.tsx'
+import { toast } from '@/components/ui/Toast'
 import {
     Tooltip,
     TooltipContent,
@@ -64,7 +64,10 @@ export default function ConsoleView({
                 rfb.addEventListener('disconnect', event => {
                     setConnected(false)
                     if (!event.detail.clean && !disposed)
-                        toast.error('Console disconnected')
+                        toast.add({
+                            title: 'Console disconnected',
+                            type: 'error',
+                        })
                 })
                 connection.current = rfb
             } else {
@@ -100,7 +103,9 @@ export default function ConsoleView({
                 connection.current = socket
             }
         }
-        connect().catch(() => toast.error('Unable to open console'))
+        connect().catch(() =>
+            toast.add({ title: 'Unable to open console', type: 'error' })
+        )
         const resize = () => fit?.fit()
         window.addEventListener('resize', resize)
         return () => {

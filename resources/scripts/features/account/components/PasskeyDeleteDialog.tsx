@@ -8,7 +8,6 @@ import { Passkey } from '@/features/account/types.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -20,6 +19,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const PasskeyDeleteDialog = () => {
     const queryClient = useQueryClient()
@@ -34,7 +34,7 @@ const PasskeyDeleteDialog = () => {
             try {
                 await deletePasskey(currentPasskey.id)
 
-                toast.success('Passkey deleted')
+                toast.add({ title: 'Passkey deleted', type: 'success' })
 
                 await queryClient.invalidateQueries({
                     queryKey: passkeyQueries.all(),
@@ -47,7 +47,7 @@ const PasskeyDeleteDialog = () => {
 
                 close()
             } catch (e) {
-                toast.error('Deletion failed')
+                toast.add({ title: 'Deletion failed', type: 'error' })
                 throw e
             }
         }

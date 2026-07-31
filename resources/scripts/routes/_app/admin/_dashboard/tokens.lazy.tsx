@@ -14,7 +14,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Badge } from '@/components/ui/Badge.tsx'
@@ -28,6 +27,7 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/tokens')({
@@ -57,9 +57,10 @@ function TokensIndex() {
                       }
                     : data
             )
-            toast.success('API token revoked')
+            toast.add({ title: 'API token revoked', type: 'success' })
         },
-        onError: () => toast.error('Failed to revoke token'),
+        onError: () =>
+            toast.add({ title: 'Failed to revoke token', type: 'error' }),
     })
 
     const handleDelete = async (token: ApiKey) => {

@@ -7,7 +7,6 @@ import { recoveryCodeQueries } from '@/features/account/recovery-codes/api.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -19,6 +18,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const AuthenticatorDisableDialog = () => {
     const queryClient = useQueryClient()
@@ -37,11 +37,14 @@ const AuthenticatorDisableDialog = () => {
                 queryKey: recoveryCodeQueries.all(),
             })
 
-            toast.success('Authenticator disabled')
+            toast.add({ title: 'Authenticator disabled', type: 'success' })
 
             close()
         } catch (e) {
-            toast.error('Failed to disable authenticator')
+            toast.add({
+                title: 'Failed to disable authenticator',
+                type: 'error',
+            })
             throw e
         }
     })

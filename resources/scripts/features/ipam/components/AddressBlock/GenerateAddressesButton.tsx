@@ -1,13 +1,12 @@
+import { generateAddresses } from '@/features/ipam/blocks/addresses/api.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks.$addressBlockId.tsx'
 import { PaginatedAddresses } from '@/types/address.ts'
+import { Mutator } from '@/types/query.ts'
 import { IconPlus } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
-
-import { generateAddresses } from '@/features/ipam/blocks/addresses/api.ts'
 
 import { Button } from '@/components/ui/Button'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: Mutator<PaginatedAddresses>
@@ -23,12 +22,13 @@ const GenerateAddressesButton = ({ mutate }: Props) => {
         mutationFn: () => generateAddresses(blockGroupIdNum, blockIdNum),
         onSuccess: async data => {
             await mutate()
-            toast.success(
-                `Generated ${data.createdCount.toLocaleString()} addresses`
-            )
+            toast.add({
+                title: `Generated ${data.createdCount.toLocaleString()} addresses`,
+                type: 'success',
+            })
         },
         onError: () => {
-            toast.error('Failed to generate addresses')
+            toast.add({ title: 'Failed to generate addresses', type: 'error' })
         },
     })
 

@@ -6,7 +6,6 @@ import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -18,6 +17,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const DeleteStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
@@ -41,10 +41,10 @@ const DeleteStorageModal = () => {
                     return data.filter(item => item.id !== currentStorage.id)
                 }, false)
 
-                toast.success('Storage deleted')
+                toast.add({ title: 'Storage deleted', type: 'success' })
                 close()
             } catch (e) {
-                toast.error('Deletion failed')
+                toast.add({ title: 'Deletion failed', type: 'error' })
                 throw e
             }
         }

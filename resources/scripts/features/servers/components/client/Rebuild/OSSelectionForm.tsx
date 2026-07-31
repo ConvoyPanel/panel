@@ -1,20 +1,16 @@
-import { Server } from '@/types/server'
-import { handleFormErrors } from '@/utils/http'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
-import { useQueryClient } from '@tanstack/react-query'
-
 import {
     reinstallServer,
     serverQueries,
     useTemplateGroups,
 } from '@/features/servers/detail/api.ts'
-
 import TemplateIconDisplay from '@/features/template-groups/components/TemplateIconDisplay'
+import { Server } from '@/types/server'
+import { handleFormErrors } from '@/utils/http'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import {
     Form,
@@ -33,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/Select'
+import { toast } from '@/components/ui/Toast'
 
 interface OSSelectionFormProps {
     server: Server
@@ -122,12 +119,17 @@ export default function OSSelectionForm({ server }: OSSelectionFormProps) {
                 accountPassword: values.accountPassword,
                 startOnCompletion: true,
             })
-            toast.success('The installation started successfully.')
-            queryClient.invalidateQueries({ queryKey: serverQueries.detail(server.uuid).queryKey })
+            toast.add({
+                title: 'The installation started successfully.',
+                type: 'success',
+            })
+            queryClient.invalidateQueries({
+                queryKey: serverQueries.detail(server.uuid).queryKey,
+            })
         } catch (error) {
             if (handleFormErrors(error, form.setError)) return
 
-            toast.error('Failed to start installation.')
+            toast.add({ title: 'Failed to start installation.', type: 'error' })
         }
     }
 

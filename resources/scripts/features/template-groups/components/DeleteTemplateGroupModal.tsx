@@ -7,7 +7,6 @@ import { useModal } from '@/hooks/create-modal-store.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -19,6 +18,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const DeleteTemplateGroupModal = () => {
     const mutate = useQueryMutator<TemplateGroup[]>(
@@ -40,10 +40,13 @@ const DeleteTemplateGroupModal = () => {
                 )
             }, false)
             close()
-            toast.success('Template group deleted')
+            toast.add({ title: 'Template group deleted', type: 'success' })
         },
         onError: () => {
-            toast.error('Failed to delete template group')
+            toast.add({
+                title: 'Failed to delete template group',
+                type: 'error',
+            })
         },
     })
 

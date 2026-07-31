@@ -1,13 +1,3 @@
-import { handleFormErrors } from '@/utils/http.ts'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { IconCheck } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
-import { createLazyFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
 import PenaltyActionFields from '@/features/bandwidth/components/PenaltyActionFields.tsx'
 import { BYTES_PER_MB } from '@/features/bandwidth/overage-penalty.ts'
 import {
@@ -16,6 +6,15 @@ import {
     updateBandwidthSettings,
     useBandwidthSettings,
 } from '@/features/settings/api.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { IconCheck } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import {
     Card,
@@ -26,9 +25,8 @@ import {
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
 
 export const Route = createLazyFileRoute('/_app/admin/settings/bandwidth')({
     component: BandwidthSettingsPage,
@@ -59,7 +57,7 @@ function BandwidthSettingsPage() {
         mutationFn: updateBandwidthSettings,
         onSuccess: async updated => {
             await mutateSettings(() => updated)
-            toast.success('Bandwidth settings updated')
+            toast.add({ title: 'Bandwidth settings updated', type: 'success' })
         },
     })
 
@@ -68,7 +66,10 @@ function BandwidthSettingsPage() {
             await save(data)
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to update bandwidth settings')
+            toast.add({
+                title: 'Failed to update bandwidth settings',
+                type: 'error',
+            })
             console.error(e)
         }
     }
@@ -91,8 +92,8 @@ function BandwidthSettingsPage() {
                         <CardHeader>
                             <CardTitle>Overage penalty</CardTitle>
                             <CardDescription>
-                                The default for every server, used unless its node
-                                or the server itself overrides it.
+                                The default for every server, used unless its
+                                node or the server itself overrides it.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

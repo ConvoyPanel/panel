@@ -1,19 +1,17 @@
+import {
+    type CreateBackupPayload,
+    createBackup,
+    createBackupDefaults,
+    createBackupSchema,
+} from '@/features/servers/backups/api.ts'
+import type { PaginatedBackups } from '@/features/servers/types.ts'
 import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { AxiosError } from 'axios'
-import { useState, type ReactElement } from 'react'
+import { type ReactElement, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-
-import {
-    createBackup,
-    createBackupDefaults,
-    createBackupSchema,
-    type CreateBackupPayload,
-} from '@/features/servers/backups/api.ts'
-import type { PaginatedBackups } from '@/features/servers/types.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -21,6 +19,8 @@ import {
     CollapsiblePanel,
     CollapsibleTrigger,
 } from '@/components/ui/Collapsible'
+import { Form, FormButton } from '@/components/ui/Form'
+import { CheckboxForm, InputForm, SelectForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -31,8 +31,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm, InputForm, SelectForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 // Mode decides what happens to a RUNNING guest, so the copy has to say so —
 // "Kill" stops the VM for the duration of the backup.
@@ -89,10 +88,13 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
 
             form.reset(createBackupDefaults)
             setOpen(false)
-            toast.success('Backup started')
+            toast.add({ title: 'Backup started', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error(errorMessage(e, 'Failed to create backup'))
+            toast.add({
+                title: errorMessage(e, 'Failed to create backup'),
+                type: 'error',
+            })
             throw e
         }
     }
@@ -119,7 +121,9 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
                             {/* Defaults (snapshot + zstd) cover the common case;
                                 the rest stays out of the way until asked for. */}
                             <Collapsible>
-                                <CollapsibleTrigger>Advanced</CollapsibleTrigger>
+                                <CollapsibleTrigger>
+                                    Advanced
+                                </CollapsibleTrigger>
                                 <CollapsiblePanel>
                                     <div className={'space-y-4 pt-3'}>
                                         <SelectForm

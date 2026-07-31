@@ -6,7 +6,6 @@ import {
 import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -18,6 +17,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const RecoveryCodesResetDialog = () => {
     const queryClient = useQueryClient()
@@ -31,13 +31,16 @@ const RecoveryCodesResetDialog = () => {
                 queryKey: recoveryCodeQueries.codes().queryKey,
             })
 
-            toast.success('Recovery codes reset')
+            toast.add({ title: 'Recovery codes reset', type: 'success' })
 
             // Closing this step reveals the parent, which is already showing the
             // codes — now the fresh ones. No separate reveal to queue up.
             close()
         } catch (e) {
-            toast.error('Failed to reset recovery codes')
+            toast.add({
+                title: 'Failed to reset recovery codes',
+                type: 'error',
+            })
             throw e
         }
     })

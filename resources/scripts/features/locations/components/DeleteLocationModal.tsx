@@ -5,7 +5,6 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { useLocationsModalStore } from '@/routes/_app/admin/_dashboard/locations.lazy.tsx'
 import { Mutator } from '@/types/query.ts'
 import { IconExclamationCircle } from '@tabler/icons-react'
-import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -19,6 +18,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: Mutator<PaginatedLocations>
@@ -47,11 +47,11 @@ const DeleteLocationModal = ({ mutate }: Props) => {
                     }
                 })
 
-                toast.success('Location deleted')
+                toast.add({ title: 'Location deleted', type: 'success' })
 
                 close()
             } catch (e) {
-                toast.error('Deletion failed')
+                toast.add({ title: 'Deletion failed', type: 'error' })
                 throw e
             }
         }

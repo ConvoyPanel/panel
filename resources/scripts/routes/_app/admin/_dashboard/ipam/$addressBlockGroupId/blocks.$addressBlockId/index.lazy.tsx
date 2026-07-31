@@ -22,7 +22,6 @@ import { Server } from '@/types/server.ts'
 import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { DataTable } from '@/components/ui/DataTable'
@@ -35,6 +34,7 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 const isSystemReserved = (address: Address) =>
@@ -113,13 +113,16 @@ function BlockIndex() {
                 }
             }, false)
 
-            toast.success(
-                updated.state === AddressState.Reserved
-                    ? 'Address reserved'
-                    : 'Address unreserved'
-            )
+            toast.add({
+                title:
+                    updated.state === AddressState.Reserved
+                        ? 'Address reserved'
+                        : 'Address unreserved',
+                type: 'success',
+            })
         },
-        onError: () => toast.error('Failed to update reservation'),
+        onError: () =>
+            toast.add({ title: 'Failed to update reservation', type: 'error' }),
     })
 
     const renderActions = (address: Address) => (

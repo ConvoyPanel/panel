@@ -1,21 +1,20 @@
-import { useModal } from '@/hooks/create-modal-store.ts'
-import { PaginatedAddressBlocks } from '@/types/address-block.ts'
-import { handleFormErrors } from '@/utils/http.ts'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
-import { z } from 'zod'
-
 import {
     addressBlockSchema,
     updateAddressBlock,
 } from '@/features/ipam/blocks/api.ts'
-
 import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
+import { useModal } from '@/hooks/create-modal-store.ts'
+import { PaginatedAddressBlocks } from '@/types/address-block.ts'
+import { Mutator } from '@/types/query.ts'
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm, TextareaForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -25,8 +24,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     addressBlockGroupId: number
@@ -34,7 +32,11 @@ interface Props {
 }
 
 const EditAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
-    const { open, data: addressBlock, close } = useModal(useAddressBlockModal, 'edit')
+    const {
+        open,
+        data: addressBlock,
+        close,
+    } = useModal(useAddressBlockModal, 'edit')
 
     const form = useForm({
         resolver: zodResolver(addressBlockSchema),
@@ -90,10 +92,10 @@ const EditAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
             }, false)
 
             close()
-            toast.success('Address block updated')
+            toast.add({ title: 'Address block updated', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }

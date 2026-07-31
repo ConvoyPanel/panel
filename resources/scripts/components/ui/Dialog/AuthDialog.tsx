@@ -1,24 +1,24 @@
-import usePasskeyConfirmation from '@/hooks/use-passkey-confirmation.ts'
-import useIdentityConfirmationStore, {
-    ConfirmationType,
-} from '@/stores/identity-confirmation-store.ts'
-import { handleFormErrors } from '@/utils/http.ts'
-import { useQueryClient } from '@tanstack/react-query'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { IconFingerprint } from '@tabler/icons-react'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-import { useShallow } from 'zustand/react/shallow'
-
 import {
     confirmIdentity,
     identityQueries,
     useIdentityUnconfirmed,
 } from '@/features/auth/identity/api.ts'
+import usePasskeyConfirmation from '@/hooks/use-passkey-confirmation.ts'
+import useIdentityConfirmationStore, {
+    ConfirmationType,
+} from '@/stores/identity-confirmation-store.ts'
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { IconFingerprint } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -29,9 +29,8 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     type: z.enum([ConfirmationType.Password, ConfirmationType.Passkey]),
@@ -57,9 +56,13 @@ interface Props {
  * flash.
  */
 const AuthDialog = ({ onCancel }: Props) => {
-    const [confirmationType, setConfirmationType] = useIdentityConfirmationStore(
-        useShallow(state => [state.confirmationType, state.setConfirmationType])
-    )
+    const [confirmationType, setConfirmationType] =
+        useIdentityConfirmationStore(
+            useShallow(state => [
+                state.confirmationType,
+                state.setConfirmationType,
+            ])
+        )
     const { confirm: confirmWithPasskey } = usePasskeyConfirmation()
     const queryClient = useQueryClient()
     // The gate belongs open precisely while identity is unconfirmed; confirming
@@ -142,7 +145,7 @@ const AuthDialog = ({ onCancel }: Props) => {
             const message =
                 e instanceof Error ? e.message : 'An unexpected error occurred'
 
-            toast.error(message)
+            toast.add({ title: message, type: 'error' })
 
             throw e
         }
@@ -208,17 +211,17 @@ const AuthDialog = ({ onCancel }: Props) => {
                                 <TabsContent value={ConfirmationType.Passkey}>
                                     <div
                                         className={
-                                            'flex items-center gap-3 rounded-lg bg-muted/50 p-3'
+                                            'bg-muted/50 flex items-center gap-3 rounded-lg p-3'
                                         }
                                     >
                                         <IconFingerprint
                                             className={
-                                                'size-5 shrink-0 text-muted-foreground'
+                                                'text-muted-foreground size-5 shrink-0'
                                             }
                                         />
                                         <p
                                             className={
-                                                'text-sm text-muted-foreground'
+                                                'text-muted-foreground text-sm'
                                             }
                                         >
                                             {form.formState.isSubmitting

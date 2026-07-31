@@ -16,7 +16,6 @@ import { IconCheck, IconCopy, IconPlus } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
@@ -33,6 +32,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const scopeItems = [
     { value: 'none', label: 'No access' },
@@ -74,11 +74,11 @@ const CreateTokenModal = ({ mutate }: Props) => {
             }, false)
 
             setPlainTextToken(token.plainTextToken ?? '')
-            toast.success('API token created')
+            toast.add({ title: 'API token created', type: 'success' })
         },
         onError: e => {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to create token')
+            toast.add({ title: 'Failed to create token', type: 'error' })
         },
     })
 

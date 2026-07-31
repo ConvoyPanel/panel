@@ -1,21 +1,20 @@
+import {
+    type SSHKeyCreateInput,
+    createSSHKey,
+    sshKeyCreateSchema,
+    sshKeyQueries,
+} from '@/features/account/ssh-keys/api.ts'
+import { SSHKey } from '@/features/account/types.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-
-import {
-    createSSHKey,
-    sshKeyCreateSchema,
-    sshKeyQueries,
-    type SSHKeyCreateInput,
-} from '@/features/account/ssh-keys/api.ts'
-import { SSHKey } from '@/features/account/types.ts'
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
-import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
 
 import { Button } from '@/components/ui/Button'
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm, TextareaForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -26,8 +25,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 const defaultValues: SSHKeyCreateInput = { name: '', publicKey: '' }
 
@@ -48,13 +46,13 @@ const SSHKeyCreateDialog = ({ open, onOpenChange }: Props) => {
         mutationFn: createSSHKey,
         onSuccess: async key => {
             await mutate(keys => (keys ? [key, ...keys] : keys), false)
-            toast.success('SSH key added')
+            toast.add({ title: 'SSH key added', type: 'success' })
             onOpenChange(false)
             setTimeout(() => form.reset(defaultValues), 200)
         },
         onError: e => {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to add key')
+            toast.add({ title: 'Failed to add key', type: 'error' })
         },
     })
 

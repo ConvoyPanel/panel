@@ -8,7 +8,6 @@ import {
 import { IconDisc } from '@tabler/icons-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import byteSize from 'byte-size'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -33,6 +32,7 @@ import {
     OverflowItemGroup,
 } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     uuid: string
@@ -49,9 +49,16 @@ const IsoLibraryCard = ({ uuid }: Props) => {
                 : mountMedia(uuid, iso.uuid),
         onSuccess: (_, iso) => {
             queryClient.invalidateQueries({ queryKey: mediaQueries.all(uuid) })
-            toast.success(iso.mounted ? 'ISO unmounted' : 'ISO mounted')
+            toast.add({
+                title: iso.mounted ? 'ISO unmounted' : 'ISO mounted',
+                type: 'success',
+            })
         },
-        onError: () => toast.error('Failed to change mounted media'),
+        onError: () =>
+            toast.add({
+                title: 'Failed to change mounted media',
+                type: 'error',
+            }),
     })
 
     return (

@@ -8,7 +8,6 @@ import { Server } from '@/types/server'
 import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -19,6 +18,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { ItemGroup } from '@/components/ui/Item'
+import { toast } from '@/components/ui/Toast'
 
 import DeploymentStepRow from './DeploymentStepRow.tsx'
 
@@ -79,7 +79,7 @@ export default function InstallingServer({ server }: InstallingServerProps) {
             await retryInstallation(server.uuid)
             refetchServer()
         } catch (error) {
-            toast.error('Failed to retry installation.')
+            toast.add({ title: 'Failed to retry installation.', type: 'error' })
         }
     }
 

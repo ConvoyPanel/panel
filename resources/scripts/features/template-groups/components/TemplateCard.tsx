@@ -1,3 +1,10 @@
+import {
+    templateQueries,
+    templateSchema,
+    updateTemplate,
+    useDeleteTemplateMutation,
+} from '@/features/template-groups/templates/api.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { TemplateGroup } from '@/types/template-group.ts'
 import { Template } from '@/types/template.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -5,17 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconDots, IconLockFilled } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
-import {
-    templateQueries,
-    templateSchema,
-    updateTemplate,
-    useDeleteTemplateMutation,
-} from '@/features/template-groups/templates/api.ts'
 
 import { badgeVariants } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
@@ -31,6 +28,7 @@ import {
     InputForm,
     TextareaForm,
 } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     templateGroup: TemplateGroup
@@ -78,7 +76,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
             setIsEditing(false)
         } catch (e) {
             if (!handleFormErrors(e, form.setError)) {
-                toast.error('Failed to save changes')
+                toast.add({ title: 'Failed to save changes', type: 'error' })
             }
         }
     }
@@ -152,14 +150,14 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                     </span>
                 </h3>
                 {template.description && (
-                    <p className={'truncate text-sm text-muted-foreground'}>
+                    <p className={'text-muted-foreground truncate text-sm'}>
                         {template.description}
                     </p>
                 )}
 
                 {isDeleting && (
                     <>
-                        <p className={'text-sm text-destructive'}>
+                        <p className={'text-destructive text-sm'}>
                             Are you sure you want to delete this template?
                         </p>
 
@@ -192,7 +190,7 @@ const TemplateCard = ({ templateGroup, template }: Props) => {
                             aria-label={'Open template actions'}
                         >
                             <IconDots
-                                className={'size-4 text-muted-foreground'}
+                                className={'text-muted-foreground size-4'}
                             />
                         </Button>
                     </DropdownMenuTrigger>

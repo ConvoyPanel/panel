@@ -1,3 +1,6 @@
+import { Template } from '@/types/template.ts'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
+import TemplateController from '@/wayfinder/actions/App/Http/Controllers/Admin/TemplateController'
 import {
     keepPreviousData,
     queryOptions,
@@ -5,14 +8,12 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { type DataResponse, apiFetch } from '@/lib/api'
 import { rawDataToTemplate } from '@/lib/transformers/template.ts'
-import { apiFetch, type DataResponse } from '@/lib/api'
-import { Template } from '@/types/template.ts'
-import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
-import TemplateController from '@/wayfinder/actions/App/Http/Controllers/Admin/TemplateController'
+
+import { toast } from '@/components/ui/Toast'
 
 export type TemplateQueryParams = QueryBuilderParams<'name' | 'isAdminOnly'>
 
@@ -27,9 +28,13 @@ export const templateSchema = z.object({
 // Application (`/api/application`) prefixes, so Wayfinder emits URI-keyed
 // dictionaries — reference the admin route explicitly.
 const indexRoute =
-    TemplateController.index['/api/admin/template-groups/{template_group}/templates']
+    TemplateController.index[
+        '/api/admin/template-groups/{template_group}/templates'
+    ]
 const storeRoute =
-    TemplateController.store['/api/admin/template-groups/{template_group}/templates']
+    TemplateController.store[
+        '/api/admin/template-groups/{template_group}/templates'
+    ]
 const updateRoute =
     TemplateController.update[
         '/api/admin/template-groups/{template_group}/templates/{template}'
@@ -131,10 +136,13 @@ export const useDeleteTemplateMutation = (templateGroupUuid: string) => {
                 current =>
                     current ? current.filter(t => t.uuid !== templateUuid) : []
             )
-            toast.success('Template deleted successfully')
+            toast.add({
+                title: 'Template deleted successfully',
+                type: 'success',
+            })
         },
         onError: () => {
-            toast.error('Failed to delete template')
+            toast.add({ title: 'Failed to delete template', type: 'error' })
         },
     })
 

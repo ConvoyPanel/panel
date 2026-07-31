@@ -1,20 +1,18 @@
+import { updateAddress } from '@/features/ipam/blocks/addresses/api.ts'
+import ServerPicker from '@/features/ipam/components/AddressBlock/ServerPicker.tsx'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import { PaginatedAddresses } from '@/types/address.ts'
+import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
-import { updateAddress } from '@/features/ipam/blocks/addresses/api.ts'
-
-import ServerPicker from '@/features/ipam/components/AddressBlock/ServerPicker.tsx'
-import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -24,10 +22,13 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
+import { toast } from '@/components/ui/Toast'
 
 const addressSchema = z.object({
-    serverId: z.string().nullable().transform(val => val || null),
+    serverId: z
+        .string()
+        .nullable()
+        .transform(val => val || null),
 })
 
 interface Props {
@@ -80,10 +81,10 @@ const EditAddressModal = ({ mutate }: Props) => {
             }, false)
 
             close()
-            toast.success('Address updated')
+            toast.add({ title: 'Address updated', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }
@@ -92,7 +93,9 @@ const EditAddressModal = ({ mutate }: Props) => {
         <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Editing Address {address?.ip}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Editing Address {address?.ip}
+                    </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
@@ -104,9 +107,9 @@ const EditAddressModal = ({ mutate }: Props) => {
                             />
                             <Button
                                 variant={'link'}
-                                className={'px-0 block ml-auto'}
+                                className={'ml-auto block px-0'}
                                 onClick={() => form.setValue('serverId', '')}
-                                type="button"
+                                type='button'
                             >
                                 Clear
                             </Button>

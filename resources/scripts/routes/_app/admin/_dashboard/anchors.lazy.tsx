@@ -17,7 +17,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import type { z } from 'zod'
 
 import { queryClient } from '@/lib/query-client.ts'
@@ -49,6 +48,7 @@ import {
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/anchors')({
@@ -78,15 +78,20 @@ function AnchorsPage() {
     const enrollmentMutation = useMutation({
         mutationFn: (anchor: Anchor) => createEnrollment(anchor.id),
         onSuccess: result => setEnrollment(result.command),
-        onError: () => toast.error('Failed to create enrollment command'),
+        onError: () =>
+            toast.add({
+                title: 'Failed to create enrollment command',
+                type: 'error',
+            }),
     })
     const deleteMutation = useMutation({
         mutationFn: (anchor: Anchor) => deleteAnchor(anchor.id),
         onSuccess: async () => {
-            toast.success('Anchor deleted')
+            toast.add({ title: 'Anchor deleted', type: 'success' })
             await refresh()
         },
-        onError: () => toast.error('Failed to delete Anchor'),
+        onError: () =>
+            toast.add({ title: 'Failed to delete Anchor', type: 'error' }),
     })
     const handleDelete = async (anchor: Anchor) => {
         const confirmed = await confirm({
@@ -268,11 +273,14 @@ function AnchorForm({
         try {
             await save.mutateAsync(data)
             await refresh()
-            toast.success(`Anchor ${current ? 'updated' : 'created'}`)
+            toast.add({
+                title: `Anchor ${current ? 'updated' : 'created'}`,
+                type: 'success',
+            })
             close()
         } catch (error) {
             handleFormErrors(error, form.setError)
-            toast.error('Failed to save Anchor')
+            toast.add({ title: 'Failed to save Anchor', type: 'error' })
         }
     }
     return (

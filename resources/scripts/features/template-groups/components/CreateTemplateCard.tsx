@@ -1,18 +1,15 @@
-import { TemplateGroup } from '@/types/template-group.ts'
-import { handleFormErrors } from '@/utils/http.ts'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { Template } from '@/types/template.ts'
-
 import {
     createTemplate,
     templateQueries,
     templateSchema,
 } from '@/features/template-groups/templates/api.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { TemplateGroup } from '@/types/template-group.ts'
+import { Template } from '@/types/template.ts'
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
@@ -21,6 +18,7 @@ import {
     InputForm,
     TextareaForm,
 } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     templateGroup: TemplateGroup
@@ -56,7 +54,7 @@ const CreateTemplateCard = ({ templateGroup, onClose }: Props) => {
             onClose()
         } catch (e) {
             if (handleFormErrors(e, form.setError)) {
-                toast.error('Failed to create template')
+                toast.add({ title: 'Failed to create template', type: 'error' })
             }
         }
     }

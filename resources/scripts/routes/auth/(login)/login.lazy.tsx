@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import {
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute('/auth/(login)/login')({
     component: Login,
@@ -34,7 +34,7 @@ function Login() {
 
     useEffect(() => {
         if (oauthError) {
-            toast.error(oauthErrorMessage(oauthError))
+            toast.add({ title: oauthErrorMessage(oauthError), type: 'error' })
             void navigate({
                 to: '/auth/login',
                 search: { redirect: redirect ? redirect : undefined },

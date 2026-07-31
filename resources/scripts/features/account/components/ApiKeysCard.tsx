@@ -11,7 +11,6 @@ import { cn } from '@/utils'
 import { IconApi } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -29,6 +28,7 @@ import {
 } from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const ApiKeysCard = () => {
     const mutate = useQueryMutator<ApiKeyType[]>(apiKeyQueries.all())
@@ -41,9 +41,10 @@ const ApiKeysCard = () => {
         mutationFn: (apiKey: ApiKeyType) => deleteApiKey(apiKey.id),
         onSuccess: (_, apiKey) => {
             mutate(keys => keys?.filter(k => k.id !== apiKey.id))
-            toast.success('API token revoked')
+            toast.add({ title: 'API token revoked', type: 'success' })
         },
-        onError: () => toast.error('Failed to revoke token'),
+        onError: () =>
+            toast.add({ title: 'Failed to revoke token', type: 'error' }),
     })
 
     return (

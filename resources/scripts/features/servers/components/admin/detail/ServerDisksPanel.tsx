@@ -11,7 +11,6 @@ import { ColumnDef } from '@tanstack/react-table'
 import { AxiosError } from 'axios'
 import byteSize from 'byte-size'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Badge } from '@/components/ui/Badge'
@@ -28,6 +27,7 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Actions from '@/components/ui/Table/Actions.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 interface Props {
@@ -68,9 +68,12 @@ const ServerDisksPanel = ({ serverId }: Props) => {
 
         try {
             await remove.mutateAsync(disk.id)
-            toast.success('Disk removed')
+            toast.add({ title: 'Disk removed', type: 'success' })
         } catch (e) {
-            toast.error(errorMessage(e, 'Failed to remove disk'))
+            toast.add({
+                title: errorMessage(e, 'Failed to remove disk'),
+                type: 'error',
+            })
         }
     }
 

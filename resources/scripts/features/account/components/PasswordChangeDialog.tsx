@@ -5,7 +5,6 @@ import { PASSWORD_MAX_BYTES, PASSWORD_MIN_LENGTH } from '@/utils/password.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -22,6 +21,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z
     .object({
@@ -65,7 +65,7 @@ const PasswordChangeDialog = () => {
             await updatePassword(data)
             form.reset()
             setOpen(false)
-            toast.success('Password updated')
+            toast.add({ title: 'Password updated', type: 'success' })
         } catch (error) {
             handleFormErrors(error, form.setError)
 

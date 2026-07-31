@@ -18,7 +18,6 @@ import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import {
@@ -31,6 +30,7 @@ import {
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute(
@@ -90,7 +90,7 @@ function ServerBuildSettings() {
             await mutateServer(() => updatedServer, false)
             await mutateServerLists()
             form.reset(defaultsFromServer(updatedServer))
-            toast.success('Server limits updated')
+            toast.add({ title: 'Server limits updated', type: 'success' })
         } catch (error) {
             handleFormErrors(error, form.setError, {
                 'backup_count_limit': 'backupCountLimit',
@@ -102,7 +102,10 @@ function ServerBuildSettings() {
                 'overage_penalty.action': 'overagePenaltyAction',
                 'overage_penalty.rate': 'overagePenaltyRate',
             })
-            toast.error('Failed to update server limits')
+            toast.add({
+                title: 'Failed to update server limits',
+                type: 'error',
+            })
             console.error(error)
         }
     }

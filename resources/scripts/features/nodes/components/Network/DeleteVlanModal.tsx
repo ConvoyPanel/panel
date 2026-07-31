@@ -11,7 +11,6 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/nodes.$nodeId/network.tsx'
 import { NetworkInterface, Vlan } from '@/types/network-interface.ts'
 import { AxiosError } from 'axios'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -23,6 +22,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const DeleteVlanModal = () => {
     const { nodeId } = Route.useParams()
@@ -43,7 +43,7 @@ const DeleteVlanModal = () => {
 
                 await mutate(withVlans(interfaceId, removeVlan(target)), false)
 
-                toast.success('VLAN deleted')
+                toast.add({ title: 'VLAN deleted', type: 'success' })
                 close()
             } catch (e) {
                 let message = 'Deletion failed'
@@ -52,7 +52,7 @@ const DeleteVlanModal = () => {
                     message = e.response.data.message
                 }
 
-                toast.error(message)
+                toast.add({ title: message, type: 'error' })
 
                 throw e
             }

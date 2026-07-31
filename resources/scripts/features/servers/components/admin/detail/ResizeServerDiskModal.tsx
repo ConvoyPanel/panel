@@ -1,17 +1,17 @@
-import byteSize from 'byte-size'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
 import {
     type ServerDisk,
     useResizeServerDisk,
 } from '@/features/servers/disks/api.ts'
 import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import byteSize from 'byte-size'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -22,8 +22,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 const BYTES_PER_GIB = 1024 * 1024 * 1024
 
@@ -63,11 +62,12 @@ const ResizeServerDiskModal = ({ serverId, disk, onOpenChange }: Props) => {
                 diskId: disk.id,
                 size: data.size * BYTES_PER_GIB,
             })
-            toast.success('Disk resized')
+            toast.add({ title: 'Disk resized', type: 'success' })
             onOpenChange(false)
         } catch (e) {
             const handled = handleFormErrors(e, form.setError, { size: 'size' })
-            if (!handled) toast.error('Failed to resize disk')
+            if (!handled)
+                toast.add({ title: 'Failed to resize disk', type: 'error' })
         }
     }
 

@@ -7,7 +7,6 @@ import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/Ser
 import { IconChevronDown } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { apiFetch } from '@/lib/api'
 
@@ -19,6 +18,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
+import { toast } from '@/components/ui/Toast'
 
 const sendPowerCommandRoute =
     ServerController.sendPowerCommand['/api/admin/servers/{server}/power']
@@ -70,9 +70,15 @@ const ServerBulkPowerActions = ({ servers, onDone }: Props) => {
 
         const failed = results.filter(r => r.status === 'rejected').length
         if (failed) {
-            toast.error(`${failed} of ${servers.length} power actions failed`)
+            toast.add({
+                title: `${failed} of ${servers.length} power actions failed`,
+                type: 'error',
+            })
         } else {
-            toast.success(`Queued ${action} for ${servers.length} server(s)`)
+            toast.add({
+                title: `Queued ${action} for ${servers.length} server(s)`,
+                type: 'success',
+            })
         }
         onDone?.()
     }

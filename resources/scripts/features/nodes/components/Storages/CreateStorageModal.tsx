@@ -1,22 +1,22 @@
+import {
+    createStorage,
+    storageQueries,
+    storageSchema,
+} from '@/features/nodes/storages/api.ts'
+import { NodeStorage } from '@/features/nodes/types.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
-import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import { NodeStorage } from '@/features/nodes/types.ts'
-
-import {
-    createStorage,
-    storageSchema,
-    storageQueries,
-} from '@/features/nodes/storages/api.ts'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -27,9 +27,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
-import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const CreateStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
@@ -64,7 +62,9 @@ const CreateStorageModal = () => {
         try {
             const storage = await createStorage(Number(nodeId), {
                 size: size * 1024 * 1024,
-                reservedBytes: reservedBytes ? reservedBytes * 1024 * 1024 : null,
+                reservedBytes: reservedBytes
+                    ? reservedBytes * 1024 * 1024
+                    : null,
                 ...data,
             })
 
@@ -76,10 +76,10 @@ const CreateStorageModal = () => {
 
             form.reset()
             setOpen(false)
-            toast.success('Storage created')
+            toast.add({ title: 'Storage created', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }
@@ -108,7 +108,11 @@ const CreateStorageModal = () => {
                                 name={'description'}
                                 label={'Description'}
                             />
-                            <InputForm name={'name'} label={'Name'} autoComplete={'off'} />
+                            <InputForm
+                                name={'name'}
+                                label={'Name'}
+                                autoComplete={'off'}
+                            />
                             <InputForm name={'size'} label={'Size (MiB)'} />
                             <InputForm
                                 name={'reservedBytes'}
@@ -123,7 +127,7 @@ const CreateStorageModal = () => {
                                 </h3>
                                 <p
                                     className={
-                                        'text-[0.8rem] text-muted-foreground'
+                                        'text-muted-foreground text-[0.8rem]'
                                     }
                                 >
                                     Select which content types this storage

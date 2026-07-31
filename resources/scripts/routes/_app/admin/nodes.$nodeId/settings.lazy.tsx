@@ -20,7 +20,6 @@ import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -33,6 +32,7 @@ import {
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute('/_app/admin/nodes/$nodeId/settings')({
     component: NodeSettings,
@@ -82,7 +82,7 @@ function NodeSettings() {
         onSuccess: async updatedNode => {
             await mutateNode(() => updatedNode)
             await mutateNodeLists()
-            toast.success('Node updated')
+            toast.add({ title: 'Node updated', type: 'success' })
         },
     })
 
@@ -97,7 +97,7 @@ function NodeSettings() {
             })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to update node')
+            toast.add({ title: 'Failed to update node', type: 'error' })
             console.error(e)
         }
     }

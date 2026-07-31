@@ -1,14 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { IconPlus, IconTrash } from '@tabler/icons-react'
-import { AxiosError } from 'axios'
-import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-
 import {
     nameserverQueries,
     updateNameservers,
     useNameservers,
 } from '@/features/servers/networking/api.ts'
+import { IconPlus, IconTrash } from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -21,6 +19,7 @@ import {
 } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const errorMessage = (e: unknown, fallback: string): string =>
     e instanceof AxiosError && e.response?.data?.message
@@ -61,10 +60,13 @@ const NameserversCard = ({ uuid }: Props) => {
             queryClient.invalidateQueries({
                 queryKey: nameserverQueries.all(uuid),
             })
-            toast.success('Nameservers updated')
+            toast.add({ title: 'Nameservers updated', type: 'success' })
         },
         onError: e =>
-            toast.error(errorMessage(e, 'Failed to update nameservers')),
+            toast.add({
+                title: errorMessage(e, 'Failed to update nameservers'),
+                type: 'error',
+            }),
     })
 
     return (

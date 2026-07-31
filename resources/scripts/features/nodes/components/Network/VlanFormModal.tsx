@@ -15,7 +15,6 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -31,6 +30,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 /**
  * Declaring and editing share one form: the fields are identical, and the only
@@ -89,10 +89,13 @@ const VlanFormModal = ({ mode }: { mode: 'create' | 'edit' }) => {
             )
 
             close()
-            toast.success(mode === 'edit' ? 'VLAN updated' : 'VLAN declared')
+            toast.add({
+                title: mode === 'edit' ? 'VLAN updated' : 'VLAN declared',
+                type: 'success',
+            })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }

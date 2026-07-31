@@ -8,11 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCheck } from '@tabler/icons-react'
 import { Link, createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes/create')(
     {
@@ -52,7 +52,7 @@ function CreateNodePage() {
                 ...data,
             })
 
-            toast.success('Node created')
+            toast.add({ title: 'Node created', type: 'success' })
 
             navigate({
                 to: '/admin/nodes/$nodeId',
@@ -61,7 +61,7 @@ function CreateNodePage() {
             })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to create node')
+            toast.add({ title: 'Failed to create node', type: 'error' })
             console.error(e)
         }
     }

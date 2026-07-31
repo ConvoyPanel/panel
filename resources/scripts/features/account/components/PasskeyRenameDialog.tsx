@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -24,6 +23,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     name: z.string().min(1).max(40),
@@ -53,7 +53,7 @@ const PasskeyRenameDialog = () => {
 
         await renamePasskey(passkey.id, data.name)
 
-        toast.success('Passkey renamed')
+        toast.add({ title: 'Passkey renamed', type: 'success' })
 
         await queryClient.invalidateQueries({ queryKey: passkeyQueries.all() })
 

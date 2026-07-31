@@ -1,14 +1,18 @@
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { toast } from 'sonner'
-import { IconPlus } from '@tabler/icons-react'
+import { attachNode } from '@/features/ipam/api.ts'
+import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker.tsx'
+import NodePicker from '@/features/servers/components/admin/Create/pickers/NodePicker.tsx'
+import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
+import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
 import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
-import { attachNode } from '@/features/ipam/api.ts'
-import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId.tsx'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { IconPlus } from '@tabler/icons-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -19,10 +23,7 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import NodePicker from '@/features/servers/components/admin/Create/pickers/NodePicker.tsx'
-import NetworkInterfacePicker from '@/features/servers/components/admin/Create/pickers/NetworkInterfacePicker.tsx'
-import { PaginatedNetworkInterfaces } from '@/types/network-interface.ts'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     nodeId: z.string().min(1, 'A node is required'),
@@ -49,14 +50,17 @@ const AttachNodeModal = ({ mutate }: Props) => {
 
     const submit = async (data: z.infer<typeof schema>) => {
         try {
-            await attachNode(Number(addressBlockGroupId), Number(data.networkInterfaceId))
+            await attachNode(
+                Number(addressBlockGroupId),
+                Number(data.networkInterfaceId)
+            )
             await mutate()
             form.reset()
             setOpen(false)
-            toast.success('Node attached successfully')
+            toast.add({ title: 'Node attached successfully', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to attach node')
+            toast.add({ title: 'Failed to attach node', type: 'error' })
         }
     }
 
@@ -65,7 +69,7 @@ const AttachNodeModal = ({ mutate }: Props) => {
             <ResponsiveDialogTrigger
                 render={
                     <Button>
-                        <IconPlus className="size-4" /> Attach Node
+                        <IconPlus className='size-4' /> Attach Node
                     </Button>
                 }
             />
@@ -75,16 +79,16 @@ const AttachNodeModal = ({ mutate }: Props) => {
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
-                        <ResponsiveDialogBody className="space-y-4">
+                        <ResponsiveDialogBody className='space-y-4'>
                             <NodePicker />
                             <NetworkInterfacePicker
                                 nodeId={nodeId ? Number(nodeId) : null}
                             />
                         </ResponsiveDialogBody>
-                        <ResponsiveDialogFooter className="mt-4">
+                        <ResponsiveDialogFooter className='mt-4'>
                             <ResponsiveDialogClose
                                 render={
-                                    <Button variant="outline" type="button">
+                                    <Button variant='outline' type='button'>
                                         Cancel
                                     </Button>
                                 }

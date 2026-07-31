@@ -1,24 +1,25 @@
-import { handleFormErrors } from '@/utils/http.ts'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { IconCheck, IconCopy } from '@tabler/icons-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-
 import {
+    type ApiKey,
+    type ApiKeyCreateInput,
     apiKeyCreateSchema,
     apiKeyQueries,
     apiKeyScopes,
     createApiKey,
-    type ApiKey,
-    type ApiKeyCreateInput,
 } from '@/features/account/api-keys/api.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-
-import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+import { handleFormErrors } from '@/utils/http.ts'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { IconCheck, IconCopy } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/Button'
+import AuthDialog from '@/components/ui/Dialog/AuthDialog.tsx'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
+import SelectForm from '@/components/ui/Forms/SelectForm'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -29,11 +30,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import useClipboard from '@/hooks/use-clipboard.ts'
-
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
-import SelectForm from '@/components/ui/Forms/SelectForm'
+import { toast } from '@/components/ui/Toast'
 
 const defaultValues: ApiKeyCreateInput = { name: '', scope: 'servers:*' }
 
@@ -57,11 +54,11 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
         onSuccess: async ({ key, plainTextToken }) => {
             await mutate(keys => (keys ? [key, ...keys] : keys), false)
             setPlainTextToken(plainTextToken)
-            toast.success('API token created')
+            toast.add({ title: 'API token created', type: 'success' })
         },
         onError: e => {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to create token')
+            toast.add({ title: 'Failed to create token', type: 'error' })
         },
     })
 
@@ -81,22 +78,24 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                 {plainTextToken ? (
                     <>
                         <ResponsiveDialogHeader>
-                            <ResponsiveDialogTitle>API token created</ResponsiveDialogTitle>
+                            <ResponsiveDialogTitle>
+                                API token created
+                            </ResponsiveDialogTitle>
                             <ResponsiveDialogDescription>
-                                Copy your token now. For your security, it
-                                won’t be shown again.
+                                Copy your token now. For your security, it won’t
+                                be shown again.
                             </ResponsiveDialogDescription>
                         </ResponsiveDialogHeader>
 
                         <ResponsiveDialogBody>
                             <div
                                 className={
-                                    'flex items-center gap-2 rounded-md border bg-muted p-3'
+                                    'bg-muted flex items-center gap-2 rounded-md border p-3'
                                 }
                             >
                                 <code
                                     className={
-                                        'grow overflow-x-auto whitespace-nowrap font-mono text-sm'
+                                        'grow overflow-x-auto font-mono text-sm whitespace-nowrap'
                                     }
                                 >
                                     {plainTextToken}
@@ -121,16 +120,16 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
 
                         <ResponsiveDialogFooter>
                             <ResponsiveDialogClose
-                                render={
-                                    <Button>Done</Button>
-                                }
+                                render={<Button>Done</Button>}
                             />
                         </ResponsiveDialogFooter>
                     </>
                 ) : (
                     <>
                         <ResponsiveDialogHeader>
-                            <ResponsiveDialogTitle>Create API token</ResponsiveDialogTitle>
+                            <ResponsiveDialogTitle>
+                                Create API token
+                            </ResponsiveDialogTitle>
                             <ResponsiveDialogDescription>
                                 Generate a personal access token to use the API
                                 on your behalf.
@@ -138,7 +137,11 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                         </ResponsiveDialogHeader>
 
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(data => trigger(data))}>
+                            <form
+                                onSubmit={form.handleSubmit(data =>
+                                    trigger(data)
+                                )}
+                            >
                                 <ResponsiveDialogBody className={'space-y-4'}>
                                     <InputForm
                                         name={'name'}

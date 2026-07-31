@@ -13,7 +13,6 @@ import {
 } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -26,6 +25,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
     const form = useFormContext<ConnectionTestForm>()
@@ -61,7 +61,7 @@ const TestConnectionButton = ({ nodeId }: { nodeId?: number }) => {
                 )
             }
         } catch (e) {
-            toast.error('Failed to test connection')
+            toast.add({ title: 'Failed to test connection', type: 'error' })
             console.error(e)
         }
     })

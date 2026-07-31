@@ -1,15 +1,14 @@
+import StoragePicker from '@/features/servers/components/admin/Create/pickers/StoragePicker'
+import { useAddServerDisk } from '@/features/servers/disks/api.ts'
+import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { useAddServerDisk } from '@/features/servers/disks/api.ts'
-import { handleFormErrors } from '@/utils/http.ts'
-
-import StoragePicker from '@/features/servers/components/admin/Create/pickers/StoragePicker'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm } from '@/components/ui/Forms'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -19,8 +18,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 const addDiskSchema = z.object({
     storageId: z.string({ error: 'Storage is required.' }).min(1),
@@ -37,7 +35,12 @@ interface Props {
     onOpenChange: (open: boolean) => void
 }
 
-const AddServerDiskModal = ({ serverId, nodeId, open, onOpenChange }: Props) => {
+const AddServerDiskModal = ({
+    serverId,
+    nodeId,
+    open,
+    onOpenChange,
+}: Props) => {
     const add = useAddServerDisk(serverId)
 
     const form = useForm<z.input<typeof addDiskSchema>>({
@@ -55,14 +58,15 @@ const AddServerDiskModal = ({ serverId, nodeId, open, onOpenChange }: Props) => 
                 storageId: Number(data.storageId),
                 size: data.size * 1024 * 1024 * 1024,
             })
-            toast.success('Disk added')
+            toast.add({ title: 'Disk added', type: 'success' })
             onOpenChange(false)
         } catch (e) {
             const handled = handleFormErrors(e, form.setError, {
                 storage_id: 'storageId',
                 size: 'size',
             })
-            if (!handled) toast.error('Failed to add disk')
+            if (!handled)
+                toast.add({ title: 'Failed to add disk', type: 'error' })
         }
     }
 

@@ -2,7 +2,8 @@ import { useServerState } from '@/features/servers/detail/api.ts'
 import type { PowerActionResult } from '@/types/server.ts'
 import { useParams } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
-import { toast } from 'sonner'
+
+import { toast } from '@/components/ui/Toast'
 
 type Command = PowerActionResult['command']
 
@@ -69,7 +70,16 @@ export const usePowerActionToast = (uuid?: string) => {
         if (pending) {
             if (activeRef.current !== pending.requestedAt) {
                 activeRef.current = pending.requestedAt
-                toast.loading(progressLabel[pending.command], { id: toastId })
+                // Adding under an existing id merges into that toast rather
+                // than replacing it, so the fields a previous cycle's failure
+                // set are cleared here instead of bleeding into this one.
+                toast.add({
+                    id: toastId,
+                    title: progressLabel[pending.command],
+                    description: undefined,
+                    timeout: undefined,
+                    type: 'loading',
+                })
             }
             return
         }
@@ -83,22 +93,28 @@ export const usePowerActionToast = (uuid?: string) => {
 
         if (result && result.requestedAt === finished) {
             if (result.ok) {
-                toast.success(successLabel[result.command], { id: toastId })
-            } else {
-                toast.error(failureLabel[result.command], {
+                toast.add({
                     id: toastId,
+                    title: successLabel[result.command],
+                    type: 'success',
+                })
+            } else {
+                toast.add({
+                    id: toastId,
+                    title: failureLabel[result.command],
                     description: result.exitStatus?.slice(0, MAX_DETAIL),
-                    duration: 8000,
+                    timeout: 8000,
+                    type: 'error',
                 })
             }
         } else {
-            toast.dismiss(toastId)
+            toast.close(toastId)
         }
     }, [pending, result, toastId])
 
     useEffect(() => {
         return () => {
-            toast.dismiss(toastId)
+            toast.close(toastId)
             activeRef.current = null
         }
     }, [toastId])

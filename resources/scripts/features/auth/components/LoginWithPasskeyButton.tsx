@@ -1,3 +1,7 @@
+import {
+    getPasskeyAuthenticationOptions,
+    verifyPasskeyAuthentication,
+} from '@/features/auth/api.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { startAuthentication } from '@simplewebauthn/browser'
 import {
@@ -6,14 +10,9 @@ import {
 } from '@simplewebauthn/browser'
 import { IconKey } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
-import { toast } from 'sonner'
-
-import {
-    getPasskeyAuthenticationOptions,
-    verifyPasskeyAuthentication,
-} from '@/features/auth/api.ts'
 
 import { Button } from '@/components/ui/Button'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     redirectTo?: string
@@ -27,7 +26,10 @@ const LoginWithPasskeyButton = ({ redirectTo }: Props) => {
         try {
             optionsJSON = await getPasskeyAuthenticationOptions()
         } catch (e) {
-            toast.error('Failed to get passkey authentication options')
+            toast.add({
+                title: 'Failed to get passkey authentication options',
+                type: 'error',
+            })
             throw e
         }
 
@@ -35,14 +37,17 @@ const LoginWithPasskeyButton = ({ redirectTo }: Props) => {
         try {
             authResponse = await startAuthentication({ optionsJSON })
         } catch (e) {
-            toast.error('Authentication failed')
+            toast.add({ title: 'Authentication failed', type: 'error' })
             throw e
         }
 
         try {
             await verifyPasskeyAuthentication(authResponse)
         } catch (e) {
-            toast.error('Invalid passkey. Please try again.')
+            toast.add({
+                title: 'Invalid passkey. Please try again.',
+                type: 'error',
+            })
             throw e
         }
 

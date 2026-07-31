@@ -14,7 +14,6 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import byteSize from 'byte-size'
 import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -44,6 +43,7 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const label = (device: BootDevice) => {
     const size = byteSize(device.size, { units: 'iec', precision: 0 })
@@ -105,9 +105,10 @@ const BootOrderCard = ({ uuid }: Props) => {
             queryClient.invalidateQueries({
                 queryKey: storageQueries.bootOrder(uuid).queryKey,
             })
-            toast.success('Boot order updated')
+            toast.add({ title: 'Boot order updated', type: 'success' })
         },
-        onError: () => toast.error('Failed to update boot order'),
+        onError: () =>
+            toast.add({ title: 'Failed to update boot order', type: 'error' }),
     })
 
     const addDeviceMenu = unused.length > 0 && (

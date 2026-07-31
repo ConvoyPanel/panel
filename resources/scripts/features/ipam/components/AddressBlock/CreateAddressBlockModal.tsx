@@ -1,20 +1,21 @@
+import {
+    addressBlockSchema,
+    createAddressBlock,
+} from '@/features/ipam/blocks/api.ts'
 import { PaginatedAddressBlocks } from '@/types/address-block.ts'
 import { AddressVersion } from '@/types/address.ts'
+import { Mutator } from '@/types/query.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { Mutator } from '@/types/query.ts'
 import { z } from 'zod'
 
-import {
-    createAddressBlock,
-    addressBlockSchema,
-} from '@/features/ipam/blocks/api.ts'
-
 import { Button } from '@/components/ui/Button'
+import { Form, FormButton } from '@/components/ui/Form'
+import { InputForm, TextareaForm } from '@/components/ui/Forms'
+import TabForm from '@/components/ui/Forms/TabForm.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -25,10 +26,8 @@ import {
     ResponsiveDialogTitle,
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
-import { Form, FormButton } from '@/components/ui/Form'
-import { InputForm, TextareaForm } from '@/components/ui/Forms'
-import TabForm from '@/components/ui/Forms/TabForm.tsx'
 import { TabsTrigger } from '@/components/ui/Tabs'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     addressBlockGroupId: number
@@ -73,10 +72,10 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
 
             form.reset()
             setOpen(false)
-            toast.success('Address block created')
+            toast.add({ title: 'Address block created', type: 'success' })
         } catch (e) {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }
@@ -92,17 +91,28 @@ const CreateAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
             />
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>New Address Block</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        New Address Block
+                    </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit as any)}>
-                        <ResponsiveDialogBody className={'space-y-2 max-sm:max-h-[60vh] max-sm:overflow-y-auto'}>
+                        <ResponsiveDialogBody
+                            className={
+                                'space-y-2 max-sm:max-h-[60vh] max-sm:overflow-y-auto'
+                            }
+                        >
                             <InputForm name={'name'} label={'Name'} />
                             <TextareaForm
                                 name={'description'}
                                 label={'Description'}
                             />
-                            <TabForm name={'version'} tabsListProps={{className: 'grid grid-cols-2 w-full'}}>
+                            <TabForm
+                                name={'version'}
+                                tabsListProps={{
+                                    className: 'grid grid-cols-2 w-full',
+                                }}
+                            >
                                 <TabsTrigger value={'ipv4'}>IPv4</TabsTrigger>
                                 <TabsTrigger value={'ipv6'}>IPv6</TabsTrigger>
                             </TabForm>

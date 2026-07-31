@@ -1,15 +1,13 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { toast } from 'sonner'
-
-import { oauthErrorMessage } from '@/features/auth/oauth.ts'
-
 import ApiKeysCard from '@/features/account/components/ApiKeysCard.tsx'
 import AuthenticationCard from '@/features/account/components/AuthenticationCard.tsx'
 import KeychainCard from '@/features/account/components/KeychainCard.tsx'
 import OAuthConnectionsCard from '@/features/account/components/OAuthConnectionsCard.tsx'
 import SessionListCard from '@/features/account/components/SessionListCard.tsx'
+import { oauthErrorMessage } from '@/features/auth/oauth.ts'
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
 
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/_dashboard/security')({
@@ -25,9 +23,9 @@ function Security() {
         if (!oauthLinked && !oauthError) return
 
         if (oauthError) {
-            toast.error(oauthErrorMessage(oauthError))
+            toast.add({ title: oauthErrorMessage(oauthError), type: 'error' })
         } else if (oauthLinked) {
-            toast.success('Provider connected')
+            toast.add({ title: 'Provider connected', type: 'success' })
         }
 
         // Strip the one-shot params so a refresh doesn't re-toast.

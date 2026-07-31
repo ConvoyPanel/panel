@@ -11,7 +11,6 @@ import { cn } from '@/utils'
 import { IconKey } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -29,6 +28,7 @@ import {
 } from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const KeychainCard = () => {
     const mutate = useQueryMutator<SSHKeyType[]>(sshKeyQueries.all())
@@ -41,9 +41,10 @@ const KeychainCard = () => {
         mutationFn: (key: SSHKeyType) => deleteSSHKey(key.id),
         onSuccess: (_, key) => {
             mutate(keys => keys?.filter(k => k.id !== key.id))
-            toast.success('SSH key removed')
+            toast.add({ title: 'SSH key removed', type: 'success' })
         },
-        onError: () => toast.error('Failed to remove key'),
+        onError: () =>
+            toast.add({ title: 'Failed to remove key', type: 'error' }),
     })
 
     return (

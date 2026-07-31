@@ -1,12 +1,9 @@
+import { deleteAddressBlock } from '@/features/ipam/blocks/api.ts'
+import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlocks } from '@/types/address-block.ts'
-import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
-
-import { deleteAddressBlock } from '@/features/ipam/blocks/api.ts'
-
-import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -18,6 +15,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     addressBlockGroupId: number
@@ -25,7 +23,11 @@ interface Props {
 }
 
 const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
-    const { open, data: addressBlock, close } = useModal(useAddressBlockModal, 'delete')
+    const {
+        open,
+        data: addressBlock,
+        close,
+    } = useModal(useAddressBlockModal, 'delete')
 
     const [state, submit] = useAsyncFunction(async () => {
         try {
@@ -38,14 +40,16 @@ const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
 
                 return {
                     ...data,
-                    items: data.items.filter(item => item.id !== addressBlock.id),
+                    items: data.items.filter(
+                        item => item.id !== addressBlock.id
+                    ),
                 }
             }, false)
 
-            toast.success('Address block deleted')
+            toast.add({ title: 'Address block deleted', type: 'success' })
             close()
         } catch (e) {
-            toast.error('Deletion failed')
+            toast.add({ title: 'Deletion failed', type: 'error' })
             throw e
         }
     })
@@ -54,7 +58,9 @@ const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
         <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Delete {addressBlock?.name || 'Address Block'}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Delete {addressBlock?.name || 'Address Block'}
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to delete this address block? This
                         action cannot be undone.
@@ -62,9 +68,7 @@ const DeleteAddressBlockModal = ({ addressBlockGroupId, mutate }: Props) => {
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose
-                        render={
-                            <Button variant={'outline'}>Cancel</Button>
-                        }
+                        render={<Button variant={'outline'}>Cancel</Button>}
                     />
                     <Button
                         autoFocus

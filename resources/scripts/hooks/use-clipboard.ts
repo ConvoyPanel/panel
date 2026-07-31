@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+
+import { toast } from '@/components/ui/Toast'
 
 interface UseClipboardOptions {
     /** Time in ms after which the copied state will reset, `2000` by default */
@@ -35,7 +36,10 @@ const useClipboard = (
                 .writeText(value)
                 .then(() => {
                     if (options?.successMessage) {
-                        toast.success(options.successMessage)
+                        toast.add({
+                            title: options.successMessage,
+                            type: 'success',
+                        })
                     }
                     setCopied(true)
                     timeoutRef.current = window.setTimeout(() => {
@@ -43,7 +47,10 @@ const useClipboard = (
                     }, options?.timeout ?? 2000)
                 })
                 .catch(err => {
-                    toast.error('Failed to copy to clipboard')
+                    toast.add({
+                        title: 'Failed to copy to clipboard',
+                        type: 'error',
+                    })
                     throw err
                 })
         },

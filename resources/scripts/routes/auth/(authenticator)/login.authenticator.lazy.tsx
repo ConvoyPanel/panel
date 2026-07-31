@@ -12,7 +12,6 @@ import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -38,6 +37,7 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from '@/components/ui/InputOTP'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute(
     '/auth/(authenticator)/login/authenticator'
@@ -94,7 +94,8 @@ function Authenticator() {
                 await verifySecondFactorPasskey(response)
             },
             onSuccess: finishLogin,
-            onError: () => toast.error('Failed to verify passkey'),
+            onError: () =>
+                toast.add({ title: 'Failed to verify passkey', type: 'error' }),
         })
 
     const submit = async (_data: any) => {
@@ -116,7 +117,7 @@ function Authenticator() {
         } catch (e) {
             if (handleFormErrors(e, form.setError)) return
 
-            toast.error('Failed to verify code')
+            toast.add({ title: 'Failed to verify code', type: 'error' })
 
             throw e
         }

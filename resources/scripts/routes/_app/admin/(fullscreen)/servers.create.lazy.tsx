@@ -1,23 +1,21 @@
+import { createServer, serverSchema } from '@/features/servers/admin/api.ts'
+import GeneralForm from '@/features/servers/components/admin/Create/GeneralForm'
+import LimitsForm from '@/features/servers/components/admin/Create/LimitsForm'
+import NetworkForm from '@/features/servers/components/admin/Create/NetworkForm'
+import SecondaryDisksForm from '@/features/servers/components/admin/Create/SecondaryDisksForm'
+import VmOptionsForm from '@/features/servers/components/admin/Create/VmOptionsForm'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCheck } from '@tabler/icons-react'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
-import {
-    createServer,
-    serverSchema,
-} from '@/features/servers/admin/api.ts'
-import GeneralForm from '@/features/servers/components/admin/Create/GeneralForm'
-import LimitsForm from '@/features/servers/components/admin/Create/LimitsForm'
-import SecondaryDisksForm from '@/features/servers/components/admin/Create/SecondaryDisksForm'
-import NetworkForm from '@/features/servers/components/admin/Create/NetworkForm'
-import VmOptionsForm from '@/features/servers/components/admin/Create/VmOptionsForm'
 import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
+
 import { Form, FormButton } from '@/components/ui/Form'
-import { useEffect } from 'react'
+import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute(
     '/_app/admin/(fullscreen)/servers/create'
@@ -76,9 +74,15 @@ function CreateServerPage() {
             // Secondary disks are entered in GiB (PVE allocates in whole GiB).
             const convertedData = {
                 ...data,
-                memory: data.memory !== -1 ? data.memory * 1024 * 1024 : data.memory,
+                memory:
+                    data.memory !== -1
+                        ? data.memory * 1024 * 1024
+                        : data.memory,
                 disk: data.disk !== -1 ? data.disk * 1024 * 1024 : data.disk,
-                backupSize: data.backupSize !== -1 ? data.backupSize * 1024 * 1024 : data.backupSize,
+                backupSize:
+                    data.backupSize !== -1
+                        ? data.backupSize * 1024 * 1024
+                        : data.backupSize,
                 disks: data.disks?.map(d => ({
                     ...d,
                     size: d.size * 1024 * 1024 * 1024,
@@ -87,7 +91,7 @@ function CreateServerPage() {
 
             await createServer(convertedData)
 
-            toast.success('Server created')
+            toast.add({ title: 'Server created', type: 'success' })
 
             navigate({
                 to: '/admin/servers',
@@ -117,7 +121,7 @@ function CreateServerPage() {
                 'limits.addresses': 'addresses',
                 ...diskFieldMapping,
             })
-            toast.error('Failed to create server')
+            toast.add({ title: 'Failed to create server', type: 'error' })
             console.error(e)
         }
     }
@@ -135,11 +139,7 @@ function CreateServerPage() {
                     }
                     center
                 >
-                    <div
-                        className={
-                            'flex w-full max-w-lg flex-col space-y-16'
-                        }
-                    >
+                    <div className={'flex w-full max-w-lg flex-col space-y-16'}>
                         <GeneralForm />
                         <LimitsForm />
                         <SecondaryDisksForm />

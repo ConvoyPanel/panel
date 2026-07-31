@@ -9,7 +9,6 @@ import { Mutator } from '@/types/query.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -24,6 +23,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: Mutator<PaginatedLocations>
@@ -70,11 +70,11 @@ const EditLocationModal = ({ mutate }: Props) => {
                 }
             }, false)
 
-            toast.success('Location updated')
+            toast.add({ title: 'Location updated', type: 'success' })
 
             close()
         } catch (e) {
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
             throw e
         }
     }

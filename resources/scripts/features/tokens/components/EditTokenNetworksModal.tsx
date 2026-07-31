@@ -8,7 +8,6 @@ import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -24,6 +23,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({ allowedNetworks: allowedNetworksSchema })
 type Input = z.infer<typeof schema>
@@ -64,12 +64,18 @@ const EditTokenNetworksModal = ({ token, onClose, mutate }: Props) => {
             )
 
             onClose()
-            toast.success('Network restrictions updated')
+            toast.add({
+                title: 'Network restrictions updated',
+                type: 'success',
+            })
         } catch (error) {
             handleFormErrors(error, form.setError, {
                 allowed_networks: 'allowedNetworks',
             })
-            toast.error('Failed to update network restrictions')
+            toast.add({
+                title: 'Failed to update network restrictions',
+                type: 'error',
+            })
         }
     }
 

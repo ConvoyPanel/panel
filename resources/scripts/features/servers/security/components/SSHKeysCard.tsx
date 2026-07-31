@@ -15,7 +15,6 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -48,6 +47,7 @@ import {
     OverflowItemGroup,
 } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const errorMessage = (e: unknown, fallback: string): string =>
     e instanceof AxiosError && e.response?.data?.message
@@ -97,7 +97,10 @@ const SSHKeysCard = ({ uuid }: Props) => {
             const present = new Set(prev.map(k => k.trim()))
             const additions = incoming.filter(k => !present.has(k.trim()))
             if (additions.length === 0) {
-                toast.info('That key is already on this server')
+                toast.add({
+                    title: 'That key is already on this server',
+                    type: 'info',
+                })
                 return prev
             }
             return [...prev, ...additions]
@@ -109,9 +112,13 @@ const SSHKeysCard = ({ uuid }: Props) => {
             queryClient.invalidateQueries({
                 queryKey: serverSSHKeyQueries.all(uuid),
             })
-            toast.success('SSH keys updated')
+            toast.add({ title: 'SSH keys updated', type: 'success' })
         },
-        onError: e => toast.error(errorMessage(e, 'Failed to update keys')),
+        onError: e =>
+            toast.add({
+                title: errorMessage(e, 'Failed to update keys'),
+                type: 'error',
+            }),
     })
 
     return (

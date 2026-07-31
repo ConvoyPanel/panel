@@ -1,13 +1,10 @@
+import { deleteAddress } from '@/features/ipam/blocks/addresses/api.ts'
+import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import { PaginatedAddresses } from '@/types/address.ts'
-import { useParams } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { Mutator } from '@/types/query.ts'
-
-import { deleteAddress } from '@/features/ipam/blocks/addresses/api.ts'
-
-import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
+import { useMutation } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -19,6 +16,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: Mutator<PaginatedAddresses>
@@ -53,22 +51,21 @@ const DeleteAddressModal = ({ mutate }: Props) => {
                 }, false)
 
                 close()
-                toast.success('Address deleted')
+                toast.add({ title: 'Address deleted', type: 'success' })
             },
             onError: () => {
-                toast.error('Failed to delete address')
+                toast.add({ title: 'Failed to delete address', type: 'error' })
             },
         }
     )
 
     return (
-        <ResponsiveDialog
-            open={open}
-            onOpenChange={open => !open && close()}
-        >
+        <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
-                    <ResponsiveDialogTitle>Delete {address?.ip}</ResponsiveDialogTitle>
+                    <ResponsiveDialogTitle>
+                        Delete {address?.ip}
+                    </ResponsiveDialogTitle>
                     <ResponsiveDialogDescription>
                         Are you sure you want to delete this address? This
                         action cannot be undone.

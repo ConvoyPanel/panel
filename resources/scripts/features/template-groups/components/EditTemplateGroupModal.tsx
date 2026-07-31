@@ -13,7 +13,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -28,6 +27,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 const EditTemplateGroupModal = () => {
     const mutate = useQueryMutator<TemplateGroup[]>(
@@ -70,11 +70,11 @@ const EditTemplateGroupModal = () => {
             }, false)
 
             close()
-            toast.success('Template group updated')
+            toast.add({ title: 'Template group updated', type: 'success' })
         },
         onError: e => {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to save changes')
+            toast.add({ title: 'Failed to save changes', type: 'error' })
         },
     })
 

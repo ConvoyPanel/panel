@@ -21,7 +21,6 @@ import {
 import { IconDatabase } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -38,6 +37,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/Sheet'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const LoadBalancerSidebar = () => {
     const { nodeId } = StorageRoute.useParams()
@@ -117,7 +117,10 @@ const LoadBalancerSidebar = () => {
             const idsToSend = reorderedBackupStorages.map(s => s.id)
 
             // --- Manually handle loading toast ---
-            const toastId = toast.loading('Saving backup order...') // Show loading toast immediately
+            const toastId = toast.add({
+                title: 'Saving backup order...',
+                type: 'loading',
+            }) // Show loading toast immediately
 
             // 4. --- Optimistically update the cache, then roll back on error ---
             const key = storageQueries.all(Number(nodeId))
@@ -127,16 +130,20 @@ const LoadBalancerSidebar = () => {
             try {
                 await updateBackupOrder(Number(nodeId), idsToSend)
                 // Update the toast to success
-                toast.success('Saved changes', {
+                toast.add({
                     id: toastId,
+                    title: 'Saved changes',
+                    type: 'success',
                 })
             } catch (error) {
                 // Roll the cache back to its previous state
                 queryClient.setQueryData(key, previous)
                 console.error('Failed to update backup order:', error)
                 // Update the toast to error
-                toast.error('Failed to save changes', {
+                toast.add({
                     id: toastId,
+                    title: 'Failed to save changes',
+                    type: 'error',
                 })
             }
         }

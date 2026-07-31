@@ -18,7 +18,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -47,6 +46,7 @@ import {
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const schema = z.object({
     code: z.string().length(6, 'Enter the 6-digit code from your app'),
@@ -119,9 +119,13 @@ const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
                     return
                 }
 
-                toast.error(
-                    getApiErrorMessage(e, 'Could not start authenticator setup')
-                )
+                toast.add({
+                    title: getApiErrorMessage(
+                        e,
+                        'Could not start authenticator setup'
+                    ),
+                    type: 'error',
+                })
             }
         }
 
@@ -150,7 +154,7 @@ const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
                 queryKey: recoveryCodeQueries.all(),
             })
 
-            toast.success('Authenticator enabled')
+            toast.add({ title: 'Authenticator enabled', type: 'success' })
 
             // Reveal the codes only if this flow is what created them; an
             // account that already had a passkey already has (and has saved)
@@ -167,12 +171,13 @@ const AuthenticatorEnableDialog = ({ onEnabled }: Props) => {
             // expired session.
             if (handleFormErrors(e, form.setError)) return
 
-            toast.error(
-                getApiErrorMessage(
+            toast.add({
+                title: getApiErrorMessage(
                     e,
                     'Could not verify that code. Please try again.'
-                )
-            )
+                ),
+                type: 'error',
+            })
         },
     })
 

@@ -1,14 +1,12 @@
+import {
+    type PasswordInput,
+    passwordSchema,
+    updateServerPassword,
+} from '@/features/servers/security/api.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-
-import {
-    passwordSchema,
-    updateServerPassword,
-    type PasswordInput,
-} from '@/features/servers/security/api.ts'
 
 import {
     Card,
@@ -20,6 +18,7 @@ import {
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     uuid: string
@@ -35,12 +34,12 @@ const PasswordCard = ({ uuid }: Props) => {
         mutationFn: (data: PasswordInput) =>
             updateServerPassword(uuid, data.password),
         onSuccess: () => {
-            toast.success('Root password updated')
+            toast.add({ title: 'Root password updated', type: 'success' })
             form.reset({ password: '' })
         },
         onError: e => {
             handleFormErrors(e, form.setError)
-            toast.error('Failed to update password')
+            toast.add({ title: 'Failed to update password', type: 'error' })
         },
     })
 

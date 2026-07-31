@@ -5,10 +5,10 @@ import {
     useServer,
     useServerState,
 } from '@/features/servers/detail/api.ts'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Button } from '@/components/ui/Button'
+import { toast } from '@/components/ui/Toast'
 
 const PowerActionsExpanded = () => {
     const confirm = useConfirmationStore(state => state.confirm)
@@ -28,7 +28,7 @@ const PowerActionsExpanded = () => {
 
             await sendPowerCommand(server!.uuid, action)
         } catch (e) {
-            toast.error('Power action failed')
+            toast.add({ title: 'Power action failed', type: 'error' })
             throw e
         }
     }

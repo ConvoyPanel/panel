@@ -5,7 +5,6 @@ import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { PaginatedAddressBlockGroups } from '@/types/address-block-group.ts'
 import { Mutator } from '@/types/query.ts'
 import { AxiosError } from 'axios'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import {
@@ -17,6 +16,7 @@ import {
     ResponsiveDialogHeader,
     ResponsiveDialogTitle,
 } from '@/components/ui/ResponsiveDialog'
+import { toast } from '@/components/ui/Toast'
 
 interface Props {
     mutate: Mutator<PaginatedAddressBlockGroups>
@@ -44,7 +44,7 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
                 }
             }, false)
 
-            toast.success('Block group deleted')
+            toast.add({ title: 'Block group deleted', type: 'success' })
             close()
         } catch (e) {
             // Check if it's an Axios error with a response
@@ -54,12 +54,12 @@ const DeleteBlockGroupModal = ({ mutate }: Props) => {
                     // If there's a specific message about servers being attached
                     const message =
                         e.response.data.message || 'Deletion not authorized'
-                    toast.error(message)
+                    toast.add({ title: message, type: 'error' })
                 } else {
-                    toast.error('Deletion failed')
+                    toast.add({ title: 'Deletion failed', type: 'error' })
                 }
             } else {
-                toast.error('Deletion failed')
+                toast.add({ title: 'Deletion failed', type: 'error' })
             }
 
             throw e

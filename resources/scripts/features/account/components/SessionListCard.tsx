@@ -9,7 +9,6 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
 import { IconDevices } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import {
@@ -25,6 +24,7 @@ import {
 } from '@/components/ui/EmptyStates'
 import { OverflowItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 
 const SessionListCard = () => {
     const confirm = useConfirmationStore(state => state.confirm)
@@ -36,9 +36,10 @@ const SessionListCard = () => {
         mutationFn: (session: SessionType) => revokeSession(session.id),
         onSuccess: (_, session) => {
             mutate(list => list?.filter(s => s.id !== session.id))
-            toast.success('Session revoked')
+            toast.add({ title: 'Session revoked', type: 'success' })
         },
-        onError: () => toast.error('Failed to revoke session'),
+        onError: () =>
+            toast.add({ title: 'Failed to revoke session', type: 'error' }),
     })
 
     const handleRevoke = async (session: SessionType) => {
