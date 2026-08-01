@@ -1,4 +1,8 @@
-import type { Server, ServerStateData, ServerTimepointData } from '@/types/server'
+import type {
+    Server,
+    ServerStateData,
+    ServerTimepointData,
+} from '@/types/server'
 import byteSize from 'byte-size'
 
 /**
@@ -45,6 +49,16 @@ export interface Metric {
      * memory is always 0-limit; a disk or network axis has to follow the data.
      */
     ceiling?: (server: Server | undefined) => number | undefined
+    /**
+     * Where to put y ticks, as fractions of the ceiling. None sits at 0: the
+     * plot bleeds to its cell's bottom edge and a label on the baseline would
+     * be sliced in half.
+     *
+     * Per metric because the right spacing depends on the unit. Quarters of a
+     * memory limit land on 1.5 GiB, which a zero-decimal byte format rounds to
+     * "2 GiB" -- the same label as the tick above it.
+     */
+    tickFractions?: number[]
     /** The values to plot, pulled from one historical timepoint. */
     fromTimepoint: (point: ServerTimepointData) => number[]
     /** The values to plot, pulled from live guest state (absent where live state carries no such reading). */
@@ -56,9 +70,14 @@ export interface Metric {
 const bytes = (value: number, precision = 1) =>
     byteSize(Math.abs(value), { units: 'iec', precision }).toString()
 
-const bytesShort = (value: number) => bytes(value, 0)
+/*
+ * One decimal, but only when it says something. Rounding to whole units is too
+ * coarse for an axis: quarter steps of a 2 GiB limit put a tick at 1.5 GiB,
+ * which "2 GiB" renders identically to the tick above it.
+ */
+const bytesShort = (value: number) => bytes(value, 1).replace(/\.0(?= )/, '')
 const rate = (value: number) => `${bytes(value, 1)}/s`
-const rateShort = (value: number) => `${bytes(value, 0)}/s`
+const rateShort = (value: number) => `${bytesShort(value)}/s`
 const percent = (value: number) => `${Math.round(Math.abs(value))}%`
 
 export const METRICS: Metric[] = [
@@ -70,10 +89,10 @@ export const METRICS: Metric[] = [
         format: percent,
         formatShort: percent,
         ceiling: () => 100,
+        tickFractions: [0.25, 0.5, 0.75, 1],
         fromTimepoint: point => [point.cpuUsed * 100],
         fromState: state => [state.cpuUsed * 100],
-        caption: server =>
-            server ? `${server.cpu} ${server.cpu === 1 ? 'vCPU' : 'vCPU'}` : '',
+        caption: server => (server ? `${server.cpu} vCPU` : ''),
     },
     {
         key: 'memory',
@@ -83,6 +102,7 @@ export const METRICS: Metric[] = [
         format: value => bytes(value, 2),
         formatShort: bytesShort,
         ceiling: server => server?.memory,
+        tickFractions: [0.25, 0.5, 0.75, 1],
         fromTimepoint: point => [point.memoryUsed],
         fromState: state => [state.memoryUsed],
         caption: server => (server ? `of ${bytes(server.memory, 0)}` : ''),

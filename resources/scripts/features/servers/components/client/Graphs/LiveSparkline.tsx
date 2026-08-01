@@ -2,11 +2,10 @@ import type {
     LiveMetricKey,
     LiveMetrics,
 } from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
-import { cn } from '@/utils'
-import { type RefObject, useId, useRef } from 'react'
-
 import useAnimationFrame from '@/hooks/use-animation-frame.ts'
 import useMediaQuery from '@/hooks/use-media-query.ts'
+import { cn } from '@/utils'
+import { type RefObject, useId, useRef } from 'react'
 
 /* The plot is drawn on a fixed viewBox with preserveAspectRatio="none", so it
    stretches to whatever width the rail gives it without measuring anything.
@@ -65,9 +64,11 @@ const LiveSparkline = ({
         const area = areaRef.current
         if (!line || !area) return
 
-        const { buffers, lastSampleAt, intervalMs } = metrics.current
+        const { buffers, lastSampleAt, intervalMs, filled } = metrics.current
         const values = buffers[series]
-        if (values.length < 3) return
+
+        /* Two points make a line; below that there is nothing honest to draw. */
+        if (filled < 2) return
 
         /* Reduced motion still redraws, but with no sub-interval offset: the
            trace steps forward once per sample instead of gliding. */
@@ -75,9 +76,14 @@ const LiveSparkline = ({
             ? 0
             : clamp((now - lastSampleAt) / intervalMs, 0, 1)
 
+        const count = values.length
+        /* Only the newest `filled` slots hold a reading; the rest of the
+           buffer has never been written to. */
+        const first = count - filled
+
         let max = ceiling
         if (!max) {
-            max = Math.max(...values) * 1.15 || 1
+            max = Math.max(...values.slice(first)) * 1.15 || 1
             /* Ease the autoscale, or a single spike snaps the whole axis and
                every earlier point appears to drop. */
             scale.current =
@@ -87,26 +93,28 @@ const LiveSparkline = ({
             max = scale.current
         }
 
-        const count = values.length
         /* One extra slot of width: the newest sample sits just off the right
-           edge and slides into view over the interval. */
+           edge and slides into view over the interval. Positions come from the
+           slot's index in the whole window, so a partly-filled buffer puts its
+           newest reading in exactly the same place a full one would -- the
+           trace grows leftward while its right-hand edge stays put. */
         const step = VIEW_W / (count - 2)
+        const x = (index: number) => (index - progress) * step
         const y = (value: number) =>
             VIEW_H - (clamp(value, 0, max) / max) * (VIEW_H - 2) - 1
 
         let d = ''
-        for (let i = 0; i < count; i++) {
-            const x = (i - progress) * step
+        for (let i = first; i < count; i++) {
             /* Straight segments, not a spline. A smoothed curve on live
                telemetry invents peaks between samples that the guest never
                reported. */
-            d += `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y(values[i]).toFixed(1)}`
+            d += `${i === first ? 'M' : 'L'}${x(i).toFixed(1)},${y(values[i]).toFixed(1)}`
         }
 
         line.setAttribute('d', d)
         area.setAttribute(
             'd',
-            `${d}L${((count - 1 - progress) * step).toFixed(1)},${VIEW_H}L${(-progress * step).toFixed(1)},${VIEW_H}Z`
+            `${d}L${x(count - 1).toFixed(1)},${VIEW_H}L${x(first).toFixed(1)},${VIEW_H}Z`
         )
     })
 
@@ -118,13 +126,7 @@ const LiveSparkline = ({
             className={cn('block h-full w-full overflow-hidden', className)}
         >
             <defs>
-                <linearGradient
-                    id={gradientId}
-                    x1='0'
-                    y1='0'
-                    x2='0'
-                    y2='1'
-                >
+                <linearGradient id={gradientId} x1='0' y1='0' x2='0' y2='1'>
                     <stop offset='0%' stopColor={color} stopOpacity={0.22} />
                     <stop offset='100%' stopColor={color} stopOpacity={0} />
                 </linearGradient>

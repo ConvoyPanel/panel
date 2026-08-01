@@ -10,6 +10,7 @@ import type {
 } from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
 import type { Server } from '@/types/server'
 import { cn } from '@/utils'
+import { formatDistanceToNowStrict } from 'date-fns'
 import { type RefObject } from 'react'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -30,8 +31,29 @@ interface Props {
      * and there is no answer", which must not pulse forever.
      */
     unavailable: boolean
+    /**
+     * When the shown figure was recorded, for metrics that have no live feed.
+     *
+     * Disk and network exist only in the statistics endpoint, so their rail
+     * figure is the newest sample of the selected range -- which is a minute
+     * old on the hourly view and can be days old on the yearly one. Without a
+     * stamp it sits next to two genuinely live figures in identical styling
+     * and reads as equally current.
+     */
+    sampledAt?: Date
+    isFirst: boolean
     isLast: boolean
 }
+
+/** "3m", "2h", "5d" — short enough to sit inline beside the metric name. */
+const compactAge = (date: Date) =>
+    formatDistanceToNowStrict(date)
+        .replace(/ seconds?/, 's')
+        .replace(/ minutes?/, 'm')
+        .replace(/ hours?/, 'h')
+        .replace(/ days?/, 'd')
+        .replace(/ months?/, 'mo')
+        .replace(/ years?/, 'y')
 
 /**
  * One metric's cell in the live column: its name, current figure, and -- for
@@ -50,6 +72,8 @@ const MetricRail = ({
     live,
     value,
     unavailable,
+    sampledAt,
+    isFirst,
     isLast,
 }: Props) => {
     const mirrored = metric.shape.kind === 'mirrored'
@@ -58,7 +82,17 @@ const MetricRail = ({
     return (
         <div
             className={cn(
-                'relative flex flex-col justify-center gap-0.5 p-3 pl-4',
+                /* Top-aligned, not centred: the rows are different heights
+                   (a sparkline here, a legend there), and centring each one
+                   independently left the names, figures and captions sitting
+                   at four different heights across the rail. */
+                'relative flex flex-col items-start gap-0.5 p-3 pl-4',
+                /* The outer cells round off and clip, so the full-height
+                   accent stripe follows the card's corner instead of poking
+                   out past it. Safe to clip here in a way the card itself is
+                   not: the readout opens from the plot cell, not this one. */
+                isFirst && 'overflow-hidden rounded-tl-xl',
+                isLast && 'overflow-hidden rounded-bl-xl',
                 !isLast && 'border-b',
                 '@3xl:border-r'
             )}
@@ -67,12 +101,26 @@ const MetricRail = ({
                 figure itself in the series hue. */}
             <span
                 aria-hidden
-                className='absolute top-3 bottom-3 left-0 w-0.5 rounded-full'
+                /* Full height, so the four stripes butt together into one
+                   continuous edge down the card rather than four floating
+                   ticks. The cell clips them to the card's corner radius --
+                   see the rounding on the container. */
+                className='absolute inset-y-0 left-0 w-0.5'
                 style={{ background: metric.color }}
             />
             <div className='flex items-center gap-2'>
                 <span className='text-sm font-medium'>{metric.name}</span>
                 {live && !unavailable && <LiveIndicator />}
+                {/* The same slot the live dot occupies, carrying the opposite
+                    message: this figure is a reading from the past, not now. */}
+                {!live && sampledAt && (
+                    <span
+                        className='text-muted-foreground ml-auto text-[11px] tabular-nums'
+                        title={`Last recorded ${sampledAt.toLocaleString()}`}
+                    >
+                        {compactAge(sampledAt)} ago
+                    </span>
+                )}
             </div>
 
             {value !== undefined ? (
@@ -89,20 +137,32 @@ const MetricRail = ({
                     &mdash;
                 </span>
             ) : (
-                <Skeleton className='h-6 w-24' />
+                /* `h-7` is the line box of the figure it stands in for; a
+                   shorter placeholder made every row resize on load. */
+                <Skeleton className='h-7 w-24' />
             )}
 
             <span className='text-muted-foreground text-xs tabular-nums'>
                 {metric.caption(server)}
             </span>
 
-            {live && value !== undefined && (
+            {live && (
                 <LiveSparkline
                     metrics={metrics}
                     series={metric.key as LiveMetricKey}
                     color={metric.color}
                     ceiling={metric.ceiling?.(server)}
-                    className='mt-2 h-7'
+                    /* Bleeds to the cell's edges, cancelling its padding, the
+                       way the admin overview's MetricTile trend does. The
+                       accent stripe is absolutely positioned so it still
+                       paints over the left edge. */
+                    /* `w-auto` overrides the component's own `w-full`: an
+                       explicit width pins the box, so the negative margins
+                       would shift it left without letting it reach the right
+                       edge. Stretching in the flex column does the rest. */
+                    /* `mt-auto` keeps it pinned to the bottom edge now that
+                       the cell packs its content to the top. */
+                    className='mt-auto -mr-3 -mb-3 -ml-4 h-8 w-auto self-stretch'
                 />
             )}
 

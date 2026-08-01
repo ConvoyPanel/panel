@@ -1,8 +1,7 @@
-import { cn } from '@/utils'
-import { useRef } from 'react'
-
 import useAnimationFrame from '@/hooks/use-animation-frame.ts'
 import useMediaQuery from '@/hooks/use-media-query.ts'
+import { cn } from '@/utils'
+import { useRef } from 'react'
 
 interface Props {
     value: number | undefined

@@ -51,6 +51,29 @@
         --chart-4: oklch(0.488 0.243 264.376);
         --chart-5: oklch(0.424 0.199 265.638);
 
+        /*
+         * Named per metric, not per slot. --chart-1..5 above are five steps of
+         * one blue ramp -- a sequential scale, which is the wrong tool for
+         * telling series apart: run through a CVD check its adjacent pairs sit
+         * at ΔE 5.2 (deuteranopia) and 5.9 for normal vision, against a floor
+         * of 15. Disk read against disk write was effectively one colour.
+         *
+         * These four are a categorical set, stepped separately for each mode
+         * and validated as a set against that mode's card surface: worst
+         * adjacent pair ΔE 22.4 light / 16.9 dark under CVD simulation.
+         * Slot 1 is the existing --primary, so CPU stays the product's blue.
+         *
+         * Colour follows the metric and never its position in a list, so a
+         * hue means the same thing in every chart, legend and tile on the page.
+         * Read/write and in/out are NOT a second hue -- one hue cannot carry
+         * two series inside the lightness band -- they split across a mirrored
+         * baseline, where position does the work.
+         */
+        --chart-cpu: oklch(0.504 0.128 245.46);
+        --chart-memory: oklch(0.573 0.212 292.023);
+        --chart-disk: oklch(0.611 0.13 162.634);
+        --chart-network: oklch(0.632 0.158 52.908);
+
         --sidebar: oklch(0.988 0.003 106.5);
         --sidebar-foreground: oklch(0.153 0.006 107.1);
         --sidebar-primary: oklch(0.588 0.158 241.966);
@@ -96,6 +119,13 @@
         --chart-3: oklch(0.546 0.245 262.881);
         --chart-4: oklch(0.488 0.243 264.376);
         --chart-5: oklch(0.424 0.199 265.638);
+
+        /* Stepped for the dark card surface, not flipped from the light set --
+           see the note on the light tokens. */
+        --chart-cpu: oklch(0.665 0.135 244.294);
+        --chart-memory: oklch(0.633 0.158 292.833);
+        --chart-disk: oklch(0.637 0.128 164.68);
+        --chart-network: oklch(0.649 0.138 69.134);
 
         --sidebar: oklch(0.228 0.013 107.4);
         --sidebar-foreground: oklch(0.988 0.003 106.5);

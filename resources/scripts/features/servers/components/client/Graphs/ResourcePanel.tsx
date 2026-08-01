@@ -1,15 +1,19 @@
+import MetricRail from '@/features/servers/components/client/Graphs/MetricRail.tsx'
 import MetricRow, {
     type PanelPoint,
 } from '@/features/servers/components/client/Graphs/MetricRow.tsx'
-import PanelReadout from '@/features/servers/components/client/Graphs/PanelReadout.tsx'
-import { METRICS, seriesKeys } from '@/features/servers/components/client/Graphs/metrics.ts'
+import {
+    METRICS,
+    seriesKeys,
+} from '@/features/servers/components/client/Graphs/metrics.ts'
 import useLiveMetrics from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
 import {
     type TimeRange,
     useServer,
     useServerStatistics,
 } from '@/features/servers/detail/api.ts'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { IconChartAreaLine } from '@tabler/icons-react'
+import { useMemo, useState } from 'react'
 
 import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -18,10 +22,9 @@ interface Props {
     from: TimeRange
     /** Formats a timestamp for the x axis at the current range. */
     xTickFormatter: (value: Date) => string
+    /** Formats the readout's heading, which has room to be less terse. */
+    stampFormatter: (value: Date) => string
 }
-
-const clamp = (value: number, min: number, max: number) =>
-    value < min ? min : value > max ? max : value
 
 /**
  * The whole of the graphs page: four metrics stacked on one time axis, with a
@@ -33,15 +36,15 @@ const clamp = (value: number, min: number, max: number) =>
  * independently ranged and, until now, independently *time*-ranged as well.
  * One panel, one x axis, one cursor.
  */
-const ResourcePanel = ({ from, xTickFormatter }: Props) => {
+const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
     const { data: server } = useServer()
     const { data, isPending, isError } = useServerStatistics({ from })
     const { metrics, data: state, isUnknown } = useLiveMetrics()
 
-    const [activeIndex, setActiveIndex] = useState<number | null>(null)
-
-    const panelRef = useRef<HTMLDivElement>(null)
-    const readoutRef = useRef<HTMLDivElement>(null)
+    /* Which row the pointer is over, and therefore which one opens the
+       readout. A row, not a data index -- crossing between rows is rare, so
+       this re-renders far less than tracking the cursor would. */
+    const [readoutRow, setReadoutRow] = useState<string | null>(null)
 
     /* Every row plots the same array so their indices line up, which is what
        lets one cursor position mean the same instant on all four. Mirrored
@@ -69,41 +72,11 @@ const ResourcePanel = ({ from, xTickFormatter }: Props) => {
         })
     }, [data])
 
-    /**
-     * Follow the pointer by writing to the node directly. Putting the cursor
-     * position in state would re-render four Recharts trees on every mouse
-     * move, which is enough to make the panel feel heavy.
-     */
-    const handleMouseMove = useCallback((event: React.MouseEvent) => {
-        const panel = panelRef.current
-        const readout = readoutRef.current
-        if (!panel || !readout) return
-
-        const bounds = panel.getBoundingClientRect()
-        const width = readout.offsetWidth
-        const height = readout.offsetHeight
-
-        const x = clamp(
-            event.clientX - bounds.left,
-            width / 2 + 8,
-            Math.max(width / 2 + 8, bounds.width - width / 2 - 8)
-        )
-        const top = event.clientY - bounds.top - 14
-
-        readout.style.left = `${x}px`
-        /* Flip below the pointer when there is no room above, so the readout
-           never gets clipped by the top of the panel. */
-        readout.style.top = `${top - height < 4 ? top + height + 34 : top}px`
-    }, [])
-
-    const activePoint =
-        activeIndex === null ? undefined : points[activeIndex]
-
     /* Only the two metrics the guest reports live get a live readout; the
        statistics endpoint is the only source for disk and network, so those
        rails show the newest sample it returned rather than implying a
        freshness the data does not have. */
-    const newest = points.at(-1)
+    const newest = points[points.length - 1]
 
     const railValue = (key: string, live: boolean) => {
         if (live) {
@@ -116,24 +89,98 @@ const ResourcePanel = ({ from, xTickFormatter }: Props) => {
         return typeof value === 'number' ? Math.abs(value) : undefined
     }
 
-    if (isError) {
+    /**
+     * Whether we already know no figure is coming, as opposed to still
+     * waiting for one.
+     *
+     * This is the difference between an em dash and a skeleton, and getting it
+     * wrong is not cosmetic: `useServerState` latches its failure precisely
+     * because it refetches every 50ms, so `isError` is only ever true for the
+     * sliver between one retry cycle failing and the next starting. A rail
+     * keyed on "no value yet" alone would pulse a loading skeleton forever
+     * against an unreachable node -- reading as "still coming" for something
+     * that never arrives.
+     *
+     * Disk and network read the statistics query instead, which settles: once
+     * it is no longer pending and still has no sample, none is coming --
+     * whether it failed or answered with an empty window.
+     */
+    const railUnavailable = (live: boolean) => (live ? isUnknown : !isPending)
+
+    /*
+     * A node that answers with no samples is not a failure. Proxmox serves
+     * these plots out of the guest's RRD, which is empty until it has been
+     * running long enough to be rolled up -- so a freshly created server
+     * legitimately has nothing to show for a while. Four blank axes leave the
+     * reader wondering whether the page is broken; say so instead.
+     */
+    const isEmpty = !isPending && !isError && points.length === 0
+
+    /*
+     * A statistics failure is scoped to the plots, not the card.
+     *
+     * The rail reads live guest state and the plots read the statistics
+     * endpoint; those fail independently, and a node whose RRD is unreachable
+     * can still be running a guest that answers for CPU and memory. Replacing
+     * the whole panel would throw away readings we have.
+     */
+    if (isError || isEmpty) {
         return (
-            <Card className='p-6'>
-                <SimpleEmptyState
-                    title='Resource usage is unavailable'
-                    description='The node did not return statistics for this server. It may be unreachable.'
-                />
+            <Card className='overflow-hidden'>
+                <div className='grid @3xl:grid-cols-[13rem_minmax(0,1fr)]'>
+                    <div className='flex flex-col'>
+                        {METRICS.map((metric, index) => {
+                            const live = metric.fromState !== undefined
+
+                            return (
+                                <MetricRail
+                                    key={metric.key}
+                                    metric={metric}
+                                    server={server}
+                                    metrics={metrics}
+                                    live={live}
+                                    value={railValue(
+                                        seriesKeys(metric)[0],
+                                        live
+                                    )}
+                                    unavailable={railUnavailable(live)}
+                                    sampledAt={
+                                        live ? undefined : newest?.timestamp
+                                    }
+                                    isFirst={index === 0}
+                                    isLast={index === METRICS.length - 1}
+                                />
+                            )
+                        })}
+                    </div>
+                    <SimpleEmptyState
+                        icon={IconChartAreaLine}
+                        title={
+                            isError
+                                ? 'History is unavailable'
+                                : 'No history yet'
+                        }
+                        /* No "below"/"beside" — the rail is left of this at
+                           wide widths and above it once the grid collapses. */
+                        description={
+                            isError
+                                ? 'The node did not return usage statistics for this server. Live CPU and memory readings are unaffected.'
+                                : 'This server has not been running long enough for the node to have recorded usage over this period. Try a shorter range.'
+                        }
+                        className='p-6'
+                    />
+                </div>
             </Card>
         )
     }
 
     return (
         <Card
-            ref={panelRef}
-            /* `overflow-visible` so the readout can sit above the top row
-               without being clipped by the card's own rounding. */
+            /* Not clipped: the readout opens past the row it belongs to, and
+               on the bottom row past the card itself. The accent stripes stop
+               short of the corner radius instead of relying on clipping. */
             className='relative overflow-visible'
-            onMouseMove={handleMouseMove}
+            onPointerLeave={() => setReadoutRow(null)}
         >
             <div className='grid @3xl:grid-cols-[13rem_minmax(0,1fr)]'>
                 {METRICS.map((metric, index) => {
@@ -149,20 +196,19 @@ const ResourcePanel = ({ from, xTickFormatter }: Props) => {
                             metrics={metrics}
                             live={live}
                             railValue={railValue(keys[0], live)}
+                            railUnavailable={railUnavailable(live)}
+                            sampledAt={live ? undefined : newest?.timestamp}
+                            isFirst={index === 0}
                             isLoading={isPending}
                             isLast={index === METRICS.length - 1}
                             xTickFormatter={xTickFormatter}
-                            onActiveIndex={setActiveIndex}
+                            stampFormatter={stampFormatter}
+                            showReadout={readoutRow === metric.key}
+                            onPointerEnter={() => setReadoutRow(metric.key)}
                         />
                     )
                 })}
             </div>
-
-            <PanelReadout
-                ref={readoutRef}
-                point={activePoint}
-                formatStamp={xTickFormatter}
-            />
         </Card>
     )
 }

@@ -25,8 +25,17 @@ export interface LiveMetrics {
     /** `performance.now()` when the newest sample was appended. */
     lastSampleAt: number
     intervalMs: number
-    /** False until the first reading lands, so consumers can hold off drawing a line of zeroes. */
-    primed: boolean
+    /**
+     * How many slots hold a real reading, counting back from the newest.
+     *
+     * The buffer is allocated full-length but starts empty, and consumers draw
+     * only this many points. Padding the rest -- with zeroes, or by repeating
+     * the first reading across the window -- would draw a minute of history we
+     * were not there for: a flat line asserting the value never moved, or a
+     * cliff climbing out of the floor that never happened. The trace grows in
+     * from the right instead, and says nothing about time it did not observe.
+     */
+    filled: number
 }
 
 const emptyBuffers = (): Record<LiveMetricKey, number[]> => ({
@@ -51,7 +60,7 @@ const useLiveMetrics = () => {
         buffers: emptyBuffers(),
         lastSampleAt: performance.now(),
         intervalMs: LIVE_SAMPLE_MS,
-        primed: false,
+        filled: 0,
     })
 
     /* The timer reads the latest state through a ref, so a new poll result
@@ -73,19 +82,11 @@ const useLiveMetrics = () => {
 
             for (const key of Object.keys(next) as LiveMetricKey[]) {
                 const buffer = current.buffers[key]
-
-                if (!current.primed) {
-                    /* Seed the whole window with the first real reading. Left
-                       at zero, the sparkline would open with a cliff climbing
-                       out of the floor that never happened. */
-                    buffer.fill(next[key])
-                } else {
-                    buffer.shift()
-                    buffer.push(next[key])
-                }
+                buffer.shift()
+                buffer.push(next[key])
             }
 
-            current.primed = true
+            current.filled = Math.min(current.filled + 1, LIVE_WINDOW)
             current.lastSampleAt = performance.now()
         }
 
