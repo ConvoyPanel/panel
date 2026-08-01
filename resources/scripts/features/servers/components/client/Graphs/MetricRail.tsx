@@ -148,11 +148,18 @@ const MetricRail = ({
                     {labels.map((label, index) => (
                         <div
                             key={label}
-                            className='flex w-full items-baseline gap-1.5'
+                            /* Centred, not baseline-aligned. A placeholder is
+                               an empty block and establishes no text baseline,
+                               so while one is in the row the row's baseline
+                               comes from the label alone -- and the label
+                               jumps a few pixels the moment a figure arrives
+                               to share it. The row height never changed; the
+                               contents slid inside it. */
+                            className='flex w-full items-center gap-1.5'
                         >
                             <i
                                 aria-hidden
-                                className='size-2 shrink-0 translate-y-[-1px] rounded-[2px]'
+                                className='size-2 shrink-0 rounded-[2px]'
                                 style={{
                                     background: metric.color,
                                     opacity: index === 0 ? 1 : 0.45,
@@ -172,6 +179,8 @@ const MetricRail = ({
                                     &mdash;
                                 </span>
                             ) : (
+                                /* `h-5` is the text-sm line box this stands
+                                   in for, so the row keeps its height. */
                                 <Skeleton className='ml-auto h-5 w-16' />
                             )}
                         </div>
