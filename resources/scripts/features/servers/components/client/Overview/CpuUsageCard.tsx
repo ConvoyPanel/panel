@@ -13,18 +13,19 @@ const CpuUsageCard = () => {
         <StatisticCard
             title={'CPU Usage'}
             icon={IconCpu}
-            /* Only once a reading has landed: the trace draws nothing until it
-               has two samples, and an empty band under the figure reads as a
-               rule rather than a chart waiting to fill. */
+            /* Always present, so the band is part of the card's height from
+               the first paint. Rendering it only once a reading landed grew
+               every tile in the row by 20px the moment the poll returned --
+               the grid stretches them all to the tallest. The trace itself
+               draws nothing until it has two samples, so an unfilled band is
+               simply empty rather than a flat line at zero. */
             trend={
-                state && !isUnknown ? (
-                    <LiveSparkline
-                        metrics={metrics}
-                        series='cpu'
-                        color='var(--chart-cpu)'
-                        ceiling={100}
-                    />
-                ) : undefined
+                <LiveSparkline
+                    metrics={metrics}
+                    series='cpu'
+                    color='var(--chart-cpu)'
+                    ceiling={100}
+                />
             }
         >
             {isUnknown ? (

@@ -23,17 +23,17 @@ const MemoryUsageCard = () => {
         <StatisticCard
             title={'Memory Usage'}
             icon={IconAirConditioningDisabled}
+            /* See CpuUsageCard: reserved from the first paint so the tile
+               does not grow when the first reading arrives. */
             trend={
-                state && !isUnknown ? (
-                    <LiveSparkline
-                        metrics={metrics}
-                        series='memory'
-                        color='var(--chart-memory)'
-                        /* The limit the figure is read against, so the trace
-                           and the "/ 1 GiB" beside it share a scale. */
-                        ceiling={state.memoryTotal}
-                    />
-                ) : undefined
+                <LiveSparkline
+                    metrics={metrics}
+                    series='memory'
+                    color='var(--chart-memory)'
+                    /* The limit the figure is read against, so the trace and
+                       the "/ 1 GiB" beside it share a scale. */
+                    ceiling={state?.memoryTotal}
+                />
             }
         >
             {isUnknown ? (

@@ -37,8 +37,9 @@ const StatisticCard = ({
         <Card
             className={cn(
                 'flex flex-col',
-                /* Clipped so a bleeding trend follows the rounded corners. */
-                trend && 'overflow-hidden',
+                /* Positioned and clipped, so a bleeding trend can be laid over
+                   the card's own bottom edge and follow its rounded corners. */
+                trend && 'relative overflow-hidden',
                 className
             )}
         >
@@ -48,25 +49,25 @@ const StatisticCard = ({
                 </CardTitle>
                 <Icon className='text-muted-foreground h-4 w-4 shrink-0' />
             </CardHeader>
-            <CardContent
-                className={cn(
-                    'p-4 pt-0 @sm:px-6 @sm:pb-6',
-                    /* The trend sits at the bottom however tall the row is
-                       stretched, so the content above it stays put whether or
-                       not a neighbouring card is taller. */
-                    trend && 'flex flex-1 flex-col'
-                )}
-            >
+            <CardContent className={'p-4 pt-0 @sm:px-6 @sm:pb-6'}>
                 {children}
                 {meter && <div className={'mt-3'}>{meter}</div>}
-                {trend && (
-                    /* Negative margins cancel the padding at both breakpoints,
-                       which is what takes it to the card's edges. */
-                    <div className='mt-3 -mr-4 -mb-4 -ml-4 h-8 @sm:-mr-6 @sm:-mb-6 @sm:-ml-6'>
-                        {trend}
-                    </div>
-                )}
             </CardContent>
+
+            {trend && (
+                /*
+                 * Out of flow entirely, laid over the card's bottom edge.
+                 *
+                 * In flow it added 20px to the card, and since these tiles
+                 * share a stretched grid row every card grew with it -- so the
+                 * two that have no trend gained a band of dead space to match.
+                 * The tiles have room to spare below the figure; the trend
+                 * occupies that rather than asking for more.
+                 */
+                <div className='pointer-events-none absolute inset-x-0 bottom-0 h-8'>
+                    {trend}
+                </div>
+            )}
         </Card>
     )
 }
