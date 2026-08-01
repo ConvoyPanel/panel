@@ -9,7 +9,6 @@ import byteSize from 'byte-size'
 import { differenceInMilliseconds, intervalToDuration } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-import { LinearProgressBar } from '@/components/ui/Progress'
 import {
     Item,
     ItemActions,
@@ -17,6 +16,7 @@ import {
     ItemMedia,
     ItemTitle,
 } from '@/components/ui/Item'
+import { LinearProgressBar } from '@/components/ui/Progress'
 
 interface DeploymentStepRowProps {
     step: DeploymentStep
@@ -95,17 +95,14 @@ export default function DeploymentStepRow({
             role={'listitem'}
             variant={'muted'}
             size={'sm'}
-            className={cn(
-                isPending && 'opacity-50',
-                className
-            )}
+            className={cn(isPending && 'opacity-50', className)}
         >
             <ItemMedia variant={'icon'}>
                 {isPending && (
-                    <div className='size-2 rounded-full bg-muted-foreground' />
+                    <div className='bg-muted-foreground size-2 rounded-full' />
                 )}
                 {isRunning && (
-                    <IconLoader className='animate-spin text-primary' />
+                    <IconLoader className='text-primary animate-spin' />
                 )}
                 {isCompleted && <IconCheck className='text-green-500' />}
                 {isFailed && <IconX className='text-destructive' />}
@@ -119,7 +116,7 @@ export default function DeploymentStepRow({
                     />
                 )}
                 {isFailed && (step.errorCode || step.errorMessage) && (
-                    <div className='text-xs text-destructive'>
+                    <div className='text-destructive text-xs'>
                         {step.errorCode && (
                             <span className='font-mono font-bold'>
                                 {step.errorCode}:{' '}
@@ -131,7 +128,7 @@ export default function DeploymentStepRow({
             </ItemContent>
             <ItemActions className={'flex-col items-end gap-0'}>
                 {step.startedAt && (
-                    <span className='text-right font-mono text-xs text-muted-foreground'>
+                    <span className='text-muted-foreground text-right font-mono text-xs'>
                         {isRunning && formatStepDuration(step.startedAt, now)}
                         {isCompleted &&
                             step.completedAt &&
@@ -142,7 +139,7 @@ export default function DeploymentStepRow({
                     </span>
                 )}
                 {isDeterminate && isRunning && (
-                    <span className='text-right font-mono text-xs text-muted-foreground'>
+                    <span className='text-muted-foreground text-right font-mono text-xs'>
                         {formatProgress()}
                     </span>
                 )}

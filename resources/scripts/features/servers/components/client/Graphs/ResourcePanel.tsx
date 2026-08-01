@@ -6,12 +6,12 @@ import {
     METRICS,
     seriesKeys,
 } from '@/features/servers/components/client/Graphs/metrics.ts'
-import useLiveMetrics from '@/features/servers/hooks/use-live-metrics.ts'
 import {
     type TimeRange,
     useServer,
     useServerStatistics,
 } from '@/features/servers/detail/api.ts'
+import useLiveMetrics from '@/features/servers/hooks/use-live-metrics.ts'
 import { IconChartAreaLine } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 

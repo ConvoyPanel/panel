@@ -1,9 +1,9 @@
-import LiveSparkline from '@/features/servers/components/client/LiveSparkline.tsx'
 import TweenedValue from '@/features/servers/components/client/Graphs/TweenedValue.tsx'
 import {
     type Metric,
     seriesLabels,
 } from '@/features/servers/components/client/Graphs/metrics.ts'
+import LiveSparkline from '@/features/servers/components/client/LiveSparkline.tsx'
 import type {
     LiveMetricKey,
     LiveMetrics,
@@ -11,7 +11,6 @@ import type {
 import type { Server } from '@/types/server'
 import { cn } from '@/utils'
 import { formatDistanceToNowStrict } from 'date-fns'
-import { type RefObject } from 'react'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -20,7 +19,7 @@ import LiveIndicator from './LiveIndicator.tsx'
 interface Props {
     metric: Metric
     server: Server | undefined
-    metrics: RefObject<LiveMetrics>
+    metrics: LiveMetrics
     /** Whether this metric has a live reading at all. */
     live: boolean
     /**

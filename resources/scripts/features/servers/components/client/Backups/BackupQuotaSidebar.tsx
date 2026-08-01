@@ -1,10 +1,9 @@
-import byteSize from 'byte-size'
-import { useQuery } from '@tanstack/react-query'
-import { useParams } from '@tanstack/react-router'
-
 import { backupQueries } from '@/features/servers/backups/api.ts'
 import { useServer } from '@/features/servers/detail/api.ts'
 import usePagination from '@/hooks/use-pagination.ts'
+import { useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
+import byteSize from 'byte-size'
 
 import { Button } from '@/components/ui/Button'
 import { LinearProgressBar, RingProgress } from '@/components/ui/Progress'
@@ -43,7 +42,7 @@ const Quota = ({ label, used, limit, value }: QuotaProps) => (
     <div>
         <dt className={'text-sm font-medium'}>{label}</dt>
         <dd className={'mt-2 mb-4'}>
-            <span className={'block text-2xl font-bold text-foreground'}>
+            <span className={'text-foreground block text-2xl font-bold'}>
                 {used}
             </span>
             {limit}

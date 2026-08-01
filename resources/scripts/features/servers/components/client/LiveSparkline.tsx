@@ -5,7 +5,7 @@ import type {
 import useAnimationFrame from '@/hooks/use-animation-frame.ts'
 import useMediaQuery from '@/hooks/use-media-query.ts'
 import { cn } from '@/utils'
-import { type RefObject, useId, useRef } from 'react'
+import { useId, useRef } from 'react'
 
 /* The plot is drawn on a fixed viewBox with preserveAspectRatio="none", so it
    stretches to whatever width the rail gives it without measuring anything.
@@ -15,7 +15,8 @@ const VIEW_W = 1000
 const VIEW_H = 100
 
 interface Props {
-    metrics: RefObject<LiveMetrics>
+    /** The shared per-server buffers. Stable object, mutated in place. */
+    metrics: LiveMetrics
     series: LiveMetricKey
     color: string
     /** Fixed axis maximum. Without one the axis follows the data. */
@@ -64,7 +65,7 @@ const LiveSparkline = ({
         const area = areaRef.current
         if (!line || !area) return
 
-        const { buffers, lastSampleAt, intervalMs, filled } = metrics.current
+        const { buffers, lastSampleAt, intervalMs, filled } = metrics
         const values = buffers[series]
 
         /* Two points make a line; below that there is nothing honest to draw. */

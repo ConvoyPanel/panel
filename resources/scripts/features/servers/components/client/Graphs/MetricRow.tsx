@@ -7,7 +7,7 @@ import {
 import type { LiveMetrics } from '@/features/servers/hooks/use-live-metrics.ts'
 import type { Server } from '@/types/server'
 import { cn } from '@/utils'
-import { Fragment, type RefObject, memo, useId } from 'react'
+import { Fragment, memo, useId } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
 import { ChartContainer, ChartTooltip } from '@/components/ui/Chart'
@@ -25,7 +25,7 @@ interface Props {
     points: PanelPoint[]
     server: Server | undefined
     /** Live buffers, for the two metrics the guest reports in real time. */
-    metrics: RefObject<LiveMetrics>
+    metrics: LiveMetrics
     /** Whether this metric has a live reading at all. */
     live: boolean
     /** Current figure per series, in `seriesKeys` order. */

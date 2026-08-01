@@ -1,7 +1,11 @@
-import { useServerState } from '@/features/servers/detail/api.ts'
-import { useEffect, useRef } from 'react'
+import { serverQueries, useServerState } from '@/features/servers/detail/api.ts'
+import type { ServerStateData } from '@/types/server'
+import { useParams } from '@tanstack/react-router'
+import { useEffect, useMemo } from 'react'
 
-/** Seconds of live history the rail sparklines hold. */
+import { queryClient } from '@/lib/query-client.ts'
+
+/** Seconds of live history the traces hold. */
 export const LIVE_WINDOW = 60
 
 /**
@@ -38,63 +42,136 @@ export interface LiveMetrics {
     filled: number
 }
 
-const emptyBuffers = (): Record<LiveMetricKey, number[]> => ({
-    cpu: new Array(LIVE_WINDOW).fill(0),
-    memory: new Array(LIVE_WINDOW).fill(0),
+/**
+ * One entry per server, outliving the components that read it.
+ *
+ * The buffers used to sit in a `useRef`, so every consumer kept its own: the
+ * two overview tiles sampled independently of each other and of the graphs
+ * page, and moving between those pages threw the history away and restarted
+ * from an empty trace. There is nothing page-specific about what a guest has
+ * been doing for the last minute, so it is collected once, here.
+ *
+ * Not a zustand store, despite the shape. Nothing re-renders on this: consumers
+ * read the buffers from an animation frame and write straight to the DOM, so
+ * what a store would add is subscription, and there is nothing to subscribe.
+ */
+interface Entry {
+    metrics: LiveMetrics
+    /** Consumers currently mounted. */
+    readers: number
+    sampler: number | null
+    /** Pending teardown, armed once the last reader leaves. */
+    reaper: number | null
+}
+
+const entries = new Map<string, Entry>()
+
+const emptyMetrics = (): LiveMetrics => ({
+    buffers: {
+        cpu: new Array(LIVE_WINDOW).fill(0),
+        memory: new Array(LIVE_WINDOW).fill(0),
+    },
+    lastSampleAt: performance.now(),
+    intervalMs: LIVE_SAMPLE_MS,
+    filled: 0,
 })
 
-/**
- * Live CPU and memory as fixed-length ring buffers, plus the timestamp of the
- * newest sample.
- *
- * Returned as a ref rather than state on purpose: the sparklines and readouts
- * that consume this redraw from an animation frame, and re-rendering the whole
- * panel twenty times a second to hand them numbers they are going to
- * interpolate anyway would be pure waste.
- */
-const useLiveMetrics = () => {
-    const query = useServerState()
-    const { data: state } = query
+const entryFor = (uuid: string): Entry => {
+    let entry = entries.get(uuid)
 
-    const metrics = useRef<LiveMetrics>({
-        buffers: emptyBuffers(),
-        lastSampleAt: performance.now(),
-        intervalMs: LIVE_SAMPLE_MS,
-        filled: 0,
-    })
-
-    /* The timer reads the latest state through a ref, so a new poll result
-       doesn't tear down and restart the sampling interval. */
-    const latest = useRef(state)
-    latest.current = state
-
-    useEffect(() => {
-        const sample = () => {
-            const reading = latest.current
-            if (!reading) return
-
-            const next: Record<LiveMetricKey, number> = {
-                cpu: (reading.cpuUsed ?? 0) * 100,
-                memory: reading.memoryUsed ?? 0,
-            }
-
-            const current = metrics.current
-
-            for (const key of Object.keys(next) as LiveMetricKey[]) {
-                const buffer = current.buffers[key]
-                buffer.shift()
-                buffer.push(next[key])
-            }
-
-            current.filled = Math.min(current.filled + 1, LIVE_WINDOW)
-            current.lastSampleAt = performance.now()
+    if (!entry) {
+        entry = {
+            metrics: emptyMetrics(),
+            readers: 0,
+            sampler: null,
+            reaper: null,
         }
+        entries.set(uuid, entry)
+    }
 
-        sample()
-        const id = window.setInterval(sample, LIVE_SAMPLE_MS)
+    return entry
+}
 
-        return () => window.clearInterval(id)
-    }, [])
+/**
+ * Sampling reads the query cache rather than a component's copy of the result,
+ * so it does not matter which consumer -- if any -- happens to be mounted.
+ */
+const sample = (uuid: string, entry: Entry) => {
+    const reading = queryClient.getQueryData<ServerStateData>(
+        serverQueries.state(uuid).queryKey
+    )
+
+    if (!reading) return
+
+    const next: Record<LiveMetricKey, number> = {
+        cpu: (reading.cpuUsed ?? 0) * 100,
+        memory: reading.memoryUsed ?? 0,
+    }
+
+    for (const key of Object.keys(next) as LiveMetricKey[]) {
+        const buffer = entry.metrics.buffers[key]
+        buffer.shift()
+        buffer.push(next[key])
+    }
+
+    entry.metrics.filled = Math.min(entry.metrics.filled + 1, LIVE_WINDOW)
+    entry.metrics.lastSampleAt = performance.now()
+}
+
+const acquire = (uuid: string) => {
+    const entry = entryFor(uuid)
+    entry.readers++
+
+    if (entry.reaper !== null) {
+        window.clearTimeout(entry.reaper)
+        entry.reaper = null
+    }
+
+    if (entry.sampler === null) {
+        sample(uuid, entry)
+        entry.sampler = window.setInterval(
+            () => sample(uuid, entry),
+            LIVE_SAMPLE_MS
+        )
+    }
+
+    return () => {
+        entry.readers--
+        if (entry.readers > 0) return
+
+        /*
+         * Keep sampling for a window's worth of time after the last reader
+         * leaves, then throw the entry away.
+         *
+         * A route change unmounts the old page before mounting the new one, so
+         * tearing down the moment the count hits zero would stop the clock on
+         * every navigation -- the reset this exists to avoid. Holding on for
+         * exactly the length of the window also decides the other case for us:
+         * stay away longer than that and every sample would have scrolled out
+         * regardless, so starting clean loses nothing.
+         */
+        entry.reaper = window.setTimeout(() => {
+            if (entry.sampler !== null) window.clearInterval(entry.sampler)
+            entries.delete(uuid)
+        }, LIVE_WINDOW * LIVE_SAMPLE_MS)
+    }
+}
+
+/**
+ * Live CPU and memory as fixed-length ring buffers, shared by every consumer
+ * looking at the same server.
+ *
+ * The returned `metrics` object is stable and mutates in place; read it from an
+ * animation frame rather than rendering off it.
+ */
+const useLiveMetrics = (uuid?: string) => {
+    const params = useParams({ strict: false }) as { serverUuid: string }
+    const serverUuid = uuid ?? params.serverUuid
+
+    const query = useServerState(serverUuid)
+    const metrics = useMemo(() => entryFor(serverUuid).metrics, [serverUuid])
+
+    useEffect(() => acquire(serverUuid), [serverUuid])
 
     return { metrics, ...query }
 }
