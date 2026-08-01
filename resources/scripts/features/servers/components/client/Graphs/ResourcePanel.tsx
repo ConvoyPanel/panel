@@ -139,9 +139,8 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
                                     server={server}
                                     metrics={metrics}
                                     live={live}
-                                    value={railValue(
-                                        seriesKeys(metric)[0],
-                                        live
+                                    values={seriesKeys(metric).map(key =>
+                                        railValue(key, live)
                                     )}
                                     unavailable={railUnavailable(live)}
                                     sampledAt={
@@ -195,7 +194,7 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
                             server={server}
                             metrics={metrics}
                             live={live}
-                            railValue={railValue(keys[0], live)}
+                            railValues={keys.map(key => railValue(key, live))}
                             railUnavailable={railUnavailable(live)}
                             sampledAt={live ? undefined : newest?.timestamp}
                             isFirst={index === 0}

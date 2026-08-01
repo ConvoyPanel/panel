@@ -23,8 +23,11 @@ interface Props {
     metrics: RefObject<LiveMetrics>
     /** Whether this metric has a live reading at all. */
     live: boolean
-    /** Current live value, or the newest historical sample when there is none. */
-    value: number | undefined
+    /**
+     * Current figure per series, in `seriesKeys` order -- live where the guest
+     * reports it, otherwise the newest historical sample.
+     */
+    values: (number | undefined)[]
     /**
      * Whether we already know no value is coming. A missing value alone means
      * "still loading" and shows a skeleton; this distinguishes it from "asked
@@ -70,7 +73,7 @@ const MetricRail = ({
     server,
     metrics,
     live,
-    value,
+    values,
     unavailable,
     sampledAt,
     isFirst,
@@ -123,28 +126,75 @@ const MetricRail = ({
                 )}
             </div>
 
-            {value !== undefined ? (
-                <TweenedValue
-                    value={value}
-                    format={metric.format}
-                    className='text-xl font-semibold tracking-tight'
-                />
-            ) : unavailable ? (
-                <span
-                    className='text-muted-foreground text-xl font-semibold tracking-tight'
-                    title='No reading available'
-                >
-                    &mdash;
-                </span>
+            {mirrored ? (
+                /*
+                 * Both directions, each against its own name.
+                 *
+                 * A single figure over the caption "read / write" does not say
+                 * which of the two it is -- and it was the first, silently.
+                 * Naming them also makes the legend redundant, so the swatches
+                 * move here and carry the mapping to the halves of the plot.
+                 */
+                <div className='mt-0.5 flex flex-col gap-0.5'>
+                    {labels.map((label, index) => (
+                        <div
+                            key={label}
+                            className='flex w-full items-baseline gap-1.5'
+                        >
+                            <i
+                                aria-hidden
+                                className='size-2 shrink-0 translate-y-[-1px] rounded-[2px]'
+                                style={{
+                                    background: metric.color,
+                                    opacity: index === 0 ? 1 : 0.45,
+                                }}
+                            />
+                            <span className='text-muted-foreground text-xs'>
+                                {label}
+                            </span>
+                            {values[index] !== undefined ? (
+                                <TweenedValue
+                                    value={values[index]}
+                                    format={metric.format}
+                                    className='ml-auto text-sm font-semibold tracking-tight'
+                                />
+                            ) : unavailable ? (
+                                <span className='text-muted-foreground ml-auto text-sm font-semibold'>
+                                    &mdash;
+                                </span>
+                            ) : (
+                                <Skeleton className='ml-auto h-5 w-16' />
+                            )}
+                        </div>
+                    ))}
+                </div>
             ) : (
-                /* `h-7` is the line box of the figure it stands in for; a
-                   shorter placeholder made every row resize on load. */
-                <Skeleton className='h-7 w-24' />
-            )}
+                <>
+                    {values[0] !== undefined ? (
+                        <TweenedValue
+                            value={values[0]}
+                            format={metric.format}
+                            className='text-xl font-semibold tracking-tight'
+                        />
+                    ) : unavailable ? (
+                        <span
+                            className='text-muted-foreground text-xl font-semibold tracking-tight'
+                            title='No reading available'
+                        >
+                            &mdash;
+                        </span>
+                    ) : (
+                        /* `h-7` is the line box of the figure it stands in
+                           for; a shorter placeholder made every row resize on
+                           load. */
+                        <Skeleton className='h-7 w-24' />
+                    )}
 
-            <span className='text-muted-foreground text-xs tabular-nums'>
-                {metric.caption(server)}
-            </span>
+                    <span className='text-muted-foreground text-xs tabular-nums'>
+                        {metric.caption(server)}
+                    </span>
+                </>
+            )}
 
             {live && (
                 <LiveSparkline
@@ -164,27 +214,6 @@ const MetricRail = ({
                        the cell packs its content to the top. */
                     className='mt-auto -mr-3 -mb-3 -ml-4 h-8 w-auto self-stretch'
                 />
-            )}
-
-            {mirrored && (
-                <div className='text-muted-foreground mt-1.5 flex items-center gap-3 text-[11px]'>
-                    {labels.map((label, index) => (
-                        <span
-                            key={label}
-                            className='inline-flex items-center gap-1.5'
-                        >
-                            <i
-                                aria-hidden
-                                className='block size-2 rounded-[2px]'
-                                style={{
-                                    background: metric.color,
-                                    opacity: index === 0 ? 1 : 0.45,
-                                }}
-                            />
-                            {label}
-                        </span>
-                    ))}
-                </div>
             )}
         </div>
     )

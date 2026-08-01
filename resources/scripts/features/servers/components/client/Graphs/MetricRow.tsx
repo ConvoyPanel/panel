@@ -28,8 +28,8 @@ interface Props {
     metrics: RefObject<LiveMetrics>
     /** Whether this metric has a live reading at all. */
     live: boolean
-    /** Current live value, or the newest historical sample when there is none. */
-    railValue: number | undefined
+    /** Current figure per series, in `seriesKeys` order. */
+    railValues: (number | undefined)[]
     /** True once we know no figure is coming, so the rail stops pulsing. */
     railUnavailable: boolean
     /** When the rail figure was recorded, for metrics with no live feed. */
@@ -90,7 +90,7 @@ const MetricRow = ({
     server,
     metrics,
     live,
-    railValue,
+    railValues,
     railUnavailable,
     sampledAt,
     isLoading,
@@ -162,7 +162,7 @@ const MetricRow = ({
                 server={server}
                 metrics={metrics}
                 live={live}
-                value={railValue}
+                values={railValues}
                 unavailable={railUnavailable}
                 sampledAt={sampledAt}
                 isFirst={isFirst}
