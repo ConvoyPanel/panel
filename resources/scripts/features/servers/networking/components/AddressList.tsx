@@ -84,14 +84,14 @@ const AddressRow = ({ address }: { address: Address }) => (
                        card near-pure-white bloom reads as heavy, so soften the
                        IP's white there while keeping full-contrast bold on light. */
                     className={
-                        'text-foreground dark:hover:text-primary text-[21px] leading-tight font-semibold break-all dark:text-[oklch(0.9_0.004_106.5)]'
+                        'text-foreground dark:hover:text-primary text-lg leading-tight font-semibold break-all dark:text-[oklch(0.9_0.004_106.5)]'
                     }
                 >
                     {address.ip}
                 </CopyValue>
                 <span
                     className={
-                        'text-muted-foreground text-[21px] leading-tight font-medium'
+                        'text-muted-foreground text-lg leading-tight font-medium'
                     }
                 >
                     /{address.prefixLength}

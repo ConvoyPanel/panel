@@ -1,7 +1,6 @@
+import Toolbar from '@/features/servers/components/client/Overview/Toolbar.tsx'
 import { useServer } from '@/features/servers/detail/api.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
-
-import Toolbar from '@/features/servers/components/client/Overview/Toolbar.tsx'
 
 import { Heading } from '@/components/ui/Typography'
 
@@ -19,10 +18,10 @@ const Header = () => {
                 <Heading className={'mt-2 truncate sm:mt-3'}>
                     {server?.name}
                 </Heading>
-                <div className={'flex justify-between sm:mt-2 '}>
+                <div className={'flex justify-between sm:mt-2'}>
                     <button
                         onClick={copyHostname}
-                        className={'text-sm text-muted-foreground sm:text-base'}
+                        className={'text-muted-foreground text-sm sm:text-base'}
                         aria-label={`Click to copy hostname: ${server?.hostname}`}
                     >
                         {server?.hostname}

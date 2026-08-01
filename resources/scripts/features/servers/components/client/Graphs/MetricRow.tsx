@@ -4,7 +4,7 @@ import {
     seriesKeys,
     seriesLabels,
 } from '@/features/servers/components/client/Graphs/metrics.ts'
-import type { LiveMetrics } from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
+import type { LiveMetrics } from '@/features/servers/hooks/use-live-metrics.ts'
 import type { Server } from '@/types/server'
 import { cn } from '@/utils'
 import { Fragment, type RefObject, memo, useId } from 'react'

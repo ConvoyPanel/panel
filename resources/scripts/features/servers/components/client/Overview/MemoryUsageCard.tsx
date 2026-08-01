@@ -1,13 +1,14 @@
+import LiveSparkline from '@/features/servers/components/client/LiveSparkline.tsx'
 import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 import UnknownStat from '@/features/servers/components/client/Overview/UnknownStat.tsx'
-import { useServerState } from '@/features/servers/detail/api.ts'
+import useLiveMetrics from '@/features/servers/hooks/use-live-metrics.ts'
 import { IconAirConditioningDisabled } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const MemoryUsageCard = () => {
-    const { data: state, isUnknown } = useServerState()
+    const { metrics, data: state, isUnknown } = useLiveMetrics()
 
     const used = byteSize(state?.memoryUsed ?? 0, {
         units: 'iec',
@@ -22,6 +23,18 @@ const MemoryUsageCard = () => {
         <StatisticCard
             title={'Memory Usage'}
             icon={IconAirConditioningDisabled}
+            trend={
+                state && !isUnknown ? (
+                    <LiveSparkline
+                        metrics={metrics}
+                        series='memory'
+                        color='var(--chart-memory)'
+                        /* The limit the figure is read against, so the trace
+                           and the "/ 1 GiB" beside it share a scale. */
+                        ceiling={state.memoryTotal}
+                    />
+                ) : undefined
+            }
         >
             {isUnknown ? (
                 <UnknownStat />

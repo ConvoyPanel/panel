@@ -1,4 +1,4 @@
-import LiveSparkline from '@/features/servers/components/client/Graphs/LiveSparkline.tsx'
+import LiveSparkline from '@/features/servers/components/client/LiveSparkline.tsx'
 import TweenedValue from '@/features/servers/components/client/Graphs/TweenedValue.tsx'
 import {
     type Metric,
@@ -7,7 +7,7 @@ import {
 import type {
     LiveMetricKey,
     LiveMetrics,
-} from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
+} from '@/features/servers/hooks/use-live-metrics.ts'
 import type { Server } from '@/types/server'
 import { cn } from '@/utils'
 import { formatDistanceToNowStrict } from 'date-fns'

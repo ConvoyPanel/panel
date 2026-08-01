@@ -1,7 +1,7 @@
 import type {
     LiveMetricKey,
     LiveMetrics,
-} from '@/features/servers/components/client/Graphs/use-live-metrics.ts'
+} from '@/features/servers/hooks/use-live-metrics.ts'
 import useAnimationFrame from '@/hooks/use-animation-frame.ts'
 import useMediaQuery from '@/hooks/use-media-query.ts'
 import { cn } from '@/utils'
