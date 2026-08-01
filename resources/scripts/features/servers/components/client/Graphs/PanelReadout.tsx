@@ -1,6 +1,6 @@
-import type { PanelPoint } from '@/features/servers/components/client/Graphs/MetricRow.tsx'
 import {
     METRICS,
+    type PanelPoint,
     seriesKeys,
     seriesLabels,
 } from '@/features/servers/components/client/Graphs/metrics.ts'
@@ -8,11 +8,6 @@ import {
 interface Props {
     /** Formats the point's timestamp for the range currently shown. */
     formatStamp: (value: Date) => string
-    /**
-     * Render nothing. Every row mounts this so Recharts always sees the same
-     * content element -- only the row under the pointer actually draws a box.
-     */
-    silent?: boolean
     /* Injected by Recharts when it clones this into a chart's `content`. */
     active?: boolean
     payload?: { payload?: PanelPoint }[]
@@ -27,18 +22,21 @@ interface Props {
  * metric answers for the same instant -- so they belong in one list, read top
  * to bottom in the same order as the rows.
  *
- * Only the row under the pointer renders this; the others contribute their
- * cursor line and nothing else. Since all four rows plot the same array,
- * Recharts hands us the entire point -- every metric, already at the hovered
- * instant -- so there is no index to look up or keep in sync.
+ * All four rows mount one, and the plot cell under the pointer is the only one
+ * that shows it -- `group-hover`, not React state, because a row that
+ * re-renders while the pointer is leaving loses Recharts' cursor
+ * synchronisation and strands a cursor line on rows nobody is hovering. Since
+ * all four rows plot the same array, Recharts hands us the entire point --
+ * every metric, already at the hovered instant -- so there is no index to look
+ * up or keep in sync.
  */
-const PanelReadout = ({ formatStamp, silent, active, payload }: Props) => {
+const PanelReadout = ({ formatStamp, active, payload }: Props) => {
     const point = payload?.[0]?.payload
 
-    if (silent || !active || !point) return null
+    if (!active || !point) return null
 
     return (
-        <div className='bg-background ring-foreground/10 rounded-lg px-2.5 py-2 text-xs shadow-xl ring-1'>
+        <div className='bg-background ring-foreground/10 invisible rounded-lg px-2.5 py-2 text-xs shadow-xl ring-1 group-hover:visible'>
             <div className='text-muted-foreground mb-1.5 font-medium'>
                 {formatStamp(point.timestamp)}
             </div>

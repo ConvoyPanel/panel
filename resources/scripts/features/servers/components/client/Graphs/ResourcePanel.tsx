@@ -1,9 +1,8 @@
 import MetricRail from '@/features/servers/components/client/Graphs/MetricRail.tsx'
-import MetricRow, {
-    type PanelPoint,
-} from '@/features/servers/components/client/Graphs/MetricRow.tsx'
+import MetricRow from '@/features/servers/components/client/Graphs/MetricRow.tsx'
 import {
     METRICS,
+    type PanelPoint,
     seriesKeys,
 } from '@/features/servers/components/client/Graphs/metrics.ts'
 import {
@@ -13,7 +12,7 @@ import {
 } from '@/features/servers/detail/api.ts'
 import useLiveMetrics from '@/features/servers/hooks/use-live-metrics.ts'
 import { IconChartAreaLine } from '@tabler/icons-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -40,11 +39,6 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
     const { data: server } = useServer()
     const { data, isPending, isError } = useServerStatistics({ from })
     const { metrics, data: state, isUnknown } = useLiveMetrics()
-
-    /* Which row the pointer is over, and therefore which one opens the
-       readout. A row, not a data index -- crossing between rows is rare, so
-       this re-renders far less than tracking the cursor would. */
-    const [readoutRow, setReadoutRow] = useState<string | null>(null)
 
     /* Every row plots the same array so their indices line up, which is what
        lets one cursor position mean the same instant on all four. Mirrored
@@ -179,7 +173,6 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
                on the bottom row past the card itself. The accent stripes stop
                short of the corner radius instead of relying on clipping. */
             className='relative overflow-visible'
-            onPointerLeave={() => setReadoutRow(null)}
         >
             <div className='grid @3xl:grid-cols-[13rem_minmax(0,1fr)]'>
                 {METRICS.map((metric, index) => {
@@ -202,8 +195,6 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
                             isLast={index === METRICS.length - 1}
                             xTickFormatter={xTickFormatter}
                             stampFormatter={stampFormatter}
-                            showReadout={readoutRow === metric.key}
-                            onPointerEnter={() => setReadoutRow(metric.key)}
                         />
                     )
                 })}

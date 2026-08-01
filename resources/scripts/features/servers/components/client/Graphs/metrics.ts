@@ -129,6 +129,15 @@ export const METRICS: Metric[] = [
     },
 ]
 
+/**
+ * One instant, carrying every metric's series. All four rows plot the same
+ * array, which is what lets one cursor position mean the same moment on each.
+ */
+export interface PanelPoint {
+    timestamp: Date
+    [series: string]: number | Date
+}
+
 /** The series keys a metric contributes to a chart row's data points. */
 export const seriesKeys = (metric: Metric): [string] | [string, string] =>
     metric.shape.kind === 'single'
