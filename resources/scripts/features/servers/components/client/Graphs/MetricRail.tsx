@@ -89,7 +89,12 @@ const MetricRail = ({
                    (a sparkline here, a legend there), and centring each one
                    independently left the names, figures and captions sitting
                    at four different heights across the rail. */
-                'relative flex flex-col items-start gap-0.5 p-3 pl-4',
+                /* Children stretch rather than shrink to their content: the
+                   figures right-align into a column of their own, which is
+                   what puts air between a label and its value instead of
+                   leaving them jammed together at whatever width the widest
+                   row happened to be. */
+                'relative flex flex-col gap-0.5 p-3 pl-4',
                 /* The outer cells round off and clip, so the full-height
                    accent stripe follows the card's corner instead of poking
                    out past it. Safe to clip here in a way the card itself is
@@ -111,9 +116,13 @@ const MetricRail = ({
                 className='absolute inset-y-0 left-0 w-0.5'
                 style={{ background: metric.color }}
             />
-            <div className='flex items-center gap-2'>
+            {/* Baseline, not centre: the age is two sizes down from the name,
+                and centring the two left it floating off the name's baseline. */}
+            <div className='flex items-baseline gap-2'>
                 <span className='text-sm font-medium'>{metric.name}</span>
-                {live && !unavailable && <LiveIndicator />}
+                {live && !unavailable && (
+                    <LiveIndicator className='self-center' />
+                )}
                 {/* The same slot the live dot occupies, carrying the opposite
                     message: this figure is a reading from the past, not now. */}
                 {!live && sampledAt && (
@@ -149,7 +158,7 @@ const MetricRail = ({
                                     opacity: index === 0 ? 1 : 0.45,
                                 }}
                             />
-                            <span className='text-muted-foreground text-xs'>
+                            <span className='text-muted-foreground pr-3 text-xs'>
                                 {label}
                             </span>
                             {values[index] !== undefined ? (
