@@ -11,6 +11,15 @@ These are NOT committed (matches the existing `routeTree.gen.ts` convention):
 
 Regenerate with `ddev npm run types:generate` (also runs automatically via `predev` / `prebuild`). CI should run the generators before typecheck/build; a clean-tree assertion afterwards catches anything that drifted.
 
+## Frontend code style
+
+**Arrow functions, not `function` declarations.** Components, hooks, helpers and
+callbacks are all `const x = () => …`, with a separate `export default x` at the
+bottom where a default export is needed. This is what the codebase already does
+almost everywhere (`features/**`, `components/ui/**`); the few `function Foo()`
+declarations left are strays, not a second accepted style. Convert them when you
+touch them.
+
 ## Frontend design consistency
 
 The UI must read as **one app**, not a patchwork of per-page styles. Before building any
