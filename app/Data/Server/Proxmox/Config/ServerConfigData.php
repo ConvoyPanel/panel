@@ -238,6 +238,12 @@ class ServerConfigData extends Data
         public Collection $parallelDevices,
 
         /**
+         * The VM's serial devices, as their configured backing (`socket`, or a
+         * passed-through host device). Shaped like `$parallelDevices`.
+         *
+         * Empty means the terminal console has nothing to attach to: PVE's
+         * `termproxy` opens a serial terminal only against one of these.
+         *
          * @var Collection<int, string> $serialDevices
          */
         public Collection $serialDevices,
@@ -369,7 +375,11 @@ class ServerConfigData extends Data
             parallelDevices                   : collect($raw)
                 ->filter(fn ($value, $key) => preg_match('/^parallel\d+$/', $key))
                 ->values(),
-            serialDevices                     : collect($get('serial', [])),
+            // PVE numbers these `serial0`..`serial3` and never emits a bare
+            // `serial` key, so reading one left this permanently empty.
+            serialDevices                     : collect($raw)
+                ->filter(fn ($value, $key) => preg_match('/^serial\d+$/', $key))
+                ->values(),
             digest                            : $get('digest'),
         );
     }

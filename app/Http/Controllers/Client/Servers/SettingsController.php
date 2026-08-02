@@ -24,6 +24,7 @@ use App\Models\Template;
 use App\Models\TemplateGroup;
 use App\Services\Servers\AllocationService;
 use App\Services\Servers\CloudinitService;
+use App\Services\Servers\SerialConsoleService;
 use App\Services\Servers\ServerAuthService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ class SettingsController
         private CloudinitService $cloudinitService,
         private RebuildServerAction $rebuildServerAction,
         private AllocationService $allocationService,
+        private SerialConsoleService $serialConsoleService,
     ) {}
 
     public function rename(RenameServerRequest $request, Server $server)
@@ -114,6 +116,16 @@ class SettingsController
         $this->allocationService->setBootOrder($server, $request->order);
 
         return response()->noContent();
+    }
+
+    public function getSerialConsole(Server $server)
+    {
+        return $this->serialConsoleService->status($server);
+    }
+
+    public function enableSerialConsole(Server $server)
+    {
+        return $this->serialConsoleService->enable($server);
     }
 
     public function getMedia(Request $request, Server $server)

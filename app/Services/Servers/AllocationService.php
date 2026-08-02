@@ -25,6 +25,7 @@ class AllocationService
     public function __construct(
         private ProxmoxConfigClient $configClient,
         private ProxmoxDiskClient $diskClient,
+        private SerialConsoleService $serialConsole,
     ) {}
 
     /**
@@ -66,6 +67,15 @@ class AllocationService
         if ($currentMemoryMib !== $desiredMemoryMib) {
             $payload['memory'] = $desiredMemoryMib;
         }
+
+        // Templates are not required to carry a serial device, and without one
+        // the terminal console has nothing to attach to. Added here rather than
+        // in a job of its own so it rides the sync that already runs at deploy,
+        // and so a rebuild repairs a server that predates this.
+        $payload = $this->serialConsole->withDevice(
+            $payload,
+            $config->serialDevices->isNotEmpty(),
+        );
 
         if ($payload !== []) {
             $this->configClient->setServer($server)->update($payload);

@@ -44,6 +44,28 @@ class ProxmoxConfigClient extends ProxmoxClient
     }
 
     /**
+     * Current *and* pending config values, as `{key, value, pending}` rows.
+     *
+     * PVE cannot hot-add every device: a write against a running guest lands in
+     * the pending set and only becomes `value` at next boot. `/config` shows
+     * just the live side, so it is the wrong thing to ask "did that write take
+     * effect?" -- it reports the key as still absent.
+     *
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getPendingConfig(): array
+    {
+        $response = $this->getHttpClientWithParams()
+            ->get('/api2/json/nodes/{node}/qemu/{server}/pending')
+            ->json();
+
+        return $this->getData($response);
+    }
+
+    /**
      * Update the VM config. Pass the digest captured from getConfig() to make
      * PVE reject the write if the config changed since it was read (optimistic
      * concurrency); a mismatch surfaces as a RequestException.

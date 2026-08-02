@@ -174,6 +174,17 @@ Route::prefix('/servers/{server}')->middleware(
             [Client\Servers\SettingsController::class, 'updateBootOrder'],
         );
 
+        // The serial device the terminal console attaches to. Read before
+        // offering that console, written when the user opts to add one.
+        Route::get(
+            '/hardware/serial-console',
+            [Client\Servers\SettingsController::class, 'getSerialConsole'],
+        )->name('servers.show.serial-console');
+        Route::post(
+            '/hardware/serial-console',
+            [Client\Servers\SettingsController::class, 'enableSerialConsole'],
+        )->name('servers.show.serial-console.enable');
+
         Route::get(
             '/hardware/isos',
             [Client\Servers\SettingsController::class, 'getMedia'],

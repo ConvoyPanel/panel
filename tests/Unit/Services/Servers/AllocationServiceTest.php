@@ -111,3 +111,49 @@ it('writes only the hardware fields that changed', function () {
         && (int) ($request['cores'] ?? null) === 4
         && ! isset($request['memory']));
 });
+
+/** The fixture ships a serial device; drop it to model a server built without one. */
+function configWithoutSerialDevice(): array
+{
+    $config = serverConfigFixture();
+    unset($config['data']['serial0']);
+
+    return $config;
+}
+
+it('adds a serial device when the VM has none, so the terminal console can attach', function () {
+    Http::fake([
+        '*/qemu/*/config' => Http::response(configWithoutSerialDevice(), 200),
+        '*' => Http::response(['data' => 'ok'], 200),
+    ]);
+
+    [, , , $server] = createServerModel();
+    // Matches the fixture, so the serial device is the only reason to write.
+    $server->cpu = 2;
+    $server->memory = 2000 * 1024 * 1024;
+    $server->disk = 1024 * 1024 * 1024;
+
+    app(AllocationService::class)->syncSettings($server);
+
+    Http::assertSent(fn ($request) => $request->method() === 'POST'
+        && str_contains($request->url(), '/config')
+        && ($request['serial0'] ?? null) === 'socket');
+});
+
+it('leaves an existing serial device alone', function () {
+    Http::fake([
+        '*/qemu/*/config' => Http::response(serverConfigFixture(), 200),
+        '*' => Http::response(['data' => 'ok'], 200),
+    ]);
+
+    [, , , $server] = createServerModel();
+    $server->cpu = 4;  // forces a write, so this proves the key is absent from it
+    $server->memory = 2000 * 1024 * 1024;
+    $server->disk = 1024 * 1024 * 1024;
+
+    app(AllocationService::class)->syncSettings($server);
+
+    Http::assertNotSent(fn ($request) => $request->method() === 'POST'
+        && str_contains($request->url(), '/config')
+        && isset($request['serial0']));
+});
