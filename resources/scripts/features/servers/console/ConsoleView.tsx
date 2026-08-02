@@ -1,11 +1,23 @@
+import { useServer } from '@/features/servers/detail/api.ts'
+import useClipboard from '@/hooks/use-clipboard.ts'
+import { cn } from '@/utils'
 import RFB from '@novnc/novnc'
-import { IconArrowsMaximize, IconRefresh, IconSend } from '@tabler/icons-react'
+import {
+    IconArrowLeft,
+    IconArrowsMaximize,
+    IconArrowsMinimize,
+    IconKeyboard,
+    IconRefresh,
+    IconZoomIn,
+} from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
+import { AxiosError } from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/Button'
+import { Button, buttonVariants } from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner.tsx'
 import { toast } from '@/components/ui/Toast'
 import {
@@ -18,25 +30,151 @@ import { type ConsoleType, createConsoleSession } from './api'
 
 const protocols = (token: string) => ['anchor.v1', `anchor.session.${token}`]
 
-export default function ConsoleView({
+// The panel refuses a session with a real reason ("Anchor … is not online with a
+// compatible protocol version", "does not have an Anchor agent configured");
+// throwing it away and saying "Unable to open console" is what made this feel
+// like it fails at random.
+const reason = (error: unknown) =>
+    error instanceof AxiosError && error.response?.data?.message
+        ? (error.response.data.message as string)
+        : 'The console session could not be created.'
+
+/**
+ * What we can say when the console dies without explaining itself.
+ *
+ * `keepOutput` means the console printed something before it went: that output
+ * is the most informative thing on the screen, so the notice must sit beside it
+ * rather than cover it.
+ */
+type Failure = { message: string; code?: number; keepOutput?: boolean }
+
+// Close codes worth translating. A console that exits on its own closes
+// cleanly, so "clean" here means the process ended, not that all is well.
+const closeCodes: Record<number, string> = {
+    1000: 'the console process exited',
+    1005: 'the console process exited without a status',
+    1006: 'the connection dropped without a close frame',
+    1011: 'the agent reported an internal error',
+}
+
+/**
+ * Keys the browser and the host OS swallow before RFB ever sees them.
+ *
+ * Super opens the host's launcher, Alt+Tab switches host windows, Ctrl+W closes
+ * the tab — so a guest can never receive them from a real keyboard. These are
+ * sent explicitly instead, by X11 keysym.
+ *
+ * Modifiers are held rather than tapped: pressing one sends a key-down and
+ * nothing else, so the next ordinary keystroke arrives combined with it, just
+ * as if the key were physically down.
+ */
+const modifierKeys = [
+    { label: 'Ctrl', keysym: 0xffe3, code: 'ControlLeft' },
+    { label: 'Alt', keysym: 0xffe9, code: 'AltLeft' },
+    { label: 'Shift', keysym: 0xffe1, code: 'ShiftLeft' },
+    { label: 'Super', keysym: 0xffeb, code: 'MetaLeft' },
+] as const
+
+/**
+ * Long pastes are thousands of round-trips, and a guest keyboard buffer will
+ * drop what it cannot keep up with, so typing is paced and bounded.
+ */
+const typingDelayMs = 8
+const typingLimit = 4096
+
+/**
+ * Replay text as key events, for the screens a clipboard cannot reach.
+ *
+ * An OS installer, GRUB or a BIOS has no guest agent — there is no OS yet — so
+ * real clipboard sync is impossible there and this is the only thing that
+ * works. It is strictly worse everywhere else: one-way, slow, and keysym-based,
+ * so a guest on a non-US keymap will resolve symbols to different characters.
+ */
+const typeText = async (
+    rfb: RFB,
+    text: string,
+    onProgress: (done: number) => void
+) => {
+    const characters = [...text.slice(0, typingLimit)]
+
+    for (const [index, character] of characters.entries()) {
+        if (character === '\n' || character === '\r') {
+            rfb.sendKey(0xff0d, 'Enter')
+        } else if (character === '\t') {
+            rfb.sendKey(0xff09, 'Tab')
+        } else {
+            const point = character.codePointAt(0) ?? 0
+            // Latin-1 maps onto keysyms one to one; everything above it uses
+            // the Unicode keysym range.
+            rfb.sendKey(point < 0x100 ? point : 0x01000000 + point, null)
+        }
+
+        onProgress(index + 1)
+        await new Promise(resolve => setTimeout(resolve, typingDelayMs))
+    }
+
+    return characters.length
+}
+
+/** Sent as a full press and release, with whatever modifiers are held. */
+const tapKeys = [
+    { label: 'Esc', keysym: 0xff1b, code: 'Escape' },
+    { label: 'Tab', keysym: 0xff09, code: 'Tab' },
+    ...Array.from({ length: 12 }, (_, index) => ({
+        label: `F${index + 1}`,
+        keysym: 0xffbe + index,
+        code: `F${index + 1}`,
+    })),
+]
+
+// A serial console can only attach to a serial device the VM actually has, with
+// something listening on it inside the guest. Both are invisible from here, so
+// the terminal fails by going quiet — say what to check rather than spin.
+const hints: Record<ConsoleType, string> = {
+    novnc: 'The server may be powered off, or the node may be unreachable.',
+    xtermjs:
+        'A serial console needs a serial device on the VM (serial0) and a login prompt bound to it inside the guest. The display console does not.',
+}
+
+const ConsoleView = ({
     serverUuid,
     type,
 }: {
     serverUuid: string
     type: ConsoleType
-}) {
+}) => {
+    const { data: server } = useServer(serverUuid)
     const target = useRef<HTMLDivElement>(null)
     const connection = useRef<RFB | WebSocket | null>(null)
     const [attempt, setAttempt] = useState(0)
     const [connected, setConnected] = useState(false)
-
+    const [failure, setFailure] = useState<Failure | null>(null)
+    const [held, setHeld] = useState<string[]>([])
+    // Scale to fit by default; a low-resolution guest (a boot console, a BIOS)
+    // stretches badly, so actual size stays one click away.
+    const [fitDisplay, setFitDisplay] = useState(true)
+    const [keysOpen, setKeysOpen] = useState(false)
+    const [typing, setTyping] = useState<number | null>(null)
+    // Held when the guest copies something but the browser refuses to write to
+    // the clipboard without a gesture, so a button can finish the job.
+    const [guestClipboard, setGuestClipboard] = useState('')
+    const { copy } = useClipboard({ successMessage: 'Copied from the server' })
     useEffect(() => {
         let disposed = false
         let terminal: Terminal | undefined
         let fit: FitAddon | undefined
+        // Whether the console ever actually carried anything. Distinguishes
+        // "never came up" from "came up and then dropped", which need different
+        // explanations — and neither may leave the spinner running.
+        let established = false
+
+        const fail = (value: Failure) => {
+            if (!disposed) setFailure(value)
+        }
 
         const connect = async () => {
             setConnected(false)
+            setFailure(null)
             const session = await createConsoleSession(serverUuid, type)
             if (disposed || !target.current) return
             target.current.replaceChildren()
@@ -60,19 +198,42 @@ export default function ConsoleView({
                         })
                     }
                 })
-                rfb.addEventListener('connect', () => setConnected(true))
-                rfb.addEventListener('disconnect', event => {
+                // Unlike the socket's `open`, this fires only once RFB has
+                // actually handshaken with the VNC server, so it does mean the
+                // console came up.
+                rfb.addEventListener('connect', () => {
+                    established = true
+                    setConnected(true)
+                    rfb.focus()
+                })
+                // Guest to local. Free wherever the guest supports it, and
+                // silent where it does not — the button below is the fallback
+                // for browsers that refuse a write outside a user gesture.
+                rfb.addEventListener('clipboard', event => {
+                    const text = event.detail.text
+                    if (!text) return
+
+                    setGuestClipboard(text)
+                    navigator.clipboard?.writeText(text).catch(() => {})
+                })
+                rfb.addEventListener('disconnect', () => {
                     setConnected(false)
-                    if (!event.detail.clean && !disposed)
-                        toast.add({
-                            title: 'Console disconnected',
-                            type: 'error',
-                        })
+                    fail(
+                        established
+                            ? {
+                                  message: 'The display console disconnected.',
+                                  keepOutput: true,
+                              }
+                            : { message: hints.novnc }
+                    )
                 })
                 connection.current = rfb
             } else {
                 terminal = new Terminal({
                     cursorBlink: true,
+                    // Without this the cursor is drawn only while focused, so
+                    // a terminal you have not clicked yet looks switched off.
+                    cursorInactiveStyle: 'outline',
                     convertEol: true,
                     fontFamily:
                         'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -82,19 +243,62 @@ export default function ConsoleView({
                 terminal.loadAddon(fit)
                 terminal.open(target.current)
                 fit.fit()
+                // Typing should work the moment the console opens; having to
+                // click a black rectangle first reads as a dead page.
+                terminal.focus()
                 const socket = new WebSocket(
                     session.url,
                     protocols(session.token)
                 )
                 socket.binaryType = 'arraybuffer'
-                socket.onopen = () => setConnected(true)
-                socket.onmessage = event =>
+                // NOT proof the console works: the agent upgrades the socket
+                // and only then spawns the console process, so this fires even
+                // when that process is about to fail. Only bytes off the wire
+                // prove there is a console on the other end.
+                socket.onopen = () => {
+                    setConnected(true)
+                    // A serial console is legitimately silent until something
+                    // in the guest writes to it, so a blank screen is not
+                    // evidence of a broken session — say so, rather than poke
+                    // the guest with a newline it never asked for. Reconnecting
+                    // mid-command, that keystroke would run whatever was typed.
+                    terminal?.writeln(
+                        '\x1b[2mConnected. This screen stays blank until the server writes to the serial port; press Enter to prompt it.\x1b[0m'
+                    )
+                }
+                socket.onmessage = event => {
+                    established = true
                     terminal?.write(
                         event.data instanceof ArrayBuffer
                             ? new Uint8Array(event.data)
                             : event.data
                     )
-                socket.onclose = () => setConnected(false)
+                }
+                socket.onclose = event => {
+                    setConnected(false)
+                    // The agent puts the console process's own diagnostic in
+                    // the close reason; nothing we could infer beats that. An
+                    // older agent sends none, so fall back to what the close
+                    // frame itself says rather than to a shrug.
+                    const detail = event.reason.trim()
+                    if (detail !== '')
+                        fail({
+                            message: detail,
+                            code: event.code,
+                            keepOutput: established,
+                        })
+                    else if (established)
+                        fail({
+                            message:
+                                'The console ended without saying why. Its last output is below.',
+                            code: event.code,
+                            keepOutput: true,
+                        })
+                    else fail({ message: hints.xtermjs, code: event.code })
+                }
+                socket.onerror = () => {
+                    if (!established) fail({ message: hints.xtermjs })
+                }
                 terminal.onData(
                     data =>
                         socket.readyState === WebSocket.OPEN &&
@@ -103,9 +307,7 @@ export default function ConsoleView({
                 connection.current = socket
             }
         }
-        connect().catch(() =>
-            toast.add({ title: 'Unable to open console', type: 'error' })
-        )
+        connect().catch(error => fail({ message: reason(error) }))
         const resize = () => fit?.fit()
         window.addEventListener('resize', resize)
         return () => {
@@ -123,64 +325,316 @@ export default function ConsoleView({
         // here tore the socket down and reconnected in a loop.
     }, [attempt, serverUuid, type])
 
+    const display = () =>
+        connection.current instanceof WebSocket ? null : connection.current
+
     const sendCtrlAltDel = useCallback(() => {
         if (!(connection.current instanceof WebSocket))
             connection.current?.sendCtrlAltDel()
     }, [])
 
+    // Held down until pressed again, so the modifier composes with whatever is
+    // typed on the real keyboard next. Focus goes straight back to the guest,
+    // or the following keystroke would land on this button instead.
+    const toggleModifier = (key: (typeof modifierKeys)[number]) => {
+        const rfb = display()
+        if (!rfb) return
+
+        const down = !held.includes(key.label)
+        rfb.sendKey(key.keysym, key.code, down)
+        setHeld(current =>
+            down
+                ? [...current, key.label]
+                : current.filter(label => label !== key.label)
+        )
+        rfb.focus()
+    }
+
+    const tapKey = (key: { keysym: number; code: string }) => {
+        const rfb = display()
+        if (!rfb) return
+
+        rfb.sendKey(key.keysym, key.code)
+        rfb.focus()
+    }
+
+    /**
+     * The browser will only hand over the clipboard from a user gesture, and
+     * Safari and Firefox may refuse outright, so a failed read is a normal
+     * outcome to explain rather than an error to swallow.
+     */
+    const readClipboard = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (text) return text
+
+            toast.add({ title: 'Your clipboard is empty', type: 'error' })
+        } catch {
+            toast.add({
+                title: 'This browser would not share the clipboard',
+                type: 'error',
+            })
+        }
+
+        return null
+    }
+
+    // Real clipboard: instant and any size, but it reaches nothing unless the
+    // guest runs an agent that implements it.
+    const pasteClipboard = async () => {
+        const rfb = display()
+        if (!rfb) return
+
+        const text = await readClipboard()
+        if (!text) return
+
+        rfb.clipboardPasteFrom(text)
+        rfb.focus()
+    }
+
+    const typeClipboard = async () => {
+        const rfb = display()
+        if (!rfb || typing !== null) return
+
+        const text = await readClipboard()
+        if (!text) return
+
+        if (text.length > typingLimit)
+            toast.add({
+                title: `Only the first ${typingLimit} characters will be typed`,
+                type: 'error',
+            })
+
+        rfb.focus()
+        setTyping(0)
+        try {
+            await typeText(rfb, text, done => setTyping(done))
+        } finally {
+            setTyping(null)
+        }
+    }
+
+    // Scaling and clipping are mutually exclusive in RFB; clipping shows the
+    // guest at its true resolution and scrolls, which is the only way to read a
+    // low-resolution console without interpolation blur.
+    useEffect(() => {
+        const rfb = display()
+        if (!rfb) return
+
+        rfb.scaleViewport = fitDisplay
+        rfb.clipViewport = !fitDisplay
+    }, [fitDisplay, connected])
+
+    // A modifier left down would silently poison every later keystroke, and
+    // nothing on screen would explain it.
+    useEffect(() => {
+        if (connected) return
+
+        setHeld([])
+    }, [connected])
+
+    const retry = (
+        <Button
+            variant='outline'
+            className='shrink-0 border-white/15 bg-transparent text-zinc-200 hover:bg-zinc-800 hover:text-white'
+            onClick={() => setAttempt(value => value + 1)}
+        >
+            <IconRefresh />
+            Try again
+        </Button>
+    )
+
+    // When the console named its own failure this adds nothing, but when it
+    // said nothing the close code is the only fact left — and naming it beats
+    // making the user guess from a shrug.
+    const closeNote = failure?.code !== undefined && (
+        <p className='font-mono text-xs text-zinc-500'>
+            Close code {failure.code}
+            {closeCodes[failure.code] ? ` — ${closeCodes[failure.code]}` : ''}
+        </p>
+    )
+
+    const tools = (
+        <div className='flex items-center gap-1'>
+            {type === 'novnc' && (
+                <>
+                    <ToolButton
+                        label={
+                            keysOpen
+                                ? 'Hide keyboard keys'
+                                : 'Keys the browser intercepts'
+                        }
+                        active={keysOpen || held.length > 0}
+                        onClick={() => setKeysOpen(open => !open)}
+                    >
+                        <IconKeyboard />
+                    </ToolButton>
+                    <ToolButton
+                        label={
+                            fitDisplay ? 'Show at actual size' : 'Scale to fit'
+                        }
+                        onClick={() => setFitDisplay(fit => !fit)}
+                    >
+                        {fitDisplay ? <IconZoomIn /> : <IconArrowsMinimize />}
+                    </ToolButton>
+                </>
+            )}
+            <ToolButton
+                label='Reconnect'
+                onClick={() => setAttempt(value => value + 1)}
+            >
+                <IconRefresh />
+            </ToolButton>
+            <ToolButton
+                label='Fullscreen'
+                onClick={() => document.documentElement.requestFullscreen()}
+            >
+                <IconArrowsMaximize />
+            </ToolButton>
+        </div>
+    )
+
     return (
-        <div className='relative h-full min-h-0 bg-zinc-950'>
-            {!connected && (
-                <div className='absolute inset-0 z-10 grid place-items-center bg-zinc-950'>
-                    <Spinner className='size-6 text-zinc-300' />
+        <div className='flex h-dvh min-h-0 flex-col bg-zinc-950 text-zinc-100'>
+            {/* Chrome lives above the guest, never on top of it. Every corner of
+                a desktop guest belongs to something — the tray, the Start
+                button, a menu bar — so an overlaid toolbar always covers a
+                control someone is reaching for, and hiding it on idle does not
+                help: moving the pointer towards that corner is what brings it
+                back. */}
+            <header className='flex h-12 shrink-0 items-center gap-3 border-b border-white/10 px-3'>
+                <Link
+                    to='/servers/$serverUuid'
+                    params={{ serverUuid }}
+                    aria-label='Back to server'
+                    className={buttonVariants({
+                        variant: 'ghost',
+                        size: 'icon',
+                        className:
+                            'text-zinc-300 hover:bg-zinc-900 hover:text-white',
+                    })}
+                >
+                    <IconArrowLeft />
+                </Link>
+                <div className='min-w-0 flex-1'>
+                    <p className='truncate text-sm font-medium'>
+                        {server?.name ?? 'Console'}
+                    </p>
+                    <p className='text-xs text-zinc-400'>
+                        {type === 'novnc' ? 'Display' : 'Terminal'}
+                    </p>
+                </div>
+                {tools}
+            </header>
+            {type === 'novnc' && keysOpen && (
+                <div className='flex shrink-0 flex-wrap items-center gap-1 border-b border-white/10 bg-zinc-900/60 px-3 py-1.5'>
+                    {modifierKeys.map(key => (
+                        <KeyButton
+                            key={key.label}
+                            held={held.includes(key.label)}
+                            onClick={() => toggleModifier(key)}
+                        >
+                            {key.label}
+                        </KeyButton>
+                    ))}
+                    <span className='mx-1 h-5 w-px bg-white/10' />
+                    {tapKeys.map(key => (
+                        <KeyButton key={key.label} onClick={() => tapKey(key)}>
+                            {key.label}
+                        </KeyButton>
+                    ))}
+                    <KeyButton onClick={sendCtrlAltDel}>Ctrl+Alt+Del</KeyButton>
+                    <span className='mx-1 h-5 w-px bg-white/10' />
+                    <KeyButton
+                        onClick={pasteClipboard}
+                        title='Send your clipboard to the guest. Needs a clipboard agent running inside it.'
+                    >
+                        Paste
+                    </KeyButton>
+                    <KeyButton
+                        onClick={typeClipboard}
+                        disabled={typing !== null}
+                        title='Replay your clipboard as keystrokes. Works on installers and BIOS screens, but follows the guest keyboard layout.'
+                    >
+                        {typing === null ? 'Type' : `Typing ${typing}`}
+                    </KeyButton>
+                    {guestClipboard !== '' && (
+                        <KeyButton
+                            onClick={() => copy(guestClipboard)}
+                            title='The guest copied something; put it on your clipboard.'
+                        >
+                            Copy from guest
+                        </KeyButton>
+                    )}
                 </div>
             )}
-            <div
-                ref={target}
-                className='h-full w-full overflow-hidden [&_.xterm]:h-full [&_.xterm-viewport]:!overflow-y-auto [&_canvas]:mx-auto'
-            />
-            <div className='absolute right-3 bottom-3 z-20 flex gap-1 rounded-md border border-white/10 bg-zinc-900/90 p-1 shadow-lg'>
-                {type === 'novnc' && (
-                    <ToolButton
-                        label='Send Ctrl+Alt+Delete'
-                        onClick={sendCtrlAltDel}
-                    >
-                        <IconSend />
-                    </ToolButton>
+            {failure?.keepOutput && (
+                // In flow, not overlaid: a notice that says the output is below
+                // must not be sitting on top of it.
+                <div className='flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-white/10 bg-zinc-900/95 px-3 py-2'>
+                    <div className='min-w-0 flex-1'>
+                        <p className='text-sm text-zinc-200'>
+                            {failure.message}
+                        </p>
+                        {closeNote}
+                    </div>
+                    {retry}
+                </div>
+            )}
+            <main className='relative min-h-0 flex-1'>
+                {!connected && !failure?.keepOutput && (
+                    <div className='absolute inset-0 z-10 grid place-items-center bg-zinc-950 p-6'>
+                        {failure ? (
+                            <div className='flex max-w-md flex-col items-center gap-3 text-center'>
+                                <p className='text-sm font-medium text-zinc-100'>
+                                    {type === 'novnc'
+                                        ? 'Display console unavailable'
+                                        : 'Serial console unavailable'}
+                                </p>
+                                <p className='text-sm text-zinc-400'>
+                                    {failure.message}
+                                </p>
+                                {closeNote}
+                                {retry}
+                            </div>
+                        ) : (
+                            <Spinner className='size-6 text-zinc-300' />
+                        )}
+                    </div>
                 )}
-                <ToolButton
-                    label='Reconnect'
-                    onClick={() => setAttempt(value => value + 1)}
-                >
-                    <IconRefresh />
-                </ToolButton>
-                <ToolButton
-                    label='Fullscreen'
-                    onClick={() => document.documentElement.requestFullscreen()}
-                >
-                    <IconArrowsMaximize />
-                </ToolButton>
-            </div>
+                <div
+                    ref={target}
+                    // `pixelated` matters when scaling up: a text console is a
+                    // tiny framebuffer, and interpolating it to a 4K viewport
+                    // turns every glyph to mush. Blocky beats blurry for text.
+                    className='h-full w-full overflow-hidden [&_.xterm]:h-full [&_.xterm-viewport]:!overflow-y-auto [&_canvas]:mx-auto [&_canvas]:[image-rendering:pixelated]'
+                />
+            </main>
         </div>
     )
 }
 
-function ToolButton({
+const ToolButton = ({
     label,
     onClick,
+    active,
     children,
 }: {
     label: string
     onClick: () => void
+    active?: boolean
     children: React.ReactNode
-}) {
+}) => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
                     size='icon'
                     variant='ghost'
-                    className='text-zinc-200 hover:bg-zinc-800 hover:text-white'
+                    className={cn(
+                        'text-zinc-200 hover:bg-zinc-800 hover:text-white',
+                        active && 'bg-zinc-800 text-white'
+                    )}
                     onClick={onClick}
                 >
                     {children}
@@ -190,3 +644,48 @@ function ToolButton({
         </Tooltip>
     )
 }
+
+/**
+ * A held modifier is styled as pressed, because there is nothing else on screen
+ * to say the guest thinks that key is down.
+ */
+const KeyButton = ({
+    held,
+    onClick,
+    disabled,
+    title,
+    children,
+}: {
+    held?: boolean
+    onClick: () => void
+    disabled?: boolean
+    title?: string
+    children: React.ReactNode
+}) => {
+    const button = (
+        <Button
+            size='sm'
+            variant='ghost'
+            disabled={disabled}
+            className={cn(
+                'h-7 min-w-9 px-2 font-mono text-xs text-zinc-200 hover:bg-zinc-800 hover:text-white',
+                held &&
+                    'bg-zinc-100 text-zinc-900 hover:bg-white hover:text-zinc-900'
+            )}
+            onClick={onClick}
+        >
+            {children}
+        </Button>
+    )
+
+    if (!title) return button
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>{button}</TooltipTrigger>
+            <TooltipContent className='max-w-64'>{title}</TooltipContent>
+        </Tooltip>
+    )
+}
+
+export default ConsoleView
