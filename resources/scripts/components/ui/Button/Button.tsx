@@ -8,9 +8,9 @@ import Spinner from '@/components/ui/Spinner.tsx'
 
 import buttonVariants from './Button.variants.ts'
 
-
 export interface ButtonProps
-    extends ButtonHTMLAttributes<HTMLButtonElement>,
+    extends
+        ButtonHTMLAttributes<HTMLButtonElement>,
         VariantProps<typeof buttonVariants> {
     icon?: ReactNode
     loading?: boolean
@@ -44,6 +44,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <Comp
+                // nova keys its group/joining selectors off `[data-slot]`
+                // (see ButtonGroup): without this they compile and then match
+                // nothing, which is silent rather than loud.
+                data-slot={'button'}
                 className={cn(buttonVariants({ variant, size, className }))}
                 disabled={disabled || loading}
                 ref={ref}
