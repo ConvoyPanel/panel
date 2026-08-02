@@ -271,6 +271,15 @@ Route::prefix('/settings')->group(function () {
         '/bandwidth',
         [Admin\Settings\BandwidthSettingsController::class, 'update'],
     );
+
+    Route::get(
+        '/anchor',
+        [Admin\Settings\AnchorSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/anchor',
+        [Admin\Settings\AnchorSettingsController::class, 'update'],
+    );
 });
 
 /*

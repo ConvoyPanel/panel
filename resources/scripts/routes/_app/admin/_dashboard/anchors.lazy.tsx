@@ -262,6 +262,7 @@ function AnchorForm({
             name: current?.name ?? '',
             mode: current?.mode ?? 'agent',
             publicUrl: current?.publicUrl ?? '',
+            panelUrlOverride: current?.panelUrlOverride ?? '',
             relayId: current?.relayId?.toString() ?? 'none',
         },
     })
@@ -310,6 +311,13 @@ function AnchorForm({
                                 name='publicUrl'
                                 label='Connection URL'
                                 placeholder='https://anchor.example.com'
+                                description='Where the panel and your browser reach this Anchor.'
+                            />
+                            <InputForm
+                                name='panelUrlOverride'
+                                label='Panel URL override'
+                                placeholder='Optional'
+                                description='Where this Anchor reaches the panel, when the panel URL does not resolve on its network. Leave blank to use the default.'
                             />
                             <SelectForm
                                 name='relayId'

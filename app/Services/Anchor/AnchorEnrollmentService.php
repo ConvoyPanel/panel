@@ -18,9 +18,12 @@ class AnchorEnrollmentService
             'enrollment_expires_at' => $expiresAt,
         ]);
 
+        // The same URL the enrollment response will write into the agent's
+        // config, so the command shown here cannot disagree with what the
+        // agent ends up using.
         $command = sprintf(
             "anchor enroll --panel-url %s --token '%s'",
-            rtrim(config('app.url'), '/'),
+            $anchor->panelUrl(),
             $token,
         );
 

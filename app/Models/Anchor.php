@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Anchor\AnchorCompatibility;
 use App\Enums\Anchor\AnchorMode;
+use App\Settings\AnchorSettings;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
@@ -14,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property AnchorMode $mode
  * @property string $public_url
+ * @property string|null $panel_url_override
  * @property string $secret
  * @property int|null $relay_id
  * @property Carbon|null $enrollment_expires_at
@@ -40,6 +42,7 @@ class Anchor extends Model
         'name' => 'required|string|max:191',
         'mode' => 'required|string|in:agent,relay',
         'public_url' => 'required|url:http,https|max:2048',
+        'panel_url_override' => 'nullable|url:http,https|max:2048',
         'secret' => 'required|string|min:32',
         'relay_id' => 'nullable|integer|exists:anchors,id',
         'enrollment_token_hash' => 'nullable|string|size:64',
@@ -82,6 +85,26 @@ class Anchor extends Model
     public function nodes(): HasMany
     {
         return $this->hasMany(Node::class);
+    }
+
+    /**
+     * Where this anchor should reach the panel.
+     *
+     * The reverse of `public_url`: an anchor may sit on a network where the
+     * panel's canonical address does not resolve (a private tunnel, a split
+     * DNS horizon), so it can be pointed at one that does.
+     *
+     * Cascades this anchor's override over the panel-wide default, because a
+     * fleet usually shares one such address and only occasionally needs them to
+     * differ per anchor.
+     */
+    public function panelUrl(): string
+    {
+        $url = $this->panel_url_override
+            ?: app(AnchorSettings::class)->panel_url
+            ?: config('app.url');
+
+        return rtrim($url, '/');
     }
 
     public function consoleWebsocketUrl(): string

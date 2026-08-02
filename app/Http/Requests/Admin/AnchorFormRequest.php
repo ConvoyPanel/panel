@@ -19,6 +19,7 @@ class AnchorFormRequest extends BaseApiRequest
             'name' => ['required', 'string', 'max:191'],
             'mode' => ['required', new Enum(AnchorMode::class)],
             'public_url' => ['required', 'url:http,https', 'max:2048'],
+            'panel_url_override' => ['nullable', 'url:http,https', 'max:2048'],
             'relay_id' => [
                 'nullable',
                 'integer',

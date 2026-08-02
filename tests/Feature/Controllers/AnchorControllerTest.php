@@ -3,6 +3,7 @@
 use App\Enums\Anchor\AnchorCompatibility;
 use App\Models\Anchor;
 use App\Models\User;
+use App\Settings\AnchorSettings;
 
 it('issues and consumes a one-time enrollment token', function () {
     $admin = User::factory()->create(['root_admin' => true]);
@@ -69,4 +70,39 @@ it('creates agents and attaches nodes through the admin API', function () {
         ->assertJsonPath('data.nodesCount', 1)
         ->assertJsonPath('data.compatibility', 'unenrolled');
     expect($node->refresh()->anchor_id)->toBe($response->json('data.id'));
+});
+
+it('resolves the panel URL an Anchor is given from the override cascade', function () {
+    config(['app.url' => 'https://panel.example.com']);
+    $admin = User::factory()->create(['root_admin' => true]);
+    $anchor = Anchor::factory()->create(['panel_url_override' => null]);
+
+    $enrollUrl = function () use ($admin, $anchor) {
+        $anchor->refresh();
+
+        return $this->actingAs($admin)
+            ->postJson("/api/admin/anchors/{$anchor->id}/enrollment")
+            ->json('data.command');
+    };
+
+    // Nothing set: the panel's own address, as before.
+    expect($enrollUrl())->toContain('--panel-url https://panel.example.com');
+
+    // A panel-wide default covers a fleet that all needs the same address.
+    app(AnchorSettings::class)->fill(['panel_url' => 'https://panel.internal'])->save();
+    expect($enrollUrl())->toContain('--panel-url https://panel.internal');
+
+    // A single Anchor on a different network still wins over that default.
+    $anchor->update(['panel_url_override' => 'https://panel.tailnet.ts.net']);
+    expect($enrollUrl())->toContain('--panel-url https://panel.tailnet.ts.net');
+
+    // And whatever the command shows is what the agent is told to store, so
+    // the two can never disagree.
+    $token = $this->actingAs($admin)
+        ->postJson("/api/admin/anchors/{$anchor->id}/enrollment")
+        ->json('data.token');
+
+    $this->postJson('/api/anchor/enroll', ['token' => $token])
+        ->assertOk()
+        ->assertJsonPath('config.panel_url', 'https://panel.tailnet.ts.net/');
 });

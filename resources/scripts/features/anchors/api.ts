@@ -51,6 +51,8 @@ const payload = (data: z.infer<typeof anchorSchema>) => ({
     name: data.name,
     mode: data.mode,
     public_url: data.publicUrl,
+    panel_url_override:
+        data.panelUrlOverride === '' ? null : data.panelUrlOverride,
     relay_id: data.relayId === 'none' ? null : Number(data.relayId),
 })
 

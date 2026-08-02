@@ -37,7 +37,7 @@ class EnrollmentController
                 'listen_addr' => $anchor->mode === AnchorMode::AGENT ? '127.0.0.1:2115' : '0.0.0.0:2115',
                 'installation_id' => $anchor->uuid,
                 'secret' => $anchor->secret,
-                'panel_url' => rtrim(config('app.url'), '/').'/',
+                'panel_url' => $anchor->panelUrl().'/',
                 'public_url' => $anchor->public_url,
                 'agent' => ['qm_path' => '/usr/sbin/qm'],
             ],

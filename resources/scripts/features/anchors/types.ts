@@ -10,6 +10,9 @@ export const anchorSchema = z
         name: z.string().min(1).max(191),
         mode: z.enum(['agent', 'relay']),
         publicUrl: z.url(),
+        // Blank means the panel's own APP_URL, which is right for anchors
+        // that can resolve it.
+        panelUrlOverride: z.union([z.url(), z.literal('')]),
         relayId: z.string(),
     })
     .refine(data => data.mode === 'agent' || data.relayId === 'none', {
