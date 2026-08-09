@@ -9,11 +9,12 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Security
 
-- Fixed the client API resolving `{iso}` by itself rather than through the server it is nested under, which let a user
-  mount an ISO belonging to a node they have no server on. On installations where ISO storage is shared between nodes
-  (CephFS, NFS, or a directory storage using the same identifier on each node), the image's contents were then readable
-  from inside the caller's own virtual machine. Exploiting it required knowing the other ISO's UUID, which Convoy does
-  not expose to non-administrators.
+- Fixed the client API resolving `{iso}` on its own rather than through the server it is nested under, which let a mount
+  request name an ISO belonging to a node the caller has no server on. No practical exposure followed from it: an ISO is
+  addressed by UUID, and the only place Convoy shows a non-administrator an ISO's UUID is the media list for a server on
+  that ISO's own node, where mounting it is already allowed. Hidden ISOs were refused either way. The fix restores the
+  scoped route-model binding that the rest of the client API relies on to keep one server's URL from reaching another
+  server's resources.
 
 ### Fixed
 
