@@ -8,6 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Spinner from '@/components/ui/Spinner.tsx'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { Heading, Stat, StatLabel } from '@/components/ui/Typography'
 
 import NeedsAttentionCard from './NeedsAttentionCard'
@@ -132,8 +137,8 @@ const CapacityMeter = ({
 }
 
 // Lifecycle buckets only -- these partition the fleet and add up to the total. Suspension is
-// a separate axis that overlaps every one of them, so it is rendered below the list rather
-// than as another row that would appear to be competing for the same servers.
+// a separate axis that overlaps every one of them, so its row carries a note explaining why
+// it does not compete for the same servers.
 const LIFECYCLE_META: ReadonlyArray<
     [
         keyof Omit<Breakdown, 'total' | 'lifecycles' | 'suspended'>,
@@ -152,12 +157,16 @@ const StatusRow = ({
     label,
     count,
     barClass,
+    note,
 }: {
     label: string
     count: number
     barClass: string
+    /** Explanation shown on hover/focus, marked by a dotted underline. */
+    note?: string
 }) => {
     const zero = count === 0
+    const labelClass = cn('text-sm', zero && 'text-muted-foreground')
     return (
         <div className='flex items-center gap-3 border-b py-2 first:pt-0 last:border-0 last:pb-0'>
             <span
@@ -166,9 +175,23 @@ const StatusRow = ({
                     zero ? 'bg-border' : barClass
                 )}
             />
-            <span className={cn('text-sm', zero && 'text-muted-foreground')}>
-                {label}
-            </span>
+            {note ? (
+                <Tooltip>
+                    {/* A real trigger element, not `asChild` over a span, so
+                        the note is reachable by keyboard. */}
+                    <TooltipTrigger
+                        className={cn(
+                            labelClass,
+                            'cursor-help underline decoration-dotted underline-offset-4'
+                        )}
+                    >
+                        {label}
+                    </TooltipTrigger>
+                    <TooltipContent className='max-w-64'>{note}</TooltipContent>
+                </Tooltip>
+            ) : (
+                <span className={labelClass}>{label}</span>
+            )}
             <span
                 className={cn(
                     'ml-auto text-[15px] font-semibold tabular-nums',
@@ -291,37 +314,12 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
                                 barClass={barClass}
                             />
                         ))}
-                        <div className='mt-3 flex items-center gap-3 border-t pt-3'>
-                            <span
-                                className={cn(
-                                    'h-4 w-[3px] shrink-0 rounded-full',
-                                    servers.suspended === 0
-                                        ? 'bg-border'
-                                        : 'bg-destructive'
-                                )}
-                            />
-                            <span
-                                className={cn(
-                                    'text-sm',
-                                    servers.suspended === 0 &&
-                                        'text-muted-foreground'
-                                )}
-                            >
-                                Suspended
-                            </span>
-                            <span className='text-label text-xs'>
-                                also counted above
-                            </span>
-                            <span
-                                className={cn(
-                                    'ml-auto text-[15px] font-semibold tabular-nums',
-                                    servers.suspended === 0 &&
-                                        'text-muted-foreground font-normal'
-                                )}
-                            >
-                                {num(servers.suspended)}
-                            </span>
-                        </div>
+                        <StatusRow
+                            label='Suspended'
+                            count={servers.suspended}
+                            barClass='bg-destructive'
+                            note='Suspension is separate from the lifecycle, so these servers are also counted in one of the rows above.'
+                        />
                     </CardContent>
                 </Card>
 
