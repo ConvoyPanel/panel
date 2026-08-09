@@ -71,6 +71,24 @@ class Server extends Model
     }
 
     /**
+     * The ISOs this server is able to mount.
+     *
+     * ISO images live on a node (Node::isos()), not on an individual server, so
+     * this is an availability relationship rather than an ownership one: it
+     * matches on node_id at both ends instead of on a server_id column.
+     *
+     * Naming it isos() is deliberate. Scoped route-model binding resolves
+     * {iso} nested under {server} by calling Str::plural('iso') on the parent,
+     * so this relationship is what makes the /settings/hardware/isos/{iso}
+     * routes reject an ISO belonging to another node. Renaming or removing it
+     * turns those routes into a global lookup by uuid.
+     */
+    public function isos(): HasMany
+    {
+        return $this->hasMany(ISO::class, 'node_id', 'node_id');
+    }
+
+    /**
      * Returns all the activity log entries where the server is the subject.
      */
     public function activity(): MorphToMany

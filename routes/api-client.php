@@ -44,11 +44,11 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get('/hardware/isos', [Client\Servers\SettingsController::class, 'getMedia']);
         Route::post(
             '/hardware/isos/{iso}/mount', [Client\Servers\SettingsController::class, 'mountMedia'],
-        )->withoutScopedBindings();
+        );
         Route::post(
             '/hardware/isos/{iso}/unmount',
             [Client\Servers\SettingsController::class, 'unmountMedia'],
-        )->withoutScopedBindings();
+        );
 
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetworkSettings']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetworkSettings']);

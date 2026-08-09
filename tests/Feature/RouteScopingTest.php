@@ -8,26 +8,27 @@ use Illuminate\Support\Facades\Route;
  * resource from being addressed through a parent that doesn't own it.
  *
  * That guarantee is structural rather than defensive: BackupController::restore()
- * and ::destroy() never compare $backup->server_id to $server->id, and neither
- * does the service layer beneath them. Moving a nested route out of the group,
- * or hanging ->withoutScopedBindings() off it, silently turns a 404 into a
- * cross-tenant read or delete. These tests fail when that happens.
+ * and ::destroy() never compare $backup->server_id to $server->id, nor do
+ * SettingsController::mountMedia() and ::unmountMedia() compare $iso->node_id
+ * to $server->node_id, and neither does the service layer beneath any of them.
+ * Moving a nested route out of the group, or hanging ->withoutScopedBindings()
+ * off it, silently turns a 404 into a cross-tenant read, mount or delete.
+ * These tests fail when that happens.
  */
 
 /**
  * Nested routes that opt out of scoping on purpose.
  *
- * ISOs belong to a Node (Node::isos()), not a Server, so there is no
- * relationship for Laravel to scope {iso} through and the binding would throw.
- * Those two routes authorize the ISO in the controller instead.
+ * Empty, and it should stay that way. Scoping a child through its parent is
+ * cheap when the relationship exists and can be made to exist when it doesn't:
+ * ISOs hang off Node rather than Server, and Server::isos() bridges that on
+ * node_id precisely so {iso} still has something to scope through.
  *
- * Adding an entry here should be a deliberate decision with the same reasoning
- * written down, not a way to quiet a failing test.
+ * Adding an entry here means a child resource is once again addressable
+ * through a parent that has no claim to it, so it should be a deliberate
+ * decision with the reasoning written down, not a way to quiet a failing test.
  */
-$deliberateOptOuts = [
-    'api/client/servers/{server}/settings/hardware/isos/{iso}/mount',
-    'api/client/servers/{server}/settings/hardware/isos/{iso}/unmount',
-];
+$deliberateOptOuts = [];
 
 it('scopes every nested client route to its parent', function () use ($deliberateOptOuts) {
     $nested = collect(Route::getRoutes()->getRoutes())

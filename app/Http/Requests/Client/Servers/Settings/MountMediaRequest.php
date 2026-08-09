@@ -11,7 +11,9 @@ class MountMediaRequest extends BaseApiRequest
     {
         $iso = $this->parameter('iso', ISO::class);
 
-        // check if they're authorized to mount a hidden media (iso)
+        // Only the hidden flag is checked here. That the ISO belongs to the
+        // server's node is settled before this runs, by the scoped route-model
+        // binding resolving {iso} through Server::isos() — see RouteScopingTest.
         if ($iso->hidden && !$this->user()->root_admin) {
             return false;
         }

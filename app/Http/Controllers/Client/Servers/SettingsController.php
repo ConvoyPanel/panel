@@ -129,9 +129,9 @@ class SettingsController extends ApiController
     {
         $disks = $this->allocationService->getDisks($server);
         if ($request->user()->root_admin) {
-            $media = $server->node->isos()->where('is_successful', '=', true)->get()->toArray();
+            $media = $server->isos()->where('is_successful', '=', true)->get()->toArray();
         } else {
-            $media = $server->node->isos()->where(
+            $media = $server->isos()->where(
                 [['hidden', '=', false], ['is_successful', '=', true]],
             )->get()->toArray();
         }
@@ -152,6 +152,16 @@ class SettingsController extends ApiController
 
         return fractal($media, new MediaTransformer())->respond();
     }
+
+    /*
+     * Neither of these compares $iso->node_id to $server->node_id, and neither
+     * does AllocationService beneath them — it pairs the ISO's file name with
+     * the *server's* node storage. What keeps an ISO from another node out is
+     * the scoped route-model binding on the /api/client group, which resolves
+     * {iso} through Server::isos() and 404s anything else. That boundary is
+     * invisible from here, so: don't hang ->withoutScopedBindings() off these
+     * routes, and see RouteScopingTest, which fails if anyone does.
+     */
 
     public function mountMedia(MountMediaRequest $request, Server $server, ISO $iso)
     {
