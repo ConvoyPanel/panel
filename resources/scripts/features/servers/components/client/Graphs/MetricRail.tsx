@@ -119,11 +119,6 @@ const MetricRail = ({
                 and centring the two left it floating off the name's baseline. */}
             <div className='flex items-baseline gap-2'>
                 <span className='text-sm font-medium'>{metric.name}</span>
-                {live && !unavailable && (
-                    <LiveIndicator className='self-center' />
-                )}
-                {/* The same slot the live dot occupies, carrying the opposite
-                    message: this figure is a reading from the past, not now. */}
                 {!live && sampledAt && (
                     <span
                         className='text-muted-foreground ml-auto text-[11px] tabular-nums'
