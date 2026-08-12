@@ -7,7 +7,7 @@
 
     <title>{{ config('app.name', 'Convoy') }}</title>
 
-    <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.svg') }}?v=2" sizes="any" type="image/svg+xml">
 
     @if(!empty($siteConfiguration))
         <script>
