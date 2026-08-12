@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Manage virtual servers, infrastructure, networking, and backups with Convoy.">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Convoy') }}</title>
 
     <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
 
