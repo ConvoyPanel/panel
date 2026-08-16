@@ -42,7 +42,6 @@ class PasskeyController extends Controller
             passkeyJson: $request->getContent(),
             passkeyOptionsJson: $request->session()->get('passkeys.registration-options'),
             hostName: $request->getHost(),
-            additionalProperties: ['name' => 'Passkey '.now()->format('Y-m-d')],
         );
 
         if ($recoveryCodesCreated) {

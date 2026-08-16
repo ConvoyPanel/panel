@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
+use App\Support\Passkeys\AuthenticatorAaguids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\LaravelPasskeys\Models\Passkey as SpatiePasskey;
 use Webauthn\PublicKeyCredentialSource;
@@ -28,6 +29,12 @@ class Passkey extends SpatiePasskey
 {
     const UPDATED_AT = null;
 
+    /**
+     * Also the width the authenticator display names in {@see AuthenticatorAaguids} are trimmed
+     * to, so a name we assign automatically is always one a rename would accept back.
+     */
+    public const NAME_MAX_LENGTH = 40;
+
     protected $hidden = [
         'credential_id',
         'data',
@@ -37,7 +44,7 @@ class Passkey extends SpatiePasskey
      * Kept for {@see RenamePasskeyRequest}.
      */
     public static array $validationRules = [
-        'name' => 'required|string|max:40',
+        'name' => 'required|string|max:'.self::NAME_MAX_LENGTH,
     ];
 
     /**
