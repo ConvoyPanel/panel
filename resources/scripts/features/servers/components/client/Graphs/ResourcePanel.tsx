@@ -170,8 +170,9 @@ const ResourcePanel = ({ from, xTickFormatter, stampFormatter }: Props) => {
     return (
         <Card
             /* Not clipped: the readout opens past the row it belongs to, and
-               on the bottom row past the card itself. The accent stripes stop
-               short of the corner radius instead of relying on clipping. */
+               on the bottom row past the card itself. The rail cells round
+               their own outer corners instead of relying on the card to clip
+               them. */
             className='relative overflow-visible'
         >
             <div className='grid @3xl:grid-cols-[13rem_minmax(0,1fr)]'>

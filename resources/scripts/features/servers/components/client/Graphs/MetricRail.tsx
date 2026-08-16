@@ -14,8 +14,6 @@ import { formatDistanceToNowStrict } from 'date-fns'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-import LiveIndicator from './LiveIndicator.tsx'
-
 interface Props {
     metric: Metric
     server: Server | undefined
@@ -93,28 +91,18 @@ const MetricRail = ({
                    what puts air between a label and its value instead of
                    leaving them jammed together at whatever width the widest
                    row happened to be. */
-                'relative flex flex-col gap-0.5 p-3 pl-4',
-                /* The outer cells round off and clip, so the full-height
-                   accent stripe follows the card's corner instead of poking
-                   out past it. Safe to clip here in a way the card itself is
-                   not: the readout opens from the plot cell, not this one. */
+                'flex flex-col gap-0.5 p-3 pl-4',
+                /* The outer cells round off and clip, so the sparkline that
+                   bleeds to their edges follows the card's corner instead of
+                   poking out past it. Safe to clip here in a way the card
+                   itself is not: the readout opens from the plot cell, not
+                   this one. */
                 isFirst && 'overflow-hidden rounded-tl-xl',
                 isLast && 'overflow-hidden rounded-bl-xl',
                 !isLast && 'border-b',
                 '@3xl:border-r'
             )}
         >
-            {/* Ties the figure to its trace by colour without printing the
-                figure itself in the series hue. */}
-            <span
-                aria-hidden
-                /* Full height, so the four stripes butt together into one
-                   continuous edge down the card rather than four floating
-                   ticks. The cell clips them to the card's corner radius --
-                   see the rounding on the container. */
-                className='absolute inset-y-0 left-0 w-0.5'
-                style={{ background: metric.color }}
-            />
             {/* Baseline, not centre: the age is two sizes down from the name,
                 and centring the two left it floating off the name's baseline. */}
             <div className='flex items-baseline gap-2'>
@@ -215,9 +203,7 @@ const MetricRail = ({
                     color={metric.color}
                     ceiling={metric.ceiling?.(server)}
                     /* Bleeds to the cell's edges, cancelling its padding, the
-                       way the admin overview's MetricTile trend does. The
-                       accent stripe is absolutely positioned so it still
-                       paints over the left edge. */
+                       way the admin overview's MetricTile trend does. */
                     /* `w-auto` overrides the component's own `w-full`: an
                        explicit width pins the box, so the negative margins
                        would shift it left without letting it reach the right
