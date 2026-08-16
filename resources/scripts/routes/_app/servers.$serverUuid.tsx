@@ -10,6 +10,7 @@ import {
     IconNetwork,
     IconRefresh,
     IconServer,
+    IconShieldHalf,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { Suspense, lazy } from 'react'
@@ -99,6 +100,11 @@ function ServerLayout() {
                         icon: IconNetwork,
                         label: 'Networking',
                         path: `/servers/${serverUuid}/networking`,
+                    },
+                    {
+                        icon: IconShieldHalf,
+                        label: 'Firewall',
+                        path: `/servers/${serverUuid}/firewall`,
                     },
                 ],
             },
