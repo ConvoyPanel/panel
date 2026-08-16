@@ -151,6 +151,33 @@ Route::prefix('/servers/{server}')->middleware(
         );
     });
 
+    // Read and written straight through to Proxmox -- a rule's position is an
+    // index into the remote ruleset, not a Convoy model, so nothing here can
+    // be scope-bound to the server.
+    Route::prefix('/firewall')->withoutScopedBindings()->group(function () {
+        Route::get('/options', [Client\Servers\FirewallController::class, 'options']);
+        Route::put('/options', [Client\Servers\FirewallController::class, 'updateOptions']);
+
+        Route::get('/rules', [Client\Servers\FirewallController::class, 'index']);
+        Route::post('/rules', [Client\Servers\FirewallController::class, 'store']);
+        Route::put(
+            '/rules/{position}',
+            [Client\Servers\FirewallController::class, 'update'],
+        )->whereNumber('position');
+        Route::put(
+            '/rules/{position}/move',
+            [Client\Servers\FirewallController::class, 'move'],
+        )->whereNumber('position');
+        Route::delete(
+            '/rules/{position}',
+            [Client\Servers\FirewallController::class, 'destroy'],
+        )->whereNumber('position');
+
+        Route::get('/refs', [Client\Servers\FirewallController::class, 'refs']);
+        Route::get('/macros', [Client\Servers\FirewallController::class, 'macros']);
+        Route::get('/log', [Client\Servers\FirewallController::class, 'log']);
+    });
+
     Route::prefix('/settings')->group(function () {
         Route::post(
             '/rename',
