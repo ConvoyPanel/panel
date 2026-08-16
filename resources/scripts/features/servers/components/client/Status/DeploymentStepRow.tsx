@@ -9,17 +9,12 @@ import byteSize from 'byte-size'
 import { differenceInMilliseconds, intervalToDuration } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemMedia,
-    ItemTitle,
-} from '@/components/ui/Item'
 import { LinearProgressBar } from '@/components/ui/Progress'
 
 interface DeploymentStepRowProps {
     step: DeploymentStep
+    /** Drops the connector below the marker, so the rail ends with the list. */
+    isLast?: boolean
     className?: string
 }
 
@@ -36,10 +31,40 @@ const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
     'start-vm': { label: 'Starting VM' },
 }
 
-export default function DeploymentStepRow({
+/** The step's display name, for callers that need it outside a row. */
+export const stepLabel = (name: string): string =>
+    STEP_MAPPINGS[name]?.label ?? name
+
+/** Whether this step reports its progress in bytes rather than as a count. */
+export const stepIsBytes = (name: string): boolean =>
+    STEP_MAPPINGS[name]?.isBytes === true
+
+export const formatStepDuration = (start: Date, end: Date): string => {
+    const actualEnd = end < start ? start : end
+    const duration = intervalToDuration({ start, end: actualEnd })
+    const ms = differenceInMilliseconds(actualEnd, start)
+    const seconds = (ms / 1000) % 60
+
+    const parts = []
+    if (duration.hours) parts.push(`${duration.hours}h`)
+    if (duration.minutes) parts.push(`${duration.minutes}m`)
+    if (seconds > 0 || parts.length === 0) {
+        parts.push(`${seconds.toFixed(1)}s`)
+    }
+
+    return parts.join(' ')
+}
+
+/**
+ * One step on the deployment's rail. The connector is anchored to the marker
+ * column rather than given a fixed height, so it spans whatever height the row
+ * grows to — a running step with a progress bar under it included.
+ */
+const DeploymentStepRow = ({
     step,
+    isLast,
     className,
-}: DeploymentStepRowProps) {
+}: DeploymentStepRowProps) => {
     const mapping = STEP_MAPPINGS[step.name] || { label: step.name }
 
     const isPending = step.status === DeploymentStatus.Pending
@@ -60,22 +85,6 @@ export default function DeploymentStepRow({
         return () => clearInterval(interval)
     }, [isRunning])
 
-    const formatStepDuration = (start: Date, end: Date) => {
-        const actualEnd = end < start ? start : end
-        const duration = intervalToDuration({ start, end: actualEnd })
-        const ms = differenceInMilliseconds(actualEnd, start)
-        const seconds = (ms / 1000) % 60
-
-        const parts = []
-        if (duration.hours) parts.push(`${duration.hours}h`)
-        if (duration.minutes) parts.push(`${duration.minutes}m`)
-        if (seconds > 0 || parts.length === 0) {
-            parts.push(`${seconds.toFixed(1)}s`)
-        }
-
-        return parts.join(' ')
-    }
-
     const progressPercent =
         step.progressTotal > 0
             ? Math.round((step.progressCurrent / step.progressTotal) * 100)
@@ -91,59 +100,94 @@ export default function DeploymentStepRow({
     }
 
     return (
-        <Item
-            role={'listitem'}
-            variant={'muted'}
-            size={'sm'}
-            className={cn(isPending && 'opacity-50', className)}
+        <li
+            className={cn(
+                'grid grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-3 py-2',
+                className
+            )}
         >
-            <ItemMedia variant={'icon'}>
-                {isPending && (
-                    <div className='bg-muted-foreground size-2 rounded-full' />
+            <span
+                className={cn(
+                    'relative flex w-5 justify-center self-stretch',
+                    isCompleted && 'text-success',
+                    isRunning && 'text-primary',
+                    isFailed && 'text-destructive',
+                    isPending && 'text-muted-foreground'
                 )}
-                {isRunning && (
-                    <IconLoader className='text-primary animate-spin' />
-                )}
-                {isCompleted && <IconCheck className='text-green-500' />}
-                {isFailed && <IconX className='text-destructive' />}
-            </ItemMedia>
-            <ItemContent className={'min-w-0'}>
-                <ItemTitle>{mapping.label}</ItemTitle>
-                {isDeterminate && isRunning && (
-                    <LinearProgressBar
-                        value={progressPercent}
-                        className='h-1.5'
+            >
+                <span className={'flex h-5 items-center'}>
+                    {isPending && (
+                        <span
+                            className={
+                                'border-input size-2.5 rounded-full border-[1.5px]'
+                            }
+                        />
+                    )}
+                    {isRunning && (
+                        <IconLoader className={'size-4 animate-spin'} />
+                    )}
+                    {isCompleted && <IconCheck className={'size-4'} />}
+                    {isFailed && <IconX className={'size-4'} />}
+                </span>
+                {!isLast && (
+                    <span
+                        className={cn(
+                            // -bottom-4 clears both this row's bottom padding
+                            // and the next row's top padding (py-2 each), so
+                            // the rail is continuous rather than a tick.
+                            'absolute top-5 -bottom-4 left-1/2 w-px -translate-x-1/2',
+                            isCompleted ? 'bg-success/40' : 'bg-border'
+                        )}
                     />
                 )}
-                {isFailed && (step.errorCode || step.errorMessage) && (
-                    <div className='text-destructive text-xs'>
-                        {step.errorCode && (
-                            <span className='font-mono font-bold'>
-                                {step.errorCode}:{' '}
-                            </span>
-                        )}
-                        {step.errorMessage}
+            </span>
+
+            <span
+                className={cn(
+                    'text-sm/5',
+                    isRunning && 'font-medium',
+                    isPending && 'text-muted-foreground'
+                )}
+            >
+                {mapping.label}
+            </span>
+
+            <span
+                className={
+                    'text-muted-foreground text-right font-mono text-xs/5 tabular-nums'
+                }
+            >
+                {isRunning &&
+                    step.startedAt &&
+                    formatStepDuration(step.startedAt, now)}
+                {isCompleted &&
+                    step.startedAt &&
+                    step.completedAt &&
+                    formatStepDuration(step.startedAt, step.completedAt)}
+            </span>
+
+            {isDeterminate && isRunning && (
+                <div
+                    className={
+                        'col-start-2 col-end-4 flex flex-col gap-1.5 pt-1.5'
+                    }
+                >
+                    <LinearProgressBar
+                        value={progressPercent}
+                        className={'bg-muted h-1'}
+                    />
+                    <div
+                        className={
+                            'text-muted-foreground flex justify-between gap-4 font-mono text-xs tabular-nums'
+                        }
+                    >
+                        <span>{formatProgress()}</span>
+                        <span>{progressPercent}%</span>
                     </div>
-                )}
-            </ItemContent>
-            <ItemActions className={'flex-col items-end gap-0'}>
-                {step.startedAt && (
-                    <span className='text-muted-foreground text-right font-mono text-xs'>
-                        {isRunning && formatStepDuration(step.startedAt, now)}
-                        {isCompleted &&
-                            step.completedAt &&
-                            formatStepDuration(
-                                step.startedAt,
-                                step.completedAt
-                            )}
-                    </span>
-                )}
-                {isDeterminate && isRunning && (
-                    <span className='text-muted-foreground text-right font-mono text-xs'>
-                        {formatProgress()}
-                    </span>
-                )}
-            </ItemActions>
-        </Item>
+                </div>
+            )}
+        </li>
     )
 }
+
+export default DeploymentStepRow

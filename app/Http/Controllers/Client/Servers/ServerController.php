@@ -52,9 +52,18 @@ class ServerController
 
         if ($server->lifecycle === ServerLifecycle::INSTALL_FAILED) {
             $query->where('status', DeploymentStatus::FAILED);
-        } else {
-            $query->nonCompleted();
         }
+
+        // Deliberately no `nonCompleted()` filter on the running branch. A
+        // deployment's terminal status and the server lifecycle it implies are
+        // written in one transaction (ManagesDeploymentLifecycle::onComplete),
+        // so scoping this to in-flight deployments meant the completed one was
+        // never servable: the last poll before the commit still showed a step
+        // running, and every poll after it 204'd. The progress screen could
+        // therefore never show the finish — the one moment worth watching — and
+        // instead emptied itself out while it waited to be replaced. The only
+        // caller is that screen, and it renders solely for a server whose
+        // lifecycle is transient, so "the latest deployment" is what it wants.
 
         $deployment = $query->with(['template', 'steps'])->first();
 

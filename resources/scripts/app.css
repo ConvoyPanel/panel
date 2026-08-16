@@ -39,6 +39,11 @@
         --destructive: oklch(0.577 0.245 27.325);
         --destructive-foreground: oklch(0.985 0 0);
 
+        /* The other half of destructive: "this finished, and it went well".
+           Deployment steps drew it as a hardcoded text-green-500, which is
+           the one status colour on those screens that never had a token. */
+        --success: oklch(0.596 0.145 163.2);
+
         --border: oklch(0.93 0.007 106.5);
         --input: oklch(0.93 0.007 106.5);
         --ring: oklch(0.737 0.021 106.9);
@@ -109,6 +114,8 @@
 
         --destructive: oklch(0.704 0.191 22.216);
         --destructive-foreground: oklch(0.985 0 0);
+
+        --success: oklch(0.696 0.146 162.5);
 
         --border: oklch(1 0 0 / 10%);
         --input: oklch(1 0 0 / 15%);
@@ -275,6 +282,42 @@
         .animate-nav-in-back,
         .animate-nav-out,
         .animate-nav-out-back {
+            animation: none;
+        }
+    }
+
+    /*
+     * The install screen's indeterminate sweep. One sliver crosses the whole
+     * segmented row — a sliver clipped inside each segment would shrink to
+     * nothing at every boundary and swell again on the other side — but the
+     * gaps between segments still have to read as gaps, so the sliver is
+     * masked with the row's own geometry: four equal segments separated by the
+     * row's gap, which is what `flex-1` + `gap-1.5` lays down underneath.
+     *
+     * The mask goes on a full-row layer rather than on the sliver itself:
+     * percentages in the gradient resolve against the element they are painted
+     * on, and the sliver is only a fifth of the row wide.
+     */
+    .pip-sweep-mask {
+        --pip-gap: 0.375rem;
+        --pip-segment: calc((100% - 3 * var(--pip-gap)) / 4);
+
+        -webkit-mask-image: repeating-linear-gradient(
+            to right,
+            #000 0 var(--pip-segment),
+            transparent var(--pip-segment)
+                calc(var(--pip-segment) + var(--pip-gap))
+        );
+        mask-image: repeating-linear-gradient(
+            to right,
+            #000 0 var(--pip-segment),
+            transparent var(--pip-segment)
+                calc(var(--pip-segment) + var(--pip-gap))
+        );
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-pip-sweep {
             animation: none;
         }
     }

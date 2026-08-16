@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Client\Servers\Settings;
 
+use App\Auth\IdentityConfirmation;
 use App\Enums\Server\ServerLifecycle;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Server;
@@ -9,6 +10,7 @@ use App\Models\Template;
 use App\Rules\TemplateFitsStorage;
 use App\Rules\TemplateIsAvailable;
 use Illuminate\Validation\Validator;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ReinstallServerRequest extends BaseApiRequest
 {
@@ -23,6 +25,15 @@ class ReinstallServerRequest extends BaseApiRequest
         // has to reach it), so the suspension check has to happen here or not at all.
         if ($server->isSuspended()) {
             return false;
+        }
+
+        // Rebuilding a live server destroys its disk, so it gets the same identity gate as
+        // the other irreversible acts (setting a root password, minting a token) rather than
+        // trusting a live cookie alone. The gate is on the rebuild branch only: a server in
+        // DEFERRED_OS_SELECTION has nothing to erase, and gating its first install would
+        // stop a brand-new account from reaching a usable server at all.
+        if ($server->isReady() && ! IdentityConfirmation::isConfirmed($this->session())) {
+            throw new AccessDeniedHttpException('Your identity must be confirmed to rebuild a server.');
         }
 
         return $server->isReady() || $server->lifecycle === ServerLifecycle::DEFERRED_OS_SELECTION;

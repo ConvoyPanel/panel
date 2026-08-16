@@ -43,7 +43,12 @@ trait ManagesDeploymentLifecycle
                     'status' => DeploymentStatus::FAILED,
                     'completed_at' => now(),
                 ]);
-                $deployment->server->update(['status' => $serverStatus]);
+                // `lifecycle`, not `status`: there is no `status` column on
+                // servers, so this threw inside the chain's catch callback and
+                // the failure was never recorded — the deployment stayed
+                // running and the server sat in `installing` forever, with the
+                // install screen up and no way off it but a rebuild.
+                $deployment->server->update(['lifecycle' => $serverStatus]);
             });
         };
     }

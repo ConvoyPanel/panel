@@ -21,11 +21,15 @@ import {
 } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { z } from 'zod'
 
 import { type DataResponse, apiFetch } from '@/lib/api'
 import { queryClient } from '@/lib/query-client.ts'
 import { rawDataToAddress } from '@/lib/transformers/address.ts'
-import { rawDataToServerTimepointData } from '@/lib/transformers/server.ts'
+import {
+    rawDataToServer,
+    rawDataToServerTimepointData,
+} from '@/lib/transformers/server.ts'
 import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
 
 export type TimeRange = 'hour' | 'day' | 'week' | 'month' | 'year'
@@ -38,42 +42,44 @@ export interface ReinstallServerRequest {
     startOnCompletion?: boolean
 }
 
+/**
+ * `templateGroupUuid` is not sent — the API only takes the template — but it
+ * lives in the form so the group choice is validated and can drive which
+ * versions are offered. Length bounds mirror ReinstallServerRequest
+ * (`min:8`, `max:191`); there are deliberately no composition rules, for the
+ * reasons in `utils/password.ts`.
+ */
+export const reinstallServerSchema = z
+    .object({
+        templateGroupUuid: z
+            .string()
+            .min(1, 'Please select an operating system'),
+        templateUuid: z.string().min(1, 'Please select a version'),
+        accountPassword: z
+            .string()
+            .min(8, 'Password must be at least 8 characters')
+            .max(191, 'Password must be at most 191 characters'),
+        accountPasswordConfirmation: z
+            .string()
+            .min(1, 'Please confirm the password'),
+        startOnCompletion: z.boolean(),
+    })
+    .refine(data => data.accountPassword === data.accountPasswordConfirmation, {
+        message: "Passwords don't match",
+        path: ['accountPasswordConfirmation'],
+    })
+
+export type ReinstallServerInput = z.infer<typeof reinstallServerSchema>
+
 export const getServer = async (uuid: string): Promise<Server> => {
     const { data } = await apiFetch<DataResponse<any>>(
         ServerController.show(uuid)
     )
 
-    return {
-        id: data.id,
-        uuid: data.uuid,
-        uuidShort: data.uuidShort,
-        nodeId: data.nodeId,
-        networkInterfaceId: data.networkInterfaceId,
-        node: undefined,
-        userId: data.userId,
-        vmid: data.vmid,
-        hostname: data.hostname,
-        name: data.name,
-        description: data.description,
-        lifecycle: data.lifecycle,
-        suspendedAt: data.suspendedAt ?? null,
-        powerState: data.powerState ?? null,
-        cpu: data.cpu,
-        memory: data.memory,
-        disk: data.disk,
-        backup: {
-            countLimit: data.backupCountLimit,
-            sizeLimit: data.backupSizeLimit,
-        },
-        bandwidth: {
-            usage: data.bandwidthUsage,
-            limit: data.bandwidthLimit,
-            speedLimit: data.speedLimit,
-            overagePenalty: data.overagePenalty,
-        },
-        vlanTag: data.vlanTag,
-        createdAt: new Date(data.createdAt),
-    }
+    // The client show endpoint doesn't load the node relation, so the shared
+    // transformer's `node` branch resolves to undefined on its own — this was a
+    // verbatim second copy of it, and every new server field had to be added twice.
+    return rawDataToServer(data)
 }
 
 export const getState = async (uuid: string): Promise<ServerStateData> => {
@@ -141,6 +147,12 @@ export const getServerDeployment = async (
             id: step.id,
             name: step.name,
             status: step.status,
+            // DeploymentStepData sends both of these; dropping them here is
+            // what kept `progressMode === 'determinate'` from ever being true,
+            // so the one step that reports real byte progress (clone) drew no
+            // bar at all. `sequence` is the step order the backend assigned.
+            progressMode: step.progressMode,
+            sequence: step.sequence,
             progressCurrent: step.progressCurrent,
             progressTotal: step.progressTotal,
             startedAt: step.startedAt ? new Date(step.startedAt) : null,
@@ -324,7 +336,9 @@ export const sendPowerCommand = async (
     uuid: string,
     command: PowerAction
 ): Promise<void> => {
-    await apiFetch(ServerController.sendPowerCommand(uuid), { body: { command } })
+    await apiFetch(ServerController.sendPowerCommand(uuid), {
+        body: { command },
+    })
 }
 
 export const reinstallServer = async (
