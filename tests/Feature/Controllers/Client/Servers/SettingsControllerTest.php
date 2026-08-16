@@ -141,3 +141,22 @@ it('can\'t unmount an ISO from a node the user\'s server is not on', function ()
 
     $response->assertStatus(403);
 });
+
+it('returns the boot order as bare arrays', function () {
+    // Nested DataCollections inherit the global `data` wrap, which would hand the
+    // client {"data": [...]} where it expects a list to iterate over.
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->getJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/boot-order",
+    );
+
+    $response->assertOk()
+        ->assertJsonPath('data.bootOrder.0.interface', 'sata0')
+        ->assertJsonPath('data.unusedDevices.0.interface', 'ide0');
+
+    expect($response->json('data.bootOrder'))->toBeList()
+        ->and($response->json('data.unusedDevices'))->toBeList();
+});

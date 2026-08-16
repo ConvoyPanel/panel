@@ -305,7 +305,8 @@ class ServerConfigData extends Data
                     return $disk->getFullIdentifier() === $diskId;
                 });
             })
-            ->filter(); // Remove any null values (disks that weren't found)
+            ->filter() // Remove any null values (disks that weren't found)
+            ->values(); // Reindex so this serialises as a JSON array, not an object
 
         return new self(
             description                       : $get('description'),

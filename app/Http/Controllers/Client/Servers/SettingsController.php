@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Client\Servers;
 
 use App\Actions\Server\RebuildServerAction;
 use App\Data\Server\BootOrderData;
-use App\Data\Server\Proxmox\Config\DiskData;
 use App\Data\Server\RenamedServerData;
 use App\Data\Server\ServerNetworkSettingsData;
 use App\Data\Server\ServerSecuritySettingsData;
@@ -97,17 +96,16 @@ class SettingsController
     {
         $availableDevices = $this->allocationService->getDisks($server);
         $configuredDevices = $this->allocationService->getBootOrder($server);
-        $unconfiguredDevices = [];
 
-        foreach ($availableDevices as $device) {
-            if ($configuredDevices->where('interface', '=', $device->interface)->first() === null) {
-                array_push($unconfiguredDevices, $device);
-            }
-        }
+        $unconfiguredDevices = $availableDevices
+            ->filter(fn ($device) => $configuredDevices
+                ->where('interface', '=', $device->interface)
+                ->first() === null)
+            ->values();
 
         return new BootOrderData(
-            unusedDevices: DiskData::collect($unconfiguredDevices, DataCollection::class),
-            bootOrder: DiskData::collect($configuredDevices, DataCollection::class),
+            unusedDevices: $unconfiguredDevices,
+            bootOrder: $configuredDevices->values(),
         );
     }
 
