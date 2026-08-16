@@ -17,6 +17,14 @@ class ServerFirewallService
     /**
      * Automatically configures the firewall options for IP address management.
      *
+     * Deliberately limited to the two options the platform guarantees: the
+     * firewall being on at all, and ipfilter, which is what makes the
+     * per-interface anti-spoof ipsets below actually bind. The default
+     * policies are NOT set here -- they belong to the user, and this method
+     * runs on every network sync (address changes, rebuilds, VM syncs), so
+     * writing them would silently revert a user's default-deny posture the
+     * next time any of those happened.
+     *
      * @throws RequestException
      */
     public function configureFirewall(Server $server): void
@@ -24,8 +32,6 @@ class ServerFirewallService
         $this->firewallClient->setServer($server)->updateOptions([
             'enable' => true,
             'ipfilter' => true,
-            'policy_in' => 'ACCEPT',
-            'policy_out' => 'ACCEPT',
         ]);
     }
 
