@@ -1,15 +1,18 @@
 import { useServer } from '@/features/servers/detail/api.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
+import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { cn } from '@/utils'
 import RFB from '@novnc/novnc'
 import {
     IconArrowLeft,
     IconArrowsMaximize,
     IconArrowsMinimize,
+    IconDeviceDesktop,
     IconKeyboard,
     IconRefresh,
     IconZoomIn,
 } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
@@ -26,7 +29,13 @@ import {
     TooltipTrigger,
 } from '@/components/ui/Tooltip'
 
-import { type ConsoleType, createConsoleSession } from './api'
+import {
+    type ConsoleType,
+    type DisplayConsole,
+    createConsoleSession,
+    enableDisplayConsole,
+    useDisplayConsole,
+} from './api'
 
 const protocols = (token: string) => ['anchor.v1', `anchor.session.${token}`]
 
@@ -130,10 +139,48 @@ const tapKeys = [
 // A serial console can only attach to a serial device the VM actually has, with
 // something listening on it inside the guest. Both are invisible from here, so
 // the terminal fails by going quiet — say what to check rather than spin.
-const hints: Record<ConsoleType, string> = {
-    novnc: 'The server may be powered off, or the node may be unreachable.',
-    xtermjs:
-        'A serial console needs a serial device on the VM (serial0) and a login prompt bound to it inside the guest. The display console does not.',
+const serialHint =
+    'A serial console needs a serial device on the VM (serial0) and a login prompt bound to it inside the guest. The display console does not.'
+
+// The display console has no equivalent prerequisite — every VM has a VGA
+// device — so once the agent has accepted the session, all that is left is the
+// RFB handshake, and noVNC keeps its own account of that.
+const displayHint =
+    'The agent accepted the session but the VNC handshake never finished, which usually means the one-time password was refused. noVNC logs the step it stopped on to the browser console.'
+
+/** How a console's WebSocket ended, as far as the browser can tell. */
+type Closure = { code: number; reason: string }
+
+/** The address the browser itself has to reach, named so it can be checked. */
+const agentHost = (url: string) => {
+    try {
+        return new URL(url).host
+    } catch {
+        return url
+    }
+}
+
+/**
+ * Whether the agent answers this browser at all.
+ *
+ * A WebSocket that never opens cannot say why: a refused upgrade, a certificate
+ * the browser will not trust and a host that does not resolve all arrive as the
+ * same empty failure. An ordinary request to the agent's health endpoint tells
+ * them apart — the response is opaque without CORS, but whether one arrives is
+ * the entire question.
+ */
+const reachable = async (url: string) => {
+    try {
+        const health = new URL(url)
+        health.protocol = health.protocol === 'wss:' ? 'https:' : 'http:'
+        health.pathname = '/health'
+        health.search = ''
+        await fetch(health, { mode: 'no-cors', cache: 'no-store' })
+
+        return true
+    } catch {
+        return false
+    }
 }
 
 const ConsoleView = ({
@@ -159,6 +206,23 @@ const ConsoleView = ({
     // the clipboard without a gesture, so a button can finish the job.
     const [guestClipboard, setGuestClipboard] = useState('')
     const { copy } = useClipboard({ successMessage: 'Copied from the server' })
+    // Reaches the node, so it is only asked once this console has actually
+    // failed — a working console has already proven the answer.
+    const { data: displayStatus } = useDisplayConsole(
+        serverUuid,
+        type === 'novnc' && failure !== null
+    )
+    const refreshDisplay = useQueryMutator<DisplayConsole>([
+        'servers',
+        serverUuid,
+        'display-console',
+    ])
+    const { mutate: enableDisplay, isPending: enablingDisplay } = useMutation({
+        mutationFn: () => enableDisplayConsole(serverUuid),
+        onSuccess: status => refreshDisplay(() => status),
+        onError: () =>
+            toast.add({ title: 'Could not change the display', type: 'error' }),
+    })
     useEffect(() => {
         let disposed = false
         let terminal: Terminal | undefined
@@ -179,10 +243,82 @@ const ConsoleView = ({
             if (disposed || !target.current) return
             target.current.replaceChildren()
 
-            if (type === 'novnc') {
-                const rfb = new RFB(target.current, session.url, {
-                    wsProtocols: protocols(session.token),
+            const host = agentHost(session.url)
+
+            // A browser refuses an insecure socket from a secure page before it
+            // sends anything, so nothing further down would ever get to explain
+            // it. This is a property of the Anchor's address, not a fault.
+            if (
+                window.location.protocol === 'https:' &&
+                session.url.startsWith('ws:')
+            ) {
+                fail({
+                    message: `The panel is served over HTTPS, so this browser will not open an insecure console connection to ${host}. Give this Anchor an https:// public URL.`,
                 })
+
+                return
+            }
+
+            // noVNC would open this itself, but it reports a disconnect as a
+            // bare boolean, so the agent's close frame — the one thing that
+            // says why a session died — never reaches the panel. Opening it
+            // here and handing RFB the socket (noVNC accepts one in place of a
+            // URL) keeps that diagnostic on the display console too.
+            const socket = new WebSocket(session.url, protocols(session.token))
+            socket.binaryType = 'arraybuffer'
+            // Whether the upgrade ever succeeded, and what the peer said on the
+            // way out. Added as listeners rather than as `on*` handlers, which
+            // RFB assigns for itself when it attaches.
+            let opened = false
+            let closure: Closure | null = null
+            socket.addEventListener('open', () => {
+                opened = true
+            })
+            socket.addEventListener('close', event => {
+                closure = { code: event.code, reason: event.reason.trim() }
+            })
+
+            /** Explain a console that never carried anything. */
+            const failToStart = () => {
+                // The agent ends every session with a close frame carrying its
+                // own diagnostic — whatever `qm` reported, or which VM it could
+                // not find. Where there is one, nothing we could infer beats it.
+                if (closure?.reason) {
+                    fail({ message: closure.reason, code: closure.code })
+
+                    return
+                }
+
+                if (opened) {
+                    fail({
+                        message: type === 'novnc' ? displayHint : serialHint,
+                        code: closure?.code,
+                    })
+
+                    return
+                }
+
+                // The socket never opened, so nothing on the node was ever even
+                // asked about the VM: whatever is wrong sits between this
+                // browser and the agent's address. The panel reaches the agent
+                // over its own path and cannot vouch for that one, so probe it
+                // from here and say which half is actually broken.
+                fail({
+                    message: `The browser could not open a console connection to ${host}.`,
+                    code: closure?.code,
+                })
+                void reachable(session.url).then(answered =>
+                    fail({
+                        message: answered
+                            ? `${host} answered this browser but refused the console session. The panel and the agent may no longer share a secret, or the session may have expired before it was used.`
+                            : `${host} could not be reached from this browser. The agent has to be reachable from here, not only from the panel, with a certificate this browser already trusts.`,
+                        code: closure?.code,
+                    })
+                )
+            }
+
+            if (type === 'novnc') {
+                const rfb = new RFB(target.current, socket)
                 rfb.scaleViewport = true
                 rfb.resizeSession = true
                 rfb.background = 'rgb(9 9 11)'
@@ -218,14 +354,19 @@ const ConsoleView = ({
                 })
                 rfb.addEventListener('disconnect', () => {
                     setConnected(false)
-                    fail(
-                        established
-                            ? {
-                                  message: 'The display console disconnected.',
-                                  keepOutput: true,
-                              }
-                            : { message: hints.novnc }
-                    )
+                    if (!established) {
+                        failToStart()
+
+                        return
+                    }
+
+                    fail({
+                        message:
+                            closure?.reason ||
+                            'The display console disconnected.',
+                        code: closure?.code,
+                        keepOutput: true,
+                    })
                 })
                 connection.current = rfb
             } else {
@@ -246,16 +387,11 @@ const ConsoleView = ({
                 // Typing should work the moment the console opens; having to
                 // click a black rectangle first reads as a dead page.
                 terminal.focus()
-                const socket = new WebSocket(
-                    session.url,
-                    protocols(session.token)
-                )
-                socket.binaryType = 'arraybuffer'
                 // NOT proof the console works: the agent upgrades the socket
                 // and only then spawns the console process, so this fires even
                 // when that process is about to fail. Only bytes off the wire
                 // prove there is a console on the other end.
-                socket.onopen = () => {
+                socket.addEventListener('open', () => {
                     setConnected(true)
                     // A serial console is legitimately silent until something
                     // in the guest writes to it, so a blank screen is not
@@ -265,40 +401,35 @@ const ConsoleView = ({
                     terminal?.writeln(
                         '\x1b[2mConnected. This screen stays blank until the server writes to the serial port; press Enter to prompt it.\x1b[0m'
                     )
-                }
-                socket.onmessage = event => {
+                })
+                socket.addEventListener('message', event => {
                     established = true
                     terminal?.write(
                         event.data instanceof ArrayBuffer
                             ? new Uint8Array(event.data)
                             : event.data
                     )
-                }
-                socket.onclose = event => {
+                })
+                socket.addEventListener('close', event => {
                     setConnected(false)
+                    if (!established) {
+                        failToStart()
+
+                        return
+                    }
+
                     // The agent puts the console process's own diagnostic in
                     // the close reason; nothing we could infer beats that. An
                     // older agent sends none, so fall back to what the close
                     // frame itself says rather than to a shrug.
-                    const detail = event.reason.trim()
-                    if (detail !== '')
-                        fail({
-                            message: detail,
-                            code: event.code,
-                            keepOutput: established,
-                        })
-                    else if (established)
-                        fail({
-                            message:
-                                'The console ended without saying why. Its last output is below.',
-                            code: event.code,
-                            keepOutput: true,
-                        })
-                    else fail({ message: hints.xtermjs, code: event.code })
-                }
-                socket.onerror = () => {
-                    if (!established) fail({ message: hints.xtermjs })
-                }
+                    fail({
+                        message:
+                            event.reason.trim() ||
+                            'The console ended without saying why. Its last output is below.',
+                        code: event.code,
+                        keepOutput: true,
+                    })
+                })
                 terminal.onData(
                     data =>
                         socket.readyState === WebSocket.OPEN &&
@@ -442,6 +573,35 @@ const ConsoleView = ({
             <IconRefresh />
             Try again
         </Button>
+    )
+
+    // Proxmox refuses a display console on a VM whose display is a serial
+    // terminal, and its wording ("No VNC display is present") names neither the
+    // setting responsible nor what to do about it. Retrying will never help, so
+    // put the fix on the failure itself rather than leaving it in the picker.
+    const noDisplay =
+        type === 'novnc' &&
+        displayStatus !== undefined &&
+        !displayStatus.enabled
+    const displayFix = noDisplay && (
+        <div className='flex flex-col items-center gap-3 rounded-md border border-white/10 bg-zinc-900/60 p-3'>
+            <p className='text-sm text-zinc-300'>
+                {displayStatus.restartRequired
+                    ? `${server?.name ?? 'This server'} has a display from its next boot onwards. Restart it to use this console.`
+                    : `This server's display is set to ${displayStatus.display}, so there is no screen to show. Giving it one takes a restart, and leaves the serial console as it is.`}
+            </p>
+            {!displayStatus.restartRequired && (
+                <Button
+                    variant='outline'
+                    className='shrink-0 border-white/15 bg-transparent text-zinc-200 hover:bg-zinc-800 hover:text-white'
+                    loading={enablingDisplay}
+                    onClick={() => enableDisplay()}
+                >
+                    <IconDeviceDesktop />
+                    Enable display output
+                </Button>
+            )}
+        </div>
     )
 
     // When the console named its own failure this adds nothing, but when it
@@ -595,6 +755,7 @@ const ConsoleView = ({
                                     {failure.message}
                                 </p>
                                 {closeNote}
+                                {displayFix}
                                 {retry}
                             </div>
                         ) : (

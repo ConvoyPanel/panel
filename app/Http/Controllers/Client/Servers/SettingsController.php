@@ -23,6 +23,7 @@ use App\Models\Template;
 use App\Models\TemplateGroup;
 use App\Services\Servers\AllocationService;
 use App\Services\Servers\CloudinitService;
+use App\Services\Servers\DisplayConsoleService;
 use App\Services\Servers\SerialConsoleService;
 use App\Services\Servers\ServerAuthService;
 use Illuminate\Database\ConnectionInterface;
@@ -39,6 +40,7 @@ class SettingsController
         private RebuildServerAction $rebuildServerAction,
         private AllocationService $allocationService,
         private SerialConsoleService $serialConsoleService,
+        private DisplayConsoleService $displayConsoleService,
     ) {}
 
     public function rename(RenameServerRequest $request, Server $server)
@@ -124,6 +126,16 @@ class SettingsController
     public function enableSerialConsole(Server $server)
     {
         return $this->serialConsoleService->enable($server);
+    }
+
+    public function getDisplayConsole(Server $server)
+    {
+        return $this->displayConsoleService->status($server);
+    }
+
+    public function enableDisplayConsole(Server $server)
+    {
+        return $this->displayConsoleService->enable($server);
     }
 
     public function getMedia(Request $request, Server $server)

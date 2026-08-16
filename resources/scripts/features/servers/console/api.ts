@@ -7,6 +7,7 @@ import { type DataResponse, apiFetch } from '@/lib/api'
 export type ConsoleType = 'novnc' | 'xtermjs'
 export type ConsoleSession = App.Data.Server.ConsoleSessionData
 export type SerialConsole = App.Data.Server.SerialConsoleData
+export type DisplayConsole = App.Data.Server.DisplayConsoleData
 
 export const createConsoleSession = async (
     server: string,
@@ -35,6 +36,24 @@ export const enableSerialConsole = async (
         )
     ).data
 
+export const getDisplayConsole = async (
+    uuid: string
+): Promise<DisplayConsole> =>
+    (
+        await apiFetch<DataResponse<DisplayConsole>>(
+            SettingsController.getDisplayConsole(uuid)
+        )
+    ).data
+
+export const enableDisplayConsole = async (
+    uuid: string
+): Promise<DisplayConsole> =>
+    (
+        await apiFetch<DataResponse<DisplayConsole>>(
+            SettingsController.enableDisplayConsole(uuid)
+        )
+    ).data
+
 export const consoleQueries = {
     serial: (uuid: string) =>
         queryOptions({
@@ -45,7 +64,17 @@ export const consoleQueries = {
             staleTime: 60_000,
             retry: false,
         }),
+    display: (uuid: string) =>
+        queryOptions({
+            queryKey: ['servers', uuid, 'display-console'] as const,
+            queryFn: () => getDisplayConsole(uuid),
+            staleTime: 60_000,
+            retry: false,
+        }),
 }
 
 export const useSerialConsole = (uuid: string, enabled = true) =>
     useQuery({ ...consoleQueries.serial(uuid), enabled })
+
+export const useDisplayConsole = (uuid: string, enabled = true) =>
+    useQuery({ ...consoleQueries.display(uuid), enabled })

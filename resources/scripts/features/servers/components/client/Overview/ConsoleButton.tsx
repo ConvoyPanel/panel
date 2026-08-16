@@ -1,7 +1,10 @@
 import {
     type ConsoleType,
+    type DisplayConsole,
     type SerialConsole,
+    enableDisplayConsole,
     enableSerialConsole,
+    useDisplayConsole,
     useSerialConsole,
 } from '@/features/servers/console/api'
 import useConsoleType from '@/features/servers/console/use-console-type.ts'
@@ -246,6 +249,12 @@ const ConsoleControls = ({ server }: { server: Server }) => {
                                             open={picking}
                                         />
                                     )}
+                                    {type === 'novnc' && (
+                                        <DisplayOutputNotice
+                                            server={server}
+                                            open={picking}
+                                        />
+                                    )}
                                 </div>
                             )
                         )}
@@ -326,6 +335,75 @@ const SerialDeviceNotice = ({
                         onClick={() => mutate()}
                     >
                         Add serial device
+                    </Button>
+                </>
+            )}
+        </div>
+    )
+}
+
+/**
+ * The display console's counterpart to a missing serial device.
+ *
+ * A VM whose display is a serial terminal — the standard recipe for cloud
+ * images — is started with `-nographic`, so QEMU has no VNC server and Proxmox
+ * refuses the session with "No VNC display is present". Nothing about that
+ * names the setting responsible, so say it here and offer to change it; PVE
+ * cannot change a running VM's display, so this too costs a restart.
+ */
+const DisplayOutputNotice = ({
+    server,
+    open,
+}: {
+    server: Server
+    open: boolean
+}) => {
+    const { data: display, isPending } = useDisplayConsole(server.uuid, open)
+    const refresh = useQueryMutator<DisplayConsole>([
+        'servers',
+        server.uuid,
+        'display-console',
+    ])
+
+    const { mutate, isPending: enabling } = useMutation({
+        mutationFn: () => enableDisplayConsole(server.uuid),
+        onSuccess: status => refresh(() => status),
+        onError: () =>
+            toast.add({
+                title: 'Could not change the display',
+                type: 'error',
+            }),
+    })
+
+    if (isPending || !display || display.enabled) return null
+
+    return (
+        <div
+            className={
+                'text-muted-foreground border-border ml-2 flex flex-col gap-2 border-l pl-3 text-xs'
+            }
+        >
+            {display.restartRequired ? (
+                <p>
+                    The display is set but only takes effect once the server
+                    boots. Restart {server.name} to finish enabling it.
+                </p>
+            ) : (
+                <>
+                    <p>
+                        This server's display is set to{' '}
+                        <code>{display.display}</code>, so it has no screen for
+                        the display console to show. Giving it one takes a
+                        restart, and does not affect the serial console.
+                    </p>
+                    <Button
+                        variant={'outline'}
+                        size={'sm'}
+                        className={'w-fit'}
+                        loading={enabling}
+                        onClick={() => mutate()}
+                    >
+                        Enable display output
                     </Button>
                 </>
             )}

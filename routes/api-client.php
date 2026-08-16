@@ -212,6 +212,17 @@ Route::prefix('/servers/{server}')->middleware(
             [Client\Servers\SettingsController::class, 'enableSerialConsole'],
         )->name('servers.show.serial-console.enable');
 
+        // The same for the display console: a VM whose display is a serial
+        // terminal has no VNC server for it to attach to.
+        Route::get(
+            '/hardware/display-console',
+            [Client\Servers\SettingsController::class, 'getDisplayConsole'],
+        )->name('servers.show.display-console');
+        Route::post(
+            '/hardware/display-console',
+            [Client\Servers\SettingsController::class, 'enableDisplayConsole'],
+        )->name('servers.show.display-console.enable');
+
         Route::get(
             '/hardware/isos',
             [Client\Servers\SettingsController::class, 'getMedia'],
