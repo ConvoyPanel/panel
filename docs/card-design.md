@@ -51,9 +51,39 @@ Good demo cards to read when building a **form inside a card** (our most common 
 | `CardAction` | `.../CardAction.tsx` | top-right slot in the header; needs `CardHeader`'s grid mode |
 | `CardContent` | `.../CardContent.tsx` | `p-4 pt-0` |
 | `CardFooter` | `.../CardFooter.tsx` | `flex items-center border-t bg-muted/50 p-4` |
-| `Field` / `FieldGroup` / `FieldLabel` / `FieldDescription` | `components/ui/Field/` | `FieldGroup` stacks fields with `gap-5`; `Field` supports `orientation="horizontal"` |
+| `Field` / `FieldGroup` / `FieldLabel` / `FieldDescription` | `components/ui/Field/` | `FieldGroup` stacks fields with `gap-5`; `Field` supports `orientation="horizontal"`; a `FieldLabel` wrapping a `Field` becomes a **radio card** (see below) |
 | `InputGroup*` | `components/ui/InputGroup/` | input with inline addons/buttons |
 | `InputForm` / `CheckboxForm` | `components/ui/Forms/` | RHF-wired field + label + error, our default inside forms |
+
+### The radio card is already in `Field`
+
+A **`FieldLabel` whose direct child is a `Field`** is a selectable card, and none of it
+needs writing at the call site: the label picks up `rounded-lg border` and gives the field
+`p-2.5`, then `has-data-checked:border-primary/30 has-data-checked:bg-primary/5`
+(`/20` and `/10` in dark) tints it once the control inside reports `data-checked`.
+
+```tsx
+<FieldLabel htmlFor={id}>
+  <Field orientation={'horizontal'}>
+    <RadioGroupItem id={id} value={group.uuid} />
+    <TemplateIconDisplay icon={group.icon} className={'size-5 shrink-0'} />
+    <FieldContent>
+      <FieldTitle>{group.name}</FieldTitle>
+      <FieldDescription>{group.description}</FieldDescription>
+    </FieldContent>
+  </Field>
+</FieldLabel>
+```
+
+Two things to keep in mind. The `Field` has to be a **direct** child or none of the
+`has-[>[data-slot=field]]:` selectors match. And the state attribute is Base UI's
+`data-checked`, not Radix's `data-state=checked` — a ported Radix selector compiles fine
+and silently never matches.
+
+Lay a set of them out with `grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]` rather than a
+`@md:` breakpoint when the same field renders at more than one width: the `@container` a
+container query resolves against is `AppLayout`'s content area, not the card the cards are
+sitting in (see the `@sm:`/`@md:` warning under *Do / don't*).
 
 The flat `ring-1 ring-foreground/10` (instead of `border` + `shadow`) is the defining look
 of the `nova` base — cards read as quiet, inset surfaces rather than raised panels.
@@ -91,6 +121,16 @@ primitive), and don't reach for `Button variant="outline"` as a field-like trigg
 override its background — `outline` is `bg-background` for button reasons, which is only
 coincidentally the same value. `InputGroupInput`/`InputGroupTextarea` stay `bg-transparent`
 on purpose: the `InputGroup` shell owns the fill, and a second one would double up.
+
+### Status colour is a token, including the good kind
+
+`--destructive` always had a token and `--success` never did, so "this finished, and it
+went well" got written as a literal `text-green-500` — one colour on the deployment screens
+that no theme could reach and no dark-mode step ever touched. There is now a `--success`
+token in both blocks of `app.css`, mapped in `tailwind.config.cjs` as `success`; use
+`text-success` / `bg-success` (and `bg-success/40` for the rail between finished steps) the
+way you already use `text-destructive`. Semantic colour is separate from the accent: blue
+means "in progress", not "good".
 
 ## Anatomy — the rules
 
@@ -144,9 +184,13 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
   with `@xl:col-span-2`. See the reference layout cited under *In this codebase* below.
 - **Do** keep body text at `text-sm` (the Card sets it) and descriptions
   `text-muted-foreground`.
-- **Don't** wrap checkboxes in their own bordered boxes inside a card — inside a settings
-  card, a switch row (`justify-between`, `border-t` between rows) reads cleaner than the
-  boxed `CheckboxForm`.
+- **Do** match the checkbox to the card it sits in. In a **settings** card a switch row
+  (`justify-between`, `border-t` between rows) reads cleaner than a boxed one; in a card
+  where the user is **choosing** things — a picker, a wizard step — use the boxed
+  `CheckboxForm` (`rounded-lg border p-3`, checkbox + label + description), which is the
+  same shape as the radio cards above it. A bare checkbox row among selection cards reads
+  as a different design. The rebuild page's "Start the server when the install finishes"
+  is the boxed case; `/security`'s toggles are the row case.
 - **Don't** stack sections with giant `space-y-16` gaps (the old create-node page). Card
   padding + `FieldGroup` gaps already provide the rhythm.
 - **Don't** read a `@sm:`/`@md:` in a card as a statement about *the card*. The
@@ -170,6 +214,27 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
   that (General beside Connection) and now stacks full-width sections instead, letting
   each card's own internal grid supply the horizontal density. Neither shape is more
   correct than the other — the field counts decide.
+- **A stack of cards that is a single task** — `routes/_app/servers.$serverUuid/rebuild.lazy.tsx`
+  plus `features/servers/components/client/Rebuild/*`: operating system, version, password,
+  in that order, with the destructive action in the last card's footer. Three things there
+  are worth copying.
+
+  **Cap the form, not the page.** The wrapper around the heading *and* the cards is
+  `mx-auto w-full max-w-3xl`, the same move `nodes.$nodeId/settings.lazy.tsx:122` makes and
+  for the same reason: `AppLayout` gives the page up to 1600px, and a form stretched that
+  far pulls every label away from its control. Cap the page column instead and the
+  breadcrumbs come with it; leave out the `mx-auto` and the whole form hugs the left edge
+  under a full-width heading.
+
+  **A card that fills its width beats a card with a measure inside it.** The first attempt
+  capped the field group at 26rem inside a full-width card, which just moved the emptiness
+  to the right of the inputs. Either the card is the width of its contents or the contents
+  are the width of the card.
+
+  **A form spanning several cards still submits once.** The `<form>` wraps the card stack,
+  the submit lives in the last `CardFooter`, and it opens the confirmation rather than
+  firing the mutation — so the fields are validated before anyone is asked to type a server
+  name to confirm.
 - The node **create** screen (`routes/_app/admin/(fullscreen)/nodes.create.lazy.tsx` +
   `features/nodes/components/Create/*`) predates this pattern and is the next thing to
   bring in line — see the redesign directions discussed in the v10 handoff.
