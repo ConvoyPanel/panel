@@ -117,7 +117,19 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
                         <ResponsiveDialogBody className={'space-y-4'}>
-                            <InputForm name={'name'} label={'Name'} />
+                            {/* A field called "name" reads as a person's name to
+                                password managers, so 1Password offers to fill in
+                                the account holder's. autoComplete alone does not
+                                stop it — the vendor opt-outs do. */}
+                            <InputForm
+                                name={'name'}
+                                label={'Name'}
+                                autoComplete={'off'}
+                                data-1p-ignore
+                                data-lpignore={'true'}
+                                data-bwignore
+                                data-form-type={'other'}
+                            />
                             {/* Defaults (snapshot + zstd) cover the common case;
                                 the rest stays out of the way until asked for. */}
                             <Collapsible>
