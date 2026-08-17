@@ -225,12 +225,18 @@ to it. `update()`, `updateBackupOrder()`, `buildSortQuery()` and `destroy()` are
 now all node-scoped, and `destroy()` detaches rather than deleting when others
 still reach the pool.
 
-**Not built: the global storage list.** With storage no longer owned by a node, a
-pool that four hosts mount has no home in the panel — "where in the fleet do I
-have room" and "who is on this array" are answerable nowhere. The proposal is to
-promote Storage to a top-level item beside IPAM, which is already both a global
-inventory and a node tab, and keep the node tab as a filtered view. Needs a
-decision before building.
+**The global storage list (DONE).** Storage is a top-level Provisioning item
+beside IPAM, which is already both a global inventory and a node tab — the same
+shape storage took once a pool could be attached to several nodes. The node tab
+stays and keeps its own job: registering a host's disks, and answering whether
+this host can take another server.
+
+`StorageInventoryController` makes **no PVE call at all**. The node-scoped list
+can afford one live lookup because it is one node; a fleet page would make one
+per node, and a single unreachable host would stall the whole list for a full
+connect timeout. It reads the figures the poll already writes, and a test asserts
+no stray HTTP. Storages no node reaches are omitted, matching what
+`OverviewService::storage()` already counts as fleet capacity.
 
 **History.** Per-node CPU/RAM/disk over time should come from PVE's own RRD store
 (`GET /nodes/{node}/rrddata`, the node-scoped sibling of what
