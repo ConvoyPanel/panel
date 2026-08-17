@@ -245,14 +245,24 @@ class OverviewService
     {
         $allocated = ByteUnit::Mebibytes->toBytes((int) $allocations->sum('disk_allocated'));
 
-        // Total VM-disk capacity: distinct storages that back VM disks and are attached to a
-        // node (storage with no node isn't usable fleet capacity). $storage->size is
-        // StorageSizeCast (bytes). Distinct by row, so shared storage isn't double-counted.
+        /*
+         * Total VM-disk capacity: distinct storages that back VM disks and are
+         * attached to a node (storage no node reaches is not usable fleet
+         * capacity). Distinct by row, so a shared pool counts once however many
+         * nodes mount it.
+         *
+         * Prefers what the poll observed over what the operator typed. `size` is
+         * a hand-entered figure that nothing checks and everything else on the
+         * storage now reads from discovery; leaving the one fleet-wide number on
+         * the declared value would make the dashboard disagree with every page
+         * beneath it. It remains the fallback for a storage no node has reported
+         * yet, which is the only case where it is the best answer available.
+         */
         $total = (int) Storage::query()
             ->where('stores_kvm', true)
             ->whereHas('nodes')
             ->get()
-            ->sum(fn (Storage $storage) => $storage->size);
+            ->sum(fn (Storage $storage) => $storage->discovered_total ?? $storage->size);
 
         return $this->allocation($allocated, $total);
     }

@@ -179,3 +179,49 @@ it('requires an admin user', function () {
     $this->actingAs($user)->getJson('/api/admin/overview')
         ->assertForbidden();
 });
+
+it('counts fleet storage from what the poll observed, not what was typed', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $node = Node::factory()->for(Location::factory())->create();
+
+    // Declared 100 GiB, actually 250 GiB. Every other page reads the observed
+    // figure; the dashboard disagreeing with them would be the bug.
+    $observed = Storage::factory()->create([
+        'size' => 100 * 1024 * 1024 * 1024,
+        'stores_kvm' => true,
+    ]);
+    $observed->forceFill([
+        'discovered_total' => 250 * 1024 * 1024 * 1024,
+        'discovered_used' => 0,
+        'discovered_at' => now(),
+    ])->save();
+
+    // Never polled, so the declared size is the best answer there is.
+    $declaredOnly = Storage::factory()->create([
+        'size' => 50 * 1024 * 1024 * 1024,
+        'stores_kvm' => true,
+    ]);
+
+    $node->storages()->attach([$observed->id, $declaredOnly->id]);
+
+    $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->assertJsonPath('data.storage.total', 300 * 1024 * 1024 * 1024);
+});
+
+it('counts a shared pool once however many nodes mount it', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $location = Location::factory()->create();
+    $shared = Storage::factory()->create([
+        'size' => 200 * 1024 * 1024 * 1024,
+        'stores_kvm' => true,
+    ]);
+
+    foreach (range(1, 3) as $ignored) {
+        Node::factory()->for($location)->create()->storages()->attach($shared);
+    }
+
+    $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->assertJsonPath('data.storage.total', 200 * 1024 * 1024 * 1024);
+});
