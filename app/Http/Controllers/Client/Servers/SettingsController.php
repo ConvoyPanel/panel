@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Client\Servers;
 
 use App\Actions\Server\RebuildServerAction;
-use App\Data\Server\BootOrderData;
+use App\Data\Server\Proxmox\Config\DiskData;
 use App\Data\Server\RenamedServerData;
 use App\Data\Server\ServerNetworkSettingsData;
 use App\Data\Server\ServerSecuritySettingsData;
+use App\Data\Server\ServerStorageData;
+use App\Data\Server\StorageDeviceData;
 use App\Data\Template\TemplateGroupData;
 use App\Enums\Server\AuthenticationType;
 use App\Enums\Server\DeploymentStatus;
@@ -94,20 +96,20 @@ class SettingsController
         return response()->noContent();
     }
 
-    public function getBootOrder(Server $server)
+    public function getStorage(Server $server)
     {
-        $availableDevices = $this->allocationService->getDisks($server);
-        $configuredDevices = $this->allocationService->getBootOrder($server);
+        // Both halves come out of one config read. Asking the service for disks
+        // and boot order separately would issue the same PVE request twice.
+        $config = $this->allocationService->getConfig($server);
 
-        $unconfiguredDevices = $availableDevices
-            ->filter(fn ($device) => $configuredDevices
-                ->where('interface', '=', $device->interface)
-                ->first() === null)
-            ->values();
-
-        return new BootOrderData(
-            unusedDevices: $unconfiguredDevices,
-            bootOrder: $configuredDevices->values(),
+        return new ServerStorageData(
+            devices: $config->disks
+                ->values()
+                ->map(fn (DiskData $disk) => StorageDeviceData::fromDisk($disk)),
+            bootOrder: $config->bootOrder
+                ->map(fn (DiskData $disk) => $disk->interface->value)
+                ->values()
+                ->all(),
         );
     }
 
@@ -141,25 +143,23 @@ class SettingsController
     public function getMedia(Request $request, Server $server)
     {
         $disks = $this->allocationService->getDisks($server);
-        if ($request->user()->root_admin) {
-            $media = $server->node->isos()->where('is_successful', '=', true)->get()->toArray();
-        } else {
-            $media = $server->node->isos()->where(
-                [['hidden', '=', false], ['is_successful', '=', true]],
-            )->get()->toArray();
+
+        $query = $server->node->isos()->with('storage')->where('is_successful', '=', true);
+
+        if (! $request->user()->root_admin) {
+            $query->where('hidden', '=', false);
         }
 
-        return array_map(function ($iso) use ($disks) {
-            $isMounted = (bool) $disks->where('media_name', '=', $iso['name'])->first();
-
-            return [
-                'uuid' => $iso['uuid'],
-                'name' => $iso['name'],
-                'size' => $iso['size'],
-                'hidden' => $iso['hidden'],
-                'mounted' => $isMounted,
-            ];
-        }, $media);
+        return $query->get()->map(fn (ISO $iso) => [
+            'uuid' => $iso->uuid,
+            'name' => $iso->name,
+            'size' => $iso->size,
+            'hidden' => $iso->hidden,
+            // Matched on the backing volume, the same way mount and unmount
+            // locate it. The previous check compared a `media_name` property
+            // DiskData has never had, so every ISO reported itself unmounted.
+            'mounted' => $this->allocationService->findMountedIsoDisk($disks, $iso) !== null,
+        ])->all();
     }
 
     public function mountMedia(MediaRequest $request, Server $server, ISO $iso)

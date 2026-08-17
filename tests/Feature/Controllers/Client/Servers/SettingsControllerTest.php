@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ISO;
+use Illuminate\Support\Facades\Http;
 
 it('can rename servers', function () {
     fakeProxmox();
@@ -142,7 +143,7 @@ it('can\'t unmount an ISO from a node the user\'s server is not on', function ()
     $response->assertStatus(403);
 });
 
-it('returns the boot order as bare arrays', function () {
+it('returns every device with the boot ordering over them', function () {
     // Nested DataCollections inherit the global `data` wrap, which would hand the
     // client {"data": [...]} where it expects a list to iterate over.
     fakeProxmox();
@@ -150,13 +151,89 @@ it('returns the boot order as bare arrays', function () {
     [$user, $_, $_, $server] = createServerModel();
 
     $response = $this->actingAs($user)->getJson(
-        "/api/client/servers/{$server->uuid}/settings/hardware/boot-order",
+        "/api/client/servers/{$server->uuid}/settings/hardware/storage",
+    );
+
+    // The fixture is one sata disk plus the cloud-init drive, with only the
+    // disk in the boot order -- so the devices list is strictly larger than the
+    // ordering, which is the whole point of the shape.
+    $response->assertOk()
+        ->assertJsonPath('data.devices.0.interface', 'sata0')
+        ->assertJsonPath('data.devices.0.media', 'disk')
+        ->assertJsonPath('data.devices.1.interface', 'ide0')
+        ->assertJsonPath('data.bootOrder', ['sata0']);
+
+    expect($response->json('data.devices'))->toBeList()
+        ->and($response->json('data.bootOrder'))->toBeList();
+});
+
+it('reads back every device in a multi-device boot order', function () {
+    // PVE separates the devices inside `order=` with `;` and ends the property
+    // with `,`. Reading only as far as the first `;` returned a one-device boot
+    // order no matter what was saved, so switching a second device on and
+    // saving it came straight back off on the next read.
+    fakeProxmox([
+        '*/config' => Http::response(serverConfigFixture(['boot' => 'order=ide0;sata0']), 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $this->actingAs($user)->getJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/storage",
+    )
+        ->assertOk()
+        ->assertJsonPath('data.bootOrder', ['ide0', 'sata0']);
+});
+
+it('keeps the boot order when a legacy entry precedes it', function () {
+    fakeProxmox([
+        '*/config' => Http::response(serverConfigFixture(['boot' => 'legacy=dc,order=sata0;ide0']), 200),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $this->actingAs($user)->getJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/storage",
+    )
+        ->assertOk()
+        ->assertJsonPath('data.bootOrder', ['sata0', 'ide0']);
+});
+
+it('narrows a device down to the fields the client can act on', function () {
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->getJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/storage",
+    );
+
+    // `sata0: local-lvm:vm-608782004-disk-0,discard=on,size=4712M,ssd=1`
+    $response->assertOk()
+        ->assertJsonPath('data.devices.0.volume', 'local-lvm:vm-608782004-disk-0')
+        ->assertJsonPath('data.devices.0.isEmulatingSSD', true)
+        ->assertJsonPath('data.devices.0.discardMode', 'on')
+        ->assertJsonPath('data.devices.0.isCloudinitDrive', false)
+        ->assertJsonPath('data.devices.0.mediaName', null);
+
+    // PVE's host-identifying plumbing has no business on a client screen.
+    expect($response->json('data.devices.0'))
+        ->not->toHaveKeys(['wwn', 'serial', 'vendor', 'model']);
+});
+
+it('marks the cloud-init drive rather than calling it a CD-ROM', function () {
+    // `ide0: local-lvm:vm-608782004-cloudinit,media=cdrom,size=4M` -- the 4 MiB
+    // device that shows up unexplained on nearly every server.
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->getJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/storage",
     );
 
     $response->assertOk()
-        ->assertJsonPath('data.bootOrder.0.interface', 'sata0')
-        ->assertJsonPath('data.unusedDevices.0.interface', 'ide0');
-
-    expect($response->json('data.bootOrder'))->toBeList()
-        ->and($response->json('data.unusedDevices'))->toBeList();
+        ->assertJsonPath('data.devices.1.media', 'cdrom')
+        ->assertJsonPath('data.devices.1.isCloudinitDrive', true)
+        ->assertJsonPath('data.devices.1.mediaName', null);
 });

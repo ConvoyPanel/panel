@@ -3,6 +3,7 @@
 namespace App\Services\Servers;
 
 use App\Data\Server\Proxmox\Config\DiskData;
+use App\Data\Server\Proxmox\Config\ServerConfigData;
 use App\Enums\Server\Disk\DiskMediaType;
 use App\Enums\Server\DiskInterface;
 use App\Exceptions\Proxmox\RequestException;
@@ -27,6 +28,21 @@ class AllocationService
         private ProxmoxDiskClient $diskClient,
         private SerialConsoleService $serialConsole,
     ) {}
+
+    /**
+     * The server's full PVE config.
+     *
+     * {@see getDisks} and {@see getBootOrder} each issue their own request, so
+     * callers that need more than one facet should read the config once and
+     * pick fields off it rather than paying for the round trip twice.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getConfig(Server $server): ServerConfigData
+    {
+        return $this->configClient->setServer($server)->getConfig();
+    }
 
     /**
      * @throws RequestException
@@ -409,7 +425,7 @@ class AllocationService
      *
      * @param  Collection<int, DiskData>  $disks
      */
-    private function findMountedIsoDisk(Collection $disks, ISO $iso): ?DiskData
+    public function findMountedIsoDisk(Collection $disks, ISO $iso): ?DiskData
     {
         $volume = $this->isoVolume($iso);
 

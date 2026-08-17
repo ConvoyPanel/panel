@@ -192,9 +192,10 @@ Route::prefix('/servers/{server}')->middleware(
             [Client\Servers\SettingsController::class, 'reinstall'],
         )->name('servers.show.reinstall');
 
+        // Devices plus the boot ordering over them, from one config read.
         Route::get(
-            '/hardware/boot-order',
-            [Client\Servers\SettingsController::class, 'getBootOrder'],
+            '/hardware/storage',
+            [Client\Servers\SettingsController::class, 'getStorage'],
         );
         Route::put(
             '/hardware/boot-order',

@@ -1,6 +1,5 @@
-import byteSize from 'byte-size'
-
-import { useServerResources } from '@/features/servers/detail/api.ts'
+import { useServer, useServerResources } from '@/features/servers/detail/api.ts'
+import { formatBytes } from '@/features/servers/storage/api.ts'
 
 import {
     Card,
@@ -12,19 +11,26 @@ import {
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
-const format = (bytes: number) => {
-    const size = byteSize(bytes, { units: 'iec', precision: 1 })
-    return `${size.value} ${size.unit}`
-}
-
 interface Props {
     uuid: string
 }
 
+/**
+ * How full the server is, and against what.
+ *
+ * There are two sizes here and they are not the same number: the guest agent
+ * reports the filesystem it can see, while the server record holds the block
+ * device Convoy provisioned. The gap between them — unpartitioned space, a
+ * filesystem that has not been grown into its disk — is most of the reason
+ * someone opens this page, so both are stated rather than one silently standing
+ * in for the other.
+ */
 const StorageUsageCard = ({ uuid }: Props) => {
+    const { data: server } = useServer(uuid)
     const { data: usage, isLoading, isError } = useServerResources(uuid)
 
-    const hasUsage = usage && usage.totalBytes > 0
+    const provisioned = server?.disk ?? 0
+    const hasUsage = usage !== undefined && usage.totalBytes > 0
     const percent = hasUsage
         ? Math.min(100, Math.round((usage.usedBytes / usage.totalBytes) * 100))
         : 0
@@ -32,39 +38,94 @@ const StorageUsageCard = ({ uuid }: Props) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Disk Usage</CardTitle>
+                <CardTitle>Filesystem usage</CardTitle>
                 <CardDescription>
-                    Live filesystem usage reported by the guest agent.
+                    Reported live by the guest agent.
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className={'flex-1'}>
                 {isLoading ? (
-                    <Skeleton className={'h-16 w-full'} />
+                    <Skeleton className={'h-28 w-full'} />
                 ) : isError || !hasUsage ? (
-                    <p className={'text-sm text-muted-foreground'}>
-                        Usage is unavailable — the guest agent may not be
-                        running on this server.
-                    </p>
+                    <div className={'flex flex-col gap-3 text-sm'}>
+                        <p className={'text-muted-foreground'}>
+                            The guest agent isn’t answering, so there’s nothing
+                            to report on how full the filesystem is. Install and
+                            start{' '}
+                            <code className={'font-mono'}>
+                                qemu-guest-agent
+                            </code>{' '}
+                            inside the server to see usage here.
+                        </p>
+                        {provisioned > 0 && (
+                            <Row
+                                label={'Provisioned'}
+                                value={formatBytes(provisioned)}
+                            />
+                        )}
+                    </div>
                 ) : (
-                    <div className={'space-y-2'}>
-                        <div
-                            className={
-                                'flex items-baseline justify-between text-sm'
-                            }
-                        >
-                            <span className={'font-medium'}>
-                                {format(usage.usedBytes)} used
-                            </span>
-                            <span className={'text-muted-foreground'}>
-                                of {format(usage.totalBytes)} ({percent}%)
-                            </span>
+                    <div className={'flex flex-col gap-4'}>
+                        <div className={'flex flex-col gap-2'}>
+                            <p className={'flex items-baseline gap-2'}>
+                                <span
+                                    className={
+                                        'text-2xl font-semibold tracking-tight tabular-nums'
+                                    }
+                                >
+                                    {formatBytes(usage.usedBytes)}
+                                </span>
+                                <span
+                                    className={
+                                        'text-muted-foreground text-sm tabular-nums'
+                                    }
+                                >
+                                    used · {percent}%
+                                </span>
+                            </p>
+                            <LinearProgressBar
+                                value={percent}
+                                aria-label={`${percent}% of the filesystem is used`}
+                            />
                         </div>
-                        <LinearProgressBar value={percent} />
+
+                        <div className={'flex flex-col'}>
+                            <Row
+                                label={'Filesystem'}
+                                value={formatBytes(usage.totalBytes)}
+                            />
+                            <Row
+                                label={'Free'}
+                                value={formatBytes(
+                                    Math.max(
+                                        0,
+                                        usage.totalBytes - usage.usedBytes
+                                    )
+                                )}
+                            />
+                            {provisioned > 0 && (
+                                <Row
+                                    label={'Provisioned'}
+                                    value={formatBytes(provisioned)}
+                                />
+                            )}
+                        </div>
                     </div>
                 )}
             </CardContent>
         </Card>
     )
 }
+
+const Row = ({ label, value }: { label: string; value: string }) => (
+    <div
+        className={
+            'flex items-baseline justify-between border-t py-2 text-sm first:border-t-0'
+        }
+    >
+        <span className={'text-muted-foreground'}>{label}</span>
+        <span className={'font-mono tabular-nums'}>{value}</span>
+    </div>
+)
 
 export default StorageUsageCard

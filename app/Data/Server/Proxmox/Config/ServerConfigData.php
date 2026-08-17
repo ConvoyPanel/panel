@@ -277,8 +277,13 @@ class ServerConfigData extends Data
             if (is_string($bootConfig)) {
                 // Handle legacy format (comma-separated list or just a single value)
                 if (str_contains($bootConfig, 'order=')) {
-                    // Extract from order=disk1;disk2 format
-                    preg_match('/order=([^;]+)/', $bootConfig, $matches);
+                    // `boot` is `[legacy=<letters>][,order=<dev>[;<dev>...]]`:
+                    // `;` separates the devices *within* order, and `,` is what
+                    // ends the property. Stopping the capture at `;` -- as this
+                    // did -- kept only the first device, so a saved order of
+                    // `ide2;sata0` read back as `ide2` alone and every device
+                    // after the first appeared to switch itself off again.
+                    preg_match('/order=([^,]+)/', $bootConfig, $matches);
                     if (isset($matches[1])) {
                         $bootDiskIdentifiers = explode(';', $matches[1]);
                     }
