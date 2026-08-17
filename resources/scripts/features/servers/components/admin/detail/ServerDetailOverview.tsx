@@ -1,16 +1,16 @@
-import byteSize from 'byte-size'
+import { useServer } from '@/features/servers/admin/api.ts'
+import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
+import { serverStateQueries } from '@/features/servers/state/api.ts'
+import { ServerLifecycle } from '@/types/server.ts'
+import { IconBolt } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { IconBolt } from '@tabler/icons-react'
-
-import { useServer } from '@/features/servers/admin/api.ts'
-import { serverStateQueries } from '@/features/servers/state/api.ts'
-
-import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
+import byteSize from 'byte-size'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import CopyValue from '@/components/ui/CopyValue.tsx'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,8 +18,6 @@ import {
 } from '@/components/ui/DropdownMenu'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
-
-import { ServerLifecycle } from '@/types/server.ts'
 
 interface Props {
     serverId: number
@@ -87,9 +85,36 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                 server.nodeId
             ),
         },
-        { title: 'Owner (user ID)', value: server.userId },
-        { title: 'VMID', value: server.vmid },
-        { title: 'UUID', value: <span className='font-mono text-xs'>{server.uuid}</span> },
+        {
+            title: 'Owner (user ID)',
+            value: (
+                <CopyValue
+                    label={'user ID'}
+                    value={String(server.userId)}
+                    className={'tabular-nums'}
+                />
+            ),
+        },
+        {
+            title: 'VMID',
+            value: (
+                <CopyValue
+                    label={'VMID'}
+                    value={String(server.vmid)}
+                    className={'tabular-nums'}
+                />
+            ),
+        },
+        {
+            title: 'UUID',
+            value: (
+                <CopyValue
+                    label={'UUID'}
+                    value={server.uuid}
+                    className={'text-xs'}
+                />
+            ),
+        },
         { title: 'Created', value: server.createdAt.toLocaleString() },
         { title: 'Description', value: server.description || '—' },
     ]
@@ -118,7 +143,7 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                         )}
                     </div>
                     {server && (
-                        <p className='text-sm text-muted-foreground'>
+                        <p className='text-muted-foreground text-sm'>
                             {server.hostname}
                         </p>
                     )}
@@ -153,7 +178,9 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                                         ? 'Running'
                                         : 'Stopped'}
                                 </dd>
-                                <dt className='text-muted-foreground'>Uptime</dt>
+                                <dt className='text-muted-foreground'>
+                                    Uptime
+                                </dt>
                                 <dd className='text-right'>
                                     {formatDuration(state.uptime)}
                                 </dd>
@@ -161,7 +188,9 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                                 <dd className='text-right'>
                                     {(state.cpuUsed * 100).toFixed(1)}%
                                 </dd>
-                                <dt className='text-muted-foreground'>Memory</dt>
+                                <dt className='text-muted-foreground'>
+                                    Memory
+                                </dt>
                                 <dd className='text-right'>
                                     {formatBytes(state.memoryUsed)} /{' '}
                                     {formatBytes(state.memoryTotal)}
@@ -205,7 +234,10 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                         {details ? (
                             <dl className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-sm'>
                                 {details.map(detail => (
-                                    <div key={detail.title} className='contents'>
+                                    <div
+                                        key={detail.title}
+                                        className='contents'
+                                    >
                                         <dt className='text-muted-foreground'>
                                             {detail.title}
                                         </dt>

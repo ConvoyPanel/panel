@@ -1,10 +1,10 @@
-import useClipboard from '@/hooks/use-clipboard.ts'
 import { Address, AddressVersion } from '@/types/address.ts'
 import { cn } from '@/utils'
 import { IconWifiOff } from '@tabler/icons-react'
-import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
+import CopyValue from '@/components/ui/CopyValue.tsx'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     TableBody,
@@ -48,43 +48,6 @@ const versionLabels: Record<AddressVersion, string> = {
 type VersionFilter = AddressVersion | 'all'
 
 const unique = <T,>(values: T[]): T[] => [...new Set(values)]
-
-const CopyValue = ({
-    label,
-    value,
-    className,
-    children,
-}: {
-    label: string
-    value: string
-    className?: string
-    children?: ReactNode
-}) => {
-    const { copy } = useClipboard({ successMessage: 'Copied to clipboard' })
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            copy(value)
-        }
-    }
-
-    return (
-        <span
-            role={'button'}
-            tabIndex={0}
-            aria-label={`Click to copy ${label} ${value}`}
-            onClick={() => copy(value)}
-            onKeyDown={handleKeyDown}
-            className={cn(
-                'hover:text-primary focus-visible:ring-ring/50 cursor-pointer rounded-sm font-mono outline-none select-none focus-visible:ring-[3px]',
-                className
-            )}
-        >
-            {children ?? value}
-        </span>
-    )
-}
 
 /** A cell whose value the API can leave unset. */
 const ValueCell = ({
