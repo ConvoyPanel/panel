@@ -44,7 +44,6 @@ const CreateStorageModal = () => {
             name: '',
             size: '',
             reservedBytes: '',
-            isShareable: false,
             storesKvm: false,
             storesLxc: false,
             storesLxcTemplates: false,

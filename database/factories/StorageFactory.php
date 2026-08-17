@@ -15,7 +15,6 @@ class StorageFactory extends Factory
             'description' => rand(0, 3) === 3 ? $this->faker->sentence() : null,
             'name' => $this->faker->word(),
             'size' => rand(60, 100) * 1024 * 1024 * 1024,
-            'is_shareable' => false,
             'stores_kvm' => true,
             'stores_lxc' => true,
             'stores_lxc_templates' => true,

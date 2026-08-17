@@ -48,7 +48,6 @@ const EditStorageModal = () => {
             name: '',
             size: '',
             reservedBytes: '',
-            isShareable: false,
             storesKvm: false,
             storesLxc: false,
             storesLxcTemplates: false,
@@ -70,7 +69,6 @@ const EditStorageModal = () => {
                 storage.reservedBytes != null
                     ? (storage.reservedBytes / 1024 / 1024).toString()
                     : '',
-            isShareable: storage.isShareable,
             storesKvm: storage.storesKvm,
             storesLxc: storage.storesLxc,
             storesLxcTemplates: storage.storesLxcTemplates,

@@ -7,7 +7,6 @@ export interface Storage {
     name: string
     size: number
     reservedBytes: number | null
-    isShareable: boolean
     storesKvm: boolean
     storesLxc: boolean
     storesLxcTemplates: boolean

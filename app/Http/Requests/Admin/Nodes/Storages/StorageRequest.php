@@ -26,12 +26,11 @@ class StorageRequest extends BaseApiRequest
         }
         $rules['name'][] = new UniqueStorageNamePerNode($node->id, $storageId);
 
-        // Override display_name validation based on is_shareable
-        if ($this->boolean('is_shareable')) {
-            $rules['display_name'] = 'required|string|min:1|max:40';
-        } else {
-            $rules['display_name'] = 'nullable|string|max:40';
-        }
+        // Always optional. This used to be required when the operator ticked
+        // "shareable", but that flag is gone -- whether a storage is shared is
+        // Proxmox's answer (`pve_shared`), and it is not known at registration
+        // because nothing has polled the node yet.
+        $rules['display_name'] = 'nullable|string|max:40';
 
         return $rules;
     }

@@ -24,7 +24,6 @@ use Illuminate\Support\Str;
  * @property ?int $discovered_total
  * @property ?int $discovered_used
  * @property ?CarbonImmutable $discovered_at
- * @property bool $is_shareable
  * @property bool $stores_kvm
  * @property bool $stores_lxc
  * @property bool $stores_lxc_templates
@@ -52,7 +51,6 @@ class Storage extends Model
         'name' => 'required|string|max:191',
         'size' => 'required|numeric|min:1',
         'reserved_bytes' => 'nullable|numeric|min:0',
-        'is_shareable' => 'required|boolean',
         'stores_kvm' => 'required|boolean',
         'stores_lxc' => 'required|boolean',
         'stores_lxc_templates' => 'required|boolean',
@@ -66,7 +64,6 @@ class Storage extends Model
         return [
             'size' => StorageSizeCast::class,
             'reserved_bytes' => StorageSizeCast::class,
-            'is_shareable' => 'boolean',
             'pve_shared' => 'boolean',
             'discovered_at' => 'immutable_datetime',
             'stores_kvm' => 'boolean',

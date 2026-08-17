@@ -419,3 +419,46 @@ it('reports no other nodes for a storage only this one reaches', function () {
 
     expect($row['sharedWith'])->toBe([]);
 });
+
+it('creates a storage without a display name', function () {
+    // `display_name` used to be required when the operator ticked "shareable".
+    // That flag is gone -- whether a storage is shared is Proxmox's answer, and
+    // it is not known at registration because nothing has polled yet.
+    fakeLiveStorage('new-pool', total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages", [
+            'name' => 'new-pool',
+            'size' => 100 * 1048576,
+            'stores_kvm' => true,
+            'stores_lxc' => false,
+            'stores_lxc_templates' => false,
+            'stores_backups' => false,
+            'stores_iso' => false,
+            'stores_snippets' => false,
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.name', 'new-pool')
+        ->assertJsonPath('data.displayName', null);
+
+    expect($this->node->storages()->where('name', 'new-pool')->exists())->toBeTrue();
+});
+
+it('still bounds the display name it is given', function () {
+    fakeLiveStorage('new-pool', total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages", [
+            'display_name' => str_repeat('a', 41),
+            'name' => 'new-pool',
+            'size' => 100 * 1048576,
+            'stores_kvm' => true,
+            'stores_lxc' => false,
+            'stores_lxc_templates' => false,
+            'stores_backups' => false,
+            'stores_iso' => false,
+            'stores_snippets' => false,
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('display_name');
+});

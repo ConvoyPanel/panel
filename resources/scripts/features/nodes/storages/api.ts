@@ -11,30 +11,19 @@ import { z } from 'zod'
 
 import { type DataResponse, apiFetch } from '@/lib/api'
 
-export const storageSchema = z
-    .object({
-        displayName: z.string().max(40).optional(),
-        description: z.string().max(191),
-        name: z.string().min(1).max(191),
-        size: z.coerce.number().min(1),
-        reservedBytes: z.coerce.number().min(0).nullable().optional(),
-        isShareable: z.boolean(),
-        storesKvm: z.boolean(),
-        storesLxc: z.boolean(),
-        storesLxcTemplates: z.boolean(),
-        storesBackups: z.boolean(),
-        storesIso: z.boolean(),
-        storesSnippets: z.boolean(),
-    })
-    .superRefine((data, ctx) => {
-        if (data.isShareable && !data.displayName) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['displayName'],
-                message: 'Display name is required when storage is shareable',
-            })
-        }
-    })
+export const storageSchema = z.object({
+    displayName: z.string().max(40).optional(),
+    description: z.string().max(191),
+    name: z.string().min(1).max(191),
+    size: z.coerce.number().min(1),
+    reservedBytes: z.coerce.number().min(0).nullable().optional(),
+    storesKvm: z.boolean(),
+    storesLxc: z.boolean(),
+    storesLxcTemplates: z.boolean(),
+    storesBackups: z.boolean(),
+    storesIso: z.boolean(),
+    storesSnippets: z.boolean(),
+})
 
 // StorageController is served under both the panel (`/api/admin`) and
 // Application (`/api/application`) prefixes, so Wayfinder emits URI-keyed
@@ -144,7 +133,6 @@ export const createStorage = async (
         name,
         size,
         reservedBytes,
-        isShareable,
         storesKvm,
         storesLxc,
         storesLxcTemplates,
@@ -162,7 +150,6 @@ export const createStorage = async (
                     name,
                     size,
                     reserved_bytes: reservedBytes,
-                    is_shareable: isShareable,
                     stores_kvm: storesKvm,
                     stores_lxc: storesLxc,
                     stores_lxc_templates: storesLxcTemplates,
@@ -183,7 +170,6 @@ export const updateStorage = async (
         name,
         size,
         reservedBytes,
-        isShareable,
         storesKvm,
         storesLxc,
         storesLxcTemplates,
@@ -203,7 +189,6 @@ export const updateStorage = async (
                         name,
                         size,
                         reserved_bytes: reservedBytes,
-                        is_shareable: isShareable,
                         stores_kvm: storesKvm,
                         stores_lxc: storesLxc,
                         stores_lxc_templates: storesLxcTemplates,

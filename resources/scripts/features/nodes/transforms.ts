@@ -7,7 +7,6 @@ export const rawDataToStorage = (raw: any): Storage => ({
     name: raw.name,
     size: raw.size,
     reservedBytes: raw.reservedBytes ?? null,
-    isShareable: raw.isShareable,
     storesKvm: raw.storesKvm,
     storesLxc: raw.storesLxc,
     storesLxcTemplates: raw.storesLxcTemplates,
