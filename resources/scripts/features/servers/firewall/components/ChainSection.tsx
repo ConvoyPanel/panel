@@ -1,4 +1,3 @@
-import LedgerRuleRow from '@/features/servers/firewall/components/LedgerRuleRow.tsx'
 import {
     type FirewallPolicy,
     type FirewallRule,
@@ -8,9 +7,14 @@ import {
     directionLabels,
     policyAdjectives,
 } from '@/features/servers/firewall/api.ts'
+import LedgerRuleRow, {
+    LedgerRuleRowOverlay,
+    ruleRowId,
+} from '@/features/servers/firewall/components/LedgerRuleRow.tsx'
 import {
     DndContext,
     type DragEndEvent,
+    DragOverlay,
     KeyboardSensor,
     PointerSensor,
     closestCenter,
@@ -19,6 +23,7 @@ import {
 } from '@dnd-kit/core'
 import {
     SortableContext,
+    arrayMove,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
@@ -41,6 +46,17 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table'
+
+/**
+ * The column widths of the row being dragged, so the floating copy keeps the
+ * table's proportions once it is out of the table.
+ */
+const measureColumns = (row: HTMLElement | null) =>
+    row
+        ? [...row.querySelectorAll('td')].map(
+              c => c.getBoundingClientRect().width
+          )
+        : []
 
 const policyItems = (
     Object.entries(policyAdjectives) as [FirewallPolicy, string][]
@@ -116,21 +132,60 @@ const ChainSection = ({
         })
     )
 
+    const [dragging, setDragging] = useState<{
+        active: number | null
+        over: number | null
+        columns: number[]
+    }>({ active: null, over: null, columns: [] })
+
     // Each chain owns its own drag context, so a rule can never be dropped into
     // the other one. Dragging across directions would be meaningless -- the two
     // chains are matched separately -- but the combined list has a single index
     // space, so it would happily renumber everything for no effect.
-    const onDragEnd = ({ active, over }: DragEndEvent) => {
-        if (!over || active.id === over.id) return
+    const onDragEnd = ({ active, over, delta }: DragEndEvent) => {
+        setDragging({ active: null, over: null, columns: [] })
 
         const from = Number(active.id)
+        const fromIndex = rules.findIndex(rule => rule.position === from)
+
+        if (fromIndex === -1) return
+
+        // A drop that lands off the rows resolves to nothing, and reverting it
+        // reads as the handle being broken -- so it goes to whichever end of the
+        // chain it was headed for.
+        const overIndex = over
+            ? rules.findIndex(rule => rule.position === Number(over.id))
+            : -1
+        const toIndex =
+            overIndex === -1 ? (delta.y > 0 ? rules.length - 1 : 0) : overIndex
+
+        if (toIndex === fromIndex) return
 
         onReorder(
             from,
-            Number(over.id),
-            rules.find(rule => rule.position === from)?.digest ?? null
+            rules[toIndex].position!,
+            rules[fromIndex].digest ?? null
         )
     }
+
+    const activeRule = rules.find(rule => rule.position === dragging.active)
+
+    /*
+     * Ordinals read from where the rows have *moved to*. Numbering them by the
+     * saved order while they sit somewhere else labels every one of them wrong
+     * until the drop lands and the refetch catches up.
+     */
+    const preview = (() => {
+        if (dragging.active === null || dragging.over === null) return rules
+
+        const from = rules.findIndex(rule => rule.position === dragging.active)
+        const to = rules.findIndex(rule => rule.position === dragging.over)
+
+        return from === -1 || to === -1 ? rules : arrayMove(rules, from, to)
+    })()
+
+    const ordinalOf = (rule: FirewallRule) =>
+        preview.findIndex(candidate => candidate.position === rule.position) + 1
 
     const DirectionIcon = direction === 'in' ? IconArrowDown : IconArrowUp
 
@@ -143,12 +198,12 @@ const ChainSection = ({
             >
                 <h3 className={'flex items-center gap-1.5 font-medium'}>
                     <DirectionIcon
-                        className={'size-4 text-muted-foreground'}
+                        className={'text-muted-foreground size-4'}
                         aria-hidden
                     />
                     {directionLabels[direction]}
                 </h3>
-                <span className={'text-xs text-muted-foreground'}>
+                <span className={'text-muted-foreground text-xs'}>
                     {describeChain(rules)}
                 </span>
                 <span className={'flex-1'} />
@@ -162,6 +217,37 @@ const ChainSection = ({
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
+                    // The page may scroll if a rule is dragged past the
+                    // viewport; the table's own overflow container may not.
+                    // This table is wide enough to scroll sideways, and sliding
+                    // it out from under the pointer is what makes a drag feel
+                    // trapped in its box.
+                    autoScroll={{
+                        canScroll: element =>
+                            element === document.scrollingElement ||
+                            element === document.documentElement,
+                    }}
+                    onDragStart={({ active }) =>
+                        setDragging({
+                            active: Number(active.id),
+                            over: Number(active.id),
+                            columns: measureColumns(
+                                document.getElementById(
+                                    ruleRowId(Number(active.id))
+                                )
+                            ),
+                        })
+                    }
+                    onDragOver={({ active, over }) =>
+                        setDragging(current => ({
+                            ...current,
+                            active: Number(active.id),
+                            over: over ? Number(over.id) : null,
+                        }))
+                    }
+                    onDragCancel={() =>
+                        setDragging({ active: null, over: null, columns: [] })
+                    }
                     onDragEnd={onDragEnd}
                 >
                     <Table>
@@ -173,7 +259,9 @@ const ChainSection = ({
                                 <TableHead className={'w-10'}>#</TableHead>
                                 <TableHead className={'w-12'}>On</TableHead>
                                 <TableHead className={'w-24'}>Action</TableHead>
-                                <TableHead className={'w-40'}>Service</TableHead>
+                                <TableHead className={'w-40'}>
+                                    Service
+                                </TableHead>
                                 {/* The chain says which end of the connection
                                     this is, so the column can name the far end
                                     outright instead of shipping two mostly
@@ -194,11 +282,11 @@ const ChainSection = ({
                                 items={rules.map(rule => rule.position!)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rules.map((rule, index) => (
+                                {rules.map(rule => (
                                     <LedgerRuleRow
                                         key={rule.position}
                                         rule={rule}
-                                        ordinal={index + 1}
+                                        ordinal={ordinalOf(rule)}
                                         isMutating={isMutating}
                                         onEdit={() => onEdit(rule)}
                                         onDelete={() => onDelete(rule)}
@@ -210,12 +298,43 @@ const ChainSection = ({
                             </SortableContext>
                         </TableBody>
                     </Table>
+
+                    {/* The row travels in here rather than in the table, so it
+                        follows the pointer instead of being held to the rows it
+                        came from. It needs a table of its own -- a lone `tr` has
+                        no columns to size against -- with the widths measured
+                        off the row it was lifted from. */}
+                    <DragOverlay>
+                        {activeRule && (
+                            <table
+                                className={
+                                    'bg-card ring-foreground/10 [table-layout:fixed] cursor-grabbing overflow-hidden rounded-lg text-sm shadow-lg ring-1'
+                                }
+                            >
+                                <colgroup>
+                                    {dragging.columns.map((width, index) => (
+                                        <col key={index} style={{ width }} />
+                                    ))}
+                                </colgroup>
+                                <tbody>
+                                    <LedgerRuleRowOverlay
+                                        rule={activeRule}
+                                        ordinal={ordinalOf(activeRule)}
+                                        isMutating={isMutating}
+                                        onEdit={() => {}}
+                                        onDelete={() => {}}
+                                        onToggle={() => {}}
+                                    />
+                                </tbody>
+                            </table>
+                        )}
+                    </DragOverlay>
                 </DndContext>
             )}
 
             <div
                 className={
-                    'flex flex-wrap items-center gap-x-3 gap-y-2 border-t bg-muted/30 px-4 py-3 text-sm'
+                    'bg-muted/30 flex flex-wrap items-center gap-x-3 gap-y-2 border-t px-4 py-3 text-sm'
                 }
             >
                 <span className={'text-muted-foreground'}>
@@ -252,7 +371,7 @@ const ChainSection = ({
                     in the activity list it fills. */}
                 <label
                     className={
-                        'flex items-center gap-2 text-xs text-muted-foreground'
+                        'text-muted-foreground flex items-center gap-2 text-xs'
                     }
                 >
                     Log unmatched traffic

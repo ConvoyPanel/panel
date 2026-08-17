@@ -1,4 +1,3 @@
-import ChainSection from '@/features/servers/firewall/components/ChainSection.tsx'
 import {
     type FirewallPolicy,
     type FirewallRule,
@@ -8,6 +7,7 @@ import {
     firewallQueries,
     isLogging,
     moveRule,
+    reorderRules,
     ruleToFormValues,
     rulesInChain,
     updateRule,
@@ -17,6 +17,7 @@ import {
     withLogging,
     withPolicy,
 } from '@/features/servers/firewall/api.ts'
+import ChainSection from '@/features/servers/firewall/components/ChainSection.tsx'
 import useUpdateFirewallOptions from '@/features/servers/firewall/use-update-options.ts'
 import { getApiErrorMessage } from '@/utils/http.ts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -44,7 +45,14 @@ interface Props {
 const FirewallLedger = ({ uuid }: Props) => {
     const queryClient = useQueryClient()
     const confirm = useConfirmationStore(state => state.confirm)
-    const { data: rules, isLoading } = useFirewallRules(uuid)
+    const { data: serverRules, isLoading } = useFirewallRules(uuid)
+
+    /** A drop's ordering, shown until the write settles. See {@link onReorder}. */
+    const [optimisticRules, setOptimisticRules] = useState<
+        FirewallRule[] | null
+    >(null)
+
+    const rules = optimisticRules ?? serverRules
     const { data: options } = useFirewallOptions(uuid)
 
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -54,8 +62,9 @@ const FirewallLedger = ({ uuid }: Props) => {
     const rulesKey = firewallQueries.rules(uuid).queryKey
 
     /*
-     * Every write renumbers positions, so the ordering is never patched into
-     * the cache -- the list is refetched and the server's wins.
+     * Writes renumber positions, so anything patched into the cache has to
+     * renumber them the same way Proxmox will -- see the reorder below, which
+     * does exactly that rather than waiting for the refetch.
      *
      * Only the two queries carrying digests are awaited. Proxmox's digest locks
      * the whole VM firewall file, so a write sent before the previous one's new
@@ -83,13 +92,45 @@ const FirewallLedger = ({ uuid }: Props) => {
             to: number
             digest: string | null
         }) => moveRule(uuid, from, to, digest),
-        onError: e =>
+        onError: e => {
+            // Straight back to whatever Proxmox actually has -- the refetch in
+            // onSettled confirms it a moment later.
+            setOptimisticRules(null)
+
             toast.add({
                 title: getApiErrorMessage(e, 'Failed to reorder the rules'),
                 type: 'error',
-            }),
-        onSettled: refreshConfig,
+            })
+        },
+        onSettled: async () => {
+            await refreshConfig()
+
+            setOptimisticRules(null)
+        },
     })
+
+    /*
+     * The rule lands where it was dropped, in the same commit dnd-kit clears
+     * its drag transforms in.
+     *
+     * Held in React state rather than patched into the query cache, because the
+     * cache is not fast enough to be part of that commit: react-query notifies
+     * observers on its own scheduler, so a `setQueryData` in the drop handler
+     * still repaints a frame later. That frame showed the transforms gone and
+     * the old order still in place -- the rows sprang home and then their text
+     * swapped underneath them. A plain setState in the same event handler
+     * batches with dnd-kit's own, so no frame is ever painted mid-move.
+     *
+     * Dropped again in `onSettled`, once the refetch has landed the server's
+     * ordering -- so the override never gives way to a stale list.
+     */
+    const onReorder = (from: number, to: number, digest: string | null) => {
+        setOptimisticRules(current =>
+            reorderRules(current ?? rules ?? [], from, to)
+        )
+
+        reorder({ from, to, digest })
+    }
 
     const { mutate: toggle, isPending: isToggling } = useMutation({
         mutationFn: ({
@@ -231,8 +272,7 @@ const FirewallLedger = ({ uuid }: Props) => {
         onDelete,
         onToggle: (rule: FirewallRule, enabled: boolean) =>
             toggle({ rule, enabled }),
-        onReorder: (from: number, to: number, digest: string | null) =>
-            reorder({ from, to, digest }),
+        onReorder,
         onPolicyChange: (policy: FirewallPolicy) =>
             onPolicyChange(direction, policy),
         onLoggingChange: (enabled: boolean) =>

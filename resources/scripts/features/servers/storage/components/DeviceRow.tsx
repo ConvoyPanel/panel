@@ -125,7 +125,17 @@ const DeviceRow = ({ device, rank, ...cells }: Props) => {
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: device.interface, disabled: rank === null })
+    } = useSortable({
+        id: device.interface,
+        disabled: rank === null,
+        // The row is already where it was dropped by the time the pointer is
+        // released. dnd-kit's default is to FLIP it there anyway -- inverse
+        // transforms on every row it displaced, animated to zero -- which
+        // replays the move after the fact. This list happens to land on
+        // dnd-kit's own bail-out for that, but only by how its ids resolve;
+        // saying so outright keeps it from coming back.
+        animateLayoutChanges: () => false,
+    })
 
     return (
         <TableRow

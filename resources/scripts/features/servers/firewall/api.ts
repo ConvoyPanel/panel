@@ -5,7 +5,8 @@ import { z } from 'zod'
 import { type DataResponse, apiFetch } from '@/lib/api'
 
 export type FirewallRule = App.Data.Server.Proxmox.Firewall.FirewallRuleData
-export type FirewallOptions = App.Data.Server.Proxmox.Firewall.FirewallOptionsData
+export type FirewallOptions =
+    App.Data.Server.Proxmox.Firewall.FirewallOptionsData
 export type FirewallRef = App.Data.Server.Proxmox.Firewall.FirewallRefData
 export type FirewallMacro = App.Data.Server.Proxmox.Firewall.FirewallMacroData
 export type FirewallLogEntry =
@@ -73,19 +74,29 @@ export const firewallQueries = {
 }
 
 export const getOptions = async (uuid: string): Promise<FirewallOptions> =>
-    (await apiFetch<DataResponse<FirewallOptions>>(FirewallController.options(uuid)))
-        .data
+    (
+        await apiFetch<DataResponse<FirewallOptions>>(
+            FirewallController.options(uuid)
+        )
+    ).data
 
 export const getRules = async (uuid: string): Promise<FirewallRule[]> =>
-    (await apiFetch<DataResponse<FirewallRule[]>>(FirewallController.index(uuid)))
-        .data
+    (
+        await apiFetch<DataResponse<FirewallRule[]>>(
+            FirewallController.index(uuid)
+        )
+    ).data
 
 export const getRefs = async (uuid: string): Promise<FirewallRef[]> =>
-    (await apiFetch<DataResponse<FirewallRef[]>>(FirewallController.refs(uuid))).data
+    (await apiFetch<DataResponse<FirewallRef[]>>(FirewallController.refs(uuid)))
+        .data
 
 export const getMacros = async (uuid: string): Promise<FirewallMacro[]> =>
-    (await apiFetch<DataResponse<FirewallMacro[]>>(FirewallController.macros(uuid)))
-        .data
+    (
+        await apiFetch<DataResponse<FirewallMacro[]>>(
+            FirewallController.macros(uuid)
+        )
+    ).data
 
 export const getLog = async (
     uuid: string,
@@ -144,7 +155,7 @@ export const ruleFormSchema = z
         digest: z.string().nullable(),
     })
     .refine(
-        (v) =>
+        v =>
             v.macro !== CUSTOM_MACRO ||
             v.protocol.trim() !== '' ||
             v.destinationPort.trim() !== '',
@@ -390,6 +401,36 @@ export const rulesInChain = (
 ): FirewallRule[] => (rules ?? []).filter(rule => rule.direction === direction)
 
 /**
+ * The ruleset with one rule moved, keeping every rule's `position` as it was.
+ *
+ * Deliberately not renumbered. Proxmox will renumber -- a rule's position *is*
+ * its index in the combined list -- but position is also the only thing
+ * identifying a rule to React and to dnd-kit, and renumbering hands every slot
+ * the same key it had before. Rows then keep their DOM nodes and swap their
+ * text instead of moving, which is the drop animating rather than landing.
+ *
+ * The stale positions live only until the write settles and the refetch brings
+ * the server's numbering back; dragging is disabled for that window, so nothing
+ * can address one of them in the meantime.
+ */
+export const reorderRules = (
+    rules: FirewallRule[],
+    from: number,
+    to: number
+): FirewallRule[] => {
+    const fromIndex = rules.findIndex(rule => rule.position === from)
+    const toIndex = rules.findIndex(rule => rule.position === to)
+
+    if (fromIndex === -1 || toIndex === -1) return rules
+
+    const next = [...rules]
+    const [moved] = next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, moved)
+
+    return next
+}
+
+/**
  * Where a new rule in this chain should land: after the chain's current last
  * rule, not at the end of the combined list. Appending globally would drop an
  * inbound rule below the outbound ones, which changes nothing about
@@ -451,8 +492,9 @@ export const describePolicyRow = (
  * rule anyone writes -- and on a server with no datacenter groups it was the
  * only suggestion the field ever made.
  */
-export const datacenterRefs = (refs: FirewallRef[] | undefined): FirewallRef[] =>
-    (refs ?? []).filter(ref => ref.scope === 'dc')
+export const datacenterRefs = (
+    refs: FirewallRef[] | undefined
+): FirewallRef[] => (refs ?? []).filter(ref => ref.scope === 'dc')
 
 const trimmed = (value: string): string => value.trim()
 
@@ -505,7 +547,8 @@ export const describeRuleTraffic = (rule: FirewallRule): string | null => {
 
     const protocol = rule.protocol?.toLowerCase()
 
-    if (protocol && rule.destinationPort) return `${protocol}/${rule.destinationPort}`
+    if (protocol && rule.destinationPort)
+        return `${protocol}/${rule.destinationPort}`
     if (protocol) return protocol
     if (rule.destinationPort) return `port ${rule.destinationPort}`
 
@@ -523,7 +566,7 @@ export const willBlockSsh = (
     if (policy === 'ACCEPT') return false
 
     return !rules.some(
-        (rule) =>
+        rule =>
             rule.isEnabled &&
             rule.direction === 'in' &&
             rule.action === 'ACCEPT' &&
@@ -536,7 +579,7 @@ export const willBlockSsh = (
 const matchesPort = (spec: string | null, port: number): boolean => {
     if (!spec) return false
 
-    return spec.split(',').some((part) => {
+    return spec.split(',').some(part => {
         const [start, end] = part.trim().split(':')
         const from = Number(start)
 
