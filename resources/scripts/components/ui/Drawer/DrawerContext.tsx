@@ -24,7 +24,12 @@ const DrawerContent = ({
                     'group/drawer',
                     // Surface matches the nova dialog popup: rounded-xl on
                     // bg-popover with a flat ring instead of a border.
-                    'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl bg-popover text-sm text-popover-foreground ring-1 ring-foreground/10',
+                    // `outline-none` for the same reason DialogContent carries
+                    // it: Base UI moves focus to the popup when it opens, and
+                    // without this the browser draws its own focus ring around
+                    // the entire sheet -- a blue rectangle framing the drawer,
+                    // which reads as a rendering fault rather than focus.
+                    'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl bg-popover text-sm text-popover-foreground ring-1 ring-foreground/10 outline-none',
                     // Depth cue for nested drawers, the drawer-side counterpart
                     // of DialogContent's offset/scale/tint. Base UI hides a
                     // nested drawer's backdrop exactly like a nested dialog's, so
