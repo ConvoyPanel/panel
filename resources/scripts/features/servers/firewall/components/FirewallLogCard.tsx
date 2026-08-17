@@ -1,37 +1,32 @@
 import {
     type FirewallLogEntry,
+    type FirewallOptions,
+    isLogging,
     useFirewallLog,
+    useFirewallOptions,
+    withLogging,
 } from '@/features/servers/firewall/api.ts'
-import { IconArrowDown, IconArrowUp, IconRefresh } from '@tabler/icons-react'
+import useUpdateFirewallOptions from '@/features/servers/firewall/use-update-options.ts'
+import {
+    IconArrowDown,
+    IconArrowUp,
+    IconLogs,
+    IconRefresh,
+} from '@tabler/icons-react'
 import { useState } from 'react'
 
-import { Badge } from '@/components/ui/Badge.tsx'
 import { Button } from '@/components/ui/Button'
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Switch } from '@/components/ui/Switch'
 
 const PAGE_SIZE = 50
 
-const actionVariant = {
-    ACCEPT: 'default',
-    DROP: 'destructive',
-    REJECT: 'secondary',
-} as const
-
-const actionLabel = {
-    ACCEPT: 'Accept',
-    DROP: 'Drop',
-    REJECT: 'Reject',
+const actionStyles = {
+    ACCEPT: 'text-success',
+    DROP: 'text-destructive',
+    REJECT: 'text-destructive/80',
 } as const
 
 const formatTime = (value: string | null): string => {
@@ -49,8 +44,8 @@ const formatTime = (value: string | null): string => {
 }
 
 /**
- * One log line. The parsed fields are best-effort — Proxmox's format is not a
- * contract — so a line that did not parse still shows, as its raw text.
+ * One log line. The parsed fields are best-effort -- Proxmox's format is not a
+ * contract -- so a line that did not parse still shows, as its raw text.
  */
 const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
     if (!entry.action && !entry.sourceAddress) {
@@ -68,27 +63,21 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
     return (
         <li
             className={
-                'flex items-center gap-3 border-b px-4 py-1.5 text-xs last:border-b-0'
+                'flex items-center gap-3 border-b px-4 py-1.5 font-mono text-xs last:border-b-0'
             }
             title={entry.raw}
         >
-            <span
-                className={
-                    'w-20 shrink-0 font-mono text-muted-foreground tabular-nums'
-                }
-            >
+            <span className={'w-20 shrink-0 text-muted-foreground tabular-nums'}>
                 {formatTime(entry.loggedAt)}
             </span>
 
-            <span className={'w-16 shrink-0'}>
-                {entry.action && (
-                    <Badge variant={actionVariant[entry.action]}>
-                        {actionLabel[entry.action]}
-                    </Badge>
-                )}
+            <span
+                className={`w-14 shrink-0 font-semibold tracking-wide ${entry.action ? actionStyles[entry.action] : ''}`}
+            >
+                {entry.action}
             </span>
 
-            <span className={'w-6 shrink-0 text-muted-foreground'}>
+            <span className={'w-4 shrink-0 text-muted-foreground'}>
                 {entry.direction === 'in' ? (
                     <IconArrowDown className={'size-3'} />
                 ) : entry.direction === 'out' ? (
@@ -96,13 +85,13 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
                 ) : null}
             </span>
 
-            <span className={'min-w-0 flex-1 truncate font-mono'}>
+            <span className={'min-w-0 flex-1 truncate'}>
                 {entry.sourceAddress ?? '?'}
                 <span className={'px-1.5 text-muted-foreground'}>→</span>
                 {entry.destinationAddress ?? '?'}
             </span>
 
-            <span className={'shrink-0 font-mono text-muted-foreground'}>
+            <span className={'shrink-0 text-muted-foreground'}>
                 {entry.protocol}
                 {entry.destinationPort != null && `/${entry.destinationPort}`}
             </span>
@@ -110,13 +99,35 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
     )
 }
 
+/** Which directions are recording, for the bar's status line. */
+const describeLoggedDirections = (options: FirewallOptions): string => {
+    const inbound = isLogging(options.inboundLogLevel)
+    const outbound = isLogging(options.outboundLogLevel)
+
+    if (inbound && outbound) return 'inbound and outbound'
+
+    return inbound ? 'inbound' : 'outbound'
+}
+
 interface Props {
     uuid: string
 }
 
+/**
+ * What the firewall actually did, most recent first.
+ *
+ * With nothing to show and nothing configured to log, this collapses to its own
+ * header and the switch that would fill it. The card it replaced spent a third
+ * of the page telling the reader to go and find a control in a different card
+ * at the top of the screen.
+ */
 const FirewallLogCard = ({ uuid }: Props) => {
     const [start, setStart] = useState(0)
     const [autoRefresh, setAutoRefresh] = useState(false)
+
+    const { data: options } = useFirewallOptions(uuid)
+    const { mutate: saveOptions, isPending: isSavingOptions } =
+        useUpdateFirewallOptions(uuid)
 
     // Only meaningful while looking at the newest page; refreshing under a user
     // who has paged back would pull the ground out from under them.
@@ -129,85 +140,143 @@ const FirewallLogCard = ({ uuid }: Props) => {
         refetch,
     } = useFirewallLog(uuid, start, PAGE_SIZE, isLive ? 10_000 : false)
 
+    /*
+     * The default policy is not the only thing that writes to this log -- an
+     * individual rule can set its own log level too. So an empty list is only
+     * evidence that nothing is configured when the policies also say so, and
+     * entries are shown whenever they exist regardless of these switches.
+     */
+    const isLoggingUnmatched =
+        options !== undefined &&
+        (isLogging(options.inboundLogLevel) ||
+            isLogging(options.outboundLogLevel))
+
+    const hasEntries = Boolean(entries?.length)
+
+    // `options !== undefined` is part of the condition, not a null guard: the
+    // two queries settle independently, and without it the card renders its
+    // dormant one-liner for a frame while the options are still in flight.
+    const isDormant =
+        !isLoading && options !== undefined && !hasEntries && !isLoggingUnmatched
+
+    const status = isDormant
+        ? 'Nothing is being logged'
+        : options && isLoggingUnmatched
+          ? `Logging unmatched ${describeLoggedDirections(options)} traffic`
+          : 'Logged by individual rules'
+
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Recent activity</CardTitle>
-                <CardDescription>
-                    Packets the firewall logged. Useful for working out why
-                    something cannot connect.
-                </CardDescription>
-                <CardAction className={'flex items-center gap-3'}>
-                    <label
-                        className={
-                            'flex items-center gap-2 text-xs text-muted-foreground'
-                        }
-                    >
-                        Auto-refresh
-                        <Switch
-                            checked={autoRefresh}
-                            onCheckedChange={setAutoRefresh}
-                            disabled={start !== 0}
-                        />
-                    </label>
+            {/* A plain bar rather than CardHeader: this card sits under the
+                ledger, whose chains use the same bar, and a title-plus-sentence
+                header here would read as a third unrelated surface. */}
+            <div
+                className={
+                    'flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3'
+                }
+            >
+                <h3 className={'font-medium'}>Recent activity</h3>
+                <span className={'text-xs text-muted-foreground'}>{status}</span>
+                <span className={'flex-1'} />
+
+                {isDormant ? (
                     <Button
                         variant={'outline'}
                         size={'sm'}
-                        onClick={() => refetch()}
-                        loading={isFetching}
-                        icon={<IconRefresh className={'size-4'} />}
-                    >
-                        Refresh
-                    </Button>
-                </CardAction>
-            </CardHeader>
-
-            <CardContent className={'flex-1 px-0'}>
-                {isLoading ? (
-                    <Skeleton className={'mx-4 h-40'} />
-                ) : !entries?.length ? (
-                    <SimpleEmptyState
-                        icon={IconRefresh}
-                        title={'Nothing logged'}
-                        description={
-                            'Turn on logging above to record the packets this firewall drops.'
+                        loading={isSavingOptions}
+                        onClick={() =>
+                            options &&
+                            saveOptions(withLogging(options, 'in', true))
                         }
-                    />
+                    >
+                        Log dropped inbound traffic
+                    </Button>
                 ) : (
-                    <ul>
-                        {entries.map(entry => (
-                            <LogRow key={entry.lineNumber} entry={entry} />
-                        ))}
-                    </ul>
+                    <>
+                        <label
+                            className={
+                                'flex items-center gap-2 text-xs text-muted-foreground'
+                            }
+                        >
+                            Live
+                            <Switch
+                                checked={autoRefresh}
+                                onCheckedChange={setAutoRefresh}
+                                disabled={start !== 0}
+                            />
+                        </label>
+                        <Button
+                            variant={'outline'}
+                            size={'sm'}
+                            onClick={() => refetch()}
+                            loading={isFetching}
+                        >
+                            <IconRefresh className={'size-4'} />
+                            Refresh
+                        </Button>
+                    </>
                 )}
-            </CardContent>
+            </div>
 
-            <CardFooter className={'gap-3 text-xs text-muted-foreground'}>
-                <span>
-                    {!entries?.length
-                        ? 'No entries on this page'
-                        : isLive
-                          ? `Showing the latest ${entries.length} entries`
-                          : `Showing entries ${start + 1}–${start + entries.length}`}
-                </span>
-                <span className={'flex-1'} />
-                <Button
-                    variant={'outline'}
-                    size={'sm'}
-                    disabled={start === 0}
-                    onClick={() => setStart(Math.max(start - PAGE_SIZE, 0))}
-                >
-                    Newer
-                </Button>
-                <Button
-                    variant={'outline'}
-                    size={'sm'}
-                    disabled={(entries?.length ?? 0) < PAGE_SIZE}
-                    onClick={() => setStart(start + PAGE_SIZE)}
-                >
-                    Older
-                </Button>
-            </CardFooter>
+            {!isDormant && (
+                <>
+                    <div className={'border-t'}>
+                        {isLoading ? (
+                            <Skeleton className={'m-4 h-24'} />
+                        ) : hasEntries ? (
+                            <ul>
+                                {(entries ?? []).map(entry => (
+                                    <LogRow
+                                        key={entry.lineNumber}
+                                        entry={entry}
+                                    />
+                                ))}
+                            </ul>
+                        ) : (
+                            <SimpleEmptyState
+                                icon={IconLogs}
+                                title={'Nothing logged yet'}
+                                description={
+                                    'Packets will appear here as the firewall logs them.'
+                                }
+                            />
+                        )}
+                    </div>
+
+                    {(hasEntries || start > 0) && (
+                        <div
+                            className={
+                                'flex items-center gap-3 border-t px-4 py-3 text-xs text-muted-foreground'
+                            }
+                        >
+                            <span>
+                                {isLive
+                                    ? `Latest ${entries?.length ?? 0} entries`
+                                    : `Entries ${start + 1}–${start + (entries?.length ?? 0)}`}
+                            </span>
+                            <span className={'flex-1'} />
+                            <Button
+                                variant={'outline'}
+                                size={'sm'}
+                                disabled={start === 0}
+                                onClick={() =>
+                                    setStart(Math.max(start - PAGE_SIZE, 0))
+                                }
+                            >
+                                Newer
+                            </Button>
+                            <Button
+                                variant={'outline'}
+                                size={'sm'}
+                                disabled={(entries?.length ?? 0) < PAGE_SIZE}
+                                onClick={() => setStart(start + PAGE_SIZE)}
+                            >
+                                Older
+                            </Button>
+                        </div>
+                    )}
+                </>
+            )}
         </Card>
     )
 }

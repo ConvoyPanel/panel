@@ -162,7 +162,7 @@ export const ruleFormDefaults: RuleFormValues = {
     direction: 'in',
     action: 'ACCEPT',
     enabled: true,
-    macro: CUSTOM_MACRO,
+    macro: '',
     protocol: '',
     sourceAddress: '',
     destinationAddress: '',
@@ -180,7 +180,15 @@ export const ruleToFormValues = (rule: FirewallRule): RuleFormValues => ({
     direction: rule.direction,
     action: rule.action,
     enabled: rule.isEnabled,
-    macro: rule.macro ?? CUSTOM_MACRO,
+    /*
+     * A rule with no macro but a protocol or port was written by hand, so it
+     * reopens as Custom with those fields showing. Mapping every macro-less
+     * rule to the empty option instead would hide the protocol and port inputs
+     * and silently drop what they held on the next save.
+     */
+    macro:
+        rule.macro ??
+        (rule.protocol || rule.destinationPort ? CUSTOM_MACRO : ''),
     protocol: rule.protocol ?? '',
     sourceAddress: rule.sourceAddress ?? '',
     destinationAddress: rule.destinationAddress ?? '',
@@ -275,6 +283,71 @@ export const optionsFormSchema = z.object({
 
 export type OptionsFormValues = z.infer<typeof optionsFormSchema>
 
+/**
+ * The options as the form holds them, so a caller can change one field and send
+ * the rest back untouched. Every write carries all four, and the digest that
+ * came with them.
+ */
+export const optionsToFormValues = (
+    options: FirewallOptions
+): OptionsFormValues => ({
+    inboundPolicy: options.inboundPolicy,
+    outboundPolicy: options.outboundPolicy,
+    inboundLogLevel: options.inboundLogLevel,
+    outboundLogLevel: options.outboundLogLevel,
+    digest: options.digest,
+})
+
+/**
+ * The severity a direction logs at once logging is switched on. Proxmox has
+ * nine; picking between them is not a decision this page asks anyone to make,
+ * and one an operator has already made from Proxmox is preserved rather than
+ * flattened back to this.
+ */
+export const DEFAULT_LOG_LEVEL: FirewallLogLevel = 'info'
+
+export const isLogging = (level: FirewallLogLevel): boolean => level !== 'nolog'
+
+/** The options with one direction's default policy changed. */
+export const withPolicy = (
+    options: FirewallOptions,
+    direction: RuleDirection,
+    policy: FirewallPolicy
+): OptionsFormValues => {
+    const values = optionsToFormValues(options)
+
+    return direction === 'in'
+        ? { ...values, inboundPolicy: policy }
+        : { ...values, outboundPolicy: policy }
+}
+
+/**
+ * The options with one direction's logging switched on or off.
+ *
+ * A severity an operator set from Proxmox survives being switched off and on
+ * again in the same visit, because the options this is derived from are the
+ * ones last loaded; only a direction that has never logged falls back to the
+ * default.
+ */
+export const withLogging = (
+    options: FirewallOptions,
+    direction: RuleDirection,
+    enabled: boolean
+): OptionsFormValues => {
+    const values = optionsToFormValues(options)
+    const current =
+        direction === 'in' ? options.inboundLogLevel : options.outboundLogLevel
+    const level: FirewallLogLevel = enabled
+        ? isLogging(current)
+            ? current
+            : DEFAULT_LOG_LEVEL
+        : 'nolog'
+
+    return direction === 'in'
+        ? { ...values, inboundLogLevel: level }
+        : { ...values, outboundLogLevel: level }
+}
+
 export const updateOptions = async (
     uuid: string,
     values: OptionsFormValues
@@ -294,7 +367,134 @@ export const updateOptions = async (
         )
     ).data
 
+// ─── chains ─────────────────────────────────────────────────────────────────
+
+/*
+ * Proxmox keeps one ordered list with the directions mixed together, and a
+ * rule's position is its index in that combined list. Only the order *within*
+ * a direction decides anything though: the inbound chain and the outbound
+ * chain are matched separately, so an inbound rule sitting "above" an outbound
+ * one means nothing at all. Everything below splits the list for display while
+ * keeping each rule's real, global position, which is still its identity in
+ * every write.
+ */
+
+export const directionLabels: Record<RuleDirection, string> = {
+    in: 'Inbound',
+    out: 'Outbound',
+}
+
+export const rulesInChain = (
+    rules: FirewallRule[] | undefined,
+    direction: RuleDirection
+): FirewallRule[] => (rules ?? []).filter(rule => rule.direction === direction)
+
+/**
+ * Where a new rule in this chain should land: after the chain's current last
+ * rule, not at the end of the combined list. Appending globally would drop an
+ * inbound rule below the outbound ones, which changes nothing about
+ * enforcement but reads as though it did.
+ */
+export const appendPosition = (
+    rules: FirewallRule[] | undefined,
+    direction: RuleDirection
+): number => {
+    const all = rules ?? []
+    const chain = rulesInChain(all, direction)
+    const last = chain[chain.length - 1]
+
+    return last?.position != null ? last.position + 1 : all.length
+}
+
 // ─── display helpers ────────────────────────────────────────────────────────
+
+const plural = (count: number, noun: string): string =>
+    `${count} ${noun}${count === 1 ? '' : 's'}`
+
+export const policyAdjectives: Record<FirewallPolicy, string> = {
+    ACCEPT: 'Accepted',
+    DROP: 'Dropped',
+    REJECT: 'Rejected',
+}
+
+/** The count line beside a chain's name: `4 rules · 1 off`. */
+export const describeChain = (rules: FirewallRule[]): string => {
+    if (rules.length === 0) return 'No rules'
+
+    const off = rules.filter(rule => !rule.isEnabled).length
+
+    return off === 0
+        ? plural(rules.length, 'rule')
+        : `${plural(rules.length, 'rule')} · ${off} off`
+}
+
+/**
+ * The lead-in to a chain's policy row. With no rules above it there is nothing
+ * for traffic to be "unmatched" by, so the sentence covers all of it.
+ */
+export const describePolicyRow = (
+    direction: RuleDirection,
+    hasRules: boolean
+): string =>
+    hasRules
+        ? `Unmatched ${directionLabels[direction].toLowerCase()} traffic is`
+        : `All ${directionLabels[direction].toLowerCase()} traffic is`
+
+/**
+ * The aliases and IP sets worth offering in a rule.
+ *
+ * Only the datacenter-scoped ones. The guest-scoped entries are Convoy's own:
+ * `configureFirewall()` turns on Proxmox's `ipfilter`, which keeps an
+ * `ipfilter-net0` set per interface holding the addresses that interface may
+ * send from, and `clearIpsets()` rebuilds them on every address change. As a
+ * rule's source that reads "traffic claiming to come from me", which is not a
+ * rule anyone writes -- and on a server with no datacenter groups it was the
+ * only suggestion the field ever made.
+ */
+export const datacenterRefs = (refs: FirewallRef[] | undefined): FirewallRef[] =>
+    (refs ?? []).filter(ref => ref.scope === 'dc')
+
+const trimmed = (value: string): string => value.trim()
+
+/** What a half-filled form currently matches, for {@see describeRuleIntent}. */
+const describeFormTraffic = (values: RuleFormValues): string => {
+    if (values.macro !== CUSTOM_MACRO && trimmed(values.macro) !== '') {
+        return trimmed(values.macro)
+    }
+
+    const protocol = trimmed(values.protocol).toLowerCase()
+    const port = trimmed(values.destinationPort)
+
+    if (protocol && port) return `${protocol}/${port}`
+    if (protocol) return protocol
+    if (port) return `port ${port}`
+
+    return 'all traffic'
+}
+
+/**
+ * The rule as a sentence, for the dialog's description line.
+ *
+ * This replaces a static "Allow or block specific traffic to this server",
+ * which said the same thing however the form was filled in. Reading back what
+ * is about to be written is the one thing the form could never do.
+ */
+export const describeRuleIntent = (values: RuleFormValues): string => {
+    const verbs: Record<RuleAction, string> = {
+        ACCEPT: 'Accepts',
+        DROP: 'Drops',
+        REJECT: 'Rejects',
+    }
+
+    const isInbound = values.direction === 'in'
+    const peer = trimmed(
+        isInbound ? values.sourceAddress : values.destinationAddress
+    )
+
+    return `${verbs[values.action]} ${describeFormTraffic(values)} ${
+        isInbound ? 'from' : 'to'
+    } ${peer === '' ? 'anywhere' : peer}.`
+}
 
 /**
  * What a rule matches, in one string: `tcp/22`, `icmp`, or the macro's name.
