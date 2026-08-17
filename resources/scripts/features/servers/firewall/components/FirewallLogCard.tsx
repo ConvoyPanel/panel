@@ -155,8 +155,8 @@ const FirewallLogCard = ({ uuid }: Props) => {
                         size={'sm'}
                         onClick={() => refetch()}
                         loading={isFetching}
+                        icon={<IconRefresh className={'size-4'} />}
                     >
-                        <IconRefresh className={'size-4'} />
                         Refresh
                     </Button>
                 </CardAction>

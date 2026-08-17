@@ -596,8 +596,8 @@ const ConsoleView = ({
                     className='shrink-0 border-white/15 bg-transparent text-zinc-200 hover:bg-zinc-800 hover:text-white'
                     loading={enablingDisplay}
                     onClick={() => enableDisplay()}
+                    icon={<IconDeviceDesktop />}
                 >
-                    <IconDeviceDesktop />
                     Enable display output
                 </Button>
             )}
