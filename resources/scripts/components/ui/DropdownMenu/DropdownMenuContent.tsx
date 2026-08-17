@@ -33,7 +33,14 @@ const DropdownMenuContent = forwardRef<
                     ref={ref}
                     data-slot={'dropdown-menu-content'}
                     className={cn(
-                        'bg-popover text-popover-foreground ring-foreground/10 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-50 max-h-[var(--available-height)] w-[var(--anchor-width)] min-w-32 origin-[var(--transform-origin)] overflow-x-hidden overflow-y-auto rounded-lg p-1 shadow-md ring-1 duration-100 outline-none data-closed:overflow-hidden',
+                        // The trigger's width is a floor, not the width. Pinning
+                        // the menu to `w-[--anchor-width]` is Select behaviour --
+                        // there the popup stands in for the trigger, so matching
+                        // it is the point -- and applied to a menu it wraps the
+                        // items' own labels under a small button. Capped at the
+                        // space the positioner reports so a long label cannot
+                        // push the menu off-screen instead.
+                        'bg-popover text-popover-foreground ring-foreground/10 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-50 max-h-[var(--available-height)] max-w-[var(--available-width)] min-w-[max(8rem,var(--anchor-width))] origin-[var(--transform-origin)] overflow-x-hidden overflow-y-auto rounded-lg p-1 shadow-md ring-1 duration-100 outline-none data-closed:overflow-hidden',
                         className
                     )}
                     {...props}
