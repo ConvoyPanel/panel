@@ -10,11 +10,13 @@ import {
     IconNetwork,
     IconRefresh,
     IconServer,
+    IconShieldCog,
     IconShieldHalf,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { Suspense, lazy } from 'react'
 
+import { useUser } from '@/features/auth/api.ts'
 import { useServer, preloadServer } from '@/features/servers/detail/api.ts'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -53,6 +55,7 @@ export const Route = createFileRoute('/_app/servers/$serverUuid')({
 function ServerLayout() {
     const { serverUuid } = Route.useParams()
     const { data: server } = useServer(serverUuid)
+    const { data: user } = useUser()
     useTitle(server?.name)
 
     const nav: SidebarNav = {
@@ -123,6 +126,23 @@ function ServerLayout() {
                     },
                 ],
             },
+            // The admin side is keyed by the numeric id, not the uuid this route
+            // carries, so the jump has to wait for the server to load. Gated on
+            // root_admin because a customer has nothing to land on over there.
+            ...(user?.rootAdmin && server
+                ? [
+                      {
+                          label: 'Admin',
+                          items: [
+                              {
+                                  icon: IconShieldCog,
+                                  label: 'Manage in Admin',
+                                  path: `/admin/servers/${server.id}`,
+                              },
+                          ],
+                      },
+                  ]
+                : []),
         ],
     }
 

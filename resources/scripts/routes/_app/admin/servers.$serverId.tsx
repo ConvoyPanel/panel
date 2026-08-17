@@ -4,6 +4,7 @@ import { processAxiosError } from '@/utils/http.ts'
 import {
     IconAdjustments,
     IconDatabase,
+    IconLayoutDashboard,
     IconLayoutGrid,
     IconServer,
 } from '@tabler/icons-react'
@@ -68,6 +69,24 @@ function ServerLayout() {
                     },
                 ],
             },
+            // Mirror of the client sidebar's "Manage in Admin". The client route
+            // is keyed by uuid, which only arrives with the loaded server. Every
+            // route under /admin is root-admin only, and the server policy lets a
+            // root admin through for any server, so this never dead-ends.
+            ...(server
+                ? [
+                      {
+                          label: 'Client',
+                          items: [
+                              {
+                                  icon: IconLayoutDashboard,
+                                  label: 'Client dashboard',
+                                  path: `/servers/${server.uuid}`,
+                              },
+                          ],
+                      },
+                  ]
+                : []),
         ],
     }
 
