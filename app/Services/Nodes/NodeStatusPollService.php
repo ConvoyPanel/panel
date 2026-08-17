@@ -45,6 +45,7 @@ class NodeStatusPollService
         private GuestStateCache $guestStates,
         private NodeResourceSnapshotCache $resourceSnapshots,
         private StorageDiscoveryService $storageDiscovery,
+        private SharedStorageLinkService $sharedStorageLinks,
     ) {}
 
     public function handle(Node $node): NodeStatus
@@ -72,7 +73,19 @@ class NodeStatusPollService
         // to what the operator declared so the two can be compared.
         $this->storageDiscovery->handle($node, $storages);
 
-        return $this->markOnline($node, $this->clusterNameFor($node));
+        $clusterName = $this->clusterNameFor($node);
+
+        // Recorded before the storage links are drawn, because that step reads
+        // cluster membership back out of the database -- including this node's.
+        // Linking first would query a row that does not yet know its own cluster.
+        $status = $this->markOnline($node, $clusterName);
+
+        // The response describes the whole cluster's storage layout, not just
+        // this node's, so one poll is enough to keep every shared pool attached
+        // where Proxmox says it is available.
+        $this->sharedStorageLinks->handle($node, $clusterName, $resources->storages);
+
+        return $status;
     }
 
     /**

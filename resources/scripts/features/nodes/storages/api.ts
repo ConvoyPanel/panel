@@ -34,10 +34,6 @@ const proxmoxRoute =
         '/api/admin/nodes/{node}/storages/proxmox'
     ]
 const storeRoute = StorageController.store['/api/admin/nodes/{node}/storages']
-const attachableRoute =
-    StorageController.attachable['/api/admin/nodes/{node}/storages/attachable']
-const attachRoute =
-    StorageController.attach['/api/admin/nodes/{node}/storages/attach']
 // Served under both the panel and Application prefixes, so reference the admin one.
 const inventoryRoute = StorageInventoryController['/api/admin/storages']
 const backupOrderRoute =
@@ -62,32 +58,6 @@ export const getStoragesProxmox = async (nodeId: number) => {
 }
 
 /**
- * Storages registered on another node of the same PVE cluster that this node
- * could take on. The server filters rather than validating on submit, so
- * anything returned here is known to be attachable.
- */
-export const getAttachableStorages = async (
-    nodeId: number
-): Promise<NodeStorage[]> => {
-    const { data } = await apiFetch<DataResponse<any[]>>(
-        attachableRoute(nodeId)
-    )
-
-    return data.map(rawDataToNodeStorage)
-}
-
-export const attachStorage = async (
-    nodeId: number,
-    storageId: number
-): Promise<NodeStorage> => {
-    const { data } = await apiFetch<DataResponse<any>>(attachRoute(nodeId), {
-        body: { storage_id: storageId },
-    })
-
-    return rawDataToNodeStorage(data)
-}
-
-/**
  * Every storage across every node, with recorded capacity only -- the fleet page
  * cannot make a live Proxmox call per node.
  */
@@ -108,12 +78,6 @@ export const storageQueries = {
         queryOptions({
             queryKey: storageQueries.all(nodeId),
             queryFn: () => getStorages(nodeId),
-            enabled: !!nodeId,
-        }),
-    attachable: (nodeId: number) =>
-        queryOptions({
-            queryKey: [...storageQueries.all(nodeId), 'attachable'] as const,
-            queryFn: () => getAttachableStorages(nodeId),
             enabled: !!nodeId,
         }),
 }

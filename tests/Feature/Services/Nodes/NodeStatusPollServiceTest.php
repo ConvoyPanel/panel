@@ -603,3 +603,97 @@ it('does not ask for the cluster when the node is unreachable', function () {
     // The whole point of ordering it second: a down node must not cost two timeouts.
     Http::assertNotSent(fn ($request) => str_contains($request->url(), '/cluster/status'));
 });
+
+it('attaches a shared pool to every clustered node Proxmox reports it on', function () {
+    $peer = Node::factory()->for(Location::factory())->create([
+        'name' => 'pve-2',
+        'cluster_name' => 'prod',
+    ]);
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $this->node->storages()->attach($storage);
+
+    $this->clusterStatus = [
+        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
+        ...STANDALONE_STATUS,
+    ];
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('ceph-vm', $this->node->name, used: 1, total: 10, shared: true, pluginType: 'rbd'),
+            storageRow('ceph-vm', 'pve-2', used: 1, total: 10, shared: true, pluginType: 'rbd'),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    // Which nodes reach a pool is Proxmox's answer, not something to ask for.
+    expect($storage->refresh()->nodes()->pluck('name')->sort()->values()->all())
+        ->toBe([$this->node->name, 'pve-2']);
+});
+
+it('never links a local storage that merely shares a name', function () {
+    $peer = Node::factory()->for(Location::factory())->create([
+        'name' => 'pve-2',
+        'cluster_name' => 'prod',
+    ]);
+    $storage = Storage::factory()->create(['name' => 'local-lvm']);
+    $this->node->storages()->attach($storage);
+
+    $this->clusterStatus = [
+        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
+        ...STANDALONE_STATUS,
+    ];
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('local-lvm', $this->node->name, used: 1, total: 10, shared: false, pluginType: 'lvmthin'),
+            storageRow('local-lvm', 'pve-2', used: 5, total: 10, shared: false, pluginType: 'lvmthin'),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    // `local-lvm` exists on every host under one cluster-wide definition, but
+    // each is a physically different disk. Linking them would claim one pool
+    // where there are two.
+    expect($storage->refresh()->nodes()->count())->toBe(1)
+        ->and($peer->storages()->count())->toBe(0);
+});
+
+it('does not link a shared pool onto a node in another cluster', function () {
+    $stranger = Node::factory()->for(Location::factory())->create([
+        'name' => 'pve-2',
+        'cluster_name' => 'somewhere-else',
+    ]);
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $this->node->storages()->attach($storage);
+
+    $this->clusterStatus = [
+        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
+        ...STANDALONE_STATUS,
+    ];
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('ceph-vm', 'pve-2', used: 1, total: 10, shared: true, pluginType: 'rbd'),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($stranger->storages()->count())->toBe(0);
+});
+
+it('links nothing for a standalone host', function () {
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $this->node->storages()->attach($storage);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow('ceph-vm', $this->node->name, used: 1, total: 10, shared: true)],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh()->nodes()->count())->toBe(1);
+});
