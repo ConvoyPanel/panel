@@ -53,7 +53,7 @@ it('can change server passwords', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $response = $this->actingAs($user)->putJson(
+    $response = $this->actingAs($user)->withSession(confirmedSession())->putJson(
         "/api/client/servers/{$server->uuid}/settings/auth",
         [
             'type' => 'password',
@@ -62,6 +62,57 @@ it('can change server passwords', function () {
     );
 
     $response->assertNoContent();
+});
+
+it('cannot change server passwords without a confirmed identity', function () {
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->putJson(
+        "/api/client/servers/{$server->uuid}/settings/auth",
+        [
+            'type' => 'password',
+            'password' => 'Advinservers is king!123',
+        ],
+    );
+
+    $response->assertForbidden();
+});
+
+it('does not gate ssh keys behind identity confirmation', function () {
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->putJson(
+        "/api/client/servers/{$server->uuid}/settings/auth",
+        [
+            'type' => 'ssh_keys',
+            'ssh_keys' => '',
+        ],
+    );
+
+    $response->assertNoContent();
+});
+
+it('rejects passwords the guest OS policy would not accept', function () {
+    fakeProxmox();
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->withSession(confirmedSession())->putJson(
+        "/api/client/servers/{$server->uuid}/settings/auth",
+        [
+            'type' => 'password',
+            'password' => 'alllowercase',
+        ],
+    );
+
+    // The message has to be the sentence, not the `validation.password.default` key it
+    // used to leak when the only translations lived in a locale nothing loaded.
+    $response->assertUnprocessable()
+        ->assertJsonPath('errors.password.0', __('validation.password.default', ['attribute' => 'password']));
 });
 
 it('can fetch available ISOs', function () {
