@@ -29,7 +29,8 @@ export interface Address {
     version: AddressVersion
     ip: string
     prefixLength: number
-    gateway: string
+    /** Both come from the address block, so every address in a block repeats them. */
+    gateway: string | null
     macAddress: string | null
     server: Server | null | undefined
     addressBlock?: AddressBlock

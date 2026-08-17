@@ -19,7 +19,7 @@ const AddressesCard = ({ uuid }: Props) => {
     const { data: addresses, isLoading, isError, refetch } = useAddresses(uuid)
 
     return (
-        <Card className={'@md:col-span-2'}>
+        <Card>
             <CardHeader>
                 <CardTitle>IP Addresses</CardTitle>
                 <CardDescription>
@@ -30,7 +30,12 @@ const AddressesCard = ({ uuid }: Props) => {
                 {isError && !addresses ? (
                     <CollectionErrorState onRetry={refetch} />
                 ) : isLoading || !addresses ? (
-                    <Skeleton className={'h-32 w-full'} />
+                    /* Shaped like the table it becomes — a summary line over a
+                       bordered body — so the card doesn't resize on load. */
+                    <div className={'flex flex-col gap-3'}>
+                        <Skeleton className={'h-4 w-40'} />
+                        <Skeleton className={'h-32 w-full rounded-lg'} />
+                    </div>
                 ) : (
                     <AddressList addresses={addresses} />
                 )}

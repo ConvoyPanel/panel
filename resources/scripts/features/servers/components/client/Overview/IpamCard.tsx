@@ -25,7 +25,12 @@ const IpamCard = () => {
                 {addresses ? (
                     <AddressList addresses={addresses} />
                 ) : (
-                    <Skeleton className={'h-8 w-full'} />
+                    /* Same shape as the table that replaces it — a summary line
+                       over a bordered body — so the card holds still on load. */
+                    <div className={'flex flex-col gap-3'}>
+                        <Skeleton className={'h-4 w-40'} />
+                        <Skeleton className={'h-32 w-full rounded-lg'} />
+                    </div>
                 )}
             </CardContent>
         </Card>
