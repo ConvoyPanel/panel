@@ -1,9 +1,10 @@
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
+import { storageCapacity } from '@/features/nodes/storages/capacity.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import byteSize from 'byte-size'
 import { useMemo } from 'react'
 
-import { type Segment, SegmentedProgressBar } from '@/components/ui/Progress'
+import { SegmentedProgressBar } from '@/components/ui/Progress'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -25,95 +26,14 @@ const ShowStorageModal = () => {
         close,
     } = useModal(useStoragesModalStore, 'show')
 
-    // Prefer live Proxmox capacity (the truth — includes the base system and any
-    // non-Convoy consumers). Fall back to Convoy's own allocation against the
-    // configured size only when the node is offline.
-    const view = useMemo(() => {
-        if (!storage) return null
-
-        const committed =
-            storage.usages.server + storage.usages.backup + storage.usages.iso
-
-        if (storage.online && storage.physicalTotal) {
-            const total = storage.physicalTotal
-            const used = storage.physicalUsed ?? 0
-            const untracked = storage.untracked ?? 0
-            const free = storage.physicalFree ?? 0
-            const freeForConvoy = storage.freeForConvoy ?? free
-            // Reserve is carved out of the free space, not from what's used.
-            const reservedShown = Math.max(0, free - freeForConvoy)
-
-            const segments: Segment[] = [
-                {
-                    label: 'KVM',
-                    value: pct(storage.usages.server, total),
-                    color: 'var(--chart-1)',
-                },
-                {
-                    label: 'Backups',
-                    value: pct(storage.usages.backup, total),
-                    color: 'var(--chart-2)',
-                },
-                {
-                    label: 'ISO Images',
-                    value: pct(storage.usages.iso, total),
-                    color: 'var(--chart-3)',
-                },
-                {
-                    label: 'Untracked (base system + other)',
-                    value: pct(untracked, total),
-                    color: 'var(--chart-4)',
-                },
-                {
-                    label: 'Reserved (headroom)',
-                    value: pct(reservedShown, total),
-                    color: 'color-mix(in oklab, var(--muted-foreground) 35%, transparent)',
-                },
-            ]
-
-            return {
-                online: true as const,
-                total,
-                used,
-                freeForConvoy,
-                reserved: reservedShown,
-                segments,
-            }
-        }
-
-        // Offline fallback: Convoy's bookkeeping against the configured size.
-        const total = storage.size
-        const segments: Segment[] = [
-            {
-                label: 'KVM',
-                value: pct(storage.usages.server, total),
-                color: 'var(--chart-1)',
-            },
-            {
-                label: 'Backups',
-                value: pct(storage.usages.backup, total),
-                color: 'var(--chart-2)',
-            },
-            {
-                label: 'ISO Images',
-                value: pct(storage.usages.iso, total),
-                color: 'var(--chart-3)',
-            },
-        ]
-
-        return {
-            online: false as const,
-            total,
-            used: committed,
-            freeForConvoy: Math.max(0, total - committed),
-            reserved: 0,
-            segments,
-        }
-    }, [storage])
+    // One derivation, shared with the list row, so the modal and the row can
+    // never disagree about the same storage.
+    const view = useMemo(
+        () => (storage ? storageCapacity(storage) : null),
+        [storage]
+    )
 
     if (!view) return null
-
-    const usedPercent = view.total ? (view.used / view.total) * 100 : 0
 
     return (
         <ResponsiveDialog open={open} onOpenChange={open => !open && close()}>
@@ -124,15 +44,15 @@ const ShowStorageModal = () => {
                     </ResponsiveDialogTitle>
                 </ResponsiveDialogHeader>
                 <ResponsiveDialogBody>
-                    {!view.online && (
+                    {view.source !== 'live' && (
                         <p
                             className={
                                 'bg-muted text-muted-foreground mb-2 rounded-md px-3 py-2 text-sm'
                             }
                         >
-                            Live usage unavailable — the node is offline.
-                            Showing Convoy&rsquo;s own allocation against the
-                            configured size.
+                            {view.source === 'recorded'
+                                ? 'The node is unreachable. These are the figures Convoy last recorded from it.'
+                                : 'Convoy has never reached this storage, so its capacity is unknown.'}
                         </p>
                     )}
                     <p
@@ -141,7 +61,7 @@ const ShowStorageModal = () => {
                         }
                     >
                         {fmt(view.used)} used out of {fmt(view.total)} &#x2022;{' '}
-                        {usedPercent.toFixed(2)}%
+                        {view.percent.toFixed(2)}%
                     </p>
                     <SegmentedProgressBar
                         className={'h-4'}
@@ -169,7 +89,7 @@ const ShowStorageModal = () => {
                             ))}
                     </ul>
 
-                    {view.online && (
+                    {view.known && (
                         <dl
                             className={
                                 'mt-6 grid grid-cols-2 gap-x-6 gap-y-2 text-sm'
@@ -179,7 +99,7 @@ const ShowStorageModal = () => {
                                 Free for Convoy
                             </dt>
                             <dd className={'text-right font-medium'}>
-                                {fmt(view.freeForConvoy)}
+                                {fmt(view.freeForConvoy ?? 0)}
                             </dd>
                             {view.reserved > 0 && (
                                 <>
@@ -198,8 +118,5 @@ const ShowStorageModal = () => {
         </ResponsiveDialog>
     )
 }
-
-const pct = (part: number, total: number) =>
-    total > 0 ? (part / total) * 100 : 0
 
 export default ShowStorageModal

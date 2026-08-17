@@ -3,7 +3,7 @@ import DeleteStorageModal from '@/features/nodes/components/Storages/DeleteStora
 import EditStorageModal from '@/features/nodes/components/Storages/EditStorageModal.tsx'
 import LoadBalancerSidebar from '@/features/nodes/components/Storages/LoadBalancerSidebar.tsx'
 import ShowStorageModal from '@/features/nodes/components/Storages/ShowStorageModal.tsx'
-import StorageCard from '@/features/nodes/components/Storages/StorageCard.tsx'
+import StorageList from '@/features/nodes/components/Storages/StorageList.tsx'
 import { useStorages } from '@/features/nodes/storages/api.ts'
 import { IconDatabase } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
@@ -13,7 +13,6 @@ import {
     CollectionErrorState,
     SimpleEmptyState,
 } from '@/components/ui/EmptyStates'
-import { ItemGroup } from '@/components/ui/Item'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -62,11 +61,7 @@ function NodeStorages() {
                     />
                 </Card>
             ) : (
-                <ItemGroup className={'gap-3'}>
-                    {storages?.map(storage => (
-                        <StorageCard key={storage.id} storage={storage} />
-                    ))}
-                </ItemGroup>
+                <StorageList storages={storages ?? []} />
             )}
         </>
     )
