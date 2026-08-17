@@ -26,6 +26,7 @@ export const rawDataToStorage = (raw: any): Storage => ({
     pveShared: raw.pveShared ?? null,
     pveContent: raw.pveContent ?? null,
     isThin: raw.isThin ?? false,
+    sharedWith: raw.sharedWith ?? [],
     online: raw.online ?? false,
     capacitySource: raw.capacitySource ?? 'unknown',
     observedAt: raw.observedAt ?? null,

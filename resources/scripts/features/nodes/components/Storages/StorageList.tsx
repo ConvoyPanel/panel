@@ -93,6 +93,21 @@ const qualifier = (
 }
 
 /**
+ * Who else is on this pool, in words.
+ *
+ * A "shared" badge says a pool is shared without saying what that costs the
+ * reader: 20 TiB of free Ceph on four nodes is 20 TiB in total, not per node,
+ * and an operator who does not know that will plan the same disk four times.
+ */
+const SharedWith = ({ storage }: { storage: NodeStorage }) =>
+    storage.sharedWith.length > 0 ? (
+        <StatLabel className='mt-1 block text-xs'>
+            Shared with {storage.sharedWith.join(', ')} — this capacity is not
+            this node&rsquo;s alone
+        </StatLabel>
+    ) : null
+
+/**
  * How full a storage is, and the one sentence that qualifies the number.
  *
  * A store Proxmox could not read shows no bar at all: it reports zeroes when an
@@ -109,6 +124,7 @@ const Capacity = ({ storage }: { storage: NodeStorage }) => {
                 <StatLabel className='mt-1 block text-xs'>
                     Proxmox could not read it — offline or not mounted
                 </StatLabel>
+                <SharedWith storage={storage} />
             </>
         )
     }
@@ -137,6 +153,7 @@ const Capacity = ({ storage }: { storage: NodeStorage }) => {
                     {qualifier(storage, view)}
                 </StatLabel>
             )}
+            <SharedWith storage={storage} />
         </>
     )
 }

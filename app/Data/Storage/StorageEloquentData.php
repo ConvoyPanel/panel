@@ -3,6 +3,7 @@
 namespace App\Data\Storage;
 
 use App\Data\Node\Storage\StorageData;
+use App\Models\Node;
 use App\Models\Storage;
 use App\Support\StorageBackends;
 use Carbon\CarbonImmutable;
@@ -30,6 +31,17 @@ class StorageEloquentData extends Data
         public bool $storesIso,
         public bool $storesSnippets,
         public ?int $backupOrder,
+        /**
+         * The other nodes reaching this same storage, named.
+         *
+         * A shared pool's capacity is not this node's alone, and a badge saying
+         * "shared" does not convey that -- an operator reading 20 TiB of free
+         * Ceph on four nodes will happily plan four nodes' growth against one
+         * disk. Naming the others is what stops that.
+         *
+         * @var array<int, string>
+         */
+        public array $sharedWith,
         // What Proxmox says this storage is, recorded by the poll. Null until a
         // node has reported it at least once.
         public ?string $pveType,
@@ -78,8 +90,11 @@ class StorageEloquentData extends Data
         public ?int $freeForConvoy,
     ) {}
 
-    public static function fromModel(Storage $storage, ?StorageData $live = null): self
-    {
+    public static function fromModel(
+        Storage $storage,
+        ?StorageData $live = null,
+        ?Node $viewedFrom = null,
+    ): self {
         $serverUsage = (int) ($storage->server_usage ?? 0);
         $backupUsage = (int) ($storage->backup_usage ?? 0);
         $isoUsage = (int) ($storage->iso_usage ?? 0);
@@ -118,6 +133,13 @@ class StorageEloquentData extends Data
             storesIso: (bool) $storage->stores_iso,
             storesSnippets: (bool) $storage->stores_snippets,
             backupOrder: $storage->pivot?->backup_order,
+            sharedWith: $storage->relationLoaded('nodes') || $viewedFrom !== null
+                ? $storage->nodes
+                    ->reject(fn (Node $node) => $viewedFrom !== null && $node->is($viewedFrom))
+                    ->map(fn (Node $node) => $node->display_name ?? $node->name)
+                    ->values()
+                    ->all()
+                : [],
             pveType: $storage->pve_type,
             pveShared: $storage->pve_shared,
             pveContent: $storage->pve_content,

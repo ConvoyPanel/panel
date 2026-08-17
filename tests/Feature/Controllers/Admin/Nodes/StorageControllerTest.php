@@ -394,3 +394,28 @@ it('does not offer a storage Proxmox cannot see here', function () {
         ->assertOk()
         ->assertJsonCount(0, 'data');
 });
+
+it('names the other nodes a shared storage reaches', function () {
+    $peer = Node::factory()->for($this->location)->create(['display_name' => 'pve-2']);
+    $peer->storages()->attach($this->storage);
+    fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
+
+    $row = $this->actingAs($this->user)
+        ->getJson("/api/admin/nodes/{$this->node->id}/storages")
+        ->assertOk()
+        ->json('data.0');
+
+    // The node being viewed is excluded -- it is not "shared with" itself.
+    expect($row['sharedWith'])->toBe(['pve-2']);
+});
+
+it('reports no other nodes for a storage only this one reaches', function () {
+    fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
+
+    $row = $this->actingAs($this->user)
+        ->getJson("/api/admin/nodes/{$this->node->id}/storages")
+        ->assertOk()
+        ->json('data.0');
+
+    expect($row['sharedWith'])->toBe([]);
+});

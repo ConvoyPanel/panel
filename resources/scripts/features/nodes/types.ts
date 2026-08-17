@@ -31,6 +31,11 @@ export interface Storage {
      * and PBS. A large gap there is ordinary, not something to warn about.
      */
     isThin: boolean
+    /**
+     * The other nodes reaching this same storage, named. Empty when only this
+     * node has it.
+     */
+    sharedWith: string[]
     // Whether the physical figures below came from a live call this request.
     online: boolean
     /**

@@ -264,11 +264,14 @@ class StorageController extends Controller
     private function mapWithLiveData(Node $node, Collection $storages): DataCollection
     {
         $live = $this->liveStorage->forNode($node);
+        // Eager-loaded so naming the other nodes costs one query, not one per row.
+        $storages->loadMissing('nodes');
 
         return StorageEloquentData::collect(
             $storages->map(fn (Storage $storage) => StorageEloquentData::fromModel(
                 $storage,
                 $live->get($storage->name),
+                $node,
             ))->all(),
             DataCollection::class,
         );
