@@ -11,6 +11,18 @@ import { z } from 'zod'
 
 import { type DataResponse, apiFetch } from '@/lib/api'
 
+/**
+ * Registering a storage Proxmox already has.
+ *
+ * Only the operator's own decisions. Name, size and content types come from the
+ * picked storage, so nothing here can drift from the host.
+ */
+export const registerStorageSchema = z.object({
+    displayName: z.string().max(40).optional(),
+    description: z.string().max(191),
+    reservedBytes: z.coerce.number().min(0).nullable().optional(),
+})
+
 export const storageSchema = z.object({
     displayName: z.string().max(40).optional(),
     description: z.string().max(191),
