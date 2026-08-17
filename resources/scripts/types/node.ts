@@ -22,6 +22,11 @@ export interface Node {
      * degraded to `unknown` server-side when the last check is too stale to
      * stand behind, so this can be rendered as-is.
      */
+    /**
+     * The PVE cluster this host is in, or null when standalone. Standalone hosts
+     * share no storage, which is why they are offered none to attach.
+     */
+    clusterName: string | null
     status: App.Enums.Node.NodeStatus
     /** Why it is unreachable. Only sent alongside an `unreachable` status. */
     statusCode: App.Enums.Node.ConnectionErrorCode | null

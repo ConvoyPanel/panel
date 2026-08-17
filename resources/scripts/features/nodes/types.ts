@@ -35,7 +35,7 @@ export interface Storage {
      * The other nodes reaching this same storage, named. Empty when only this
      * node has it.
      */
-    sharedWith: string[]
+    sharedWith: { id: number; name: string }[]
     // Whether the physical figures below came from a live call this request.
     online: boolean
     /**

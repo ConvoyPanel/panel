@@ -3,9 +3,12 @@ import {
     storageSummary,
 } from '@/features/nodes/storages/capacity.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
+import { cn } from '@/utils'
+import { Link } from '@tanstack/react-router'
 import byteSize from 'byte-size'
 
 import { Badge } from '@/components/ui/Badge.tsx'
+import { buttonVariants } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Item, ItemContent, ItemGroup, ItemTitle } from '@/components/ui/Item'
 import { SegmentedProgressBar } from '@/components/ui/Progress'
@@ -38,8 +41,25 @@ const fmt = (bytes: number) => {
  */
 const Nodes = ({ storage }: { storage: NodeStorage }) =>
     storage.sharedWith.length > 0 ? (
-        <span className='text-muted-foreground font-mono text-xs'>
-            {storage.sharedWith.join(', ')}
+        <span className='flex flex-wrap gap-x-1 gap-y-0.5 text-xs'>
+            {storage.sharedWith.map((node, index) => (
+                <span key={node.id}>
+                    {/* Linked to that node's own storages tab, which is where
+                        this storage can actually be acted on -- the inventory
+                        answers "where is it", the tab answers "change it". */}
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'h-auto p-0 font-mono text-xs font-normal'
+                        )}
+                        to='/admin/nodes/$nodeId/storages'
+                        params={{ nodeId: String(node.id) }}
+                    >
+                        {node.name}
+                    </Link>
+                    {index < storage.sharedWith.length - 1 && ','}
+                </span>
+            ))}
         </span>
     ) : (
         <StatLabel className='text-xs'>Not attached to a node</StatLabel>

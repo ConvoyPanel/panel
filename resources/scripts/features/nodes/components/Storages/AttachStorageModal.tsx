@@ -1,3 +1,4 @@
+import { useNode } from '@/features/nodes/api.ts'
 import { attachStorage, storageQueries } from '@/features/nodes/storages/api.ts'
 import { storageSummary } from '@/features/nodes/storages/capacity.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
@@ -42,6 +43,7 @@ const AttachStorageModal = () => {
     const [open, setOpen] = useState(false)
     const [pending, setPending] = useState<number | null>(null)
     const queryClient = useQueryClient()
+    const { data: node } = useNode(id)
 
     const { data: candidates, isLoading } = useQuery({
         ...storageQueries.attachable(id),
@@ -137,9 +139,15 @@ const AttachStorageModal = () => {
                          * an error -- there is nothing wrong.
                          */
                         <p className='text-muted-foreground text-sm'>
-                            Nothing to attach. This node is either standalone,
-                            or every storage its cluster has registered is
-                            already here.
+                            {/*
+                             * Name the actual reason rather than listing both.
+                             * "Standalone" is a fact about this host that no
+                             * amount of retrying will change, and saying so is
+                             * the difference between an explanation and a shrug.
+                             */}
+                            {node && node.clusterName === null
+                                ? 'This node is not part of a Proxmox cluster, so it shares no storage with any other node.'
+                                : 'Every storage this cluster has registered is already attached to this node.'}
                         </p>
                     )}
                 </ResponsiveDialogBody>

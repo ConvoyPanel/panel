@@ -102,8 +102,8 @@ const qualifier = (
 const SharedWith = ({ storage }: { storage: NodeStorage }) =>
     storage.sharedWith.length > 0 ? (
         <StatLabel className='mt-1 block text-xs'>
-            Shared with {storage.sharedWith.join(', ')} — this capacity is not
-            this node&rsquo;s alone
+            Shared with {storage.sharedWith.map(node => node.name).join(', ')} —
+            this capacity is not this node&rsquo;s alone
         </StatLabel>
     ) : null
 

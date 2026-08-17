@@ -31,8 +31,9 @@ it('lists every storage across every node', function () {
     // With no node in scope, every node the storage reaches is named -- that is
     // the column the whole page exists for.
     $byName = collect($rows)->keyBy('name');
-    expect($byName['ceph-vm']['sharedWith'])->toBe(['pve-1', 'pve-2'])
-        ->and($byName['local-lvm']['sharedWith'])->toBe(['pve-1']);
+    expect(array_column($byName['ceph-vm']['sharedWith'], 'name'))->toBe(['pve-1', 'pve-2'])
+        ->and(array_column($byName['local-lvm']['sharedWith'], 'name'))->toBe(['pve-1'])
+        ->and($byName['ceph-vm']['sharedWith'][0]['id'])->toBe($one->id);
 });
 
 it('reads recorded capacity without calling Proxmox', function () {

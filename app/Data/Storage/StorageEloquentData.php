@@ -39,7 +39,7 @@ class StorageEloquentData extends Data
          * Ceph on four nodes will happily plan four nodes' growth against one
          * disk. Naming the others is what stops that.
          *
-         * @var array<int, string>
+         * @var array<int, array{id: int, name: string}>
          */
         public array $sharedWith,
         // What Proxmox says this storage is, recorded by the poll. Null until a
@@ -136,7 +136,13 @@ class StorageEloquentData extends Data
             sharedWith: $storage->relationLoaded('nodes') || $viewedFrom !== null
                 ? $storage->nodes
                     ->reject(fn (Node $node) => $viewedFrom !== null && $node->is($viewedFrom))
-                    ->map(fn (Node $node) => $node->display_name ?? $node->name)
+                    // Carries the id as well as the name so a list with no node
+                    // in scope can link to each one -- a fleet page you cannot
+                    // navigate from is a dead end.
+                    ->map(fn (Node $node) => [
+                        'id' => $node->id,
+                        'name' => $node->display_name ?? $node->name,
+                    ])
                     ->values()
                     ->all()
                 : [],

@@ -303,6 +303,18 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                                     )}
                                 </dd>
                                 <dt className='text-muted-foreground'>
+                                    Cluster
+                                </dt>
+                                <dd className='text-right'>
+                                    {/*
+                                     * Standalone is an answer, not a blank. It is
+                                     * also what explains an empty "Attach
+                                     * existing" list: a host in no cluster shares
+                                     * no storage with anything.
+                                     */}
+                                    {node.clusterName ?? 'Standalone'}
+                                </dd>
+                                <dt className='text-muted-foreground'>
                                     Proxmox VE
                                 </dt>
                                 <dd className='text-right'>
@@ -338,6 +350,12 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                                     Proxmox name
                                 </dt>
                                 <dd className='text-right'>{node.name}</dd>
+                                <dt className='text-muted-foreground'>
+                                    Cluster
+                                </dt>
+                                <dd className='text-right'>
+                                    {node.clusterName ?? 'Standalone'}
+                                </dd>
                                 <dt className='text-muted-foreground'>
                                     TLS verification
                                 </dt>

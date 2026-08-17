@@ -406,7 +406,7 @@ it('names the other nodes a shared storage reaches', function () {
         ->json('data.0');
 
     // The node being viewed is excluded -- it is not "shared with" itself.
-    expect($row['sharedWith'])->toBe(['pve-2']);
+    expect($row['sharedWith'])->toBe([['id' => $peer->id, 'name' => 'pve-2']]);
 });
 
 it('reports no other nodes for a storage only this one reaches', function () {
