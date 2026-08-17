@@ -4,6 +4,7 @@ namespace App\Jobs\Node;
 
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\ISO;
 use App\Models\Node;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
@@ -11,7 +12,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
@@ -28,7 +28,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
 
     public function middleware()
     {
-        return [new WithoutOverlapping("node:iso.download#{$this->isoId}")];
+        return [new ExpiringWithoutOverlapping("node:iso.download#{$this->isoId}")];
     }
 
     public function handle(ProxmoxActivityClient $client): void

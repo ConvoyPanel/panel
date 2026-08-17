@@ -3,6 +3,7 @@
 namespace App\Jobs\Server;
 
 use App\Exceptions\Proxmox\RequestException;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\DeploymentStep;
 use App\Services\Servers\VmSyncService;
 use App\Traits\Jobs\FailsWithStep;
@@ -13,7 +14,6 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class ConfigureVmJob implements ShouldQueue
@@ -33,7 +33,7 @@ class ConfigureVmJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping((string) $this->step->deployment->server_id),
+            new ExpiringWithoutOverlapping((string) $this->step->deployment->server_id),
         ];
     }
 

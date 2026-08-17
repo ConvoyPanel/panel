@@ -6,6 +6,7 @@ use App\Data\Server\Proxmox\Backup\BackupData;
 use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Enums\Server\Backup\BackupErrorCode;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\Backup;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use App\Services\Proxmox\Server\ProxmoxBackupClient;
@@ -14,7 +15,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
@@ -35,7 +35,7 @@ class MonitorBackupJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new WithoutOverlapping((string) $this->backup->id)];
+        return [new ExpiringWithoutOverlapping((string) $this->backup->id)];
     }
 
     public function handle(ProxmoxActivityClient $client, ProxmoxBackupClient $backupClient): void

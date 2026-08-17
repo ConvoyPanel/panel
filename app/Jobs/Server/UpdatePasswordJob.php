@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Server;
 
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\DeploymentStep;
 use App\Services\Servers\ServerAuthService;
 use App\Traits\Jobs\FailsWithStep;
@@ -11,7 +12,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class UpdatePasswordJob implements ShouldQueue
@@ -32,7 +32,7 @@ class UpdatePasswordJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping(
+            new ExpiringWithoutOverlapping(
                 (string) $this->step->deployment->server->id
             ),
         ];

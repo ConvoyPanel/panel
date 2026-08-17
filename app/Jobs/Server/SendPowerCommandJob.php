@@ -4,6 +4,7 @@ namespace App\Jobs\Server;
 
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Proxmox\RequestException;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\DeploymentStep;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Traits\HandlesProxmoxErrors;
@@ -16,7 +17,6 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class SendPowerCommandJob implements ShouldQueue
@@ -37,7 +37,7 @@ class SendPowerCommandJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping((string) $this->step->deployment->server->id),
+            new ExpiringWithoutOverlapping((string) $this->step->deployment->server->id),
         ];
     }
 

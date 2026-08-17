@@ -4,6 +4,7 @@ namespace App\Jobs\Server;
 
 use App\Enums\Activity\TaskStatus;
 use App\Enums\Server\ServerLifecycle;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
@@ -11,7 +12,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
@@ -32,7 +32,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new WithoutOverlapping((string) $this->server->id)];
+        return [new ExpiringWithoutOverlapping((string) $this->server->id)];
     }
 
     public function handle(ProxmoxActivityClient $client): void

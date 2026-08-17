@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Server;
 
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\Server;
 use App\Services\Backups\PurgeBackupsService;
 use Illuminate\Bus\Batchable;
@@ -11,7 +12,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class PurgeBackupsJob implements ShouldQueue
@@ -29,7 +29,7 @@ class PurgeBackupsJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled, new WithoutOverlapping(
+        return [new SkipIfBatchCancelled, new ExpiringWithoutOverlapping(
             (string) $this->server->id,
         )];
     }

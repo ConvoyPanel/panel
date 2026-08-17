@@ -3,6 +3,7 @@
 namespace App\Jobs\Server;
 
 use App\Exceptions\Proxmox\RequestException;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\Server;
 use App\Services\Servers\ServerNetworkService;
 use Illuminate\Bus\Batchable;
@@ -12,7 +13,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class SyncNetworkSettingsJob implements ShouldQueue
@@ -30,7 +30,7 @@ class SyncNetworkSettingsJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new WithoutOverlapping((string) $this->server->id),
+            new ExpiringWithoutOverlapping((string) $this->server->id),
         ];
     }
 
