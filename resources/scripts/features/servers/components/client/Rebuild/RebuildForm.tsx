@@ -158,8 +158,7 @@ const RebuildForm = ({ server }: Props) => {
                     <CardHeader>
                         <CardTitle>Operating system</CardTitle>
                         <CardDescription>
-                            Choose the image to install. Names, icons and
-                            descriptions are set by your provider.
+                            Choose the image to install.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
