@@ -77,6 +77,7 @@ Route::prefix('/nodes')->group(function () {
             Route::post('/', [Admin\Nodes\StorageController::class, 'store']);
             Route::put('/backup-order', [Admin\Nodes\StorageController::class, 'updateBackupOrder']);
 
+            Route::get('/attachable', [Admin\Nodes\StorageController::class, 'attachable']);
             Route::post('/attach', [Admin\Nodes\StorageController::class, 'attach']);
             Route::put('/{storage}', [Admin\Nodes\StorageController::class, 'update']);
             Route::delete('/{storage}', [Admin\Nodes\StorageController::class, 'destroy']);

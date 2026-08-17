@@ -70,6 +70,43 @@ class StorageController extends Controller
     }
 
     /**
+     * Storages this node could be given, and would accept.
+     *
+     * Filtered rather than validated-on-submit: offering a choice that will be
+     * refused is a worse experience than not offering it, and every condition
+     * `attach()` enforces is knowable up front. An empty list is the honest
+     * answer for a standalone host, which can never share.
+     *
+     * @throws RequestException
+     */
+    public function attachable(Node $node)
+    {
+        if ($node->cluster_name === null) {
+            return StorageEloquentData::collect([], DataCollection::class);
+        }
+
+        $reported = $this->liveStorage->forNode($node);
+
+        $candidates = Storage::query()
+            ->whereDoesntHave('nodes', fn ($query) => $query->whereKey($node->getKey()))
+            ->whereHas('nodes', fn ($query) => $query->where('nodes.cluster_name', $node->cluster_name))
+            ->withUsageSums()
+            ->get()
+            // Proxmox has to report it here, or attaching would assert a
+            // reachability Convoy has never observed.
+            ->filter(fn (Storage $storage) => $reported->has($storage->name))
+            ->values();
+
+        return StorageEloquentData::collect(
+            $candidates->map(fn (Storage $storage) => StorageEloquentData::fromModel(
+                $storage,
+                $reported->get($storage->name),
+            ))->all(),
+            DataCollection::class,
+        );
+    }
+
+    /**
      * Point an already-registered storage at a second node.
      *
      * Separate from `store()` because they are different intentions: `store()`

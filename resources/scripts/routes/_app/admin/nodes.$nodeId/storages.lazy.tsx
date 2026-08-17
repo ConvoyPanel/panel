@@ -1,3 +1,4 @@
+import AttachStorageModal from '@/features/nodes/components/Storages/AttachStorageModal.tsx'
 import CreateStorageModal from '@/features/nodes/components/Storages/CreateStorageModal.tsx'
 import DeleteStorageModal from '@/features/nodes/components/Storages/DeleteStorageModal.tsx'
 import EditStorageModal from '@/features/nodes/components/Storages/EditStorageModal.tsx'
@@ -32,6 +33,7 @@ function NodeStorages() {
                 {Boolean(storages?.length) && (
                     <div className={'flex gap-2'}>
                         <LoadBalancerSidebar />
+                        <AttachStorageModal />
                         <CreateStorageModal />
                     </div>
                 )}

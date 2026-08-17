@@ -347,3 +347,50 @@ it('refuses to attach a storage the node already has', function () {
         ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $this->storage->id])
         ->assertStatus(422);
 });
+
+it('offers only storages this node could actually accept', function () {
+    $shared = Storage::factory()->create(['name' => 'ceph-vm']);
+    $elsewhere = Storage::factory()->create(['name' => 'other-cluster-pool']);
+    clusteredPeer($shared);
+
+    $stranger = Node::factory()->for($this->location)->create(['cluster_name' => 'somewhere-else']);
+    $stranger->storages()->attach($elsewhere);
+
+    // PVE reports both names here, so the cluster check is what separates them.
+    Http::fake([
+        '*/storage' => Http::response(['data' => [
+            ['storage' => 'ceph-vm', 'total' => 100, 'used' => 20, 'avail' => 80, 'enabled' => 1, 'active' => 1, 'shared' => 1, 'content' => 'images'],
+            ['storage' => 'other-cluster-pool', 'total' => 100, 'used' => 20, 'avail' => 80, 'enabled' => 1, 'active' => 1, 'shared' => 1, 'content' => 'images'],
+        ]], 200),
+    ]);
+
+    $names = $this->actingAs($this->user)
+        ->getJson("/api/admin/nodes/{$this->node->id}/storages/attachable")
+        ->assertOk()
+        ->json('data.*.name');
+
+    expect($names)->toBe(['ceph-vm']);
+});
+
+it('offers nothing to a standalone host', function () {
+    $shared = Storage::factory()->create(['name' => 'ceph-vm']);
+    Node::factory()->for($this->location)->create(['cluster_name' => 'prod'])
+        ->storages()->attach($shared);
+    $this->node->update(['cluster_name' => null]);
+
+    $this->actingAs($this->user)
+        ->getJson("/api/admin/nodes/{$this->node->id}/storages/attachable")
+        ->assertOk()
+        ->assertJsonCount(0, 'data');
+});
+
+it('does not offer a storage Proxmox cannot see here', function () {
+    $shared = Storage::factory()->create(['name' => 'ceph-vm']);
+    clusteredPeer($shared);
+    fakeLiveStorage('something-else', total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->getJson("/api/admin/nodes/{$this->node->id}/storages/attachable")
+        ->assertOk()
+        ->assertJsonCount(0, 'data');
+});

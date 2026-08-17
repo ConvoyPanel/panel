@@ -1,14 +1,14 @@
-import { useParams } from '@tanstack/react-router'
-import { queryOptions, useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
-
 import {
     rawDataToNodeStorage,
     rawDataToStorageProxmox,
 } from '@/features/nodes/transforms.ts'
-import { apiFetch, type DataResponse } from '@/lib/api'
 import { NodeStorage } from '@/features/nodes/types.ts'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'
+import { queryOptions, useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
+import { z } from 'zod'
+
+import { type DataResponse, apiFetch } from '@/lib/api'
 
 export const storageSchema = z
     .object({
@@ -44,6 +44,10 @@ const proxmoxRoute =
         '/api/admin/nodes/{node}/storages/proxmox'
     ]
 const storeRoute = StorageController.store['/api/admin/nodes/{node}/storages']
+const attachableRoute =
+    StorageController.attachable['/api/admin/nodes/{node}/storages/attachable']
+const attachRoute =
+    StorageController.attach['/api/admin/nodes/{node}/storages/attach']
 const backupOrderRoute =
     StorageController.updateBackupOrder[
         '/api/admin/nodes/{node}/storages/backup-order'
@@ -65,12 +69,44 @@ export const getStoragesProxmox = async (nodeId: number) => {
     return data.map(rawDataToStorageProxmox)
 }
 
+/**
+ * Storages registered on another node of the same PVE cluster that this node
+ * could take on. The server filters rather than validating on submit, so
+ * anything returned here is known to be attachable.
+ */
+export const getAttachableStorages = async (
+    nodeId: number
+): Promise<NodeStorage[]> => {
+    const { data } = await apiFetch<DataResponse<any[]>>(
+        attachableRoute(nodeId)
+    )
+
+    return data.map(rawDataToNodeStorage)
+}
+
+export const attachStorage = async (
+    nodeId: number,
+    storageId: number
+): Promise<NodeStorage> => {
+    const { data } = await apiFetch<DataResponse<any>>(attachRoute(nodeId), {
+        body: { storage_id: storageId },
+    })
+
+    return rawDataToNodeStorage(data)
+}
+
 export const storageQueries = {
     all: (nodeId: number) => ['admin', 'nodes', nodeId, 'storages'] as const,
     list: (nodeId: number) =>
         queryOptions({
             queryKey: storageQueries.all(nodeId),
             queryFn: () => getStorages(nodeId),
+            enabled: !!nodeId,
+        }),
+    attachable: (nodeId: number) =>
+        queryOptions({
+            queryKey: [...storageQueries.all(nodeId), 'attachable'] as const,
+            queryFn: () => getAttachableStorages(nodeId),
             enabled: !!nodeId,
         }),
 }
