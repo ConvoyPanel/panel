@@ -4,7 +4,7 @@ Covers GitHub #104 (node resource overview on the admin dashboard, plus
 monitoring with email alerts) and the reachability/power indicators wanted on
 the Nodes table and the server lists. Written 2026-07-17.
 
-Slices 1, 2 and 4 are implemented. Slice 3 (email alerting) is deliberately
+Slices 1, 2, 4 and 5 are implemented. Slice 3 (email alerting) is deliberately
 parked — the maintainer does not want it yet, reaffirmed 2026-08-17.
 
 **#104 therefore cannot be closed on slice 4 alone.** The issue asks for a
@@ -160,9 +160,9 @@ unmounted export reports 0/0 and would quietly deflate everything around it — 
 `unreadableDatastores` is how the card admits the total is incomplete.
 
 `$datastores` still carries the per-store breakdown (sorted fullest-first) even
-though the dashboard no longer draws it; it is what the Storages tab redesign is
-meant to consume, so the tab can read the poller's snapshot instead of calling
-PVE per request the way `LiveStorageService` does today.
+though the dashboard no longer draws it; it is there for a future Storages tab
+that reads the poller's snapshot instead of calling PVE per request the way
+`LiveStorageService` still does.
 
 Two notes for whoever touches this next:
 
@@ -182,6 +182,55 @@ gated on the stored status: a node already recorded `unreachable` is not asked a
 all (neither on mount nor on the 30s refetch), and the page renders the cause the
 poller classified, behind a "Check anyway" button. `unknown` still fires — nobody
 has asked yet, and one call for one node is a reasonable way to find out.
+
+**5 — the storage model (DONE, except the global list).** Everything on
+`storages` was operator-declared and unchecked, so any of it could drift. The
+poll now records what PVE says beside it — `pve_type`, `pve_shared`,
+`pve_content` and capacity — from the `type=storage` rows of the
+`/cluster/resources` response it already makes, so discovery costs no request and
+no timeout on a node that is down.
+
+`pve_type` is the load-bearing one. It separates a thin backend, where committed
+legitimately exceeds written bytes, from a thick one where the same gap is space
+nobody can account for — and it identifies a Proxmox Backup Server datastore,
+which needs **no model of its own**. PBS is an ordinary storage in PVE too
+(`type: pbs`, `content: backup`, marked shared, reached entirely through PVE), and
+its three apparent caveats are the general `content`, `thin` and `shared`
+properties every other backend already needs. `Support\StorageBackends` owns the
+thin list, shared by the cluster DTO and the Eloquent side so they cannot drift.
+
+The storages tab reads capacity live → recorded → unknown and says which, so an
+unreachable node costs freshness rather than the whole panel. `untracked` is
+*withheld* rather than clamped on thin and deduplicating backends: the old
+`max(0, ...)` turned a negative into zero and presented "nothing unaccounted for"
+as a finding when it was an artefact of arithmetic that does not apply there.
+
+**Clusters.** `nodes.cluster_name` comes from `/cluster/status`, asked only after
+`/cluster/resources` has already succeeded — a second endpoint is a second
+timeout on a node that is down, and a test asserts the call is never made on an
+unreachable one. Null means standalone, which is PVE's own answer rather than a
+gap.
+
+That is what makes shared storage expressible. A storage may now be attached to
+several nodes, refused unless the nodes share a cluster (`storage.cfg` is
+cluster-wide, so a storage id means nothing across clusters) and unless PVE
+actually reports it on the target — taking the operator's word for it is the same
+mistake as trusting a hand-set `shared` flag. Rows name the other nodes they
+reach, because "shared" as a badge does not tell a reader that 20 TiB of free
+Ceph on four nodes is 20 TiB in total.
+
+Four pivot writes were fixed first, all one bug: `storage_to_node` declares
+`storage_id` as its primary key, so with two nodes there are two rows answering
+to it. `update()`, `updateBackupOrder()`, `buildSortQuery()` and `destroy()` are
+now all node-scoped, and `destroy()` detaches rather than deleting when others
+still reach the pool.
+
+**Not built: the global storage list.** With storage no longer owned by a node, a
+pool that four hosts mount has no home in the panel — "where in the fleet do I
+have room" and "who is on this array" are answerable nowhere. The proposal is to
+promote Storage to a top-level item beside IPAM, which is already both a global
+inventory and a node tab, and keep the node tab as a filtered view. Needs a
+decision before building.
 
 **History.** Per-node CPU/RAM/disk over time should come from PVE's own RRD store
 (`GET /nodes/{node}/rrddata`, the node-scoped sibling of what
