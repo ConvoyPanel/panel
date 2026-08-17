@@ -8,7 +8,6 @@ import { NodeStorage } from '@/features/nodes/types.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import { cn } from '@/utils'
 import byteSize from 'byte-size'
-import { formatDistanceToNow } from 'date-fns'
 
 import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
@@ -180,13 +179,6 @@ const StorageList = ({ storages }: Props) => {
     )
 
     /*
-     * How fresh the numbers are, said once for the list rather than per row --
-     * every storage on a node is observed by the same poll, so repeating it
-     * would be repeating one fact N times.
-     */
-    const observedAt = storages.find(storage => storage.observedAt)?.observedAt
-
-    /*
      * Fullest first, unreadable last. The default order was insertion order,
      * which put whichever storage happened to be added most recently at the top
      * -- and floated the one storage with no figures above every real one.
@@ -202,20 +194,6 @@ const StorageList = ({ storages }: Props) => {
 
     return (
         <Card className='overflow-hidden'>
-            <div className='flex flex-wrap items-baseline justify-between gap-2 p-4'>
-                <StatLabel className='text-xs'>
-                    {storages.length} storage{storages.length === 1 ? '' : 's'}
-                </StatLabel>
-                {observedAt && (
-                    <StatLabel className='text-xs'>
-                        Observed{' '}
-                        {formatDistanceToNow(new Date(observedAt), {
-                            addSuffix: true,
-                        })}
-                    </StatLabel>
-                )}
-            </div>
-
             {/* Desktop: what it is on the left, how full it is on the right. */}
             <div className='hidden @3xl:block'>
                 <Table>

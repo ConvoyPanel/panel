@@ -111,13 +111,6 @@ const StorageInventory = ({ storages }: Props) => {
 
     return (
         <Card className='overflow-hidden'>
-            <div className='p-4'>
-                <StatLabel className='text-xs'>
-                    {storages.length} storage{storages.length === 1 ? '' : 's'}{' '}
-                    across the fleet
-                </StatLabel>
-            </div>
-
             <div className='hidden @3xl:block'>
                 <Table>
                     <TableHeader>

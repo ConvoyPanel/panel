@@ -30,12 +30,16 @@ function NodeNetwork() {
 
     return (
         <>
-            <div
-                className={'flex flex-wrap items-center justify-between gap-2'}
-            >
-                <Heading>Network</Heading>
-                {Boolean(interfaces?.length) && <CreateNetworkModal />}
-            </div>
+            <Heading>Network</Heading>
+            {/* Actions sit in their own row under the heading, the same
+                toolbar-then-content rhythm every admin index uses. */}
+            {Boolean(interfaces?.length) && (
+                <div className={'flex flex-wrap items-center gap-2'}>
+                    <div className={'ml-auto flex items-center gap-2'}>
+                        <CreateNetworkModal />
+                    </div>
+                </div>
+            )}
             <EditNetworkInterfaceModal />
             <DeleteNetworkInterfaceModal />
             <VlanFormModal mode={'create'} />

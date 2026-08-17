@@ -26,18 +26,18 @@ function NodeStorages() {
 
     return (
         <>
-            <div
-                className={'flex flex-wrap items-center justify-between gap-2'}
-            >
-                <Heading>Storages</Heading>
-                {Boolean(storages?.length) && (
-                    <div className={'flex gap-2'}>
+            <Heading>Storages</Heading>
+            {/* Actions sit in their own row under the heading, the same
+                toolbar-then-content rhythm every admin index uses. */}
+            {Boolean(storages?.length) && (
+                <div className={'flex flex-wrap items-center gap-2'}>
+                    <div className={'ml-auto flex items-center gap-2'}>
                         <LoadBalancerSidebar />
                         <AttachStorageModal />
                         <CreateStorageModal />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
             <DeleteStorageModal />
             <ShowStorageModal />
             <EditStorageModal />
