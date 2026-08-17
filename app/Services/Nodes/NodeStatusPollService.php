@@ -10,6 +10,7 @@ use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
 use App\Models\Node;
+use App\Services\Proxmox\Cluster\ProxmoxClusterStatusClient;
 use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use Illuminate\Http\Client\ConnectionException;
@@ -40,6 +41,7 @@ class NodeStatusPollService
 {
     public function __construct(
         private ProxmoxResourceClient $client,
+        private ProxmoxClusterStatusClient $clusterStatus,
         private GuestStateCache $guestStates,
         private NodeResourceSnapshotCache $resourceSnapshots,
         private StorageDiscoveryService $storageDiscovery,
@@ -70,7 +72,7 @@ class NodeStatusPollService
         // to what the operator declared so the two can be compared.
         $this->storageDiscovery->handle($node, $storages);
 
-        return $this->markOnline($node);
+        return $this->markOnline($node, $this->clusterNameFor($node));
     }
 
     /**
@@ -113,9 +115,30 @@ class NodeStatusPollService
             ->all();
     }
 
-    private function markOnline(Node $node): NodeStatus
+    /**
+     * Which PVE cluster this host is in, asked only once the host has already
+     * answered.
+     *
+     * A second endpoint is a second timeout on a node that is down -- the very
+     * thing the poll is shaped to avoid. Ordering it after `/cluster/resources`
+     * has succeeded means it is only ever called on a host that just proved it
+     * responds. A failure here is not a failure of the poll: the node is
+     * demonstrably up, so the reachability answer stands and the cluster name
+     * simply keeps its previous value.
+     */
+    private function clusterNameFor(Node $node): ?string
+    {
+        try {
+            return $this->clusterStatus->setNode($node)->getClusterName();
+        } catch (ConvoyRequestException|GuzzleRequestException|ConnectionException) {
+            return $node->cluster_name;
+        }
+    }
+
+    private function markOnline(Node $node, ?string $clusterName = null): NodeStatus
     {
         $node->forceFill([
+            'cluster_name' => $clusterName,
             'status' => NodeStatus::ONLINE,
             'status_code' => null,
             'status_message' => null,

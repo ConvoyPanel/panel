@@ -15,6 +15,9 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
+/** A standalone host: `/cluster/status` lists members but carries no `type=cluster` row. */
+const STANDALONE_STATUS = [['type' => 'node', 'name' => 'pve', 'local' => 1, 'online' => 1]];
+
 beforeEach(function () {
     // The array cache is not torn down between tests, but the database is --
     // so node ids restart and a previous test's `node:1:vm-states` is still
@@ -24,6 +27,23 @@ beforeEach(function () {
 
     $this->node = Node::factory()->for(Location::factory())->create();
     $this->service = app(NodeStatusPollService::class);
+
+    /*
+     * Http::fake merges stubs and the first registered match wins, so a later
+     * call cannot replace this one. The stub reads the property instead, and a
+     * test that wants a clustered host just assigns to it.
+     */
+    $this->clusterStatus = STANDALONE_STATUS;
+    Http::fake([
+        '*/api2/json/cluster/status' => function () {
+            // `false` means "this endpoint is down"; anything else is a body.
+            if ($this->clusterStatus === false) {
+                throw new ConnectionException('refused');
+            }
+
+            return Http::response(['data' => $this->clusterStatus], 200);
+        },
+    ]);
 });
 
 /** One `type=qemu` row as /cluster/resources returns it. */
@@ -535,4 +555,51 @@ it('leaves storages registered on another node alone', function () {
     // duplication cluster-wide identity is meant to collapse later.
     expect($mine->refresh()->discovered_used)->toBe(10)
         ->and($theirs->refresh()->discovered_used)->toBeNull();
+});
+
+it('records the PVE cluster a node belongs to', function () {
+    $this->clusterStatus = [
+        ['type' => 'cluster', 'name' => 'prod-cluster', 'nodes' => 3, 'quorate' => 1],
+        ...STANDALONE_STATUS,
+    ];
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($this->node->refresh()->cluster_name)->toBe('prod-cluster');
+});
+
+it('reads a standalone host as belonging to no cluster', function () {
+    // No `type=cluster` row is how PVE says "not clustered" -- not an error.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($this->node->refresh()->cluster_name)->toBeNull();
+});
+
+it('keeps the known cluster when only the cluster lookup fails', function () {
+    $this->clusterStatus = [
+        ['type' => 'cluster', 'name' => 'prod-cluster', 'nodes' => 3, 'quorate' => 1],
+        ...STANDALONE_STATUS,
+    ];
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+    $this->service->handle($this->node);
+
+    // The node itself is demonstrably up -- /cluster/resources just answered --
+    // so a failure on the second call must not erase what we already knew.
+    $this->clusterStatus = false;
+    $this->service->handle($this->node->refresh());
+
+    expect($this->node->refresh()->cluster_name)->toBe('prod-cluster')
+        ->and($this->node->status)->toBe(NodeStatus::ONLINE);
+});
+
+it('does not ask for the cluster when the node is unreachable', function () {
+    Http::fake(['*/api2/json/cluster/resources' => fn () => throw new ConnectionException('refused')]);
+
+    $this->service->handle($this->node);
+
+    // The whole point of ordering it second: a down node must not cost two timeouts.
+    Http::assertNotSent(fn ($request) => str_contains($request->url(), '/cluster/status'));
 });
