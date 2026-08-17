@@ -7,6 +7,7 @@ use App\Enums\Server\PowerState;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
+use App\Models\Storage;
 use App\Services\Nodes\GuestStateCache;
 use App\Services\Nodes\NodeResourceSnapshotCache;
 use App\Services\Nodes\NodeStatusPollService;
@@ -53,6 +54,8 @@ function storageRow(
     int $total = 0,
     string $status = 'available',
     bool $shared = false,
+    ?string $pluginType = 'dir',
+    ?string $content = 'images,rootdir',
 ): array {
     return [
         'type' => 'storage',
@@ -63,6 +66,8 @@ function storageRow(
         'shared' => $shared,
         'disk' => $used,
         'maxdisk' => $total,
+        'plugintype' => $pluginType,
+        'content' => $content,
     ];
 }
 
@@ -425,4 +430,109 @@ it('expires the guest map with the node status it was observed alongside', funct
             && $value['observed_at'] === now()->getTimestampMs()
             && $expiry->equalTo(now()->addMinutes(Node::STATUS_TTL_MINUTES))
     );
+});
+
+it('records what Proxmox says about a registered storage', function () {
+    $storage = Storage::factory()->create(['name' => 'local-lvm']);
+    $this->node->storages()->attach($storage);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow(
+            'local-lvm',
+            $this->node->name,
+            used: 900,
+            total: 1000,
+            shared: false,
+            pluginType: 'lvmthin',
+            content: 'images,rootdir',
+        )],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh())
+        ->pve_type->toBe('lvmthin')
+        ->pve_shared->toBeFalse()
+        ->pve_content->toBe('images,rootdir')
+        ->discovered_total->toBe(1000)
+        ->discovered_used->toBe(900)
+        ->and($storage->discovered_at)->not->toBeNull();
+});
+
+it('identifies a Proxmox Backup Server datastore by its type alone', function () {
+    // PBS needs no model of its own: it arrives as an ordinary storage row whose
+    // plugintype says `pbs`, marked shared by PVE, carrying backups only.
+    $storage = Storage::factory()->create(['name' => 'pbs-main']);
+    $this->node->storages()->attach($storage);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow(
+            'pbs-main',
+            $this->node->name,
+            used: 4_000,
+            total: 20_000,
+            shared: true,
+            pluginType: 'pbs',
+            content: 'backup',
+        )],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh())
+        ->pve_type->toBe('pbs')
+        ->pve_shared->toBeTrue()
+        ->pve_content->toBe('backup');
+});
+
+it('keeps the last known capacity when a storage stops reporting', function () {
+    $storage = Storage::factory()->create(['name' => 'nfs-flaky']);
+    $this->node->storages()->attach($storage);
+
+    $reporting = true;
+    Http::fake(['*/api2/json/cluster/resources' => function () use (&$reporting) {
+        return Http::response(['data' => pollStatusPayload(
+            nodes: [nodeResourceRow($this->node->name)],
+            storages: [storageRow(
+                'nfs-flaky',
+                $this->node->name,
+                used: 500,
+                total: 1000,
+                status: $reporting ? 'available' : 'unknown',
+            )],
+        )], 200);
+    }]);
+
+    $this->service->handle($this->node);
+    expect($storage->refresh()->discovered_used)->toBe(500);
+
+    // PVE could not read it this time round. Blanking the figures would turn a
+    // brief outage into "capacity unknown" everywhere it is shown.
+    $reporting = false;
+    $this->service->handle($this->node->refresh());
+
+    expect($storage->refresh()->discovered_used)->toBe(500)
+        ->and($storage->discovered_total)->toBe(1000);
+});
+
+it('leaves storages registered on another node alone', function () {
+    $mine = Storage::factory()->create(['name' => 'shared-name']);
+    $theirs = Storage::factory()->create(['name' => 'shared-name']);
+    $otherNode = Node::factory()->for(Location::factory())->create();
+    $this->node->storages()->attach($mine);
+    $otherNode->storages()->attach($theirs);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow('shared-name', $this->node->name, used: 10, total: 100)],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    // Same PVE name, different node, different row -- which is exactly the
+    // duplication cluster-wide identity is meant to collapse later.
+    expect($mine->refresh()->discovered_used)->toBe(10)
+        ->and($theirs->refresh()->discovered_used)->toBeNull();
 });

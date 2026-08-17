@@ -42,6 +42,7 @@ class NodeStatusPollService
         private ProxmoxResourceClient $client,
         private GuestStateCache $guestStates,
         private NodeResourceSnapshotCache $resourceSnapshots,
+        private StorageDiscoveryService $storageDiscovery,
     ) {}
 
     public function handle(Node $node): NodeStatus
@@ -58,10 +59,16 @@ class NodeStatusPollService
 
         $this->guestStates->put($node, $this->mapGuestStates($node, $resources->servers));
 
+        $storages = $this->storagesFor($node, $resources->storages);
+
         $resource = $this->findNodeResource($node, $resources);
         if ($resource !== null) {
-            $this->resourceSnapshots->put($node, $resource, $this->storagesFor($node, $resources->storages));
+            $this->resourceSnapshots->put($node, $resource, $storages);
         }
+
+        // What PVE says about the storages Convoy has registered, recorded next
+        // to what the operator declared so the two can be compared.
+        $this->storageDiscovery->handle($node, $storages);
 
         return $this->markOnline($node);
     }

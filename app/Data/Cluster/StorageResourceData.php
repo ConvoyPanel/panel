@@ -35,7 +35,35 @@ class StorageResourceData extends Data
          * than implying each node has its own copy.
          */
         public readonly bool $shared,
+        /**
+         * The PVE backend: `dir`, `lvmthin`, `zfspool`, `nfs`, `rbd`, `pbs`, ...
+         *
+         * PVE calls it `plugintype`. It is what separates a thin backend, where
+         * committed legitimately exceeds physical bytes, from a thick one where
+         * the same gap means something is wrong -- and it is the only thing that
+         * identifies a Proxmox Backup Server datastore, which deduplicates and so
+         * behaves like a thin backend no matter what is written to it.
+         */
+        public readonly ?string $type = null,
+        /** PVE's comma-separated content list: `images,rootdir`, `backup`, ... */
+        public readonly ?string $content = null,
     ) {}
+
+    /** Backends where written bytes are always below the sum of provisioned sizes. */
+    private const THIN_TYPES = ['lvmthin', 'zfspool', 'zfs', 'rbd', 'pbs', 'btrfs'];
+
+    /**
+     * Whether Convoy's committed total may legitimately exceed physical usage.
+     *
+     * True for thin backends and for PBS, which dedups chunk-wise across every
+     * namespace and cluster pointed at it. Callers use this to decide whether
+     * `physical - committed` is a meaningful subtraction; on these it is not, and
+     * presenting the difference as unaccounted space would be a fabrication.
+     */
+    public function isThin(): bool
+    {
+        return $this->type !== null && in_array($this->type, self::THIN_TYPES, true);
+    }
 
     public static function fromRaw(array $raw): self
     {
@@ -49,6 +77,8 @@ class StorageResourceData extends Data
             total: (int) Arr::get($raw, 'maxdisk', 0),
             status: (string) Arr::get($raw, 'status', 'unknown'),
             shared: (bool) Arr::get($raw, 'shared', false),
+            type: Arr::get($raw, 'plugintype'),
+            content: Arr::get($raw, 'content'),
         );
     }
 }
