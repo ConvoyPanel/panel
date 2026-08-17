@@ -10,7 +10,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route as StorageRoute } from '@/routes/_app/admin/nodes.$nodeId/storages.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconPlus } from '@tabler/icons-react'
+import { IconDatabase, IconPlugConnectedX, IconPlus } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import byteSize from 'byte-size'
 import { useId, useState } from 'react'
@@ -18,6 +18,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
+import { SimpleEmptyState } from '@/components/ui/EmptyStates'
 import {
     Field,
     FieldContent,
@@ -109,6 +110,10 @@ const CreateStorageModal = () => {
         queryFn: () => getStoragesProxmox(id),
         // Costs a live Proxmox call, so it waits until the dialog is opened.
         enabled: open,
+        // An unreachable node is a settled answer, not a blip -- the same reason
+        // nodeQueries.status does this. Retrying holds the dialog on skeletons
+        // for the better part of a minute before showing the same result.
+        retry: false,
     })
 
     // Anything already registered here is not a candidate; registering it twice
@@ -189,10 +194,14 @@ const CreateStorageModal = () => {
                                  * "Proxmox has no storage" when the truth is
                                  * that nobody asked it successfully.
                                  */
-                                <p className={'text-muted-foreground text-sm'}>
-                                    Couldn&rsquo;t reach this node, so Convoy
-                                    can&rsquo;t list what storage it has.
-                                </p>
+                                <SimpleEmptyState
+                                    className={'py-6'}
+                                    icon={IconPlugConnectedX}
+                                    title={'Node unreachable'}
+                                    description={
+                                        'Convoy could not reach this node, so it cannot list what storage it has.'
+                                    }
+                                />
                             ) : isLoading ? (
                                 <div className={'flex flex-col gap-2'}>
                                     {Array.from({ length: 3 }, (_, index) => (
@@ -203,11 +212,31 @@ const CreateStorageModal = () => {
                                     ))}
                                 </div>
                             ) : candidates.length === 0 ? (
-                                <p className={'text-muted-foreground text-sm'}>
-                                    {reported?.length
-                                        ? 'Every storage Proxmox reports on this node is already registered.'
-                                        : 'Proxmox reported no storage on this node.'}
-                                </p>
+                                /*
+                                 * Two different empty states, because they call
+                                 * for different actions: one is finished, the
+                                 * other means the work has to happen in Proxmox
+                                 * first.
+                                 */
+                                reported?.length ? (
+                                    <SimpleEmptyState
+                                        className={'py-6'}
+                                        icon={IconDatabase}
+                                        title={'Nothing left to add'}
+                                        description={
+                                            'Every storage Proxmox reports on this node is already registered with Convoy.'
+                                        }
+                                    />
+                                ) : (
+                                    <SimpleEmptyState
+                                        className={'py-6'}
+                                        icon={IconDatabase}
+                                        title={'No storage on this node'}
+                                        description={
+                                            'Proxmox reported none. Create the storage in Proxmox first and it will show up here.'
+                                        }
+                                    />
+                                )
                             ) : (
                                 <RadioGroup
                                     className={'gap-2'}
