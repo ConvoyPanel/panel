@@ -1,5 +1,10 @@
 import useTitle from '@/hooks/use-title.ts'
-import { IconAnchor, IconGauge, IconSettings } from '@tabler/icons-react'
+import {
+    IconAnchor,
+    IconGauge,
+    IconRefresh,
+    IconSettings,
+} from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -36,6 +41,11 @@ const nav: SidebarNav = {
                     icon: IconAnchor,
                     label: 'Anchor',
                     path: '/admin/settings/anchor',
+                },
+                {
+                    icon: IconRefresh,
+                    label: 'Updates',
+                    path: '/admin/settings/updates',
                 },
             ],
         },

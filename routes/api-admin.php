@@ -17,6 +17,22 @@ Route::get('/overview', Admin\OverviewController::class);
 
 /*
 |--------------------------------------------------------------------------
+| Version Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/version
+|
+| What this panel is running and whether a newer release exists. The read is
+| served from the last scheduled check; `check` is the manual refresh, and is
+| throttled because the limit that matters is GitHub's.
+|
+*/
+Route::get('/version', [Admin\VersionController::class, 'show']);
+Route::post('/version/check', [Admin\VersionController::class, 'check'])
+    ->middleware('throttle:10,1');
+
+/*
+|--------------------------------------------------------------------------
 | Location Controller Routes
 |--------------------------------------------------------------------------
 |

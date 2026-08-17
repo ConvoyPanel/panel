@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\Anchor\PollAnchorLivenessCommand;
+use App\Console\Commands\Maintenance\CheckForUpdatesCommand;
 use App\Console\Commands\Maintenance\PruneDeploymentsCommand;
 use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
@@ -50,6 +51,12 @@ Schedule::command(PollNodeStatusesCommand::class)->everyMinute()->withoutOverlap
 // otherwise sit at "Offline" forever. Same reasoning as node polling: the admin
 // list must never probe per row, so a background pass keeps it truthful instead.
 Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverlapping();
+
+// Whether a newer release of the panel exists. Same rule as the pollers above:
+// the admin area reads only what this writes, so nothing an admin loads ever
+// waits on GitHub. Hourly is far below the API's rate limit and well inside how
+// quickly anyone needs to hear about a release.
+Schedule::command(CheckForUpdatesCommand::class)->hourly()->withoutOverlapping();
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

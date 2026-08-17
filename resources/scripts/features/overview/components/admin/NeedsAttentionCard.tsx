@@ -1,7 +1,9 @@
+import { type UpdateStatus, useUpdateStatus } from '@/features/updates/api.ts'
 import { cn } from '@/utils'
 import {
     IconAlertTriangle,
     IconCheck,
+    IconCircleArrowUp,
     IconDatabaseExclamation,
     IconDisc,
     IconNetwork,
@@ -89,7 +91,10 @@ const AttentionRow = ({ item }: { item: AttentionItem }) => {
 }
 
 /** Real problems worth surfacing, most-severe first. Empty when all is well. */
-const deriveAttention = (data: OverviewData): AttentionItem[] => {
+const deriveAttention = (
+    data: OverviewData,
+    update: UpdateStatus | undefined
+): AttentionItem[] => {
     const { summary, servers, backups, nodes } = data
     const items: AttentionItem[] = []
 
@@ -112,6 +117,21 @@ const deriveAttention = (data: OverviewData): AttentionItem[] => {
             title: `${num(backups.failed)} backup${backups.failed === 1 ? '' : 's'} failed`,
             description: 'Backups that did not complete successfully.',
             action: <ActionLink to='/admin/servers'>View</ActionLink>,
+        })
+    }
+
+    // Below the outright failures above: a panel a release behind is worth
+    // knowing about, but it is not broken the way a failed install is.
+    if (update?.updateAvailable) {
+        items.push({
+            id: 'update-available',
+            tone: 'neutral',
+            icon: IconCircleArrowUp,
+            title: `Convoy ${update.latestVersion} is available`,
+            description: `This panel is running ${update.currentVersion}.`,
+            action: (
+                <ActionLink to='/admin/settings/updates'>View</ActionLink>
+            ),
         })
     }
 
@@ -185,7 +205,12 @@ interface Props {
 }
 
 const NeedsAttentionCard = ({ data, isFresh }: Props) => {
-    const items = isFresh ? deriveSetup(data) : deriveAttention(data)
+    // Shares its query with the rest of the dashboard, so this costs no extra
+    // request. A fresh install is walking through setup, not chasing releases,
+    // so the update only surfaces in the attention list.
+    const { data: update } = useUpdateStatus()
+
+    const items = isFresh ? deriveSetup(data) : deriveAttention(data, update)
     const title = isFresh ? 'Finish setup' : 'Needs attention'
 
     return (

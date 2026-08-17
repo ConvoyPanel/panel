@@ -1,4 +1,5 @@
 import { overviewQueries } from '@/features/overview/api'
+import UpdateAvailableAlert from '@/features/updates/components/UpdateAvailableAlert.tsx'
 import { cn } from '@/utils'
 import { IconDatabaseOff } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
@@ -225,6 +226,8 @@ const Dashboard = ({ data }: { data: OverviewData }) => {
     return (
         <div className='@container min-w-0 space-y-4'>
             <Heading>Admin Dashboard</Heading>
+
+            <UpdateAvailableAlert />
 
             {/* Top-line counts */}
             <div className='grid grid-cols-2 gap-4 @xl:grid-cols-4'>
