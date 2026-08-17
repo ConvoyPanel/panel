@@ -3,6 +3,7 @@
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Storage;
+use App\Models\StorageToNode;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
@@ -213,4 +214,60 @@ it('does not delete a storage through an unrelated node', function () {
         'node_id' => $this->node->id,
         'storage_id' => $this->storage->id,
     ]);
+});
+
+it('detaches a shared storage instead of deleting it off every node', function () {
+    $other = Node::factory()->for($this->location)->create();
+    $other->storages()->attach($this->storage);
+
+    $this->actingAs($this->user)
+        ->deleteJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}")
+        ->assertNoContent();
+
+    // Still registered, just not here. Removing it from one node's list is not a
+    // statement about the pool itself.
+    expect(Storage::find($this->storage->id))->not->toBeNull()
+        ->and($this->node->storages()->count())->toBe(0)
+        ->and($other->storages()->count())->toBe(1);
+});
+
+it('deletes a storage outright when only one node reaches it', function () {
+    $this->actingAs($this->user)
+        ->deleteJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}")
+        ->assertNoContent();
+
+    expect(Storage::find($this->storage->id))->toBeNull();
+});
+
+it('orders backups per node rather than across all of them', function () {
+    // The response re-reads live capacity; the node being offline is irrelevant
+    // to ordering and keeps this test about the pivot writes.
+    Http::fake(fn () => throw new ConnectionException('node down'));
+
+    // One pool reachable from two nodes: a drag on one must not reorder the other.
+    $other = Node::factory()->for($this->location)->create();
+    $second = Storage::factory()->create(['stores_backups' => true]);
+    $this->storage->update(['stores_backups' => true]);
+
+    $this->node->storages()->attach($second);
+    $other->storages()->attach($this->storage);
+    $other->storages()->attach($second);
+
+    StorageToNode::query()->where('node_id', $other->id)
+        ->update(['backup_order' => 99]);
+
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/nodes/{$this->node->id}/storages/backup-order", [
+            'ids' => [$second->id, $this->storage->id],
+        ])
+        ->assertOk();
+
+    $onThisNode = StorageToNode::query()->where('node_id', $this->node->id)->pluck('backup_order', 'storage_id');
+    expect((int) $onThisNode[$second->id])->toBe(1)
+        ->and((int) $onThisNode[$this->storage->id])->toBe(2);
+
+    // The other node's preferences are untouched.
+    expect(
+        StorageToNode::query()->where('node_id', $other->id)->pluck('backup_order')->unique()->all()
+    )->toBe([99]);
 });

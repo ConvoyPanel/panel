@@ -72,11 +72,20 @@ class StorageController extends Controller
      */
     public function update(StorageRequest $request, Node $node, Storage $storage)
     {
-        $this->connection->transaction(function () use ($request, $storage) {
+        $this->connection->transaction(function () use ($request, $node, $storage) {
             $storage->update($request->validated());
 
             if ($request->boolean('stores_backups') && $storage->stores_backups !== $request->boolean('stores_backups')) {
-                $storageToNode = StorageToNode::where('storage_id', '=', $storage->id)->firstOrFail();
+                // Scoped to this node as well as this storage. `storage_to_node`
+                // is a composite pivot whose declared primary key is
+                // `storage_id`, so a storage reachable from two nodes has two
+                // rows that both answer to it -- and looking one up by storage
+                // alone silently picks whichever the database returns first.
+                $storageToNode = StorageToNode::query()
+                    ->where('storage_id', $storage->id)
+                    ->where('node_id', $node->id)
+                    ->firstOrFail();
+
                 $storageToNode->backup_order = $storageToNode->getHighestOrderNumber() + 1;
                 $storageToNode->save();
             }
@@ -90,10 +99,20 @@ class StorageController extends Controller
 
     public function updateBackupOrder(UpdateBackupOrderRequest $request, Node $node)
     {
-        StorageToNode::setNewOrder(
-            ids: $request->array('ids'),
-            primaryKeyColumn: 'storage_id'
-        );
+        /*
+         * Written per node rather than through `setNewOrder()`, which matches on
+         * `storage_id` alone: a storage mounted by several nodes would have its
+         * order rewritten on all of them by a drag performed on one. Backup
+         * order is a property of "this node's preference", not of the storage.
+         */
+        $this->connection->transaction(function () use ($request, $node) {
+            foreach ($request->array('ids') as $position => $storageId) {
+                StorageToNode::query()
+                    ->where('storage_id', $storageId)
+                    ->where('node_id', $node->id)
+                    ->update(['backup_order' => $position + 1]);
+            }
+        });
 
         return $this->mapWithLiveData(
             $node,
@@ -108,7 +127,17 @@ class StorageController extends Controller
             404,
         );
 
-        $storage->delete();
+        /*
+         * Detach rather than delete when other nodes still reach this storage.
+         * Removing it from one node's list is not a statement about the pool
+         * itself, and deleting the row would silently take it off every other
+         * node that was using it.
+         */
+        if ($storage->nodes()->count() > 1) {
+            $storage->nodes()->detach($node->id);
+        } else {
+            $storage->delete();
+        }
 
         return response()->noContent();
     }

@@ -41,14 +41,21 @@ class StorageToNode extends Model implements Sortable
         'sort_when_creating' => true,
     ];
 
+    /**
+     * The set this row is ordered within: the backup storages of its own node.
+     *
+     * Scoped by `node_id` as well as by content type. Without it the sequence is
+     * global, so the next order number for a storage on one node is chosen by
+     * looking at every node's storages -- and a shared pool would share one
+     * position across all of them, which is not what backup order means.
+     */
     public function buildSortQuery(): Builder
     {
-        // Add a condition using `whereHas`. This ensures that we only include
-        // StorageToNode records where the related 'storage' model exists AND
-        // meets the condition specified in the closure.
-        return static::query()->whereHas('storage', function (Builder $query) {
-            $query->where('stores_backups', true);
-        });
+        return static::query()
+            ->where('node_id', $this->node_id)
+            ->whereHas('storage', function (Builder $query) {
+                $query->where('stores_backups', true);
+            });
     }
 
     public function node(): BelongsTo
