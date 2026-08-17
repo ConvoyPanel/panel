@@ -627,8 +627,10 @@ it('attaches a shared pool to every clustered node Proxmox reports it on', funct
     $this->service->handle($this->node);
 
     // Which nodes reach a pool is Proxmox's answer, not something to ask for.
+    // Both sides are sorted: the polled node's name comes from a factory, so it
+    // collates either side of 'pve-2' depending on the run.
     expect($storage->refresh()->nodes()->pluck('name')->sort()->values()->all())
-        ->toBe([$this->node->name, 'pve-2']);
+        ->toBe(collect([$this->node->name, 'pve-2'])->sort()->values()->all());
 });
 
 it('never links a local storage that merely shares a name', function () {
