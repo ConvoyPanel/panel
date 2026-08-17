@@ -5,6 +5,7 @@ namespace App\Services\Nodes;
 use App\Data\Cluster\ClusterResourceSnapshot;
 use App\Data\Cluster\NodeResourceData;
 use App\Data\Cluster\ServerResourceData;
+use App\Data\Cluster\StorageResourceData;
 use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
@@ -59,10 +60,27 @@ class NodeStatusPollService
 
         $resource = $this->findNodeResource($node, $resources);
         if ($resource !== null) {
-            $this->resourceSnapshots->put($node, $resource);
+            $this->resourceSnapshots->put($node, $resource, $this->storagesFor($node, $resources->storages));
         }
 
         return $this->markOnline($node);
+    }
+
+    /**
+     * This node's datastores, from the response we already have.
+     *
+     * Same cluster trap as the guest map: `/cluster/resources` answers for every
+     * member, and a shared store is reported once per node that mounts it. Without
+     * the filter one host's datastores would be attributed to another.
+     *
+     * @param  Collection<int, StorageResourceData>  $storages
+     * @return Collection<int, StorageResourceData>
+     */
+    private function storagesFor(Node $node, Collection $storages): Collection
+    {
+        return $storages
+            ->filter(fn (StorageResourceData $storage) => $storage->nodeName === $node->name)
+            ->values();
     }
 
     private function findNodeResource(Node $node, ClusterResourceSnapshot $resources): ?NodeResourceData

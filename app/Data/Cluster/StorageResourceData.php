@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Data\Cluster;
+
+use Illuminate\Support\Arr;
+use Spatie\LaravelData\Data;
+
+/**
+ * A datastore row from `/cluster/resources` (`type=storage`).
+ *
+ * These arrive in the same response the poller already makes for node
+ * reachability and guest power state, so per-datastore capacity costs no extra
+ * call and no extra timeout on a node that is down. Before this they were
+ * decoded and thrown away.
+ *
+ * Deliberately not `StorageData` (`App\Data\Node\Storage`): that one is the
+ * live `/nodes/{node}/storage` shape, carries the content-type flags the
+ * storage manager needs, and is fetched per request. This is the subset
+ * `/cluster/resources` actually returns.
+ */
+class StorageResourceData extends Data
+{
+    public function __construct(
+        /** The PVE storage id, e.g. `local-lvm`. */
+        public readonly string $name,
+        /** The PVE node this row was reported for -- a cluster answers for all of them. */
+        public readonly string $nodeName,
+        public readonly int $used,
+        public readonly int $total,
+        /** PVE's own word for it: `available`, or `unknown` when it cannot tell. */
+        public readonly string $status,
+        /**
+         * Shared storage is reported once per node, so the same SAN counts
+         * against every host that mounts it. Marked so the UI can say so rather
+         * than implying each node has its own copy.
+         */
+        public readonly bool $shared,
+    ) {}
+
+    public static function fromRaw(array $raw): self
+    {
+        return new self(
+            name: Arr::get($raw, 'storage', ''),
+            nodeName: Arr::get($raw, 'node', ''),
+            // `disk`/`maxdisk` mean used/total bytes for storage rows, where for
+            // a guest row they would mean its root image. Same keys, different
+            // question -- which is why these are only read off `type=storage`.
+            used: (int) Arr::get($raw, 'disk', 0),
+            total: (int) Arr::get($raw, 'maxdisk', 0),
+            status: (string) Arr::get($raw, 'status', 'unknown'),
+            shared: (bool) Arr::get($raw, 'shared', false),
+        );
+    }
+}

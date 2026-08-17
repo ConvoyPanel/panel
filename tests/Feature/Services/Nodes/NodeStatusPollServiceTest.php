@@ -45,15 +45,36 @@ function guestRow(int $vmid, string $status, string $nodeName): array
     ];
 }
 
+/** One `type=storage` row as /cluster/resources returns it. */
+function storageRow(
+    string $name,
+    string $nodeName,
+    int $used = 0,
+    int $total = 0,
+    string $status = 'available',
+    bool $shared = false,
+): array {
+    return [
+        'type' => 'storage',
+        'id' => "storage/{$nodeName}/{$name}",
+        'storage' => $name,
+        'node' => $nodeName,
+        'status' => $status,
+        'shared' => $shared,
+        'disk' => $used,
+        'maxdisk' => $total,
+    ];
+}
+
 /**
  * A /cluster/resources body. The node/storage rows are included because the
  * real endpoint returns them and the poller has to tolerate them.
  */
-function pollStatusPayload(array $guests = [], array $nodes = []): array
+function pollStatusPayload(array $guests = [], array $nodes = [], array $storages = []): array
 {
     return [
         ...($nodes ?: [['type' => 'node', 'id' => 'node/pve', 'node' => 'pve', 'status' => 'online']]),
-        ['type' => 'storage', 'id' => 'storage/pve/local', 'node' => 'pve', 'status' => 'available'],
+        ...($storages ?: [['type' => 'storage', 'id' => 'storage/pve/local', 'node' => 'pve', 'status' => 'available']]),
         ...$guests,
     ];
 }
@@ -200,6 +221,108 @@ it('records current resources for this node from the same response', function ()
         ->and($snapshot->disk->used)->toBe(64 * 1024 * 1024 * 1024)
         ->and($snapshot->disk->percent)->toBe(25.0)
         ->and($snapshot->uptimeInSeconds)->toBe(86400);
+});
+
+it('records every datastore on this node, fullest first', function () {
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('local', $this->node->name, used: 10, total: 100),
+            storageRow('local-lvm', $this->node->name, used: 90, total: 100),
+            storageRow('nfs-backups', $this->node->name, used: 50, total: 100, shared: true),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    $datastores = app(NodeResourceSnapshotCache::class)->for($this->node)->datastores;
+
+    // Sorted by fullness, not by the order PVE happened to list them: the store
+    // about to run out is the one worth reading first.
+    expect($datastores)->toHaveCount(3)
+        ->and(array_map(fn ($datastore) => $datastore->name, $datastores->items()))
+        ->toBe(['local-lvm', 'nfs-backups', 'local'])
+        ->and($datastores[0]->usage->percent)->toBe(90.0)
+        ->and($datastores[0]->usage->used)->toBe(90)
+        ->and($datastores[0]->usage->total)->toBe(100)
+        ->and($datastores[0]->online)->toBeTrue()
+        ->and($datastores[1]->shared)->toBeTrue()
+        ->and($datastores[2]->shared)->toBeFalse();
+});
+
+it('ignores datastores belonging to another node in the cluster', function () {
+    // Same trap as the guest map: /cluster/resources answers for every member,
+    // and a shared store is reported once per node that mounts it. Unfiltered,
+    // a neighbour's datastores are attributed to this node.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('mine', $this->node->name, used: 1, total: 10),
+            storageRow('theirs', 'some-other-node', used: 9, total: 10),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect(array_map(
+        fn ($datastore) => $datastore->name,
+        app(NodeResourceSnapshotCache::class)->for($this->node)->datastores->items(),
+    ))->toBe(['mine']);
+});
+
+it('sums the datastores into one storage figure for the dashboard', function () {
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [
+            storageRow('local', $this->node->name, used: 10, total: 100),
+            storageRow('local-lvm', $this->node->name, used: 40, total: 100),
+            // Excluded from the sum: it reports zeroes because it is unmounted,
+            // and counting it would deflate the percentage of everything else.
+            storageRow('nfs-dead', $this->node->name, status: 'unknown'),
+        ],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    $snapshot = app(NodeResourceSnapshotCache::class)->for($this->node);
+
+    expect($snapshot->storage->used)->toBe(50)
+        ->and($snapshot->storage->total)->toBe(200)
+        ->and($snapshot->storage->percent)->toBe(25.0)
+        ->and($snapshot->datastoreCount)->toBe(3)
+        ->and($snapshot->unreadableDatastores)->toBe(1);
+});
+
+it('reports zero storage rather than dividing by zero when nothing is readable', function () {
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow('nfs-dead', $this->node->name, status: 'unknown')],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    $snapshot = app(NodeResourceSnapshotCache::class)->for($this->node);
+
+    expect($snapshot->storage->total)->toBe(0)
+        ->and($snapshot->storage->percent)->toBe(0.0)
+        ->and($snapshot->unreadableDatastores)->toBe(1);
+});
+
+it('marks a datastore it could not read as offline rather than empty', function () {
+    // An unmounted NFS export still appears in the listing, reporting zeroes.
+    // "0% used" is a comfortable lie; the row has to say it is unreadable.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow('nfs-dead', $this->node->name, status: 'unknown')],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    $datastores = app(NodeResourceSnapshotCache::class)->for($this->node)->datastores;
+
+    expect($datastores)->toHaveCount(1)
+        ->and($datastores[0]->online)->toBeFalse()
+        ->and($datastores[0]->usage->percent)->toBe(0.0);
 });
 
 it('leaves the last resource snapshot alone when a poll fails', function () {

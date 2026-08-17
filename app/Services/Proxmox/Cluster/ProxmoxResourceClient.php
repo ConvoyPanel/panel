@@ -5,6 +5,7 @@ namespace App\Services\Proxmox\Cluster;
 use App\Data\Cluster\ClusterResourceSnapshot;
 use App\Data\Cluster\NodeResourceData;
 use App\Data\Cluster\ServerResourceData;
+use App\Data\Cluster\StorageResourceData;
 use App\Exceptions\Proxmox\RequestException;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
@@ -48,10 +49,15 @@ class ProxmoxResourceClient extends ProxmoxClient
             $resources,
             fn (array $resource) => Arr::get($resource, 'type') === 'qemu',
         );
+        $storages = array_filter(
+            $resources,
+            fn (array $resource) => Arr::get($resource, 'type') === 'storage',
+        );
 
         return new ClusterResourceSnapshot(
             nodes: NodeResourceData::collect($nodes, Collection::class),
             servers: ServerResourceData::collect($servers, Collection::class),
+            storages: StorageResourceData::collect($storages, Collection::class),
         );
     }
 

@@ -4,9 +4,13 @@ Covers GitHub #104 (node resource overview on the admin dashboard, plus
 monitoring with email alerts) and the reachability/power indicators wanted on
 the Nodes table and the server lists. Written 2026-07-17.
 
-Slices 1 and 2 are implemented (slice 2 on the client list only); slices 3–4 are
-designed, not built. Slice 3 (email alerting) is deliberately parked — the
-maintainer does not want it yet.
+Slices 1, 2 and 4 are implemented. Slice 3 (email alerting) is deliberately
+parked — the maintainer does not want it yet, reaffirmed 2026-08-17.
+
+**#104 therefore cannot be closed on slice 4 alone.** The issue asks for a
+resource overview *and* an email when a check fails; the first half is shipped
+and the second is a standing decision not to build. Say that when closing rather
+than implying the request was met in full.
 
 ## The problem
 
@@ -22,8 +26,13 @@ page costs `timeout × N`. Polling per render was never going to work.
 
 ## The lever: one call answers everything
 
-`GET /cluster/resources` returns every node **and** every guest in one response:
-`type`, `status`, `cpu`, `mem`, `maxmem`, `disk`, `uptime`, `node`.
+`GET /cluster/resources` returns every node, every guest **and** every datastore
+in one response: `type`, `status`, `cpu`, `mem`, `maxmem`, `disk`, `maxdisk`,
+`uptime`, `node`, `storage`, `shared`.
+
+Note `disk`/`maxdisk` change meaning with `type`: used/total bytes on a
+`storage` row, the guest's root image on a `qemu` one. Same keys, different
+question — read them only off the row type you meant.
 
 Measured against the dev node (`us-southeast-2`, PVE 9.2.2):
 
@@ -100,10 +109,10 @@ and `nodes:poll` scheduled every minute. One queued job per node so a dead node'
 timeout never serialises behind a healthy one. Nodes table shows the state with
 the cause behind it.
 
-**2 — guest power state (DONE, client list only).** `GuestStateCache` (vmid→status
-per node), written by the poll, read into `ServerData::$powerState` and rendered by
-`PowerStateBadge` on the client server list. **The admin server list still shows
-none** — same badge, not yet wired.
+**2 — guest power state (DONE).** `GuestStateCache` (vmid→status per node),
+written by the poll, read into `ServerData::$powerState` and rendered by
+`PowerStateBadge` on the client server list, the admin server list, and a node's
+own server list.
 
 Correcting this section's own claim of "same response, no new call": slice 1
 shipped against `/nodes/{node}/status`, which does not return guests, so slice 2
@@ -126,10 +135,60 @@ transition only, debounced behind `consecutive_failures >= N` so a flap does not
 page anyone, plus a recovery notice on the way back. Laravel notifications over
 the existing mail config.
 
-**4 — dashboard overview (#104's first half).** CPU/RAM/disk per node on the
-admin dashboard, read from the poller's snapshot. `metrics:snapshot` +
-VictoriaMetrics already exist for history and sparklines; the poller covers
-"now".
+**4 — dashboard overview (#104's first half) (DONE).** CPU/RAM/storage per node
+on the admin dashboard (`NodesCard`), read from the poller's snapshot
+(`NodeResourceSnapshotCache`) and never fetched on the read path.
+
+Storage covers **every datastore, not just the host's root filesystem** — #104
+asks about "the installed hard disks", plural. The figures come from the
+`type=storage` rows of the same `/cluster/resources` response the poll already
+makes, which were previously decoded and discarded, so this costs no extra call
+and no extra timeout on a node that is down. Rows are filtered by `Node::$name`
+(the cluster trap again — a shared store is reported once per node that mounts
+it).
+
+The dashboard shows them **summed into one figure per node**, not a meter each.
+A meter per store makes the cell grow without bound — a host with a dozen
+datastores turns one table row into a dozen meters, on a card meant to be read
+at a glance across a fleet. The per-store breakdown belongs on the node's own
+Storages tab, where there is room for it.
+
+The sum is over raw bytes, not a mean of percentages: averaging would let a full
+10 GiB scratch store weigh as heavily as a half-empty 20 TiB array. Stores PVE
+could not read are **excluded from the sum** rather than counted as empty — an
+unmounted export reports 0/0 and would quietly deflate everything around it — and
+`unreadableDatastores` is how the card admits the total is incomplete.
+
+`$datastores` still carries the per-store breakdown (sorted fullest-first) even
+though the dashboard no longer draws it; it is what the Storages tab redesign is
+meant to consume, so the tab can read the poller's snapshot instead of calling
+PVE per request the way `LiveStorageService` does today.
+
+Two notes for whoever touches this next:
+
+- `NodeResourceSnapshotData::$datastores` is a `DataCollection`, not an array of
+  `Data`. A plain array picks up the `data` wrapper when serialised through the
+  response, so the JSON came out as `datastores.data[]` while the generated
+  TypeScript said `NodeDatastoreUsageData[]`.
+- The snapshot cache key carries a `:v2` suffix. Cached `Data` objects are
+  unserialised without running the constructor, so adding a property leaves rows
+  written by the old shape uninitialised and they throw on first read. Bump the
+  suffix when the shape changes; the old rows then simply expire.
+
+**Node detail page.** `NodeStatusController` (`/nodes/{node}/status`) is the one
+read path that still calls PVE per request, because `/cluster/resources` does not
+carry the CPU model, kernel, boot mode or PVE version that page shows. It is
+gated on the stored status: a node already recorded `unreachable` is not asked at
+all (neither on mount nor on the 30s refetch), and the page renders the cause the
+poller classified, behind a "Check anyway" button. `unknown` still fires — nobody
+has asked yet, and one call for one node is a reasonable way to find out.
+
+**History.** Per-node CPU/RAM/disk over time should come from PVE's own RRD store
+(`GET /nodes/{node}/rrddata`, the node-scoped sibling of what
+`ProxmoxStatisticsClient` already calls for servers), *not* from per-node series
+in VictoriaMetrics. PVE consolidates with `AVERAGE` server-side; `metrics:snapshot`
+is hourly and fleet-wide, and hourly sampling of an instantaneous CPU reading is
+noise rather than a trend. Not built.
 
 ## Risks
 

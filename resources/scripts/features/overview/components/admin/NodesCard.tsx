@@ -22,7 +22,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { StatLabel } from '@/components/ui/Typography'
 
 import {
@@ -57,7 +61,10 @@ const Usage = ({
             <span className='text-sm font-semibold tabular-nums'>
                 {usage.percent}%
             </span>
-            <StatLabel as='span' className='text-xs whitespace-nowrap tabular-nums'>
+            <StatLabel
+                as='span'
+                className='text-xs whitespace-nowrap tabular-nums'
+            >
                 {bytes(usage.used)} / {bytes(usage.total)}
             </StatLabel>
         </div>
@@ -81,6 +88,51 @@ const NoMetric = ({ sub }: { sub?: string }) => (
         {sub && <StatLabel className='mt-1.5 text-xs'>{sub}</StatLabel>}
     </div>
 )
+
+/**
+ * Every datastore on the node as one figure.
+ *
+ * A meter per store would make this cell grow without bound — a host with a
+ * dozen datastores turns one table row into a dozen meters, and the card is
+ * meant to be read at a glance across a fleet. The per-store breakdown lives on
+ * the node's Storages tab.
+ *
+ * A node with no datastores falls back to the host's root filesystem rather
+ * than an empty cell — that is the figure this column used to show, and "none
+ * reported" is not the same as "nothing to say".
+ */
+const NodeStorage = ({ node }: { node: NodeSummary }) => {
+    if (!node.resources) {
+        return <NoMetric />
+    }
+
+    const { storage, datastoreCount, unreadableDatastores } = node.resources
+
+    if (datastoreCount === 0) {
+        return (
+            <Usage
+                usage={node.resources.disk}
+                label={`Root filesystem used on ${node.displayName}`}
+                sub='Root filesystem — no datastores reported'
+            />
+        )
+    }
+
+    return (
+        <Usage
+            usage={storage}
+            label={`Storage used on ${node.displayName}`}
+            sub={
+                `Across ${num(datastoreCount)} datastore${datastoreCount === 1 ? '' : 's'}` +
+                // Naming the excluded stores matters: without it the total looks
+                // like the whole picture when part of it could not be read.
+                (unreadableDatastores > 0
+                    ? ` · ${num(unreadableDatastores)} unreadable`
+                    : '')
+            }
+        />
+    )
+}
 
 const statusClasses: Record<NodeSummary['status'], string> = {
     online: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
@@ -171,8 +223,12 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                         Servers
                                     </TableHead>
                                     <TableHead className='w-32'>CPU</TableHead>
-                                    <TableHead className='w-[28%]'>Memory</TableHead>
-                                    <TableHead className='w-[28%]'>Root disk</TableHead>
+                                    <TableHead className='w-[28%]'>
+                                        Memory
+                                    </TableHead>
+                                    <TableHead className='w-[28%]'>
+                                        Storage
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -198,17 +254,25 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 <SnapshotMeta node={node} />
                                             </div>
                                         </TableCell>
-                                        <TableCell className='align-top text-center tabular-nums'>
+                                        <TableCell className='text-center align-top tabular-nums'>
                                             {num(node.servers)}
                                         </TableCell>
                                         <TableCell className='align-top'>
                                             {node.resources ? (
                                                 <div>
                                                     <div className='text-sm font-semibold tabular-nums'>
-                                                        {node.resources.cpu.percent}%
+                                                        {
+                                                            node.resources.cpu
+                                                                .percent
+                                                        }
+                                                        %
                                                     </div>
                                                     <StatLabel className='text-xs'>
-                                                        {num(node.resources.cpu.count)} CPUs
+                                                        {num(
+                                                            node.resources.cpu
+                                                                .count
+                                                        )}{' '}
+                                                        CPUs
                                                     </StatLabel>
                                                 </div>
                                             ) : (
@@ -218,7 +282,9 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                         <TableCell className='align-top'>
                                             {node.resources ? (
                                                 <Usage
-                                                    usage={node.resources.memory}
+                                                    usage={
+                                                        node.resources.memory
+                                                    }
                                                     label={`Memory used on ${node.displayName}`}
                                                     sub={`${bytes(node.memory.allocated)} committed`}
                                                 />
@@ -229,14 +295,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                             )}
                                         </TableCell>
                                         <TableCell className='pr-0 align-top'>
-                                            {node.resources ? (
-                                                <Usage
-                                                    usage={node.resources.disk}
-                                                    label={`Root disk used on ${node.displayName}`}
-                                                />
-                                            ) : (
-                                                <NoMetric />
-                                            )}
+                                            <NodeStorage node={node} />
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -268,7 +327,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 line-clamp-2 + text-balance,
                                                 which otherwise silently defeat
                                                 `truncate`. */}
-                                            <ItemDescription className='block truncate text-nowrap font-mono text-xs'>
+                                            <ItemDescription className='block truncate font-mono text-xs text-nowrap'>
                                                 {node.fqdn}
                                             </ItemDescription>
                                         </div>
@@ -286,8 +345,12 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     CPU
                                                 </StatLabel>
                                                 <div className='text-sm font-semibold tabular-nums'>
-                                                    {node.resources.cpu.percent}% ·{' '}
-                                                    {num(node.resources.cpu.count)} CPUs
+                                                    {node.resources.cpu.percent}
+                                                    % ·{' '}
+                                                    {num(
+                                                        node.resources.cpu.count
+                                                    )}{' '}
+                                                    CPUs
                                                 </div>
                                             </div>
                                             <div>
@@ -295,25 +358,24 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     Memory
                                                 </StatLabel>
                                                 <Usage
-                                                    usage={node.resources.memory}
+                                                    usage={
+                                                        node.resources.memory
+                                                    }
                                                     label={`Memory used on ${node.displayName}`}
                                                     sub={`${bytes(node.memory.allocated)} committed`}
                                                 />
                                             </div>
                                             <div className='@lg:col-span-2'>
                                                 <StatLabel className='mb-1.5 text-xs'>
-                                                    Root disk
+                                                    Storage
                                                 </StatLabel>
-                                                <Usage
-                                                    usage={node.resources.disk}
-                                                    label={`Root disk used on ${node.displayName}`}
-                                                />
+                                                <NodeStorage node={node} />
                                             </div>
                                         </div>
                                     ) : (
                                         <StatLabel className='text-xs'>
-                                            {bytes(node.memory.allocated)} memory
-                                            committed
+                                            {bytes(node.memory.allocated)}{' '}
+                                            memory committed
                                         </StatLabel>
                                     )}
                                 </ItemContent>

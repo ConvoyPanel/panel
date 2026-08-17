@@ -1,6 +1,7 @@
 <?php
 
 use App\Data\Cluster\NodeResourceData;
+use App\Data\Cluster\StorageResourceData;
 use App\Enums\Server\Backup\BackupErrorCode;
 use App\Enums\Server\ServerLifecycle;
 use App\Models\Address;
@@ -123,6 +124,53 @@ it('counts servers restoring from a backup', function () {
     $this->actingAs($admin)->getJson('/api/admin/overview')
         ->assertOk()
         ->assertJsonPath('data.servers.restoring', 1);
+});
+
+it('exposes each node datastore the poller recorded', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $node = Node::factory()->for(Location::factory())->create();
+
+    app(NodeResourceSnapshotCache::class)->put(
+        $node,
+        new NodeResourceData(
+            nodeName: $node->name,
+            status: 'online',
+            cpuCount: 8,
+            cpuUsed: 0.1,
+            memoryTotal: 100,
+            memoryUsed: 10,
+            diskTotal: 100,
+            diskUsed: 10,
+            uptimeInSeconds: 60,
+        ),
+        collect([
+            new StorageResourceData(
+                name: 'local',
+                nodeName: $node->name,
+                used: 25,
+                total: 100,
+                status: 'available',
+                shared: false,
+            ),
+            new StorageResourceData(
+                name: 'nfs-dead',
+                nodeName: $node->name,
+                used: 0,
+                total: 0,
+                status: 'unknown',
+                shared: true,
+            ),
+        ]),
+    );
+
+    $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->assertJsonPath('data.nodes.0.resources.datastores.0.name', 'local')
+        ->assertJsonPath('data.nodes.0.resources.datastores.0.usage.percent', 25)
+        ->assertJsonPath('data.nodes.0.resources.datastores.0.online', true)
+        ->assertJsonPath('data.nodes.0.resources.datastores.1.name', 'nfs-dead')
+        ->assertJsonPath('data.nodes.0.resources.datastores.1.online', false)
+        ->assertJsonPath('data.nodes.0.resources.datastores.1.shared', true);
 });
 
 it('requires an admin user', function () {
