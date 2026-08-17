@@ -116,11 +116,22 @@ export const nodeQueries = {
             queryFn: () => getNode(id as number),
             enabled: typeof id === 'number',
         }),
-    status: (id: number | null | undefined) =>
+    /**
+     * Live status, straight from PVE — the one read path that still talks to a
+     * node per request, because `/cluster/resources` (what the poller uses) does
+     * not carry the CPU model, kernel, boot mode or PVE version this endpoint
+     * does.
+     *
+     * `enabled` is how the caller declines to make that call. A node the poller
+     * has already recorded as `unreachable` will not answer, and asking anyway
+     * costs the full connect timeout every 30s to rediscover a fact already
+     * stored on the row.
+     */
+    status: (id: number | null | undefined, enabled = true) =>
         queryOptions({
             queryKey: [...nodeQueries.details(), id, 'status'] as const,
             queryFn: () => getNodeStatus(id as number),
-            enabled: typeof id === 'number',
+            enabled: typeof id === 'number' && enabled,
             refetchInterval: 30_000,
             // An unreachable node is a settled answer, not a blip: the endpoint
             // has already classified why. Retrying a 503 three times with
@@ -143,11 +154,11 @@ export const useNode = (id?: number | null) => {
     return useQuery(nodeQueries.detail(nodeId))
 }
 
-export const useNodeStatus = (id?: number | null) => {
+export const useNodeStatus = (id?: number | null, enabled = true) => {
     const params = useParams({ strict: false }) as { nodeId?: number }
     const nodeId = id ?? params.nodeId
 
-    return useQuery(nodeQueries.status(nodeId))
+    return useQuery(nodeQueries.status(nodeId, enabled))
 }
 
 export const createNode = async (
@@ -259,14 +270,7 @@ export type ConnectionTestForm = ConnectionTestInput &
     >
 
 export const testConnection = async (
-    {
-        name,
-        fqdn,
-        port,
-        verifyTls,
-        tokenId,
-        tokenSecret,
-    }: ConnectionTestInput,
+    { name, fqdn, port, verifyTls, tokenId, tokenSecret }: ConnectionTestInput,
     nodeId?: number
 ) => {
     const { data } = await apiFetch<DataResponse<unknown>>(
