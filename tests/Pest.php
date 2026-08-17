@@ -61,6 +61,19 @@ uses(
 */
 
 /**
+ * A root admin.
+ *
+ * Lives here rather than in a test file because two suites had each declared
+ * their own identical copy -- and Pest's test-file functions are global, so the
+ * second one to load made the whole run die with "Cannot redeclare admin()"
+ * before a single test executed.
+ */
+function admin(): User
+{
+    return User::factory()->create(['root_admin' => true]);
+}
+
+/**
  * Session state that satisfies RequireIdentityConfirmation (a 300s window).
  *
  * Pair with `actingAs()` on any account route that mints or revokes a

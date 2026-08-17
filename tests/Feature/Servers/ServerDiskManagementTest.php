@@ -2,15 +2,9 @@
 
 use App\Models\ServerDisk;
 use App\Models\Storage;
-use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 const BYTES_PER_GIB = 1024 * 1024 * 1024;
-
-function admin(): User
-{
-    return User::factory()->create(['root_admin' => true]);
-}
 
 /**
  * fakeProxmox + an empty storage-status list so the capacity closures in the
