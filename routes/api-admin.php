@@ -59,6 +59,10 @@ Route::prefix('/locations')->group(function () {
 | Endpoint: /api/admin/nodes
 |
 */
+// Storage across every node. Node-scoped storage lives under /nodes/{node}/storages;
+// this is the inventory, for the questions that are not about one host.
+Route::get('/storages', Admin\StorageInventoryController::class);
+
 Route::prefix('/nodes')->group(function () {
     Route::get('/', [Admin\Nodes\NodeController::class, 'index']);
     Route::post('/', [Admin\Nodes\NodeController::class, 'store']);

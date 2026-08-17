@@ -4,6 +4,7 @@ import {
 } from '@/features/nodes/transforms.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'
+import StorageInventoryController from '@/wayfinder/actions/App/Http/Controllers/Admin/StorageInventoryController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -48,6 +49,8 @@ const attachableRoute =
     StorageController.attachable['/api/admin/nodes/{node}/storages/attachable']
 const attachRoute =
     StorageController.attach['/api/admin/nodes/{node}/storages/attach']
+// Served under both the panel and Application prefixes, so reference the admin one.
+const inventoryRoute = StorageInventoryController['/api/admin/storages']
 const backupOrderRoute =
     StorageController.updateBackupOrder[
         '/api/admin/nodes/{node}/storages/backup-order'
@@ -94,6 +97,21 @@ export const attachStorage = async (
 
     return rawDataToNodeStorage(data)
 }
+
+/**
+ * Every storage across every node, with recorded capacity only -- the fleet page
+ * cannot make a live Proxmox call per node.
+ */
+export const getStorageInventory = async (): Promise<NodeStorage[]> => {
+    const { data } = await apiFetch<DataResponse<any[]>>(inventoryRoute())
+
+    return data.map(rawDataToNodeStorage)
+}
+
+export const storageInventoryQuery = queryOptions({
+    queryKey: ['admin', 'storages'] as const,
+    queryFn: getStorageInventory,
+})
 
 export const storageQueries = {
     all: (nodeId: number) => ['admin', 'nodes', nodeId, 'storages'] as const,

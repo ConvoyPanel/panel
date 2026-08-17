@@ -1,12 +1,14 @@
 import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
+    IconDatabase,
     IconHome,
     IconKey,
     IconMapPin,
     IconMapPins,
     IconServer,
     IconSettings,
+    IconStack2,
     IconTransform,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
@@ -79,9 +81,19 @@ const nav: SidebarNav = {
                     path: '/admin/ipam',
                 },
                 {
+                    icon: IconDatabase,
+                    label: 'Storage',
+                    path: '/admin/storage',
+                },
+                {
                     icon: IconBoxMargin,
                     label: 'Templates',
                     path: '/admin/templates',
+                },
+                {
+                    icon: IconStack2,
+                    label: 'Server Presets',
+                    path: '/admin/server-presets',
                 },
             ],
         },
