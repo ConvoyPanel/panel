@@ -77,6 +77,7 @@ Route::prefix('/nodes')->group(function () {
             Route::post('/', [Admin\Nodes\StorageController::class, 'store']);
             Route::put('/backup-order', [Admin\Nodes\StorageController::class, 'updateBackupOrder']);
 
+            Route::post('/attach', [Admin\Nodes\StorageController::class, 'attach']);
             Route::put('/{storage}', [Admin\Nodes\StorageController::class, 'update']);
             Route::delete('/{storage}', [Admin\Nodes\StorageController::class, 'destroy']);
         });
@@ -127,6 +128,29 @@ Route::prefix('/nodes')->group(function () {
             '/tools/query-remote-file',
             [Admin\Nodes\IsoController::class, 'queryLink'],
         );
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Server Preset Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/server-presets
+|
+| Sits beside /servers rather than under it: a preset is not a server, and
+| nesting it would have to share the `{server}` binding it has nothing to do
+| with.
+|
+*/
+Route::prefix('/server-presets')->group(function () {
+    Route::get('/', [Admin\ServerPresetController::class, 'index']);
+    Route::post('/', [Admin\ServerPresetController::class, 'store']);
+
+    Route::prefix('/{server_preset}')->group(function () {
+        Route::get('/', [Admin\ServerPresetController::class, 'show']);
+        Route::put('/', [Admin\ServerPresetController::class, 'update']);
+        Route::delete('/', [Admin\ServerPresetController::class, 'destroy']);
     });
 });
 
@@ -229,6 +253,26 @@ Route::prefix('/template-groups')->group(function () {
         Route::resource('/templates', Admin\TemplateController::class)
             ->only(['index', 'store', 'show', 'update', 'destroy']);
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Template Import Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/template-registry
+|
+| Importing prebuilt templates from the Cofoundry registry, and watching the
+| per-node installs that an import fans out into.
+|
+*/
+Route::prefix('/template-registry')->group(function () {
+    Route::get('/', [Admin\TemplateImportController::class, 'index']);
+    Route::post('/refresh', [Admin\TemplateImportController::class, 'refresh']);
+    Route::post('/import', [Admin\TemplateImportController::class, 'store']);
+
+    Route::get('/installs', [Admin\TemplateImportController::class, 'installs']);
+    Route::delete('/installs/{template_install}', [Admin\TemplateImportController::class, 'destroy']);
 });
 
 /*

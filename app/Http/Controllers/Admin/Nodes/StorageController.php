@@ -6,6 +6,7 @@ use App\Data\Node\Storage\StorageData;
 use App\Data\Storage\StorageEloquentData;
 use App\Exceptions\Proxmox\RequestException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Nodes\Storages\AttachStorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
 use App\Models\Node;
@@ -15,6 +16,7 @@ use App\Services\Nodes\LiveStorageService;
 use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -63,6 +65,77 @@ class StorageController extends Controller
 
         return StorageEloquentData::fromModel(
             $storage,
+            $this->liveStorage->get($node, $storage->name),
+        );
+    }
+
+    /**
+     * Point an already-registered storage at a second node.
+     *
+     * Separate from `store()` because they are different intentions: `store()`
+     * brings a PVE storage under Convoy's management, this says an existing pool
+     * is reachable from somewhere else too. Conflating them is what made shared
+     * storage impossible to express -- every registration created its own row,
+     * so one NFS export across three nodes was three unrelated records.
+     *
+     * The storage arrives in the body rather than the path because route model
+     * bindings here are scoped to the node (`scopeBindings()` in bootstrap/app.php)
+     * -- and a storage that is not yet attached to this node is, by definition,
+     * exactly the one that cannot be resolved that way.
+     *
+     * @throws Throwable
+     */
+    public function attach(AttachStorageRequest $request, Node $node)
+    {
+        $storage = Storage::findOrFail($request->integer('storage_id'));
+
+        if ($node->storages()->whereKey($storage->getKey())->exists()) {
+            throw ValidationException::withMessages([
+                'storage_id' => 'That storage is already attached to this node.',
+            ]);
+        }
+
+        /*
+         * A storage id is only meaningful inside the cluster that defines it --
+         * `storage.cfg` is cluster-wide, so `local-lvm` on one cluster has
+         * nothing to do with `local-lvm` on another. Attaching across that line
+         * would assert the two are one pool, which is exactly the confusion this
+         * feature exists to remove. Standalone hosts (null cluster) can never
+         * share, so they are excluded by the same comparison.
+         */
+        $sharesCluster = $storage->nodes()
+            ->when(
+                $node->cluster_name === null,
+                fn ($query) => $query->whereRaw('1 = 0'),
+                fn ($query) => $query->where('nodes.cluster_name', $node->cluster_name),
+            )
+            ->exists();
+
+        if (! $sharesCluster) {
+            throw ValidationException::withMessages([
+                'storage_id' => 'That storage belongs to a different Proxmox cluster, so it cannot be shared with this node.',
+            ]);
+        }
+
+        /*
+         * And Proxmox has to actually report it here. Taking the operator's word
+         * for it is the same mistake as trusting a hand-set `shared` flag: the
+         * panel would claim a reachability it has never observed, and the first
+         * evidence would be a failed deployment.
+         */
+        if ($this->liveStorage->get($node, $storage->name) === null) {
+            throw ValidationException::withMessages([
+                'storage_id' => "Proxmox did not report a storage named \"{$storage->name}\" on this node.",
+            ]);
+        }
+
+        StorageToNode::create([
+            'storage_id' => $storage->id,
+            'node_id' => $node->id,
+        ]);
+
+        return StorageEloquentData::fromModel(
+            $storage->refresh(),
             $this->liveStorage->get($node, $storage->name),
         );
     }

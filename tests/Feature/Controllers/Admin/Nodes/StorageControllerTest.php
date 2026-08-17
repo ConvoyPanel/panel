@@ -271,3 +271,79 @@ it('orders backups per node rather than across all of them', function () {
         StorageToNode::query()->where('node_id', $other->id)->pluck('backup_order')->unique()->all()
     )->toBe([99]);
 });
+
+/** Two nodes in the same PVE cluster, both reporting the storage under test. */
+function clusteredPeer(Storage $storage): Node
+{
+    $peer = Node::factory()->for(test()->location)->create(['cluster_name' => 'prod']);
+    test()->node->update(['cluster_name' => 'prod']);
+    $peer->storages()->attach($storage);
+
+    return $peer;
+}
+
+it('attaches a storage the cluster already has to another node', function () {
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    clusteredPeer($storage);
+    fakeLiveStorage('ceph-vm', total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $storage->id])
+        ->assertCreated()
+        ->assertJsonPath('data.name', 'ceph-vm');
+
+    // One row, two nodes -- which is the whole point.
+    expect($storage->refresh()->nodes()->count())->toBe(2);
+});
+
+it('refuses to attach a storage Proxmox does not report on this node', function () {
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    clusteredPeer($storage);
+    // The node answers, but with a different storage entirely.
+    fakeLiveStorage('something-else', total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $storage->id])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('storage_id');
+
+    expect($storage->refresh()->nodes()->count())->toBe(1);
+});
+
+it('refuses to attach a storage from another cluster', function () {
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $peer = Node::factory()->for($this->location)->create(['cluster_name' => 'other']);
+    $peer->storages()->attach($storage);
+    $this->node->update(['cluster_name' => 'prod']);
+    fakeLiveStorage('ceph-vm', total: 100, used: 20, avail: 80);
+
+    // Same storage id, different cluster: `storage.cfg` is cluster-wide, so the
+    // two names refer to unrelated pools.
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $storage->id])
+        ->assertStatus(422);
+
+    expect($storage->refresh()->nodes()->count())->toBe(1);
+});
+
+it('refuses to attach when either host is standalone', function () {
+    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $peer = Node::factory()->for($this->location)->create(['cluster_name' => null]);
+    $peer->storages()->attach($storage);
+    fakeLiveStorage('ceph-vm', total: 100, used: 20, avail: 80);
+
+    // A standalone host shares nothing by definition, so a matching name is a
+    // coincidence rather than the same disk.
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $storage->id])
+        ->assertStatus(422);
+});
+
+it('refuses to attach a storage the node already has', function () {
+    clusteredPeer($this->storage);
+    fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages/attach", ['storage_id' => $this->storage->id])
+        ->assertStatus(422);
+});
