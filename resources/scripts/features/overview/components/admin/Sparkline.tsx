@@ -20,14 +20,14 @@ const Sparkline = ({
     return (
         <ChartContainer
             config={{ value: { color: 'var(--primary)' } }}
-            className={cn('block', className)}
+            className={cn('pointer-events-none block', className)}
         >
             <AreaChart
-                accessibilityLayer
                 data={data}
                 margin={{ top: 2, right: 0, bottom: 0, left: 0 }}
             >
                 <Area
+                    activeDot={false}
                     isAnimationActive={false}
                     type='monotone'
                     dataKey='value'
