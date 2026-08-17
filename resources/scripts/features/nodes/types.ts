@@ -21,12 +21,31 @@ export interface Storage {
     }
     // Sum of the usages above — "Allocated by Convoy".
     committedByConvoy: number
-    // Live Proxmox truth. `online` false ⇒ physical figures are null (offline).
+    // What Proxmox reports this storage is, recorded by the node poll. Null
+    // until a node has reported it at least once.
+    pveType: string | null
+    pveShared: boolean | null
+    pveContent: string | null
+    /**
+     * Whether committed may legitimately exceed physical usage — thin backends
+     * and PBS. A large gap there is ordinary, not something to warn about.
+     */
+    isThin: boolean
+    // Whether the physical figures below came from a live call this request.
     online: boolean
+    /**
+     * Where the physical figures came from. `recorded` means the node was
+     * unreachable and these are the last ones the poll wrote, which is why
+     * `online` being false no longer implies they are missing.
+     */
+    capacitySource: 'live' | 'recorded' | 'unknown'
+    // When the physical figures were observed. Null when never.
+    observedAt: string | null
     physicalTotal: number | null
     physicalUsed: number | null
     physicalFree: number | null
-    // physicalUsed − committedByConvoy: base-system + non-Convoy usage.
+    // physicalUsed − committedByConvoy. Null when unknown, and null on thin or
+    // deduplicating backends where the subtraction is not valid.
     untracked: number | null
     // physicalFree − reservedBytes: what a new disk may actually consume.
     freeForConvoy: number | null

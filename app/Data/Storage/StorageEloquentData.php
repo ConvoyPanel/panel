@@ -4,6 +4,8 @@ namespace App\Data\Storage;
 
 use App\Data\Node\Storage\StorageData;
 use App\Models\Storage;
+use App\Support\StorageBackends;
+use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -28,23 +30,51 @@ class StorageEloquentData extends Data
         public bool $storesIso,
         public bool $storesSnippets,
         public ?int $backupOrder,
+        // What Proxmox says this storage is, recorded by the poll. Null until a
+        // node has reported it at least once.
+        public ?string $pveType,
+        public ?bool $pveShared,
+        public ?string $pveContent,
+        /**
+         * Whether committed may legitimately exceed physical usage — thin
+         * backends and PBS. The UI needs this to know that a large gap is
+         * ordinary rather than something to warn about.
+         */
+        public bool $isThin,
         // Convoy's own bookkeeping (bytes) — what it has allocated, per resource.
         public int $serverUsage,
         public int $backupUsage,
         public int $isoUsage,
         // Sum of the three above — "Allocated by Convoy".
         public int $committedByConvoy,
-        // Live Proxmox figures (bytes). Null when the node/storage is offline or
-        // unreachable — the list still renders, flagged not-online.
+        // Whether the figures below came from a live call this request.
         public bool $online,
+        /**
+         * Where the physical figures came from: `live` this request, `recorded`
+         * by the last poll, or `unknown` if no node has ever reported it.
+         *
+         * The page used to go blank the moment a node was unreachable, because
+         * live was the only source. The poll now writes the same figures, so a
+         * brief outage costs freshness rather than the whole panel — but only if
+         * the UI can say which it is showing.
+         */
+        public string $capacitySource,
+        /** When the physical figures were observed. Null when never. */
+        public ?CarbonImmutable $observedAt,
         public ?int $physicalTotal,
         public ?int $physicalUsed,
         public ?int $physicalFree,
-        // physicalUsed − committedByConvoy: the base-system + non-Convoy slice,
-        // made explicit instead of silently netted out. Null when offline.
+        /**
+         * physicalUsed − committedByConvoy: the slice Convoy cannot account for.
+         *
+         * Null when there is nothing to subtract from, and null on thin or
+         * deduplicating backends where the subtraction is not valid — there the
+         * ledger legitimately exceeds physical bytes, and clamping the result at
+         * zero would present "no unaccounted space" as a finding rather than an
+         * artefact of the arithmetic.
+         */
         public ?int $untracked,
         // What a new disk may actually consume: physicalFree − reservedBytes.
-        // Null when offline (no physical truth to subtract the reserve from).
         public ?int $freeForConvoy,
     ) {}
 
@@ -55,6 +85,23 @@ class StorageEloquentData extends Data
         $isoUsage = (int) ($storage->iso_usage ?? 0);
         $committed = $serverUsage + $backupUsage + $isoUsage;
         $reserved = (int) ($storage->reserved_bytes ?? 0);
+        $isThin = StorageBackends::isThin($storage->pve_type);
+
+        // Live if we have it, otherwise whatever the poll last wrote. `free` is
+        // derived rather than stored: PVE gives used and total on the cluster
+        // rows, and total − used is the same number it would have reported.
+        [$source, $observedAt, $total, $used] = match (true) {
+            $live !== null => ['live', CarbonImmutable::now(), $live->total, $live->used],
+            $storage->discovered_at !== null => [
+                'recorded',
+                $storage->discovered_at,
+                (int) $storage->discovered_total,
+                (int) $storage->discovered_used,
+            ],
+            default => ['unknown', null, null, null],
+        };
+
+        $free = $total !== null ? max(0, $total - $used) : null;
 
         return new self(
             id: $storage->id,
@@ -71,16 +118,27 @@ class StorageEloquentData extends Data
             storesIso: (bool) $storage->stores_iso,
             storesSnippets: (bool) $storage->stores_snippets,
             backupOrder: $storage->pivot?->backup_order,
+            pveType: $storage->pve_type,
+            pveShared: $storage->pve_shared,
+            pveContent: $storage->pve_content,
+            isThin: $isThin,
             serverUsage: $serverUsage,
             backupUsage: $backupUsage,
             isoUsage: $isoUsage,
             committedByConvoy: $committed,
             online: $live !== null,
-            physicalTotal: $live?->total,
-            physicalUsed: $live?->used,
-            physicalFree: $live?->free,
-            untracked: $live !== null ? max(0, $live->used - $committed) : null,
-            freeForConvoy: $live !== null ? max(0, $live->free - $reserved) : null,
+            capacitySource: $source,
+            observedAt: $observedAt,
+            physicalTotal: $total,
+            physicalUsed: $used,
+            // Live reports free directly; a recorded figure derives it. Prefer
+            // the reported one, which accounts for filesystem overhead the
+            // subtraction cannot see.
+            physicalFree: $live?->free ?? $free,
+            untracked: $used !== null && ! $isThin ? max(0, $used - $committed) : null,
+            freeForConvoy: ($live?->free ?? $free) !== null
+                ? max(0, ($live?->free ?? $free) - $reserved)
+                : null,
         );
     }
 }

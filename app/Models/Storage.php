@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\StorageSizeCast;
 use App\Support\ByteUnit;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,6 +18,12 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property int $size
  * @property ?int $reserved_bytes
+ * @property ?string $pve_type
+ * @property ?bool $pve_shared
+ * @property ?string $pve_content
+ * @property ?int $discovered_total
+ * @property ?int $discovered_used
+ * @property ?CarbonImmutable $discovered_at
  * @property bool $is_shareable
  * @property bool $stores_kvm
  * @property bool $stores_lxc
@@ -60,6 +67,8 @@ class Storage extends Model
             'size' => StorageSizeCast::class,
             'reserved_bytes' => StorageSizeCast::class,
             'is_shareable' => 'boolean',
+            'pve_shared' => 'boolean',
+            'discovered_at' => 'immutable_datetime',
             'stores_kvm' => 'boolean',
             'stores_lxc' => 'boolean',
             'stores_lxc_templates' => 'boolean',

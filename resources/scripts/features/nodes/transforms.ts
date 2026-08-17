@@ -22,7 +22,13 @@ export const rawDataToStorage = (raw: any): Storage => ({
     committedByConvoy:
         raw.committedByConvoy ??
         (raw.serverUsage ?? 0) + (raw.backupUsage ?? 0) + (raw.isoUsage ?? 0),
+    pveType: raw.pveType ?? null,
+    pveShared: raw.pveShared ?? null,
+    pveContent: raw.pveContent ?? null,
+    isThin: raw.isThin ?? false,
     online: raw.online ?? false,
+    capacitySource: raw.capacitySource ?? 'unknown',
+    observedAt: raw.observedAt ?? null,
     physicalTotal: raw.physicalTotal ?? null,
     physicalUsed: raw.physicalUsed ?? null,
     physicalFree: raw.physicalFree ?? null,

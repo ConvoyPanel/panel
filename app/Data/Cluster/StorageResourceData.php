@@ -2,6 +2,7 @@
 
 namespace App\Data\Cluster;
 
+use App\Support\StorageBackends;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\Data;
 
@@ -49,20 +50,10 @@ class StorageResourceData extends Data
         public readonly ?string $content = null,
     ) {}
 
-    /** Backends where written bytes are always below the sum of provisioned sizes. */
-    private const THIN_TYPES = ['lvmthin', 'zfspool', 'zfs', 'rbd', 'pbs', 'btrfs'];
-
-    /**
-     * Whether Convoy's committed total may legitimately exceed physical usage.
-     *
-     * True for thin backends and for PBS, which dedups chunk-wise across every
-     * namespace and cluster pointed at it. Callers use this to decide whether
-     * `physical - committed` is a meaningful subtraction; on these it is not, and
-     * presenting the difference as unaccounted space would be a fabrication.
-     */
+    /** @see StorageBackends::isThin() -- one list, shared with the Eloquent side. */
     public function isThin(): bool
     {
-        return $this->type !== null && in_array($this->type, self::THIN_TYPES, true);
+        return StorageBackends::isThin($this->type);
     }
 
     public static function fromRaw(array $raw): self
