@@ -18,6 +18,7 @@ import type {
 export type AnchorQueryParams = QueryBuilderParams<'name' | 'mode'>
 
 const indexRoute = AnchorController.index['/api/admin/anchors']
+const showRoute = AnchorController.show['/api/admin/anchors/{anchor}']
 const storeRoute = AnchorController.store['/api/admin/anchors']
 const updateRoute = AnchorController.update['/api/admin/anchors/{anchor}']
 const destroyRoute = AnchorController.destroy['/api/admin/anchors/{anchor}']
@@ -33,8 +34,18 @@ export const getAnchors = async (
     return { items: response.items, pagination: response.pagination }
 }
 
+export const getAnchor = async (id: number): Promise<Anchor> =>
+    (await apiFetch<DataResponse<Anchor>>(showRoute(id))).data
+
 export const anchorQueries = {
     all: () => ['admin', 'anchors'] as const,
+    // Only this endpoint fills `nodes`; the list leaves it null.
+    detail: (id: number) =>
+        queryOptions({
+            queryKey: [...anchorQueries.all(), 'detail', id] as const,
+            queryFn: () => getAnchor(id),
+            refetchInterval: 30_000,
+        }),
     list: (params: AnchorQueryParams) =>
         queryOptions({
             queryKey: [...anchorQueries.all(), params] as const,
@@ -47,13 +58,18 @@ export const anchorQueries = {
 export const useAnchors = (params: AnchorQueryParams) =>
     useQuery(anchorQueries.list(params))
 
+export const useAnchor = (id: number) => useQuery(anchorQueries.detail(id))
+
 const payload = (data: z.infer<typeof anchorSchema>) => ({
     name: data.name,
     mode: data.mode,
     public_url: data.publicUrl,
     panel_url_override:
         data.panelUrlOverride === '' ? null : data.panelUrlOverride,
-    relay_id: data.relayId === 'none' ? null : Number(data.relayId),
+    relay_id:
+        data.mode === 'relay' || data.relayId === 'none'
+            ? null
+            : Number(data.relayId),
 })
 
 export const createAnchor = async (

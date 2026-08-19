@@ -31,6 +31,29 @@ it('issues and consumes a one-time enrollment token', function () {
         ->assertUnprocessable();
 });
 
+it('names the attached nodes on the detail endpoint and nowhere else', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    [, , $node] = createServerModel();
+    $anchor = Anchor::factory()->create();
+    $node->update(['anchor_id' => $anchor->id]);
+
+    $this->actingAs($admin)
+        ->getJson("/api/admin/anchors/{$anchor->id}")
+        ->assertOk()
+        ->assertJsonPath('data.nodesCount', 1)
+        ->assertJsonPath('data.nodes.0.id', $node->id)
+        ->assertJsonPath('data.nodes.0.displayName', $node->display_name)
+        ->assertJsonPath('data.nodes.0.serversCount', 1);
+
+    // The roster shows the count and never the list, so the index must not pay
+    // for a nodes query per row -- and `nodes` there means "not asked for".
+    $this->actingAs($admin)
+        ->getJson('/api/admin/anchors')
+        ->assertOk()
+        ->assertJsonPath('items.0.nodesCount', 1)
+        ->assertJsonPath('items.0.nodes', null);
+});
+
 it('authenticates heartbeats and records compatibility data', function () {
     $anchor = Anchor::factory()->create(['enrolled_at' => now()]);
     $payload = [

@@ -21,6 +21,7 @@ class AnchorController
     public function index(Request $request)
     {
         $anchors = QueryBuilder::for(Anchor::query())
+            ->with('relay:id,name')
             ->withCount(['nodes', 'agents'])
             ->defaultSort('name')
             ->allowedFilters(['name', AllowedFilter::exact('mode')])
@@ -32,7 +33,14 @@ class AnchorController
 
     public function show(Anchor $anchor)
     {
-        return AnchorData::from($anchor->loadCount(['nodes', 'agents']));
+        // The detail screen names the nodes rather than counting them: what
+        // loses console access if this anchor goes away is the question the
+        // screen exists to answer.
+        return AnchorData::from(
+            $this->hydrate($anchor)->load([
+                'nodes' => fn ($query) => $query->withCount('servers')->orderBy('display_name'),
+            ])
+        );
     }
 
     public function store(AnchorFormRequest $request)
@@ -44,7 +52,7 @@ class AnchorController
         ]);
         $this->syncNodes($anchor, $request->input('node_ids', []));
 
-        return AnchorData::from($anchor->loadCount(['nodes', 'agents']));
+        return AnchorData::from($this->hydrate($anchor));
     }
 
     public function update(AnchorFormRequest $request, Anchor $anchor)
@@ -54,7 +62,7 @@ class AnchorController
             $this->syncNodes($anchor, $request->input('node_ids', []));
         }
 
-        return AnchorData::from($anchor->loadCount(['nodes', 'agents']));
+        return AnchorData::from($this->hydrate($anchor));
     }
 
     public function enrollment(Anchor $anchor, AnchorEnrollmentService $enrollment)
@@ -72,6 +80,15 @@ class AnchorController
         $anchor->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Everything AnchorData reads beyond the row itself: the counts the roster
+     * shows as load, and the relay it names as the route.
+     */
+    private function hydrate(Anchor $anchor): Anchor
+    {
+        return $anchor->loadCount(['nodes', 'agents'])->load('relay:id,name');
     }
 
     /** @param array<int, int> $nodeIds */
