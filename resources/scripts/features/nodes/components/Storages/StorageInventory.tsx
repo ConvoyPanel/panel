@@ -124,9 +124,23 @@ const StorageInventory = ({ storages }: Props) => {
                         {ordered.map(storage => (
                             <TableRow key={storage.id}>
                                 <TableCell className='max-w-0 py-3 pl-4 align-top'>
-                                    <div className='truncate font-semibold'>
-                                        {storage.displayName ?? storage.name}
-                                    </div>
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({
+                                                variant: 'link',
+                                            }),
+                                            'h-auto max-w-full min-w-0 justify-start p-0 font-semibold'
+                                        )}
+                                        to='/admin/storage/$storageId'
+                                        params={{
+                                            storageId: String(storage.id),
+                                        }}
+                                    >
+                                        <span className='truncate'>
+                                            {storage.displayName ??
+                                                storage.name}
+                                        </span>
+                                    </Link>
                                     <StorageSummary
                                         storage={storage}
                                         className='mt-0.5'
@@ -153,9 +167,18 @@ const StorageInventory = ({ storages }: Props) => {
                     >
                         <ItemContent className='min-w-0 gap-1'>
                             <ItemTitle className='w-full min-w-0'>
-                                <span className='truncate'>
-                                    {storage.displayName ?? storage.name}
-                                </span>
+                                <Link
+                                    className={cn(
+                                        buttonVariants({ variant: 'link' }),
+                                        'h-auto max-w-full min-w-0 justify-start p-0 font-semibold'
+                                    )}
+                                    to='/admin/storage/$storageId'
+                                    params={{ storageId: String(storage.id) }}
+                                >
+                                    <span className='truncate'>
+                                        {storage.displayName ?? storage.name}
+                                    </span>
+                                </Link>
                             </ItemTitle>
                             <StorageSummary storage={storage} />
                             <Nodes storage={storage} />

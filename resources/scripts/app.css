@@ -55,6 +55,16 @@
         --chart-3: oklch(0.546 0.245 262.881);
         --chart-4: oklch(0.488 0.243 264.376);
         --chart-5: oklch(0.424 0.199 265.638);
+        /*
+         * Storage consumers are categories, not magnitudes, so they do not use
+         * the --chart ramp: that is one hue at five lightnesses and two adjacent
+         * segments read as the same colour. Four separate hues instead, with
+         * untracked in amber because it is the one that means "look at this".
+         */
+        --storage-servers: oklch(0.55 0.14 250);
+        --storage-backups: oklch(0.55 0.16 305);
+        --storage-isos: oklch(0.6 0.11 190);
+        --storage-untracked: oklch(0.62 0.13 75);
 
         /*
          * Named per metric, not per slot. --chart-1..5 above are five steps of
@@ -126,6 +136,10 @@
         --chart-3: oklch(0.546 0.245 262.881);
         --chart-4: oklch(0.488 0.243 264.376);
         --chart-5: oklch(0.424 0.199 265.638);
+        --storage-servers: oklch(0.68 0.13 250);
+        --storage-backups: oklch(0.68 0.15 305);
+        --storage-isos: oklch(0.72 0.1 190);
+        --storage-untracked: oklch(0.78 0.13 75);
 
         /* Stepped for the dark card surface, not flipped from the light set --
            see the note on the light tokens. */

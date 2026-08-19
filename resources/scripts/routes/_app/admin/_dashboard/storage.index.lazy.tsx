@@ -12,7 +12,7 @@ import {
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
-export const Route = createLazyFileRoute('/_app/admin/_dashboard/storage')({
+export const Route = createLazyFileRoute('/_app/admin/_dashboard/storage/')({
     component: StorageInventoryPage,
 })
 

@@ -3,7 +3,11 @@ import {
     rawDataToStorageProxmox,
 } from '@/features/nodes/transforms.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
+import IsoController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/IsoController'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'
+import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
+import StorageBackupController from '@/wayfinder/actions/App/Http/Controllers/Admin/StorageBackupController'
+import StorageConsumerController from '@/wayfinder/actions/App/Http/Controllers/Admin/StorageConsumerController'
 import StorageInventoryController from '@/wayfinder/actions/App/Http/Controllers/Admin/StorageInventoryController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
@@ -48,6 +52,16 @@ const proxmoxRoute =
 const storeRoute = StorageController.store['/api/admin/nodes/{node}/storages']
 // Served under both the panel and Application prefixes, so reference the admin one.
 const inventoryRoute = StorageInventoryController['/api/admin/storages']
+const consumersRoute =
+    StorageConsumerController['/api/admin/storages/{storage}/consumers']
+const deleteBackupRoute =
+    StorageBackupController.destroy['/api/admin/backups/{backup}']
+// An ISO's delete route is node-scoped and a server's is not; both live here
+// because the storage detail page is the only screen that calls them.
+const deleteIsoRoute =
+    IsoController.destroy['/api/admin/nodes/{node}/isos/{iso}']
+const deleteServerRoute =
+    ServerController.destroy['/api/admin/servers/{server}']
 const backupOrderRoute =
     StorageController.updateBackupOrder[
         '/api/admin/nodes/{node}/storages/backup-order'
@@ -77,6 +91,38 @@ export const getStorageInventory = async (): Promise<NodeStorage[]> => {
     const { data } = await apiFetch<DataResponse<any[]>>(inventoryRoute())
 
     return data.map(rawDataToNodeStorage)
+}
+
+export type StorageConsumers = App.Data.Storage.StorageConsumersData
+export type StorageConsumer = App.Data.Storage.StorageConsumerData
+
+/** The servers, backups and ISOs occupying a storage, largest first. */
+export const getStorageConsumers = async (
+    storageId: number
+): Promise<StorageConsumers> =>
+    (await apiFetch<DataResponse<StorageConsumers>>(consumersRoute(storageId)))
+        .data
+
+export const storageConsumersQuery = (storageId: number) =>
+    queryOptions({
+        queryKey: ['admin', 'storages', storageId, 'consumers'] as const,
+        queryFn: () => getStorageConsumers(storageId),
+        enabled: !!storageId,
+    })
+
+export const deleteBackup = async (uuid: string): Promise<void> => {
+    await apiFetch(deleteBackupRoute(uuid))
+}
+
+export const deleteIso = async (
+    nodeId: number,
+    uuid: string
+): Promise<void> => {
+    await apiFetch(deleteIsoRoute([nodeId, uuid]))
+}
+
+export const deleteServer = async (uuid: string): Promise<void> => {
+    await apiFetch(deleteServerRoute(uuid))
 }
 
 export const storageInventoryQuery = queryOptions({

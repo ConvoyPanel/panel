@@ -15,6 +15,14 @@ class StorageConsumerData extends Data
 {
     public function __construct(
         public int $id,
+        /**
+         * What the delete route binds on. Every one of these models inherits
+         * `uuid` as its route key, so the integer id above is for React lists and
+         * this is for the API.
+         */
+        public string $routeKey,
+        /** The node to address an ISO through; its delete route is node-scoped. */
+        public ?int $nodeId,
         public string $name,
         /** Bytes. */
         public int $size,

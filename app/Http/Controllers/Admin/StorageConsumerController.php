@@ -71,6 +71,8 @@ class StorageConsumerController extends Controller
 
                 return new StorageConsumerData(
                     id: $server->id,
+                    routeKey: $server->uuid,
+                    nodeId: null,
                     name: $server->name,
                     size: (int) $group->sum('size'),
                     owner: $server->user?->email,
@@ -97,6 +99,8 @@ class StorageConsumerController extends Controller
             ->get()
             ->map(fn (Backup $backup) => new StorageConsumerData(
                 id: $backup->id,
+                routeKey: $backup->uuid,
+                nodeId: null,
                 name: $backup->name,
                 size: (int) ($backup->size ?? 0),
                 owner: $backup->server?->name,
@@ -115,11 +119,18 @@ class StorageConsumerController extends Controller
     /** @return DataCollection<int, StorageConsumerData> */
     private function isos(Storage $storage): DataCollection
     {
+        $nodeId = $storage->nodes()->value('nodes.id');
+
         $rows = ISO::query()
             ->where('storage_id', $storage->id)
             ->get()
             ->map(fn (ISO $iso) => new StorageConsumerData(
                 id: $iso->id,
+                routeKey: $iso->uuid,
+                // An ISO's delete route is node-scoped, so the row carries the
+                // node to address it through -- any node reaching the storage
+                // will do, and this is the one Convoy recorded it against.
+                nodeId: $nodeId,
                 name: $iso->name,
                 size: (int) ($iso->size ?? 0),
                 owner: null,

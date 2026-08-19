@@ -46,8 +46,8 @@ const pct = (part: number, total: number) =>
  */
 const solidColor = (storage: Storage) =>
     storage.storesBackups && !storage.storesKvm
-        ? 'var(--chart-2)'
-        : 'var(--chart-1)'
+        ? 'var(--storage-backups)'
+        : 'var(--storage-servers)'
 
 export const storageCapacity = (storage: Storage): StorageCapacityView => {
     const committed =
@@ -110,22 +110,22 @@ export const storageCapacity = (storage: Storage): StorageCapacityView => {
             {
                 label: 'Server disks',
                 value: pct(storage.usages.server, total),
-                color: 'var(--chart-1)',
+                color: 'var(--storage-servers)',
             },
             {
                 label: 'Backups',
                 value: pct(storage.usages.backup, total),
-                color: 'var(--chart-2)',
+                color: 'var(--storage-backups)',
             },
             {
                 label: 'ISO images',
                 value: pct(storage.usages.iso, total),
-                color: 'var(--chart-3)',
+                color: 'var(--storage-isos)',
             },
             {
                 label: 'Untracked',
                 value: pct(storage.untracked ?? 0, total),
-                color: 'var(--chart-4)',
+                color: 'var(--storage-untracked)',
             },
             {
                 label: 'Reserved (headroom)',
@@ -166,29 +166,29 @@ const BACKEND_LABELS: Record<string, string> = {
 }
 
 /**
- * What each backend actually is, for the tooltip.
+ * What each backend means in Proxmox, in one line.
  *
- * Written to answer "where does this live and what does it mean for me" rather
- * than to define the technology: whether the storage is on this host or on the
- * network is the part that changes what an operator does next.
+ * Not a definition of the technology -- everyone knows what a directory is. The
+ * facts that change what an operator does next are whether the storage is local
+ * to this node or shared across the cluster, and what it is allowed to hold.
  */
 const BACKEND_HINTS: Record<string, string> = {
-    dir: 'Files in a folder on this host’s own filesystem.',
-    btrfs: 'A Btrfs filesystem on this host’s own disks.',
-    lvm: 'An LVM volume group on this host’s own disks.',
+    dir: 'Local to this node. Stores everything as files, so it can hold any content type.',
+    btrfs: 'Local to this node. File-based, with cheap snapshots.',
+    lvm: 'Local block storage. Disk images only — no ISOs or backups.',
     lvmthin:
-        'An LVM thin pool on this host’s own disks. Space is allocated as guests write, so more can be promised than is used.',
-    zfspool: 'A ZFS pool on this host’s own disks. Allocates on write.',
-    zfs: 'ZFS volumes exported from another machine over iSCSI.',
-    nfs: 'A directory shared over NFS from another machine. Every node that mounts it sees the same content.',
-    cifs: 'A share mounted over SMB/CIFS from another machine.',
-    glusterfs: 'A GlusterFS volume, shared across the cluster.',
-    iscsi: 'Raw block devices from an iSCSI target.',
-    iscsidirect: 'Raw block devices from an iSCSI target, addressed directly.',
-    cephfs: 'A CephFS filesystem, reachable from every node in the cluster.',
-    rbd: 'A Ceph block-storage pool, reachable from every node in the cluster.',
-    pbs: 'A Proxmox Backup Server. Holds backups only, and deduplicates them on the server — so what it stores is far less than the backups add up to.',
-    esxi: 'An ESXi datastore, used for importing existing virtual machines.',
+        'Local block storage. Allocates on write, so guests can be promised more than the pool holds.',
+    zfspool: 'Local to this node. Allocates on write, with cheap snapshots.',
+    zfs: 'Block storage from another machine over iSCSI.',
+    nfs: 'A network share. Every node that mounts it sees the same files.',
+    cifs: 'A network share over SMB. Every node that mounts it sees the same files.',
+    glusterfs: 'A clustered filesystem, shared across nodes.',
+    iscsi: 'Raw LUNs from a SAN. Disk images only.',
+    iscsidirect: 'Raw LUNs from a SAN, used without LVM on top.',
+    cephfs: 'Ceph filesystem, shared across the cluster. Holds ISOs and backups too.',
+    rbd: 'Ceph block storage, shared across the cluster. Disk images only.',
+    pbs: 'A Proxmox Backup Server. Backups only, deduplicated — it stores far less than the backups add up to.',
+    esxi: 'An ESXi datastore, for importing existing VMs.',
 }
 
 export const backendHint = (type: string | null): string | null =>
