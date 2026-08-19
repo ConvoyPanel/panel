@@ -1,7 +1,5 @@
-import {
-    storageCapacity,
-    storageSummary,
-} from '@/features/nodes/storages/capacity.ts'
+import StorageSummary from '@/features/nodes/components/Storages/StorageSummary.tsx'
+import { storageCapacity } from '@/features/nodes/storages/capacity.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
@@ -129,9 +127,10 @@ const StorageInventory = ({ storages }: Props) => {
                                     <div className='truncate font-semibold'>
                                         {storage.displayName ?? storage.name}
                                     </div>
-                                    <StatLabel className='mt-0.5 block truncate text-xs text-nowrap'>
-                                        {storageSummary(storage)}
-                                    </StatLabel>
+                                    <StorageSummary
+                                        storage={storage}
+                                        className='mt-0.5'
+                                    />
                                 </TableCell>
                                 <TableCell className='py-3 align-top'>
                                     <Nodes storage={storage} />
@@ -158,9 +157,7 @@ const StorageInventory = ({ storages }: Props) => {
                                     {storage.displayName ?? storage.name}
                                 </span>
                             </ItemTitle>
-                            <StatLabel className='block truncate text-xs text-nowrap'>
-                                {storageSummary(storage)}
-                            </StatLabel>
+                            <StorageSummary storage={storage} />
                             <Nodes storage={storage} />
                             <div className='mt-1 w-full'>
                                 <Capacity storage={storage} />

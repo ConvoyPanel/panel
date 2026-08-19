@@ -1,8 +1,8 @@
+import StorageSummary from '@/features/nodes/components/Storages/StorageSummary.tsx'
 import useStoragesModalStore from '@/features/nodes/hooks/use-storages-modal-store.ts'
 import {
     type StorageCapacityView,
     storageCapacity,
-    storageSummary,
 } from '@/features/nodes/storages/capacity.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
@@ -211,9 +211,10 @@ const StorageList = ({ storages }: Props) => {
                             <TableRow key={storage.id}>
                                 <TableCell className='max-w-0 py-3 pl-4 align-top'>
                                     <StorageName storage={storage} />
-                                    <StatLabel className='mt-0.5 block truncate text-xs text-nowrap'>
-                                        {storageSummary(storage)}
-                                    </StatLabel>
+                                    <StorageSummary
+                                        storage={storage}
+                                        className='mt-0.5'
+                                    />
                                 </TableCell>
                                 <TableCell className='py-3 align-top'>
                                     <Capacity storage={storage} />
@@ -237,9 +238,7 @@ const StorageList = ({ storages }: Props) => {
                     >
                         <ItemContent className='min-w-0 gap-1'>
                             <StorageName storage={storage} />
-                            <StatLabel className='block truncate text-xs text-nowrap'>
-                                {storageSummary(storage)}
-                            </StatLabel>
+                            <StorageSummary storage={storage} />
                             <div className='mt-1 w-full'>
                                 <Capacity storage={storage} />
                             </div>

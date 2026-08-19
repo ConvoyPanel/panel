@@ -137,21 +137,62 @@ export const storageCapacity = (storage: Storage): StorageCapacityView => {
 }
 
 /**
- * The line under a storage's name: what it is, not how full it is.
+ * Proxmox backend ids, under the names Proxmox itself uses for them.
  *
- * Mirrors `anchorSummary` -- the facts that never change sit here so the
- * capacity column carries only the ones that do.
+ * Deliberately not translated into plain English -- "Local folder" for `dir`
+ * reads well right up until someone goes looking for it in the Proxmox UI and
+ * finds nothing by that name. The label matches what the host calls it; the
+ * explanation of what that means lives in a tooltip beside it.
+ *
+ * Unknown backends fall through to the raw id. An install can carry a plugin
+ * Convoy has never heard of, and `foo` is more use than nothing.
  */
-export const storageSummary = (storage: Storage): string =>
-    [
-        storage.name,
-        storage.pveType,
-        storage.isThin
-            ? storage.pveType === 'pbs'
-                ? 'deduplicating'
-                : 'thin'
-            : null,
-        storage.pveShared ? 'shared' : null,
-    ]
-        .filter(Boolean)
-        .join(' · ')
+const BACKEND_LABELS: Record<string, string> = {
+    dir: 'Directory',
+    btrfs: 'Btrfs',
+    lvm: 'LVM',
+    lvmthin: 'LVM-thin',
+    zfspool: 'ZFS',
+    zfs: 'ZFS over iSCSI',
+    nfs: 'NFS',
+    cifs: 'SMB/CIFS',
+    glusterfs: 'GlusterFS',
+    iscsi: 'iSCSI',
+    iscsidirect: 'iSCSI (direct)',
+    cephfs: 'CephFS',
+    rbd: 'Ceph RBD',
+    pbs: 'Proxmox Backup Server',
+    esxi: 'ESXi',
+}
+
+/**
+ * What each backend actually is, for the tooltip.
+ *
+ * Written to answer "where does this live and what does it mean for me" rather
+ * than to define the technology: whether the storage is on this host or on the
+ * network is the part that changes what an operator does next.
+ */
+const BACKEND_HINTS: Record<string, string> = {
+    dir: 'Files in a folder on this host’s own filesystem.',
+    btrfs: 'A Btrfs filesystem on this host’s own disks.',
+    lvm: 'An LVM volume group on this host’s own disks.',
+    lvmthin:
+        'An LVM thin pool on this host’s own disks. Space is allocated as guests write, so more can be promised than is used.',
+    zfspool: 'A ZFS pool on this host’s own disks. Allocates on write.',
+    zfs: 'ZFS volumes exported from another machine over iSCSI.',
+    nfs: 'A directory shared over NFS from another machine. Every node that mounts it sees the same content.',
+    cifs: 'A share mounted over SMB/CIFS from another machine.',
+    glusterfs: 'A GlusterFS volume, shared across the cluster.',
+    iscsi: 'Raw block devices from an iSCSI target.',
+    iscsidirect: 'Raw block devices from an iSCSI target, addressed directly.',
+    cephfs: 'A CephFS filesystem, reachable from every node in the cluster.',
+    rbd: 'A Ceph block-storage pool, reachable from every node in the cluster.',
+    pbs: 'A Proxmox Backup Server. Holds backups only, and deduplicates them on the server — so what it stores is far less than the backups add up to.',
+    esxi: 'An ESXi datastore, used for importing existing virtual machines.',
+}
+
+export const backendHint = (type: string | null): string | null =>
+    type === null ? null : (BACKEND_HINTS[type] ?? null)
+
+export const backendLabel = (type: string | null): string | null =>
+    type === null ? null : (BACKEND_LABELS[type] ?? type)
