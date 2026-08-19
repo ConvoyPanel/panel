@@ -19,6 +19,18 @@ Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a
 -   [Panel Documentation](https://docs.convoypanel.com)
 -   [Discord Community](https://discord.convoypanel.com)
 
+## Installation
+
+Convoy installs onto a dedicated host with one command:
+
+```bash
+curl -fsSL https://install.convoypanel.com | sudo bash
+```
+
+See [docs/deployment.md](docs/deployment.md) for requirements, TLS, upgrades and
+running against an external database, and [docs/configuration.md](docs/configuration.md)
+for every supported setting.
+
 ## Local Development
 
 Local dev runs on [ddev](https://ddev.com) (Postgres 17):

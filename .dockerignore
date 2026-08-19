@@ -1,0 +1,62 @@
+# Build context excludes. Keep this tight: the image build copies the whole
+# tree, and docs/pve-api alone is tens of megabytes of generated API reference
+# that has no business in a runtime image.
+
+.git
+.github
+.ddev
+.idea
+.vscode
+.claude
+.sbx
+.tanstack
+.tinker
+
+# Installed fresh inside the build so the image never inherits a host-built tree.
+node_modules
+vendor
+
+# Generated during the build (and gitignored), never copied in.
+public/build
+public/hot
+public/storage
+resources/scripts/wayfinder
+resources/scripts/routeTree.gen.ts
+resources/scripts/types/generated.d.ts
+resources/scripts/types/typescript-transformer-manifest.json
+
+# Local state that must not leak into a distributed image.
+.env
+.env.backup
+.env.ci
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/*.key
+
+# Development-only tooling and docs.
+tests
+docs
+phpunit.xml
+phpstan.neon
+pint.json
+.phpunit.cache
+.phpunit.result.cache
+.styleci.yml
+stats.html
+CODE_OF_CONDUCT.md
+CONTRIBUTOR_LICENSE_AGREEMENT
+CHANGELOG.md
+AGENTS.md
+CLAUDE.md
+
+# The deployment tooling itself is delivered next to the compose file on the
+# host, not baked into the image -- except docker/entrypoint.d, copied explicitly.
+docker/install.sh
+docker/convoyctl
+
+**/.DS_Store
+**/._.DS_Store
+*.tmp.mjs
+*.tmp.php

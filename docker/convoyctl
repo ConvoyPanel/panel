@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+#
+# convoyctl -- day-two operations for a Convoy install.
+#
+# Everything here is a thin wrapper over `docker compose` in the install
+# directory. That is deliberate: an operator who knows Docker can ignore this
+# script entirely, and one who does not never has to learn which of the five
+# containers to exec into.
+
+set -euo pipefail
+
+CONVOY_DIR="${CONVOY_DIR:-/opt/convoy}"
+BACKUP_DIR="${CONVOY_BACKUP_DIR:-$CONVOY_DIR/backups}"
+
+readonly RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' DIM=$'\033[2m' RESET=$'\033[0m'
+
+err()  { printf '%s\n' "${RED}error:${RESET} $*" >&2; }
+info() { printf '%s\n' "${GREEN}==>${RESET} $*"; }
+warn() { printf '%s\n' "${YELLOW}warning:${RESET} $*" >&2; }
+
+die() { err "$@"; exit 1; }
+
+[[ -f "$CONVOY_DIR/compose.yml" ]] || die "no Convoy install found at $CONVOY_DIR (set CONVOY_DIR to override)."
+cd "$CONVOY_DIR"
+
+# Read the install's own settings. Without this, `backup` would dump using the
+# default credentials rather than whatever the operator actually configured, and
+# fail confusingly on any install that changed them.
+if [[ -f .env ]]; then
+    while IFS='=' read -r key value; do
+        [[ "$key" =~ ^(DB_USERNAME|DB_DATABASE)$ ]] || continue
+        # Strip surrounding quotes the way Compose does.
+        value="${value%\"}"; value="${value#\"}"
+        printf -v "$key" '%s' "$value"
+    done < <(grep -E '^(DB_USERNAME|DB_DATABASE)=' .env || true)
+fi
+
+compose() { docker compose "$@"; }
+
+# True when the bundled Postgres container is part of this project rather than
+# an external database being used.
+bundled_postgres() {
+    compose config --services 2>/dev/null | grep -qx postgres
+}
+
+# Prefer exec into the running web container; fall back to a throwaway container
+# so `artisan` still works while the stack is down.
+run_artisan() {
+    if [[ -n "$(compose ps -q web 2>/dev/null)" ]]; then
+        compose exec -T web php artisan "$@"
+    else
+        warn "web container is not running; using a temporary container."
+        compose run --rm --no-deps -T web php artisan "$@"
+    fi
+}
+
+cmd_backup() {
+    bundled_postgres || die "this install uses an external database; back it up with your provider's tooling."
+
+    mkdir -p "$BACKUP_DIR"
+    local stamp file
+    stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    file="$BACKUP_DIR/convoy-$stamp.sql.gz"
+
+    info "dumping database to $file"
+    # --clean --if-exists so the dump can be replayed over an existing database.
+    compose exec -T postgres pg_dump \
+        --username "${DB_USERNAME:-convoy}" \
+        --dbname "${DB_DATABASE:-convoy}" \
+        --clean --if-exists \
+        | gzip > "$file"
+
+    info "backup complete ($(du -h "$file" | cut -f1))"
+    printf '%s\n' "$file"
+}
+
+cmd_upgrade() {
+    if bundled_postgres; then
+        info "taking a database backup first"
+        cmd_backup >/dev/null
+    else
+        warn "external database in use -- take your own backup before continuing."
+    fi
+
+    info "pulling images"
+    compose pull
+
+    # Migrations run automatically when the web container starts (AUTORUN).
+    info "restarting the stack"
+    compose up -d --remove-orphans
+
+    info "waiting for the panel to report healthy"
+    local waited=0
+    until [[ "$(docker inspect -f '{{.State.Health.Status}}' "$(compose ps -q web)" 2>/dev/null)" == "healthy" ]]; do
+        (( waited >= 180 )) && die "panel did not become healthy within 3 minutes. Check 'convoyctl logs web'."
+        sleep 5
+        waited=$(( waited + 5 ))
+    done
+
+    info "upgrade complete: $(run_artisan --version 2>/dev/null | tail -1)"
+}
+
+usage() {
+    cat <<'EOF'
+convoyctl -- manage a Convoy installation
+
+  convoyctl up                 Start the stack
+  convoyctl down               Stop the stack (data volumes are kept)
+  convoyctl restart [service]  Restart everything, or one service
+  convoyctl ps                 Show container status
+  convoyctl logs [service]     Follow logs
+  convoyctl upgrade            Back up, pull new images, restart, verify
+  convoyctl backup             Dump the bundled database to ./backups
+  convoyctl artisan <args>     Run an Artisan command
+  convoyctl shell [service]    Open a shell (default: web)
+  convoyctl horizon            Show queue worker status
+
+EOF
+}
+
+main() {
+    local cmd="${1:-help}"
+    [[ $# -gt 0 ]] && shift
+
+    case "$cmd" in
+        up)       compose up -d --remove-orphans ;;
+        down)     compose down ;;
+        restart)  compose restart "$@" ;;
+        ps)       compose ps ;;
+        logs)     compose logs -f --tail=200 "$@" ;;
+        upgrade)  cmd_upgrade ;;
+        backup)   cmd_backup ;;
+        artisan)  run_artisan "$@" ;;
+        horizon)  run_artisan horizon:status ;;
+        # The images are Alpine-based and ship no bash.
+        shell)    compose exec "${1:-web}" sh ;;
+        help|-h|--help) usage ;;
+        *)        usage; die "unknown command: $cmd" ;;
+    esac
+}
+
+main "$@"

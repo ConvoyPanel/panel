@@ -1,0 +1,164 @@
+# Convoy production stack.
+#
+# Five containers. The first three are the same image running different
+# commands, and all of them read their configuration from .env:
+#
+#   web         serves the panel (and terminates TLS)
+#   worker      runs the queue -- every Proxmox action is a job, so nothing
+#               works without it
+#   scheduler   runs the timed jobs in routes/console.php, including the
+#               per-minute polls behind the node status indicators
+#   postgres    the database
+#   redis       backs the queue, cache and sessions
+#
+# To use a database or Redis you already run, see "Using your own database and
+# Redis" in docs/deployment.md.
+
+name: convoy
+
+services:
+  web:
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Only this container runs migrations and cache warming on boot. Setting
+      # this on the worker or scheduler too would have them race each other.
+      AUTORUN_ENABLED: "true"
+      # Serve HTTP and HTTPS, redirecting the former.
+      SSL_MODE: full
+      # "on" gets a real certificate automatically. It needs APP_DOMAIN to be a
+      # domain name that resolves here -- certificate authorities do not issue
+      # for bare IPs, so the installer sets this to "off" (self-signed) when you
+      # give it an IP address.
+      CADDY_AUTO_HTTPS: ${CONVOY_AUTO_HTTPS:-on}
+      CADDY_HTTP_SERVER_ADDRESS: "http://${APP_DOMAIN:?APP_DOMAIN is not set in .env}"
+      CADDY_HTTPS_SERVER_ADDRESS: "https://${APP_DOMAIN:?APP_DOMAIN is not set in .env}"
+    ports:
+      # The web server runs unprivileged and cannot bind 80/443 inside the
+      # container, so the standard ports map to its 8080/8443. The UDP line is
+      # HTTP/3. Automatic certificates need port 80 reachable from the internet.
+      - "${CONVOY_HTTP_PORT:-80}:8080"
+      - "${CONVOY_HTTPS_PORT:-443}:8443"
+      - "${CONVOY_HTTPS_PORT:-443}:8443/udp"
+    volumes:
+      - storage:/var/www/html/storage
+      # Issued certificates. Losing this means re-issuing on every restart,
+      # which is a quick way into a rate limit.
+      - caddy-data:/data/caddy
+      - caddy-config:/config/caddy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging:
+      # A panel runs unattended for months, and Docker does not cap log files by
+      # default. This is how a control node fills its disk.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    restart: unless-stopped
+    command: ["php", "artisan", "horizon"]
+    env_file:
+      - .env
+    # Horizon finishes the jobs it is holding when asked to stop. Cutting it off
+    # mid-job can leave a Proxmox operation half-applied.
+    stop_grace_period: 60s
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # The image's built-in check asks the web server, which is not running
+      # here. This exits non-zero when the queue is stopped or paused.
+      test: ["CMD", "php", "artisan", "horizon:status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  scheduler:
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    env_file:
+      - .env
+    stop_grace_period: 30s
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # There is nothing to ask this container, and the image's built-in check
+      # would report it permanently unhealthy.
+      disable: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-convoy}
+      POSTGRES_USER: ${DB_USERNAME:-convoy}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is not set in .env}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-convoy} -d ${DB_DATABASE:-convoy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    # Persist to disk. The queue lives here, so an unsaved restart drops jobs
+    # that were accepted but not yet run.
+    command: ["redis-server", "--appendonly", "yes", "--save", "900", "1"]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  storage:
+  postgres:
+  redis:
+  caddy-data:
+  caddy-config:
