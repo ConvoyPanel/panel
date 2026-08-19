@@ -62,6 +62,10 @@ Route::prefix('/locations')->group(function () {
 // Storage across every node. Node-scoped storage lives under /nodes/{node}/storages;
 // this is the inventory, for the questions that are not about one host.
 Route::get('/storages', Admin\StorageInventoryController::class);
+Route::get('/storages/{storage}/consumers', Admin\StorageConsumerController::class);
+// The only backup delete was the client's, scoped to a server. An operator
+// clearing a full disk should not have to find the owning server first.
+Route::delete('/backups/{backup}', [Admin\StorageBackupController::class, 'destroy']);
 
 Route::prefix('/nodes')->group(function () {
     Route::get('/', [Admin\Nodes\NodeController::class, 'index']);
