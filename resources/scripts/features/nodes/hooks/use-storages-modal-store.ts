@@ -3,7 +3,7 @@ import { NodeStorage } from '@/features/nodes/types.ts'
 
 const useStoragesModalStore = createModalStore<
     NodeStorage,
-    'show' | 'edit' | 'delete'
+    'edit' | 'delete'
 >()
 
 export default useStoragesModalStore

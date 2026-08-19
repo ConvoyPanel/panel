@@ -7,6 +7,7 @@ import {
 import { NodeStorage } from '@/features/nodes/types.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import { cn } from '@/utils'
+import { Link } from '@tanstack/react-router'
 import byteSize from 'byte-size'
 
 import { Badge } from '@/components/ui/Badge.tsx'
@@ -39,26 +40,18 @@ const fmt = (bytes: number) => {
     return `${value} ${unit}`
 }
 
-const StorageName = ({ storage }: { storage: NodeStorage }) => {
-    const openModal = useOpenModal(useStoragesModalStore)
-
-    return (
-        <button
-            className={cn(
-                buttonVariants({ variant: 'link' }),
-                // `self-start justify-start` because this is a <button>, not the
-                // <Link> AnchorList uses: the button variant centres its content,
-                // which left the name centred inside the stacked Item.
-                'h-auto max-w-full min-w-0 justify-start self-start p-0 font-semibold'
-            )}
-            onClick={() => openModal('show', storage)}
-        >
-            <span className='truncate'>
-                {storage.displayName ?? storage.name}
-            </span>
-        </button>
-    )
-}
+const StorageName = ({ storage }: { storage: NodeStorage }) => (
+    <Link
+        className={cn(
+            buttonVariants({ variant: 'link' }),
+            'h-auto max-w-full min-w-0 justify-start self-start p-0 font-semibold'
+        )}
+        to='/admin/storage/$storageId'
+        params={{ storageId: String(storage.id) }}
+    >
+        <span className='truncate'>{storage.displayName ?? storage.name}</span>
+    </Link>
+)
 
 /**
  * The sentence under the bar, which changes with the backend because the same
@@ -162,9 +155,6 @@ const StorageList = ({ storages }: Props) => {
 
     const menu = (storage: NodeStorage) => (
         <>
-            <DropdownMenuItem onClick={() => openModal('show', storage)}>
-                Usage
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => openModal('edit', storage)}>
                 Edit
             </DropdownMenuItem>

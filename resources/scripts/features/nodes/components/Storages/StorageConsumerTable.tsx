@@ -106,10 +106,7 @@ const StorageConsumerTable = ({
                                 (row.deletable ? (
                                     <Button
                                         size={'sm'}
-                                        variant={'outline'}
-                                        className={
-                                            'text-destructive border-destructive/35'
-                                        }
+                                        variant={'destructiveOutline'}
                                         onClick={() => onDelete(row)}
                                     >
                                         Delete

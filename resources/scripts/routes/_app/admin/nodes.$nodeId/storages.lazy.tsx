@@ -2,7 +2,6 @@ import CreateStorageModal from '@/features/nodes/components/Storages/CreateStora
 import DeleteStorageModal from '@/features/nodes/components/Storages/DeleteStorageModal.tsx'
 import EditStorageModal from '@/features/nodes/components/Storages/EditStorageModal.tsx'
 import LoadBalancerSidebar from '@/features/nodes/components/Storages/LoadBalancerSidebar.tsx'
-import ShowStorageModal from '@/features/nodes/components/Storages/ShowStorageModal.tsx'
 import StorageList from '@/features/nodes/components/Storages/StorageList.tsx'
 import { useStorages } from '@/features/nodes/storages/api.ts'
 import { IconDatabase } from '@tabler/icons-react'
@@ -37,7 +36,6 @@ function NodeStorages() {
                 </div>
             )}
             <DeleteStorageModal />
-            <ShowStorageModal />
             <EditStorageModal />
             {isError && !storages ? (
                 <Card className={'py-6'}>
