@@ -1,13 +1,6 @@
+import { useTemplates } from '@/features/template-groups/templates/api.ts'
 import { useFormContext } from 'react-hook-form'
 
-import { useTemplates } from '@/features/template-groups/templates/api.ts'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/Select'
 import {
     FormControl,
     FormField,
@@ -15,6 +8,13 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/Select'
 
 interface TemplatePickerProps {
     templateGroupId: string | null
@@ -31,19 +31,22 @@ const TemplatePicker = ({ templateGroupId }: TemplatePickerProps) => {
     return (
         <FormField
             control={control}
-            name="templateUuid"
+            name='templateUuid'
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Template</FormLabel>
                     <Select
                         items={items}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        // Controlled: the field is also written from outside
+                        // the picker (applying a preset), which an
+                        // uncontrolled Select would ignore.
+                        value={field.value ?? null}
                         disabled={!templateGroupId || isLoading}
                     >
                         <FormControl>
                             <SelectTrigger className='w-full'>
-                                <SelectValue placeholder="Select a template" />
+                                <SelectValue placeholder='Select a template' />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>

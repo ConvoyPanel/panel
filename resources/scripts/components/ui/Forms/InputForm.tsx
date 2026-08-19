@@ -9,6 +9,12 @@ import {
     FormMessage,
 } from '@/components/ui/Form'
 import { Input, InputProps } from '@/components/ui/Input'
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupText,
+} from '@/components/ui/InputGroup'
 
 interface Props extends InputProps {
     name: string
@@ -19,6 +25,14 @@ interface Props extends InputProps {
      * a plain labelled field beside it in a grid.
      */
     labelAction?: ReactNode
+    /**
+     * Unit shown inside the field's trailing edge — `MiB`, `MB/s`, `GiB`.
+     *
+     * A unit belongs to the value, not to the question: "Memory" with a `MiB`
+     * suffix says the same thing as "Memory (MiB)" plus a helper line, in one
+     * short label and no second line of text.
+     */
+    suffix?: ReactNode
     description?: ReactNode
     formItemProps?: HTMLAttributes<HTMLDivElement>
 }
@@ -27,6 +41,7 @@ const InputForm = ({
     name,
     label,
     labelAction,
+    suffix,
     description,
     formItemProps,
     ...props
@@ -52,13 +67,36 @@ const InputForm = ({
                         ) : (
                             <FormLabel>{label}</FormLabel>
                         ))}
-                    <FormControl>
-                        <Input
-                            {...props}
-                            {...field}
-                            disabled={props.disabled || formState.isSubmitting}
-                        />
-                    </FormControl>
+                    {suffix ? (
+                        /* FormControl wraps the *input*, not the InputGroup:
+                           it clones its child to inject the id and aria, and on
+                           the wrapper those land on a div, leaving the label
+                           associated with nothing. */
+                        <InputGroup>
+                            <FormControl>
+                                <InputGroupInput
+                                    {...props}
+                                    {...field}
+                                    disabled={
+                                        props.disabled || formState.isSubmitting
+                                    }
+                                />
+                            </FormControl>
+                            <InputGroupAddon align={'inline-end'}>
+                                <InputGroupText>{suffix}</InputGroupText>
+                            </InputGroupAddon>
+                        </InputGroup>
+                    ) : (
+                        <FormControl>
+                            <Input
+                                {...props}
+                                {...field}
+                                disabled={
+                                    props.disabled || formState.isSubmitting
+                                }
+                            />
+                        </FormControl>
+                    )}
                     {description && (
                         <FormDescription>{description}</FormDescription>
                     )}

@@ -6,7 +6,6 @@ import {
     updateNode,
     useNode,
 } from '@/features/nodes/api.ts'
-import NodeFormToolbar from '@/features/nodes/components/NodeFormToolbar.tsx'
 import NodeStatusIndicator from '@/features/nodes/components/NodeStatusIndicator.tsx'
 import ConnectionSection from '@/features/nodes/components/sections/ConnectionSection.tsx'
 import GeneralSection from '@/features/nodes/components/sections/GeneralSection.tsx'
@@ -31,6 +30,7 @@ import {
     CardTitle,
 } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
+import FormToolbar from '@/components/ui/FormToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { toast } from '@/components/ui/Toast'
 
@@ -120,7 +120,7 @@ function NodeSettings() {
                     the page up to 1600px, and a form stretched that far pulls
                     each label away from its own control. */}
                 <div className={'mx-auto w-full max-w-4xl'}>
-                    <NodeFormToolbar
+                    <FormToolbar
                         title={'Settings'}
                         subtitle={
                             <span className={'flex items-center gap-3'}>

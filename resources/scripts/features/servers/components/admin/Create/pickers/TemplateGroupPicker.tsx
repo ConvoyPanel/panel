@@ -1,14 +1,15 @@
-import { TemplateGroup } from '@/types/template-group'
-import { cn } from '@/utils'
-import { IconCheck, IconFolder } from '@tabler/icons-react'
-import { useController } from 'react-hook-form'
-import { ResourceComboboxForm } from '@/components/ui/Forms'
-import Skeleton from '@/components/ui/Skeleton'
-import { useQuery } from '@tanstack/react-query'
 import {
     getTemplateGroup,
     getTemplateGroups,
 } from '@/features/template-groups/api.ts'
+import { TemplateGroup } from '@/types/template-group'
+import { cn } from '@/utils'
+import { IconCheck, IconFolder } from '@tabler/icons-react'
+import { useQuery } from '@tanstack/react-query'
+import { useController } from 'react-hook-form'
+
+import { ResourceComboboxForm } from '@/components/ui/Forms'
+import Skeleton from '@/components/ui/Skeleton'
 
 const TemplateGroupPicker = () => {
     const { field } = useController<{

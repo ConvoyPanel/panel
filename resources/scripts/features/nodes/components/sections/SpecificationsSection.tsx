@@ -1,6 +1,6 @@
 import { IconCpu, IconDeviceSdCard } from '@tabler/icons-react'
 import byteSize from 'byte-size'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { useWatch } from 'react-hook-form'
 
 import {
@@ -17,7 +17,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
-import { InputForm } from '@/components/ui/Forms'
+import { GroupHeader, InputForm } from '@/components/ui/Forms'
 import {
     InputGroup,
     InputGroupAddon,
@@ -26,28 +26,6 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/ToggleGroup'
 
 const iec = { units: 'iec' as const, precision: 1 }
-
-const GroupHeader = ({
-    icon,
-    title,
-    aside,
-}: {
-    icon: ReactNode
-    title: string
-    aside?: ReactNode
-}) => (
-    <div className={'mb-3 flex items-center gap-2'}>
-        <span
-            className={
-                'bg-primary/10 text-primary flex size-6 items-center justify-center rounded-md'
-            }
-        >
-            {icon}
-        </span>
-        <span className={'text-sm font-semibold'}>{title}</span>
-        {aside && <div className={'ml-auto'}>{aside}</div>}
-    </div>
-)
 
 type MemoryUnit = 'MiB' | 'GiB'
 

@@ -235,9 +235,57 @@ A card follows this order top-to-bottom. Skip parts, never reorder them.
   the submit lives in the last `CardFooter`, and it opens the confirmation rather than
   firing the mutation — so the fields are validated before anyone is asked to type a server
   name to confirm.
-- The node **create** screen (`routes/_app/admin/(fullscreen)/nodes.create.lazy.tsx` +
-  `features/nodes/components/Create/*`) predates this pattern and is the next thing to
-  bring in line — see the redesign directions discussed in the v10 handoff.
+- **The two admin create screens are now the same screen twice.** Node
+  (`routes/_app/admin/_dashboard/nodes.create.lazy.tsx` +
+  `features/nodes/components/sections/*`) and server
+  (`routes/_app/admin/_dashboard/servers.create.lazy.tsx` +
+  `features/servers/components/admin/Create/sections/*`) both live in the app shell,
+  cap the column at `max-w-4xl`, open with the shared sticky `FormToolbar`
+  (`components/ui/FormToolbar`, carrying Cancel + submit), and stack `@container`
+  cards under it. Copy one when adding a third; do not reintroduce `FullscreenLayout`,
+  which no route uses any more.
+
+  Inside a long card, split the fields into icon'd groups with the shared
+  `GroupHeader` (`components/ui/Forms`) rather than letting a run of number boxes blur
+  together — Processor and Memory on the node's capacity card.
+
+### A form should ask only what is authored
+
+The server create page was consistent with the node page and still hard to face: it put
+24 controls on screen to collect the 8 answers that are actually written per server
+(name, hostname, owner, node, storage, template group, template, password). The other 16
+are taken as they arrive — from the form's defaults, or from the preset that just filled
+them in — so asking for them at full weight is what made the page read as busy. Measured
+before and after: **2,376px → 1,414px, 24 visible controls → 9, 7 cards → 5.**
+
+Two devices did that, and both are worth reaching for on any long form:
+
+- **`FieldFold` (`components/ui/Forms`) states its values instead of asking for them.**
+  A collapsed row reads `2 vCPU · 2 GiB · 20 GiB · unmetered · no backups` with an Edit
+  beside it. Nothing is hidden — the answers are on screen, they have just stopped being
+  questions. Write the summary in the values themselves, never as a field count
+  ("5 settings" tells the reader nothing they can check).
+
+  It opens itself in the two cases where a fold would otherwise lie: when a field inside
+  it is **dirty** (which is exactly what applying a preset does — `applyPresetSettings`
+  passes `shouldDirty`, and RHF marks a field dirty only when the value actually differs
+  from its default, so a preset's changes announce themselves and untouched groups stay
+  shut), and when a field inside it **failed validation**, including the server errors
+  `handleFormErrors` maps back after a rejected submit. A click always beats the dirty
+  rule, and never beats the error rule — a fold that swallows the message leaves a
+  submit that fails with nothing on screen to explain it. Everything in the group must
+  be listed in `fields`, or its error is what gets swallowed.
+
+- **A unit belongs to the value, not the question.** `InputForm`'s `suffix` puts `MiB` /
+  `MB/s` / `GiB` inside the field's trailing edge, so `Memory` replaces
+  `Memory (MiB)` *plus* a helper line. Note the wiring: `FormControl` goes around
+  `InputGroupInput`, not around `InputGroup` — it clones its child to inject the `id` and
+  aria, and on the wrapper those land on a `div`, leaving the label associated with
+  nothing (the bug still open against the node page's `MemoryAmountField`).
+
+The card count came down the same way: merge a card whose whole content is two pickers
+(Placement) into the card it qualifies, and put a repeating list (extra disks) inside the
+group it belongs to rather than giving it a header of its own to say it is empty.
 
 ## Statistic cards: a meter is not a footer
 
@@ -290,6 +338,31 @@ It is silent in production: Base UI's controlled/uncontrolled warning is behind
 
 Prefer giving `useForm` real `defaultValues` as well — but the `?? false` in the primitives
 is what makes every consumer safe by default.
+
+## A clipped panel needs room for the focus ring
+
+`CollapsiblePanel` and `AccordionContent` animate their height, which requires
+`overflow: hidden` — and that clips at the panel's padding edge, cropping the 3px
+`focus-visible:ring-3` of any control sitting against it. The first field in an open
+"Advanced" disclosure loses the left of its ring; the last one loses the bottom.
+
+This kept coming back because the bug lives in the primitive and only ever shows up at a
+call site, so it gets patched locally (a stray `px-1` on somebody's form) and returns with
+the next panel. **Both primitives now carry `clip-slack`** (`app.css`), which pads the clip
+box by `0.25rem` and cancels the same amount in margin: the ring has somewhere to paint,
+nothing moves, and a collapsed `h-0` panel still measures zero. Anything else that has to
+clip a box containing focusable controls should use it too — don't re-solve this at the
+call site.
+
+Not `overflow-clip-margin`, which is designed for exactly this but isn't old enough to rely
+on; and not "drop the clip once open", which races the height transition and lets content
+spill mid-animation.
+
+**Related trap, same shape:** `AlertDialogAction`/`AlertDialogCancel` used to paint
+`buttonVariants()` on themselves. With `asChild` — which is how `ConfirmDialog` uses them —
+Radix merges the *parent's* className last, so a `variant="destructive"` on the `Button`
+inside was silently overridden and every destructive confirmation rendered primary-blue.
+A wrapper that is not the button must not style like one.
 
 ## Dialog family, Tabs, and Select
 

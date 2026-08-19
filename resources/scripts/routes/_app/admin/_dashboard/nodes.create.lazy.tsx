@@ -1,5 +1,4 @@
 import { createNode, nodeSchema } from '@/features/nodes/api.ts'
-import NodeFormToolbar from '@/features/nodes/components/NodeFormToolbar.tsx'
 import ConnectionSection from '@/features/nodes/components/sections/ConnectionSection.tsx'
 import GeneralSection from '@/features/nodes/components/sections/GeneralSection.tsx'
 import SpecificationsSection from '@/features/nodes/components/sections/SpecificationsSection.tsx'
@@ -12,6 +11,7 @@ import { z } from 'zod'
 
 import { buttonVariants } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
+import FormToolbar from '@/components/ui/FormToolbar'
 import { toast } from '@/components/ui/Toast'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes/create')(
@@ -73,7 +73,7 @@ function CreateNodePage() {
                     the page up to 1600px, and a form stretched that far pulls
                     each label away from its own control. */}
                 <div className={'mx-auto w-full max-w-4xl'}>
-                    <NodeFormToolbar
+                    <FormToolbar
                         title={'Add a new node'}
                         subtitle={
                             'Connect a Proxmox host and describe its capacity.'

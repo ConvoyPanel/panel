@@ -1,10 +1,10 @@
+import { getNodes, useNode } from '@/features/nodes/api.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
 import { IconCheck, IconServer } from '@tabler/icons-react'
-import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { useController } from 'react-hook-form'
 
-import { getNodes, useNode } from '@/features/nodes/api.ts'
+import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -36,7 +36,7 @@ const NodePicker = () => {
                     <dl className={'flex grow flex-col overflow-hidden'}>
                         <dt className={'truncate'}>{item.displayName}</dt>
                         <dd
-                            className={'truncate text-xs text-muted-foreground'}
+                            className={'text-muted-foreground truncate text-xs'}
                         >
                             {item.name}
                         </dd>
@@ -66,11 +66,11 @@ const NodePicker = () => {
             label={'Node'}
             searchPlaceholder={'Search nodes...'}
             nothingFoundMessage={
-                <div className="p-2">
+                <div className='p-2'>
                     <SimpleEmptyState
                         icon={IconServer}
-                        title="No Nodes"
-                        description="There are no nodes available matching your criteria."
+                        title='No Nodes'
+                        description='There are no nodes available matching your criteria.'
                     />
                 </div>
             }

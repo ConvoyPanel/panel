@@ -1,9 +1,9 @@
+import { getUsers, useUser } from '@/features/users/api.ts'
 import { AdminUser } from '@/types/admin/user.ts'
 import { cn } from '@/utils'
 import { IconCheck, IconUser } from '@tabler/icons-react'
 import { useController } from 'react-hook-form'
 
-import { getUsers, useUser } from '@/features/users/api.ts'
 import { ResourceComboboxForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -35,7 +35,7 @@ const UserPicker = () => {
                     <dl className={'flex grow flex-col overflow-hidden'}>
                         <dt className={'truncate'}>{item.name}</dt>
                         <dd
-                            className={'truncate text-xs text-muted-foreground'}
+                            className={'text-muted-foreground truncate text-xs'}
                         >
                             {item.email}
                         </dd>

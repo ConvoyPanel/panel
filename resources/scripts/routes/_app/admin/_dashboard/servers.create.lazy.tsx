@@ -1,29 +1,23 @@
 import { createServer, serverSchema } from '@/features/servers/admin/api.ts'
-import GeneralForm from '@/features/servers/components/admin/Create/GeneralForm'
-import LimitsForm from '@/features/servers/components/admin/Create/LimitsForm'
-import NetworkForm from '@/features/servers/components/admin/Create/NetworkForm'
-import SecondaryDisksForm from '@/features/servers/components/admin/Create/SecondaryDisksForm'
-import VmOptionsForm from '@/features/servers/components/admin/Create/VmOptionsForm'
+import GeneralSection from '@/features/servers/components/admin/Create/sections/GeneralSection.tsx'
+import NetworkSection from '@/features/servers/components/admin/Create/sections/NetworkSection.tsx'
+import OperatingSystemSection from '@/features/servers/components/admin/Create/sections/OperatingSystemSection.tsx'
+import PresetSection from '@/features/servers/components/admin/Create/sections/PresetSection.tsx'
+import ResourcesSection from '@/features/servers/components/admin/Create/sections/ResourcesSection.tsx'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCheck } from '@tabler/icons-react'
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import FullscreenLayout from '@/components/layouts/FullscreenLayout.tsx'
-
+import { buttonVariants } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
+import FormToolbar from '@/components/ui/FormToolbar'
 import { toast } from '@/components/ui/Toast'
 
-export const Route = createLazyFileRoute(
-    '/_app/admin/(fullscreen)/servers/create'
-)({
-    component: CreateServerPage,
-})
-
-function CreateServerPage() {
+const CreateServerPage = () => {
     const navigate = useNavigate()
 
     const form = useForm({
@@ -129,25 +123,48 @@ function CreateServerPage() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(submit)}>
-                <FullscreenLayout
-                    backLink={'/admin/servers'}
-                    title={'Add a new server'}
-                    headerActions={
-                        <FormButton className={'flex'}>
-                            Add server <IconCheck className={'size-4'} />
-                        </FormButton>
-                    }
-                    center
-                >
-                    <div className={'flex w-full max-w-lg flex-col space-y-16'}>
-                        <GeneralForm />
-                        <LimitsForm />
-                        <SecondaryDisksForm />
-                        <NetworkForm />
-                        <VmOptionsForm />
+                {/* Capped so the fields keep a readable measure: AppLayout gives
+                    the page up to 1600px, and a form stretched that far pulls
+                    each label away from its own control. */}
+                <div className={'mx-auto w-full max-w-4xl'}>
+                    <FormToolbar
+                        title={'Add a new server'}
+                        subtitle={
+                            'Place a server on a node and describe what it gets.'
+                        }
+                        actions={
+                            <>
+                                <Link
+                                    to={'/admin/servers'}
+                                    className={buttonVariants({
+                                        variant: 'ghost',
+                                    })}
+                                >
+                                    Cancel
+                                </Link>
+                                <FormButton className={'flex'}>
+                                    Add server{' '}
+                                    <IconCheck className={'size-4'} />
+                                </FormButton>
+                            </>
+                        }
+                    />
+
+                    <div className={'space-y-4 pt-4'}>
+                        <PresetSection />
+                        <GeneralSection />
+                        <ResourcesSection />
+                        <NetworkSection />
+                        <OperatingSystemSection />
                     </div>
-                </FullscreenLayout>
+                </div>
             </form>
         </Form>
     )
 }
+
+export const Route = createLazyFileRoute(
+    '/_app/admin/_dashboard/servers/create'
+)({
+    component: CreateServerPage,
+})

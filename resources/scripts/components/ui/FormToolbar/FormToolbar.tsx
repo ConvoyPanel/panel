@@ -11,10 +11,11 @@ interface Props {
 }
 
 /**
- * The sticky title + actions bar shared by the node create page and the node's
- * settings tab, so the primary action is always a flick away on both.
+ * The sticky title + actions bar for a full-page form — node create, node
+ * settings, server create — so the primary action is always a flick away
+ * however long the form runs.
  */
-const NodeFormToolbar = ({ title, subtitle, actions }: Props) => {
+const FormToolbar = ({ title, subtitle, actions }: Props) => {
     // Headroom: the toolbar gets out of the way on the way down and comes back
     // the moment you scroll up, so the actions are always a flick away without
     // permanently eating vertical space. fixedAt keeps it put near the top,
@@ -159,4 +160,4 @@ const NodeFormToolbar = ({ title, subtitle, actions }: Props) => {
     )
 }
 
-export default NodeFormToolbar
+export default FormToolbar

@@ -1,17 +1,10 @@
+import { useStorages } from '@/features/nodes/storages/api.ts'
 import { Storage } from '@/features/nodes/types'
+import { IconDatabase } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 import { useFormContext } from 'react-hook-form'
 
-import { useStorages } from '@/features/nodes/storages/api.ts'
 import SimpleEmptyState from '@/components/ui/EmptyStates/SimpleEmptyState'
-import { IconDatabase } from '@tabler/icons-react'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/Select'
 import {
     FormControl,
     FormField,
@@ -19,6 +12,13 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/Form'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/Select'
 
 interface StoragePickerProps {
     nodeId: number | null
@@ -56,8 +56,8 @@ const StoragePicker = ({
                         {storage.displayName} ({storage.name})
                     </span>
                     <span className='text-muted-foreground text-xs'>
-                        {byteSize(free, { units: 'iec' }).toString()} free out of{' '}
-                        {byteSize(storage.size, { units: 'iec' }).toString()}
+                        {byteSize(free, { units: 'iec' }).toString()} free out
+                        of {byteSize(storage.size, { units: 'iec' }).toString()}
                     </span>
                 </div>
             ),
@@ -74,21 +74,25 @@ const StoragePicker = ({
                     <Select
                         items={items}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        // Controlled, not `defaultValue`: the field is also
+                        // written from outside the picker (applying a preset,
+                        // a form reset), and an uncontrolled Select would keep
+                        // showing the placeholder over a real value.
+                        value={field.value ?? null}
                         disabled={!nodeId || isLoading}
                     >
                         <FormControl>
                             <SelectTrigger className='h-auto! w-full text-left *:data-[slot=select-value]:line-clamp-none!'>
-                                <SelectValue placeholder="Select a storage" />
+                                <SelectValue placeholder='Select a storage' />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             {filteredStorages?.length === 0 ? (
-                                <div className="p-2">
+                                <div className='p-2'>
                                     <SimpleEmptyState
                                         icon={IconDatabase}
-                                        title="No Storages"
-                                        description="There are no storages available for this node."
+                                        title='No Storages'
+                                        description='There are no storages available for this node.'
                                     />
                                 </div>
                             ) : (

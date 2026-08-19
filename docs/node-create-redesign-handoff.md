@@ -13,8 +13,9 @@ form, capacity block "B1", and switched the connection toggles to real switches.
 ### Decisions locked (from the design iterations / artifacts)
 - **Layout:** Design 1 "sectioned rows" (title+blurb in a left column, fields right,
   `divide-y` between sections). Not fullscreen anymore.
-- **In the app shell**, not the Stripe-style `FullscreenLayout`. `servers.create` stays
-  fullscreen — only nodes moved.
+- **In the app shell**, not the Stripe-style `FullscreenLayout`. (At the time only nodes
+  moved; `servers.create` followed on 2026-08-17 and `FullscreenLayout` now has no
+  consumers — see `docs/card-design.md`.)
 - **Page toolbar:** sticky title row with `Cancel` + `Add node` on the right (global
   header still owns search/avatar, so actions can't go there). Single sticky toolbar
   replaces the earlier top+bottom duplication idea.
