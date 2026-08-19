@@ -174,6 +174,30 @@
     }
 }
 
+/*
+ * Room for a focus ring inside a box that has to clip.
+ *
+ * A disclosure panel (Collapsible, Accordion) animates its height, which needs
+ * `overflow: hidden` — and that clips at the panel's padding edge, taking the
+ * 3px `focus-visible:ring-3` off any control sitting against it. Every field in
+ * the last row of an open accordion loses part of its ring, which is why this
+ * keeps coming back: the bug lives in the primitive but only shows up at call
+ * sites, so it gets "fixed" locally and returns with the next panel.
+ *
+ * Padding the clip box and cancelling the same amount in margin gives the ring
+ * somewhere to paint without moving anything. It is deliberately padding rather
+ * than `overflow-clip-margin`, which does exactly this job but is not old
+ * enough to rely on, and rather than dropping the clip once the panel is open,
+ * which races the transition and lets content spill mid-animation.
+ *
+ * 0.25rem clears `ring-3` with a pixel to spare. Vertical slack cancels the
+ * same way, so a collapsed `h-0` panel still measures zero.
+ */
+@utility clip-slack {
+    padding: 0.25rem;
+    margin: -0.25rem;
+}
+
 @layer utilities {
     /*
      * Base UI exposes only the number of open descendant dialogs. Measure the

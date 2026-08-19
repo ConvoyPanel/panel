@@ -22,8 +22,8 @@ const CollapsibleTrigger = ({
 }: ComponentProps<typeof CollapsiblePrimitive.Trigger>) => (
     <CollapsiblePrimitive.Trigger
         className={cn(
-            'flex w-full items-center gap-1.5 rounded-lg py-1 text-sm font-medium text-muted-foreground outline-none transition-colors',
-            'hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
+            'text-muted-foreground flex w-full items-center gap-1.5 rounded-lg py-1 text-sm font-medium transition-colors outline-none',
+            'hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-3',
             // data-panel-open, not Radix's data-state=open.
             '[&[data-panel-open]>svg]:rotate-90',
             className
@@ -48,6 +48,10 @@ const CollapsiblePanel = ({
             // Base UI measures the panel and exposes its height as a CSS var;
             // the starting/ending styles are what make the transition run.
             'h-[var(--collapsible-panel-height)] overflow-hidden transition-[height] duration-200 ease-out',
+            // The clip that makes the transition possible also crops the focus
+            // ring of any control against the panel edge; `clip-slack` pads the
+            // clip box and cancels it in layout. See app.css.
+            'clip-slack',
             'data-[ending-style]:h-0 data-[starting-style]:h-0',
             'motion-reduce:transition-none',
             className
