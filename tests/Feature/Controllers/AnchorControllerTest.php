@@ -54,6 +54,40 @@ it('names the attached nodes on the detail endpoint and nowhere else', function 
         ->assertJsonPath('items.0.nodes', null);
 });
 
+it('rotates the secret every time an Anchor enrolls', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $anchor = Anchor::factory()->create();
+    $original = $anchor->secret;
+
+    $enroll = function () use ($admin, $anchor) {
+        $token = $this->actingAs($admin)
+            ->postJson("/api/admin/anchors/{$anchor->id}/enrollment")
+            ->json('data.token');
+
+        return $this->postJson('/api/anchor/enroll', ['token' => $token])
+            ->assertOk()
+            ->json('config.secret');
+    };
+
+    $first = $enroll();
+    $second = $enroll();
+
+    // Re-enrolling is the remediation for a leaked anchor.toml, so the secret
+    // it delivers has to be new -- and the one before it has to stop working.
+    expect($first)->not->toBe($original)
+        ->and($second)->not->toBe($first)
+        ->and($anchor->refresh()->secret)->toBe($second);
+
+    $this->withToken("{$anchor->uuid}.{$first}")
+        ->postJson('/api/anchor/heartbeat', [
+            'version' => '0.1.0-alpha.1',
+            'mode' => 'agent',
+            'protocol' => ['min' => 1, 'max' => 1],
+            'capabilities' => [],
+        ])
+        ->assertUnauthorized();
+});
+
 it('authenticates heartbeats and records compatibility data', function () {
     $anchor = Anchor::factory()->create(['enrolled_at' => now()]);
     $payload = [

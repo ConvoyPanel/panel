@@ -6,6 +6,7 @@ use App\Enums\Anchor\AnchorMode;
 use App\Http\Requests\Anchor\ConsumeEnrollmentRequest;
 use App\Models\Anchor;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class EnrollmentController
@@ -26,6 +27,20 @@ class EnrollmentController
                 'enrollment_token_hash' => null,
                 'enrollment_expires_at' => null,
                 'enrolled_at' => now(),
+                /*
+                 * Enrolling is the only path that hands the secret out, so it
+                 * is the only place that can rotate it -- and it has to, or the
+                 * enrollment token is a fresh courier delivering the same
+                 * payload forever: any copy of anchor.toml that ever leaked
+                 * stays valid, and re-enrolling, the one action that looks like
+                 * remediation, hands the identical secret back.
+                 *
+                 * Rotating here makes "reissue the command, run it again" the
+                 * remediation. The cost is deliberate: the previous
+                 * installation's bearer stops matching immediately and its
+                 * console sessions, signed with the old secret, die with it.
+                 */
+                'secret' => Str::random(64),
             ]);
 
             return $anchor;
