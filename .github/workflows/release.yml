@@ -24,7 +24,11 @@ jobs:
         env:
           VERSION: ${{ github.ref_name }}
         run: |
-          sed -i "s/    'version' => 'canary',/    'version' => '${VERSION#v}',/" config/app.php
+          # Match whatever version is committed, not the literal 'canary': when
+          # that value changes the substitution would otherwise silently do
+          # nothing and ship a release stamped with the wrong version.
+          sed -i "s/    'version' => '[^']*',/    'version' => '${VERSION#v}',/" config/app.php
+          grep -q "    'version' => '${VERSION#v}'," config/app.php
 
       - name: Build Assets
         run: |
@@ -53,7 +57,7 @@ jobs:
           files_to_include=(
             ".editorconfig"
             ".env.example"
-            ".env.full_example"
+            ".env.reference"
             ".gitattributes"
             ".gitignore"
             ".prettierignore"
