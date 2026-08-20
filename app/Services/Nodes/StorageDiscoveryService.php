@@ -3,6 +3,7 @@
 namespace App\Services\Nodes;
 
 use App\Data\Cluster\StorageResourceData;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Node;
 use App\Models\Storage;
 use Illuminate\Support\Collection;
@@ -10,11 +11,17 @@ use Illuminate\Support\Collection;
 /**
  * Records what Proxmox says about the storages Convoy has registered.
  *
- * Convoy's `storages` rows are operator-declared: a name typed by hand, a size
- * typed by hand, content flags ticked by hand. None of it is checked against the
- * host, so any of it can drift. This writes PVE's answer alongside the
- * declaration so the two can be compared -- and so the UI can show the real
- * figure while a node is up and fall back to the declared one when it is not.
+ * Convoy's `storages` rows carry a name and a size taken from the host once, at
+ * registration, and never checked again -- so either can drift. This writes
+ * PVE's answer alongside the declaration so the two can be compared, and so the
+ * UI can show the real figure while a node is up and fall back to the declared
+ * one when it is not.
+ *
+ * Content types are not merely recorded but adopted: `stores_*` is overwritten
+ * from PVE's list on every poll. What a storage may hold is decided in
+ * `storage.cfg` and enforced by PVE, so a separate answer in Convoy could only
+ * ever agree with it or be wrong -- and being wrong meant offering an operator a
+ * storage that would reject the write.
  *
  * The facts come from the `type=storage` rows of the poll's existing
  * `/cluster/resources` call, so discovery adds no request and no timeout.
@@ -57,6 +64,13 @@ class StorageDiscoveryService
                 'pve_type' => $live->type,
                 'pve_shared' => $live->shared,
                 'pve_content' => $live->content,
+                // Adopted, not just recorded -- see the note above. Skipped
+                // when the row carried no content list at all: that is a report
+                // that did not say, not a storage that holds nothing, and
+                // deriving from it would silently strip every flag.
+                ...$live->content !== null
+                    ? StorageContentType::flagsFor($live->content)
+                    : [],
                 // `available` is PVE saying it actually read the store. Anything
                 // else means the numbers beside it are not worth recording, so
                 // the previous ones stand.

@@ -51,12 +51,10 @@ class Storage extends Model
         'name' => 'required|string|max:191',
         'size' => 'required|numeric|min:1',
         'reserved_bytes' => 'nullable|numeric|min:0',
-        'stores_kvm' => 'required|boolean',
-        'stores_lxc' => 'required|boolean',
-        'stores_lxc_templates' => 'required|boolean',
-        'stores_backups' => 'required|boolean',
-        'stores_iso' => 'required|boolean',
-        'stores_snippets' => 'required|boolean',
+        // No `stores_*` rules: the content flags are never submitted. They are
+        // read off Proxmox at registration and restated by every poll, so
+        // accepting a client's version of them would only let it disagree with
+        // the host.
     ];
 
     protected function casts(): array

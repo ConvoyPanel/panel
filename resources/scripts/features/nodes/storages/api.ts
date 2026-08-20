@@ -27,18 +27,19 @@ export const registerStorageSchema = z.object({
     reservedBytes: z.coerce.number().min(0).nullable().optional(),
 })
 
+/**
+ * Editing a storage Convoy already has.
+ *
+ * No content types: what a storage may hold is declared in Proxmox and read
+ * back by the poll, so there is nothing here to tick. It used to be six check
+ * boxes, which could only ever restate the host's answer or contradict it.
+ */
 export const storageSchema = z.object({
     displayName: z.string().max(40).optional(),
     description: z.string().max(191),
     name: z.string().min(1).max(191),
     size: z.coerce.number().min(1),
     reservedBytes: z.coerce.number().min(0).nullable().optional(),
-    storesKvm: z.boolean(),
-    storesLxc: z.boolean(),
-    storesLxcTemplates: z.boolean(),
-    storesBackups: z.boolean(),
-    storesIso: z.boolean(),
-    storesSnippets: z.boolean(),
 })
 
 // StorageController is served under both the panel (`/api/admin`) and
@@ -155,12 +156,6 @@ export const createStorage = async (
         name,
         size,
         reservedBytes,
-        storesKvm,
-        storesLxc,
-        storesLxcTemplates,
-        storesBackups,
-        storesIso,
-        storesSnippets,
     }: z.infer<typeof storageSchema>
 ) =>
     rawDataToNodeStorage(
@@ -172,12 +167,6 @@ export const createStorage = async (
                     name,
                     size,
                     reserved_bytes: reservedBytes,
-                    stores_kvm: storesKvm,
-                    stores_lxc: storesLxc,
-                    stores_lxc_templates: storesLxcTemplates,
-                    stores_backups: storesBackups,
-                    stores_iso: storesIso,
-                    stores_snippets: storesSnippets,
                 },
             })
         ).data
@@ -192,12 +181,6 @@ export const updateStorage = async (
         name,
         size,
         reservedBytes,
-        storesKvm,
-        storesLxc,
-        storesLxcTemplates,
-        storesBackups,
-        storesIso,
-        storesSnippets,
     }: z.infer<typeof storageSchema>
 ) =>
     rawDataToNodeStorage(
@@ -211,12 +194,6 @@ export const updateStorage = async (
                         name,
                         size,
                         reserved_bytes: reservedBytes,
-                        stores_kvm: storesKvm,
-                        stores_lxc: storesLxc,
-                        stores_lxc_templates: storesLxcTemplates,
-                        stores_backups: storesBackups,
-                        stores_iso: storesIso,
-                        stores_snippets: storesSnippets,
                     },
                 }
             )

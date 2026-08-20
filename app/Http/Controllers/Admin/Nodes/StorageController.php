@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\Storage\StorageData;
 use App\Data\Storage\StorageEloquentData;
+use App\Enums\Audit\AuditEvent;
 use App\Exceptions\Proxmox\RequestException;
+use App\Facades\Audit;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Nodes\Storages\StorageRequest;
 use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
@@ -50,8 +52,21 @@ class StorageController extends Controller
      */
     public function store(StorageRequest $request, Node $node)
     {
-        $storage = $this->connection->transaction(function () use ($request, $node) {
-            $storage = Storage::create($request->validated());
+        // What the storage may hold comes from the node, not the request. The
+        // form used to submit six tick boxes for it; PVE already publishes the
+        // answer, and the poll keeps it current from here on.
+        $reported = $this->liveStorage->get($node, $request->string('name')->toString());
+
+        $storage = $this->connection->transaction(function () use ($request, $node, $reported) {
+            $storage = Storage::create([
+                ...$request->validated(),
+                'stores_kvm' => (bool) $reported?->storesKvm,
+                'stores_lxc' => (bool) $reported?->storesLxc,
+                'stores_lxc_templates' => (bool) $reported?->storesLxcTemplates,
+                'stores_backups' => (bool) $reported?->storesBackups,
+                'stores_iso' => (bool) $reported?->storesIso,
+                'stores_snippets' => (bool) $reported?->storesSnippets,
+            ]);
 
             StorageToNode::create([
                 'storage_id' => $storage->id,
@@ -60,6 +75,12 @@ class StorageController extends Controller
 
             return $storage;
         });
+
+        Audit::record(
+            AuditEvent::ADMIN_NODE_STORAGE_CREATED,
+            subject: $node,
+            properties: ['name' => $storage->name, 'stores_backups' => $storage->stores_backups],
+        );
 
         return StorageEloquentData::fromModel(
             $storage,
@@ -75,20 +96,17 @@ class StorageController extends Controller
         $this->connection->transaction(function () use ($request, $node, $storage) {
             $storage->update($request->validated());
 
-            if ($request->boolean('stores_backups') && $storage->stores_backups !== $request->boolean('stores_backups')) {
-                // Scoped to this node as well as this storage. `storage_to_node`
-                // is a composite pivot whose declared primary key is
-                // `storage_id`, so a storage reachable from two nodes has two
-                // rows that both answer to it -- and looking one up by storage
-                // alone silently picks whichever the database returns first.
-                $storageToNode = StorageToNode::query()
-                    ->where('storage_id', $storage->id)
-                    ->where('node_id', $node->id)
-                    ->firstOrFail();
+            // Nothing here assigns a backup order any more. It used to be
+            // granted when the operator first ticked "stores backups", but that
+            // box is gone -- content comes from Proxmox now -- and the pivot
+            // sorts on creation, so a backup-capable storage already has one by
+            // the time it can be edited.
 
-                $storageToNode->backup_order = $storageToNode->getHighestOrderNumber() + 1;
-                $storageToNode->save();
-            }
+            Audit::record(
+                AuditEvent::ADMIN_NODE_STORAGE_UPDATED,
+                subject: $node,
+                properties: ['name' => $storage->name, 'changed' => array_keys($storage->getChanges())],
+            );
         });
 
         return StorageEloquentData::fromModel(
@@ -112,6 +130,12 @@ class StorageController extends Controller
                     ->where('node_id', $node->id)
                     ->update(['backup_order' => $position + 1]);
             }
+
+            Audit::record(
+                AuditEvent::ADMIN_NODE_STORAGE_BACKUP_ORDER_UPDATED,
+                subject: $node,
+                properties: ['order' => $request->array('ids')],
+            );
         });
 
         return $this->mapWithLiveData(
@@ -133,11 +157,21 @@ class StorageController extends Controller
          * itself, and deleting the row would silently take it off every other
          * node that was using it.
          */
-        if ($storage->nodes()->count() > 1) {
+        $detachedOnly = $storage->nodes()->count() > 1;
+
+        if ($detachedOnly) {
             $storage->nodes()->detach($node->id);
         } else {
             $storage->delete();
         }
+
+        // Two materially different outcomes behind one endpoint: detaching leaves the pool intact
+        // for other nodes, deleting does not. The log has to say which happened.
+        Audit::record(
+            AuditEvent::ADMIN_NODE_STORAGE_DELETED,
+            subject: $node,
+            properties: ['name' => $storage->name, 'detached_only' => $detachedOnly],
+        );
 
         return response()->noContent();
     }

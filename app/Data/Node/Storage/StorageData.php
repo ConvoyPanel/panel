@@ -2,7 +2,7 @@
 
 namespace App\Data\Node\Storage;
 
-use Illuminate\Support\Str;
+use App\Enums\Node\Storage\StorageContentType;
 use Spatie\LaravelData\Data;
 
 class StorageData extends Data
@@ -25,7 +25,11 @@ class StorageData extends Data
 
     public static function fromRaw(array $raw): self
     {
-        $stores = fn (string $content) => Str::contains($raw['content'], $content);
+        // One parser for PVE's content list, shared with the poll that records
+        // the same flags. It used to be a substring test done here by hand, and
+        // it looked for `templates` -- a token PVE does not emit, so no storage
+        // ever came back able to hold an LXC template.
+        $flags = StorageContentType::flagsFor($raw['content'] ?? null);
 
         return new self(
             name              : $raw['storage'],
@@ -35,12 +39,12 @@ class StorageData extends Data
             enabled           : $raw['enabled'],
             online            : $raw['active'],
             isSharable        : $raw['shared'],
-            storesKvm         : $stores('images'),
-            storesLxc         : $stores('rootdir'),
-            storesLxcTemplates: $stores('templates'),
-            storesBackups     : $stores('backup'),
-            storesIso         : $stores('iso'),
-            storesSnippets    : $stores('snippets'),
+            storesKvm         : $flags['stores_kvm'],
+            storesLxc         : $flags['stores_lxc'],
+            storesLxcTemplates: $flags['stores_lxc_templates'],
+            storesBackups     : $flags['stores_backups'],
+            storesIso         : $flags['stores_iso'],
+            storesSnippets    : $flags['stores_snippets'],
         );
     }
 }

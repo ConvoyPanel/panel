@@ -17,7 +17,6 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/Button'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
-import CheckboxItemForm from '@/components/ui/Forms/CheckboxItemForm.tsx'
 import {
     ResponsiveDialog,
     ResponsiveDialogBody,
@@ -29,6 +28,14 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 import { toast } from '@/components/ui/Toast'
 
+/**
+ * Editing a registered storage.
+ *
+ * Content types are not on this form. They are declared in Proxmox and read
+ * back by the poll, so the six check boxes that used to live here could only
+ * restate the host's answer or contradict it -- and contradicting it meant
+ * Convoy offering a storage for a job PVE would then refuse.
+ */
 const EditStorageModal = () => {
     const { nodeId } = StorageRoute.useParams()
     const mutate = useQueryMutator<NodeStorage[]>(
@@ -48,12 +55,6 @@ const EditStorageModal = () => {
             name: '',
             size: '',
             reservedBytes: '',
-            storesKvm: false,
-            storesLxc: false,
-            storesLxcTemplates: false,
-            storesBackups: false,
-            storesIso: false,
-            storesSnippets: false,
         },
     })
 
@@ -69,12 +70,6 @@ const EditStorageModal = () => {
                 storage.reservedBytes != null
                     ? (storage.reservedBytes / 1024 / 1024).toString()
                     : '',
-            storesKvm: storage.storesKvm,
-            storesLxc: storage.storesLxc,
-            storesLxcTemplates: storage.storesLxcTemplates,
-            storesBackups: storage.storesBackups,
-            storesIso: storage.storesIso,
-            storesSnippets: storage.storesSnippets,
         })
     }, [storage])
 
@@ -151,57 +146,6 @@ const EditStorageModal = () => {
                                     'Free space Convoy will never allocate into. Leave blank for none.'
                                 }
                             />
-                            <div>
-                                <h3 className={'text-sm font-semibold'}>
-                                    Content Types
-                                </h3>
-                                <p
-                                    className={
-                                        'text-muted-foreground text-[0.8rem]'
-                                    }
-                                >
-                                    Select which content types this storage
-                                    should be able to store.
-                                </p>
-                                <ul className={'mt-2 space-y-2'}>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesKvm'}
-                                            label={'KVM'}
-                                        />
-                                    </li>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesLxc'}
-                                            label={'LXC'}
-                                        />
-                                    </li>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesLxcTemplates'}
-                                            label={'LXC Templates'}
-                                        />
-                                    </li>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesBackups'}
-                                            label={'Backups'}
-                                        />
-                                    </li>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesIso'}
-                                            label={'ISO Images'}
-                                        />
-                                    </li>
-                                    <li>
-                                        <CheckboxItemForm
-                                            name={'storesSnippets'}
-                                            label={'Snippets'}
-                                        />
-                                    </li>
-                                </ul>
-                            </div>
                         </ResponsiveDialogBody>
                         <ResponsiveDialogFooter className={'mt-4'}>
                             <ResponsiveDialogClose

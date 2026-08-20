@@ -480,6 +480,73 @@ it('records what Proxmox says about a registered storage', function () {
         ->and($storage->discovered_at)->not->toBeNull();
 });
 
+it('adopts the content types Proxmox reports, correcting a stale answer', function () {
+    // The flags used to be tick boxes on the edit form, so a storage could carry
+    // an answer PVE disagreed with -- here, one that has since stopped accepting
+    // backups and started accepting containers. The poll settles it.
+    $storage = Storage::factory()->create([
+        'name' => 'local-lvm',
+        'stores_kvm' => true,
+        'stores_lxc' => false,
+        'stores_backups' => true,
+    ]);
+    $this->node->storages()->attach($storage);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow(
+            'local-lvm',
+            $this->node->name,
+            used: 900,
+            total: 1000,
+            shared: false,
+            pluginType: 'lvmthin',
+            content: 'images,rootdir',
+        )],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh())
+        ->stores_kvm->toBeTrue()
+        ->stores_lxc->toBeTrue()
+        ->stores_backups->toBeFalse()
+        ->stores_lxc_templates->toBeFalse()
+        ->stores_iso->toBeFalse()
+        ->stores_snippets->toBeFalse();
+});
+
+it('leaves the content flags alone when the row carried no content list', function () {
+    // No list is a report that did not say, not a storage that holds nothing.
+    // Deriving from it would strip every flag and quietly take the storage out
+    // of every allocation the panel offers.
+    $storage = Storage::factory()->create([
+        'name' => 'quiet-pool',
+        'stores_kvm' => true,
+        'stores_backups' => true,
+    ]);
+    $this->node->storages()->attach($storage);
+
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name)],
+        storages: [storageRow(
+            'quiet-pool',
+            $this->node->name,
+            used: 10,
+            total: 100,
+            shared: false,
+            pluginType: 'dir',
+            content: null,
+        )],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh())
+        ->stores_kvm->toBeTrue()
+        ->stores_backups->toBeTrue();
+});
+
 it('identifies a Proxmox Backup Server datastore by its type alone', function () {
     // PBS needs no model of its own: it arrives as an ordinary storage row whose
     // plugintype says `pbs`, marked shared by PVE, carrying backups only.

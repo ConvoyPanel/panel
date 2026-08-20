@@ -149,12 +149,9 @@ const CreateStorageModal = () => {
                 reservedBytes: reservedBytes
                     ? reservedBytes * 1024 * 1024
                     : null,
-                storesKvm: storage.storesKvm,
-                storesLxc: storage.storesLxc,
-                storesLxcTemplates: storage.storesLxcTemplates,
-                storesBackups: storage.storesBackups,
-                storesIso: storage.storesIso,
-                storesSnippets: storage.storesSnippets,
+                // Content types are not sent: the panel reads them off the node
+                // by name, so the browser cannot hand it a different answer than
+                // the one it just displayed.
             })
 
             await mutate(existing => existing?.concat(created), false)

@@ -25,8 +25,13 @@ beforeEach(function () {
 });
 
 /** Fake the PVE per-node storage listing endpoint with one live entry. */
-function fakeLiveStorage(string $name, int $total, int $used, int $avail): void
-{
+function fakeLiveStorage(
+    string $name,
+    int $total,
+    int $used,
+    int $avail,
+    string $content = 'images,rootdir',
+): void {
     Http::fake([
         '*/storage' => Http::response([
             'data' => [[
@@ -37,7 +42,7 @@ function fakeLiveStorage(string $name, int $total, int $used, int $avail): void
                 'enabled' => 1,
                 'active' => 1,
                 'shared' => 0,
-                'content' => 'images,rootdir',
+                'content' => $content,
             ]],
         ], 200),
     ]);
@@ -307,12 +312,6 @@ it('creates a storage without a display name', function () {
         ->postJson("/api/admin/nodes/{$this->node->id}/storages", [
             'name' => 'new-pool',
             'size' => 100 * 1048576,
-            'stores_kvm' => true,
-            'stores_lxc' => false,
-            'stores_lxc_templates' => false,
-            'stores_backups' => false,
-            'stores_iso' => false,
-            'stores_snippets' => false,
         ])
         ->assertCreated()
         ->assertJsonPath('data.name', 'new-pool')
@@ -329,13 +328,51 @@ it('still bounds the display name it is given', function () {
             'display_name' => str_repeat('a', 41),
             'name' => 'new-pool',
             'size' => 100 * 1048576,
-            'stores_kvm' => true,
-            'stores_lxc' => false,
-            'stores_lxc_templates' => false,
-            'stores_backups' => false,
-            'stores_iso' => false,
-            'stores_snippets' => false,
         ])
         ->assertStatus(422)
         ->assertJsonValidationErrors('display_name');
+});
+
+it('takes the content types from Proxmox, not from the request', function () {
+    // The request used to carry six booleans. Nothing stops a caller sending
+    // them still, and the one thing that must not happen is Convoy believing a
+    // storage holds backups when PVE will refuse the write.
+    fakeLiveStorage('new-pool', total: 100, used: 20, avail: 80, content: 'images,vztmpl');
+
+    $this->actingAs($this->user)
+        ->postJson("/api/admin/nodes/{$this->node->id}/storages", [
+            'name' => 'new-pool',
+            'size' => 100 * 1048576,
+            'stores_backups' => true,
+            'stores_kvm' => false,
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.storesKvm', true)
+        ->assertJsonPath('data.storesLxcTemplates', true)
+        ->assertJsonPath('data.storesBackups', false);
+
+    expect(Storage::query()->where('name', 'new-pool')->sole())
+        ->stores_kvm->toBeTrue()
+        ->stores_lxc_templates->toBeTrue()
+        ->stores_backups->toBeFalse();
+});
+
+it('will not let an update rewrite the content types', function () {
+    fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
+    $this->storage->update(['stores_kvm' => true, 'stores_backups' => false]);
+
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}", [
+            'name' => $this->storage->name,
+            'size' => 100 * 1048576,
+            'description' => 'still just a disk',
+            'stores_backups' => true,
+            'stores_kvm' => false,
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.description', 'still just a disk');
+
+    expect($this->storage->refresh())
+        ->stores_kvm->toBeTrue()
+        ->stores_backups->toBeFalse();
 });
