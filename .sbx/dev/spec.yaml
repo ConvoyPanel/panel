@@ -148,5 +148,30 @@ commands:
     - command: ["bash", "-lc", "install -m 0644 \"${WORKSPACE_DIR:-.}/.sbx/dev/browser.mjs\" /opt/sbx-e2e/browser.mjs"]
       description: publish the Playwright helpers to /opt/sbx-e2e
 
+    # ddev signs the project cert with the mkcert CA of whichever machine runs
+    # `ddev start`, and drops it in .ddev/traefik/certs — which is part of the
+    # mounted workspace. Left alone, this sandbox's throwaway CA overwrites the
+    # host's cert in the checkout, and the next host `ddev start` copies it into
+    # the host router: every *.ddev.site project on the Mac then fails TLS in
+    # the browser, until a host-side `ddev restart` regenerates it. Overmount a
+    # sandbox-local dir (the same trick as /etc/hosts above) so ddev in here
+    # signs its own certs and the host checkout is never written to.
+    - command:
+          - "bash"
+          - "-lc"
+          - |
+            set -euo pipefail
+            certs="${WORKSPACE_DIR:-.}/.ddev/traefik/certs"
+            mkdir -p "$certs"
+            certs=$(cd "$certs" && pwd -P)
+            if awk -v d="$certs" '$2 == d { found = 1 } END { exit !found }' /proc/self/mounts; then
+              echo 'convoy-dev: .ddev/traefik/certs already overmounted'
+              exit 0
+            fi
+            sudo install -d -m 0755 -o 1000 -g 1000 /var/lib/sbx-ddev-certs
+            sudo mount --bind /var/lib/sbx-ddev-certs "$certs"
+            echo 'convoy-dev: overmounted .ddev/traefik/certs (sandbox-local)'
+      description: keep sandbox-signed ddev certs out of the host checkout
+
     - command: ["bash", "-lc", "cd \"${WORKSPACE_DIR:-.}\" && ddev start -y"]
       description: boot the ddev stack

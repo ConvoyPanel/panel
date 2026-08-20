@@ -100,6 +100,32 @@ Nothing is written to the workspace and the overmount dies with the sandbox, so 
 sandbox-local. In a sandbox that predates the kit change, run it by hand, then `ddev start` and
 confirm with the `remote_ip` curl above.
 
+## Host browser: "invalid certificate" on *every* `*.ddev.site` site
+
+`ddev start` signs the project certificate with the mkcert CA of the machine it runs on, and writes
+it to `.ddev/traefik/certs/<project>.crt` — **inside the workspace**, which the sandbox shares with
+your checkout. A sandbox has its own throwaway mkcert CA (`mkcert agent@claude-<repo>`), so starting
+ddev in here overwrites the host's certificate in the repo, and the next host-side `ddev start`
+copies that file into `~/.ddev/traefik/certs` for the shared router. The Mac does not trust that CA,
+so the browser rejects the site — and because one `ddev start` refreshes the router config for every
+running project, a *different* project's sandbox can be what broke the one you are looking at.
+
+The `dev` kit prevents it on every start by overmounting a sandbox-local directory over the cert
+directory, before `ddev start` runs:
+
+```bash
+sudo install -d -m 0755 -o 1000 -g 1000 /var/lib/sbx-ddev-certs
+sudo mount --bind /var/lib/sbx-ddev-certs "$WORKSPACE_DIR/.ddev/traefik/certs"
+```
+
+ddev in here then signs into that directory and the checkout is never written to. To repair a host
+already poisoned by an older sandbox, run `ddev restart` in each affected project **on the Mac** and
+confirm the issuer is yours:
+
+```bash
+openssl x509 -in ~/.ddev/traefik/certs/<project>.crt -noout -issuer   # must not say agent@claude-…
+```
+
 ## `php artisan tinker` segfaults (SIGSEGV / exit 139) — fix
 
 **Symptom:** `php artisan tinker` (especially the interactive REPL) intermittently dies with a
