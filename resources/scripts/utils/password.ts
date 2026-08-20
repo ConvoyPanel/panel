@@ -1,5 +1,7 @@
 /**
- * Mirrors the server rules in UpdatePasswordRequest: length only, no character composition.
+ * Mirrors the server rules in App\Rules\PasswordPolicy — the one policy every password goes
+ * through, whether a user picks their own or an admin sets one for them: length only, no
+ * character composition.
  *
  * There are deliberately no uppercase/number/symbol criteria. NIST SP 800-63B says verifiers
  * SHOULD NOT impose composition rules — they push people toward `Password1!` and discourage the
@@ -12,7 +14,7 @@
 
 export const PASSWORD_MIN_LENGTH = 12
 
-/** bcrypt hashes at most 72 bytes and ignores the rest — see UpdatePasswordRequest. */
+/** bcrypt hashes at most 72 bytes and ignores the rest — see PasswordPolicy::MAX_BYTES. */
 export const PASSWORD_MAX_BYTES = 72
 
 export interface PasswordCriterion {

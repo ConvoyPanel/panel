@@ -11,6 +11,7 @@ import {
     IconSettings,
     IconStack2,
     IconTransform,
+    IconUsers,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -101,6 +102,11 @@ const nav: SidebarNav = {
         {
             label: 'Administration',
             items: [
+                {
+                    icon: IconUsers,
+                    label: 'Users',
+                    path: '/admin/users',
+                },
                 {
                     icon: IconKey,
                     label: 'API Tokens',

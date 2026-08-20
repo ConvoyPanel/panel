@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Admin\Users;
 
 use App\Models\User;
+use App\Rules\PasswordPolicy;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => $rules['name'],
             'email' => $rules['email'],
-            'password' => ['required', Password::defaults()],
+            'password' => ['required', ...PasswordPolicy::rules()],
             'root_admin' => $rules['root_admin'],
         ];
     }

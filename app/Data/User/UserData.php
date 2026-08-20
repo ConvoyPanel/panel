@@ -3,6 +3,7 @@
 namespace App\Data\User;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -17,6 +18,7 @@ class UserData extends Data
         public string $email,
         public bool $rootAdmin,
         public int|Optional $serversCount,
+        public ?CarbonImmutable $createdAt,
     ) {}
 
     public static function fromModel(User $user): self
@@ -29,6 +31,9 @@ class UserData extends Data
             serversCount: isset($user->servers_count)
                 ? (int) $user->servers_count
                 : Optional::create(),
+            createdAt: $user->created_at
+                ? CarbonImmutable::parse($user->created_at)
+                : null,
         );
     }
 }

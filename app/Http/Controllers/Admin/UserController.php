@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -36,6 +37,17 @@ class UserController
                     'email',
                 ), AllowedFilter::custom('*', new FiltersUserWildcard)],
             )
+            // The admin list is sortable by every column it shows. Sorts are named after the
+            // response's camelCase properties, since the table sends the column it sorted by.
+            ->allowedSorts([
+                'id',
+                'name',
+                'email',
+                AllowedSort::field('rootAdmin', 'root_admin'),
+                AllowedSort::field('serversCount', 'servers_count'),
+                AllowedSort::field('createdAt', 'created_at'),
+            ])
+            ->defaultSort('name')
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
             );
@@ -70,6 +82,14 @@ class UserController
 
     public function update(UpdateUserRequest $request, User $user)
     {
+        // Demoting yourself is a one-way door: the screen you would fix it from is the one you
+        // just lost. Another admin can still do it, which is the point.
+        if ($user->is($request->user()) && $user->root_admin && ! $request->boolean('root_admin')) {
+            throw new BadRequestHttpException(
+                'You cannot remove administrator access from your own account.',
+            );
+        }
+
         DB::transaction(function () use ($request, $user) {
             // Demoting an admin: revoke their API tokens so elevated access
             // doesn't linger on tokens issued while they were an admin.
@@ -105,8 +125,14 @@ class UserController
         return UserData::from($user);
     }
 
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
+        if ($user->is($request->user())) {
+            throw new BadRequestHttpException(
+                'You cannot delete the account you are signed in as.',
+            );
+        }
+
         $user->loadCount('servers');
 
         if ($user->servers_count > 0) {

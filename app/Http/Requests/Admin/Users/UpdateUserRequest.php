@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Users;
 
 use App\Http\Requests\BaseApiRequest;
 use App\Models\User;
-use Illuminate\Validation\Rules\Password;
+use App\Rules\PasswordPolicy;
 
 class UpdateUserRequest extends BaseApiRequest
 {
@@ -14,6 +14,18 @@ class UpdateUserRequest extends BaseApiRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * An untouched password field posts as an empty string, which is the same intent as omitting
+     * it: leave the password alone. Normalising here keeps that from being reported as a policy
+     * failure on a field the admin never filled in.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->input('password') === '') {
+            $this->merge(['password' => null]);
+        }
     }
 
     /**
@@ -30,7 +42,7 @@ class UpdateUserRequest extends BaseApiRequest
         return [
             'name' => $rules['name'],
             'email' => $rules['email'],
-            'password' => [Password::defaults(), 'nullable'],
+            'password' => ['nullable', ...PasswordPolicy::rules()],
             'root_admin' => $rules['root_admin'],
         ];
     }
