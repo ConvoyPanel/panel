@@ -52,7 +52,7 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
         return (
             <li
                 className={
-                    'border-b px-4 py-1.5 font-mono text-xs break-all text-muted-foreground last:border-b-0'
+                    'text-muted-foreground border-b px-4 py-1.5 font-mono text-xs break-all last:border-b-0'
                 }
             >
                 {entry.raw}
@@ -67,7 +67,9 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
             }
             title={entry.raw}
         >
-            <span className={'w-20 shrink-0 text-muted-foreground tabular-nums'}>
+            <span
+                className={'text-muted-foreground w-20 shrink-0 tabular-nums'}
+            >
                 {formatTime(entry.loggedAt)}
             </span>
 
@@ -77,7 +79,7 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
                 {entry.action}
             </span>
 
-            <span className={'w-4 shrink-0 text-muted-foreground'}>
+            <span className={'text-muted-foreground w-4 shrink-0'}>
                 {entry.direction === 'in' ? (
                     <IconArrowDown className={'size-3'} />
                 ) : entry.direction === 'out' ? (
@@ -87,11 +89,11 @@ const LogRow = ({ entry }: { entry: FirewallLogEntry }) => {
 
             <span className={'min-w-0 flex-1 truncate'}>
                 {entry.sourceAddress ?? '?'}
-                <span className={'px-1.5 text-muted-foreground'}>→</span>
+                <span className={'text-muted-foreground px-1.5'}>→</span>
                 {entry.destinationAddress ?? '?'}
             </span>
 
-            <span className={'shrink-0 text-muted-foreground'}>
+            <span className={'text-muted-foreground shrink-0'}>
                 {entry.protocol}
                 {entry.destinationPort != null && `/${entry.destinationPort}`}
             </span>
@@ -157,7 +159,10 @@ const FirewallLogCard = ({ uuid }: Props) => {
     // two queries settle independently, and without it the card renders its
     // dormant one-liner for a frame while the options are still in flight.
     const isDormant =
-        !isLoading && options !== undefined && !hasEntries && !isLoggingUnmatched
+        !isLoading &&
+        options !== undefined &&
+        !hasEntries &&
+        !isLoggingUnmatched
 
     const status = isDormant
         ? 'Nothing is being logged'
@@ -176,7 +181,9 @@ const FirewallLogCard = ({ uuid }: Props) => {
                 }
             >
                 <h3 className={'font-medium'}>Recent activity</h3>
-                <span className={'text-xs text-muted-foreground'}>{status}</span>
+                <span className={'text-muted-foreground text-xs'}>
+                    {status}
+                </span>
                 <span className={'flex-1'} />
 
                 {isDormant ? (
@@ -195,7 +202,7 @@ const FirewallLogCard = ({ uuid }: Props) => {
                     <>
                         <label
                             className={
-                                'flex items-center gap-2 text-xs text-muted-foreground'
+                                'text-muted-foreground flex items-center gap-2 text-xs'
                             }
                         >
                             Live
@@ -210,8 +217,8 @@ const FirewallLogCard = ({ uuid }: Props) => {
                             size={'sm'}
                             onClick={() => refetch()}
                             loading={isFetching}
+                            icon={<IconRefresh className={'size-4'} />}
                         >
-                            <IconRefresh className={'size-4'} />
                             Refresh
                         </Button>
                     </>
@@ -246,7 +253,7 @@ const FirewallLogCard = ({ uuid }: Props) => {
                     {(hasEntries || start > 0) && (
                         <div
                             className={
-                                'flex items-center gap-3 border-t px-4 py-3 text-xs text-muted-foreground'
+                                'text-muted-foreground flex items-center gap-3 border-t px-4 py-3 text-xs'
                             }
                         >
                             <span>

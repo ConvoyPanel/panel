@@ -327,7 +327,9 @@ const RuleFormDialog = ({
                                             draw. `pt-3` rather than `pt-4`
                                             because the padding now supplies the
                                             other 4px. */}
-                                        <CollapsiblePanel className={'-m-1 p-1'}>
+                                        <CollapsiblePanel
+                                            className={'-m-1 p-1'}
+                                        >
                                             <FieldGroup className={'pt-3'}>
                                                 {/* Here rather than at the top of
                                                 the form: the chain the Add rule

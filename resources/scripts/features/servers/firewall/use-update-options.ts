@@ -31,7 +31,10 @@ const useUpdateFirewallOptions = (uuid: string) => {
         onSuccess: fresh => {
             // The endpoint re-reads the options after writing them, so this is
             // server truth and not a guess -- no GET needed to unblock.
-            queryClient.setQueryData(firewallQueries.options(uuid).queryKey, fresh)
+            queryClient.setQueryData(
+                firewallQueries.options(uuid).queryKey,
+                fresh
+            )
 
             // Logging changes what the activity list will show, but no write is
             // blocked on it, so it refreshes without holding the mutation open.

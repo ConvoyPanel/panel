@@ -83,9 +83,15 @@ const SourceField = ({ name, label, groups }: Props) => (
                                                         group.reference
                                                     )
                                                 }
-                                                className={'flex-col items-start gap-0.5'}
+                                                className={
+                                                    'flex-col items-start gap-0.5'
+                                                }
                                             >
-                                                <span className={'font-mono text-xs'}>
+                                                <span
+                                                    className={
+                                                        'font-mono text-xs'
+                                                    }
+                                                >
                                                     {group.reference}
                                                 </span>
                                                 {/* The operator's own note on
@@ -95,7 +101,7 @@ const SourceField = ({ name, label, groups }: Props) => (
                                                 {group.comment && (
                                                     <span
                                                         className={
-                                                            'text-xs text-muted-foreground'
+                                                            'text-muted-foreground text-xs'
                                                         }
                                                     >
                                                         {group.comment}
