@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Data\PaginationMeta;
 use App\Data\Server\ServerData;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerLifecycle;
 use App\Enums\Server\SuspensionAction;
 use App\Exceptions\Proxmox\RequestException;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use App\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use App\Http\Requests\Admin\Servers\StoreServerRequest;
@@ -78,6 +80,12 @@ class ServerController
 
         $server->load(['addresses', 'user', 'node']);
 
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_CREATED,
+            subject: $server,
+            properties: ['name' => $server->name, 'node' => $server->node->name],
+        );
+
         return ServerData::from($server);
     }
 
@@ -95,6 +103,12 @@ class ServerController
             }
 
             $server->update($request->validated());
+
+            Audit::record(
+                AuditEvent::ADMIN_SERVER_UPDATED,
+                subject: $server,
+                properties: ['changed' => array_keys($server->getChanges())],
+            );
         });
 
         $server->load(['addresses', 'user', 'node']);
@@ -119,6 +133,14 @@ class ServerController
             // do nothing
         }
 
+        // Resource limits are what a customer is billed on, so a change here belongs in their
+        // server's feed as well as the admin log.
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_BUILD_UPDATED,
+            subject: $server,
+            properties: ['changed' => array_keys($server->getChanges())],
+        );
+
         $server->load(['addresses', 'user', 'node']);
 
         return ServerData::from($server);
@@ -128,12 +150,16 @@ class ServerController
     {
         $this->suspensionService->toggle($server);
 
+        Audit::record(AuditEvent::ADMIN_SERVER_SUSPENDED, subject: $server);
+
         return response()->noContent();
     }
 
     public function unsuspend(Server $server)
     {
         $this->suspensionService->toggle($server, SuspensionAction::UNSUSPEND);
+
+        Audit::record(AuditEvent::ADMIN_SERVER_UNSUSPENDED, subject: $server);
 
         return response()->noContent();
     }
@@ -149,7 +175,17 @@ class ServerController
 
     public function sendPowerCommand(SendPowerCommandRequest $request, Server $server)
     {
-        $this->powerCommand->handle($server, $request->enum('command', PowerCommand::class));
+        $command = $request->enum('command', PowerCommand::class);
+
+        $this->powerCommand->handle($server, $command);
+
+        // A separate event from the client-side one: "staff power-cycled your server" and "you
+        // power-cycled your server" read very differently in the owner's feed.
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_POWER_SENT,
+            subject: $server,
+            properties: ['command' => $command->value],
+        );
 
         return response()->noContent();
     }
@@ -159,7 +195,21 @@ class ServerController
         $this->connection->transaction(function () use ($server, $request) {
             $server->update(['lifecycle' => ServerLifecycle::DELETING->value]);
 
+            $properties = [
+                'name' => $server->name,
+                'uuid' => $server->uuid,
+                'no_purge' => (bool) $request->input('no_purge', false),
+            ];
+
             $this->deletionService->handle($server, $request->input('no_purge', false));
+
+            // Retained forever: "who deleted this server" is one of the questions an audit log
+            // exists to answer, and the subject morph will not resolve once the row is gone.
+            Audit::record(
+                AuditEvent::ADMIN_SERVER_DELETED,
+                subject: $server,
+                properties: $properties,
+            );
         });
 
         return response()->noContent();

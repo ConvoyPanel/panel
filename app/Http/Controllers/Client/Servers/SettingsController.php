@@ -10,9 +10,11 @@ use App\Data\Server\ServerSecuritySettingsData;
 use App\Data\Server\ServerStorageData;
 use App\Data\Server\StorageDeviceData;
 use App\Data\Template\TemplateGroupData;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\AuthenticationType;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
+use App\Facades\Audit;
 use App\Http\Requests\Client\Servers\Settings\MediaRequest;
 use App\Http\Requests\Client\Servers\Settings\ReinstallServerRequest;
 use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
@@ -53,6 +55,12 @@ class SettingsController
             $server->update($request->validated());
         });
 
+        Audit::record(
+            AuditEvent::SERVER_RENAMED,
+            subject: $server,
+            properties: ['hostname' => $request->hostname],
+        );
+
         return RenamedServerData::from($server);
     }
 
@@ -91,6 +99,18 @@ class SettingsController
             ]);
 
             $this->rebuildServerAction->execute($deployment, $request->account_password);
+
+            // Inside the transaction: a reinstall that rolls back must not leave a record
+            // claiming it happened. The account password is deliberately not recorded.
+            Audit::record(
+                AuditEvent::SERVER_REINSTALLED,
+                subject: $server,
+                properties: [
+                    'template' => $template->name,
+                    'template_uuid' => $template->uuid,
+                    'start_on_completion' => $request->boolean('start_on_completion'),
+                ],
+            );
         });
 
         return response()->noContent();
@@ -117,6 +137,12 @@ class SettingsController
     {
         $this->allocationService->setBootOrder($server, $request->order);
 
+        Audit::record(
+            AuditEvent::SERVER_BOOT_ORDER_UPDATED,
+            subject: $server,
+            properties: ['order' => $request->order],
+        );
+
         return response()->noContent();
     }
 
@@ -127,7 +153,11 @@ class SettingsController
 
     public function enableSerialConsole(Server $server)
     {
-        return $this->serialConsoleService->enable($server);
+        $result = $this->serialConsoleService->enable($server);
+
+        Audit::record(AuditEvent::SERVER_CONSOLE_SERIAL_ENABLED, subject: $server);
+
+        return $result;
     }
 
     public function getDisplayConsole(Server $server)
@@ -137,7 +167,11 @@ class SettingsController
 
     public function enableDisplayConsole(Server $server)
     {
-        return $this->displayConsoleService->enable($server);
+        $result = $this->displayConsoleService->enable($server);
+
+        Audit::record(AuditEvent::SERVER_CONSOLE_DISPLAY_ENABLED, subject: $server);
+
+        return $result;
     }
 
     public function getMedia(Request $request, Server $server)
@@ -166,12 +200,24 @@ class SettingsController
     {
         $this->allocationService->mountIso($server, $iso);
 
+        Audit::record(
+            AuditEvent::SERVER_MEDIA_MOUNTED,
+            subject: $server,
+            properties: ['iso' => $iso->name, 'iso_uuid' => $iso->uuid],
+        );
+
         return response()->noContent();
     }
 
     public function unmountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
         $this->allocationService->unmountIso($server, $iso);
+
+        Audit::record(
+            AuditEvent::SERVER_MEDIA_UNMOUNTED,
+            subject: $server,
+            properties: ['iso' => $iso->name, 'iso_uuid' => $iso->uuid],
+        );
 
         return response()->noContent();
     }
@@ -187,6 +233,12 @@ class SettingsController
     {
         $this->cloudinitService->setNameservers($server, $request->nameservers);
 
+        Audit::record(
+            AuditEvent::SERVER_NETWORK_SETTINGS_UPDATED,
+            subject: $server,
+            properties: ['nameservers' => $request->nameservers],
+        );
+
         return new ServerNetworkSettingsData(
             nameservers: $this->cloudinitService->getNameservers($server),
         );
@@ -201,11 +253,25 @@ class SettingsController
 
     public function updateAuthSettings(UpdateAuthSettingsRequest $request, Server $server)
     {
-        if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
+        $type = AuthenticationType::from($request->type);
+
+        if ($type === AuthenticationType::KEY) {
             $this->authService->setSSHKeys($server, $request->ssh_keys);
         } else {
             $this->authService->setPassword($server, $request->password);
         }
+
+        // The type and, for keys, how many were set — never the password or the key material.
+        Audit::record(
+            AuditEvent::SERVER_AUTH_SETTINGS_UPDATED,
+            subject: $server,
+            properties: array_filter([
+                'type' => $type->value,
+                'ssh_key_count' => $type === AuthenticationType::KEY
+                    ? count($request->ssh_keys ?? [])
+                    : null,
+            ], fn ($value) => $value !== null),
+        );
 
         return response()->noContent();
     }

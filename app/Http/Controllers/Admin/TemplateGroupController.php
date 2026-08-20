@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Data\Template\TemplateGroupData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\TemplateGroups\TemplateGroupRequest;
 use App\Models\TemplateGroup;
 use Illuminate\Http\Request;
@@ -32,6 +34,12 @@ class TemplateGroupController
     {
         $templateGroup = TemplateGroup::create($request->validated());
 
+        Audit::record(
+            AuditEvent::ADMIN_TEMPLATE_GROUP_CREATED,
+            subject: $templateGroup,
+            properties: ['name' => $templateGroup->name],
+        );
+
         return TemplateGroupData::from($templateGroup);
     }
 
@@ -44,12 +52,26 @@ class TemplateGroupController
     {
         $templateGroup->update($request->validated());
 
+        Audit::record(
+            AuditEvent::ADMIN_TEMPLATE_GROUP_UPDATED,
+            subject: $templateGroup,
+            properties: ['name' => $templateGroup->name, 'changed' => array_keys($templateGroup->getChanges())],
+        );
+
         return TemplateGroupData::from($templateGroup);
     }
 
     public function destroy(TemplateGroup $templateGroup): Response
     {
+        $name = $templateGroup->name;
+
         $templateGroup->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_TEMPLATE_GROUP_DELETED,
+            subject: $templateGroup,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

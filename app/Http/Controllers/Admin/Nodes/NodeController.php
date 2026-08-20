@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\NodeData;
 use App\Data\PaginationMeta;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
 use App\Models\Filters\FiltersNodeWildcard;
@@ -48,12 +50,26 @@ class NodeController
             ->append(['memory_allocated'])
             ->loadCount('servers');
 
+        Audit::record(
+            AuditEvent::ADMIN_NODE_CREATED,
+            subject: $node,
+            properties: ['name' => $node->name, 'fqdn' => $node->fqdn],
+        );
+
         return NodeData::from($node);
     }
 
     public function update(UpdateNodeRequest $request, Node $node)
     {
         $node->update($request->validated());
+
+        // Credentials for the node live in these columns; record which fields moved, never
+        // their values.
+        Audit::record(
+            AuditEvent::ADMIN_NODE_UPDATED,
+            subject: $node,
+            properties: ['name' => $node->name, 'changed' => array_keys($node->getChanges())],
+        );
 
         $node->append(['memory_allocated'])
             ->loadCount('servers');
@@ -71,7 +87,11 @@ class NodeController
             );
         }
 
+        $properties = ['name' => $node->name, 'fqdn' => $node->fqdn];
+
         $node->delete();
+
+        Audit::record(AuditEvent::ADMIN_NODE_DELETED, subject: $node, properties: $properties);
 
         return response()->noContent();
     }

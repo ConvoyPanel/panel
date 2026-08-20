@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Client\Servers;
 
 use App\Data\PaginationMeta;
 use App\Data\Server\Backup\BackupEloquentData;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\BackupCompressionType;
 use App\Enums\Server\BackupMode;
+use App\Facades\Audit;
 use App\Http\Requests\Client\Servers\Backups\DeleteBackupRequest;
 use App\Http\Requests\Client\Servers\Backups\RestoreBackupRequest;
 use App\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
@@ -54,6 +56,19 @@ class BackupController
                 isLocked: $request->boolean('is_locked'),
             );
 
+        // Subject is the server, not the backup: the feed people read is the server's, and a
+        // backup that is later deleted would take its own history with it.
+        Audit::record(
+            AuditEvent::SERVER_BACKUP_CREATED,
+            subject: $server,
+            properties: [
+                'backup' => $backup->name,
+                'backup_uuid' => $backup->uuid,
+                'mode' => $backup->mode,
+                'is_locked' => $backup->is_locked,
+            ],
+        );
+
         return BackupEloquentData::from($backup);
     }
 
@@ -61,12 +76,23 @@ class BackupController
     {
         $this->restoreFromBackupService->handle($server, $backup);
 
+        Audit::record(
+            AuditEvent::SERVER_BACKUP_RESTORED,
+            subject: $server,
+            properties: ['backup' => $backup->name, 'backup_uuid' => $backup->uuid],
+        );
+
         return response()->noContent();
     }
 
     public function destroy(DeleteBackupRequest $request, Server $server, Backup $backup)
     {
+        // Read before the delete: afterwards the model's attributes are all that is left of it.
+        $properties = ['backup' => $backup->name, 'backup_uuid' => $backup->uuid];
+
         $this->backupDeletionService->handle($backup);
+
+        Audit::record(AuditEvent::SERVER_BACKUP_DELETED, subject: $server, properties: $properties);
 
         return response()->noContent();
     }

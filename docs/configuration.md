@@ -116,7 +116,7 @@ if the scheduler is running.
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `APP_ACTIVITY_PRUNE_DAYS` | `90` | Days of activity log to keep. |
+| `APP_AUDIT_PRUNE_DAYS` | `90` | Days of audit log to keep. Security events (authentication, credential and token changes) are exempt and kept forever. |
 | `BACKUP_PRUNE_AGE` | `360` | Days before a backup is eligible for pruning. |
 | `DEPLOYMENT_RETENTION_PERIOD` | `90` | Days of deployment records to keep. |
 | `DEPLOYMENT_STUCK_AGE` | `1440` | Minutes after which an in-progress deployment is treated as stuck. |

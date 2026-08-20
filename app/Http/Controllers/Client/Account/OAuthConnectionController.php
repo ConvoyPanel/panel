@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Client\Account;
 
 use App\Data\User\OAuthConnectionData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Models\OAuthConnection;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\DataCollection;
@@ -32,7 +34,15 @@ class OAuthConnectionController
             throw new NotFoundHttpException;
         }
 
+        $provider = $oauthConnection->provider;
+
         $oauthConnection->delete();
+
+        Audit::record(
+            AuditEvent::ACCOUNT_OAUTH_CONNECTION_DELETED,
+            subject: $request->user(),
+            properties: ['provider' => $provider],
+        );
 
         return response()->noContent();
     }

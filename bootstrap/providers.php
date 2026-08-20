@@ -1,13 +1,13 @@
 <?php
 
-use App\Providers\ActivityLogServiceProvider;
 use App\Providers\AppServiceProvider;
+use App\Providers\AuditServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\HorizonServiceProvider;
 use App\Providers\TypeScriptTransformerServiceProvider;
 
 return [
-    ActivityLogServiceProvider::class,
+    AuditServiceProvider::class,
     AppServiceProvider::class,
     TypeScriptTransformerServiceProvider::class,
     HorizonServiceProvider::class,

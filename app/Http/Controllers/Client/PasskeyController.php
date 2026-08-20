@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Client;
 use App\Actions\Auth\GeneratePasskeyRegisterOptionsAction;
 use App\Actions\Auth\StorePasskeyAction;
 use App\Data\User\PasskeyData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\Passkeys\RenamePasskeyRequest;
 use App\Models\Passkey;
@@ -48,6 +50,17 @@ class PasskeyController extends Controller
             $generateRecoveryCodes($request->user());
         }
 
+        Audit::record(
+            AuditEvent::ACCOUNT_PASSKEY_CREATED,
+            subject: $request->user(),
+            properties: [
+                'name' => $passkey->name,
+                // Worth recording separately: it means the account gained its first second factor,
+                // not just another one.
+                'recovery_codes_created' => $recoveryCodesCreated,
+            ],
+        );
+
         return response()->json([
             'data' => PasskeyData::from($passkey),
             'recovery_codes' => $recoveryCodesCreated
@@ -60,7 +73,15 @@ class PasskeyController extends Controller
 
     public function rename(RenamePasskeyRequest $request, Passkey $passkey)
     {
+        $previousName = $passkey->name;
+
         $passkey->update($request->validated());
+
+        Audit::record(
+            AuditEvent::ACCOUNT_PASSKEY_RENAMED,
+            subject: $request->user(),
+            properties: ['from' => $previousName, 'to' => $passkey->name],
+        );
 
         return PasskeyData::from($passkey);
     }
@@ -68,11 +89,24 @@ class PasskeyController extends Controller
     public function destroy(Passkey $passkey)
     {
         $user = $passkey->user;
+        $name = $passkey->name;
         $passkey->delete();
 
-        if (! $user->passkeys()->exists() && empty($user->two_factor_secret)) {
+        $secondFactorRemoved = ! $user->passkeys()->exists() && empty($user->two_factor_secret);
+
+        if ($secondFactorRemoved) {
             $user->forceFill(['two_factor_recovery_codes' => null])->save();
         }
+
+        Audit::record(
+            AuditEvent::ACCOUNT_PASSKEY_DELETED,
+            subject: $user,
+            properties: [
+                'name' => $name,
+                // True means the account no longer has any second factor at all.
+                'left_without_second_factor' => $secondFactorRemoved,
+            ],
+        );
 
         return response()->noContent();
     }

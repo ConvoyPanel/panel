@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Data\Ipam\AddressBlockData;
 use App\Data\PaginationMeta;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\AddressBlocks\StoreAddressBlockRequest;
 use App\Http\Requests\Admin\AddressBlocks\UpdateAddressBlockRequest;
 use App\Jobs\Server\BatchSyncNetworkSettingsJob;
@@ -52,6 +54,12 @@ class AddressBlockController
     {
         $block = $addressBlockGroup->addressBlocks()->create($request->validated());
 
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_CREATED,
+            subject: $block,
+            properties: ['base_ip' => $block->base_ip, 'group' => $addressBlockGroup->name],
+        );
+
         return AddressBlockData::from($block);
     }
 
@@ -84,6 +92,15 @@ class AddressBlockController
             },
         );
 
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_UPDATED,
+            subject: $addressBlock,
+            properties: [
+                'base_ip' => $addressBlock->base_ip,
+                'changed' => array_keys($addressBlock->getChanges()),
+            ],
+        );
+
         return AddressBlockData::from($addressBlock);
     }
 
@@ -91,7 +108,15 @@ class AddressBlockController
     {
         Gate::authorize('delete', $addressBlock);
 
+        $baseIp = $addressBlock->base_ip;
+
         $addressBlock->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_DELETED,
+            subject: $addressBlock,
+            properties: ['base_ip' => $baseIp],
+        );
 
         return response()->noContent();
     }

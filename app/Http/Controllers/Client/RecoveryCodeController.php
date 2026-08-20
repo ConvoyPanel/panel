@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 use Laravel\Fortify\Contracts\RecoveryCodesGeneratedResponse;
@@ -46,6 +48,8 @@ class RecoveryCodeController
     public function store(Request $request, GenerateNewRecoveryCodes $generate)
     {
         $generate($request->user());
+
+        Audit::record(AuditEvent::ACCOUNT_RECOVERY_CODES_REGENERATED, subject: $request->user());
 
         return app(RecoveryCodesGeneratedResponse::class);
     }

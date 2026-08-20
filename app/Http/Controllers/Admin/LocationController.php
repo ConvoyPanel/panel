@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Data\Location\LocationData;
 use App\Data\Node\NodeData;
 use App\Data\PaginationMeta;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\LocationFormRequest;
 use App\Models\Filters\FiltersLocationWildcard;
 use App\Models\Location;
@@ -53,12 +55,25 @@ class LocationController
         $location = Location::create($request->validated());
         $location->loadCount('nodes', 'servers');
 
+        Audit::record(
+            AuditEvent::ADMIN_LOCATION_CREATED,
+            subject: $location,
+            properties: ['short_code' => $location->short_code],
+        );
+
         return LocationData::from($location);
     }
 
     public function update(LocationFormRequest $request, Location $location)
     {
         $location->update($request->validated());
+
+        Audit::record(
+            AuditEvent::ADMIN_LOCATION_UPDATED,
+            subject: $location,
+            properties: ['short_code' => $location->short_code, 'changed' => array_keys($location->getChanges())],
+        );
+
         $location->loadCount('nodes', 'servers');
 
         return LocationData::from($location);
@@ -74,7 +89,15 @@ class LocationController
             );
         }
 
+        $shortCode = $location->short_code;
+
         $location->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_LOCATION_DELETED,
+            subject: $location,
+            properties: ['short_code' => $shortCode],
+        );
 
         return response()->noContent();
     }

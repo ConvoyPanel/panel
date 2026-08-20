@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Data\Server\ServerDiskData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Servers\Disks\AddServerDiskRequest;
 use App\Http\Requests\Admin\Servers\Disks\ResizeServerDiskRequest;
 use App\Models\Server;
@@ -37,6 +39,12 @@ class ServerDiskController
             (int) $request->input('size'),
         );
 
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_DISK_CREATED,
+            subject: $server,
+            properties: ['size' => $disk->size, 'storage_id' => $disk->storage_id],
+        );
+
         return ServerDiskData::from($disk->load('storage'));
     }
 
@@ -45,7 +53,15 @@ class ServerDiskController
      */
     public function update(ResizeServerDiskRequest $request, Server $server, ServerDisk $disk)
     {
+        $previousSize = $disk->size;
+
         $this->allocationService->resizeDisk($server, $disk, (int) $request->input('size'));
+
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_DISK_UPDATED,
+            subject: $server,
+            properties: ['from' => $previousSize, 'to' => (int) $request->input('size')],
+        );
 
         return ServerDiskData::from($disk->refresh()->load('storage'));
     }
@@ -55,7 +71,15 @@ class ServerDiskController
      */
     public function destroy(Server $server, ServerDisk $disk): Response
     {
+        $properties = ['size' => $disk->size, 'disk_index' => $disk->disk_index];
+
         $this->allocationService->removeDisk($server, $disk);
+
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_DISK_DELETED,
+            subject: $server,
+            properties: $properties,
+        );
 
         return response()->noContent();
     }

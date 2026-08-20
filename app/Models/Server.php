@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property int $id
@@ -218,11 +218,13 @@ class Server extends Model
     }
 
     /**
-     * Returns all the activity log entries where the server is the subject.
+     * Every audit entry where this server is the thing that was acted on. Includes actions taken
+     * by staff, not just by the owner; see App\Enums\Audit\AuditEvent::visibility() for which of
+     * those a non-admin is allowed to see.
      */
-    public function activity(): MorphToMany
+    public function auditLogs(): MorphMany
     {
-        return $this->morphToMany(ActivityLog::class, 'subject', 'activity_log_subjects');
+        return $this->morphMany(AuditLog::class, 'subject');
     }
 
     /**

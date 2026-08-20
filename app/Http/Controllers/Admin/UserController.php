@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Data\Auth\SSOTokenData;
 use App\Data\PaginationMeta;
 use App\Data\User\UserData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
 use App\Models\Filters\FiltersUserWildcard;
@@ -57,6 +59,12 @@ class UserController
             'root_admin' => $request->root_admin,
         ])->loadCount(['servers']);
 
+        Audit::record(
+            AuditEvent::ADMIN_USER_CREATED,
+            subject: $user,
+            properties: ['email' => $user->email, 'root_admin' => $user->root_admin],
+        );
+
         return UserData::from($user);
     }
 
@@ -69,12 +77,27 @@ class UserController
                 $user->tokens()->delete();
             }
 
+            $wasAdmin = $user->root_admin;
+
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'root_admin' => $request->root_admin,
                 ...(is_null($request->password) ? [] : ['password' => $request->password]),
             ]);
+
+            // Which fields moved, never their values — this covers a password reset performed on
+            // someone else's account, which is exactly the kind of thing the log exists for.
+            Audit::record(
+                AuditEvent::ADMIN_USER_UPDATED,
+                subject: $user,
+                properties: array_filter([
+                    'email' => $user->wasChanged('email') ? $user->email : null,
+                    'name' => $user->wasChanged('name') ? $user->name : null,
+                    'password_changed' => $user->wasChanged('password') ?: null,
+                    'root_admin' => $wasAdmin !== $user->root_admin ? $user->root_admin : null,
+                ], fn ($value) => $value !== null),
+            );
         });
 
         $user->loadCount(['servers']);
@@ -92,7 +115,13 @@ class UserController
             );
         }
 
+        // Captured before the delete, and recorded after it succeeds: the subject morph will not
+        // resolve once the row is gone, so these properties and actor_label are the whole record.
+        $properties = ['name' => $user->name, 'email' => $user->email];
+
         $this->userDeletion->delete($user);
+
+        Audit::record(AuditEvent::ADMIN_USER_DELETED, subject: $user, properties: $properties);
 
         return response()->noContent();
     }
@@ -107,6 +136,11 @@ class UserController
             CarbonImmutable::now()->addSeconds(config('sso.link_ttl')),
             ['uuid' => $user->uuid, 'nonce' => Str::random(40)],
         );
+
+        // Admin-only in the catalog: this mints a link that logs the admin in as the user, and
+        // the fact of it should not surface in that user's own feed. The link itself is never
+        // recorded — it is a working credential until it is consumed.
+        Audit::record(AuditEvent::ADMIN_USER_SSO_TOKEN_GENERATED, subject: $user);
 
         return new SSOTokenData(
             userId: $user->id,

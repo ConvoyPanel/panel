@@ -2,6 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
     IconDatabase,
+    IconHistory,
     IconHome,
     IconKey,
     IconMapPin,
@@ -104,6 +105,11 @@ const nav: SidebarNav = {
                     icon: IconKey,
                     label: 'API Tokens',
                     path: '/admin/tokens',
+                },
+                {
+                    icon: IconHistory,
+                    label: 'Audit Log',
+                    path: '/admin/audit-log',
                 },
                 {
                     icon: IconSettings,

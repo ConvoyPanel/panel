@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Data\Server\ServerPresetData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Servers\Presets\ServerPresetRequest;
 use App\Models\ServerPreset;
 use Illuminate\Http\Response;
@@ -25,6 +27,12 @@ class ServerPresetController
     {
         $preset = ServerPreset::create($request->attributesForPreset());
 
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_PRESET_CREATED,
+            subject: $preset,
+            properties: ['name' => $preset->name],
+        );
+
         return ServerPresetData::from($preset);
     }
 
@@ -37,12 +45,26 @@ class ServerPresetController
     {
         $serverPreset->update($request->attributesForPreset());
 
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_PRESET_UPDATED,
+            subject: $serverPreset,
+            properties: ['name' => $serverPreset->name, 'changed' => array_keys($serverPreset->getChanges())],
+        );
+
         return ServerPresetData::from($serverPreset);
     }
 
     public function destroy(ServerPreset $serverPreset): Response
     {
+        $name = $serverPreset->name;
+
         $serverPreset->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_PRESET_DELETED,
+            subject: $serverPreset,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

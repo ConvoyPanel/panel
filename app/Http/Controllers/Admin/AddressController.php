@@ -6,11 +6,13 @@ use App\Actions\Ipam\GenerateAddressesAction;
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
 use App\Data\PaginationMeta;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
 use App\Exceptions\Service\Address\AddressNotAvailableException;
 use App\Exceptions\Service\Address\AddressNotReservedException;
 use App\Exceptions\Service\Address\AddressReservedBySystemException;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Addresses\UpdateAddressRequest;
 use App\Jobs\Server\SyncNetworkSettingsJob;
 use App\Models\Address;
@@ -50,6 +52,12 @@ class AddressController
     {
         $result = $this->generateAddressesAction->execute($addressBlock);
 
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_GENERATED,
+            subject: $addressBlock,
+            properties: ['base_ip' => $addressBlock->base_ip],
+        );
+
         return GeneratedAddressesData::from($result);
     }
 
@@ -86,6 +94,15 @@ class AddressController
                     }
                 }
             }
+
+            Audit::record(
+                AuditEvent::ADMIN_ADDRESS_UPDATED,
+                subject: $address,
+                properties: [
+                    'address' => $address->ip,
+                    'changed' => array_keys($address->getChanges()),
+                ],
+            );
         });
 
         $address->load('server', 'addressBlock');
@@ -103,6 +120,13 @@ class AddressController
             'state' => AddressState::Reserved,
             'state_reason' => AddressStateReason::Admin,
         ]);
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_RESERVED,
+            subject: $address,
+            properties: ['address' => $address->ip],
+        );
+
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);
@@ -121,6 +145,13 @@ class AddressController
         }
 
         $address->update(['state' => AddressState::Available, 'state_reason' => null]);
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_UNRESERVED,
+            subject: $address,
+            properties: ['address' => $address->ip],
+        );
+
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);
@@ -129,7 +160,15 @@ class AddressController
     public function destroy(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address): Response
     {
         $this->connection->transaction(function () use ($address) {
+            $ip = $address->ip;
+
             $address->delete();
+
+            Audit::record(
+                AuditEvent::ADMIN_ADDRESS_DELETED,
+                subject: $address,
+                properties: ['address' => $ip],
+            );
 
             if ($address->server) {
                 dispatch(new SyncNetworkSettingsJob($address->server));

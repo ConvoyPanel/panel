@@ -1,6 +1,7 @@
 <?php
 
 use App\Settings\AnchorSettings;
+use App\Settings\AuditSettings;
 use App\Settings\BandwidthSettings;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelSettings\SettingsCasts\DataCast;
@@ -17,6 +18,7 @@ return [
      */
     'settings' => [
         AnchorSettings::class,
+        AuditSettings::class,
         BandwidthSettings::class,
     ],
 

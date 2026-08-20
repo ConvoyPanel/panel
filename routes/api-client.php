@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Client;
-use App\Http\Middleware\Activity\ServerSubject;
 use App\Http\Middleware\Client\Server\AuthenticateServerAccess;
 use App\Http\Middleware\DenyApiTokenAccess;
 use App\Http\Middleware\RequireIdentityConfirmation;
@@ -99,10 +98,17 @@ Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function
 Route::get('/servers', [Client\Servers\ServerController::class, 'index']);
 
 Route::prefix('/servers/{server}')->middleware(
-    [ServerSubject::class, AuthenticateServerAccess::class],
+    [AuthenticateServerAccess::class],
 )->group(function () {
     Route::get('/', [Client\Servers\ServerController::class, 'show'])
         ->name('servers.show');
+
+    // The server's activity feed (GitHub #53). Read-only; the visibility filtering that keeps
+    // admin-only events out of a customer's view lives in the controller.
+    Route::get(
+        '/audit-logs',
+        Client\Servers\AuditLogController::class,
+    )->name('servers.show.audit-logs');
 
     Route::get(
         '/deployment',

@@ -17,6 +17,19 @@ Route::get('/overview', Admin\OverviewController::class);
 
 /*
 |--------------------------------------------------------------------------
+| Audit Log Route
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/audit-logs
+|
+| The panel-wide audit feed. Filterable by event, area prefix, actor, subject
+| and date range; see App\Http\Controllers\Admin\AuditLogController.
+|
+*/
+Route::get('/audit-logs', Admin\AuditLogController::class);
+
+/*
+|--------------------------------------------------------------------------
 | Version Controller Routes
 |--------------------------------------------------------------------------
 |

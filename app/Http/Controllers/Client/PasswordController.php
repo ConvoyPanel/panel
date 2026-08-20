@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\UpdatePasswordRequest;
 use App\Notifications\PasswordChanged;
@@ -31,6 +33,8 @@ class PasswordController extends Controller
         // else does: `auth.session` is only on the SPA shell routes, so a stolen cookie driving
         // the client API alone is never checked against the new hash.
         $this->revocation->revokeOtherSessionsForUser($user, $request->session()->getId());
+
+        Audit::record(AuditEvent::ACCOUNT_PASSWORD_UPDATED, subject: $user);
 
         $user->notify(new PasswordChanged($request->ip()));
 

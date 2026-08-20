@@ -6,7 +6,9 @@ use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\FileMetaData;
 use App\Data\Node\Storage\IsoEloquentData;
 use App\Data\PaginationMeta;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Helpers\ChecksumAlgorithm;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\Isos\StoreIsoRequest;
 use App\Http\Requests\Admin\Nodes\Isos\UpdateIsoRequest;
 use App\Models\ISO;
@@ -67,6 +69,16 @@ class IsoController
             ]);
         }
 
+        Audit::record(
+            AuditEvent::ADMIN_NODE_ISO_CREATED,
+            subject: $node,
+            properties: [
+                'name' => $iso->name,
+                'file_name' => $iso->file_name,
+                'downloaded' => $shouldDownload,
+            ],
+        );
+
         return IsoEloquentData::from($iso);
     }
 
@@ -74,12 +86,26 @@ class IsoController
     {
         $iso->update($request->validated());
 
+        Audit::record(
+            AuditEvent::ADMIN_NODE_ISO_UPDATED,
+            subject: $node,
+            properties: ['name' => $iso->name, 'changed' => array_keys($iso->getChanges())],
+        );
+
         return IsoEloquentData::from($iso);
     }
 
     public function destroy(Node $node, ISO $iso)
     {
+        $name = $iso->name;
+
         $this->isoService->delete($node, $iso);
+
+        Audit::record(
+            AuditEvent::ADMIN_NODE_ISO_DELETED,
+            subject: $node,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

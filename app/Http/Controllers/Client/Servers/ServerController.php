@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Client\Servers;
 use App\Data\PaginationMeta;
 use App\Data\Server\Deployments\DeploymentData;
 use App\Data\Server\ServerData;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\ConsoleType;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerLifecycle;
+use App\Facades\Audit;
 use App\Http\Requests\Client\Servers\CreateConsoleSessionRequest;
 use App\Http\Requests\Client\Servers\RetryInstallationRequest;
 use App\Http\Requests\Servers\SendPowerCommandRequest;
@@ -80,6 +82,8 @@ class ServerController
             'lifecycle' => ServerLifecycle::DEFERRED_OS_SELECTION,
         ]);
 
+        Audit::record(AuditEvent::SERVER_INSTALLATION_RETRIED, subject: $server);
+
         return response()->noContent();
     }
 
@@ -94,7 +98,17 @@ class ServerController
 
     public function sendPowerCommand(Server $server, SendPowerCommandRequest $request)
     {
-        $this->powerCommand->handle($server, $request->enum('command', PowerCommand::class));
+        $command = $request->enum('command', PowerCommand::class);
+
+        $this->powerCommand->handle($server, $command);
+
+        // Records the request, not the outcome: the command is dispatched asynchronously, and
+        // whether it landed is deployment/task tracking's job. See docs/audit-log-plan.md.
+        Audit::record(
+            AuditEvent::SERVER_POWER_SENT,
+            subject: $server,
+            properties: ['command' => $command->value],
+        );
 
         return response()->noContent();
     }
@@ -103,10 +117,22 @@ class ServerController
     {
         $server->node->loadMissing('anchor.relay');
 
-        return $this->anchorSession->create(
+        $type = $request->enum('type', ConsoleType::class);
+
+        $session = $this->anchorSession->create(
             server: $server,
             user: $request->user(),
-            type: $request->enum('type', ConsoleType::class),
+            type: $type,
         );
+
+        // Console access is the one client action that hands out an interactive shell, so it is
+        // worth a line in the log even though it changes nothing.
+        Audit::record(
+            AuditEvent::SERVER_CONSOLE_SESSION_CREATED,
+            subject: $server,
+            properties: ['type' => $type->value],
+        );
+
+        return $session;
     }
 }

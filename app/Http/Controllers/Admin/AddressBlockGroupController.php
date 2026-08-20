@@ -6,6 +6,8 @@ use App\Data\Ipam\AddressBlockGroupData;
 use App\Data\Node\NetworkInterfaceData;
 use App\Data\PaginationMeta;
 use App\Data\Server\ServerData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\AddressBlockGroups\AddressBlockGroupRequest;
 use App\Http\Requests\Admin\AddressBlockGroups\AttachNodeRequest;
 use App\Http\Requests\Admin\AddressBlockGroups\DetachNodeRequest;
@@ -68,12 +70,27 @@ class AddressBlockGroupController
     {
         $addressBlockGroup = AddressBlockGroup::create($request->validated());
 
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_CREATED,
+            subject: $addressBlockGroup,
+            properties: ['name' => $addressBlockGroup->name],
+        );
+
         return AddressBlockGroupData::from($addressBlockGroup);
     }
 
     public function update(AddressBlockGroupRequest $request, AddressBlockGroup $addressBlockGroup)
     {
         $addressBlockGroup->update($request->validated());
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_UPDATED,
+            subject: $addressBlockGroup,
+            properties: [
+                'name' => $addressBlockGroup->name,
+                'changed' => array_keys($addressBlockGroup->getChanges()),
+            ],
+        );
 
         return AddressBlockGroupData::from($addressBlockGroup);
     }
@@ -82,7 +99,15 @@ class AddressBlockGroupController
     {
         Gate::authorize('delete', $addressBlockGroup);
 
+        $name = $addressBlockGroup->name;
+
         $addressBlockGroup->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_DELETED,
+            subject: $addressBlockGroup,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }
@@ -116,6 +141,12 @@ class AddressBlockGroupController
             $request->input('network_interface_id'),
         ]);
 
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_NODE_ATTACHED,
+            subject: $addressBlockGroup,
+            properties: ['network_interface_id' => (int) $request->input('network_interface_id')],
+        );
+
         return response()->json([], 201);
     }
 
@@ -123,6 +154,12 @@ class AddressBlockGroupController
     {
         $interfaceIds = $node->networkInterfaces()->pluck('id');
         $addressBlockGroup->networkInterfaces()->detach($interfaceIds);
+
+        Audit::record(
+            AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_NODE_DETACHED,
+            subject: $addressBlockGroup,
+            properties: ['node' => $node->name],
+        );
 
         return response()->noContent();
     }

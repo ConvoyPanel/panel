@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Client\Account;
 
 use App\Data\User\SSHKeyData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Client\Account\StoreSSHKeyRequest;
 use App\Models\SSHKey;
 use Illuminate\Http\Request;
@@ -23,6 +25,12 @@ class SSHKeyController
     {
         $key = $request->user()->sshKeys()->create($request->validated());
 
+        Audit::record(
+            AuditEvent::ACCOUNT_SSH_KEY_CREATED,
+            subject: $request->user(),
+            properties: ['name' => $key->name],
+        );
+
         return SSHKeyData::fromModel($key);
     }
 
@@ -33,7 +41,15 @@ class SSHKeyController
             throw new NotFoundHttpException;
         }
 
+        $name = $sshKey->name;
+
         $sshKey->delete();
+
+        Audit::record(
+            AuditEvent::ACCOUNT_SSH_KEY_DELETED,
+            subject: $request->user(),
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Client\Account;
 
 use App\Data\User\ApiKeyData;
 use App\Enums\Api\ApiKeyType;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Client\Account\StoreApiKeyRequest;
 use App\Models\PersonalAccessToken;
 use App\Services\Api\CreateAccountTokenService;
@@ -37,6 +39,15 @@ class ApiKeyController
             throw new LogicException('Sanctum is not using the application personal access token model.');
         }
 
+        Audit::record(
+            AuditEvent::ACCOUNT_API_KEY_CREATED,
+            subject: $newToken->accessToken,
+            properties: [
+                'name' => $newToken->accessToken->name,
+                'abilities' => $newToken->accessToken->abilities,
+            ],
+        );
+
         return ApiKeyData::fromModel($newToken->accessToken, $newToken->plainTextToken);
     }
 
@@ -50,7 +61,17 @@ class ApiKeyController
             throw new NotFoundHttpException;
         }
 
+        $name = $apiKey->name;
+
         $apiKey->delete();
+
+        // Subject is the acting user, not the token: the token row is gone, and this belongs in
+        // the account's own security history.
+        Audit::record(
+            AuditEvent::ACCOUNT_API_KEY_DELETED,
+            subject: $request->user(),
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

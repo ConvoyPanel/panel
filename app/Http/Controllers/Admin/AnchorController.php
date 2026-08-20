@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Data\Anchor\AnchorData;
 use App\Data\PaginationMeta;
 use App\Enums\Anchor\AnchorMode;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\AnchorFormRequest;
 use App\Models\Anchor;
 use App\Models\Node;
@@ -52,6 +54,13 @@ class AnchorController
         ]);
         $this->syncNodes($anchor, $request->input('node_ids', []));
 
+        // The generated secret is never recorded — it is a live credential for the agent.
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_CREATED,
+            subject: $anchor,
+            properties: ['name' => $anchor->name],
+        );
+
         return AnchorData::from($this->hydrate($anchor));
     }
 
@@ -62,12 +71,28 @@ class AnchorController
             $this->syncNodes($anchor, $request->input('node_ids', []));
         }
 
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_UPDATED,
+            subject: $anchor,
+            properties: ['name' => $anchor->name, 'changed' => array_keys($anchor->getChanges())],
+        );
+
         return AnchorData::from($this->hydrate($anchor));
     }
 
     public function enrollment(Anchor $anchor, AnchorEnrollmentService $enrollment)
     {
-        return $enrollment->issue($anchor);
+        $enrollmentDetails = $enrollment->issue($anchor);
+
+        // Enrollment rotates the installation secret, so this both grants access and revokes the
+        // previous one. The issued secret itself is never recorded.
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_ENROLLMENT_ROTATED,
+            subject: $anchor,
+            properties: ['name' => $anchor->name],
+        );
+
+        return $enrollmentDetails;
     }
 
     public function destroy(Anchor $anchor)
@@ -77,7 +102,15 @@ class AnchorController
             throw new BadRequestHttpException('Detach this Anchor before deleting it.');
         }
 
+        $name = $anchor->name;
+
         $anchor->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_DELETED,
+            subject: $anchor,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }

@@ -2,6 +2,7 @@
 
 use App\Console\Commands\Anchor\PollAnchorLivenessCommand;
 use App\Console\Commands\Maintenance\CheckForUpdatesCommand;
+use App\Console\Commands\Maintenance\PruneAuditLogsCommand;
 use App\Console\Commands\Maintenance\PruneDeploymentsCommand;
 use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
@@ -9,7 +10,6 @@ use App\Console\Commands\Node\PollNodeStatusesCommand;
 use App\Console\Commands\Server\ResetUsagesCommand;
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
-use App\Models\ActivityLog;
 use App\Models\SessionRecord;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\Schedule;
@@ -36,8 +36,10 @@ if (config('backups.prune_age')) {
     Schedule::command(PruneOrphanedBackupsCommand::class)->everyThirtyMinutes();
 }
 
-if (config('activity.prune_days')) {
-    Schedule::command(PruneCommand::class, ['--model' => [ActivityLog::class]])->daily();
+// Audit log retention. Not Laravel's generic PruneCommand: events the AuditEvent catalog marks
+// as retained forever are exempt, which a `prunable()` scope cannot express per-event.
+if (config('audit.prune_days')) {
+    Schedule::command(PruneAuditLogsCommand::class)->daily();
 }
 
 // Node reachability (see docs/node-status-plan.md). The panel reads only what this

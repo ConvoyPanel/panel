@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin\Settings;
 
 use App\Data\Admin\Settings\BandwidthSettingsData;
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\OveragePenaltyAction;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Settings\UpdateBandwidthSettingsRequest;
 use App\Services\Servers\OveragePenaltyResolver;
 use App\Settings\BandwidthSettings;
@@ -34,6 +36,15 @@ class BandwidthSettingsController
         }
 
         $settings->save();
+
+        // No subject: this is panel-wide configuration, not an action on a record.
+        Audit::record(
+            AuditEvent::ADMIN_SETTINGS_BANDWIDTH_UPDATED,
+            properties: [
+                'overage_action' => $settings->overage_action,
+                'overage_rate' => $settings->overage_rate,
+            ],
+        );
 
         return new BandwidthSettingsData($resolver->global());
     }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Client\Account;
 
 use App\Data\User\SessionRecordData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Models\SessionRecord;
 use App\Services\Auth\SessionRevocationService;
 use Illuminate\Http\Request;
@@ -59,7 +61,15 @@ class SessionRecordController
 
         // Kill the actual session in the store (Redis) so the other device is logged out, and drop
         // the metadata row — kept consistent by the shared revocation service.
+        $ipAddress = $sessionRecord->ip_address;
+
         $this->revocation->revoke($sessionRecord);
+
+        Audit::record(
+            AuditEvent::ACCOUNT_SESSION_REVOKED,
+            subject: $request->user(),
+            properties: ['ip' => $ipAddress],
+        );
 
         return response()->noContent();
     }

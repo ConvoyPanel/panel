@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin\Nodes;
 
 use App\Data\Node\NetworkInterfaceData;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\DeleteNetworkInterfaceRequest;
 use App\Http\Requests\Admin\Nodes\NetworkInterfaces\NetworkInterfaceRequest;
 use App\Jobs\Server\SyncNetworkSettingsJob;
@@ -54,6 +56,12 @@ class NetworkInterfaceController
 
         $interface = $node->networkInterfaces()->create($data);
 
+        Audit::record(
+            AuditEvent::ADMIN_NODE_INTERFACE_CREATED,
+            subject: $node,
+            properties: ['name' => $interface->name, 'is_vlan_aware' => $interface->is_vlan_aware],
+        );
+
         return $this->respondWith($interface);
     }
 
@@ -85,6 +93,15 @@ class NetworkInterfaceController
                 ->each(fn (Server $server) => dispatch(new SyncNetworkSettingsJob($server)));
         }
 
+        Audit::record(
+            AuditEvent::ADMIN_NODE_INTERFACE_UPDATED,
+            subject: $node,
+            properties: [
+                'name' => $networkInterface->name,
+                'changed' => array_keys($networkInterface->getChanges()),
+            ],
+        );
+
         return $this->respondWith($networkInterface);
     }
 
@@ -107,7 +124,15 @@ class NetworkInterfaceController
 
     public function destroy(DeleteNetworkInterfaceRequest $request, Node $node, NetworkInterface $networkInterface): Response
     {
+        $name = $networkInterface->name;
+
         $networkInterface->delete();
+
+        Audit::record(
+            AuditEvent::ADMIN_NODE_INTERFACE_DELETED,
+            subject: $node,
+            properties: ['name' => $name],
+        );
 
         return response()->noContent();
     }
