@@ -22,7 +22,8 @@ const RadioGroupItem = ({ className, ...props }: RadioGroupItemProps) => (
             'focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
             'data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
             'aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20',
-            'disabled:cursor-not-allowed disabled:opacity-50',
+            // `data-disabled`, not `disabled:` -- see Checkbox.tsx.
+            'data-disabled:cursor-not-allowed data-disabled:opacity-50',
             'dark:bg-input/30 dark:data-checked:bg-primary dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
             className
         )}

@@ -138,15 +138,6 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                                     'Full access to every node, server and account in the panel.'
                                 }
                                 disabled={cannotSelfDemote}
-                                // Base UI renders the checkbox as a span, so
-                                // `disabled:` never matches and the control
-                                // looks live — the same reason AnchorFormDialog
-                                // dims its locked role field at the call site.
-                                formItemProps={
-                                    cannotSelfDemote
-                                        ? { className: 'opacity-60' }
-                                        : undefined
-                                }
                             />
                             {cannotSelfDemote && (
                                 <Alert>
