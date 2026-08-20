@@ -309,6 +309,21 @@ Route::prefix('/anchors')->group(function () {
     Route::get('/', [Admin\AnchorController::class, 'index']);
     Route::post('/', [Admin\AnchorController::class, 'store']);
 
+    /*
+     * Declared before the /{anchor} group on purpose: registered after it,
+     * "enrollment-keys" would be matched as an Anchor route key and 404 on
+     * binding instead of reaching this controller.
+     *
+     * These keys admit *new* installations and so are not scoped to an anchor,
+     * unlike POST /{anchor}/enrollment, which re-keys one that already exists.
+     */
+    Route::prefix('/enrollment-keys')->group(function () {
+        Route::get('/', [Admin\AnchorEnrollmentKeyController::class, 'index']);
+        Route::post('/', [Admin\AnchorEnrollmentKeyController::class, 'store']);
+        Route::post('/{enrollment_key}/revoke', [Admin\AnchorEnrollmentKeyController::class, 'revoke']);
+        Route::delete('/{enrollment_key}', [Admin\AnchorEnrollmentKeyController::class, 'destroy']);
+    });
+
     Route::prefix('/{anchor}')->group(function () {
         Route::get('/', [Admin\AnchorController::class, 'show']);
         Route::put('/', [Admin\AnchorController::class, 'update']);

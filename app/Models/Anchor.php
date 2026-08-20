@@ -100,11 +100,20 @@ class Anchor extends Model
      */
     public function panelUrl(): string
     {
-        $url = $this->panel_url_override
-            ?: app(AnchorSettings::class)->panel_url
-            ?: config('app.url');
+        return $this->panel_url_override
+            ? rtrim($this->panel_url_override, '/')
+            : self::defaultPanelUrl();
+    }
 
-        return rtrim($url, '/');
+    /**
+     * The bottom two tiers of the cascade, for callers with no Anchor to ask.
+     *
+     * An enrollment key is the case that needs this: the installation command
+     * has to name a panel address before any row exists to carry an override.
+     */
+    public static function defaultPanelUrl(): string
+    {
+        return rtrim(app(AnchorSettings::class)->panel_url ?: config('app.url'), '/');
     }
 
     public function consoleWebsocketUrl(): string
