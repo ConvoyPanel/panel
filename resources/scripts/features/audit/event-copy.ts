@@ -337,19 +337,6 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         detail: changedFields,
     },
     'admin.template.deleted': { verb: 'deleted a template' },
-    'admin.template-registry.imported': {
-        verb: 'imported templates from the registry',
-        detail: (p) =>
-            Array.isArray(p.templates) ? `${p.templates.length} template(s)` : null,
-    },
-    'admin.template-registry.refreshed': {
-        verb: 'refreshed the template registry',
-        detail: () => null,
-    },
-    'admin.template-registry.install-deleted': {
-        verb: 'cleared a template install',
-        detail: (p) => pick(p, 'template'),
-    },
 }
 
 /** The sentence for one entry: what was done, and to what where that adds something. */

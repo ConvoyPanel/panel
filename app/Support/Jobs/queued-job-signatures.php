@@ -75,7 +75,4 @@ return [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'password', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
-    'App\\Jobs\\Template\\InstallTemplateJob' => [
-        ['name' => 'install', 'type' => 'App\\Models\\TemplateInstall', 'optional' => false, 'promoted' => true, 'variadic' => false],
-    ],
 ];

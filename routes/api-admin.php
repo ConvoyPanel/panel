@@ -277,26 +277,6 @@ Route::prefix('/template-groups')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Template Import Controller Routes
-|--------------------------------------------------------------------------
-|
-| Endpoint: /api/admin/template-registry
-|
-| Importing prebuilt templates from the Cofoundry registry, and watching the
-| per-node installs that an import fans out into.
-|
-*/
-Route::prefix('/template-registry')->group(function () {
-    Route::get('/', [Admin\TemplateImportController::class, 'index']);
-    Route::post('/refresh', [Admin\TemplateImportController::class, 'refresh']);
-    Route::post('/import', [Admin\TemplateImportController::class, 'store']);
-
-    Route::get('/installs', [Admin\TemplateImportController::class, 'installs']);
-    Route::delete('/installs/{template_install}', [Admin\TemplateImportController::class, 'destroy']);
-});
-
-/*
-|--------------------------------------------------------------------------
 | User Controller Routes
 |--------------------------------------------------------------------------
 |

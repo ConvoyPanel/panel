@@ -152,7 +152,7 @@ enum AuditEvent: string
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
 
     // -----------------------------------------------------------------------------------------
-    // Presets and templates. Subject is the preset, group, template, or install.
+    // Presets and templates. Subject is the preset, group, or template.
     // -----------------------------------------------------------------------------------------
     case ADMIN_SERVER_PRESET_CREATED = 'admin.server-preset.created';
     case ADMIN_SERVER_PRESET_UPDATED = 'admin.server-preset.updated';
@@ -163,9 +163,6 @@ enum AuditEvent: string
     case ADMIN_TEMPLATE_CREATED = 'admin.template.created';
     case ADMIN_TEMPLATE_UPDATED = 'admin.template.updated';
     case ADMIN_TEMPLATE_DELETED = 'admin.template.deleted';
-    case ADMIN_TEMPLATE_REGISTRY_IMPORTED = 'admin.template-registry.imported';
-    case ADMIN_TEMPLATE_REGISTRY_REFRESHED = 'admin.template-registry.refreshed';
-    case ADMIN_TEMPLATE_INSTALL_DELETED = 'admin.template-registry.install-deleted';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed
