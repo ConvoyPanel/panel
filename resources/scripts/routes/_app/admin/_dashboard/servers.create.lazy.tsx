@@ -32,10 +32,10 @@ const CreateServerPage = () => {
             cpu: 1,
             memory: 1024,
             disk: 10240,
-            bandwidth: 0,
-            // '' (not 0) so a left-alone field stays "uncapped" rather than
-            // capping every NIC at zero.
-            speedLimit: '',
+            // -1, not 0: a left-alone field means "no ceiling", where 0
+            // would hand the server a zero quota and a NIC capped at zero.
+            bandwidth: -1,
+            speedLimit: -1,
             disks: [],
             backupCount: 0,
             backupSize: 0,
@@ -73,6 +73,10 @@ const CreateServerPage = () => {
                         ? data.memory * 1024 * 1024
                         : data.memory,
                 disk: data.disk !== -1 ? data.disk * 1024 * 1024 : data.disk,
+                bandwidth:
+                    data.bandwidth !== -1
+                        ? data.bandwidth * 1024 * 1024
+                        : data.bandwidth,
                 backupSize:
                     data.backupSize !== -1
                         ? data.backupSize * 1024 * 1024

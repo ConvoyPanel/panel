@@ -61,10 +61,14 @@ const useResourceSummary = () => {
         )
     }
 
-    const transfer = fromMib(bandwidth)
-    parts.push(transfer ? `${transfer} transfer` : 'unmetered')
+    if (Number(bandwidth) === -1) {
+        parts.push('unmetered')
+    } else {
+        const transfer = fromMib(bandwidth)
+        parts.push(transfer ? `${transfer} transfer` : 'no transfer')
+    }
 
-    if (speedLimit) parts.push(`${speedLimit} MB/s cap`)
+    if (Number(speedLimit) > 0) parts.push(`${speedLimit} MB/s cap`)
 
     const backups = Number(backupCount)
     if (backups === -1) parts.push('unlimited backups')
@@ -204,19 +208,18 @@ const ResourcesSection = () => {
                                 name={'bandwidth'}
                                 label={'Bandwidth'}
                                 type={'number'}
+                                min={-1}
                                 suffix={'MiB'}
-                                description={'Blank is unmetered.'}
+                                description={'-1 for unmetered.'}
                             />
                             <InputForm
                                 name={'speedLimit'}
                                 label={'Speed limit'}
                                 type={'number'}
-                                min={1}
+                                min={-1}
                                 step={'any'}
                                 suffix={'MB/s'}
-                                description={
-                                    'Caps every NIC. Blank is uncapped.'
-                                }
+                                description={'Caps every NIC. -1 for uncapped.'}
                             />
                         </div>
 

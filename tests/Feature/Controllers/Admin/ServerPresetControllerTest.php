@@ -52,6 +52,26 @@ it('drops settings left blank rather than storing them as null', function () {
         ->toBe(['cpu' => 4]);
 });
 
+it('saves an unmetered, uncapped preset with the -1 sentinel', function () {
+    $this->actingAs($this->admin)->postJson('/api/admin/server-presets', [
+        'name' => 'No ceilings',
+        'settings' => [
+            'bandwidth' => -1,
+            'speed_limit' => -1,
+        ],
+    ])->assertCreated();
+
+    expect(ServerPreset::query()->where('name', 'No ceilings')->sole()->settings)
+        ->toBe(['bandwidth' => -1, 'speed_limit' => -1]);
+});
+
+it('refuses a speed cap between the uncapped sentinel and 1 MB/s', function () {
+    $this->actingAs($this->admin)->postJson('/api/admin/server-presets', [
+        'name' => 'A stopped NIC',
+        'settings' => ['speed_limit' => 0],
+    ])->assertStatus(422)->assertJsonValidationErrors('settings.speed_limit');
+});
+
 it('refuses a node-scoped setting saved without its node', function () {
     $storage = Storage::factory()->create();
 

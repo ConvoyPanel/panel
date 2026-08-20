@@ -55,9 +55,11 @@ const defaultsFromServer = (
         server.bandwidth.limit === -1 ? -1 : server.bandwidth.limit / MEBIBYTE
     ),
     bandwidthUsage: String(server.bandwidth.usage / MEBIBYTE),
+    // A null column is uncapped, which the form spells -1 so the field is
+    // never blank — the same sentinel the quota and backup limits use.
     speedLimit:
         server.bandwidth.speedLimit == null
-            ? ''
+            ? '-1'
             : String(server.bandwidth.speedLimit / BYTES_PER_MB),
     ...overagePenaltyDefaults(server.bandwidth.overagePenalty),
 })
@@ -230,10 +232,10 @@ function ServerBuildSettings() {
                                         name={'speedLimit'}
                                         label={'Speed Limit (MB/s)'}
                                         type={'number'}
-                                        min={1}
+                                        min={-1}
                                         step={'any'}
                                         description={
-                                            'Caps every NIC. Leave blank for uncapped.'
+                                            'Caps every NIC. Use -1 for uncapped.'
                                         }
                                     />
                                 </div>

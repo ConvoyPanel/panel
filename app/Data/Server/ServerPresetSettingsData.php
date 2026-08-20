@@ -39,9 +39,9 @@ class ServerPresetSettingsData extends Data
         public ?int $memory = null,
         /** Mebibytes. */
         public ?int $disk = null,
-        /** Mebibytes. */
+        /** Mebibytes; -1 for unmetered. */
         public ?int $bandwidth = null,
-        /** Megabytes per second, per NIC. Null leaves the NIC uncapped. */
+        /** Megabytes per second, per NIC; -1 leaves the NIC uncapped. */
         public ?float $speedLimit = null,
         /** -1 for unlimited, matching the create form. */
         public ?int $backupCount = null,

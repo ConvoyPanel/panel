@@ -98,7 +98,11 @@ const PresetSettings = ({ settings }: { settings: ServerPresetSettings }) => {
                 </Row>
             )}
             {settings.speedLimit != null && (
-                <Row label={'Speed limit'}>{settings.speedLimit} MB/s</Row>
+                <Row label={'Speed limit'}>
+                    {settings.speedLimit === -1
+                        ? 'Uncapped'
+                        : `${settings.speedLimit} MB/s`}
+                </Row>
             )}
             {settings.backupCount != null && (
                 <Row label={'Backup count'}>

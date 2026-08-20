@@ -8,6 +8,7 @@ use App\Models\ServerPreset;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\StorageAllows;
 use App\Rules\VlanIsDeclaredOnInterface;
+use Closure;
 use Illuminate\Validation\Rule;
 
 class ServerPresetRequest extends BaseApiRequest
@@ -50,9 +51,15 @@ class ServerPresetRequest extends BaseApiRequest
             // Mebibytes, as typed into the form.
             'settings.memory' => 'nullable|integer|min:128|max:1048576',
             'settings.disk' => 'nullable|integer|min:1|max:10485760',
-            'settings.bandwidth' => 'nullable|integer|min:0',
-            // MB/s. Null is "uncapped", which is why 0 is not allowed.
-            'settings.speed_limit' => 'nullable|numeric|min:1',
+            // Mebibytes, as typed into the form; -1 is unmetered.
+            'settings.bandwidth' => 'nullable|integer|min:-1',
+            // MB/s, with -1 for uncapped — which is why 0 is not allowed: a
+            // zero cap is a stopped NIC, not an absent one.
+            'settings.speed_limit' => ['nullable', 'numeric', 'min:-1', function (string $attribute, mixed $value, Closure $fail) {
+                if ($value > -1 && $value < 1) {
+                    $fail('The speed limit must be at least 1 MB/s, or -1 for uncapped.');
+                }
+            }],
             'settings.backup_count' => 'nullable|integer|min:-1',
             'settings.backup_size' => 'nullable|integer|min:-1',
 

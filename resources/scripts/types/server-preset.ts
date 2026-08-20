@@ -20,7 +20,7 @@ export interface ServerPresetSettings {
     disk: number | null
     /** Mebibytes. */
     bandwidth: number | null
-    /** Megabytes per second, per NIC. Null leaves the NIC uncapped. */
+    /** Megabytes per second, per NIC. -1 leaves the NIC uncapped. */
     speedLimit: number | null
     /** -1 for unlimited. */
     backupCount: number | null
