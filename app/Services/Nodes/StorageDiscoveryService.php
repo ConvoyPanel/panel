@@ -6,16 +6,19 @@ use App\Data\Cluster\StorageResourceData;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Node;
 use App\Models\Storage;
+use App\Models\StorageToNode;
 use Illuminate\Support\Collection;
 
 /**
  * Records what Proxmox says about the storages Convoy has registered.
  *
- * Convoy's `storages` rows carry a name and a size taken from the host once, at
- * registration, and never checked again -- so either can drift. This writes
- * PVE's answer alongside the declaration so the two can be compared, and so the
- * UI can show the real figure while a node is up and fall back to the declared
- * one when it is not.
+ * The facts split by where they are true. What a storage *is* -- its backend
+ * type, its shared flag, what it may hold -- is decided cluster-wide in
+ * `storage.cfg`, so those land on the definition row. How full it is, is
+ * observed per mount: one shared pool reads the same everywhere, but a local
+ * definition names a physically different disk on every node, so the figures
+ * land on this node's (storage, node) link and never overwrite a neighbour's
+ * reading.
  *
  * Content types are not merely recorded but adopted: `stores_*` is overwritten
  * from PVE's list on every poll. What a storage may hold is decided in
@@ -25,12 +28,6 @@ use Illuminate\Support\Collection;
  *
  * The facts come from the `type=storage` rows of the poll's existing
  * `/cluster/resources` call, so discovery adds no request and no timeout.
- *
- * Matching is by name within the node's own storages. That is exactly as narrow
- * as Convoy's model currently allows: `StorageController::store()` attaches a new
- * storage to the one node it was created under, so a PVE storage visible on three
- * nodes is three rows here, and each matches against its own node's report.
- * Cluster-wide identity is a later phase.
  */
 class StorageDiscoveryService
 {
@@ -49,13 +46,15 @@ class StorageDiscoveryService
         // is not an error and not ours to create -- deciding which stores Convoy
         // may use is the operator's call, and importing silently would make it
         // Convoy's.
-        $node->storages()->get()->each(function (Storage $storage) use ($reported) {
+        $node->storages()->get()->each(function (Storage $storage) use ($node, $reported) {
             $live = $reported->get($storage->name);
 
             // Registered here but absent from PVE's report: leave the last known
             // values alone rather than blanking them. One poll that did not
             // mention a store is not evidence the store is gone, and wiping the
             // figures would turn a rename into "capacity unknown" everywhere.
+            // (Whether the *link* should survive is the sync's question, not
+            // this one -- and it only severs links this service once confirmed.)
             if ($live === null) {
                 return;
             }
@@ -71,15 +70,21 @@ class StorageDiscoveryService
                 ...$live->content !== null
                     ? StorageContentType::flagsFor($live->content)
                     : [],
-                // `available` is PVE saying it actually read the store. Anything
-                // else means the numbers beside it are not worth recording, so
-                // the previous ones stand.
-                ...$live->status === 'available' ? [
-                    'discovered_total' => $live->total,
-                    'discovered_used' => $live->used,
-                    'discovered_at' => now(),
-                ] : [],
             ])->save();
+
+            // `available` is PVE saying it actually read the store. Anything
+            // else means the numbers beside it are not worth recording, so
+            // the previous ones stand.
+            if ($live->status === 'available') {
+                StorageToNode::query()
+                    ->where('storage_id', $storage->id)
+                    ->where('node_id', $node->id)
+                    ->update([
+                        'discovered_total' => $live->total,
+                        'discovered_used' => $live->used,
+                        'discovered_at' => now(),
+                    ]);
+            }
         });
     }
 }

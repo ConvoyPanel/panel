@@ -8,6 +8,7 @@ use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use App\Jobs\Node\PollNodeStatusJob;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Node;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class NodeController
 {
     public function index(Request $request)
     {
-        $nodes = QueryBuilder::for(Node::query())
+        $nodes = QueryBuilder::for(Node::query()->with('cluster'))
             ->withCount(['servers'])
             ->allowedFilters([
                 AllowedFilter::custom('*', new FiltersNodeWildcard),
@@ -49,6 +50,11 @@ class NodeController
         $node = Node::create($request->validated())
             ->append(['memory_allocated'])
             ->loadCount('servers');
+
+        // The scheduled poll would get there within a minute anyway; polling
+        // now means the node's status and cluster scope are known while the
+        // operator is still looking at the page they registered it from.
+        PollNodeStatusJob::dispatch($node->id);
 
         Audit::record(
             AuditEvent::ADMIN_NODE_CREATED,

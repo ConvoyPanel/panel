@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Cluster;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Storage;
@@ -15,7 +16,11 @@ beforeEach(function () {
 
     $this->user = User::factory()->create(['root_admin' => true]);
     $this->location = Location::factory()->create();
-    $this->node = Node::factory()->for($this->location)->create();
+    // A resolved scope, as registration's immediate poll leaves it: storing a
+    // storage files the definition under the node's cluster.
+    $this->node = Node::factory()->for($this->location)->create([
+        'cluster_id' => Cluster::factory()->standalone()->create()->id,
+    ]);
 
     // 100 MiB reserve buffer (passed in bytes; StorageSizeCast stores MiB).
     $this->storage = Storage::factory()->create([
@@ -97,13 +102,14 @@ it('falls back gracefully when the node is offline', function () {
 
 it('shows the last recorded capacity when the node is unreachable', function () {
     // The poll wrote these; the page used to go blank the moment live failed,
-    // even though the figures were sitting right here.
-    $this->storage->forceFill([
-        'pve_type' => 'dir',
+    // even though the figures were sitting right here. (The figures live on
+    // this node's link -- capacity is observed per mount.)
+    $this->storage->forceFill(['pve_type' => 'dir'])->save();
+    $this->node->storages()->updateExistingPivot($this->storage->id, [
         'discovered_total' => 1_000_000_000,
         'discovered_used' => 600_000_000,
         'discovered_at' => now()->subMinutes(3),
-    ])->save();
+    ]);
 
     Http::fake(fn () => throw new ConnectionException('node down'));
 
@@ -123,11 +129,11 @@ it('shows the last recorded capacity when the node is unreachable', function () 
 });
 
 it('prefers a live figure over the recorded one', function () {
-    $this->storage->forceFill([
+    $this->node->storages()->updateExistingPivot($this->storage->id, [
         'discovered_total' => 1,
         'discovered_used' => 1,
         'discovered_at' => now()->subDay(),
-    ])->save();
+    ]);
 
     fakeLiveStorage($this->storage->name, total: 1_000_000_000, used: 600_000_000, avail: 400_000_000);
 

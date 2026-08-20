@@ -13,10 +13,10 @@ use App\Http\Requests\Admin\Nodes\Storages\UpdateBackupOrderRequest;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
+use App\Services\Nodes\ClusterIdentityService;
 use App\Services\Nodes\LiveStorageService;
 use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -25,6 +25,7 @@ class StorageController extends Controller
     public function __construct(
         private ProxmoxStorageClient $client,
         private LiveStorageService $liveStorage,
+        private ClusterIdentityService $clusterIdentity,
         private ConnectionInterface $connection,
     ) {}
 
@@ -57,18 +58,40 @@ class StorageController extends Controller
         // answer, and the poll keeps it current from here on.
         $reported = $this->liveStorage->get($node, $request->string('name')->toString());
 
-        $storage = $this->connection->transaction(function () use ($request, $node, $reported) {
-            $storage = Storage::create([
-                ...$request->validated(),
-                'stores_kvm' => (bool) $reported?->storesKvm,
-                'stores_lxc' => (bool) $reported?->storesLxc,
-                'stores_lxc_templates' => (bool) $reported?->storesLxcTemplates,
-                'stores_backups' => (bool) $reported?->storesBackups,
-                'stores_iso' => (bool) $reported?->storesIso,
-                'stores_snippets' => (bool) $reported?->storesSnippets,
-            ]);
+        // A definition is filed once per scope, so the node's scope has to be
+        // known. It normally is (registration polls the node immediately);
+        // when it is not, resolve on the spot rather than filing the row
+        // somewhere it would have to be migrated out of.
+        $cluster = $node->cluster ?? $this->clusterIdentity->resolve($node);
 
-            StorageToNode::create([
+        abort_if(
+            $cluster === null,
+            422,
+            'Convoy could not reach this node to determine which cluster it is in. Check connectivity and try again.',
+        );
+
+        $storage = $this->connection->transaction(function () use ($request, $node, $reported, $cluster) {
+            // Attach-or-create: registering `ceph-vm` through a second node is
+            // a statement about that node, not a second pool. The scope's
+            // unique (cluster_id, name) makes creating a duplicate impossible
+            // even if two registrations race.
+            $storage = Storage::query()->firstOrCreate(
+                [
+                    'cluster_id' => $cluster->id,
+                    'name' => $request->string('name')->toString(),
+                ],
+                [
+                    ...$request->validated(),
+                    'stores_kvm' => (bool) $reported?->storesKvm,
+                    'stores_lxc' => (bool) $reported?->storesLxc,
+                    'stores_lxc_templates' => (bool) $reported?->storesLxcTemplates,
+                    'stores_backups' => (bool) $reported?->storesBackups,
+                    'stores_iso' => (bool) $reported?->storesIso,
+                    'stores_snippets' => (bool) $reported?->storesSnippets,
+                ],
+            );
+
+            StorageToNode::query()->firstOrCreate([
                 'storage_id' => $storage->id,
                 'node_id' => $node->id,
             ]);
@@ -83,8 +106,9 @@ class StorageController extends Controller
         );
 
         return StorageEloquentData::fromModel(
-            $storage,
+            $node->storages()->withUsageSums()->find($storage->id) ?? $storage,
             $this->liveStorage->get($node, $storage->name),
+            $node,
         );
     }
 
@@ -182,10 +206,10 @@ class StorageController extends Controller
      * match (node offline / storage missing) comes back flagged `online: false`
      * with null physical figures rather than failing the whole list.
      *
-     * @param  Collection<int, Storage>  $storages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Storage>  $storages
      * @return DataCollection<int, StorageEloquentData>
      */
-    private function mapWithLiveData(Node $node, Collection $storages): DataCollection
+    private function mapWithLiveData(Node $node, \Illuminate\Database\Eloquent\Collection $storages): DataCollection
     {
         $live = $this->liveStorage->forNode($node);
         // Eager-loaded so naming the other nodes costs one query, not one per row.

@@ -190,11 +190,6 @@ it('counts fleet storage from what the poll observed, not what was typed', funct
         'size' => 100 * 1024 * 1024 * 1024,
         'stores_kvm' => true,
     ]);
-    $observed->forceFill([
-        'discovered_total' => 250 * 1024 * 1024 * 1024,
-        'discovered_used' => 0,
-        'discovered_at' => now(),
-    ])->save();
 
     // Never polled, so the declared size is the best answer there is.
     $declaredOnly = Storage::factory()->create([
@@ -202,7 +197,14 @@ it('counts fleet storage from what the poll observed, not what was typed', funct
         'stores_kvm' => true,
     ]);
 
-    $node->storages()->attach([$observed->id, $declaredOnly->id]);
+    $node->storages()->attach([
+        $observed->id => [
+            'discovered_total' => 250 * 1024 * 1024 * 1024,
+            'discovered_used' => 0,
+            'discovered_at' => now(),
+        ],
+        $declaredOnly->id => [],
+    ]);
 
     $this->actingAs($admin)->getJson('/api/admin/overview')
         ->assertOk()

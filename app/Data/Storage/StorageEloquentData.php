@@ -101,21 +101,26 @@ class StorageEloquentData extends Data
         $reserved = (int) ($storage->reserved_bytes ?? 0);
         $isThin = StorageBackends::isThin($storage->pve_type);
 
-        // Live if we have it, otherwise whatever the poll last wrote. `free` is
-        // derived rather than stored: PVE gives used and total on the cluster
-        // rows, and total − used is the same number it would have reported.
+        // Live if we have it, otherwise whatever the poll last wrote -- the
+        // viewing node's own reading when one is in scope, and the definition's
+        // resolved figure (freshest for shared, summed for local) when not.
+        // `free` is derived rather than stored: PVE gives used and total on the
+        // cluster rows, and total − used is the same number it would have
+        // reported.
+        $recorded = $storage->recordedCapacity($viewedFrom);
+
         [$source, $observedAt, $total, $used] = match (true) {
             $live !== null => ['live', CarbonImmutable::now(), $live->total, $live->used],
-            $storage->discovered_at !== null => [
-                'recorded',
-                $storage->discovered_at,
-                (int) $storage->discovered_total,
-                (int) $storage->discovered_used,
-            ],
+            $recorded['at'] !== null => ['recorded', $recorded['at'], $recorded['total'], $recorded['used']],
             default => ['unknown', null, null, null],
         };
 
         $free = $total !== null ? max(0, $total - $used) : null;
+
+        // Live reports free directly; a recorded figure derives it. Prefer the
+        // reported one, which accounts for filesystem overhead the subtraction
+        // cannot see.
+        $physicalFree = $live->free ?? $free;
 
         return new self(
             id: $storage->id,
@@ -157,13 +162,10 @@ class StorageEloquentData extends Data
             observedAt: $observedAt,
             physicalTotal: $total,
             physicalUsed: $used,
-            // Live reports free directly; a recorded figure derives it. Prefer
-            // the reported one, which accounts for filesystem overhead the
-            // subtraction cannot see.
-            physicalFree: $live?->free ?? $free,
+            physicalFree: $physicalFree,
             untracked: $used !== null && ! $isThin ? max(0, $used - $committed) : null,
-            freeForConvoy: ($live?->free ?? $free) !== null
-                ? max(0, ($live?->free ?? $free) - $reserved)
+            freeForConvoy: $physicalFree !== null
+                ? max(0, $physicalFree - $reserved)
                 : null,
         );
     }

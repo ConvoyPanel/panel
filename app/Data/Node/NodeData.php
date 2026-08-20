@@ -20,10 +20,13 @@ class NodeData extends Data
         public string $displayName,
         public string $name,
         /**
-         * The PVE cluster this host belongs to, or null when it is standalone.
+         * The display name of the PVE cluster this host belongs to, or null
+         * when it is standalone (or not yet resolved).
          *
-         * Discovered by the poll. Standalone is a real answer, not a gap -- and
-         * it is the one that explains why a node is offered nothing to attach.
+         * Discovered by the poll; a label only -- identity lives on the
+         * cluster row's CA fingerprint. Standalone is a real answer, not a
+         * gap: it is the one that explains why a node is offered nothing to
+         * attach.
          */
         public ?string $clusterName,
         public bool $verifyTls,
@@ -69,7 +72,7 @@ class NodeData extends Data
             locationId: $node->location_id,
             displayName: $node->display_name,
             name: $node->name,
-            clusterName: $node->cluster_name,
+            clusterName: $node->cluster?->name,
             verifyTls: $node->verify_tls,
             fqdn: $node->fqdn,
             port: $node->port,

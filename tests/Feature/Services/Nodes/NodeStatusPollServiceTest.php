@@ -4,10 +4,12 @@ use App\Data\Admin\Overview\NodeResourceSnapshotData;
 use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
 use App\Enums\Server\PowerState;
+use App\Models\Cluster;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\Storage;
+use App\Models\StorageToNode;
 use App\Services\Nodes\GuestStateCache;
 use App\Services\Nodes\NodeResourceSnapshotCache;
 use App\Services\Nodes\NodeStatusPollService;
@@ -44,7 +46,44 @@ beforeEach(function () {
             return Http::response(['data' => $this->clusterStatus], 200);
         },
     ]);
+
+    // The cluster CA fingerprint, fetched only when identity is in question.
+    // `false` means "this endpoint is down", as above.
+    $this->caFingerprint = 'DE:FA:00';
+    Http::fake([
+        '*/api2/json/nodes/*/certificates/info' => function () {
+            if ($this->caFingerprint === false) {
+                throw new ConnectionException('refused');
+            }
+
+            return Http::response(['data' => [
+                ['filename' => 'pve-ssl.pem', 'fingerprint' => '55:1e'],
+                ['filename' => 'pve-root-ca.pem', 'fingerprint' => $this->caFingerprint],
+            ]], 200);
+        },
+    ]);
 });
+
+/** A clustered host's /cluster/status: the cluster row plus one row per member. */
+function clusteredStatus(string $name, array $members): array
+{
+    return [
+        ['type' => 'cluster', 'name' => $name, 'nodes' => count($members), 'quorate' => 1],
+        ...array_map(
+            fn (string $member) => ['type' => 'node', 'name' => $member, 'online' => 1],
+            $members,
+        ),
+    ];
+}
+
+/** The (storage, node) link, where the per-node figures now live. */
+function linkFor(Node $node, Storage $storage): ?StorageToNode
+{
+    return StorageToNode::query()
+        ->where('storage_id', $storage->id)
+        ->where('node_id', $node->id)
+        ->first();
+}
 
 /** One `type=qemu` row as /cluster/resources returns it. */
 function guestRow(int $vmid, string $status, string $nodeName): array
@@ -471,13 +510,17 @@ it('records what Proxmox says about a registered storage', function () {
 
     $this->service->handle($this->node);
 
+    // What the storage *is* lands on the definition; how full it is lands on
+    // this node's link, because capacity is observed per mount.
     expect($storage->refresh())
         ->pve_type->toBe('lvmthin')
         ->pve_shared->toBeFalse()
-        ->pve_content->toBe('images,rootdir')
-        ->discovered_total->toBe(1000)
-        ->discovered_used->toBe(900)
-        ->and($storage->discovered_at)->not->toBeNull();
+        ->pve_content->toBe('images,rootdir');
+
+    $link = linkFor($this->node, $storage);
+    expect($link->discovered_total)->toBe(1000)
+        ->and($link->discovered_used)->toBe(900)
+        ->and($link->discovered_at)->not->toBeNull();
 });
 
 it('adopts the content types Proxmox reports, correcting a stale answer', function () {
@@ -593,15 +636,16 @@ it('keeps the last known capacity when a storage stops reporting', function () {
     }]);
 
     $this->service->handle($this->node);
-    expect($storage->refresh()->discovered_used)->toBe(500);
+    expect(linkFor($this->node, $storage)->discovered_used)->toBe(500);
 
     // PVE could not read it this time round. Blanking the figures would turn a
     // brief outage into "capacity unknown" everywhere it is shown.
     $reporting = false;
     $this->service->handle($this->node->refresh());
 
-    expect($storage->refresh()->discovered_used)->toBe(500)
-        ->and($storage->discovered_total)->toBe(1000);
+    $link = linkFor($this->node, $storage);
+    expect($link->discovered_used)->toBe(500)
+        ->and($link->discovered_total)->toBe(1000);
 });
 
 it('leaves storages registered on another node alone', function () {
@@ -618,48 +662,105 @@ it('leaves storages registered on another node alone', function () {
 
     $this->service->handle($this->node);
 
-    // Same PVE name, different node, different row -- which is exactly the
-    // duplication cluster-wide identity is meant to collapse later.
-    expect($mine->refresh()->discovered_used)->toBe(10)
-        ->and($theirs->refresh()->discovered_used)->toBeNull();
+    // Same PVE name on two standalone hosts is two definitions, and a poll of
+    // one host may only ever write its own figures.
+    expect(linkFor($this->node, $mine)->discovered_used)->toBe(10)
+        ->and(linkFor($otherNode, $theirs)->discovered_used)->toBeNull();
 });
 
-it('records the PVE cluster a node belongs to', function () {
-    $this->clusterStatus = [
-        ['type' => 'cluster', 'name' => 'prod-cluster', 'nodes' => 3, 'quorate' => 1],
-        ...STANDALONE_STATUS,
-    ];
+it('records the PVE cluster a node belongs to, identified by its CA', function () {
+    $this->clusterStatus = clusteredStatus('prod-cluster', [$this->node->name]);
+    $this->caFingerprint = 'AA:BB:CC';
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
 
     $this->service->handle($this->node);
 
-    expect($this->node->refresh()->cluster_name)->toBe('prod-cluster');
+    $cluster = $this->node->refresh()->cluster;
+    expect($cluster)->not->toBeNull()
+        ->and($cluster->fingerprint)->toBe('AA:BB:CC')
+        ->and($cluster->name)->toBe('prod-cluster')
+        ->and($cluster->member_names)->toBe([$this->node->name]);
 });
 
-it('reads a standalone host as belonging to no cluster', function () {
+it('never confuses two clusters that share a name', function () {
+    // Somebody else's cluster, also called `proxmox`. The name used to be the
+    // identity, which glued these together and offered pools across them.
+    $other = Cluster::factory()->create([
+        'name' => 'proxmox',
+        'fingerprint' => '11:11',
+        'member_names' => ['their-pve'],
+    ]);
+
+    $this->clusterStatus = clusteredStatus('proxmox', [$this->node->name]);
+    $this->caFingerprint = '22:22';
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    $cluster = $this->node->refresh()->cluster;
+    expect($cluster->id)->not->toBe($other->id)
+        ->and($cluster->fingerprint)->toBe('22:22')
+        ->and($other->refresh()->member_names)->toBe(['their-pve']);
+});
+
+it('gives a standalone host its own scope without asking for a certificate', function () {
     // No `type=cluster` row is how PVE says "not clustered" -- not an error.
+    // Standalone scopes are keyed to the node, never to its CA: a node
+    // separated from a cluster without a reinstall still carries the old
+    // cluster's certificate, and keying by it would glue it back on.
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
 
     $this->service->handle($this->node);
 
-    expect($this->node->refresh()->cluster_name)->toBeNull();
+    $cluster = $this->node->refresh()->cluster;
+    expect($cluster)->not->toBeNull()
+        ->and($cluster->fingerprint)->toBeNull()
+        ->and($cluster->name)->toBeNull()
+        ->and($cluster->member_names)->toBe([$this->node->name]);
+
+    Http::assertNotSent(fn ($request) => str_contains($request->url(), '/certificates/info'));
 });
 
 it('keeps the known cluster when only the cluster lookup fails', function () {
-    $this->clusterStatus = [
-        ['type' => 'cluster', 'name' => 'prod-cluster', 'nodes' => 3, 'quorate' => 1],
-        ...STANDALONE_STATUS,
-    ];
+    $this->clusterStatus = clusteredStatus('prod-cluster', [$this->node->name]);
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
     $this->service->handle($this->node);
+
+    $clusterId = $this->node->refresh()->cluster_id;
 
     // The node itself is demonstrably up -- /cluster/resources just answered --
     // so a failure on the second call must not erase what we already knew.
     $this->clusterStatus = false;
     $this->service->handle($this->node->refresh());
 
-    expect($this->node->refresh()->cluster_name)->toBe('prod-cluster')
+    expect($this->node->refresh()->cluster_id)->toBe($clusterId)
+        ->and($this->node->cluster->name)->toBe('prod-cluster')
         ->and($this->node->status)->toBe(NodeStatus::ONLINE);
+});
+
+it('leaves a node unresolved when the certificate lookup fails', function () {
+    $this->clusterStatus = clusteredStatus('prod-cluster', [$this->node->name]);
+    $this->caFingerprint = false;
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    // Unidentified is a safe state -- nothing links, nothing merges -- and the
+    // node is still demonstrably up.
+    expect($this->node->refresh()->cluster_id)->toBeNull()
+        ->and($this->node->status)->toBe(NodeStatus::ONLINE);
+});
+
+it('does not refetch the certificate once the cluster is known', function () {
+    $this->clusterStatus = clusteredStatus('prod-cluster', [$this->node->name]);
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+    $this->service->handle($this->node->refresh());
+
+    // Identity questions are only asked when something suggests the answer
+    // moved; the steady-state poll stays at its usual request count.
+    Http::assertSentCount(5); // 2 x (resources + status) + 1 x certificates
 });
 
 it('does not ask for the cluster when the node is unreachable', function () {
@@ -672,17 +773,20 @@ it('does not ask for the cluster when the node is unreachable', function () {
 });
 
 it('attaches a shared pool to every clustered node Proxmox reports it on', function () {
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:00',
+        'member_names' => [$this->node->name, 'pve-2'],
+    ]);
     $peer = Node::factory()->for(Location::factory())->create([
         'name' => 'pve-2',
-        'cluster_name' => 'prod',
+        'cluster_id' => $cluster->id,
     ]);
-    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+    $storage = Storage::factory()->create(['name' => 'ceph-vm', 'cluster_id' => $cluster->id]);
     $this->node->storages()->attach($storage);
 
-    $this->clusterStatus = [
-        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
-        ...STANDALONE_STATUS,
-    ];
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2']);
+    $this->caFingerprint = 'FF:00';
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
         nodes: [nodeResourceRow($this->node->name)],
         storages: [
@@ -701,17 +805,20 @@ it('attaches a shared pool to every clustered node Proxmox reports it on', funct
 });
 
 it('never links a local storage that merely shares a name', function () {
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:00',
+        'member_names' => [$this->node->name, 'pve-2'],
+    ]);
     $peer = Node::factory()->for(Location::factory())->create([
         'name' => 'pve-2',
-        'cluster_name' => 'prod',
+        'cluster_id' => $cluster->id,
     ]);
-    $storage = Storage::factory()->create(['name' => 'local-lvm']);
+    $storage = Storage::factory()->create(['name' => 'local-lvm', 'cluster_id' => $cluster->id]);
     $this->node->storages()->attach($storage);
 
-    $this->clusterStatus = [
-        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
-        ...STANDALONE_STATUS,
-    ];
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2']);
+    $this->caFingerprint = 'FF:00';
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
         nodes: [nodeResourceRow($this->node->name)],
         storages: [
@@ -722,25 +829,36 @@ it('never links a local storage that merely shares a name', function () {
 
     $this->service->handle($this->node);
 
-    // `local-lvm` exists on every host under one cluster-wide definition, but
-    // each is a physically different disk. Linking them would claim one pool
-    // where there are two.
+    // One cluster-wide definition, but each node's `local-lvm` is a physically
+    // different disk. A link is a statement about reachability, so a local
+    // definition gains one only when an operator registers it on that node.
     expect($storage->refresh()->nodes()->count())->toBe(1)
         ->and($peer->storages()->count())->toBe(0);
 });
 
 it('does not link a shared pool onto a node in another cluster', function () {
+    // A stranger whose node name collides with a member of this cluster --
+    // the strongest version of the trap, and why peers are resolved through
+    // the scope rather than by name alone.
     $stranger = Node::factory()->for(Location::factory())->create([
         'name' => 'pve-2',
-        'cluster_name' => 'somewhere-else',
+        'cluster_id' => Cluster::factory()->create([
+            'name' => 'somewhere-else',
+            'fingerprint' => '99:99',
+        ])->id,
     ]);
-    $storage = Storage::factory()->create(['name' => 'ceph-vm']);
+
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:00',
+        'member_names' => [$this->node->name, 'pve-2'],
+    ]);
+    $this->node->forceFill(['cluster_id' => $cluster->id])->save();
+    $storage = Storage::factory()->create(['name' => 'ceph-vm', 'cluster_id' => $cluster->id]);
     $this->node->storages()->attach($storage);
 
-    $this->clusterStatus = [
-        ['type' => 'cluster', 'name' => 'prod', 'nodes' => 2, 'quorate' => 1],
-        ...STANDALONE_STATUS,
-    ];
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2']);
+    $this->caFingerprint = 'FF:00';
     Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
         nodes: [nodeResourceRow($this->node->name)],
         storages: [
@@ -753,7 +871,7 @@ it('does not link a shared pool onto a node in another cluster', function () {
     expect($stranger->storages()->count())->toBe(0);
 });
 
-it('links nothing for a standalone host', function () {
+it('links nothing beyond itself for a standalone host', function () {
     $storage = Storage::factory()->create(['name' => 'ceph-vm']);
     $this->node->storages()->attach($storage);
 
@@ -765,4 +883,151 @@ it('links nothing for a standalone host', function () {
     $this->service->handle($this->node);
 
     expect($storage->refresh()->nodes()->count())->toBe(1);
+});
+
+it('folds per-node rows into one definition when the cluster is discovered', function () {
+    // The shape the v4 upgrade migration leaves behind: every node in its own
+    // singleton scope, each with its own `ceph-vm` row linked to itself --
+    // which was also v4's answer to registering one pool through three nodes.
+    $myScope = Cluster::factory()->standalone()->create();
+    $peerScope = Cluster::factory()->standalone()->create();
+    $this->node->forceFill(['cluster_id' => $myScope->id])->save();
+    $peer = Node::factory()->for(Location::factory())->create([
+        'name' => 'pve-2',
+        'cluster_id' => $peerScope->id,
+    ]);
+
+    $mine = Storage::factory()->create(['name' => 'ceph-vm', 'cluster_id' => $myScope->id]);
+    $theirs = Storage::factory()->create(['name' => 'ceph-vm', 'cluster_id' => $peerScope->id]);
+    $this->node->storages()->attach($mine);
+    $peer->storages()->attach($theirs);
+
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2']);
+    $this->caFingerprint = 'AB:12';
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+    $this->service->handle($peer);
+
+    // One definition, both links, and the emptied singletons are gone.
+    expect(Storage::query()->where('name', 'ceph-vm')->count())->toBe(1);
+
+    $survivor = Storage::query()->where('name', 'ceph-vm')->first();
+    expect($survivor->cluster_id)->toBe($this->node->refresh()->cluster_id)
+        ->and($peer->refresh()->cluster_id)->toBe($this->node->cluster_id)
+        ->and($survivor->nodes()->pluck('name')->sort()->values()->all())
+        ->toBe(collect([$this->node->name, 'pve-2'])->sort()->values()->all())
+        ->and(Cluster::query()->whereNull('fingerprint')->count())->toBe(0);
+});
+
+it('moves a node that left its cluster into a fresh scope and severs its links', function () {
+    // `pvecm delnode` -- or the discouraged separate-without-reinstall, whose
+    // stale certificate is exactly why standalone scopes are never keyed by CA.
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:AA',
+        'member_names' => [$this->node->name, 'pve-2'],
+    ]);
+    $this->node->forceFill(['cluster_id' => $cluster->id])->save();
+    $shared = Storage::factory()->create(['name' => 'ceph-vm', 'cluster_id' => $cluster->id]);
+    $this->node->storages()->attach($shared);
+
+    // Default $this->clusterStatus: no cluster row any more.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    $this->node->refresh();
+    // The pool belongs to the cluster it left; a node that cannot prove it
+    // reaches it must not be offered it.
+    expect($this->node->cluster->fingerprint)->toBeNull()
+        ->and($this->node->storages()->count())->toBe(0)
+        ->and($shared->refresh()->cluster_id)->toBe($cluster->id);
+});
+
+it('flags a cluster whose reported members share nothing with the record', function () {
+    // Same CA, wholly different members: either every node was renamed at
+    // once, or a dirty-separated node re-clustered on the old certificate.
+    // Both deserve a human; neither should silently rewrite the record.
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:AA',
+        'member_names' => ['old-1', 'old-2'],
+    ]);
+    $this->node->forceFill(['cluster_id' => $cluster->id])->save();
+
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'new-2']);
+    $this->caFingerprint = 'FF:AA';
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload()], 200)]);
+
+    $this->service->handle($this->node);
+
+    $cluster->refresh();
+    expect($cluster->flagged_at)->not->toBeNull()
+        ->and($cluster->flag_reason)->toContain('old-1')
+        ->and($cluster->member_names)->toBe(['old-1', 'old-2']);
+});
+
+it('severs a confirmed link the cluster no longer reports', function () {
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:00',
+        'member_names' => [$this->node->name, 'pve-2'],
+    ]);
+    $this->node->forceFill(['cluster_id' => $cluster->id])->save();
+    $peer = Node::factory()->for(Location::factory())->create([
+        'name' => 'pve-2',
+        'cluster_id' => $cluster->id,
+    ]);
+    $storage = Storage::factory()->create(['name' => 'nfs-old', 'cluster_id' => $cluster->id]);
+    $this->node->storages()->attach($storage, ['discovered_total' => 10, 'discovered_used' => 1, 'discovered_at' => now()->subMinute()]);
+    $peer->storages()->attach($storage, ['discovered_total' => 10, 'discovered_used' => 1, 'discovered_at' => now()->subMinute()]);
+
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2']);
+    $this->caFingerprint = 'FF:00';
+    // The response vouches for both members as online, and reports the pool on
+    // the polled node only: pve-2 was removed from the storage's node list.
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [nodeResourceRow($this->node->name), nodeResourceRow('pve-2')],
+        storages: [storageRow('nfs-old', $this->node->name, used: 1, total: 10, shared: true)],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh()->nodes()->pluck('name')->all())->toBe([$this->node->name]);
+});
+
+it('leaves links alone when unconfirmed or when the member is not vouched for', function () {
+    $cluster = Cluster::factory()->create([
+        'name' => 'prod',
+        'fingerprint' => 'FF:00',
+        'member_names' => [$this->node->name, 'pve-2', 'pve-3'],
+    ]);
+    $this->node->forceFill(['cluster_id' => $cluster->id])->save();
+    $fresh = Node::factory()->for(Location::factory())->create(['name' => 'pve-2', 'cluster_id' => $cluster->id]);
+    $down = Node::factory()->for(Location::factory())->create(['name' => 'pve-3', 'cluster_id' => $cluster->id]);
+
+    $storage = Storage::factory()->create(['name' => 'nfs-a', 'cluster_id' => $cluster->id]);
+    // An operator's fresh registration PVE has not acknowledged yet: their
+    // claim to make, so it stays visible for them to see and fix.
+    $fresh->storages()->attach($storage);
+    // Confirmed once, but its node is offline in this response: absent is not
+    // detached, and severing would turn an outage into a config change.
+    $down->storages()->attach($storage, ['discovered_total' => 10, 'discovered_used' => 1, 'discovered_at' => now()->subMinute()]);
+
+    $this->clusterStatus = clusteredStatus('prod', [$this->node->name, 'pve-2', 'pve-3']);
+    $this->caFingerprint = 'FF:00';
+    Http::fake(['*/api2/json/cluster/resources' => Http::response(['data' => pollStatusPayload(
+        nodes: [
+            nodeResourceRow($this->node->name),
+            nodeResourceRow('pve-2'),
+            nodeResourceRow('pve-3', ['status' => 'offline']),
+        ],
+        storages: [],
+    )], 200)]);
+
+    $this->service->handle($this->node);
+
+    expect($storage->refresh()->nodes()->pluck('name')->sort()->values()->all())
+        ->toBe(['pve-2', 'pve-3']);
 });

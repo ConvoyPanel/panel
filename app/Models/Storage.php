@@ -7,12 +7,22 @@ use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
+ * One `storage.cfg` definition, scoped to its cluster (or to a standalone
+ * node's singleton scope) and unique by name within it. Which nodes actually
+ * mount it -- and how full each mount is -- lives on the `storage_to_node`
+ * links, so one shared pool is one row with N links, and one local definition
+ * instantiated on N nodes is *also* one row with N links, each link carrying
+ * that node's own figures.
+ *
  * @property int $id
+ * @property ?int $cluster_id
  * @property ?string $display_name
  * @property ?string $description
  * @property string $name
@@ -21,9 +31,6 @@ use Illuminate\Support\Str;
  * @property ?string $pve_type
  * @property ?bool $pve_shared
  * @property ?string $pve_content
- * @property ?int $discovered_total
- * @property ?int $discovered_used
- * @property ?CarbonImmutable $discovered_at
  * @property bool $stores_kvm
  * @property bool $stores_lxc
  * @property bool $stores_lxc_templates
@@ -33,7 +40,8 @@ use Illuminate\Support\Str;
  * @property int $server_usage
  * @property int $backup_usage
  * @property int $iso_usage
- * @property object{backup_order?: int|null}|null $pivot
+ * @property ?StorageToNode $pivot
+ * @property ?Cluster $cluster
  */
 class Storage extends Model
 {
@@ -63,7 +71,6 @@ class Storage extends Model
             'size' => StorageSizeCast::class,
             'reserved_bytes' => StorageSizeCast::class,
             'pve_shared' => 'boolean',
-            'discovered_at' => 'immutable_datetime',
             'stores_kvm' => 'boolean',
             'stores_lxc' => 'boolean',
             'stores_lxc_templates' => 'boolean',
@@ -73,6 +80,9 @@ class Storage extends Model
         ];
     }
 
+    /**
+     * @return BelongsToMany<Node, $this, StorageToNode>
+     */
     public function nodes(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -80,7 +90,76 @@ class Storage extends Model
             'storage_to_node',
             'storage_id',
             'node_id',
-        )->withPivot('backup_order');
+        )
+            ->using(StorageToNode::class)
+            ->withPivot('backup_order', 'discovered_total', 'discovered_used', 'discovered_at');
+    }
+
+    /**
+     * @return BelongsTo<Cluster, $this>
+     */
+    public function cluster(): BelongsTo
+    {
+        return $this->belongsTo(Cluster::class);
+    }
+
+    /**
+     * The last observed capacity, resolved per placement.
+     *
+     * The figures live on the (storage, node) links, so "how full is it" needs
+     * a node in scope. Given one, the answer is that link's own reading. Fleet
+     * wide it depends on the backend: a shared pool is one pool however many
+     * nodes read it, so the freshest reading stands for all of them; a local
+     * definition names a different disk on every node, so the readings sum --
+     * and the sum is only as fresh as its stalest part, which is why `at`
+     * takes the oldest timestamp there.
+     *
+     * @return array{total: ?int, used: ?int, at: ?CarbonImmutable}
+     */
+    public function recordedCapacity(?Node $node = null): array
+    {
+        $observed = $this->observedLinks()
+            ->filter(fn (StorageToNode $link) => $link->discovered_at !== null);
+
+        if ($node !== null) {
+            $observed = $observed->where('node_id', $node->id);
+        }
+
+        if ($observed->isEmpty()) {
+            return ['total' => null, 'used' => null, 'at' => null];
+        }
+
+        if ($node !== null || $this->pve_shared) {
+            /** @var StorageToNode $freshest */
+            $freshest = $observed->sortByDesc('discovered_at')->first();
+
+            return [
+                'total' => (int) $freshest->discovered_total,
+                'used' => (int) $freshest->discovered_used,
+                'at' => $freshest->discovered_at,
+            ];
+        }
+
+        return [
+            'total' => (int) $observed->sum('discovered_total'),
+            'used' => (int) $observed->sum('discovered_used'),
+            'at' => $observed->min('discovered_at'),
+        ];
+    }
+
+    /**
+     * This storage's links, from the loaded relation when the caller eager
+     * loaded it (one query for a whole listing) and from a query when not.
+     *
+     * @return Collection<int, StorageToNode>
+     */
+    private function observedLinks(): Collection
+    {
+        if ($this->relationLoaded('nodes')) {
+            return $this->nodes->map(fn (Node $node) => $node->pivot)->values();
+        }
+
+        return StorageToNode::query()->where('storage_id', $this->id)->get()->toBase();
     }
 
     /**

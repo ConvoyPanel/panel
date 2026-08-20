@@ -43,13 +43,12 @@ it('reads recorded capacity without calling Proxmox', function () {
 
     $node = Node::factory()->for($this->location)->create();
     $storage = Storage::factory()->create(['name' => 'local']);
-    $node->storages()->attach($storage);
-    $storage->forceFill([
-        'pve_type' => 'dir',
+    $storage->forceFill(['pve_type' => 'dir'])->save();
+    $node->storages()->attach($storage, [
         'discovered_total' => 1_000,
         'discovered_used' => 400,
         'discovered_at' => now(),
-    ])->save();
+    ]);
 
     $row = $this->actingAs($this->user)
         ->getJson('/api/admin/storages')

@@ -261,8 +261,9 @@ class OverviewService
         $total = (int) Storage::query()
             ->where('stores_kvm', true)
             ->whereHas('nodes')
+            ->with('nodes')
             ->get()
-            ->sum(fn (Storage $storage) => $storage->discovered_total ?? $storage->size);
+            ->sum(fn (Storage $storage) => $storage->recordedCapacity()['total'] ?? $storage->size);
 
         return $this->allocation($allocated, $total);
     }

@@ -2,30 +2,51 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class StorageToNode extends Model implements Sortable
+/**
+ * One (storage definition, node) link: this node mounts that storage.
+ *
+ * Besides availability it carries the per-node facts -- what the node last
+ * saw in the store, and where the store sits in the node's backup order. For
+ * a shared pool every link's figures agree; for a local definition each link
+ * describes a physically different disk, which is exactly why the figures
+ * live here and not on the definition.
+ *
+ * A real `Pivot` so `Storage::nodes()`/`Node::storages()` can hydrate rows
+ * through this class and callers get real casts on `pivot` instead of raw
+ * strings. (Not the app's validating base model -- this class has no rules,
+ * and Pivot is what `using()` requires.)
+ *
+ * @property int $storage_id
+ * @property int $node_id
+ * @property ?int $backup_order
+ * @property ?int $discovered_total
+ * @property ?int $discovered_used
+ * @property ?CarbonImmutable $discovered_at
+ */
+class StorageToNode extends Pivot implements Sortable
 {
     use SortableTrait;
 
     protected $table = 'storage_to_node';
 
     /**
-     * `storage_to_node` is a composite pivot with NO `id` column. Left to its
-     * defaults Eloquent assumes an auto-incrementing `id`, and Postgres then
-     * rejects every insert with `column "id" does not exist` on the appended
-     * `returning "id"` — which also broke `save()` in the update path. MySQL
-     * tolerated it, so this only surfaced after the move to Postgres, and only
-     * against a live node (a seeder writes the pivot directly).
-     *
-     * `storage_id` matches the key column `updateBackupOrder()` already passes
-     * to `setNewOrder()`.
+     * `storage_to_node` is a composite pivot with NO `id` column, so nothing
+     * may ever address a row by single key. `$incrementing = false` stops
+     * Postgres inserts from failing on an appended `returning "id"`, and the
+     * composite (storage, node) addressing comes from Pivot's `AsPivot` --
+     * which only engages when the model's key attribute is absent. That is
+     * why there is deliberately no `$primaryKey` override here: pointing it
+     * at `storage_id` made `AsPivot` fall back to whole-key deletes, and
+     * detaching one node's link silently severed the storage from every
+     * other node too.
      */
-    protected $primaryKey = 'storage_id';
-
     public $incrementing = false;
 
     public $timestamps = false;
@@ -34,7 +55,17 @@ class StorageToNode extends Model implements Sortable
         'storage_id',
         'node_id',
         'backup_order',
+        'discovered_total',
+        'discovered_used',
+        'discovered_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'discovered_at' => 'immutable_datetime',
+        ];
+    }
 
     public array $sortable = [
         'order_column_name' => 'backup_order',

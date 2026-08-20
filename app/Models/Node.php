@@ -28,7 +28,8 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property Carbon|null $status_checked_at
  * @property int $consecutive_failures
  * @property string $fqdn
- * @property string $cluster
+ * @property ?int $cluster_id
+ * @property ?Cluster $cluster
  * @property int $port
  * @property int $socket_count
  * @property int $core_count
@@ -42,6 +43,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int|null $anchor_id
  * @property ?OveragePenaltyData $overage_penalty
  * @property ?Anchor $anchor
+ * @property-read ?StorageToNode $pivot Present when reached through Storage::nodes().
  */
 class Node extends Model
 {
@@ -211,6 +213,19 @@ class Node extends Model
     }
 
     /**
+     * The storage scope this node resolves into: its PVE cluster, or its own
+     * singleton scope when standalone. Null only before the first successful
+     * poll or registration-time resolution.
+     */
+    /**
+     * @return BelongsTo<Cluster, $this>
+     */
+    public function cluster(): BelongsTo
+    {
+        return $this->belongsTo(Cluster::class);
+    }
+
+    /**
      * Gets the Anchor agent connected with this node.
      */
     /**
@@ -222,7 +237,7 @@ class Node extends Model
     }
 
     /**
-     * @return BelongsToMany<Storage, $this>
+     * @return BelongsToMany<Storage, $this, StorageToNode>
      */
     public function storages(): BelongsToMany
     {
@@ -232,7 +247,8 @@ class Node extends Model
             'node_id',
             'storage_id',
         )
-            ->withPivot('backup_order');
+            ->using(StorageToNode::class)
+            ->withPivot('backup_order', 'discovered_total', 'discovered_used', 'discovered_at');
     }
 
     /**
