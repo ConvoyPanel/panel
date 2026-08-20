@@ -108,7 +108,9 @@ return [
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',
     'password' => [
-        'default' => 'The :attribute must contain 8 - 50 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.',
+        // Describes App\Rules\Password, which checks composition and a floor of 8
+        // characters — there is no 50-character ceiling anywhere behind it.
+        'default' => 'The :attribute must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.',
         'letters' => 'The :attribute must contain at least one letter.',
         'mixed' => 'The :attribute must contain at least one uppercase and one lowercase letter.',
         'numbers' => 'The :attribute must contain at least one number.',
