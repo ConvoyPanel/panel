@@ -414,6 +414,24 @@ cross-checked with `qm`/`pvesh` over SSH:
 
 Researched direction retained for each; none built unless noted.
 
+- **Carried from retired handoffs (2026-08-20)** — the only still-open items from
+  `ui-and-status-handoff.md` and `node-network-redesign-handoff.md`, both since
+  deleted (git history has the full context):
+  - *Test connection on node settings.* The create-flow endpoint builds a `new Node`
+    from the request, but settings leaves token fields blank to mean "keep the
+    existing token" — a saved node needs a node-scoped variant that falls back to
+    the stored secret.
+  - *Admin server list shows no power state.* Client list is done; admin is just
+    `PowerStateBadge` plus whatever data the admin list returns. See
+    `docs/node-status-plan.md` (slice 4 also retires the 50ms live-tile polling).
+  - *`servers.vlan_tag` is an integer, not an FK to `vlans.id`.* Converting gives
+    referential integrity and makes "undeclared" impossible, at the cost of
+    touching `ServerNetworkService`, both server requests, the build UI, and a
+    delete policy. Related: create/update deliberately don't validate tags against
+    the registry, which is why undeclared VLANs exist.
+  - *Address pools show as a count per bridge.* `NetworkInterface::addressBlockGroups()`
+    could list them if "which subnets live here" proves the more useful answer.
+
 - **Initial bundle performance passes — DONE (2026-07-15).** The always-loaded server layout no longer imports
   installation, suspended, and deferred-OS workflows synchronously; those branches now load through
   `React.lazy` only when the server status needs them. The avatar's three-option theme picker now reuses the

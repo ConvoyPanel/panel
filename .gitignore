@@ -41,3 +41,4 @@ lang/php_*.json
 # Scratch files from agent/browser-driven verification runs.
 *.tmp.mjs
 *.tmp.php
+.tanstack/

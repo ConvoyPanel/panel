@@ -220,9 +220,10 @@ exists — an action that rolls back must not leave an audit row.
 Server operations dispatch jobs (`SendPowerCommandJob`, `ConfigureVmJob`, …).
 The audit log records what was **requested**, at the controller, where
 attribution is unambiguous: "Eric requested a reinstall". Whether the job then
-succeeded is deployment/task tracking, which already exists — see
-`docs/deployment-tracking-handoff.md`. Keeping that boundary stops the audit log
-from becoming a second, worse job monitor.
+succeeded is deployment/task tracking, which already exists (the deployment
+steps system; its design handoff lives in git history as
+`docs/deployment-tracking-handoff.md`). Keeping that boundary stops the audit
+log from becoming a second, worse job monitor.
 
 ## Visibility
 
