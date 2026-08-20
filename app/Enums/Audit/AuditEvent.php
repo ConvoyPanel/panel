@@ -125,6 +125,9 @@ enum AuditEvent: string
     case ADMIN_ANCHOR_UPDATED = 'admin.anchor.updated';
     case ADMIN_ANCHOR_DELETED = 'admin.anchor.deleted';
     case ADMIN_ANCHOR_ENROLLMENT_ROTATED = 'admin.anchor.enrollment-rotated';
+    case ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED = 'admin.anchor.enrollment-key-created';
+    case ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED = 'admin.anchor.enrollment-key-revoked';
+    case ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED = 'admin.anchor.enrollment-key-deleted';
 
     // -----------------------------------------------------------------------------------------
     // IP address management. Subject is the block group, block, or address.
@@ -202,7 +205,10 @@ enum AuditEvent: string
             self::ADMIN_TOKEN_UPDATED,
             self::ADMIN_TOKEN_DELETED,
             self::ADMIN_SERVER_DELETED,
-            self::ADMIN_NODE_DELETED => AuditRetention::FOREVER,
+            self::ADMIN_NODE_DELETED,
+            self::ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED,
+            self::ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED,
+            self::ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED => AuditRetention::FOREVER,
             default => AuditRetention::STANDARD,
         };
     }

@@ -284,6 +284,27 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.anchor.enrollment-rotated': {
         verb: 'rotated an Anchor enrollment secret',
     },
+    'admin.anchor.enrollment-key-created': {
+        verb: 'created an Anchor enrollment key',
+        // How many machines the key admits is the part worth reading at a
+        // glance; an unlimited key is the one you want to notice in a feed.
+        detail: (p) => {
+            const maxUses = p.max_uses
+            const limit =
+                typeof maxUses === 'number'
+                    ? `${maxUses} use${maxUses === 1 ? '' : 's'}`
+                    : 'unlimited uses'
+            const name = pick(p, 'name')
+
+            return name ? `${name} — ${limit}` : limit
+        },
+    },
+    'admin.anchor.enrollment-key-revoked': {
+        verb: 'revoked an Anchor enrollment key',
+    },
+    'admin.anchor.enrollment-key-deleted': {
+        verb: 'deleted an Anchor enrollment key',
+    },
 
     // IP address management
     'admin.address-block-group.created': { verb: 'created an address pool' },
