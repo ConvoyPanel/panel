@@ -60,7 +60,7 @@ const Avatar = () => {
                     </DropdownMenuLabel>
                     <p
                         className={
-                            'text-muted-foreground -mt-1 mb-3 truncate px-2 text-xs'
+                            'text-muted-foreground -mt-1 mb-1 truncate px-1.5 text-xs'
                         }
                     >
                         {user?.email}
