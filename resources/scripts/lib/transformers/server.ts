@@ -23,6 +23,7 @@ export const rawDataToServer = (data: any): Server => ({
     backup: {
         countLimit: data.backupCountLimit,
         sizeLimit: data.backupSizeLimit,
+        hasStorage: data.hasBackupStorage,
     },
     bandwidth: {
         usage: data.bandwidthUsage,

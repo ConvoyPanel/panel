@@ -269,6 +269,16 @@ class Node extends Model
     }
 
     /**
+     * Whether a backup could be stored at all. Cheaper than backupStorage() when
+     * the caller only needs to know that one exists -- the client uses it to
+     * disable the create action up front instead of failing the request.
+     */
+    public function hasBackupStorage(): bool
+    {
+        return $this->storages()->where('stores_backups', true)->exists();
+    }
+
+    /**
      * Gets the total memory used from adding up all the associated servers' allocated memory.
      */
     public function getMemoryAllocatedAttribute(): int

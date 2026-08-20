@@ -13,6 +13,7 @@ import { AxiosError } from 'axios'
 import { type ReactElement, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import {
     Collapsible,
@@ -32,6 +33,11 @@ import {
     ResponsiveDialogTrigger,
 } from '@/components/ui/ResponsiveDialog'
 import { toast } from '@/components/ui/Toast'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 
 // Mode decides what happens to a RUNNING guest, so the copy has to say so —
 // "Kill" stops the VM for the duration of the backup.
@@ -61,9 +67,21 @@ interface Props {
     serverUuid: string
     mutate: Mutator<PaginatedBackups>
     trigger?: ReactElement
+    /**
+     * Why the quota forbids another backup. Set, the trigger goes inert and
+     * says so on hover rather than opening a form the API will refuse — the
+     * refusal is a 400, which handleFormErrors cannot map onto a field, so it
+     * only ever surfaced as a toast after the user had filled the form in.
+     */
+    blockedReason?: string
 }
 
-const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
+const CreateBackupModal = ({
+    serverUuid,
+    mutate,
+    trigger,
+    blockedReason,
+}: Props) => {
     const [open, setOpen] = useState(false)
 
     const form = useForm<CreateBackupPayload>({
@@ -99,6 +117,32 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
         }
     }
 
+    // Only swap the trigger out while the dialog is closed. A scheduled backup
+    // or a second tab can take the last slot mid-form, and yanking the dialog
+    // shut under the user loses everything they typed — that case falls through
+    // to the alert and the disabled submit below.
+    if (blockedReason && !open) {
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    {/* aria-disabled rather than disabled: a disabled button
+                        receives no pointer events, so the tooltip explaining
+                        why it is disabled would never open. */}
+                    <Button
+                        aria-disabled
+                        className={
+                            'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+                        }
+                        onClick={event => event.preventDefault()}
+                    >
+                        <IconPlus className={'size-4'} /> Create backup
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>{blockedReason}</TooltipContent>
+            </Tooltip>
+        )
+    }
+
     return (
         <ResponsiveDialog open={open} onOpenChange={setOpen}>
             <ResponsiveDialogTrigger
@@ -117,6 +161,13 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
                         <ResponsiveDialogBody className={'space-y-4'}>
+                            {blockedReason && (
+                                <Alert variant={'destructive'}>
+                                    <AlertDescription>
+                                        {blockedReason}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             {/* A field called "name" reads as a person's name to
                                 password managers, so 1Password offers to fill in
                                 the account holder's. autoComplete alone does not
@@ -170,7 +221,9 @@ const CreateBackupModal = ({ serverUuid, mutate, trigger }: Props) => {
                                     </Button>
                                 }
                             />
-                            <FormButton>Create backup</FormButton>
+                            <FormButton disabled={Boolean(blockedReason)}>
+                                Create backup
+                            </FormButton>
                         </ResponsiveDialogFooter>
                     </form>
                 </Form>

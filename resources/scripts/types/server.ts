@@ -44,6 +44,8 @@ export interface Server {
     backup: {
         countLimit: number
         sizeLimit: number
+        /** False when the node has nowhere to put a backup, so none can run. */
+        hasStorage: boolean
     }
     bandwidth: {
         usage: number

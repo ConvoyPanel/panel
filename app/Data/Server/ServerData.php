@@ -58,6 +58,12 @@ class ServerData extends Data
         public int $bandwidthUsage,
         public int $backupCountLimit,
         public int $backupSizeLimit,
+        /**
+         * Whether the node has a storage capable of holding backups. Without one
+         * BackupCreationService refuses the request, so the client needs to know
+         * before it offers the action rather than after the form is submitted.
+         */
+        public bool $hasBackupStorage,
         public int $bandwidthLimit,
         public ?int $speedLimit,
         public ?OveragePenaltyData $overagePenalty,
@@ -89,6 +95,7 @@ class ServerData extends Data
             bandwidthUsage: (int) ($server->bandwidth_usage ?? 0),
             backupCountLimit: $server->backup_count_limit,
             backupSizeLimit: $server->backup_size_limit,
+            hasBackupStorage: $server->node->hasBackupStorage(),
             bandwidthLimit: (int) $server->bandwidth_limit,
             speedLimit: $server->speed_limit,
             overagePenalty: $server->overage_penalty,
