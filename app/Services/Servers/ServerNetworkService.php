@@ -6,6 +6,7 @@ use App\Data\Server\Eloquent\PrimaryAddressesData;
 use App\Data\Server\Proxmox\Config\NetworkDeviceData;
 use App\Enums\Network\AddressState;
 use App\Exceptions\Proxmox\RequestException;
+use App\Exceptions\Service\Server\ServerFlaggedException;
 use App\Models\Address;
 use App\Models\NetworkInterface;
 use App\Models\Server;
@@ -26,6 +27,15 @@ class ServerNetworkService
      */
     public function syncSettings(Server $server): void
     {
+        // A flagged server's placement is unresolved (see
+        // ServerPlacementService): the bridge and node this would write
+        // through may not be where the guest actually is, and a network
+        // config written on stale coordinates is how a survived failover
+        // becomes an outage. Refuse loudly rather than sync a guess.
+        if ($server->flagged_at !== null) {
+            throw new ServerFlaggedException($server);
+        }
+
         $this->firewallService->configureFirewall($server);
         $this->firewallService->clearIpsets($server);
         $this->lockServerAddresses($server);

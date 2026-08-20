@@ -1,4 +1,4 @@
-import { useServer } from '@/features/servers/admin/api.ts'
+import { useServer, useUnflagServer } from '@/features/servers/admin/api.ts'
 import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
 import { serverStateQueries } from '@/features/servers/state/api.ts'
 import { ServerLifecycle } from '@/types/server.ts'
@@ -17,6 +17,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { Heading } from '@/components/ui/Typography'
 
 interface Props {
@@ -53,6 +60,7 @@ const formatDuration = (seconds: number) => {
 
 const ServerDetailOverview = ({ serverId }: Props) => {
     const { data: server } = useServer(serverId)
+    const unflagServer = useUnflagServer()
     const { data: state } = useQuery({
         ...serverStateQueries.detail(server?.uuid ?? ''),
         enabled: !!server?.uuid,
@@ -140,6 +148,44 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                         )}
                         {server?.suspendedAt && (
                             <Badge variant='destructive'>Suspended</Badge>
+                        )}
+                        {server?.flaggedAt && (
+                            <>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Badge variant='destructive'>
+                                                Flagged
+                                            </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent className='max-w-72'>
+                                            {server.flagReason ??
+                                                'Flagged for review.'}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                                <Button
+                                    variant='outline'
+                                    size='sm'
+                                    disabled={unflagServer.isPending}
+                                    onClick={() =>
+                                        unflagServer.mutate(server.uuid, {
+                                            onSuccess: () =>
+                                                toast.add({
+                                                    title: 'Flag cleared',
+                                                    type: 'success',
+                                                }),
+                                            onError: () =>
+                                                toast.add({
+                                                    title: 'Failed to clear the flag',
+                                                    type: 'error',
+                                                }),
+                                        })
+                                    }
+                                >
+                                    Clear flag
+                                </Button>
+                            </>
                         )}
                     </div>
                     {server && (

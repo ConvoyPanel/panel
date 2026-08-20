@@ -228,6 +228,15 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         },
     },
     'admin.server.disk-deleted': { verb: 'removed a disk', detail: () => null },
+    'admin.server.rehomed': {
+        verb: 'moved the server between nodes',
+        detail: (p) => {
+            const from = pick(p, 'from')
+            const to = pick(p, 'to')
+
+            return from && to ? `${from} → ${to}` : null
+        },
+    },
     'admin.backup.deleted': { verb: 'deleted a backup' },
 
     // Infrastructure
@@ -255,6 +264,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.node.storage-created': { verb: 'added a storage' },
     'admin.node.storage-updated': { verb: 'updated a storage' },
     'admin.node.storage-deleted': { verb: 'removed a storage' },
+    'admin.cluster.unflagged': {
+        verb: 'cleared a cluster identity flag',
+        detail: defaultDetail,
+    },
     'admin.node.storage-backup-order-updated': {
         verb: 'reordered backup storage',
         detail: () => null,

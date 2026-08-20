@@ -13,5 +13,7 @@ class FleetSummaryData extends Data
         public int $users,
         public int $locations,
         public int $failedServers,
+        /** Cluster rows the identity tripwire flagged for a human (see ClusterIdentityService). */
+        public int $flaggedClusters,
     ) {}
 }

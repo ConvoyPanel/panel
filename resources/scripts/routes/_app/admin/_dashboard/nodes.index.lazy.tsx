@@ -3,7 +3,7 @@ import useClipboard from '@/hooks/use-clipboard.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Node } from '@/types/node.ts'
 import { cn } from '@/utils'
-import { IconPlus } from '@tabler/icons-react'
+import { IconAlertTriangle, IconPlus } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import byteSize from 'byte-size'
@@ -61,13 +61,23 @@ function NodesIndex() {
                 skeletonWidth: '5rem',
             },
             cell: ({ cell }) => (
-                <Link
-                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to='/admin/nodes/$nodeId'
-                    params={{ nodeId: String(cell.row.original.id) }}
-                >
-                    {cell.getValue<string>()}
-                </Link>
+                <span className='flex items-center gap-1.5'>
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'px-0'
+                        )}
+                        to='/admin/nodes/$nodeId'
+                        params={{ nodeId: String(cell.row.original.id) }}
+                    >
+                        {cell.getValue<string>()}
+                    </Link>
+                    {/* The cluster identity tripwire; the node's own detail
+                        page carries the reason and the clear action. */}
+                    {cell.row.original.clusterFlaggedAt && (
+                        <IconAlertTriangle className='text-destructive size-4 shrink-0' />
+                    )}
+                </span>
             ),
         },
         {

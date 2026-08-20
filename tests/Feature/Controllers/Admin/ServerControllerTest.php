@@ -166,3 +166,34 @@ it('clears a server speed cap and overage override back to inherited defaults', 
     expect($server->refresh()->speed_limit)->toBeNull()
         ->and($server->overage_penalty)->toBeNull();
 });
+
+it('lets a root admin clear a placement flag', function () {
+    [$_owner, $_, $_, $server] = createServerModel();
+    $server->forceFill(['flagged_at' => now(), 'flag_reason' => 'Guest 150 moved to "pve9".'])->save();
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->postJson("/api/admin/servers/{$server->uuid}/settings/unflag")
+        ->assertNoContent();
+
+    expect($server->fresh())->flagged_at->toBeNull()->flag_reason->toBeNull();
+});
+
+it('hides the flag reason from the owning client', function () {
+    [$owner, $_, $_, $server] = createServerModel();
+    $server->forceFill(['flagged_at' => now(), 'flag_reason' => 'Guest moved to node "pve9".'])->save();
+
+    // The reason names physical nodes; the owner sees neither field.
+    $this->actingAs($owner)
+        ->getJson("/api/client/servers/{$server->uuid}")
+        ->assertOk()
+        ->assertJsonPath('data.flaggedAt', null)
+        ->assertJsonPath('data.flagReason', null);
+
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$server->uuid}")
+        ->assertOk()
+        ->assertJsonPath('data.flagReason', 'Guest moved to node "pve9".');
+});

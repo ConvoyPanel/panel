@@ -164,6 +164,25 @@ class ServerController
         return response()->noContent();
     }
 
+    /**
+     * Clears a placement flag (see ServerPlacementService) after the operator
+     * has resolved it. The flag blocks network sync while it stands, so this
+     * is the explicit escape hatch for flags no re-home will ever clear --
+     * e.g. an SMBIOS mismatch the operator has investigated and explained.
+     */
+    public function unflag(Server $server)
+    {
+        $server->forceFill(['flagged_at' => null, 'flag_reason' => null])->save();
+
+        Audit::record(
+            AuditEvent::ADMIN_SERVER_UPDATED,
+            subject: $server,
+            properties: ['changed' => ['flagged_at']],
+        );
+
+        return response()->noContent();
+    }
+
     public function getState(Server $server)
     {
         $state = $this->serverClient->setServer($server)->getState();

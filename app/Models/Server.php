@@ -24,11 +24,14 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property int $vmid
  * @property string $uuid
  * @property string $uuid_short
+ * @property ?string $smbios_uuid
  * @property string $hostname
  * @property string $name
  * @property ?string $description
  * @property ServerLifecycle $lifecycle
  * @property ?CarbonImmutable $suspended_at
+ * @property ?CarbonImmutable $flagged_at
+ * @property ?string $flag_reason
  * @property int $cpu
  * @property int $memory
  * @property int $disk
@@ -96,6 +99,7 @@ class Server extends Model
         return [
             'lifecycle' => ServerLifecycle::class,
             'suspended_at' => 'immutable_datetime',
+            'flagged_at' => 'immutable_datetime',
             'memory' => StorageSizeCast::class,
             'disk' => StorageSizeCast::class,
             'bandwidth_usage' => StorageSizeCast::class,
@@ -293,14 +297,25 @@ class Server extends Model
     }
 
     /**
-     * Whether no server on the node already holds this VMID.
+     * Whether no server in the node's scope already holds this VMID.
+     *
+     * The scope is the cluster, not the node: PVE enforces vmid uniqueness
+     * cluster-wide, and the placement reconciler looks servers up by
+     * (cluster, vmid) after an HA move -- two rows sharing a vmid inside one
+     * cluster would make that lookup ambiguous. A standalone or not-yet-
+     * resolved node falls back to checking itself alone.
      */
     public static function isUniqueVmId(Node $node, int $vmid): bool
     {
-        return ! static::query()
-            ->where('node_id', $node->id)
-            ->where('vmid', $vmid)
-            ->exists();
+        $query = static::query()->where('vmid', $vmid);
+
+        if ($node->cluster_id !== null && ! $node->cluster->isStandalone()) {
+            $query->whereHas('node', fn (Builder $q) => $q->where('cluster_id', $node->cluster_id));
+        } else {
+            $query->where('node_id', $node->id);
+        }
+
+        return ! $query->exists();
     }
 
     /**

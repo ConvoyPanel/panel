@@ -56,6 +56,8 @@ class SendPowerCommandJob implements ShouldQueue
             if (! $this->isNonexistentVMError($e)) {
                 throw $e;
             }
+
+            $this->logSwallowedNonexistentVM($this->step->deployment->server, 'power command');
         }
 
         // Reached only when the command succeeded (or the VM was already gone).

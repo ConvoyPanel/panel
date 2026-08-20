@@ -7,7 +7,12 @@ import {
 import type { PaginatedServers, Server } from '@/types/server'
 import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
 import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
-import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    queryOptions,
+    useMutation,
+    useQuery,
+} from '@tanstack/react-query'
 import { z } from 'zod'
 
 import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
@@ -180,6 +185,21 @@ export const useServers = (params: ServerQueryParams) =>
 
 export const useServer = (id: number | null) =>
     useQuery(serverQueries.detail(id))
+
+const unflagRoute =
+    ServerController.unflag['/api/admin/servers/{server}/settings/unflag']
+
+/**
+ * Clears a placement flag once the operator has resolved it. The flag blocks
+ * network sync while it stands, so this is the escape hatch for flags no
+ * automatic re-home will clear (e.g. an investigated SMBIOS mismatch).
+ */
+export const useUnflagServer = () =>
+    useMutation({
+        mutationFn: (uuid: string) => apiFetch(unflagRoute(uuid)),
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: serverQueries.all() }),
+    })
 
 export const preloadServer = (id: number) =>
     queryClient.prefetchQuery(serverQueries.detail(id))

@@ -25,6 +25,12 @@ class ServerBreakdownData extends Data
         public int $deleting,
         public int $failed,
         public int $suspended,
+        /**
+         * Servers whose placement the reconciler flagged for a human (see
+         * ServerPlacementService). Like `$suspended`, an independent axis --
+         * not a lifecycle slice.
+         */
+        public int $flagged,
         public array $lifecycles,
     ) {}
 }

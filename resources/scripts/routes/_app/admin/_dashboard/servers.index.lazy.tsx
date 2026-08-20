@@ -5,7 +5,7 @@ import ServerPowerActions from '@/features/servers/components/admin/ServerPowerA
 import useDataTable from '@/hooks/use-data-table.ts'
 import { Server } from '@/types/server.ts'
 import { cn } from '@/utils'
-import { IconPlus, IconServer } from '@tabler/icons-react'
+import { IconAlertTriangle, IconPlus, IconServer } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
@@ -23,6 +23,12 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { Heading } from '@/components/ui/Typography'
 
 const ServersIndex = () => {
@@ -42,12 +48,30 @@ const ServersIndex = () => {
                 skeletonWidth: '5rem',
             },
             cell: ({ cell }) => (
-                <Link
-                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to={`/admin/servers/${cell.row.original.id}` as string}
-                >
-                    {cell.getValue<string>()}
-                </Link>
+                <span className='flex items-center gap-1.5'>
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'px-0'
+                        )}
+                        to={`/admin/servers/${cell.row.original.id}` as string}
+                    >
+                        {cell.getValue<string>()}
+                    </Link>
+                    {cell.row.original.flaggedAt && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <IconAlertTriangle className='text-destructive size-4 shrink-0' />
+                                </TooltipTrigger>
+                                <TooltipContent className='max-w-72'>
+                                    {cell.row.original.flagReason ??
+                                        'Flagged for review.'}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </span>
             ),
         },
         {

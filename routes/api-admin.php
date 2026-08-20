@@ -80,6 +80,8 @@ Route::get('/storages/{storage}/consumers', Admin\StorageConsumerController::cla
 // clearing a full disk should not have to find the owning server first.
 Route::delete('/backups/{backup}', [Admin\StorageBackupController::class, 'destroy']);
 
+Route::post('/clusters/{cluster}/unflag', [Admin\ClusterController::class, 'unflag']);
+
 Route::prefix('/nodes')->group(function () {
     Route::get('/', [Admin\Nodes\NodeController::class, 'index']);
     Route::post('/', [Admin\Nodes\NodeController::class, 'store']);
@@ -225,6 +227,10 @@ Route::prefix('/servers')->group(function () {
                 Route::post(
                     '/unsuspend',
                     [Admin\ServerController::class, 'unsuspend'],
+                );
+                Route::post(
+                    '/unflag',
+                    [Admin\ServerController::class, 'unflag'],
                 );
             });
         }

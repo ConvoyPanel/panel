@@ -109,6 +109,30 @@ const deriveAttention = (
         })
     }
 
+    if (summary.flaggedClusters > 0) {
+        items.push({
+            id: 'flagged-clusters',
+            tone: 'alert',
+            icon: IconNetwork,
+            title: `${num(summary.flaggedClusters)} cluster identit${summary.flaggedClusters === 1 ? 'y' : 'ies'} flagged`,
+            description:
+                'A cluster reported members that share nothing with what Convoy recorded.',
+            action: <ActionLink to='/admin/nodes'>Review</ActionLink>,
+        })
+    }
+
+    if (servers.flagged > 0) {
+        items.push({
+            id: 'flagged-servers',
+            tone: 'alert',
+            icon: IconAlertTriangle,
+            title: `${num(servers.flagged)} server${servers.flagged === 1 ? '' : 's'} flagged`,
+            description:
+                'Placement could not be reconciled automatically — a guest moved somewhere Convoy cannot follow.',
+            action: <ActionLink to='/admin/servers'>Review</ActionLink>,
+        })
+    }
+
     if (backups.failed > 0) {
         items.push({
             id: 'failed-backups',

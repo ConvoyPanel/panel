@@ -27,6 +27,14 @@ export interface Node {
      * share no storage, which is why they are offered none to attach.
      */
     clusterName: string | null
+    clusterId: number | null
+    /**
+     * When the cluster identity tripwire flagged this node's scope, and why.
+     * While it stands, storage adoption and server placement reconciliation
+     * for the whole cluster are on hold.
+     */
+    clusterFlaggedAt: string | null
+    clusterFlagReason: string | null
     status: App.Enums.Node.NodeStatus
     /** Why it is unreachable. Only sent alongside an `unreachable` status. */
     statusCode: App.Enums.Node.ConnectionErrorCode | null

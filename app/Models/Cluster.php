@@ -57,4 +57,13 @@ class Cluster extends Model
     {
         return $this->fingerprint === null;
     }
+
+    /**
+     * The column Laravel should look at for route model binding. The base
+     * model says `uuid`, which clusters do not have.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }

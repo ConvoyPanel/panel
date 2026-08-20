@@ -92,6 +92,9 @@ enum AuditEvent: string
     case ADMIN_SERVER_DISK_CREATED = 'admin.server.disk-created';
     case ADMIN_SERVER_DISK_UPDATED = 'admin.server.disk-updated';
     case ADMIN_SERVER_DISK_DELETED = 'admin.server.disk-deleted';
+    // Recorded by the placement reconciler when PVE moved the guest (HA
+    // recovery, migration) and Convoy followed. Actor is the SystemActor.
+    case ADMIN_SERVER_REHOMED = 'admin.server.rehomed';
     case ADMIN_BACKUP_DELETED = 'admin.backup.deleted';
 
     // -----------------------------------------------------------------------------------------
@@ -113,6 +116,8 @@ enum AuditEvent: string
     case ADMIN_NODE_STORAGE_UPDATED = 'admin.node.storage-updated';
     case ADMIN_NODE_STORAGE_DELETED = 'admin.node.storage-deleted';
     case ADMIN_NODE_STORAGE_BACKUP_ORDER_UPDATED = 'admin.node.storage-backup-order-updated';
+    // The operator cleared the cluster identity tripwire (see ClusterIdentityService).
+    case ADMIN_CLUSTER_UNFLAGGED = 'admin.cluster.unflagged';
     case ADMIN_LOCATION_CREATED = 'admin.location.created';
     case ADMIN_LOCATION_UPDATED = 'admin.location.updated';
     case ADMIN_LOCATION_DELETED = 'admin.location.deleted';
@@ -215,6 +220,9 @@ enum AuditEvent: string
         return match ($this) {
             // Reveals that the panel minted a token capable of impersonating the user.
             self::ADMIN_USER_SSO_TOKEN_GENERATED => AuditVisibility::ADMIN_ONLY,
+            // Names physical nodes; which host a VM lands on is infrastructure
+            // detail a client has no lever over and no need to see.
+            self::ADMIN_SERVER_REHOMED => AuditVisibility::ADMIN_ONLY,
             default => AuditVisibility::CLIENT,
         };
     }

@@ -16,6 +16,7 @@ use App\Enums\Server\ServerLifecycle;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
 use App\Models\Backup;
+use App\Models\Cluster;
 use App\Models\ISO;
 use App\Models\Location;
 use App\Models\Node;
@@ -207,6 +208,7 @@ class OverviewService
             users: User::query()->count(),
             locations: Location::query()->count(),
             failedServers: $this->failedServers($lifecycles),
+            flaggedClusters: Cluster::query()->whereNotNull('flagged_at')->count(),
         );
     }
 
@@ -220,6 +222,7 @@ class OverviewService
             deleting: (int) ($lifecycles[ServerLifecycle::DELETING->value] ?? 0),
             failed: $this->failedServers($lifecycles),
             suspended: $suspended,
+            flagged: Server::query()->whereNotNull('flagged_at')->count(),
             lifecycles: $lifecycles->all(),
         );
     }

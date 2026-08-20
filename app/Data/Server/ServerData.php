@@ -8,6 +8,7 @@ use App\Enums\Server\ServerLifecycle;
 use App\Models\Server;
 use App\Services\Nodes\GuestStateCache;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -43,6 +44,14 @@ class ServerData extends Data
          * a server is usable have to check both.
          */
         public ?CarbonImmutable $suspendedAt,
+        /**
+         * When the placement reconciler flagged this server for a human, and
+         * why -- see ServerPlacementService. Admin-only: the reason names
+         * nodes and bridges, and both fields read as null to clients (same
+         * treatment as BackupEloquentData::$errorMessage).
+         */
+        public ?CarbonImmutable $flaggedAt,
+        public ?string $flagReason,
         /**
          * Power state as of the last poll, or null for "we cannot say".
          *
@@ -88,6 +97,8 @@ class ServerData extends Data
             description: $server->description,
             lifecycle: $server->lifecycle,
             suspendedAt: $server->suspended_at,
+            flaggedAt: Auth::user()?->root_admin ? $server->flagged_at : null,
+            flagReason: Auth::user()?->root_admin ? $server->flag_reason : null,
             powerState: app(GuestStateCache::class)->stateFor($server),
             cpu: $server->cpu,
             memory: (int) $server->memory,

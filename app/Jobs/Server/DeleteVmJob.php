@@ -58,6 +58,8 @@ class DeleteVmJob implements ShouldQueue
                 throw $e;
             }
 
+            $this->logSwallowedNonexistentVM($server, 'delete');
+
             // Already gone is already deleted.
             $this->step->markCompleted();
 

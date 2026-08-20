@@ -9,10 +9,16 @@ import {
     withQueryBuilderParams,
 } from '@/utils/http.ts'
 import { hostname } from '@/utils/validation.ts'
+import ClusterController from '@/wayfinder/actions/App/Http/Controllers/Admin/ClusterController'
 import NodeConnectionTestController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeConnectionTestController'
 import NodeController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeController'
 import NodeStatusController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/NodeStatusController'
-import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    queryOptions,
+    useMutation,
+    useQuery,
+} from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { z } from 'zod'
 
@@ -291,3 +297,19 @@ export const testConnection = async (
 
     return rawDataToConnectionResult(data)
 }
+
+const unflagClusterRoute =
+    ClusterController.unflag['/api/admin/clusters/{cluster}/unflag']
+
+/**
+ * Clears the cluster identity tripwire (see ClusterIdentityService server-side)
+ * once the operator has confirmed which cluster the row really is. Every node
+ * in the scope carries the flag, so the whole node cache is invalidated.
+ */
+export const useUnflagCluster = () =>
+    useMutation({
+        mutationFn: (clusterId: number) =>
+            apiFetch(unflagClusterRoute(clusterId)),
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: nodeQueries.all() }),
+    })

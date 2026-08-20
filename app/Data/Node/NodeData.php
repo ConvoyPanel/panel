@@ -29,6 +29,16 @@ class NodeData extends Data
          * attach.
          */
         public ?string $clusterName,
+        /** The cluster row's id, so the frontend can address cluster actions (unflag). */
+        public ?int $clusterId,
+        /**
+         * When the identity tripwire flagged this node's cluster, and why --
+         * see ClusterIdentityService. While it stands, storage adoption and
+         * server placement reconciliation for the whole scope are on hold, so
+         * the operator has to see it to clear it.
+         */
+        public ?string $clusterFlaggedAt,
+        public ?string $clusterFlagReason,
         public bool $verifyTls,
         public string $fqdn,
         public int $port,
@@ -73,6 +83,9 @@ class NodeData extends Data
             displayName: $node->display_name,
             name: $node->name,
             clusterName: $node->cluster?->name,
+            clusterId: $node->cluster_id,
+            clusterFlaggedAt: $node->cluster?->flagged_at?->toIso8601String(),
+            clusterFlagReason: $node->cluster?->flag_reason,
             verifyTls: $node->verify_tls,
             fqdn: $node->fqdn,
             port: $node->port,

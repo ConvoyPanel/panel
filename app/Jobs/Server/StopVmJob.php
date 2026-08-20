@@ -63,6 +63,8 @@ class StopVmJob implements ShouldQueue
                 throw $e;
             }
 
+            $this->logSwallowedNonexistentVM($server, 'stop');
+
             // Already gone is already stopped.
             $this->step->markCompleted();
 

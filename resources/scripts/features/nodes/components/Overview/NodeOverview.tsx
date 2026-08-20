@@ -1,16 +1,27 @@
-import { useNode, useNodeStatus } from '@/features/nodes/api.ts'
+import {
+    useNode,
+    useNodeStatus,
+    useUnflagCluster,
+} from '@/features/nodes/api.ts'
 import NodeStatusIndicator from '@/features/nodes/components/NodeStatusIndicator.tsx'
 import { connectionErrorCopy } from '@/features/nodes/connection-errors.ts'
 import { getApiErrorCode } from '@/utils/http.ts'
+import { IconAlertTriangle } from '@tabler/icons-react'
 import byteSize from 'byte-size'
 import { useState } from 'react'
 
 import { mapConnectionErrorType } from '@/lib/transformers/node.ts'
 
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { LinearProgressBar } from '@/components/ui/Progress'
 import Skeleton from '@/components/ui/Skeleton.tsx'
+import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 interface NodeOverviewProps {
@@ -40,6 +51,7 @@ const formatPveVersion = (version: string) => version.split('/')[1] ?? version
 
 const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
     const { data: node } = useNode(nodeId)
+    const unflagCluster = useUnflagCluster()
 
     /*
      * The poller already knows this node does not answer, and it wrote that to
@@ -117,6 +129,45 @@ const NodeOverview = ({ nodeId }: NodeOverviewProps) => {
                     <Skeleton className='h-8 w-48' />
                 )}
             </div>
+
+            {node?.clusterFlaggedAt && (
+                <Alert variant='destructive'>
+                    <IconAlertTriangle className='size-4' />
+                    <AlertTitle>Cluster identity needs review</AlertTitle>
+                    <AlertDescription>
+                        <p>
+                            {node.clusterFlagReason ??
+                                'The cluster reported members that share nothing with what Convoy has recorded.'}{' '}
+                            Storage adoption and server placement reconciliation
+                            are paused for this cluster until the flag is
+                            cleared.
+                        </p>
+                        <Button
+                            variant='outline'
+                            size='sm'
+                            className='mt-2'
+                            disabled={unflagCluster.isPending}
+                            onClick={() =>
+                                node.clusterId !== null &&
+                                unflagCluster.mutate(node.clusterId, {
+                                    onSuccess: () =>
+                                        toast.add({
+                                            title: 'Cluster flag cleared',
+                                            type: 'success',
+                                        }),
+                                    onError: () =>
+                                        toast.add({
+                                            title: 'Failed to clear the flag',
+                                            type: 'error',
+                                        }),
+                                })
+                            }
+                        >
+                            Clear flag
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
 
             <div className='grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-3'>
                 <Card>

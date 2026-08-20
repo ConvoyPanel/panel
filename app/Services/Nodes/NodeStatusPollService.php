@@ -41,6 +41,7 @@ class NodeStatusPollService
     public function __construct(
         private ProxmoxResourceClient $client,
         private ClusterIdentityService $clusterIdentity,
+        private ServerPlacementService $serverPlacement,
         private GuestStateCache $guestStates,
         private NodeResourceSnapshotCache $resourceSnapshots,
         private StorageDiscoveryService $storageDiscovery,
@@ -72,6 +73,12 @@ class NodeStatusPollService
         // moved, re-homed) before anything storage-shaped is written: both
         // steps below read the node's scope back out of the database.
         $cluster = $this->clusterIdentity->resolve($node);
+
+        // Each guest row names the node it is actually on right now -- the
+        // authoritative answer after an HA recovery or migration, which no
+        // task log reliably records. Reconcile `servers.node_id` against it
+        // while the snapshot is in hand.
+        $this->serverPlacement->reconcile($cluster, $resources->servers);
 
         // What PVE says about the storages Convoy has registered, recorded next
         // to what the operator declared so the two can be compared.

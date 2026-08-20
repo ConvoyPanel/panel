@@ -36,6 +36,12 @@ export interface Server {
     lifecycle: ServerLifecycle
     /** ISO timestamp of an administrative suspension, or null if not suspended. */
     suspendedAt: string | null
+    /**
+     * When the placement reconciler flagged this server for an operator, and
+     * why. Both are null for non-admin viewers, not just unflagged servers.
+     */
+    flaggedAt: string | null
+    flagReason: string | null
     /** The guest's live power state per the last poll, or null for "we cannot say". */
     powerState: App.Enums.Server.PowerState | null
     cpu: number
