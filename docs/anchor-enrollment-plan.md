@@ -456,9 +456,41 @@ folded into stage B.
    them — but only by passing an explicit `null`. Omitting either field gives
    the safe shape, so the dangerous one cannot be reached by forgetting a
    parameter.
-2. **Self-registration.** Report in the enroll request; key-based enrollment
-   creates the `Anchor` with `reported_facts` + `approved_at`. Session minting
-   gates on approval. Agent gathers and sends the report.
+2. **Self-registration — DONE.** Key-based enrollment creates the `Anchor`
+   (`reported_facts`, `approved_at`, `enrollment_key_id`), approval accepts it,
+   and session minting gates on approval. Agent gathers and sends the report.
+
+   What the build settled that the plan had not:
+
+   - **Approval had to land in this slice, not slice 3.** Without it a
+     self-registered Anchor could never leave the pending state, so the slice
+     would have shipped a dead end. Slice 3 now adds *node materialization on
+     top of* an approval step that already exists, rather than inventing one.
+   - **`anchors.public_url` is nullable.** A machine that just introduced itself
+     has not been told how the panel reaches it back. The alternative -- deriving
+     a guess from the request's source address -- puts an unvalidated value in
+     the column the console dials, where it looks settled and fails at first
+     use. Approval is where it stops being null, which is also why approval
+     requires it.
+   - **`PENDING_APPROVAL` is asked before liveness.** A machine waiting to be
+     let in is heartbeating perfectly well; reporting it as unreachable sends an
+     operator to the network instead of to the queue holding the decision.
+   - **The self-enrollment audit event stayed under `admin.anchor.`** even
+     though no admin performed it. Areas are a closed, frontend-matched set, and
+     filtering `area=admin.anchor` now returns an installation's whole story.
+     That nobody did it is carried by the row having no actor.
+   - **The agent does not report the PVE version or the cluster CA
+     fingerprint.** Both come back from the Proxmox API over an authenticated
+     channel through code the panel already has and tests
+     (`ClusterIdentityService`); parsing them out of `/etc/pve` would be a
+     second implementation of an answer we can ask for. Host addresses are
+     likewise omitted -- the panel records the source address it actually
+     observed, which is the one reachability claim a machine cannot overstate.
+
+   **Follow-up worth tracking:** `/api/anchor/enroll` is throttled to 10/minute
+   per IP. A rack booting from one image behind a single NAT can exceed that, so
+   the agent should back off and retry on 429 rather than the limit being
+   raised.
 3. **Node materialization.** Approval queue UI; approve → create the node from
    the report + location. `auto_approve` collapses it to one step. Unique index
    on `nodes.anchor_id`.

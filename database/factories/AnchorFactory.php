@@ -18,7 +18,27 @@ class AnchorFactory extends Factory
             'mode' => AnchorMode::AGENT,
             'public_url' => 'https://'.$this->faker->domainName(),
             'secret' => Str::random(64),
+            /*
+             * Approved by default: a factory Anchor stands in for one an admin
+             * created by hand, which is approved by construction. The pending
+             * state is a self-registration artefact and has its own state.
+             */
+            'approved_at' => now(),
         ];
+    }
+
+    /** A machine that introduced itself and is waiting to be let in. */
+    public function pending(): static
+    {
+        return $this->state(fn () => [
+            'public_url' => null,
+            'approved_at' => null,
+            'enrolled_at' => now(),
+            'last_seen_at' => now(),
+            'protocol_min' => Anchor::PROTOCOL_VERSION,
+            'protocol_max' => Anchor::PROTOCOL_VERSION,
+            'reported_facts' => ['hostname' => 'pve-new.example.com'],
+        ]);
     }
 
     public function enrolled(): static

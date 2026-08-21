@@ -35,6 +35,13 @@ class AnchorLivenessService
      */
     public function refresh(Anchor $anchor): bool
     {
+        // Nothing to probe: a self-registered Anchor has no address until it
+        // is approved. Reporting that as a failed probe would be accurate but
+        // useless -- there was never a request to fail.
+        if ($anchor->public_url === null) {
+            return false;
+        }
+
         $url = rtrim($anchor->public_url, '/').'/api/v1/info';
 
         try {

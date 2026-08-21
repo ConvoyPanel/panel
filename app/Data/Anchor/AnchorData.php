@@ -15,6 +15,7 @@ class AnchorData extends Data
 {
     /**
      * @param  array<int, string>  $capabilities
+     * @param  array<string, mixed>|null  $reportedFacts
      * @param  DataCollection<int, AnchorNodeData>|null  $nodes
      */
     public function __construct(
@@ -22,7 +23,8 @@ class AnchorData extends Data
         public string $uuid,
         public string $name,
         public AnchorMode $mode,
-        public string $publicUrl,
+        /** Null until approval establishes how the panel reaches this installation. */
+        public ?string $publicUrl,
         public ?string $panelUrlOverride,
         /** The override cascade already resolved -- what the anchor is actually told to call. */
         public string $panelUrl,
@@ -32,6 +34,13 @@ class AnchorData extends Data
         public int $agentsCount,
         public ?string $enrollmentExpiresAt,
         public ?string $enrolledAt,
+        public ?string $approvedAt,
+        /**
+         * What the machine said about itself when it enrolled. Only ever set
+         * for a self-registered Anchor, and only read by the approval screen --
+         * it is evidence for a decision, not state anything runs on.
+         */
+        public ?array $reportedFacts,
         public ?string $lastSeenAt,
         public ?string $version,
         public ?int $protocolMin,
@@ -71,6 +80,8 @@ class AnchorData extends Data
             // countdown to show.
             enrollmentExpiresAt: $anchor->enrollment_expires_at?->toIso8601String(),
             enrolledAt: $anchor->enrolled_at?->toIso8601String(),
+            approvedAt: $anchor->approved_at?->toIso8601String(),
+            reportedFacts: $anchor->reported_facts,
             lastSeenAt: $anchor->last_seen_at?->toIso8601String(),
             version: $anchor->version,
             protocolMin: $anchor->protocol_min,

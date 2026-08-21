@@ -59,7 +59,7 @@ class AnchorSessionService
                 console: $console,
                 expiresAt: $expiresAt,
                 relay: [
-                    'url' => $agent->consoleWebsocketUrl(),
+                    'url' => $this->websocketUrl($agent),
                     'token' => $agentToken,
                 ],
             );
@@ -70,7 +70,7 @@ class AnchorSessionService
         }
 
         return new ConsoleSessionData(
-            url: $endpoint->consoleWebsocketUrl(),
+            url: $this->websocketUrl($endpoint),
             token: $token,
             protocol: Anchor::PROTOCOL_VERSION,
             type: $type,
@@ -101,6 +101,19 @@ class AnchorSessionService
         )->toString();
     }
 
+    /**
+     * An approved Anchor always has an address -- approval is where it is
+     * established -- so this never fires in practice. It exists because
+     * "never in practice" is not a type, and a console that declines with a
+     * sentence beats one that dies on a null deep inside token issuance.
+     */
+    private function websocketUrl(Anchor $anchor): string
+    {
+        return $anchor->consoleWebsocketUrl() ?? throw new ConflictHttpException(
+            "Anchor {$anchor->name} has no address for the panel to reach it on.",
+        );
+    }
+
     private function ensureCompatible(Anchor $anchor): void
     {
         $compatibility = $anchor->compatibility();
@@ -113,6 +126,16 @@ class AnchorSessionService
         if ($compatibility === AnchorCompatibility::OFFLINE) {
             $this->liveness->refresh($anchor);
             $compatibility = $anchor->compatibility();
+        }
+
+        // A machine still waiting to be let in is not a fault to report as one:
+        // it is heartbeating fine, and the fix is a decision rather than an
+        // investigation. Saying so is the difference between an operator
+        // opening the approval queue and opening a packet capture.
+        if ($compatibility === AnchorCompatibility::PENDING_APPROVAL) {
+            throw new ConflictHttpException(
+                "Anchor {$anchor->name} is waiting to be approved.",
+            );
         }
 
         if ($compatibility !== AnchorCompatibility::COMPATIBLE) {
