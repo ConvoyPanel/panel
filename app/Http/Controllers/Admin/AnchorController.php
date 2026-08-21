@@ -8,6 +8,7 @@ use App\Enums\Anchor\AnchorMode;
 use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
 use App\Http\Requests\Admin\AnchorFormRequest;
+use App\Http\Requests\Admin\ApproveAnchorRequest;
 use App\Models\Anchor;
 use App\Models\Node;
 use App\Services\Anchor\AnchorEnrollmentService;
@@ -26,7 +27,18 @@ class AnchorController
             ->with('relay:id,name')
             ->withCount(['nodes', 'agents'])
             ->defaultSort('name')
-            ->allowedFilters(['name', AllowedFilter::exact('mode')])
+            ->allowedFilters([
+                'name',
+                AllowedFilter::exact('mode'),
+                // The approval queue. Derived from two columns rather than one
+                // flag, so it cannot be filtered as an exact match.
+                AllowedFilter::callback(
+                    'pending',
+                    fn ($query, $value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
+                        ? $query->whereNull('approved_at')->whereNotNull('enrolled_at')
+                        : $query->whereNotNull('approved_at'),
+                ),
+            ])
             ->paginate(min($request->query('per_page', 50), 100))
             ->appends($request->query());
 
@@ -75,6 +87,36 @@ class AnchorController
             AuditEvent::ADMIN_ANCHOR_UPDATED,
             subject: $anchor,
             properties: ['name' => $anchor->name, 'changed' => array_keys($anchor->getChanges())],
+        );
+
+        return AnchorData::from($this->hydrate($anchor));
+    }
+
+    /**
+     * Accept a self-registered installation into the fleet.
+     *
+     * Separate from `update` because it is not an edit: it is the decision the
+     * row has been waiting for, it can only happen once, and it is the moment
+     * the panel is told how to reach the machine back. Folding it into a
+     * general-purpose PUT would make "approve" a side effect of setting a
+     * field, which is exactly the kind of thing that gets done by accident.
+     */
+    public function approve(ApproveAnchorRequest $request, Anchor $anchor)
+    {
+        $anchor->update([
+            ...$request->safe()->only(['public_url', 'panel_url_override', 'name', 'relay_id']),
+            'approved_at' => now(),
+        ]);
+
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_APPROVED,
+            subject: $anchor,
+            properties: [
+                'name' => $anchor->name,
+                'mode' => $anchor->mode->value,
+                'public_url' => $anchor->public_url,
+                'hostname' => $anchor->reported_facts['hostname'] ?? null,
+            ],
         );
 
         return AnchorData::from($this->hydrate($anchor));

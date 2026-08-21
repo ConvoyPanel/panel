@@ -71,6 +71,17 @@ const anchorStatus = (anchor: Anchor): AnchorStatus => {
                 label: 'Version mismatch',
                 detail: lastSeen(anchor),
             }
+        // Not a fault. The machine is reporting in perfectly well and is
+        // waiting on a person, so this reads as a queue item rather than an
+        // outage -- calling it unreachable sends someone to the network.
+        case 'pending_approval':
+            return {
+                tone: 'waiting',
+                label: 'Waiting for approval',
+                detail: anchor.reportedFacts?.hostname
+                    ? `${anchor.reportedFacts.hostname} asked to join`
+                    : 'Introduced itself and is awaiting review',
+            }
         default:
             return {
                 tone: 'waiting',

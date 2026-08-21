@@ -329,6 +329,7 @@ Route::prefix('/anchors')->group(function () {
         Route::put('/', [Admin\AnchorController::class, 'update']);
         Route::delete('/', [Admin\AnchorController::class, 'destroy']);
         Route::post('/enrollment', [Admin\AnchorController::class, 'enrollment']);
+        Route::post('/approve', [Admin\AnchorController::class, 'approve']);
     });
 });
 

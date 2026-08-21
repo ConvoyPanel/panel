@@ -128,6 +128,16 @@ enum AuditEvent: string
     case ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED = 'admin.anchor.enrollment-key-created';
     case ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED = 'admin.anchor.enrollment-key-revoked';
     case ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED = 'admin.anchor.enrollment-key-deleted';
+    case ADMIN_ANCHOR_APPROVED = 'admin.anchor.approved';
+
+    /*
+     * Nobody at a keyboard did this -- a machine presented a key and the panel
+     * acted on it. That is carried by the row having no actor, not by the area:
+     * the prefixes are a closed, frontend-matched set, and keeping this one
+     * under `admin.anchor` means filtering by that area returns the whole story
+     * of an installation, self-enrollment included.
+     */
+    case ADMIN_ANCHOR_SELF_ENROLLED = 'admin.anchor.self-enrolled';
 
     // -----------------------------------------------------------------------------------------
     // IP address management. Subject is the block group, block, or address.
@@ -208,7 +218,9 @@ enum AuditEvent: string
             self::ADMIN_NODE_DELETED,
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED,
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED,
-            self::ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED => AuditRetention::FOREVER,
+            self::ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED,
+            self::ADMIN_ANCHOR_APPROVED,
+            self::ADMIN_ANCHOR_SELF_ENROLLED => AuditRetention::FOREVER,
             default => AuditRetention::STANDARD,
         };
     }

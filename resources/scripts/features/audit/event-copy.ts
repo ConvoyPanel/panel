@@ -305,6 +305,16 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.anchor.enrollment-key-deleted': {
         verb: 'deleted an Anchor enrollment key',
     },
+    // No actor on these rows -- a machine presented a key and the panel acted.
+    // The feed renders that as the panel itself, which is what happened.
+    'admin.anchor.self-enrolled': {
+        verb: 'enrolled itself with an Anchor key',
+        detail: (p) => pick(p, 'hostname', 'name'),
+    },
+    'admin.anchor.approved': {
+        verb: 'approved an Anchor',
+        detail: (p) => pick(p, 'hostname', 'name'),
+    },
 
     // IP address management
     'admin.address-block-group.created': { verb: 'created an address pool' },

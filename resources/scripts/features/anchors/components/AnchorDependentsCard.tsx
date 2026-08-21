@@ -101,7 +101,9 @@ const AnchorDependentsCard = ({ anchor, fleet }: Props) => {
                   to: '/admin/anchors/$anchorId',
                   params: { anchorId: String(agent.id) },
                   title: agent.name,
-                  subtitle: agent.publicUrl,
+                  // Null until an agent that enrolled itself is approved, which
+                  // is also when it gets an address at all.
+                  subtitle: agent.publicUrl ?? 'No address yet',
                   trailing: (
                       <span className='flex items-center gap-2 text-sm whitespace-nowrap'>
                           <span
