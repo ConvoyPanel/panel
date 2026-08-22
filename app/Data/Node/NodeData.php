@@ -3,6 +3,7 @@
 namespace App\Data\Node;
 
 use App\Data\Server\OveragePenaltyData;
+use App\Enums\Anchor\AnchorCompatibility;
 use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
 use App\Models\Node;
@@ -48,7 +49,18 @@ class NodeData extends Data
         public int $memory,
         public int $memoryOverallocate,
         public int $memoryAllocated,
-        public ?int $anchorId,
+        public ?int $relayId,
+        /**
+         * The agent installed on this host, or null where none is. A node
+         * carried over from v4 has none and keeps working without one -- it
+         * simply has no console and cannot install templates.
+         */
+        public ?AnchorCompatibility $agentCompatibility,
+        public ?string $agentVersion,
+        public ?string $agentPublicUrl,
+        public ?string $agentLastSeenAt,
+        /** @var array<int, string> */
+        public array $agentCapabilities,
         public int $serversCount,
         /**
          * Reachability as of {@see $statusCheckedAt}, written by `nodes:poll`
@@ -95,7 +107,12 @@ class NodeData extends Data
             memory: (int) $node->memory,
             memoryOverallocate: $node->memory_overallocate,
             memoryAllocated: (int) ($node->memory_allocated ?? 0),
-            anchorId: $node->anchor_id,
+            relayId: $node->relay_id,
+            agentCompatibility: $node->hasAnchor() ? $node->anchorCompatibility() : null,
+            agentVersion: $node->agent_version,
+            agentPublicUrl: $node->agent_public_url,
+            agentLastSeenAt: $node->agent_last_seen_at?->toIso8601String(),
+            agentCapabilities: $node->agent_capabilities ?? [],
             serversCount: (int) ($node->servers_count ?? 0),
             status: $node->currentStatus(),
             // Only meaningful alongside a live `unreachable`; a stale row keeps

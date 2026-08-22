@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\Anchor\AnchorCompatibility;
 use App\Enums\Anchor\AnchorMode;
 use App\Enums\Audit\AuditEvent;
-use App\Models\Anchor;
+use App\Models\AnchorEnrollment;
 use App\Models\AnchorEnrollmentKey;
 use App\Models\AuditLog;
+use App\Models\Node;
 use App\Services\Anchor\AnchorEnrollmentKeyService;
 use Database\Factories\AnchorEnrollmentKeyFactory;
 use Illuminate\Support\Facades\Cache;
@@ -49,17 +49,17 @@ it('lets a machine holding a key create its own record', function () {
         ],
     ])->assertOk();
 
-    $anchor = Anchor::sole();
+    $enrollment = AnchorEnrollment::sole();
 
-    expect($anchor->name)->toBe('pve-07.example.com')
-        ->and($anchor->enrolled_at)->not->toBeNull()
-        // The key proves the presenter was told a password. It is not a person
-        // deciding this machine belongs.
-        ->and($anchor->approved_at)->toBeNull()
-        ->and($anchor->compatibility())->toBe(AnchorCompatibility::PENDING_APPROVAL)
-        ->and($anchor->reported_facts['pve_node_name'])->toBe('pve-07')
-        ->and($response->json('config.installation_id'))->toBe($anchor->uuid)
-        ->and($response->json('config.secret'))->toBe($anchor->secret);
+    // A claim, not a node. The key proves the presenter was told a password; it
+    // is not a person deciding this machine belongs, and a node also needs a
+    // location nobody has chosen yet.
+    expect($enrollment->name)->toBe('pve-07.example.com')
+        ->and($enrollment->enrolled_at)->not->toBeNull()
+        ->and($enrollment->reported_facts['pve_node_name'])->toBe('pve-07')
+        ->and(Node::count())->toBe(0)
+        ->and($response->json('config.installation_id'))->toBe($enrollment->uuid)
+        ->and($response->json('config.secret'))->toBe($enrollment->secret);
 
     // The key records that it was spent.
     $key = AnchorEnrollmentKey::sole();
@@ -78,7 +78,7 @@ it('records where the request actually came from, not just what was claimed', fu
     ])->assertOk();
 
     // The one reachability claim a machine cannot overstate.
-    expect(Anchor::sole()->reported_facts['observed_source_ip'])->not->toBeNull();
+    expect(AnchorEnrollment::sole()->reported_facts['observed_source_ip'])->not->toBeNull();
 });
 
 it('never lets the report decide anything privileged', function () {
@@ -97,12 +97,11 @@ it('never lets the report decide anything privileged', function () {
         ],
     ])->assertOk();
 
-    $anchor = Anchor::sole();
+    $enrollment = AnchorEnrollment::sole();
 
-    expect($anchor->approved_at)->toBeNull()
-        ->and($anchor->relay_id)->toBeNull()
-        ->and($anchor->reported_facts)->not->toHaveKey('approved_at')
-        ->and($anchor->reported_facts)->not->toHaveKey('location_id');
+    expect($enrollment->reported_facts)->not->toHaveKey('approved_at')
+        ->and($enrollment->reported_facts)->not->toHaveKey('location_id')
+        ->and($enrollment->reported_facts)->not->toHaveKey('relay_id');
 });
 
 it('refuses a key that cannot admit the mode presented', function () {
@@ -111,7 +110,7 @@ it('refuses a key that cannot admit the mode presented', function () {
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])
         ->assertUnprocessable();
 
-    expect(Anchor::count())->toBe(0)
+    expect(AnchorEnrollment::count())->toBe(0)
         // A refused attempt must not burn the key, or one wrong flag disposes
         // of a credential the operator then has to reissue.
         ->and(AnchorEnrollmentKey::sole()->uses)->toBe(0);
@@ -130,7 +129,7 @@ it('refuses a revoked, expired or exhausted key without saying which', function 
             ->assertJsonPath('message', 'The enrollment key is invalid or expired.');
     }
 
-    expect(Anchor::count())->toBe(0);
+    expect(AnchorEnrollment::count())->toBe(0);
 });
 
 it('spends a single-use key exactly once even under a simultaneous claim', function () {
@@ -141,7 +140,7 @@ it('spends a single-use key exactly once even under a simultaneous claim', funct
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])->assertOk();
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])->assertUnprocessable();
 
-    expect(Anchor::count())->toBe(1)
+    expect(AnchorEnrollment::count())->toBe(1)
         ->and(AnchorEnrollmentKey::sole()->uses)->toBe(1);
 });
 
@@ -159,7 +158,7 @@ it('admits a whole rack from one reusable key, naming each machine for itself', 
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])
         ->assertUnprocessable();
 
-    expect(Anchor::pluck('name')->sort()->values()->all())
+    expect(AnchorEnrollment::pluck('name')->sort()->values()->all())
         ->toBe(['pve-01', 'pve-02', 'pve-03']);
 });
 
@@ -169,7 +168,7 @@ it('falls back to a distinguishable name when the machine says nothing about its
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])->assertOk();
     $this->postJson('/api/anchor/enroll', ['token' => $token, 'mode' => 'agent'])->assertOk();
 
-    $names = Anchor::pluck('name');
+    $names = AnchorEnrollment::pluck('name');
 
     // Two rows called "Rack 4" would make the approval queue unusable.
     expect($names)->toHaveCount(2)
@@ -181,24 +180,27 @@ it('leaves the targeted rotation path alone', function () {
     // Two credentials, told apart by shape rather than by which lookup happens
     // to hit -- a mistyped rotation token must not be evaluated as an attempt
     // to enroll a stranger.
-    $anchor = Anchor::factory()->create();
+    [, , $node] = createServerModel();
+    $node->update(Node::factory()->withAgent()->raw());
 
     $token = $this->actingAs(admin())
-        ->postJson("/api/admin/anchors/{$anchor->id}/enrollment")
+        ->postJson("/api/admin/nodes/{$node->id}/agent/enrollment")
         ->json('data.token');
 
     $this->postJson('/api/anchor/enroll', ['token' => $token])
         ->assertOk()
-        ->assertJsonPath('config.installation_id', $anchor->uuid);
+        ->assertJsonPath('config.installation_id', $node->refresh()->agent_uuid);
 
-    expect(Anchor::count())->toBe(1)
-        ->and($anchor->refresh()->isApproved())->toBeTrue();
+    // Re-keying an installation we already have must not manufacture a claim.
+    expect(AnchorEnrollment::count())->toBe(0);
 });
 
 it('stops mirroring the panel-side address into the agent config', function () {
-    $anchor = Anchor::factory()->create(['public_url' => 'https://anchor.example.com']);
+    [, , $node] = createServerModel();
+    $node->update(Node::factory()->withAgent()->raw());
+
     $token = $this->actingAs(admin())
-        ->postJson("/api/admin/anchors/{$anchor->id}/enrollment")
+        ->postJson("/api/admin/nodes/{$node->id}/agent/enrollment")
         ->json('data.token');
 
     // It describes how the panel reaches the agent, the agent never read it,
@@ -240,5 +242,5 @@ it('carries a token minted through the admin API all the way to a new record', f
         'report' => ['hostname' => 'pve-09'],
     ])->assertOk();
 
-    expect(Anchor::sole()->name)->toBe('pve-09');
+    expect(AnchorEnrollment::sole()->name)->toBe('pve-09');
 });

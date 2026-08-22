@@ -278,9 +278,9 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         detail: changedFields,
     },
     'admin.location.deleted': { verb: 'deleted a location' },
-    'admin.anchor.created': { verb: 'created an Anchor' },
-    'admin.anchor.updated': { verb: 'updated an Anchor', detail: changedFields },
-    'admin.anchor.deleted': { verb: 'deleted an Anchor' },
+    'admin.relay.created': { verb: 'created a relay' },
+    'admin.relay.updated': { verb: 'updated a relay', detail: changedFields },
+    'admin.relay.deleted': { verb: 'deleted a relay' },
     'admin.anchor.enrollment-rotated': {
         verb: 'rotated an Anchor enrollment secret',
     },
@@ -314,6 +314,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.anchor.approved': {
         verb: 'approved an Anchor',
         detail: (p) => pick(p, 'hostname', 'name'),
+    },
+    'admin.anchor.rejected': {
+        verb: 'turned away an Anchor',
+        detail: (p) => pick(p, 'hostname', 'source_ip', 'name'),
     },
 
     // IP address management

@@ -115,7 +115,9 @@ class ServerController
 
     public function createConsoleSession(CreateConsoleSessionRequest $request, Server $server)
     {
-        $server->node->loadMissing('anchor.relay');
+        // The node is the agent now; only the relay it routes through is a
+        // separate record to load.
+        $server->node->loadMissing('relay');
 
         $type = $request->enum('type', ConsoleType::class);
 

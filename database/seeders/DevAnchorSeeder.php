@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Anchor\AnchorMode;
-use App\Models\Anchor;
 use App\Models\Node;
 use Illuminate\Database\Seeder;
 
@@ -57,23 +55,20 @@ class DevAnchorSeeder extends Seeder
             return;
         }
 
-        $anchor = Anchor::query()->firstOrNew(['uuid' => $uuid]);
-        $anchor->fill([
-            'name' => 'Dev Proxmox Agent',
-            'mode' => AnchorMode::AGENT,
-            'public_url' => rtrim($url, '/'),
-            'secret' => $secret,
+        // The node *is* the installation now, so this writes onto the node
+        // rather than creating a record to link to it.
+        $node->update([
+            'agent_uuid' => $uuid,
+            'agent_secret' => $secret,
+            'agent_public_url' => rtrim($url, '/'),
             // Enrollment is what proves the panel shares a secret with this
-            // installation; the liveness probe will not vouch for an
-            // unenrolled Anchor, so record that we did it out of band.
-            'enrolled_at' => $anchor->enrolled_at ?? now(),
+            // installation; the liveness probe will not vouch for an unenrolled
+            // agent, so record that we did it out of band.
+            'agent_enrolled_at' => $node->agent_enrolled_at ?? now(),
         ]);
-        $anchor->save();
-
-        $node->update(['anchor_id' => $anchor->id]);
 
         $this->command->info(
-            "DevAnchorSeeder: anchor #{$anchor->id} attached to node #{$node->id} ({$anchor->public_url})."
+            "DevAnchorSeeder: agent attached to node #{$node->id} ({$node->agent_public_url})."
         );
     }
 }

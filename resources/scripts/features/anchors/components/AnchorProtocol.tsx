@@ -1,4 +1,3 @@
-import type { Anchor } from '@/features/anchors/types.ts'
 import { IconCircleCheck } from '@tabler/icons-react'
 
 import { Badge } from '@/components/ui/Badge'
@@ -9,7 +8,15 @@ import {
     TooltipTrigger,
 } from '@/components/ui/Tooltip'
 
-const range = (anchor: Anchor) =>
+/** Anything that reports a protocol range: a node's agent, a relay, a claim. */
+interface ProtocolLike {
+    protocolMin: number | null
+    protocolMax: number | null
+    panelProtocolVersion: number
+    compatibility: App.Enums.Anchor.AnchorCompatibility | null
+}
+
+const range = (anchor: ProtocolLike) =>
     anchor.protocolMin === anchor.protocolMax
         ? `${anchor.protocolMin}`
         : `${anchor.protocolMin}–${anchor.protocolMax}`
@@ -28,7 +35,7 @@ const AnchorProtocol = ({
     anchor,
     quiet,
 }: {
-    anchor: Anchor
+    anchor: ProtocolLike
     /**
      * Roster mode: show the badge when something is wrong and nothing at all
      * when it isn't. A green tick on every healthy row would be colour spent on

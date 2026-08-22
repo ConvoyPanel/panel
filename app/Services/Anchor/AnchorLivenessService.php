@@ -2,7 +2,9 @@
 
 namespace App\Services\Anchor;
 
-use App\Models\Anchor;
+use App\Models\AnchorEnrollment;
+use App\Models\Node;
+use App\Models\Relay;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -33,16 +35,18 @@ class AnchorLivenessService
      * never fatal: the caller falls back to whatever the pushed heartbeat left
      * behind, so an unreachable Anchor simply stays offline.
      */
-    public function refresh(Anchor $anchor): bool
+    public function refresh(Node|Relay|AnchorEnrollment $anchor): bool
     {
-        // Nothing to probe: a self-registered Anchor has no address until it
-        // is approved. Reporting that as a failed probe would be accurate but
-        // useless -- there was never a request to fail.
-        if ($anchor->public_url === null) {
+        $public = $anchor->anchorPublicUrl();
+
+        // Nothing to probe. A machine still waiting to be approved has no
+        // address yet, and reporting that as a failed probe would be accurate
+        // but useless -- there was never a request to fail.
+        if ($public === null) {
             return false;
         }
 
-        $url = rtrim($anchor->public_url, '/').'/api/v1/info';
+        $url = rtrim($public, '/').'/api/v1/info';
 
         try {
             $response = Http::timeout(self::TIMEOUT_SECONDS)->get($url);
@@ -63,7 +67,7 @@ class AnchorLivenessService
         // serving a different installation than the one we have on record, so
         // it must not count as this Anchor being alive. The heartbeat endpoint
         // enforces the same invariant.
-        if ($response->json('mode') !== $anchor->mode->value) {
+        if ($response->json('mode') !== $anchor->anchorMode()->value) {
             return false;
         }
 
@@ -74,8 +78,7 @@ class AnchorLivenessService
             return false;
         }
 
-        $anchor->update([
-            'last_seen_at' => now(),
+        $anchor->recordAnchorHeartbeat([
             'version' => (string) $response->json('version'),
             'protocol_min' => $min,
             'protocol_max' => $max,

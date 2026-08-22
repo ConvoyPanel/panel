@@ -5,8 +5,8 @@ namespace App\Data\Anchor;
 use App\Data\User\UserData;
 use App\Enums\Anchor\AnchorMode;
 use App\Enums\Anchor\EnrollmentKeyStatus;
-use App\Models\Anchor;
 use App\Models\AnchorEnrollmentKey;
+use App\Settings\AnchorSettings;
 use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -61,9 +61,9 @@ class AnchorEnrollmentKeyData extends Data
                 ? Optional::create()
                 : sprintf(
                     "anchor enroll --panel-url %s --token '%s'",
-                    // No row exists yet to carry a per-Anchor override, so the
+                    // No installation exists yet to carry an override, so the
                     // command can only name the panel-wide address.
-                    Anchor::defaultPanelUrl(),
+                    app(AnchorSettings::class)->resolvedPanelUrl(),
                     $token,
                 ),
             createdBy: Lazy::whenLoaded(

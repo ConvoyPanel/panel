@@ -2,7 +2,6 @@
 
 namespace App\Settings;
 
-use App\Models\Anchor;
 use Spatie\LaravelSettings\Settings;
 
 /**
@@ -23,9 +22,18 @@ class AnchorSettings extends Settings
      * Where Anchors should reach the panel, or an empty string to use APP_URL.
      *
      * Stored as a string rather than a nullable one so the shape never changes;
-     * {@see Anchor::panelUrl()} treats empty as "not set".
+     * {@see resolvedPanelUrl()} treats empty as "not set".
      */
     public string $panel_url = '';
+
+    /**
+     * The panel address an installation with no override of its own is told to
+     * call. The bottom two tiers of the cascade, resolved.
+     */
+    public function resolvedPanelUrl(): string
+    {
+        return rtrim($this->panel_url ?: config('app.url'), '/');
+    }
 
     public static function group(): string
     {

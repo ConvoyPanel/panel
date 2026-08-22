@@ -1,6 +1,5 @@
-import { createEnrollment } from '@/features/anchors/api.ts'
 import { toneDotClass } from '@/features/anchors/status.ts'
-import type { Anchor } from '@/features/anchors/types.ts'
+import type { AnchorEnrollment } from '@/features/anchors/types.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
 import { getApiErrorMessage } from '@/utils/http.ts'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
@@ -8,23 +7,33 @@ import { useMutation } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
+import { CardContent } from '@/components/ui/Card'
 import {
     InputGroup,
     InputGroupAddon,
     InputGroupButton,
     InputGroupInput,
 } from '@/components/ui/InputGroup'
-import {
-    ResponsiveDialogBody,
-    ResponsiveDialogFooter,
-} from '@/components/ui/ResponsiveDialog'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
-    anchor: Anchor
-    /** Invalidates the anchor list; used to watch for the first heartbeat. */
+    /** What is being waited for, named in the waiting line. */
+    label: string
+    /** Shown once it arrives, when the build is known. */
+    version?: string | null
+    /**
+     * Mints the token. Passed in rather than chosen here, because the same
+     * panel serves three jobs that differ only in which endpoint issues:
+     * enrolling a brand-new machine, installing an agent on a node carried over
+     * from v4, and re-keying a relay.
+     */
+    issueToken: () => Promise<AnchorEnrollment>
+    /** Something has arrived, so stop polling and stop offering the command. */
+    done: boolean
+    /** A stable id for what this panel is issuing for; re-issues when it changes. */
+    subject: number | string
+    /** Invalidates whatever list is watching for the arrival. */
     refresh: () => Promise<unknown>
-    onClose: () => void
 }
 
 const format = (seconds: number) =>
@@ -70,21 +79,28 @@ const useCountdown = (expiresAt?: string) => {
  * its own from the row menu, so it owns the body and footer rather than a
  * dialog of its own.
  */
-const EnrollmentPanel = ({ anchor, refresh, onClose }: Props) => {
+const EnrollmentPanel = ({
+    label,
+    version,
+    issueToken,
+    done,
+    subject,
+    refresh,
+}: Props) => {
     const { copy } = useClipboard({ successMessage: 'Install command copied' })
-    const enrolled = anchor.compatibility !== 'unenrolled'
-    const issue = useMutation({ mutationFn: () => createEnrollment(anchor.id) })
+    const enrolled = done
+    const issue = useMutation({ mutationFn: issueToken })
     const remaining = useCountdown(issue.data?.expiresAt)
 
     // Issuing a token is a write, so it happens once per open rather than on
     // every render StrictMode's double-mount included.
-    const issuedFor = useRef<number | null>(null)
+    const issuedFor = useRef<number | string | null>(null)
     useEffect(() => {
-        if (issuedFor.current === anchor.id) return
+        if (issuedFor.current === subject) return
 
-        issuedFor.current = anchor.id
+        issuedFor.current = subject
         issue.mutate()
-    }, [anchor.id, issue])
+    }, [subject, issue])
 
     /*
      * The list already polls every 30s, which is fine for a screen you glance
@@ -107,7 +123,7 @@ const EnrollmentPanel = ({ anchor, refresh, onClose }: Props) => {
 
     return (
         <>
-            <ResponsiveDialogBody className='flex flex-col gap-4'>
+            <CardContent className='flex flex-col gap-4'>
                 {issue.isPending && <Skeleton className='h-9 w-full' />}
 
                 {issue.isError && (
@@ -185,9 +201,9 @@ const EnrollmentPanel = ({ anchor, refresh, onClose }: Props) => {
                             {/* The version is the answer to a different
                                 question than "did it work", so it sits at the
                                 far edge rather than trailing the sentence. */}
-                            {anchor.version && (
+                            {version && (
                                 <span className='text-muted-foreground ml-auto font-mono text-xs tabular-nums'>
-                                    {anchor.version}
+                                    {version}
                                 </span>
                             )}
                         </>
@@ -199,9 +215,7 @@ const EnrollmentPanel = ({ anchor, refresh, onClose }: Props) => {
                             />
                             <span>
                                 Waiting for{' '}
-                                <span className='font-medium'>
-                                    {anchor.name}
-                                </span>{' '}
+                                <span className='font-medium'>{label}</span>{' '}
                                 to call home…
                             </span>
                         </>
@@ -210,21 +224,12 @@ const EnrollmentPanel = ({ anchor, refresh, onClose }: Props) => {
 
                 {!enrolled && (
                     <p className='text-muted-foreground text-xs'>
-                        You can close this — the anchor stays{' '}
-                        <span className='font-medium'>Waiting for install</span>{' '}
-                        in the list until it connects, and the command can be
-                        reissued from its menu.
+                        You can close this — the command keeps working until it
+                        expires, and the machine shows up in the queue whenever
+                        it runs.
                     </p>
                 )}
-            </ResponsiveDialogBody>
-            <ResponsiveDialogFooter className='mt-4'>
-                <Button
-                    variant={enrolled ? 'default' : 'outline'}
-                    onClick={onClose}
-                >
-                    {enrolled ? 'Done' : 'Close'}
-                </Button>
-            </ResponsiveDialogFooter>
+            </CardContent>
         </>
     )
 }

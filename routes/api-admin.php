@@ -93,6 +93,9 @@ Route::prefix('/nodes')->group(function () {
         Route::post('/test-connection', Admin\Nodes\NodeConnectionTestController::class);
         Route::put('/', [Admin\Nodes\NodeController::class, 'update']);
         Route::delete('/', [Admin\Nodes\NodeController::class, 'destroy']);
+        // Re-keys the agent on this host. The node is the installation, so this
+        // hangs off the node rather than off a record of its own.
+        Route::post('/agent/enrollment', [Admin\Nodes\NodeController::class, 'agentEnrollment']);
 
         Route::prefix('/storages')->group(function () {
             Route::get('/', [Admin\Nodes\StorageController::class, 'index']);
@@ -297,6 +300,32 @@ Route::post(
 );
 
 /*
+ * One account's credentials, from the admin side: list them, and take them away.
+ *
+ * Every nested id is scope-bound to `{user}` (the group's `scopeBindings()`), so a key belonging
+ * to someone else 404s without the controller checking. `apiKey` scopes through the `apiKeys`
+ * relation, which excludes application tokens — see App\Models\User::apiKeys().
+ */
+Route::prefix('/users/{user}')->group(function () {
+    Route::get('/api-keys', [Admin\UserCredentialController::class, 'apiKeys']);
+    Route::delete('/api-keys/{apiKey}', [Admin\UserCredentialController::class, 'destroyApiKey']);
+
+    Route::get('/ssh-keys', [Admin\UserCredentialController::class, 'sshKeys']);
+    Route::delete('/ssh-keys/{sshKey}', [Admin\UserCredentialController::class, 'destroySshKey']);
+
+    Route::get('/passkeys', [Admin\UserCredentialController::class, 'passkeys']);
+    Route::delete('/passkeys/{passkey}', [Admin\UserCredentialController::class, 'destroyPasskey']);
+
+    Route::get('/oauth-connections', [Admin\UserCredentialController::class, 'oauthConnections']);
+    Route::delete(
+        '/oauth-connections/{oauthConnection}',
+        [Admin\UserCredentialController::class, 'destroyOauthConnection'],
+    );
+
+    Route::delete('/two-factor', [Admin\UserCredentialController::class, 'destroyTwoFactor']);
+});
+
+/*
 |--------------------------------------------------------------------------
 | Anchor Controller Routes
 |--------------------------------------------------------------------------
@@ -306,16 +335,9 @@ Route::post(
 */
 
 Route::prefix('/anchors')->group(function () {
-    Route::get('/', [Admin\AnchorController::class, 'index']);
-    Route::post('/', [Admin\AnchorController::class, 'store']);
-
     /*
-     * Declared before the /{anchor} group on purpose: registered after it,
-     * "enrollment-keys" would be matched as an Anchor route key and 404 on
-     * binding instead of reaching this controller.
-     *
-     * These keys admit *new* installations and so are not scoped to an anchor,
-     * unlike POST /{anchor}/enrollment, which re-keys one that already exists.
+     * Declared before any /{id} group: registered after one, "enrollment-keys"
+     * would be matched as a route key and 404 on binding.
      */
     Route::prefix('/enrollment-keys')->group(function () {
         Route::get('/', [Admin\AnchorEnrollmentKeyController::class, 'index']);
@@ -324,12 +346,39 @@ Route::prefix('/anchors')->group(function () {
         Route::delete('/{enrollment_key}', [Admin\AnchorEnrollmentKeyController::class, 'destroy']);
     });
 
-    Route::prefix('/{anchor}')->group(function () {
-        Route::get('/', [Admin\AnchorController::class, 'show']);
-        Route::put('/', [Admin\AnchorController::class, 'update']);
-        Route::delete('/', [Admin\AnchorController::class, 'destroy']);
-        Route::post('/enrollment', [Admin\AnchorController::class, 'enrollment']);
-        Route::post('/approve', [Admin\AnchorController::class, 'approve']);
+    /*
+     * Machines that have introduced themselves and are waiting to be let in.
+     * Approving one is what creates a node; there is no other supported way.
+     */
+    Route::prefix('/enrollments')->group(function () {
+        Route::get('/', [Admin\AnchorEnrollmentController::class, 'index']);
+        Route::get('/{anchor_enrollment}', [Admin\AnchorEnrollmentController::class, 'show']);
+        Route::post('/{anchor_enrollment}/approve', [Admin\AnchorEnrollmentController::class, 'approve']);
+        Route::delete('/{anchor_enrollment}', [Admin\AnchorEnrollmentController::class, 'destroy']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Relay Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/relays
+|
+| The part of an Anchor deployment that is not a node: a shared public endpoint
+| console sessions are routed through. An agent is not addressable here — it is
+| the node it runs on.
+|
+*/
+Route::prefix('/relays')->group(function () {
+    Route::get('/', [Admin\RelayController::class, 'index']);
+    Route::post('/', [Admin\RelayController::class, 'store']);
+
+    Route::prefix('/{relay}')->group(function () {
+        Route::get('/', [Admin\RelayController::class, 'show']);
+        Route::put('/', [Admin\RelayController::class, 'update']);
+        Route::delete('/', [Admin\RelayController::class, 'destroy']);
+        Route::post('/enrollment', [Admin\RelayController::class, 'enrollment']);
     });
 });
 

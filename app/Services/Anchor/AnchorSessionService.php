@@ -4,12 +4,13 @@ namespace App\Services\Anchor;
 
 use App\Data\Server\ConsoleSessionData;
 use App\Enums\Anchor\AnchorCompatibility;
-use App\Enums\Anchor\AnchorMode;
 use App\Enums\Server\ConsoleType;
-use App\Models\Anchor;
+use App\Models\Node;
+use App\Models\Relay;
 use App\Models\Server;
 use App\Models\User;
 use App\Services\Api\JWTService;
+use App\Support\Anchor\AnchorProtocol;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -23,14 +24,13 @@ class AnchorSessionService
 
     public function create(Server $server, User $user, ConsoleType $type): ConsoleSessionData
     {
-        $agent = $server->node->anchor;
+        // The node *is* the agent now, so there is no link to be missing --
+        // only an agent that was never installed on it, which is the v4 shape
+        // and stays a supported one.
+        $agent = $server->node;
 
-        if ($agent === null) {
-            throw new ConflictHttpException('This server does not have an Anchor agent configured.');
-        }
-
-        if ($agent->mode !== AnchorMode::AGENT) {
-            throw new ConflictHttpException('This server must be assigned to an Anchor agent.');
+        if (! $agent->hasAnchor()) {
+            throw new ConflictHttpException('This server\'s node does not have an Anchor agent installed.');
         }
 
         $agent->loadMissing('relay');
@@ -72,7 +72,7 @@ class AnchorSessionService
         return new ConsoleSessionData(
             url: $this->websocketUrl($endpoint),
             token: $token,
-            protocol: Anchor::PROTOCOL_VERSION,
+            protocol: AnchorProtocol::VERSION,
             type: $type,
             password: $password,
         );
@@ -80,7 +80,7 @@ class AnchorSessionService
 
     /** @param array<string, mixed> $console @param array<string, string>|null $relay */
     private function issue(
-        Anchor $anchor,
+        Node|Relay $anchor,
         Server $server,
         User $user,
         array $console,
@@ -88,11 +88,11 @@ class AnchorSessionService
         ?array $relay = null,
     ): string {
         return $this->jwt->issue(
-            signingKey: $anchor->secret,
-            audience: $anchor->uuid,
-            identifier: $user->uuid.$server->uuid.$anchor->uuid.Str::random(),
+            signingKey: $anchor->anchorSecret(),
+            audience: $anchor->anchorUuid(),
+            identifier: $user->uuid.$server->uuid.$anchor->anchorUuid().Str::random(),
             claims: array_filter([
-                'protocol' => Anchor::PROTOCOL_VERSION,
+                'protocol' => AnchorProtocol::VERSION,
                 'console' => $console,
                 'relay' => $relay,
             ], fn (mixed $value) => $value !== null),
@@ -107,16 +107,16 @@ class AnchorSessionService
      * "never in practice" is not a type, and a console that declines with a
      * sentence beats one that dies on a null deep inside token issuance.
      */
-    private function websocketUrl(Anchor $anchor): string
+    private function websocketUrl(Node|Relay $anchor): string
     {
-        return $anchor->consoleWebsocketUrl() ?? throw new ConflictHttpException(
-            "Anchor {$anchor->name} has no address for the panel to reach it on.",
+        return $anchor->anchorWebsocketUrl() ?? throw new ConflictHttpException(
+            "Anchor {$anchor->anchorName()} has no address for the panel to reach it on.",
         );
     }
 
-    private function ensureCompatible(Anchor $anchor): void
+    private function ensureCompatible(Node|Relay $anchor): void
     {
-        $compatibility = $anchor->compatibility();
+        $compatibility = $anchor->anchorCompatibility();
 
         // A stale heartbeat does not prove the Anchor is down — it may just be
         // unable to reach us. Before refusing the session, try reaching it the
@@ -125,22 +125,12 @@ class AnchorSessionService
         // than reused from above.
         if ($compatibility === AnchorCompatibility::OFFLINE) {
             $this->liveness->refresh($anchor);
-            $compatibility = $anchor->compatibility();
-        }
-
-        // A machine still waiting to be let in is not a fault to report as one:
-        // it is heartbeating fine, and the fix is a decision rather than an
-        // investigation. Saying so is the difference between an operator
-        // opening the approval queue and opening a packet capture.
-        if ($compatibility === AnchorCompatibility::PENDING_APPROVAL) {
-            throw new ConflictHttpException(
-                "Anchor {$anchor->name} is waiting to be approved.",
-            );
+            $compatibility = $anchor->anchorCompatibility();
         }
 
         if ($compatibility !== AnchorCompatibility::COMPATIBLE) {
             throw new ConflictHttpException(
-                "Anchor {$anchor->name} is not online with a compatible protocol version.",
+                "Anchor {$anchor->anchorName()} is not online with a compatible protocol version.",
             );
         }
     }

@@ -1,11 +1,13 @@
-import anchorStatus, { toneDotClass } from '@/features/anchors/status.ts'
-import type { Anchor } from '@/features/anchors/types.ts'
+import anchorStatus, {
+    type AnchorLike,
+    toneDotClass,
+} from '@/features/anchors/status.ts'
 import { cn } from '@/utils'
 
 import { StatLabel } from '@/components/ui/Typography'
 
 interface Props {
-    anchor: Anchor
+    anchor: AnchorLike
     className?: string
 }
 

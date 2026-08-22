@@ -121,14 +121,15 @@ enum AuditEvent: string
     case ADMIN_LOCATION_CREATED = 'admin.location.created';
     case ADMIN_LOCATION_UPDATED = 'admin.location.updated';
     case ADMIN_LOCATION_DELETED = 'admin.location.deleted';
-    case ADMIN_ANCHOR_CREATED = 'admin.anchor.created';
-    case ADMIN_ANCHOR_UPDATED = 'admin.anchor.updated';
-    case ADMIN_ANCHOR_DELETED = 'admin.anchor.deleted';
+    case ADMIN_RELAY_CREATED = 'admin.relay.created';
+    case ADMIN_RELAY_UPDATED = 'admin.relay.updated';
+    case ADMIN_RELAY_DELETED = 'admin.relay.deleted';
     case ADMIN_ANCHOR_ENROLLMENT_ROTATED = 'admin.anchor.enrollment-rotated';
     case ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED = 'admin.anchor.enrollment-key-created';
     case ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED = 'admin.anchor.enrollment-key-revoked';
     case ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED = 'admin.anchor.enrollment-key-deleted';
     case ADMIN_ANCHOR_APPROVED = 'admin.anchor.approved';
+    case ADMIN_ANCHOR_REJECTED = 'admin.anchor.rejected';
 
     /*
      * Nobody at a keyboard did this -- a machine presented a key and the panel
@@ -220,6 +221,7 @@ enum AuditEvent: string
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_REVOKED,
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_DELETED,
             self::ADMIN_ANCHOR_APPROVED,
+            self::ADMIN_ANCHOR_REJECTED,
             self::ADMIN_ANCHOR_SELF_ENROLLED => AuditRetention::FOREVER,
             default => AuditRetention::STANDARD,
         };
