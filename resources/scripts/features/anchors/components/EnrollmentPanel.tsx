@@ -8,12 +8,6 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { CardContent } from '@/components/ui/Card'
-import {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupButton,
-    InputGroupInput,
-} from '@/components/ui/InputGroup'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
@@ -146,23 +140,27 @@ const EnrollmentPanel = ({
 
                 {issue.data && (
                     <>
-                        <InputGroup>
-                            <InputGroupInput
-                                readOnly
-                                value={issue.data.command}
-                                className='font-mono text-xs'
-                                aria-label='Install command'
-                                onFocus={event => event.currentTarget.select()}
-                            />
-                            <InputGroupAddon align='inline-end'>
-                                <InputGroupButton
-                                    onClick={() => copy(issue.data.command)}
-                                >
-                                    <IconCopy className='size-4' />
-                                    Copy
-                                </InputGroupButton>
-                            </InputGroupAddon>
-                        </InputGroup>
+                        {/* A terminal block rather than a text input: this is a
+                            line to paste into a root shell, and dressing it as
+                            a field invited people to type into it. */}
+                        <div className='bg-foreground flex items-start justify-between gap-3 rounded-xl p-4'>
+                            <code className='text-background/90 min-w-0 font-mono text-xs leading-relaxed break-all'>
+                                <span className='text-background/45 select-none'>
+                                    ${' '}
+                                </span>
+                                {issue.data.command}
+                            </code>
+                            <Button
+                                variant='outline'
+                                size='sm'
+                                aria-label='Copy install command'
+                                className='text-background/90 border-background/20 bg-background/10 hover:bg-background/20 hover:text-background shrink-0'
+                                onClick={() => copy(issue.data.command)}
+                            >
+                                <IconCopy className='size-3.5' />
+                                Copy
+                            </Button>
+                        </div>
 
                         {!enrolled && remaining !== null && (
                             <p className='text-muted-foreground text-xs tabular-nums'>
