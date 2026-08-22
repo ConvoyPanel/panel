@@ -2,25 +2,25 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Anchor;
+use App\Services\Anchor\AnchorIdentityService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AnchorAuthenticate
 {
+    public function __construct(private AnchorIdentityService $identity) {}
+
     public function handle(Request $request, \Closure $next): mixed
     {
-        $bearer = $request->bearerToken();
-        [$uuid, $secret] = array_pad(explode('.', $bearer ?? '', 2), 2, null);
-        $anchor = $uuid !== null ? Anchor::where('uuid', $uuid)->first() : null;
+        $installation = $this->identity->resolve($request->bearerToken());
 
-        if ($anchor === null || $secret === null || ! hash_equals($anchor->secret, $secret)) {
+        if ($installation === null) {
             throw new HttpException(401, 'Invalid Anchor credentials.', null, [
                 'WWW-Authenticate' => 'Bearer',
             ]);
         }
 
-        $request->attributes->set('anchor', $anchor);
+        $request->attributes->set('anchor', $installation);
 
         return $next($request);
     }

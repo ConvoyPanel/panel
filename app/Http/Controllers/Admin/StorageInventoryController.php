@@ -31,7 +31,10 @@ class StorageInventoryController extends Controller
             // that can be.
             ->whereHas('nodes')
             ->withUsageSums()
-            ->with('nodes')
+            // Ordered because the page prints these names in a row: without it
+            // the order is whatever Postgres returns, which is stable enough to
+            // look intentional and changes the moment the table does.
+            ->with(['nodes' => fn ($query) => $query->orderBy('nodes.display_name')])
             ->get();
 
         return StorageEloquentData::collect(

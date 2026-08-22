@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Casts\OveragePenaltyCast;
 use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
+use App\Enums\Anchor\AnchorMode;
 use App\Enums\Node\ConnectionErrorCode;
+use App\Models\Concerns\AnchorInstallation;
 use App\Enums\Node\NodeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,14 +42,28 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int $disk
  * @property int $disk_allocated
  * @property int $disk_overallocate
- * @property int|null $anchor_id
+ * @property string|null $agent_uuid
+ * @property string|null $agent_secret
+ * @property string|null $agent_public_url
+ * @property string|null $agent_panel_url_override
+ * @property int|null $relay_id
+ * @property int|null $agent_enrollment_key_id
+ * @property string|null $agent_enrollment_token_hash
+ * @property Carbon|null $agent_enrollment_expires_at
+ * @property Carbon|null $agent_enrolled_at
+ * @property Carbon|null $agent_last_seen_at
+ * @property string|null $agent_version
+ * @property int|null $agent_protocol_min
+ * @property int|null $agent_protocol_max
+ * @property array<int, string>|null $agent_capabilities
+ * @property array<string, mixed>|null $agent_reported_facts
  * @property ?OveragePenaltyData $overage_penalty
- * @property ?Anchor $anchor
+ * @property ?Relay $relay
  * @property-read ?StorageToNode $pivot Present when reached through Storage::nodes().
  */
 class Node extends Model
 {
-    use HasFactory, HasRelationships;
+    use AnchorInstallation, HasFactory, HasRelationships;
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -55,6 +71,8 @@ class Node extends Model
     protected $hidden = [
         'token_id',
         'token_secret',
+        'agent_secret',
+        'agent_enrollment_token_hash',
     ];
 
     /**
@@ -77,7 +95,13 @@ class Node extends Model
         'memory' => 'required|integer',
         'memory_overallocate' => 'required|integer',
         // 'network' => ['required', 'string', 'max:191', 'regex:/^\S*$/u'],
-        'anchor_id' => 'sometimes|nullable|integer|exists:anchors,id',
+        // The agent installed on this host. Every column is nullable and stays
+        // that way: a node upgraded from v4 has no agent at all, and inventing
+        // one to satisfy a constraint would record a machine that does not exist.
+        'agent_uuid' => 'sometimes|nullable|uuid',
+        'agent_public_url' => 'sometimes|nullable|url:http,https|max:2048',
+        'agent_panel_url_override' => 'sometimes|nullable|url:http,https|max:2048',
+        'relay_id' => 'sometimes|nullable|integer|exists:relays,id',
         // Per-node override of the quota-overage penalty; null = inherit the global
         // BandwidthSettings default. See docs/bandwidth-rate-limiting-plan.md §5.
         'overage_penalty' => 'sometimes|nullable|array',
@@ -94,6 +118,14 @@ class Node extends Model
     {
         return [
             'verify_tls' => 'boolean',
+            'agent_secret' => 'encrypted',
+            'agent_enrollment_expires_at' => 'datetime',
+            'agent_enrolled_at' => 'datetime',
+            'agent_last_seen_at' => 'datetime',
+            'agent_protocol_min' => 'integer',
+            'agent_protocol_max' => 'integer',
+            'agent_capabilities' => 'array',
+            'agent_reported_facts' => 'array',
             'memory' => StorageSizeCast::class,
             'token_secret' => 'encrypted',
             'overage_penalty' => OveragePenaltyCast::class,
@@ -231,9 +263,83 @@ class Node extends Model
     /**
      * @return BelongsTo<Anchor, $this>
      */
-    public function anchor(): BelongsTo
+    /** @return BelongsTo<Relay, $this> */
+    public function relay(): BelongsTo
     {
-        return $this->belongsTo(Anchor::class);
+        return $this->belongsTo(Relay::class, 'relay_id');
+    }
+
+    /** @return BelongsTo<AnchorEnrollmentKey, $this> */
+    public function agentEnrollmentKey(): BelongsTo
+    {
+        return $this->belongsTo(AnchorEnrollmentKey::class, 'agent_enrollment_key_id');
+    }
+
+    public function anchorName(): string
+    {
+        return $this->display_name;
+    }
+
+    public function anchorUuid(): ?string
+    {
+        return $this->agent_uuid;
+    }
+
+    public function anchorSecret(): ?string
+    {
+        return $this->agent_secret;
+    }
+
+    public function anchorEnrolledAt(): ?Carbon
+    {
+        return $this->agent_enrolled_at;
+    }
+
+    public function anchorLastSeenAt(): ?Carbon
+    {
+        return $this->agent_last_seen_at;
+    }
+
+    public function anchorProtocolMin(): ?int
+    {
+        return $this->agent_protocol_min;
+    }
+
+    public function anchorProtocolMax(): ?int
+    {
+        return $this->agent_protocol_max;
+    }
+
+    public function anchorPublicUrl(): ?string
+    {
+        return $this->agent_public_url;
+    }
+
+    public function anchorPanelUrlOverride(): ?string
+    {
+        return $this->agent_panel_url_override;
+    }
+
+    /** A node's installation is always the agent; a relay is never a node. */
+    public function anchorMode(): AnchorMode
+    {
+        return AnchorMode::AGENT;
+    }
+
+    /** @param array<string, mixed> $payload */
+    public function recordAnchorHeartbeat(array $payload): void
+    {
+        // Writes the agent's liveness, never the node's. `last_seen_at` and
+        // `status` describe whether Proxmox answers, which stays a separate
+        // question -- a running daemon on a host whose API is down must not
+        // read as a healthy node.
+        $this->update([
+            'agent_last_seen_at' => now(),
+            'agent_version' => $payload['version'],
+            'agent_protocol_min' => $payload['protocol_min'],
+            'agent_protocol_max' => $payload['protocol_max'],
+            'agent_capabilities' => $payload['capabilities'],
+        ]);
     }
 
     /**

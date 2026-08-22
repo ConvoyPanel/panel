@@ -1,13 +1,15 @@
 <?php
 
-use App\Enums\Anchor\AnchorMode;
 use App\Enums\Server\PowerState;
-use App\Models\Anchor;
+use App\Models\Node;
+use App\Models\Relay;
 use App\Models\User;
 use App\Services\Api\JWTService;
 use App\Services\Nodes\GuestStateCache;
+use App\Support\Anchor\AnchorProtocol;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 beforeEach(fn () => Cache::flush());
 
@@ -98,10 +100,11 @@ it('does not let a non-owner send a power command', function () {
 
 it('can generate noVNC authorization token', function () {
     [$user, $_, $node, $server] = createServerModel();
-    $anchor = Anchor::factory()->enrolled()->create([
-        'public_url' => 'https://agent.example.com/anchor',
+    $node->update([
+        ...Node::factory()->withAgent()->raw(),
+        'agent_public_url' => 'https://agent.example.com/anchor',
     ]);
-    $node->update(['anchor_id' => $anchor->id]);
+    $node->refresh();
 
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/create-console-session", [
@@ -111,15 +114,15 @@ it('can generate noVNC authorization token', function () {
 
     $response->assertCreated()
         ->assertJsonPath('data.url', 'wss://agent.example.com/anchor/api/v1/console')
-        ->assertJsonPath('data.protocol', Anchor::PROTOCOL_VERSION)
+        ->assertJsonPath('data.protocol', AnchorProtocol::VERSION)
         ->assertJsonPath('data.type', 'novnc')
         ->assertJson(fn ($json) => $json
             ->whereType('data.password', 'string')
             ->etc());
 
-    $token = app(JWTService::class)->decode($anchor->secret, $response->json('data.token'));
+    $token = app(JWTService::class)->decode($node->agent_secret, $response->json('data.token'));
     $password = $response->json('data.password');
-    expect($token->isPermittedFor($anchor->uuid))->toBeTrue()
+    expect($token->isPermittedFor($node->agent_uuid))->toBeTrue()
         ->and($token->isRelatedTo($user->uuid))->toBeTrue()
         ->and($password)->toHaveLength(8)
         ->and($token->claims()->get('console'))->toBe([
@@ -133,16 +136,15 @@ it('can generate noVNC authorization token', function () {
 
 it('nests the agent session inside a relay session', function () {
     [$user, $_, $node, $server] = createServerModel();
-    $relay = Anchor::factory()->enrolled()->create([
-        'mode' => AnchorMode::RELAY,
+    $relay = Relay::factory()->enrolled()->create([
         'public_url' => 'https://relay.example.com',
-        'capabilities' => ['console.relay'],
     ]);
-    $agent = Anchor::factory()->enrolled()->create([
-        'public_url' => 'https://agent.internal.example.com',
+    $node->update([
+        ...Node::factory()->withAgent()->raw(),
+        'agent_public_url' => 'https://agent.internal.example.com',
         'relay_id' => $relay->id,
     ]);
-    $node->update(['anchor_id' => $agent->id]);
+    $node->refresh();
 
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/create-console-session",
@@ -157,19 +159,20 @@ it('nests the agent session inside a relay session', function () {
     $relayClaim = $outer->claims()->get('relay');
     expect($relayClaim['url'])->toBe('wss://agent.internal.example.com/api/v1/console');
 
-    $inner = app(JWTService::class)->decode($agent->secret, $relayClaim['token']);
-    expect($inner->isPermittedFor($agent->uuid))->toBeTrue()
+    $inner = app(JWTService::class)->decode($node->agent_secret, $relayClaim['token']);
+    expect($inner->isPermittedFor($node->agent_uuid))->toBeTrue()
         ->and($inner->claims()->get('console')['type'])->toBe('qemu_terminal');
 });
 
-it('fails clearly when no Anchor agent is configured', function () {
+it('fails clearly when the node has no Anchor agent installed', function () {
+    // The v4 shape: a node that works for everything except the console.
     [$user, $_, $_, $server] = createServerModel();
 
     $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/create-console-session",
         ['type' => 'novnc'],
     )->assertConflict()
-        ->assertJsonPath('message', 'This server does not have an Anchor agent configured.');
+        ->assertJsonPath('message', "This server's node does not have an Anchor agent installed.");
 });
 
 it('probes a stale Anchor before refusing the session', function () {
@@ -177,17 +180,18 @@ it('probes a stale Anchor before refusing the session', function () {
     // which can mean it cannot reach us, not that it is down. It must still be
     // reachable the other way round.
     [$user, $_, $node, $server] = createServerModel();
-    $anchor = Anchor::factory()->enrolled()->create([
-        'public_url' => 'https://agent.example.com',
-        'last_seen_at' => now()->subHour(),
-        'version' => '0.0.1-stale',
+    $node->update([
+        ...Node::factory()->withAgent()->raw(),
+        'agent_public_url' => 'https://agent.example.com',
+        'agent_last_seen_at' => now()->subHour(),
+        'agent_version' => '0.0.1-stale',
     ]);
-    $node->update(['anchor_id' => $anchor->id]);
+    $node->refresh();
 
     Http::fake(['agent.example.com/api/v1/info' => Http::response([
         'version' => '0.1.0-alpha.1',
         'mode' => 'agent',
-        'protocol' => ['min' => Anchor::PROTOCOL_VERSION, 'max' => Anchor::PROTOCOL_VERSION],
+        'protocol' => ['min' => AnchorProtocol::VERSION, 'max' => AnchorProtocol::VERSION],
         'capabilities' => ['console.qemu.vnc'],
     ])]);
 
@@ -198,19 +202,20 @@ it('probes a stale Anchor before refusing the session', function () {
 
     // The probe stands in for a heartbeat, so the reported build and
     // capabilities are refreshed too.
-    $anchor->refresh();
-    expect($anchor->version)->toBe('0.1.0-alpha.1')
-        ->and($anchor->capabilities)->toBe(['console.qemu.vnc'])
-        ->and($anchor->last_seen_at->isAfter(now()->subMinute()))->toBeTrue();
+    $node->refresh();
+    expect($node->agent_version)->toBe('0.1.0-alpha.1')
+        ->and($node->agent_capabilities)->toBe(['console.qemu.vnc'])
+        ->and($node->agent_last_seen_at->isAfter(now()->subMinute()))->toBeTrue();
 });
 
 it('still refuses the session when a stale Anchor cannot be reached either', function () {
     [$user, $_, $node, $server] = createServerModel();
-    $anchor = Anchor::factory()->enrolled()->create([
-        'public_url' => 'https://agent.example.com',
-        'last_seen_at' => now()->subHour(),
+    $node->update([
+        ...Node::factory()->withAgent()->raw(),
+        'agent_public_url' => 'https://agent.example.com',
+        'agent_last_seen_at' => now()->subHour(),
     ]);
-    $node->update(['anchor_id' => $anchor->id]);
+    $node->refresh();
 
     Http::fake(['agent.example.com/api/v1/info' => Http::response(status: 502)]);
 
@@ -218,15 +223,18 @@ it('still refuses the session when a stale Anchor cannot be reached either', fun
         "/api/client/servers/{$server->uuid}/create-console-session",
         ['type' => 'novnc'],
     )->assertConflict()
-        ->assertJsonPath('message', "Anchor {$anchor->name} is not online with a compatible protocol version.");
+        ->assertJsonPath('message', "Anchor {$node->display_name} is not online with a compatible protocol version.");
 });
 
-it('does not probe an Anchor that was never enrolled', function () {
-    // An unenrolled Anchor has no shared secret we could trust, so reaching
+it('does not probe an agent that was never enrolled', function () {
+    // An unenrolled agent has no shared secret we could trust, so reaching
     // something at its URL proves nothing. Only a stale heartbeat is probed.
     [$user, $_, $node, $server] = createServerModel();
-    $anchor = Anchor::factory()->create(['public_url' => 'https://agent.example.com']);
-    $node->update(['anchor_id' => $anchor->id]);
+    $node->update([
+        'agent_uuid' => (string) Str::uuid(),
+        'agent_secret' => Str::random(64),
+        'agent_public_url' => 'https://agent.example.com',
+    ]);
 
     Http::fake();
 

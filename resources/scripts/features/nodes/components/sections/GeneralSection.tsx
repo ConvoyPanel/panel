@@ -1,4 +1,3 @@
-import AnchorPicker from '@/features/anchors/components/AnchorPicker.tsx'
 import LocationPicker from '@/features/locations/components/LocationPicker.tsx'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -20,7 +19,6 @@ const GeneralSection = () => (
         <CardContent className={'grid grid-cols-1 gap-3 @2xl:grid-cols-3'}>
             <InputForm name={'displayName'} label={'Display Name'} />
             <LocationPicker />
-            <AnchorPicker />
         </CardContent>
     </Card>
 )

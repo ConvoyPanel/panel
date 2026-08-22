@@ -3,39 +3,33 @@
 namespace App\Services\Anchor;
 
 use App\Enums\Anchor\AnchorMode;
-use App\Models\Anchor;
+use App\Models\AnchorEnrollment;
 use App\Models\AnchorEnrollmentKey;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Turns "a machine presented a valid key" into an Anchor row.
+ * Turns "a machine presented a valid key" into a claim on the panel's attention.
  *
- * The inverse of {@see AnchorEnrollmentService}, which re-keys a row that
- * already exists. Here the row does not exist until the machine speaks, so
- * everything about it comes from what the machine says -- and consequently
- * nothing that grants privilege may be taken from there. The report fills in
- * facts (hostname, hardware, PVE identity); it cannot pick a location, a relay,
- * or its own approval.
+ * Not into a node. A node needs a location, and nobody has decided one yet;
+ * that is what approval is for. Everything the machine says about itself is
+ * kept as evidence for that decision, and nothing it says grants privilege.
  */
 class AnchorSelfRegistrationService
 {
     /**
-     * @param  array<string, mixed>  $report  the machine's self-description
+     * @param  array<string, mixed>  $report
      *
      * @throws UnprocessableEntityHttpException when the key cannot admit it
      */
-    public function register(string $token, AnchorMode $mode, array $report): Anchor
+    public function register(string $token, AnchorMode $mode, array $report): AnchorEnrollment
     {
         return DB::transaction(function () use ($token, $mode, $report) {
             /*
-             * Locked for the same reason the targeted path locks: two machines
-             * booting from one image present the same single-use key at the
-             * same moment, and without the lock both read `uses = 0` and both
-             * get in. The lock is what makes `max_uses` a limit rather than a
-             * suggestion.
+             * Locked because two machines booting from one image present the
+             * same single-use key at the same moment. Without it both read
+             * `uses = 0` and both get in, which makes max_uses a suggestion.
              */
             $key = AnchorEnrollmentKey::query()
                 ->where('token_hash', hash('sha256', $token))
@@ -43,10 +37,9 @@ class AnchorSelfRegistrationService
                 ->first();
 
             if ($key === null || ! $key->isUsable()) {
-                // Deliberately one message for "no such key", "revoked",
-                // "expired" and "used up": the presenter is unauthenticated,
-                // and which of those it is tells them something they have not
-                // earned the right to know.
+                // One message for "no such key", "revoked", "expired" and "used
+                // up": the presenter is unauthenticated, and which of those it
+                // is tells them something they have not earned the right to know.
                 throw new UnprocessableEntityHttpException('The enrollment key is invalid or expired.');
             }
 
@@ -56,25 +49,20 @@ class AnchorSelfRegistrationService
                 );
             }
 
-            $anchor = Anchor::create([
+            $enrollment = AnchorEnrollment::create([
                 'uuid' => (string) Str::uuid(),
                 'name' => $this->name($report, $key),
                 'mode' => $mode,
-                // Unknown until approval establishes it. See the migration.
-                'public_url' => null,
                 'secret' => Str::random(64),
                 'enrollment_key_id' => $key->id,
                 'reported_facts' => $report,
                 'enrolled_at' => now(),
-                // Never set here. A key proves the presenter was told a
-                // password; approval is a person deciding this machine belongs.
-                'approved_at' => null,
             ]);
 
             $key->increment('uses');
             $key->forceFill(['last_used_at' => now()])->save();
 
-            return $anchor;
+            return $enrollment;
         });
     }
 
@@ -83,8 +71,10 @@ class AnchorSelfRegistrationService
      *
      * Prefers what the machine calls itself, because that is what the person
      * who racked it will search for. Falls back to the key's name plus a
-     * discriminator so a rack enrolling from one key does not produce eight
+     * discriminator, so a rack enrolling from one key does not produce eight
      * rows called "Rack 4".
+     *
+     * @param  array<string, mixed>  $report
      */
     private function name(array $report, AnchorEnrollmentKey $key): string
     {
@@ -97,15 +87,5 @@ class AnchorSelfRegistrationService
         }
 
         return Str::limit($key->name, 180, '').' '.Str::lower(Str::random(6));
-    }
-
-    /**
-     * Anchors waiting on a decision, newest first.
-     *
-     * @return Builder<Anchor>
-     */
-    public static function pending(): Builder
-    {
-        return Anchor::query()->whereNull('approved_at')->whereNotNull('enrolled_at');
     }
 }

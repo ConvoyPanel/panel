@@ -9,6 +9,7 @@ use App\Facades\Audit;
 use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
 use App\Jobs\Node\PollNodeStatusJob;
+use App\Services\Anchor\AnchorEnrollmentService;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Node;
 use Illuminate\Http\Request;
@@ -28,7 +29,15 @@ class NodeController
                 'display_name',
                 'fqdn',
                 AllowedFilter::exact('location_id'),
-                AllowedFilter::exact('anchor_id')->nullable(),
+                AllowedFilter::exact('relay_id')->nullable(),
+                // Nodes with no agent installed -- the v4 shape, and the thing
+                // the nodes list nudges an operator to finish.
+                AllowedFilter::callback(
+                    'unlinked',
+                    fn ($query, $value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
+                        ? $query->whereNull('agent_uuid')
+                        : $query->whereNotNull('agent_uuid'),
+                ),
             ])
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
@@ -45,6 +54,13 @@ class NodeController
         return NodeData::from($node);
     }
 
+    /**
+     * Register a host by describing it.
+     *
+     * Superseded in the UI by enrollment, where the host describes itself. It
+     * stays for two constituencies that cannot run a command: hosts that will
+     * never have an agent, and API clients automating registration.
+     */
     public function store(StoreNodeRequest $request)
     {
         $node = Node::create($request->validated())
@@ -81,6 +97,25 @@ class NodeController
             ->loadCount('servers');
 
         return NodeData::from($node);
+    }
+
+    /**
+     * A fresh install command for the agent on this host.
+     *
+     * Serves both jobs: installing an agent on a node that has never had one
+     * (a node carried over from v4), and re-keying one that has.
+     */
+    public function agentEnrollment(Node $node, AnchorEnrollmentService $enrollment)
+    {
+        $details = $enrollment->issue($node);
+
+        Audit::record(
+            AuditEvent::ADMIN_ANCHOR_ENROLLMENT_ROTATED,
+            subject: $node,
+            properties: ['name' => $node->display_name],
+        );
+
+        return $details;
     }
 
     public function destroy(Node $node)
