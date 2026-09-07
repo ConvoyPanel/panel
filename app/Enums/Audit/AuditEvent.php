@@ -170,6 +170,7 @@ enum AuditEvent: string
     case ADMIN_TOKEN_CREATED = 'admin.token.created';
     case ADMIN_TOKEN_UPDATED = 'admin.token.updated';
     case ADMIN_TOKEN_DELETED = 'admin.token.deleted';
+    case ADMIN_SETTINGS_ACCOUNT_UPDATED = 'admin.settings.account-updated';
     case ADMIN_SETTINGS_ANCHOR_UPDATED = 'admin.settings.anchor-updated';
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
 

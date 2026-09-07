@@ -2,6 +2,7 @@
 
 namespace App\Services\Users;
 
+use App\Data\User\AvatarCropData;
 use App\Models\User;
 use GdImage;
 use Illuminate\Http\UploadedFile;
@@ -35,12 +36,12 @@ class AvatarService
     /** What `imagewebp` is handed. High enough that a face survives, low enough to stay small. */
     private const QUALITY = 82;
 
-    public function store(User $user, UploadedFile $upload): User
+    public function store(User $user, UploadedFile $upload, ?AvatarCropData $crop = null): User
     {
         $source = $this->decode($upload);
 
         try {
-            $canvas = $this->square($source);
+            $canvas = $this->square($source, $crop);
 
             try {
                 $bytes = $this->encode($canvas);
@@ -181,11 +182,21 @@ class AvatarService
      * the circle. Small pictures are left at their own size rather than blown
      * up to the full 512, which only invents blur.
      */
-    private function square(GdImage $source): GdImage
+    private function square(GdImage $source, ?AvatarCropData $crop = null): GdImage
     {
         $width = imagesx($source);
         $height = imagesy($source);
-        $edge = min($width, $height);
+
+        $centred = min($width, $height);
+
+        [$left, $top, $edge] = $crop
+            ? $this->clamp($crop, $width, $height)
+            : [
+                intdiv($width - $centred, 2),
+                intdiv($height - $centred, 2),
+                $centred,
+            ];
+
         $size = min($edge, self::SIZE);
 
         $canvas = imagecreatetruecolor($size, $size);
@@ -201,8 +212,8 @@ class AvatarService
             $source,
             0,
             0,
-            intdiv($width - $edge, 2),
-            intdiv($height - $edge, 2),
+            $left,
+            $top,
             $size,
             $size,
             $edge,
@@ -210,6 +221,26 @@ class AvatarService
         );
 
         return $canvas;
+    }
+
+    /**
+     * The requested crop, pulled back inside the picture.
+     *
+     * The browser measures against an image it scaled and the panel against the
+     * decoded original, so a rounding disagreement of a pixel or two at the
+     * edge is normal and is not worth a validation error -- but an out-of-bounds
+     * rectangle makes `imagecopyresampled` read past the bitmap, so it cannot
+     * be passed through either.
+     *
+     * @return array{int, int, int}
+     */
+    private function clamp(AvatarCropData $crop, int $width, int $height): array
+    {
+        $edge = max(1, min($crop->size, $width, $height));
+        $left = max(0, min($crop->x, $width - $edge));
+        $top = max(0, min($crop->y, $height - $edge));
+
+        return [$left, $top, $edge];
     }
 
     private function encode(GdImage $image): string

@@ -172,7 +172,7 @@ it('links a provider to the currently authenticated user', function () {
 
     $this->actingAs($user)
         ->get('/api/auth/oauth/google/callback')
-        ->assertRedirect('/security?oauth_linked=google');
+        ->assertRedirect('/account/security?oauth_linked=google');
 
     $this->assertDatabaseHas('oauth_connections', [
         'user_id' => $user->id,
@@ -191,7 +191,7 @@ it('conflicts when linking an identity already owned by another user', function 
 
     $this->actingAs($other)
         ->get('/api/auth/oauth/google/callback')
-        ->assertRedirect('/security?oauth_error=oauth_identity_already_linked');
+        ->assertRedirect('/account/security?oauth_error=oauth_identity_already_linked');
 
     // Ownership unchanged.
     $this->assertDatabaseHas('oauth_connections', [

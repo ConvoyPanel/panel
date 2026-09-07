@@ -2,17 +2,26 @@ import AuthenticatorContainer from '@/features/account/components/AuthenticatorC
 import PasskeysContainer from '@/features/account/components/PasskeysContainer.tsx'
 import PasswordChangeDialog from '@/features/account/components/PasswordChangeDialog.tsx'
 import RecoveryCodesContainer from '@/features/account/components/RecoveryCodesContainer.tsx'
+import { useUser } from '@/features/auth/api.ts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 
 const AuthenticationCard = () => {
+    const { data: user } = useUser()
+
+    // Dropped rather than shown disabled, unlike the profile fields: the row is
+    // only ever a way in to the dialog, so a version of it that opens nothing
+    // has nothing left to say. The rest of the card still stands — a locked
+    // password does not mean a locked second factor.
+    const canChangePassword = user?.accountCapabilities.canChangePassword ?? true
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Authentication</CardTitle>
             </CardHeader>
             <CardContent className={'flex flex-col gap-3'}>
-                <PasswordChangeDialog />
+                {canChangePassword && <PasswordChangeDialog />}
                 <AuthenticatorContainer />
                 <PasskeysContainer />
                 {/* Renders nothing until a second factor exists to recover to.

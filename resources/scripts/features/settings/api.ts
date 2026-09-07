@@ -3,6 +3,7 @@ import {
     overagePenaltyFields,
     refineOveragePenalty,
 } from '@/features/bandwidth/overage-penalty.ts'
+import AccountSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/AccountSettingsController'
 import AnchorSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/AnchorSettingsController'
 import BandwidthSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/BandwidthSettingsController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
@@ -103,6 +104,50 @@ export const updateAnchorSettings = async (
         await apiFetch<DataResponse<AnchorSettings>>(anchorUpdateRoute(), {
             body: {
                 panel_url: payload.panelUrl === '' ? null : payload.panelUrl,
+            },
+        })
+    ).data
+
+// --- Accounts ---------------------------------------------------------------
+
+export type AccountSettings = App.Data.Admin.Settings.AccountSettingsData
+
+const accountShowRoute =
+    AccountSettingsController.show['/api/admin/settings/account']
+const accountUpdateRoute =
+    AccountSettingsController.update['/api/admin/settings/account']
+
+/**
+ * What a non-admin may change about their own account. Three plain booleans
+ * rather than a per-account policy: the panel has one role bit and no groups,
+ * so there is nothing below the install to scope them to.
+ */
+export const accountSettingsSchema = z.object({
+    allowNameChange: z.boolean(),
+    allowEmailChange: z.boolean(),
+    allowPasswordChange: z.boolean(),
+})
+
+const getAccountSettings = async (): Promise<AccountSettings> =>
+    (await apiFetch<DataResponse<AccountSettings>>(accountShowRoute())).data
+
+export const accountSettingsQuery = () =>
+    queryOptions({
+        queryKey: [...settingsQueries.all(), 'account'] as const,
+        queryFn: getAccountSettings,
+    })
+
+export const useAccountSettings = () => useQuery(accountSettingsQuery())
+
+export const updateAccountSettings = async (
+    payload: z.infer<typeof accountSettingsSchema>
+): Promise<AccountSettings> =>
+    (
+        await apiFetch<DataResponse<AccountSettings>>(accountUpdateRoute(), {
+            body: {
+                allow_name_change: payload.allowNameChange,
+                allow_email_change: payload.allowEmailChange,
+                allow_password_change: payload.allowPasswordChange,
             },
         })
     ).data

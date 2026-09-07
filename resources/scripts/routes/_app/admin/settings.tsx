@@ -4,6 +4,7 @@ import {
     IconGauge,
     IconRefresh,
     IconSettings,
+    IconUserCog,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -41,6 +42,11 @@ const nav: SidebarNav = {
                     icon: IconAnchor,
                     label: 'Anchor',
                     path: '/admin/settings/anchor',
+                },
+                {
+                    icon: IconUserCog,
+                    label: 'Accounts',
+                    path: '/admin/settings/account',
                 },
                 {
                     icon: IconRefresh,

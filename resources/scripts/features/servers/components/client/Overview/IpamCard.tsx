@@ -32,7 +32,7 @@ const IpamCard = () => {
                         : 'Addresses allocated to this server.'}
                 </CardDescription>
                 <CardAction>
-                    <Button variant={'outline'} size={'sm'} asChild>
+                    <Button variant={'ghost'} size={'sm'} asChild>
                         <Link
                             to={'/servers/$serverUuid/networking'}
                             params={{ serverUuid }}

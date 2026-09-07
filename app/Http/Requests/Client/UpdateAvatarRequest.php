@@ -17,6 +17,17 @@ class UpdateAvatarRequest extends FormRequest
              * format it actually got before handing anything to GD.
              */
             'avatar' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,webp,gif', 'max:10240'],
+
+            /*
+             * The square the user framed, in the source picture's own pixels.
+             * All three or none -- a half-specified crop is a bug on the way
+             * in, not something to guess the rest of. Bounds are checked
+             * against the decoded image rather than here, since nothing at
+             * this point knows how big it is.
+             */
+            'crop_x' => ['nullable', 'integer', 'min:0', 'required_with:crop_y,crop_size'],
+            'crop_y' => ['nullable', 'integer', 'min:0', 'required_with:crop_x,crop_size'],
+            'crop_size' => ['nullable', 'integer', 'min:1', 'required_with:crop_x,crop_y'],
         ];
     }
 

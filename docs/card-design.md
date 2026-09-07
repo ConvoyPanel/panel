@@ -287,6 +287,58 @@ The card count came down the same way: merge a card whose whole content is two p
 (Placement) into the card it qualifies, and put a repeating list (extra disks) inside the
 group it belongs to rather than giving it a header of its own to say it is empty.
 
+## A table in a card is a `CardTable`
+
+`components/ui/CardTable` is the list-of-records shape: **the card is the frame, and the
+rows are the card's own**. Reach for it instead of hand-assembling `Table` inside a
+`CardContent` — half a dozen cards had each derived the same details separately (unpadded
+content, `pl-4`/`pr-4` on the edge cells, `[&_tr:last-child]:border-0`,
+`hover:bg-transparent` on the header row), which is exactly how one card ends up with a
+tinted header strip and a bordered inset while its neighbour has neither.
+
+```tsx
+const columns: CardTableColumn<Address>[] = [
+  { key: 'address', header: 'Address', className: 'whitespace-nowrap', cell: a => <CopyValue … /> },
+  { key: 'gateway', header: 'Gateway', className: 'text-muted-foreground text-xs', cell: a => a.gateway },
+]
+
+<CardContent className={'p-0'}>          {/* deliberate: the rows bleed to the card's edges */}
+  <CardTable
+    caption={'IP addresses allocated to this server'}
+    rows={addresses}
+    rowKey={a => a.id}
+    columns={columns}
+    empty={<SimpleEmptyState … />}
+    footer={<><dl>…</dl><p>5 of 7</p></>}
+  />
+</CardContent>
+```
+
+What it decides for you, and why:
+
+- **No inset and no fill.** A bordered box with a tinted header, inside a card that is
+  already a surface, is three boxes to hold two columns. The tint some tables have is a
+  local `[&_th]:bg-muted` override, not `TableHead` — don't copy it into a card.
+- **Columns hug their content; exactly one takes the slack** (the last, or the one marked
+  `fill`). An auto table spreads four short values across the whole card and the row stops
+  reading as one record. A single-column table gets a spacer cell instead.
+- **The header row appears only when a labelled column has a neighbour.** A lone column of
+  addresses under the word "Address" is a band that says nothing.
+- **`footer`** is the muted strip that closes the table: facts on the left, a count on the
+  right. Use it for what every row would otherwise repeat — a gateway they all share — and
+  for "5 of 7" when the card shows a prefix of a longer list. That is the card idiom;
+  `CardFooter` is still where an *action* goes.
+- **It scrolls rather than overhangs.** Machine values don't wrap, and four columns of them
+  outrun a phone-width card.
+
+A card shows a *prefix* of a list and links out (`CardAction`); scrolling a table inside a
+card is the page-sized behaviour, and belongs on the page whose subject the list is —
+`features/servers/networking/components/AddressList.tsx` (the tab) versus `AddressRows.tsx`
+(the overview card) are the two halves of that split.
+
+Still to convert, each currently hand-rolling the same shape: `UserServersCard`,
+`NodesCard`, `DevicesCard`, `StorageConsumerTable`, `StorageList`.
+
 ## Statistic cards: a meter is not a footer
 
 `StatisticCard` (`features/servers/components/client/Overview/`) is the compact

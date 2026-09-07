@@ -1,5 +1,6 @@
 <?php
 
+use App\Settings\AccountSettings;
 use App\Settings\AnchorSettings;
 use App\Settings\AuditSettings;
 use App\Settings\BandwidthSettings;
@@ -17,6 +18,7 @@ return [
      * put them (manually) here.
      */
     'settings' => [
+        AccountSettings::class,
         AnchorSettings::class,
         AuditSettings::class,
         BandwidthSettings::class,

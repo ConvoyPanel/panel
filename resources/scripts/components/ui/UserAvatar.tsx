@@ -36,7 +36,7 @@ const UserAvatar = ({ name, src, className }: Props) => {
     return (
         <span
             className={cn(
-                'bg-muted text-muted-foreground grid size-8 shrink-0 select-none place-items-center overflow-hidden rounded-full text-xs font-medium',
+                'bg-muted text-muted-foreground grid size-8 shrink-0 place-items-center overflow-hidden rounded-full text-xs font-medium select-none',
                 className
             )}
             aria-hidden

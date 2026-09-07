@@ -447,6 +447,15 @@ Route::prefix('/settings')->group(function () {
         '/anchor',
         [Admin\Settings\AnchorSettingsController::class, 'update'],
     );
+
+    Route::get(
+        '/account',
+        [Admin\Settings\AccountSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/account',
+        [Admin\Settings\AccountSettingsController::class, 'update'],
+    );
 });
 
 /*

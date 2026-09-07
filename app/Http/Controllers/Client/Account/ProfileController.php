@@ -7,6 +7,7 @@ use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
 use App\Http\Requests\Client\UpdateEmailRequest;
 use App\Http\Requests\Client\UpdateProfileRequest;
+use App\Services\Users\AccountPolicyResolver;
 
 /**
  * The account's own name and email.
@@ -18,6 +19,10 @@ use App\Http\Requests\Client\UpdateProfileRequest;
  */
 class ProfileController
 {
+    public function __construct(
+        private AccountPolicyResolver $policy,
+    ) {}
+
     public function update(UpdateProfileRequest $request)
     {
         $user = $request->user();
@@ -32,7 +37,7 @@ class ProfileController
             );
         }
 
-        return UserData::from($user);
+        return UserData::forSelf($user, $this->policy->for($user));
     }
 
     public function updateEmail(UpdateEmailRequest $request)
@@ -49,6 +54,6 @@ class ProfileController
             );
         }
 
-        return UserData::from($user);
+        return UserData::forSelf($user, $this->policy->for($user));
     }
 }

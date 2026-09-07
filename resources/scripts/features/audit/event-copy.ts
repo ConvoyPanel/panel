@@ -371,6 +371,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.token.created': { verb: 'created an application token' },
     'admin.token.updated': { verb: 'updated an application token' },
     'admin.token.deleted': { verb: 'revoked an application token' },
+    'admin.settings.account-updated': {
+        verb: 'changed the account settings',
+        detail: () => null,
+    },
     'admin.settings.anchor-updated': {
         verb: 'changed the Anchor settings',
         detail: () => null,
