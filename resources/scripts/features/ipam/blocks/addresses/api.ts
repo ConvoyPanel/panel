@@ -1,3 +1,4 @@
+import type { AddressMap } from '@/types/address-map.ts'
 import type { Address, PaginatedAddresses } from '@/types/address.ts'
 import {
     type QueryBuilderParams,
@@ -39,6 +40,10 @@ export type AddressInclude = 'server' | 'addressBlock'
 const indexRoute =
     AddressController.index[
         '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses'
+    ]
+const mapRoute =
+    AddressController.map[
+        '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses/map'
     ]
 const bulkRoute =
     AddressController.bulk[
@@ -90,6 +95,23 @@ export const getAddresses = async (
     }
 }
 
+/**
+ * Every unit of a block, for the map view.
+ *
+ * Not paginated and not filtered: the whole point is to see the space at once, and the server
+ * refuses (via `sparse` / `tooLarge`) rather than returning a grid too big to read.
+ */
+export const getAddressMap = async (
+    blockGroupId: number,
+    blockId: number
+): Promise<AddressMap> =>
+    apiFetch<AddressMap>(
+        mapRoute({
+            address_block_group: blockGroupId,
+            address_block: blockId,
+        })
+    )
+
 export const addressQueries = {
     all: (groupId: number, blockId: number) =>
         [
@@ -100,6 +122,11 @@ export const addressQueries = {
             blockId,
             'addresses',
         ] as const,
+    map: (groupId: number, blockId: number) =>
+        queryOptions({
+            queryKey: [...addressQueries.all(groupId, blockId), 'map'] as const,
+            queryFn: () => getAddressMap(groupId, blockId),
+        }),
     list: (
         groupId: number,
         blockId: number,

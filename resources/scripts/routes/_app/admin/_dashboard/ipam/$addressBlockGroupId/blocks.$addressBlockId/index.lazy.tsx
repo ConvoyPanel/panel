@@ -8,12 +8,15 @@ import {
     addressBlockQueries,
     useAddressBlock,
 } from '@/features/ipam/blocks/api.ts'
-import AddressBlockCard from '@/features/ipam/components/AddressBlock/AddressBlockCard.tsx'
+import AddressBlockCard, {
+    AddressBlockView,
+} from '@/features/ipam/components/AddressBlock/AddressBlockCard.tsx'
 import AddressBulkActions from '@/features/ipam/components/AddressBlock/AddressBulkActions.tsx'
 import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAddressModal.tsx'
 import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
 import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
 import AddressStateLabel, {
+    AddressStateKind,
     addressStateKind,
 } from '@/features/ipam/components/AddressStateLabel.tsx'
 import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
@@ -23,9 +26,10 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
 import { DataTableFilterField } from '@/types/data-table.ts'
 import { cn } from '@/utils'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
+import { useMemo, useState } from 'react'
 
 import { queryClient } from '@/lib/query-client.ts'
 
@@ -87,6 +91,36 @@ function BlockIndex() {
         addressQueries.list(groupId, blockId, queryParams, ['server']).queryKey
     )
     const openModal = useOpenModal(useAddressModal)
+
+    /*
+     * The map is a separate request from the table: it is the whole space rather than a page of
+     * it, and the server refuses to draw a block that is sparse or too large. Fetched regardless
+     * of the current view so the toggle only appears when there is something behind it.
+     */
+    const { data: map } = useQuery(addressQueries.map(groupId, blockId))
+    const [view, setView] = useState<AddressBlockView>('map')
+    const [selectedIds, setSelectedIds] = useState<number[]>([])
+
+    // A block that cannot be drawn has no map to fall back to.
+    const canDrawMap = !!map && !map.sparse && !map.tooLarge
+    const activeView: AddressBlockView = canDrawMap ? view : 'list'
+
+    // The map hands back address ids; the actions need to know what each one is.
+    const mapSelection = useMemo(
+        () =>
+            (map?.units ?? [])
+                .filter(
+                    unit =>
+                        unit.addressId !== null &&
+                        selectedIds.includes(unit.addressId) &&
+                        unit.state !== 'ungenerated'
+                )
+                .map(unit => ({
+                    id: unit.addressId!,
+                    kind: unit.state as AddressStateKind,
+                })),
+        [map, selectedIds]
+    )
 
     const { mutate: toggleReservation } = useMutation({
         mutationFn: async (address: Address) => {
@@ -230,77 +264,105 @@ function BlockIndex() {
             <Heading className={'max-w-xl truncate font-mono'}>
                 {block ? `${block.baseIp}/${block.prefixLengthFrom}` : ''}
             </Heading>
-            <AddressBlockCard block={block} mutate={mutate} />
-            <DataTable
-                data={data}
-                columns={columns}
-                paginated
-                searchable
-                toolbar
-                filterFields={[STATE_FILTER]}
-                enableRowSelection
-                bulkActions={addresses => (
+            <AddressBlockCard
+                block={block}
+                mutate={mutate}
+                view={activeView}
+                onViewChange={setView}
+                map={map}
+                selectedIds={selectedIds}
+                onSelectedIdsChange={setSelectedIds}
+                bulkActions={
                     <AddressBulkActions
-                        addresses={addresses}
+                        selection={mapSelection}
                         addressBlockGroupId={groupId}
                         addressBlockId={blockId}
-                        mutate={mutate}
+                        mutate={async () => {
+                            await mutate()
+                            await queryClient.invalidateQueries({
+                                queryKey: addressQueries.map(groupId, blockId)
+                                    .queryKey,
+                            })
+                            setSelectedIds([])
+                        }}
                     />
-                )}
-                isPlaceholderData={isPlaceholderData}
-                isError={isError}
-                onRetry={refetch}
-                mobileRow={row => {
-                    const address = row.original
+                }
+            />
+            {activeView === 'list' && (
+                <DataTable
+                    data={data}
+                    columns={columns}
+                    paginated
+                    searchable
+                    toolbar
+                    filterFields={[STATE_FILTER]}
+                    enableRowSelection
+                    bulkActions={addresses => (
+                        <AddressBulkActions
+                            selection={addresses.map(address => ({
+                                id: address.id,
+                                kind: addressStateKind(address),
+                            }))}
+                            addressBlockGroupId={groupId}
+                            addressBlockId={blockId}
+                            mutate={mutate}
+                        />
+                    )}
+                    isPlaceholderData={isPlaceholderData}
+                    isError={isError}
+                    onRetry={refetch}
+                    mobileRow={row => {
+                        const address = row.original
 
-                    return (
-                        <Item variant={'muted'} size={'sm'}>
-                            <ItemContent className={'min-w-0'}>
-                                <ItemTitle className={'w-full min-w-0'}>
-                                    <span className={'truncate font-mono'}>
-                                        {address.ip}
-                                    </span>
-                                </ItemTitle>
-                                {address.macAddress && (
-                                    <ItemDescription
-                                        className={
-                                            'block truncate font-mono text-nowrap'
-                                        }
-                                    >
-                                        {address.macAddress}
-                                    </ItemDescription>
-                                )}
-                                <div className={'flex flex-wrap gap-3'}>
-                                    <AddressStateLabel
-                                        kind={addressStateKind(address)}
-                                    />
-                                    {address.server && (
-                                        <Link
-                                            className={cn(
-                                                buttonVariants({
-                                                    variant: 'link',
-                                                }),
-                                                'h-auto max-w-full min-w-0 shrink p-0'
-                                            )}
-                                            to={
-                                                `/admin/servers/${address.server.id}` as string
+                        return (
+                            <Item variant={'muted'} size={'sm'}>
+                                <ItemContent className={'min-w-0'}>
+                                    <ItemTitle className={'w-full min-w-0'}>
+                                        <span className={'truncate font-mono'}>
+                                            {address.ip}
+                                        </span>
+                                    </ItemTitle>
+                                    {address.macAddress && (
+                                        <ItemDescription
+                                            className={
+                                                'block truncate font-mono text-nowrap'
                                             }
                                         >
-                                            <span className={'truncate'}>
-                                                {address.server.name}
-                                            </span>
-                                        </Link>
+                                            {address.macAddress}
+                                        </ItemDescription>
                                     )}
-                                </div>
-                            </ItemContent>
-                            <ItemActions>
-                                <Actions>{renderActions(address)}</Actions>
-                            </ItemActions>
-                        </Item>
-                    )
-                }}
-                {...tableProps}
-            />
+                                    <div className={'flex flex-wrap gap-3'}>
+                                        <AddressStateLabel
+                                            kind={addressStateKind(address)}
+                                        />
+                                        {address.server && (
+                                            <Link
+                                                className={cn(
+                                                    buttonVariants({
+                                                        variant: 'link',
+                                                    }),
+                                                    'h-auto max-w-full min-w-0 shrink p-0'
+                                                )}
+                                                to={
+                                                    `/admin/servers/${address.server.id}` as string
+                                                }
+                                            >
+                                                <span className={'truncate'}>
+                                                    {address.server.name}
+                                                </span>
+                                            </Link>
+                                        )}
+                                    </div>
+                                </ItemContent>
+                                <ItemActions>
+                                    <Actions>{renderActions(address)}</Actions>
+                                </ItemActions>
+                            </Item>
+                        )
+                    }}
+                    {...tableProps}
+                />
+            )}
             <EditAddressModal mutate={mutate} />
             <DeleteAddressModal mutate={mutate} />
             {/* The block card's Edit opens this. Delete stays on the pool's list: removing the

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Ipam\GenerateAddressesAction;
+use App\Data\Ipam\AddressMapData;
+use App\Data\Ipam\AddressMapUnitData;
 use App\Data\Ipam\BulkAddressResultData;
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
@@ -212,6 +214,81 @@ class AddressController
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);
+    }
+
+    /**
+     * The block's whole address space, in address order, one entry per allocatable unit.
+     *
+     * The list answers "what is this address"; a paginated table cannot answer "where is the next
+     * free run", which is the question a /24 is actually opened with. This returns every unit —
+     * including the ones with no address row yet — so the UI can draw the space instead of asking
+     * the operator to page through it.
+     *
+     * Units are placed by `unitIndexOf`, not by row order: generation writes in address order, but
+     * one deletion would shift every later cell if position were inferred from the sequence.
+     */
+    public function map(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock)
+    {
+        $totalUnits = $addressBlock->totalUnits();
+
+        if ($addressBlock->isSparse() || $totalUnits === null) {
+            return (new AddressMapData(sparse: true, tooLarge: false, totalUnits: null, units: []))->toArray();
+        }
+
+        if ($totalUnits > AddressMapData::MAX_UNITS) {
+            return (new AddressMapData(
+                sparse: false,
+                tooLarge: true,
+                totalUnits: $totalUnits,
+                units: [],
+            ))->toArray();
+        }
+
+        // Every unit starts as a real position with no record behind it; the materialized rows are
+        // then dropped onto their own indices.
+        $units = [];
+
+        for ($index = 0; $index < $totalUnits; $index++) {
+            $units[$index] = new AddressMapUnitData(
+                index: $index,
+                state: 'ungenerated',
+                ip: null,
+                addressId: null,
+                serverName: null,
+            );
+        }
+
+        $addressBlock->addresses()->with('server:id,name')->chunkById(1000, function ($addresses) use (&$units, $addressBlock, $totalUnits): void {
+            foreach ($addresses as $address) {
+                $index = $addressBlock->unitIndexOf($address->ip);
+
+                // An address outside the block's current geometry (the block was edited under it)
+                // has no cell to sit in. Leaving it out beats drawing it in the wrong place.
+                if ($index === null || $index < 0 || $index >= $totalUnits) {
+                    continue;
+                }
+
+                $units[$index] = new AddressMapUnitData(
+                    index: $index,
+                    state: match (true) {
+                        $address->state === AddressState::Assigned => 'assigned',
+                        $address->isSystemReserved() => 'system',
+                        $address->state === AddressState::Reserved => 'reserved',
+                        default => 'available',
+                    },
+                    ip: $address->ip,
+                    addressId: $address->id,
+                    serverName: $address->server?->name,
+                );
+            }
+        });
+
+        return (new AddressMapData(
+            sparse: false,
+            tooLarge: false,
+            totalUnits: $totalUnits,
+            units: array_values($units),
+        ))->toArray();
     }
 
     /**

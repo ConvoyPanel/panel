@@ -150,6 +150,38 @@ class AddressBlock extends Model
     }
 
     /**
+     * Where $ip sits in the block's run of allocatable units, counting from zero.
+     *
+     * This is what lets the address map place a materialized address on the grid without
+     * re-deriving the whole unit sequence: generation writes units in address order, but a
+     * deletion leaves a hole, so position cannot be inferred from row order. GMP because a v6
+     * offset does not fit in a PHP int even when the index does.
+     *
+     * Null when $ip is outside the block, or its index is past what an int can hold.
+     */
+    public function unitIndexOf(string $ip): ?int
+    {
+        $start = inet_pton($this->firstAllocatableAddress());
+        $target = inet_pton($ip);
+
+        if ($start === false || $target === false || strlen($start) !== strlen($target)) {
+            return null;
+        }
+
+        $offset = gmp_sub(gmp_import($target), gmp_import($start));
+
+        if (gmp_sign($offset) < 0) {
+            return null;
+        }
+
+        $index = gmp_div_q($offset, gmp_init((string) $this->unitStride()));
+
+        return gmp_cmp($index, gmp_init((string) PHP_INT_MAX)) > 0
+            ? null
+            : gmp_intval($index);
+    }
+
+    /**
      * The allocatable unit containing $ip — that is, $ip masked down to the block's output prefix.
      * When the block hands out individual addresses (/32, /128) every unit is one address and this
      * is the identity; when it delegates sub-blocks it answers "which sub-block owns this address".
