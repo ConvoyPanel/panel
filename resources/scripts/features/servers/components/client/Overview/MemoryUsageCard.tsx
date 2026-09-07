@@ -50,7 +50,6 @@ const MemoryUsageCard = () => {
                     /* The limit the figure is read against, so the trace and
                        the context line beneath it share a scale. */
                     ceiling={state?.memoryTotal}
-                    baseline
                 />
             }
         >

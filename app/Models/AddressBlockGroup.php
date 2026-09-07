@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CountsAddressStates;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Collection;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -17,7 +19,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  */
 class AddressBlockGroup extends Model
 {
-    use HasFactory, HasRelationships;
+    use CountsAddressStates, HasFactory, HasRelationships;
 
     public $timestamps = false;
 
@@ -55,6 +57,26 @@ class AddressBlockGroup extends Model
     public function addressBlocks(): HasMany
     {
         return $this->hasMany(AddressBlock::class);
+    }
+
+    /**
+     * Every address under the pool, through its blocks.
+     *
+     * Only used for counting: it lets a page of pools carry its capacity in the same query as the
+     * rows, rather than one round trip per pool to add up its blocks.
+     *
+     * @return HasManyThrough<Address, AddressBlock, $this>
+     */
+    public function addresses(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Address::class,
+            AddressBlock::class,
+            'address_block_group_id',
+            'address_block_id',
+            'id',
+            'id',
+        );
     }
 
     /**

@@ -17,6 +17,17 @@ Route::get('/user', Client\SessionController::class);
 Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function () {
     Route::put('/password', [Client\PasswordController::class, 'update']);
 
+    // A display name and a picture are cosmetic and reversible, so they are not
+    // gated. An email address is not: it is where a password reset lands, so
+    // changing it needs the same confirmed identity as minting a credential.
+    Route::patch('/profile', [Client\Account\ProfileController::class, 'update']);
+    Route::post('/avatar', [Client\Account\AvatarController::class, 'store']);
+    Route::delete('/avatar', [Client\Account\AvatarController::class, 'destroy']);
+
+    Route::middleware(RequireIdentityConfirmation::class)->group(function () {
+        Route::patch('/email', [Client\Account\ProfileController::class, 'updateEmail']);
+    });
+
     // Reads stay ungated: both lists render straight onto the security page, so
     // requiring confirmation to *see* them would gate the page itself. Writes
     // mint credentials that outlive the session that created them — an API token

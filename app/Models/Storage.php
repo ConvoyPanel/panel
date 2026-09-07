@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\StorageSizeCast;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -72,13 +73,6 @@ class Storage extends Model
             'size' => StorageSizeCast::class,
             'reserved_bytes' => StorageSizeCast::class,
             'pve_shared' => 'boolean',
-            'stores_kvm' => 'boolean',
-            'stores_lxc' => 'boolean',
-            'stores_lxc_templates' => 'boolean',
-            'stores_backups' => 'boolean',
-            'stores_iso' => 'boolean',
-            'stores_import' => 'boolean',
-            'stores_snippets' => 'boolean',
         ];
     }
 
@@ -213,7 +207,9 @@ class Storage extends Model
      */
     private function getUsageAttributeValue(string $relationshipName, string $sumColumn, string $preloadedSumAttribute): int
     {
-        // Check if a sum was loaded via withSum() using the expected attribute name
+        // withSum() sums the raw column, which is MiB, and never runs the cast
+        // that would have made it bytes -- so the scaling below is not a
+        // convenience, it is the cast being applied by hand. See StorageSizeCast.
         if (array_key_exists($preloadedSumAttribute, $this->attributes)) {
             // Return the preloaded value, defaulting to 0 if null
             return ByteUnit::Mebibytes->toBytes((int) ($this->attributes[$preloadedSumAttribute] ?? 0)); // convert from MiB to bytes
@@ -262,6 +258,73 @@ class Storage extends Model
     public function getIsoUsageAttribute(): int
     {
         return 0;
+    }
+
+    /**
+     * Whether PVE says this storage accepts a kind of content.
+     *
+     * Read off `pve_content` rather than a column per type, because the list is
+     * Proxmox's answer and it was already stored: keeping seven booleans beside
+     * it meant one fact written twice, and every new content type cost a
+     * migration plus five edits that could disagree with each other.
+     *
+     * A null list means "PVE has not told us yet", which is not the same as
+     * "holds nothing" -- but it still answers false, because a storage the
+     * panel cannot confirm is not one it should place anything on.
+     */
+    public function stores(StorageContentType $type): bool
+    {
+        return StorageContentType::flagsFor($this->pve_content)[$type->toModelAttributeName()] ?? false;
+    }
+
+    /**
+     * The same question, asked of the database.
+     *
+     * Matched against a delimited list rather than as a substring, so `iso`
+     * cannot be answered by a storage that only holds `vztmpl` -- the same trap
+     * {@see StorageContentType::flagsFor} exists to avoid in PHP.
+     */
+    public function scopeStores(Builder $query, StorageContentType $type): void
+    {
+        $query->whereRaw(
+            "concat(',', coalesce(storages.pve_content, ''), ',') like ?",
+            ['%,'.$type->toProxmoxString().',%'],
+        );
+    }
+
+    public function getStoresKvmAttribute(): bool
+    {
+        return $this->stores(StorageContentType::KVM);
+    }
+
+    public function getStoresLxcAttribute(): bool
+    {
+        return $this->stores(StorageContentType::LXC);
+    }
+
+    public function getStoresLxcTemplatesAttribute(): bool
+    {
+        return $this->stores(StorageContentType::LXC_TEMPLATES);
+    }
+
+    public function getStoresBackupsAttribute(): bool
+    {
+        return $this->stores(StorageContentType::BACKUPS);
+    }
+
+    public function getStoresIsoAttribute(): bool
+    {
+        return $this->stores(StorageContentType::ISO);
+    }
+
+    public function getStoresImportAttribute(): bool
+    {
+        return $this->stores(StorageContentType::IMPORT);
+    }
+
+    public function getStoresSnippetsAttribute(): bool
+    {
+        return $this->stores(StorageContentType::SNIPPETS);
     }
 
     public function getRouteKeyName(): string

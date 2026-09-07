@@ -22,6 +22,7 @@ class AddressBlockData extends Data
         public ?string $macAddress,
         public int $prefixLengthFrom,
         public int $prefixLengthTo,
+        public AddressCapacityData $capacity,
     ) {}
 
     public static function fromModel(AddressBlock $block): self
@@ -37,6 +38,7 @@ class AddressBlockData extends Data
             macAddress: $block->mac_address,
             prefixLengthFrom: $block->prefix_length_from,
             prefixLengthTo: $block->prefix_length_to,
+            capacity: AddressCapacityData::forBlock($block),
         );
     }
 }

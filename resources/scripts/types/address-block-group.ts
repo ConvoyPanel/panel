@@ -1,3 +1,4 @@
+import { AddressCapacity } from '@/types/address-capacity.ts'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export interface AddressBlockGroup {
@@ -6,6 +7,7 @@ export interface AddressBlockGroup {
     description: string | null
     addressBlocksCount: number
     nodesCount: number
+    capacity: AddressCapacity
 }
 
 export type PaginatedAddressBlockGroups = PaginatedResult<AddressBlockGroup>

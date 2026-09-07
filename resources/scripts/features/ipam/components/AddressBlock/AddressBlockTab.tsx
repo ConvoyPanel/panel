@@ -2,21 +2,21 @@ import {
     addressBlockQueries,
     useAddressBlocks,
 } from '@/features/ipam/blocks/api.ts'
+import { addressCapacity, addressInUseLabel } from '@/features/ipam/capacity.ts'
 import CreateAddressBlockModal from '@/features/ipam/components/AddressBlock/CreateAddressBlockModal.tsx'
 import DeleteAddressBlockModal from '@/features/ipam/components/AddressBlock/DeleteAddressBlockModal.tsx'
 import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
+import AddressCapacityMeter from '@/features/ipam/components/AddressCapacityMeter.tsx'
 import { useAddressBlockModal } from '@/features/ipam/hooks/use-address-block-modal.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Route } from '@/routes/_app/admin/_dashboard/ipam/$addressBlockGroupId/index.lazy.tsx'
 import { AddressBlock, PaginatedAddressBlocks } from '@/types/address-block.ts'
-import { AddressVersion } from '@/types/address.ts'
 import { cn } from '@/utils'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
@@ -32,6 +32,22 @@ import {
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { TabsContent } from '@/components/ui/Tabs'
+
+/** The block's CIDR — what an operator recognises it by, ahead of any name it was given. */
+const cidr = (block: AddressBlock) =>
+    `${block.baseIp}/${block.prefixLengthFrom}`
+
+/**
+ * What the block's geometry means, rather than the two numbers it is stored as.
+ * `prefix_length_from`/`_to` are inputs; the size of the thing they describe is the answer.
+ */
+const handsOut = (block: AddressBlock) => {
+    const { total } = addressCapacity(block.capacity)
+
+    return total === null
+        ? `/${block.prefixLengthTo} · on demand`
+        : `/${block.prefixLengthTo} · ${total.toLocaleString()} units`
+}
 
 const AddressBlockTab = () => {
     const { addressBlockGroupId } = Route.useParams()
@@ -73,42 +89,87 @@ const AddressBlockTab = () => {
     const columns: ColumnDef<AddressBlock>[] = [
         {
             header: 'IP Block',
-            accessorKey: 'name',
-            meta: {
-                skeletonWidth: '5rem',
-            },
-        },
-        {
-            header: 'Description',
-            accessorKey: 'description',
-            meta: {
-                skeletonWidth: '10rem',
-            },
-        },
-        {
-            header: 'Version',
-            accessorKey: 'version',
-            meta: {
-                skeletonWidth: '1rem',
-                align: 'center',
-            },
-            cell: ({ cell }) =>
-                cell.getValue<AddressVersion>() === AddressVersion.IPv4
-                    ? 'IPv4'
-                    : 'IPv6',
-        },
-        {
-            header: 'IP',
             accessorKey: 'baseIp',
+            enableHiding: false,
             meta: {
-                skeletonWidth: '10rem',
+                skeletonWidth: '9rem',
             },
-            cell: ({ cell, row }) => (
-                <Badge variant={'secondary'} className={'font-mono'}>
-                    {cell.getValue<string>() +
-                        '/' +
-                        row.original.prefixLengthFrom}
-                </Badge>
+            cell: ({ row }) => (
+                <div className={'min-w-0'}>
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'h-auto px-0 font-mono'
+                        )}
+                        to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
+                        params={{
+                            addressBlockGroupId: String(
+                                row.original.addressBlockGroupId
+                            ),
+                            addressBlockId: String(row.original.id),
+                        }}
+                    >
+                        {cidr(row.original)}
+                    </Link>
+                    {(row.original.name || row.original.description) && (
+                        <p className={'text-muted-foreground truncate text-xs'}>
+                            {row.original.name && row.original.description
+                                ? `${row.original.name} — ${row.original.description}`
+                                : (row.original.name ??
+                                  row.original.description)}
+                        </p>
+                    )}
+                </div>
+            ),
+        },
+        {
+            header: 'Gateway',
+            accessorKey: 'gateway',
+            meta: {
+                skeletonWidth: '6rem',
+            },
+            cell: ({ cell }) => (
+                <span className={'text-muted-foreground font-mono'}>
+                    {cell.getValue<string | null>() ?? '—'}
+                </span>
+            ),
+        },
+        {
+            id: 'handsOut',
+            header: 'Hands out',
+            meta: {
+                skeletonWidth: '7rem',
+            },
+            cell: ({ row }) => (
+                <span className={'text-muted-foreground font-mono'}>
+                    {handsOut(row.original)}
+                </span>
+            ),
+        },
+        {
+            id: 'inUse',
+            header: 'In use',
+            meta: {
+                skeletonWidth: '4rem',
+                align: 'right',
+            },
+            cell: ({ row }) => (
+                <span className={'font-mono tabular-nums'}>
+                    {addressInUseLabel(addressCapacity(row.original.capacity))}
+                </span>
+            ),
+        },
+        {
+            id: 'utilisation',
+            header: 'Utilisation',
+            meta: {
+                skeletonWidth: '8rem',
+            },
+            cell: ({ row }) => (
+                <AddressCapacityMeter
+                    capacity={row.original.capacity}
+                    className={'w-40'}
+                />
             ),
         },
         actionsColumn<AddressBlock>(({ row }) => renderActions(row.original)),
@@ -139,7 +200,7 @@ const AddressBlockTab = () => {
                                     <Link
                                         className={cn(
                                             buttonVariants({ variant: 'link' }),
-                                            'h-auto max-w-full min-w-0 shrink p-0'
+                                            'h-auto max-w-full min-w-0 shrink p-0 font-mono'
                                         )}
                                         to='/admin/ipam/$addressBlockGroupId/blocks/$addressBlockId'
                                         params={{
@@ -150,28 +211,21 @@ const AddressBlockTab = () => {
                                         }}
                                     >
                                         <span className={'truncate'}>
-                                            {block.name}
+                                            {cidr(block)}
                                         </span>
                                     </Link>
                                 </ItemTitle>
                                 <ItemDescription
                                     className={'block truncate text-nowrap'}
                                 >
-                                    {block.description || 'No description'}
+                                    {block.name ||
+                                        block.description ||
+                                        handsOut(block)}
                                 </ItemDescription>
-                                <div className={'flex flex-wrap gap-2'}>
-                                    <Badge
-                                        variant={'secondary'}
-                                        className={'font-mono'}
-                                    >
-                                        {block.baseIp}/{block.prefixLengthFrom}
-                                    </Badge>
-                                    <Badge variant={'secondary'}>
-                                        {block.version === AddressVersion.IPv4
-                                            ? 'IPv4'
-                                            : 'IPv6'}
-                                    </Badge>
-                                </div>
+                                <AddressCapacityMeter
+                                    capacity={block.capacity}
+                                    className={'w-full pt-1'}
+                                />
                             </ItemContent>
                             <ItemActions>
                                 <Actions>{renderActions(block)}</Actions>

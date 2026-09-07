@@ -4,11 +4,11 @@ namespace App\Services\Proxmox\Node;
 
 use App\Data\Helpers\ChecksumData;
 use App\Data\Node\Storage\FileMetaData;
-use App\Data\Node\Storage\IsoData;
+use App\Data\Node\Storage\ISOData;
 use App\Data\Node\Storage\StorageData;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Exceptions\Proxmox\RequestException;
-use App\Exceptions\Service\Node\IsoLibrary\InvalidIsoLinkException;
+use App\Exceptions\Service\Node\ISOLibrary\InvalidISOLinkException;
 use App\Services\Proxmox\ProxmoxClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
@@ -130,7 +130,7 @@ class ProxmoxStorageClient extends ProxmoxClient
         return $this->getData($response);
     }
 
-    public function getIsos(string $storage): DataCollection
+    public function getISOs(string $storage): DataCollection
     {
         $response = $this->getHttpClientWithParams([
             'storage' => $storage,
@@ -143,18 +143,18 @@ class ProxmoxStorageClient extends ProxmoxClient
         $isos = [];
 
         foreach ($response as $iso) {
-            $isos[] = new IsoData(
+            $isos[] = new ISOData(
                 file_name: explode('/', $iso['volid'])[1],
                 size     : $iso['size'],
                 createdAt: CarbonImmutable::createFromTimestamp($iso['ctime']),
             );
         }
 
-        return IsoData::collect($isos, DataCollection::class);
+        return ISOData::collect($isos, DataCollection::class);
     }
 
     /**
-     * @throws InvalidIsoLinkException
+     * @throws InvalidISOLinkException
      * @throws ConnectionException
      */
     public function getFileMetadata(string $link, bool $verifyCertificates = true): FileMetaData
@@ -170,14 +170,14 @@ class ProxmoxStorageClient extends ProxmoxClient
                 ->json();
         } catch (RequestException $e) {
             if (str_contains($e->getMessage(), "Can't connect to")) {
-                throw new InvalidIsoLinkException;
+                throw new InvalidISOLinkException;
             }
 
             throw $e;
         }
 
         if (Arr::get($response, 'success', 1) !== 1) {
-            throw new InvalidIsoLinkException;
+            throw new InvalidISOLinkException;
         }
 
         $data = $this->getData($response);

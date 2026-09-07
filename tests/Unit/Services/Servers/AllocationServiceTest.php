@@ -1,8 +1,8 @@
 <?php
 
 use App\Exceptions\Http\Server\ConfigModifiedException;
-use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
-use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
+use App\Exceptions\Service\Server\Allocation\ISOAlreadyMountedException;
+use App\Exceptions\Service\Server\Allocation\ISOAlreadyUnmountedException;
 use App\Models\ISO;
 use App\Models\Node;
 use App\Models\Storage;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
  * The volume now depends on the node rather than on the ISO, so the storage is
  * attached to the server's node instead of to the library entry.
  */
-function testIso(): ISO
+function testISO(): ISO
 {
     return ISO::factory()->create(['file_name' => 'test.iso']);
 }
@@ -27,16 +27,16 @@ function testIso(): ISO
  * the first it finds -- so without narrowing it the volume string would be
  * built from whichever storage happened to be created first.
  */
-function withIsoStorage(Node $node): void
+function withISOStorage(Node $node): void
 {
-    $node->storages()->update(['stores_iso' => false]);
+    $node->storages()->update(['pve_content' => 'images']);
 
     $node->storages()->attach(
-        Storage::factory()->create(['name' => 'local', 'stores_iso' => true]),
+        Storage::factory()->create(['name' => 'local', 'pve_content' => 'images,iso']),
     );
 }
 
-it('threads the config digest through mountIso and surfaces a mismatch as a 409', function () {
+it('threads the config digest through mountISO and surfaces a mismatch as a 409', function () {
     Http::fake([
         '*/qemu/*/config' => Http::sequence()
             ->push(serverConfigFixture(), 200)                     // getConfig()
@@ -45,9 +45,9 @@ it('threads the config digest through mountIso and surfaces a mismatch as a 409'
     ]);
 
     [, , $node, $server] = createServerModel();
-    withIsoStorage($node);
+    withISOStorage($node);
 
-    expect(fn () => app(AllocationService::class)->mountIso($server, testIso()))
+    expect(fn () => app(AllocationService::class)->mountISO($server, testISO()))
         ->toThrow(ConfigModifiedException::class);
 });
 
@@ -59,10 +59,10 @@ it('rejects mounting an ISO that is already mounted', function () {
     ]);
 
     [, , $node, $server] = createServerModel();
-    withIsoStorage($node);
+    withISOStorage($node);
 
-    expect(fn () => app(AllocationService::class)->mountIso($server, testIso()))
-        ->toThrow(IsoAlreadyMountedException::class);
+    expect(fn () => app(AllocationService::class)->mountISO($server, testISO()))
+        ->toThrow(ISOAlreadyMountedException::class);
 });
 
 it('unmounts a mounted ISO by deleting its interface, with the digest', function () {
@@ -72,9 +72,9 @@ it('unmounts a mounted ISO by deleting its interface, with the digest', function
     ]);
 
     [, , $node, $server] = createServerModel();
-    withIsoStorage($node);
+    withISOStorage($node);
 
-    app(AllocationService::class)->unmountIso($server, testIso());
+    app(AllocationService::class)->unmountISO($server, testISO());
 
     // The delete targets the interface the ISO was actually on, and carries the
     // read's digest for optimistic concurrency.
@@ -91,10 +91,10 @@ it('rejects unmounting an ISO that is not mounted', function () {
     ]);
 
     [, , $node, $server] = createServerModel();
-    withIsoStorage($node);
+    withISOStorage($node);
 
-    expect(fn () => app(AllocationService::class)->unmountIso($server, testIso()))
-        ->toThrow(IsoAlreadyUnmountedException::class);
+    expect(fn () => app(AllocationService::class)->unmountISO($server, testISO()))
+        ->toThrow(ISOAlreadyUnmountedException::class);
 });
 
 it('skips the hardware write when cores and memory already match the config', function () {

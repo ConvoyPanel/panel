@@ -18,7 +18,7 @@ class OverviewData extends Data
         public ResourceAllocationData $storage,
         public AddressUsageData $addresses,
         public BackupSummaryData $backups,
-        public IsoSummaryData $isos,
+        public ISOSummaryData $isos,
         /** @var DataCollection<int, NodeSummaryData> $nodes */
         public DataCollection $nodes,
         /** Week-over-week deltas + sparkline series for the KPI tiles (from VictoriaMetrics). */

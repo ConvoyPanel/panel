@@ -1,5 +1,5 @@
 import useTitle from '@/hooks/use-title.ts'
-import { IconServer, IconLock } from '@tabler/icons-react'
+import { IconServer } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 import AppLayout from '@/components/layouts/AppLayout.tsx'
@@ -31,11 +31,6 @@ const nav: SidebarNav = {
                     label: 'Servers',
                     path: '/',
                     activeOptions: { exact: true },
-                },
-                {
-                    icon: IconLock,
-                    label: 'Security',
-                    path: '/security',
                 },
             ],
         },

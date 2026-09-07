@@ -27,6 +27,7 @@ class AddressBlockController
     public function index(Request $request, AddressBlockGroup $addressBlockGroup)
     {
         $blocks = QueryBuilder::for($addressBlockGroup->addressBlocks())
+            ->withAddressStateCounts()
             ->defaultSort('-id')
             ->allowedFilters(
                 AllowedFilter::custom('*', new FiltersAddressBlockWildcard),
@@ -47,6 +48,8 @@ class AddressBlockController
 
     public function show(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock)
     {
+        $addressBlock->loadCount(AddressBlock::addressStateCounts());
+
         return AddressBlockData::from($addressBlock);
     }
 

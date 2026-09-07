@@ -257,8 +257,8 @@ it('orders backups per node rather than across all of them', function () {
 
     // One pool reachable from two nodes: a drag on one must not reorder the other.
     $other = Node::factory()->for($this->location)->create();
-    $second = Storage::factory()->create(['stores_backups' => true]);
-    $this->storage->update(['stores_backups' => true]);
+    $second = Storage::factory()->create(['pve_content' => 'images,backup']);
+    $this->storage->update(['pve_content' => 'images,backup']);
 
     $this->node->storages()->attach($second);
     $other->storages()->attach($this->storage);
@@ -365,7 +365,7 @@ it('takes the content types from Proxmox, not from the request', function () {
 
 it('will not let an update rewrite the content types', function () {
     fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
-    $this->storage->update(['stores_kvm' => true, 'stores_backups' => false]);
+    $this->storage->update(['pve_content' => 'images']);
 
     $this->actingAs($this->user)
         ->putJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}", [

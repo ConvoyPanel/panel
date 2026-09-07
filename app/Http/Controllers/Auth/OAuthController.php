@@ -25,7 +25,7 @@ class OAuthController
 {
     private const LOGIN_PATH = '/auth/login';
 
-    private const ACCOUNT_SECURITY_PATH = '/security';
+    private const ACCOUNT_SECURITY_PATH = '/account/security';
 
     public function __construct(
         private readonly OAuthAuthenticationService $service,

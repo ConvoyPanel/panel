@@ -5,13 +5,14 @@ namespace App\Services\Admin;
 use App\Data\Admin\Overview\AddressUsageData;
 use App\Data\Admin\Overview\BackupSummaryData;
 use App\Data\Admin\Overview\FleetSummaryData;
-use App\Data\Admin\Overview\IsoSummaryData;
+use App\Data\Admin\Overview\ISOSummaryData;
 use App\Data\Admin\Overview\MetricTrendData;
 use App\Data\Admin\Overview\NodeSummaryData;
 use App\Data\Admin\Overview\OverviewData;
 use App\Data\Admin\Overview\OverviewTrendsData;
 use App\Data\Admin\Overview\ResourceAllocationData;
 use App\Data\Admin\Overview\ServerBreakdownData;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Enums\Server\ServerLifecycle;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
@@ -262,7 +263,7 @@ class OverviewService
          * yet, which is the only case where it is the best answer available.
          */
         $total = (int) Storage::query()
-            ->where('stores_kvm', true)
+            ->stores(StorageContentType::KVM)
             ->whereHas('nodes')
             ->with('nodes')
             ->get()
@@ -295,14 +296,14 @@ class OverviewService
         );
     }
 
-    private function isos(): IsoSummaryData
+    private function isos(): ISOSummaryData
     {
         // A library entry is complete the moment it exists -- there is no
         // per-node download to be pending on any more, because residency is
         // settled when someone mounts it.
         $total = ISO::query()->count();
 
-        return new IsoSummaryData(
+        return new ISOSummaryData(
             total: $total,
             successful: $total,
             pending: 0,

@@ -529,9 +529,7 @@ it('adopts the content types Proxmox reports, correcting a stale answer', functi
     // backups and started accepting containers. The poll settles it.
     $storage = Storage::factory()->create([
         'name' => 'local-lvm',
-        'stores_kvm' => true,
-        'stores_lxc' => false,
-        'stores_backups' => true,
+        'pve_content' => 'images,backup',
     ]);
     $this->node->storages()->attach($storage);
 
@@ -565,8 +563,7 @@ it('leaves the content flags alone when the row carried no content list', functi
     // of every allocation the panel offers.
     $storage = Storage::factory()->create([
         'name' => 'quiet-pool',
-        'stores_kvm' => true,
-        'stores_backups' => true,
+        'pve_content' => 'images,backup',
     ]);
     $this->node->storages()->attach($storage);
 

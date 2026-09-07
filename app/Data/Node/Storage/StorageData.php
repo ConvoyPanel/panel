@@ -22,6 +22,8 @@ class StorageData extends Data
         public bool $storesIso,
         public bool $storesSnippets,
         public bool $storesImport,
+        /** PVE's own content list, verbatim -- the fact the flags above derive from. */
+        public ?string $content,
     ) {}
 
     public static function fromRaw(array $raw): self
@@ -47,6 +49,7 @@ class StorageData extends Data
             storesIso         : $flags['stores_iso'],
             storesSnippets    : $flags['stores_snippets'],
             storesImport      : $flags['stores_import'],
+            content           : $raw['content'] ?? null,
         );
     }
 }

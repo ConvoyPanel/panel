@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Ipam\GenerateAddressesAction;
+use App\Data\Ipam\BulkAddressResultData;
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
 use App\Data\PaginationMeta;
@@ -13,6 +14,7 @@ use App\Exceptions\Service\Address\AddressNotAvailableException;
 use App\Exceptions\Service\Address\AddressNotReservedException;
 use App\Exceptions\Service\Address\AddressReservedBySystemException;
 use App\Facades\Audit;
+use App\Http\Requests\Admin\Addresses\BulkAddressRequest;
 use App\Http\Requests\Admin\Addresses\UpdateAddressRequest;
 use App\Jobs\Server\SyncNetworkSettingsJob;
 use App\Models\Address;
@@ -20,6 +22,7 @@ use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
 use App\Models\Server;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -36,10 +39,64 @@ class AddressController
     {
         $addresses = QueryBuilder::for($addressBlock->addresses())
             ->with('server', 'addressBlock')
-            ->defaultSort('-id')
+            // Address order, not insertion order. A list of a subnet that opens at .255 and counts
+            // down is the reverse of how anyone reads a subnet; the inet column sorts natively.
+            ->defaultSort('ip')
             ->allowedFilters(
-                AllowedFilter::exact('ip'),
+                /*
+                 * The search box on this screen is typed at partially — ".88", "203.0.113." — so an
+                 * exact match answers nothing an operator actually asks. `host()` renders the inet
+                 * column back to its bare address string, which is what LIKE needs; inet itself has
+                 * no LIKE operator.
+                 */
+                AllowedFilter::callback('ip', function (Builder $query, $value): void {
+                    $value = is_array($value) ? reset($value) : $value;
+
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+
+                    $query->whereRaw('host(ip) LIKE ?', ['%'.$value.'%']);
+                }),
                 AllowedFilter::exact('server_id')->nullable(),
+                /*
+                 * The four states an operator sees, not the three the column stores: a system
+                 * reservation is a reserved row the panel made and no one can release, so it
+                 * filters as its own thing. Split exactly the way CountsAddressStates counts them,
+                 * so a facet's count and the rows it returns can never disagree.
+                 */
+                AllowedFilter::callback('state', function (Builder $query, $value): void {
+                    $tokens = array_filter(
+                        (array) $value,
+                        fn ($token) => $token !== null && $token !== '',
+                    );
+
+                    if ($tokens === []) {
+                        return;
+                    }
+
+                    $query->where(function (Builder $outer) use ($tokens): void {
+                        foreach ($tokens as $token) {
+                            $outer->orWhere(function (Builder $inner) use ($token): void {
+                                match ($token) {
+                                    'assigned' => $inner->where('state', AddressState::Assigned),
+                                    'available' => $inner->where('state', AddressState::Available),
+                                    'system' => $inner
+                                        ->where('state', AddressState::Reserved)
+                                        ->where('state_reason', AddressStateReason::System),
+                                    'reserved' => $inner
+                                        ->where('state', AddressState::Reserved)
+                                        ->where(fn (Builder $reason) => $reason
+                                            ->whereNull('state_reason')
+                                            ->orWhere('state_reason', '!=', AddressStateReason::System)),
+                                    // An unrecognised token matches nothing. A filter that silently
+                                    // widens the result set is worse than one that returns none.
+                                    default => $inner->whereRaw('1 = 0'),
+                                };
+                            });
+                        }
+                    });
+                }),
             )
             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),
@@ -155,6 +212,78 @@ class AddressController
         $address->load('server', 'addressBlock');
 
         return IpamAddressData::from($address);
+    }
+
+    /**
+     * Reserve, release or delete a selection of addresses in one request.
+     *
+     * Reserving `.2`–`.10` for infrastructure was nine trips through a row menu, and nine audit
+     * entries. The rules are the single-address ones, applied by skipping rather than throwing: a
+     * selection made by hand out of a table will contain rows the action does not apply to, and
+     * rejecting the whole batch because one of them is system-reserved makes the action unusable.
+     * What was skipped comes back in the result so the UI can say so.
+     */
+    public function bulk(BulkAddressRequest $request, AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock)
+    {
+        $action = $request->validated('action');
+
+        // Scoped to the block in the URL, so an id from another block cannot be reached by
+        // guessing it into the body.
+        $addresses = $addressBlock->addresses()
+            ->whereIn('id', $request->validated('ids'))
+            ->get();
+
+        $eligible = $addresses->filter(fn (Address $address) => match ($action) {
+            'reserve' => $address->state === AddressState::Available,
+            'release' => $address->state === AddressState::Reserved && ! $address->isSystemReserved(),
+            // Deleting an address out from under a running server breaks its networking. The
+            // single-address route allows it deliberately (one address, one decision); doing it to
+            // a whole selection is a different risk, so assigned addresses are left alone here.
+            'delete' => $address->state !== AddressState::Assigned,
+            default => false,
+        });
+
+        $this->connection->transaction(function () use ($action, $eligible, $addressBlock): void {
+            $ids = $eligible->pluck('id');
+
+            if ($ids->isEmpty()) {
+                return;
+            }
+
+            match ($action) {
+                'reserve' => $addressBlock->addresses()->whereIn('id', $ids)->update([
+                    'state' => AddressState::Reserved,
+                    'state_reason' => AddressStateReason::Admin,
+                ]),
+                'release' => $addressBlock->addresses()->whereIn('id', $ids)->update([
+                    'state' => AddressState::Available,
+                    'state_reason' => null,
+                ]),
+                'delete' => $addressBlock->addresses()->whereIn('id', $ids)->delete(),
+                default => null,
+            };
+
+            // One entry for the batch rather than one per address: the operator performed a single
+            // action, and a log that reads as 200 separate decisions hides that.
+            Audit::record(
+                match ($action) {
+                    'reserve' => AuditEvent::ADMIN_ADDRESS_RESERVED,
+                    'release' => AuditEvent::ADMIN_ADDRESS_UNRESERVED,
+                    default => AuditEvent::ADMIN_ADDRESS_DELETED,
+                },
+                subject: $addressBlock,
+                properties: [
+                    'count' => $ids->count(),
+                    'addresses' => $eligible->pluck('ip')->all(),
+                ],
+            );
+        });
+
+        return new BulkAddressResultData(
+            action: $action,
+            affected: $eligible->count(),
+            skipped: $addresses->count() - $eligible->count(),
+        );
     }
 
     public function destroy(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock, Address $address): Response

@@ -1,5 +1,5 @@
-import { deleteIso, isoQueries, updateIso, useIsos } from '@/features/isos/api'
-import CreateIsoModal from '@/features/isos/components/CreateIsoModal'
+import { deleteISO, isoQueries, updateISO, useISOs } from '@/features/isos/api'
+import CreateISOModal from '@/features/isos/components/CreateISOModal'
 import { IconDisc, IconLockFilled, IconTrash } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
@@ -25,7 +25,7 @@ export const Route = createLazyFileRoute('/_app/admin/_dashboard/isos')({
 
 function IsoLibrary() {
     const [search, setSearch] = useState('')
-    const { data, isLoading, isError, refetch } = useIsos(search || undefined)
+    const { data, isLoading, isError, refetch } = useISOs(search || undefined)
     const queryClient = useQueryClient()
     const confirm = useConfirmationStore(state => state.confirm)
 
@@ -38,7 +38,7 @@ function IsoLibrary() {
         <>
             <Heading>ISOs</Heading>
 
-            <PageToolbar actions={<CreateIsoModal />}>
+            <PageToolbar actions={<CreateISOModal />}>
                 <Input
                     className={'max-w-xs'}
                     placeholder={'Search ISOs'}
@@ -111,7 +111,7 @@ function IsoLibrary() {
                                 variant={'secondary'}
                                 size={'sm'}
                                 onClick={async () => {
-                                    await updateIso(iso.uuid, {
+                                    await updateISO(iso.uuid, {
                                         name: iso.name,
                                         hidden: !iso.hidden,
                                     })
@@ -141,7 +141,7 @@ function IsoLibrary() {
                                     if (!ok) return
 
                                     try {
-                                        await deleteIso(iso.uuid)
+                                        await deleteISO(iso.uuid)
                                         await refresh()
                                         toast.add({
                                             title: 'ISO deleted',

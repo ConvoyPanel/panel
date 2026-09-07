@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Network\AddressVersion;
+use App\Models\Concerns\CountsAddressStates;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,8 @@ use IPLib\Range\RangeInterface;
  */
 class AddressBlock extends Model
 {
+    use CountsAddressStates;
+
     public $timestamps = false;
 
     /** `version` is derived from base_ip — a database-generated column that cannot be written to. */
@@ -105,6 +108,18 @@ class AddressBlock extends Model
     public function isSparse(): bool
     {
         return $this->allocatableHostBits() > self::DENSE_MAX_HOST_BITS;
+    }
+
+    /**
+     * How many units this block can ever hand out, or null when that count is not representable.
+     *
+     * A sparse block's 2^n runs past a PHP int (a /64 delegating /128s is 2^64) and is never
+     * materialized anyway, so there is no denominator to report — null says "unknown", which is
+     * different from a total of zero and has to stay different all the way to the meter.
+     */
+    public function totalUnits(): ?int
+    {
+        return $this->isSparse() ? null : 1 << $this->allocatableHostBits();
     }
 
     /**

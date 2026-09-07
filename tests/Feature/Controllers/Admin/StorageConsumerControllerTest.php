@@ -12,7 +12,7 @@ use App\Models\User;
 beforeEach(function () {
     $this->admin = User::factory()->create(['root_admin' => true]);
     $this->node = Node::factory()->for(Location::factory())->create();
-    $this->storage = Storage::factory()->create(['stores_kvm' => true]);
+    $this->storage = Storage::factory()->create(['pve_content' => 'images']);
     $this->node->storages()->attach($this->storage);
 });
 

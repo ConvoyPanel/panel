@@ -234,6 +234,8 @@ Route::prefix('/servers')->group(function () {
 
 Route::prefix('/address-block-groups')->group(function () {
     Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
+    Route::get('/summary', [Admin\AddressBlockGroupController::class, 'summary']);
+    Route::get('/summary', [Admin\AddressBlockGroupController::class, 'summary']);
     Route::post('/', [Admin\AddressBlockGroupController::class, 'store']);
 
     Route::prefix('/{address_block_group}')->group(function () {
@@ -254,6 +256,8 @@ Route::prefix('/address-block-groups')->group(function () {
 
             Route::get('/addresses', [Admin\AddressController::class, 'index']);
             Route::post('/addresses/generate', [Admin\AddressController::class, 'generate']);
+            Route::post('/addresses/bulk', [Admin\AddressController::class, 'bulk']);
+            Route::post('/addresses/bulk', [Admin\AddressController::class, 'bulk']);
             Route::patch('/addresses/{address}', [Admin\AddressController::class, 'update']);
             Route::post('/addresses/{address}/reserve', [Admin\AddressController::class, 'reserve']);
             Route::delete('/addresses/{address}/reserve', [Admin\AddressController::class, 'unreserve']);
@@ -273,9 +277,9 @@ Route::prefix('/address-block-groups')->group(function () {
 | nodes hold a copy is settled when someone mounts it, not when it is added.
 |
 */
-Route::get('/isos/query-remote-file', [Admin\Isos\IsoController::class, 'queryLink']);
-Route::post('/isos/uploads', [Admin\Isos\IsoUploadController::class, 'store']);
-Route::resource('/isos', Admin\Isos\IsoController::class)
+Route::get('/isos/query-remote-file', [Admin\ISOs\ISOController::class, 'queryLink']);
+Route::post('/isos/uploads', [Admin\ISOs\ISOUploadController::class, 'store']);
+Route::resource('/isos', Admin\ISOs\ISOController::class)
     ->only(['index', 'store', 'show', 'update', 'destroy']);
 
 /*

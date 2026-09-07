@@ -35,6 +35,8 @@ enum AuditEvent: string
     // -----------------------------------------------------------------------------------------
     // Account and credential management. Subject is the User.
     // -----------------------------------------------------------------------------------------
+    case ACCOUNT_PROFILE_UPDATED = 'account.profile.updated';
+    case ACCOUNT_AVATAR_UPDATED = 'account.avatar.updated';
     case ACCOUNT_PASSWORD_UPDATED = 'account.password.updated';
     case ACCOUNT_TWO_FACTOR_ENABLED = 'account.two-factor.enabled';
     case ACCOUNT_TWO_FACTOR_CONFIRMED = 'account.two-factor.confirmed';
@@ -199,6 +201,7 @@ enum AuditEvent: string
             self::AUTH_LOGIN_SUCCEEDED,
             self::AUTH_LOGIN_FAILED,
             self::AUTH_LOGOUT,
+            self::ACCOUNT_PROFILE_UPDATED,
             self::ACCOUNT_PASSWORD_UPDATED,
             self::ACCOUNT_TWO_FACTOR_ENABLED,
             self::ACCOUNT_TWO_FACTOR_CONFIRMED,

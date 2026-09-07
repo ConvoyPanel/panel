@@ -1,12 +1,12 @@
-import IsoController from '@/wayfinder/actions/App/Http/Controllers/Admin/Isos/IsoController'
-import IsoUploadController from '@/wayfinder/actions/App/Http/Controllers/Admin/Isos/IsoUploadController'
+import ISOController from '@/wayfinder/actions/App/Http/Controllers/Admin/ISOs/ISOController'
+import ISOUploadController from '@/wayfinder/actions/App/Http/Controllers/Admin/ISOs/ISOUploadController'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
 import { type DataResponse, apiFetch } from '@/lib/api'
 import axios from '@/lib/axios'
 
-export interface Iso {
+export interface ISO {
     uuid: string
     name: string
     /** What this ISO is called on every node that fetches it. */
@@ -47,20 +47,20 @@ export const isoSchema = z
         path: ['url'],
     })
 
-const indexRoute = IsoController.index['/api/admin/isos']
-const storeRoute = IsoController.store['/api/admin/isos']
-const updateRoute = IsoController.update['/api/admin/isos/{iso}']
-const destroyRoute = IsoController.destroy['/api/admin/isos/{iso}']
+const indexRoute = ISOController.index['/api/admin/isos']
+const storeRoute = ISOController.store['/api/admin/isos']
+const updateRoute = ISOController.update['/api/admin/isos/{iso}']
+const destroyRoute = ISOController.destroy['/api/admin/isos/{iso}']
 const queryLinkRoute =
-    IsoController.queryLink['/api/admin/isos/query-remote-file']
-const uploadRoute = IsoUploadController.store['/api/admin/isos/uploads']
+    ISOController.queryLink['/api/admin/isos/query-remote-file']
+const uploadRoute = ISOUploadController.store['/api/admin/isos/uploads']
 
 interface Paginated {
-    items: Iso[]
+    items: ISO[]
     pagination: App.Data.PaginationMeta
 }
 
-export const getIsos = async (search?: string): Promise<Paginated> =>
+export const getISOs = async (search?: string): Promise<Paginated> =>
     apiFetch<Paginated>(indexRoute(), {
         params: search ? { 'filter[name]': search } : undefined,
     })
@@ -70,33 +70,33 @@ export const isoQueries = {
     list: (search?: string) =>
         queryOptions({
             queryKey: [...isoQueries.all(), search ?? ''] as const,
-            queryFn: () => getIsos(search),
+            queryFn: () => getISOs(search),
             placeholderData: keepPreviousData,
         }),
 }
 
-export const useIsos = (search?: string) => useQuery(isoQueries.list(search))
+export const useISOs = (search?: string) => useQuery(isoQueries.list(search))
 
 const toBody = ({ fileName, ...rest }: z.infer<typeof isoSchema>) => ({
     ...rest,
     file_name: fileName,
 })
 
-export const createIso = async (
+export const createISO = async (
     values: z.infer<typeof isoSchema>
-): Promise<Iso> =>
-    (await apiFetch<DataResponse<Iso>>(storeRoute(), { body: toBody(values) }))
+): Promise<ISO> =>
+    (await apiFetch<DataResponse<ISO>>(storeRoute(), { body: toBody(values) }))
         .data
 
 /** Only the label and its visibility; the source is fixed once nodes have it. */
-export const updateIso = async (
+export const updateISO = async (
     uuid: string,
     values: { name: string; hidden: boolean }
-): Promise<Iso> =>
-    (await apiFetch<DataResponse<Iso>>(updateRoute(uuid), { body: values }))
+): Promise<ISO> =>
+    (await apiFetch<DataResponse<ISO>>(updateRoute(uuid), { body: values }))
         .data
 
-export const deleteIso = async (uuid: string): Promise<void> => {
+export const deleteISO = async (uuid: string): Promise<void> => {
     await apiFetch(destroyRoute(uuid))
 }
 
@@ -112,17 +112,17 @@ export const queryRemoteFile = async (
     }
 }
 
-export interface UploadedIso {
+export interface UploadedISO {
     path: string
     sha256: string
     size: number
     fileName: string
 }
 
-export const uploadIso = async (
+export const uploadISO = async (
     file: File,
     onProgress?: (fraction: number) => void
-): Promise<UploadedIso> => {
+): Promise<UploadedISO> => {
     const body = new FormData()
     body.append('file', file)
 

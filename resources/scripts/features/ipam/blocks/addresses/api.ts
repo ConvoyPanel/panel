@@ -1,20 +1,35 @@
-import { useParams } from '@tanstack/react-router'
+import type { Address, PaginatedAddresses } from '@/types/address.ts'
 import {
-    keepPreviousData,
-    queryOptions,
-    useQuery,
-} from '@tanstack/react-query'
+    type QueryBuilderParams,
+    withQueryBuilderParams,
+} from '@/utils/http.ts'
+import AddressController from '@/wayfinder/actions/App/Http/Controllers/Admin/AddressController'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
 
+import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
 import {
     rawDataToAddress,
     rawDataToGeneratedAddressesResult,
 } from '@/lib/transformers/address.ts'
-import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import type { Address, PaginatedAddresses } from '@/types/address.ts'
-import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
-import AddressController from '@/wayfinder/actions/App/Http/Controllers/Admin/AddressController'
 
-export type AddressQueryParams = QueryBuilderParams<'ip' | 'server_id'>
+/**
+ * `state` is the operator's four states, not the column's three — `system` is a reserved row the
+ * panel made and nobody can release, and it filters as its own thing. The faceted filter sends
+ * these as an array.
+ */
+export type AddressQueryParams = QueryBuilderParams<
+    'ip' | 'server_id' | 'state'
+>
+
+export type AddressBulkAction = 'reserve' | 'release' | 'delete'
+
+export interface AddressBulkResult {
+    action: AddressBulkAction
+    affected: number
+    /** Rows the action did not apply to — a system reservation, an assigned address. */
+    skipped: number
+}
 
 export type AddressInclude = 'server' | 'addressBlock'
 
@@ -24,6 +39,10 @@ export type AddressInclude = 'server' | 'addressBlock'
 const indexRoute =
     AddressController.index[
         '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses'
+    ]
+const bulkRoute =
+    AddressController.bulk[
+        '/api/admin/address-block-groups/{address_block_group}/address-blocks/{address_block}/addresses/bulk'
     ]
 const generateRoute =
     AddressController.generate[
@@ -131,6 +150,29 @@ export const generateAddresses = async (
     )
 
     return rawDataToGeneratedAddressesResult(data)
+}
+
+/**
+ * Reserve, release or delete a selection in one request — and one audit entry.
+ *
+ * The server skips rows the action cannot touch rather than rejecting the batch, and reports how
+ * many, so the caller can say what actually happened.
+ */
+export const bulkAddresses = async (
+    blockGroupId: number,
+    blockId: number,
+    action: AddressBulkAction,
+    ids: number[]
+): Promise<AddressBulkResult> => {
+    const { data } = await apiFetch<DataResponse<AddressBulkResult>>(
+        bulkRoute({
+            address_block_group: blockGroupId,
+            address_block: blockId,
+        }),
+        { body: { action, ids } }
+    )
+
+    return data
 }
 
 export const updateAddress = async (

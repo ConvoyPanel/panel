@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Log;
  * returns rather than throwing: unlike a stranded install, nobody is waiting on
  * this, and failing it loudly would only fill the failed-jobs table.
  *
+ * Keeps the old `Iso` casing on purpose. The class name is the wire format of
+ * every payload already on the queue, so renaming it to match the rest of the
+ * codebase would strand them with `Class not found` -- the precise failure this
+ * shim exists to prevent. It goes away with the class.
+ *
  * Delete in the release after next, once no queue can still hold one.
  */
 class MonitorIsoDownloadJob implements ShouldQueue

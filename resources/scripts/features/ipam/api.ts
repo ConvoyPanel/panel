@@ -1,26 +1,26 @@
-import { useParams } from '@tanstack/react-router'
-import {
-    keepPreviousData,
-    queryOptions,
-    useQuery,
-} from '@tanstack/react-query'
-import { z } from 'zod'
-
-import { rawDataToAddressBlockGroup } from '@/lib/transformers/address-block-group.ts'
-import { rawDataToServer } from '@/lib/transformers/server.ts'
-import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import { queryClient } from '@/lib/query-client.ts'
 import type {
     AddressBlockGroup,
     PaginatedAddressBlockGroups,
 } from '@/types/address-block-group.ts'
+import type { IpamSummary } from '@/types/ipam-summary.ts'
 import type {
     NetworkInterface,
     PaginatedNetworkInterfaces,
 } from '@/types/network-interface.ts'
 import type { PaginatedServers } from '@/types/server'
-import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http.ts'
+import {
+    type QueryBuilderParams,
+    withQueryBuilderParams,
+} from '@/utils/http.ts'
 import AddressBlockGroupController from '@/wayfinder/actions/App/Http/Controllers/Admin/AddressBlockGroupController'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
+import { z } from 'zod'
+
+import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
+import { queryClient } from '@/lib/query-client.ts'
+import { rawDataToAddressBlockGroup } from '@/lib/transformers/address-block-group.ts'
+import { rawDataToServer } from '@/lib/transformers/server.ts'
 
 export type AddressBlockGroupQueryParams = QueryBuilderParams<
     '*' | 'name' | 'description' | 'node_id'
@@ -41,6 +41,10 @@ export const addressBlockGroupSchema = z.object({
 // dictionaries — reference the admin route explicitly.
 const indexRoute =
     AddressBlockGroupController.index['/api/admin/address-block-groups']
+const summaryRoute =
+    AddressBlockGroupController.summary[
+        '/api/admin/address-block-groups/summary'
+    ]
 const showRoute =
     AddressBlockGroupController.show[
         '/api/admin/address-block-groups/{address_block_group}'
@@ -82,6 +86,15 @@ export const getAddressBlockGroups = async (
 
     return { items: res.items, pagination: res.pagination }
 }
+
+/**
+ * Totals across every pool, for the index's headline tiles.
+ *
+ * A separate request rather than a sum of the table's rows: the table is one page of pools, and a
+ * headline that quietly means "of the rows you can see" is wrong as soon as there are two pages.
+ */
+const getIpamSummary = async (): Promise<IpamSummary> =>
+    (await apiFetch<DataResponse<IpamSummary>>(summaryRoute())).data
 
 const getAddressBlockGroup = async (id: number) =>
     rawDataToAddressBlockGroup(
@@ -130,6 +143,11 @@ export const addressBlockGroupQueries = {
             queryFn: () => getAddressBlockGroups(params),
             placeholderData: keepPreviousData,
         }),
+    summary: () =>
+        queryOptions({
+            queryKey: [...addressBlockGroupQueries.all(), 'summary'] as const,
+            queryFn: getIpamSummary,
+        }),
     details: () => [...addressBlockGroupQueries.all(), 'detail'] as const,
     detail: (id: number) =>
         queryOptions({
@@ -152,6 +170,8 @@ export const addressBlockGroupQueries = {
 
 export const useAddressBlockGroups = (params: AddressBlockGroupQueryParams) =>
     useQuery(addressBlockGroupQueries.list(params))
+
+export const useIpamSummary = () => useQuery(addressBlockGroupQueries.summary())
 
 export const preloadAddressBlockGroup = (id: number) =>
     queryClient.prefetchQuery(addressBlockGroupQueries.detail(id))

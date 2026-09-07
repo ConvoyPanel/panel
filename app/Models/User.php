@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
  * @property string $uuid
  * @property string $name
  * @property string $email
+ * @property string|null $avatar_path
  * @property bool $root_admin
  *
  * @mixin Eloquent
@@ -80,6 +82,19 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         ];
     }
 
+    /**
+     * Where this account's picture is served from, or null when it has none.
+     *
+     * A path rather than a stored URL: the file lives on a swappable disk and
+     * the panel is what serves it, so the address is derived at read time.
+     */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar_path
+            ? url("/avatars/{$this->avatar_path}")
+            : null;
+    }
+
     public function createToken(
         string $name,
         ApiKeyType $type,
@@ -101,6 +116,22 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function servers(): HasMany
     {
         return $this->hasMany(Server::class);
+    }
+
+    /**
+     * The account's own API keys, as opposed to every token whose `tokenable` happens to be this
+     * row: an application token is minted by an admin against their own user but belongs to the
+     * panel, and nothing on the account surface can see or revoke it.
+     *
+     * Constrained on the relation rather than at each call site so that route scope-binding
+     * (`/users/{user}/api-keys/{apiKey}`) refuses an application token id with a 404.
+     *
+     * @return MorphMany<PersonalAccessToken, $this>
+     */
+    public function apiKeys(): MorphMany
+    {
+        return $this->morphMany(PersonalAccessToken::class, 'tokenable')
+            ->where('type', '=', ApiKeyType::ACCOUNT->value);
     }
 
     /**

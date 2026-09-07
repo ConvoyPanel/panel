@@ -8,6 +8,7 @@ use App\Data\Server\OveragePenaltyData;
 use App\Enums\Anchor\AnchorMode;
 use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
+use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Concerns\AnchorInstallation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -342,7 +343,7 @@ class Node extends Model
      */
     public function isoStorage(): ?Storage
     {
-        return $this->storages()->where('stores_iso', true)->first();
+        return $this->storages()->stores(StorageContentType::ISO)->first();
     }
 
     /**
@@ -354,7 +355,7 @@ class Node extends Model
      */
     public function importStorage(): ?Storage
     {
-        return $this->storages()->where('stores_import', true)->first();
+        return $this->storages()->stores(StorageContentType::IMPORT)->first();
     }
 
     /**
@@ -362,7 +363,7 @@ class Node extends Model
      */
     public function backupStorage(): ?Storage
     {
-        return $this->storages()->where('stores_backups', true)->first();
+        return $this->storages()->stores(StorageContentType::BACKUPS)->first();
     }
 
     /**
@@ -372,7 +373,7 @@ class Node extends Model
      */
     public function hasBackupStorage(): bool
     {
-        return $this->storages()->where('stores_backups', true)->exists();
+        return $this->storages()->stores(StorageContentType::BACKUPS)->exists();
     }
 
     /**

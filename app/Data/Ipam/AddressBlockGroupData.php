@@ -16,6 +16,7 @@ class AddressBlockGroupData extends Data
         public ?string $description,
         public int $addressBlocksCount,
         public int $nodesCount,
+        public AddressCapacityData $capacity,
     ) {}
 
     public static function fromModel(AddressBlockGroup $group): self
@@ -26,6 +27,7 @@ class AddressBlockGroupData extends Data
             description: $group->description,
             addressBlocksCount: (int) ($group->address_blocks_count ?? 0),
             nodesCount: (int) ($group->nodes_count ?? 0),
+            capacity: AddressCapacityData::forGroup($group),
         );
     }
 }

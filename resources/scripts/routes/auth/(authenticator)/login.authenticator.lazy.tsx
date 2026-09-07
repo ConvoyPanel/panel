@@ -4,13 +4,17 @@ import {
     verifyAuthenticatorChallenge,
     verifySecondFactorPasskey,
 } from '@/features/auth/api.ts'
+import { isPasskeyDismissal } from '@/features/auth/passkeys.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { startAuthentication } from '@simplewebauthn/browser'
+import {
+    WebAuthnAbortService,
+    startAuthentication,
+} from '@simplewebauthn/browser'
 import { IconFingerprint } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -18,7 +22,6 @@ import { Button } from '@/components/ui/Button'
 import {
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
@@ -37,13 +40,8 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from '@/components/ui/InputOTP'
+import Spinner from '@/components/ui/Spinner.tsx'
 import { toast } from '@/components/ui/Toast'
-
-export const Route = createLazyFileRoute(
-    '/auth/(authenticator)/login/authenticator'
-)({
-    component: Authenticator,
-})
 
 const otpSchema = z.object({
     type: z.literal('code'),
@@ -63,7 +61,17 @@ const schema = z.discriminatedUnion('type', [
     passkeySchema,
 ])
 
-function Authenticator() {
+// Only two of the three steps have anything left to say. The passkey step used
+// to carry a line describing the dialog the browser was about to open; now that
+// it opens on arrival, the panel below reports its state and a description
+// would just be narrating that a second time.
+const DESCRIPTIONS: Record<string, string | null> = {
+    code: 'Enter the 6-digit code from your authenticator app.',
+    recovery: 'Enter one of your one-time recovery codes.',
+    passkey: null,
+}
+
+const Authenticator = () => {
     const { redirect } = Route.useSearch()
     const navigate = Route.useNavigate()
     const { data: methods } = useSecondFactorMethods()
@@ -94,8 +102,20 @@ function Authenticator() {
                 await verifySecondFactorPasskey(response)
             },
             onSuccess: finishLogin,
-            onError: () =>
-                toast.add({ title: 'Failed to verify passkey', type: 'error' }),
+            onError: e => {
+                // A closed sheet drops straight to whatever else this account
+                // has, rather than leaving the user on a screen whose only
+                // control re-opens the dialog they just dismissed.
+                if (methods?.authenticator) {
+                    form.setValue('type', 'code')
+                } else if (methods?.recovery) {
+                    form.setValue('type', 'recovery')
+                }
+
+                if (isPasskeyDismissal(e)) return
+
+                toast.add({ title: 'Failed to verify passkey', type: 'error' })
+            },
         })
 
     const submit = async (_data: any) => {
@@ -129,30 +149,45 @@ function Authenticator() {
         }
     }, [code, type])
 
-    useEffect(() => {
-        if (!methods || methods.authenticator) return
+    // Asking the browser is the whole step, so it happens on arrival. The ref
+    // keeps it to one prompt per visit: a sheet that reopens itself after a
+    // deliberate cancel is a trap, and React's development double-mount would
+    // otherwise abort the first ceremony with a second.
+    const prompted = useRef(false)
 
-        form.setValue('type', methods.passkey ? 'passkey' : 'recovery')
-    }, [methods])
+    useEffect(() => {
+        if (!methods || prompted.current) return
+
+        if (!methods.passkey) {
+            if (!methods.authenticator) form.setValue('type', 'recovery')
+
+            return
+        }
+
+        prompted.current = true
+        form.setValue('type', 'passkey')
+        authenticateWithPasskey()
+
+        return () => WebAuthnAbortService.cancelCeremony()
+        // Primitives, not `methods`: a refetch hands back a new object, and the
+        // cleanup above would cancel the ceremony this effect had just opened.
+    }, [methods?.passkey, methods?.authenticator])
+
+    const description = DESCRIPTIONS[type]
 
     return (
         <>
-            <CardHeader className={'space-y-2'}>
-                <CardTitle as='h1' className='text-3xl'>
-                    Second factor required
+            <CardHeader>
+                <CardTitle as={'h1'} size={'display'}>
+                    Two-factor required
                 </CardTitle>
-                <CardDescription>
-                    {type === 'code' &&
-                        'Enter the 6-digit code from your authenticator app.'}
-                    {type === 'recovery' &&
-                        'Enter one of your one-time recovery codes.'}
-                    {type === 'passkey' &&
-                        'Verify your identity with a passkey.'}
-                </CardDescription>
+                {description && (
+                    <CardDescription>{description}</CardDescription>
+                )}
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
-                    <CardContent>
+                    <CardContent className={'grid gap-5'}>
                         {type === 'code' ? (
                             <FormField
                                 control={form.control}
@@ -214,86 +249,104 @@ function Authenticator() {
                                 }}
                             />
                         ) : type === 'recovery' ? (
-                            <>
-                                <InputForm
-                                    name={'recoveryCode'}
-                                    label={'Recovery Code'}
-                                />
-                            </>
+                            <InputForm
+                                name={'recoveryCode'}
+                                label={'Recovery code'}
+                                variant={'underline'}
+                                labelTone={'mono'}
+                            />
                         ) : (
                             <div
                                 className={
                                     'bg-muted/50 flex items-center gap-3 rounded-lg p-3'
                                 }
                             >
-                                <IconFingerprint
-                                    className={
-                                        'text-muted-foreground size-5 shrink-0'
-                                    }
-                                />
-                                <p className={'text-muted-foreground text-sm'}>
-                                    Your browser will ask for your fingerprint,
-                                    face, screen lock, or security key.
+                                {isPasskeyPending ? (
+                                    <Spinner className={'size-5 shrink-0'} />
+                                ) : (
+                                    <IconFingerprint
+                                        className={
+                                            'text-muted-foreground size-5 shrink-0'
+                                        }
+                                    />
+                                )}
+                                <p className={'text-sm'}>
+                                    {isPasskeyPending
+                                        ? 'Waiting for your passkey.'
+                                        : 'Confirm with your passkey to continue.'}
                                 </p>
                             </div>
                         )}
-                    </CardContent>
 
-                    <CardFooter
-                        className={
-                            'flex flex-col justify-end gap-2 sm:flex-row'
-                        }
-                    >
-                        {type !== 'recovery' && methods?.recovery && (
-                            <Button
-                                type={'button'}
-                                className={'max-sm:w-full'}
-                                variant={'ghost'}
-                                onClick={() =>
-                                    form.setValue('type', 'recovery')
-                                }
-                            >
-                                I have a recovery code
-                            </Button>
-                        )}
-                        {type !== 'code' && methods?.authenticator && (
-                            <Button
-                                type={'button'}
-                                className={'max-sm:w-full'}
-                                variant={'ghost'}
-                                onClick={() => form.setValue('type', 'code')}
-                            >
-                                Use authenticator instead
-                            </Button>
-                        )}
-                        {type !== 'passkey' && methods?.passkey && (
-                            <Button
-                                type={'button'}
-                                className={'max-sm:w-full'}
-                                variant={'ghost'}
-                                onClick={() => form.setValue('type', 'passkey')}
-                            >
-                                Use a passkey
-                            </Button>
-                        )}
-                        {type === 'recovery' && (
-                            <FormButton className={'max-sm:w-full'}>
-                                Continue
-                            </FormButton>
-                        )}
-                        {type === 'passkey' && (
-                            <Button
-                                type={'button'}
-                                className={'max-sm:w-full'}
-                                loading={isPasskeyPending}
-                                onClick={() => authenticateWithPasskey()}
-                            >
-                                Verify with passkey
-                            </Button>
-                        )}
-                    </CardFooter>
+                        {/* Right-aligned, matching every other card's action
+                            row in the app. The login screen leads with its
+                            primary instead, because it has one to lead with. */}
+                        <div
+                            className={
+                                'flex flex-wrap items-center justify-end gap-2'
+                            }
+                        >
+                            {type !== 'recovery' && methods?.recovery && (
+                                <Button
+                                    type={'button'}
+                                    className={'max-sm:w-full'}
+                                    variant={'ghost'}
+                                    onClick={() =>
+                                        form.setValue('type', 'recovery')
+                                    }
+                                >
+                                    Recovery code
+                                </Button>
+                            )}
+                            {type !== 'code' && methods?.authenticator && (
+                                <Button
+                                    type={'button'}
+                                    className={'max-sm:w-full'}
+                                    variant={'ghost'}
+                                    onClick={() =>
+                                        form.setValue('type', 'code')
+                                    }
+                                >
+                                    Use a code
+                                </Button>
+                            )}
+                            {type !== 'passkey' && methods?.passkey && (
+                                <Button
+                                    type={'button'}
+                                    className={'max-sm:w-full'}
+                                    variant={'ghost'}
+                                    onClick={() =>
+                                        form.setValue('type', 'passkey')
+                                    }
+                                >
+                                    Use a passkey
+                                </Button>
+                            )}
+                            {type === 'recovery' && (
+                                <FormButton className={'max-sm:w-full'}>
+                                    Continue
+                                </FormButton>
+                            )}
+                            {type === 'passkey' && (
+                                <Button
+                                    type={'button'}
+                                    className={'max-sm:w-full'}
+                                    loading={isPasskeyPending}
+                                    onClick={() => authenticateWithPasskey()}
+                                >
+                                    Try again
+                                </Button>
+                            )}
+                        </div>
+                    </CardContent>
                 </form>
             </Form>
         </>
     )
 }
+
+export const Route = createLazyFileRoute(
+    '/auth/(authenticator)/login/authenticator'
+)({
+    component: Authenticator,
+})

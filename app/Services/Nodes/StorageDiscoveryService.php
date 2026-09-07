@@ -3,7 +3,6 @@
 namespace App\Services\Nodes;
 
 use App\Data\Cluster\StorageResourceData;
-use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Node;
 use App\Models\Storage;
 use App\Models\StorageToNode;
@@ -62,14 +61,15 @@ class StorageDiscoveryService
             $storage->forceFill([
                 'pve_type' => $live->type,
                 'pve_shared' => $live->shared,
-                'pve_content' => $live->content,
-                // Adopted, not just recorded -- see the note above. Skipped
-                // when the row carried no content list at all: that is a report
-                // that did not say, not a storage that holds nothing, and
-                // deriving from it would silently strip every flag.
-                ...$live->content !== null
-                    ? StorageContentType::flagsFor($live->content)
-                    : [],
+                // The list itself is the record: what a storage can hold is read
+                // off it on demand rather than projected into columns that could
+                // then disagree with it.
+                //
+                // Left alone when the report carried no list at all. That is a
+                // report that did not say, not a storage that holds nothing, and
+                // overwriting with null would take the store out of every
+                // allocation the panel offers until the next poll that does say.
+                ...$live->content !== null ? ['pve_content' => $live->content] : [],
             ])->save();
 
             // `available` is PVE saying it actually read the store. Anything

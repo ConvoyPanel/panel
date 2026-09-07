@@ -37,7 +37,6 @@ const CpuUsageCard = () => {
                     series='cpu'
                     color='var(--chart-cpu)'
                     ceiling={100}
-                    baseline
                 />
             }
         >

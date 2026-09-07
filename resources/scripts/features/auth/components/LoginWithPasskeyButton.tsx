@@ -1,70 +1,36 @@
-import {
-    getPasskeyAuthenticationOptions,
-    verifyPasskeyAuthentication,
-} from '@/features/auth/api.ts'
-import useAsyncFunction from '@/hooks/use-async-function.ts'
-import { startAuthentication } from '@simplewebauthn/browser'
-import {
-    AuthenticationResponseJSON,
-    PublicKeyCredentialRequestOptionsJSON,
-} from '@simplewebauthn/browser'
+import { usePasskeyLogin } from '@/features/auth/passkeys.ts'
 import { IconKey } from '@tabler/icons-react'
-import { useNavigate } from '@tanstack/react-router'
 
 import { Button } from '@/components/ui/Button'
-import { toast } from '@/components/ui/Toast'
 
 interface Props {
     redirectTo?: string
 }
 
+/*
+ * The repair path, not the front door. The login page arms conditional UI on
+ * mount, so this exists for the cases that offer cannot reach: a roaming
+ * security key with no discoverable credential, a dismissed autofill dropdown
+ * (there is no API to reopen one), and browsers where
+ * `browserSupportsWebAuthnAutofill()` is false.
+ *
+ * `ghost`, not `outline`: an outline button would sit at the same weight as
+ * "Continue with GitHub", and a passkey is not a parallel choice to a provider.
+ * Still a Button rather than a link, because the ceremony has a pending state
+ * worth showing and a second press worth blocking.
+ */
 const LoginWithPasskeyButton = ({ redirectTo }: Props) => {
-    const navigate = useNavigate()
-
-    const [state, login] = useAsyncFunction(async () => {
-        let optionsJSON: PublicKeyCredentialRequestOptionsJSON
-        try {
-            optionsJSON = await getPasskeyAuthenticationOptions()
-        } catch (e) {
-            toast.add({
-                title: 'Failed to get passkey authentication options',
-                type: 'error',
-            })
-            throw e
-        }
-
-        let authResponse: AuthenticationResponseJSON
-        try {
-            authResponse = await startAuthentication({ optionsJSON })
-        } catch (e) {
-            toast.add({ title: 'Authentication failed', type: 'error' })
-            throw e
-        }
-
-        try {
-            await verifyPasskeyAuthentication(authResponse)
-        } catch (e) {
-            toast.add({
-                title: 'Invalid passkey. Please try again.',
-                type: 'error',
-            })
-            throw e
-        }
-
-        await navigate({
-            to: redirectTo ? `/${redirectTo.slice(1)}` : '/',
-        })
-    })
+    const { signIn, isPending } = usePasskeyLogin(redirectTo)
 
     return (
         <Button
-            onClick={login}
-            className={'w-full'}
-            variant='outline'
-            loading={state.loading}
+            type={'button'}
+            variant={'ghost'}
+            onClick={() => signIn()}
+            loading={isPending}
             icon={<IconKey className='size-4' />}
         >
-            Passkeys
+            Use a passkey
         </Button>
     )
 }

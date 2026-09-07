@@ -15,13 +15,9 @@ class StorageFactory extends Factory
             'description' => rand(0, 3) === 3 ? $this->faker->sentence() : null,
             'name' => $this->faker->word(),
             'size' => rand(60, 100) * 1024 * 1024 * 1024,
-            'stores_kvm' => true,
-            'stores_lxc' => true,
-            'stores_lxc_templates' => true,
-            'stores_backups' => true,
-            'stores_iso' => true,
-            'stores_snippets' => true,
-            'stores_import' => true,
+            // What a storage holds is read off PVE's list, so a factory sets
+            // the list rather than seven flags derived from it.
+            'pve_content' => 'images,rootdir,vztmpl,backup,iso,snippets,import',
         ];
     }
 }
