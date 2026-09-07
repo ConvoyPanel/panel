@@ -17,7 +17,8 @@ it('starts permissive on every switch', function () {
         ->assertOk()
         ->assertJsonPath('data.allowNameChange', true)
         ->assertJsonPath('data.allowEmailChange', true)
-        ->assertJsonPath('data.allowPasswordChange', true);
+        ->assertJsonPath('data.allowPasswordChange', true)
+        ->assertJsonPath('data.allowAvatarChange', true);
 });
 
 it('stores the policy it was given', function () {
@@ -26,17 +27,20 @@ it('stores the policy it was given', function () {
             'allow_name_change' => false,
             'allow_email_change' => false,
             'allow_password_change' => true,
+            'allow_avatar_change' => false,
         ])
         ->assertOk()
         ->assertJsonPath('data.allowNameChange', false)
         ->assertJsonPath('data.allowEmailChange', false)
-        ->assertJsonPath('data.allowPasswordChange', true);
+        ->assertJsonPath('data.allowPasswordChange', true)
+        ->assertJsonPath('data.allowAvatarChange', false);
 
     $settings = app(AccountSettings::class)->refresh();
 
     expect($settings->allow_name_change)->toBeFalse()
         ->and($settings->allow_email_change)->toBeFalse()
-        ->and($settings->allow_password_change)->toBeTrue();
+        ->and($settings->allow_password_change)->toBeTrue()
+        ->and($settings->allow_avatar_change)->toBeFalse();
 });
 
 it('records what the policy was changed to', function () {
@@ -44,6 +48,7 @@ it('records what the policy was changed to', function () {
         'allow_name_change' => false,
         'allow_email_change' => true,
         'allow_password_change' => true,
+        'allow_avatar_change' => true,
     ]);
 
     $entry = AuditLog::query()
@@ -60,7 +65,11 @@ it('refuses a partial policy', function () {
     $this->actingAs($this->user)
         ->putJson('/api/admin/settings/account', ['allow_name_change' => false])
         ->assertStatus(422)
-        ->assertJsonValidationErrors(['allow_email_change', 'allow_password_change']);
+        ->assertJsonValidationErrors([
+            'allow_email_change',
+            'allow_password_change',
+            'allow_avatar_change',
+        ]);
 });
 
 it('is closed to a non-admin', function () {

@@ -10,6 +10,7 @@ const UNRESTRICTED: App.Data.User.AccountCapabilitiesData = {
     canChangeName: true,
     canChangeEmail: true,
     canChangePassword: true,
+    canChangeAvatar: true,
 }
 
 export const rawDataToAuthenticatedUser = (data: any): AuthenticatedUser => ({

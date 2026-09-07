@@ -11,7 +11,7 @@ use Spatie\LaravelData\Data;
  * Phrased as what is *allowed* rather than as the capabilities the client
  * screen reads ({@see AccountCapabilitiesData}): this is the stored policy, and
  * it is deliberately not the same object as the resolved answer for a given
- * user — an admin resolves past all three of these.
+ * user — an admin resolves past all four of these.
  */
 class AccountSettingsData extends Data
 {
@@ -19,5 +19,6 @@ class AccountSettingsData extends Data
         public bool $allowNameChange,
         public bool $allowEmailChange,
         public bool $allowPasswordChange,
+        public bool $allowAvatarChange,
     ) {}
 }

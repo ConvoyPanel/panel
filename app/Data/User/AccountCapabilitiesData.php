@@ -19,6 +19,7 @@ class AccountCapabilitiesData extends Data
         public bool $canChangeName,
         public bool $canChangeEmail,
         public bool $canChangePassword,
+        public bool $canChangeAvatar,
     ) {}
 
     /**
@@ -27,6 +28,6 @@ class AccountCapabilitiesData extends Data
      */
     public static function unrestricted(): self
     {
-        return new self(true, true, true);
+        return new self(true, true, true, true);
     }
 }

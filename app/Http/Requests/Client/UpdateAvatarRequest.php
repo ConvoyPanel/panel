@@ -2,10 +2,22 @@
 
 namespace App\Http\Requests\Client;
 
+use App\Services\Users\AccountPolicyResolver;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAvatarRequest extends FormRequest
 {
+    /**
+     * {@see UpdateProfileRequest::authorize()} — the same policy. A picture is cosmetic where a
+     * name is not, but a deployment that mirrors an upstream directory shows that directory's
+     * picture, and an upload here would put a second one in front of it.
+     */
+    public function authorize(): bool
+    {
+        // Resolved rather than injected: kept in step with its siblings, one of which extends a base class that fixes this signature.
+        return app(AccountPolicyResolver::class)->for($this->user())->canChangeAvatar;
+    }
+
     public function rules(): array
     {
         return [

@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Settings\AccountSettings;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -27,7 +28,8 @@ it('tells the account what it may change about itself', function () {
         ->assertOk()
         ->assertJsonPath('data.accountCapabilities.canChangeName', true)
         ->assertJsonPath('data.accountCapabilities.canChangeEmail', false)
-        ->assertJsonPath('data.accountCapabilities.canChangePassword', true);
+        ->assertJsonPath('data.accountCapabilities.canChangePassword', true)
+        ->assertJsonPath('data.accountCapabilities.canChangeAvatar', true);
 });
 
 it('refuses a name change once the operator turns it off', function () {
@@ -75,6 +77,37 @@ it('refuses a password change once the operator turns it off', function () {
     expect(Hash::check('Password123!', $user->refresh()->password))->toBeTrue();
 });
 
+it('refuses a picture upload once the operator turns it off', function () {
+    setAccountPolicy(['allow_avatar_change' => false]);
+
+    $user = User::factory()->create(['root_admin' => false]);
+
+    $this->actingAs($user)
+        ->postJson('/api/client/account/avatar', [
+            'avatar' => UploadedFile::fake()->image('face.png', 600, 600),
+        ])
+        ->assertForbidden();
+
+    expect($user->refresh()->avatar_path)->toBeNull();
+});
+
+it('refuses removing a picture once the operator turns it off', function () {
+    // Removal is the same capability as upload: with the switch off, what the account shows is
+    // the operator's to decide, and clearing it is as much a change as replacing it.
+    setAccountPolicy(['allow_avatar_change' => false]);
+
+    $user = User::factory()->create([
+        'root_admin' => false,
+        'avatar_path' => 'avatars/whatever.webp',
+    ]);
+
+    $this->actingAs($user)
+        ->deleteJson('/api/client/account/avatar')
+        ->assertForbidden();
+
+    expect($user->refresh()->avatar_path)->toBe('avatars/whatever.webp');
+});
+
 it('never binds an admin to the policy', function () {
     // The switches govern the self-service screen. An admin who hit a wall there would edit the
     // same row from /admin/users, so enforcing it against them restricts nothing and would read
@@ -83,6 +116,7 @@ it('never binds an admin to the policy', function () {
         'allow_name_change' => false,
         'allow_email_change' => false,
         'allow_password_change' => false,
+        'allow_avatar_change' => false,
     ]);
 
     $admin = User::factory()->create(['root_admin' => true, 'name' => 'Before']);
@@ -90,7 +124,8 @@ it('never binds an admin to the policy', function () {
     $this->actingAs($admin)
         ->getJson('/api/client/user')
         ->assertJsonPath('data.accountCapabilities.canChangeName', true)
-        ->assertJsonPath('data.accountCapabilities.canChangePassword', true);
+        ->assertJsonPath('data.accountCapabilities.canChangePassword', true)
+        ->assertJsonPath('data.accountCapabilities.canChangeAvatar', true);
 
     $this->actingAs($admin)
         ->patchJson('/api/client/account/profile', ['name' => 'After'])

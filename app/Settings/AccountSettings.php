@@ -22,7 +22,7 @@ use Spatie\LaravelSettings\Settings;
  * would need is already in the signature and adding one later touches the
  * resolver rather than every call site.
  *
- * All three default to true: the self-service surface shipped before these
+ * All four default to true: the self-service surface shipped before these
  * settings did, and an upgrade must not quietly take it away.
  */
 class AccountSettings extends Settings
@@ -35,6 +35,9 @@ class AccountSettings extends Settings
 
     /** Whether a non-admin may change their own password. */
     public bool $allow_password_change = true;
+
+    /** Whether a non-admin may upload or remove their own profile picture. */
+    public bool $allow_avatar_change = true;
 
     public static function group(): string
     {

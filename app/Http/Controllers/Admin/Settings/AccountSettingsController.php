@@ -24,6 +24,7 @@ class AccountSettingsController
         $settings->allow_name_change = $request->boolean('allow_name_change');
         $settings->allow_email_change = $request->boolean('allow_email_change');
         $settings->allow_password_change = $request->boolean('allow_password_change');
+        $settings->allow_avatar_change = $request->boolean('allow_avatar_change');
 
         $settings->save();
 
@@ -34,6 +35,7 @@ class AccountSettingsController
                 'allow_name_change' => $settings->allow_name_change,
                 'allow_email_change' => $settings->allow_email_change,
                 'allow_password_change' => $settings->allow_password_change,
+                'allow_avatar_change' => $settings->allow_avatar_change,
             ],
         );
 
@@ -52,6 +54,7 @@ class AccountSettingsController
             allowNameChange: $policy->canChangeName,
             allowEmailChange: $policy->canChangeEmail,
             allowPasswordChange: $policy->canChangePassword,
+            allowAvatarChange: $policy->canChangeAvatar,
         );
     }
 }

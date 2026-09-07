@@ -44,6 +44,7 @@ class AccountPolicyResolver
             canChangeName: $this->settings->allow_name_change,
             canChangeEmail: $this->settings->allow_email_change,
             canChangePassword: $this->settings->allow_password_change,
+            canChangeAvatar: $this->settings->allow_avatar_change,
         );
     }
 }

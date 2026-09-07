@@ -31,6 +31,7 @@ const AccountSettingsPage = () => {
             allowNameChange: true,
             allowEmailChange: true,
             allowPasswordChange: true,
+            allowAvatarChange: true,
         },
     })
 
@@ -41,6 +42,7 @@ const AccountSettingsPage = () => {
             allowNameChange: settings.allowNameChange,
             allowEmailChange: settings.allowEmailChange,
             allowPasswordChange: settings.allowPasswordChange,
+            allowAvatarChange: settings.allowAvatarChange,
         })
     }, [form, settings])
 
@@ -83,7 +85,7 @@ const AccountSettingsPage = () => {
                         <CardHeader>
                             <CardTitle>What users can change</CardTitle>
                         </CardHeader>
-                        {/* Divided rows rather than a box per switch: three
+                        {/* Divided rows rather than a box per switch: four
                             bordered cards nested inside a bordered card spend
                             a full content column on one word each. Each row
                             carries what turning it off costs, which is the
@@ -104,6 +106,16 @@ const AccountSettingsPage = () => {
                                 label={'Email address'}
                                 description={
                                     'The address they sign in with. Changing it always requires confirming their identity first.'
+                                }
+                                formItemProps={{
+                                    className: 'py-3.5 first:pt-0 last:pb-0',
+                                }}
+                            />
+                            <SwitchForm
+                                name={'allowAvatarChange'}
+                                label={'Profile picture'}
+                                description={
+                                    'Shown beside their name. Turning this off also stops them removing one they already have.'
                                 }
                                 formItemProps={{
                                     className: 'py-3.5 first:pt-0 last:pb-0',

@@ -49,6 +49,7 @@ const ProfileCard = () => {
 
     const canChangeName = user?.accountCapabilities.canChangeName ?? true
     const canChangeEmail = user?.accountCapabilities.canChangeEmail ?? true
+    const canChangeAvatar = user?.accountCapabilities.canChangeAvatar ?? true
 
     const form = useForm({
         resolver: zodResolver(profileSchema),
@@ -128,54 +129,72 @@ const ProfileCard = () => {
                                     <FieldContent>
                                         <FieldTitle>Picture</FieldTitle>
                                         <FieldDescription>
-                                            Shown beside your name. Cropped
-                                            square and stored at 512px.
+                                            {canChangeAvatar
+                                                ? 'Shown beside your name. Cropped square and stored at 512px.'
+                                                : MANAGED_NOTE}
                                         </FieldDescription>
                                     </FieldContent>
+                                    {/* The picture itself stays whether or not
+                                        it can be changed -- it is the account's
+                                        own, and a locked field still has to say
+                                        what it currently holds. */}
                                     <div className={'flex items-center gap-3'}>
                                         <UserAvatar
                                             name={user?.name}
                                             src={user?.avatarUrl}
                                             className={'size-12 text-sm'}
                                         />
-                                        <input
-                                            ref={input}
-                                            type={'file'}
-                                            accept={AVATAR_ACCEPT}
-                                            className={'hidden'}
-                                            onChange={event => {
-                                                choose(event.target.files?.[0])
-                                                // Cleared so picking the same
-                                                // file twice still fires a
-                                                // change event.
-                                                event.target.value = ''
-                                            }}
-                                        />
-                                        <Button
-                                            variant={'outline'}
-                                            type={'button'}
-                                            disabled={uploading || removing}
-                                            onClick={() =>
-                                                input.current?.click()
-                                            }
-                                        >
-                                            Upload
-                                        </Button>
-                                        {user?.avatarUrl ? (
-                                            <Button
-                                                variant={'ghost'}
-                                                type={'button'}
-                                                loading={removing}
-                                                disabled={uploading || removing}
-                                                onClick={() =>
-                                                    void remove().catch(
-                                                        () => {}
-                                                    )
-                                                }
-                                            >
-                                                Remove
-                                            </Button>
-                                        ) : null}
+                                        {canChangeAvatar && (
+                                            <>
+                                                <input
+                                                    ref={input}
+                                                    type={'file'}
+                                                    accept={AVATAR_ACCEPT}
+                                                    className={'hidden'}
+                                                    onChange={event => {
+                                                        choose(
+                                                            event.target
+                                                                .files?.[0]
+                                                        )
+                                                        // Cleared so picking
+                                                        // the same file twice
+                                                        // still fires a change
+                                                        // event.
+                                                        event.target.value = ''
+                                                    }}
+                                                />
+                                                <Button
+                                                    variant={'outline'}
+                                                    type={'button'}
+                                                    disabled={
+                                                        uploading || removing
+                                                    }
+                                                    onClick={() =>
+                                                        input.current?.click()
+                                                    }
+                                                >
+                                                    Upload
+                                                </Button>
+                                                {user?.avatarUrl ? (
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        type={'button'}
+                                                        loading={removing}
+                                                        disabled={
+                                                            uploading ||
+                                                            removing
+                                                        }
+                                                        onClick={() =>
+                                                            void remove().catch(
+                                                                () => {}
+                                                            )
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                ) : null}
+                                            </>
+                                        )}
                                     </div>
                                 </Field>
 
