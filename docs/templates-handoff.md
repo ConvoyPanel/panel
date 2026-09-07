@@ -31,15 +31,18 @@ capacity — see the `feat(clusters)` commit), which stands on its own and is
 what any future "usable from every node that mounts the pool" query will join
 against.
 
-## What was built and thrown away (find it in git history)
+## What was built and thrown away
 
-- **panel** `feat/templates-cofoundry-import` (`74e4b724`) — registry/catalog/
-  import services, `template_installs`, polling job, admin endpoints. Rejected
-  model (one panel-wide VMID fanned out per node).
+- **panel** `feat/templates-cofoundry-import` — registry/catalog/import
+  services, `template_installs`, polling job, admin endpoints. Rejected model
+  (one panel-wide VMID fanned out per node). **Gone, not archived:** the branch
+  was never pushed and was deleted on 2026-09-07, so this paragraph is the only
+  remaining record of it. Rebuild from the design notes below, not from a diff.
 - **anchor** `feat/templates-install` (`7f7b8f4`) — a `templates.install`
   capability: download → verify sha256 → `qmrestore` → `qm template`. Sound
   for what it did, but PVE 9 image import likely removes the need for an agent
-  in this feature entirely.
+  in this feature entirely. Still in the anchor repo on the branch of the same
+  name, and only for as long as that branch survives.
 - The instances redesign (this file's previous revision, plus the removal
   commit's parent tree) — `templates`/`template_instances` split, poll-side
   reconciliation, CA-scoped placement. Never finished; removed.
