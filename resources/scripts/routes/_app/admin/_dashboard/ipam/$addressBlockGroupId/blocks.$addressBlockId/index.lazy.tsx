@@ -66,6 +66,16 @@ const STATE_FILTER: DataTableFilterField<Address> = {
     ],
 }
 
+/**
+ * Why a system-reserved row has no menu. Network, broadcast and gateway exist so nothing else can
+ * take them; offering actions that the API will refuse reads as a missing feature rather than the
+ * rule it is.
+ */
+const systemReservedReason = (address: Address) =>
+    addressStateKind(address) === 'system'
+        ? 'Reserved by the panel — the network, broadcast and gateway addresses cannot be released or reassigned'
+        : undefined
+
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'
 )({
@@ -104,6 +114,22 @@ function BlockIndex() {
     // A block that cannot be drawn has no map to fall back to.
     const canDrawMap = !!map && !map.sparse && !map.tooLarge
     const activeView: AddressBlockView = canDrawMap ? view : 'list'
+
+    /*
+     * One filter, two renderings. The table owns the state as a react-table column filter (which
+     * `useDataTable` already folds into `filter[state]` on the request); the map reads and writes
+     * that same entry, so switching views never changes what is being shown.
+     */
+    const stateFilter =
+        (tableProps.columnFilters.find(entry => entry.id === 'state')?.value as
+            | string[]
+            | undefined) ?? []
+
+    const setStateFilter = (states: string[]) =>
+        tableProps.setColumnFilters(previous => [
+            ...previous.filter(entry => entry.id !== 'state'),
+            ...(states.length ? [{ id: 'state', value: states }] : []),
+        ])
 
     // The map hands back address ids; the actions need to know what each one is.
     const mapSelection = useMemo(
@@ -256,7 +282,10 @@ function BlockIndex() {
                 </span>
             ),
         },
-        actionsColumn<Address>(({ row }) => renderActions(row.original)),
+        actionsColumn<Address>(
+            ({ row }) => renderActions(row.original),
+            ({ row }) => systemReservedReason(row.original)
+        ),
     ]
 
     return (
@@ -272,6 +301,8 @@ function BlockIndex() {
                 map={map}
                 selectedIds={selectedIds}
                 onSelectedIdsChange={setSelectedIds}
+                stateFilter={stateFilter}
+                onStateFilterChange={setStateFilter}
                 bulkActions={
                     <AddressBulkActions
                         selection={mapSelection}
@@ -355,7 +386,13 @@ function BlockIndex() {
                                     </div>
                                 </ItemContent>
                                 <ItemActions>
-                                    <Actions>{renderActions(address)}</Actions>
+                                    <Actions
+                                        disabledReason={systemReservedReason(
+                                            address
+                                        )}
+                                    >
+                                        {renderActions(address)}
+                                    </Actions>
                                 </ItemActions>
                             </Item>
                         )

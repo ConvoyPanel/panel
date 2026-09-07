@@ -1,5 +1,6 @@
 import { addressCapacity } from '@/features/ipam/capacity.ts'
 import AddressMap from '@/features/ipam/components/AddressBlock/AddressMap.tsx'
+import AssignAddressModal from '@/features/ipam/components/AddressBlock/AssignAddressModal.tsx'
 import GenerateAddressesModal from '@/features/ipam/components/AddressBlock/GenerateAddressesModal.tsx'
 import AddressCapacityMeter from '@/features/ipam/components/AddressCapacityMeter.tsx'
 import AddressStateLabel from '@/features/ipam/components/AddressStateLabel.tsx'
@@ -34,6 +35,9 @@ interface Props {
     map: AddressMapPayload | undefined
     selectedIds: number[]
     onSelectedIdsChange: (ids: number[]) => void
+    /** Shared with the list's faceted filter — one filter, two renderings. */
+    stateFilter: string[]
+    onStateFilterChange: (states: string[]) => void
     /** Rendered under the map while it has a selection — the same actions the table's bar offers. */
     bulkActions: ReactNode
 }
@@ -53,6 +57,8 @@ const AddressBlockCard = ({
     map,
     selectedIds,
     onSelectedIdsChange,
+    stateFilter,
+    onStateFilterChange,
     bulkActions,
 }: Props) => {
     const openModal = useOpenModal(useAddressBlockModal)
@@ -196,6 +202,10 @@ const AddressBlockCard = ({
                                         onSelectedIdsChange={
                                             onSelectedIdsChange
                                         }
+                                        stateFilter={stateFilter}
+                                        onStateFilterChange={
+                                            onStateFilterChange
+                                        }
                                     />
                                 </div>
                             )}
@@ -237,7 +247,10 @@ const AddressBlockCard = ({
                         </Button>
                     </span>
                 ) : (
-                    <GenerateAddressesModal block={block} mutate={mutate} />
+                    <span className={'flex items-center gap-2'}>
+                        <GenerateAddressesModal block={block} mutate={mutate} />
+                        <AssignAddressModal block={block} mutate={mutate} />
+                    </span>
                 )}
             </CardFooter>
         </Card>
