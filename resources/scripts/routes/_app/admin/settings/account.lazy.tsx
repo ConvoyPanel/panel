@@ -16,7 +16,7 @@ import { z } from 'zod'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm } from '@/components/ui/Forms'
+import { SwitchForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
@@ -81,20 +81,43 @@ const AccountSettingsPage = () => {
                 <form onSubmit={form.handleSubmit(submit)}>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Self-service changes</CardTitle>
+                            <CardTitle>What users can change</CardTitle>
                         </CardHeader>
-                        <CardContent className={'space-y-3'}>
-                            <CheckboxForm
+                        {/* Divided rows rather than a box per switch: three
+                            bordered cards nested inside a bordered card spend
+                            a full content column on one word each. Each row
+                            carries what turning it off costs, which is the
+                            question the switch raises. */}
+                        <CardContent className={'divide-y'}>
+                            <SwitchForm
                                 name={'allowNameChange'}
                                 label={'Display name'}
+                                description={
+                                    'Shown on their account and beside their actions in the audit log.'
+                                }
+                                formItemProps={{
+                                    className: 'py-3.5 first:pt-0 last:pb-0',
+                                }}
                             />
-                            <CheckboxForm
+                            <SwitchForm
                                 name={'allowEmailChange'}
                                 label={'Email address'}
+                                description={
+                                    'The address they sign in with. Changing it always requires confirming their identity first.'
+                                }
+                                formItemProps={{
+                                    className: 'py-3.5 first:pt-0 last:pb-0',
+                                }}
                             />
-                            <CheckboxForm
+                            <SwitchForm
                                 name={'allowPasswordChange'}
                                 label={'Password'}
+                                description={
+                                    'There is no password reset flow, so turning this off makes their current password permanent.'
+                                }
+                                formItemProps={{
+                                    className: 'py-3.5 first:pt-0 last:pb-0',
+                                }}
                             />
                         </CardContent>
                     </Card>
