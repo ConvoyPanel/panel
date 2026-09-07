@@ -1,6 +1,7 @@
 import LiveSparkline from '@/features/servers/components/client/LiveSparkline.tsx'
 import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 import UnknownStat from '@/features/servers/components/client/Overview/UnknownStat.tsx'
+import { useServer } from '@/features/servers/detail/api.ts'
 import useLiveMetrics from '@/features/servers/hooks/use-live-metrics.ts'
 import { IconCpu } from '@tabler/icons-react'
 
@@ -8,11 +9,22 @@ import Skeleton from '@/components/ui/Skeleton.tsx'
 
 const CpuUsageCard = () => {
     const { metrics, data: state, isUnknown } = useLiveMetrics()
+    const { data: server } = useServer()
+
+    const cores = server?.cpu ?? 0
 
     return (
         <StatisticCard
             title={'CPU Usage'}
             icon={IconCpu}
+            /* The percentage is of the cores this server was given, not of the
+               node -- which is the one denominator the overview never printed.
+               It used to live in the specifications card, two rows down. */
+            context={
+                cores > 0
+                    ? `of ${cores} ${cores === 1 ? 'vCPU' : 'vCPUs'}`
+                    : undefined
+            }
             /* Always present, so the band is part of the card's height from
                the first paint. Rendering it only once a reading landed grew
                every tile in the row by 20px the moment the poll returned --
@@ -25,6 +37,7 @@ const CpuUsageCard = () => {
                     series='cpu'
                     color='var(--chart-cpu)'
                     ceiling={100}
+                    baseline
                 />
             }
         >

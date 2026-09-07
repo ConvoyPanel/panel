@@ -72,8 +72,8 @@ const settingsPayload = (settings: Partial<ServerPresetSettings>) => {
         addresses_ipv6_count: settings.addressesIpv6Count,
         deferred_os_selection: settings.deferredOsSelection,
         should_create_vm: settings.shouldCreateVm,
-        template_group_uuid: settings.templateGroupUuid,
-        template_uuid: settings.templateUuid,
+        image_group_uuid: settings.imageGroupUuid,
+        image_uuid: settings.imageUuid,
         start_on_completion: settings.startOnCompletion,
     }
 

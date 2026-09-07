@@ -47,7 +47,7 @@ const CreateServerPage = () => {
             deferredOsSelection: false,
             shouldCreateVm: true,
             accountPassword: '',
-            templateUuid: '',
+            imageUuid: '',
             startOnCompletion: true,
         },
     })
@@ -58,7 +58,7 @@ const CreateServerPage = () => {
             form.setValue('shouldCreateVm', false)
             form.setValue('startOnCompletion', false)
             form.setValue('accountPassword', '')
-            form.setValue('templateUuid', '')
+            form.setValue('imageUuid', '')
         }
     }, [deferredOsSelection, form])
 

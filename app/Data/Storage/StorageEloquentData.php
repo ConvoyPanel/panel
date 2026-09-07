@@ -29,6 +29,7 @@ class StorageEloquentData extends Data
         public bool $storesBackups,
         public bool $storesIso,
         public bool $storesSnippets,
+        public bool $storesImport,
         public ?int $backupOrder,
         /**
          * The other nodes reaching this same storage, named.
@@ -135,6 +136,7 @@ class StorageEloquentData extends Data
             storesBackups: (bool) $storage->stores_backups,
             storesIso: (bool) $storage->stores_iso,
             storesSnippets: (bool) $storage->stores_snippets,
+            storesImport: (bool) $storage->stores_import,
             backupOrder: $storage->pivot?->backup_order,
             sharedWith: $storage->relationLoaded('nodes') || $viewedFrom !== null
                 ? $storage->nodes

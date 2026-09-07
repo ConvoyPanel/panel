@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\ISO;
-use App\Models\Storage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,14 +18,23 @@ class ISOFactory extends Factory
     public function definition(): array
     {
         return [
-            'storage_id' => Storage::factory(),
             'uuid' => $this->faker->uuid(),
-            'is_successful' => true,
             'name' => $this->faker->name(),
             'file_name' => "{$this->faker->unique()->word()}.iso",
+            'url' => 'https://example.invalid/'.$this->faker->unique()->word().'.iso',
+            'path' => null,
+            'sha256' => hash('sha256', $this->faker->unique()->word()),
             'size' => $this->faker->randomNumber(),
             'hidden' => false,
-            'completed_at' => $this->faker->dateTime(),
         ];
+    }
+
+    /** An ISO the panel is hosting rather than one the operator links to. */
+    public function hosted(): static
+    {
+        return $this->state(fn () => [
+            'url' => null,
+            'path' => 'iso-'.hash('sha256', $this->faker->unique()->word()).'.iso',
+        ]);
     }
 }

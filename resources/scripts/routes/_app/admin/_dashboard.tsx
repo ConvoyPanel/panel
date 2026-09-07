@@ -2,6 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconBoxMargin,
     IconDatabase,
+    IconDisc,
     IconHistory,
     IconHome,
     IconKey,
@@ -89,8 +90,13 @@ const nav: SidebarNav = {
                 },
                 {
                     icon: IconBoxMargin,
-                    label: 'Templates',
-                    path: '/admin/templates',
+                    label: 'Images',
+                    path: '/admin/images',
+                },
+                {
+                    icon: IconDisc,
+                    label: 'ISOs',
+                    path: '/admin/isos',
                 },
                 {
                     icon: IconStack2,

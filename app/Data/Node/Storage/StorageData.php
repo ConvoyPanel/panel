@@ -21,6 +21,7 @@ class StorageData extends Data
         public bool $storesBackups,
         public bool $storesIso,
         public bool $storesSnippets,
+        public bool $storesImport,
     ) {}
 
     public static function fromRaw(array $raw): self
@@ -45,6 +46,7 @@ class StorageData extends Data
             storesBackups     : $flags['stores_backups'],
             storesIso         : $flags['stores_iso'],
             storesSnippets    : $flags['stores_snippets'],
+            storesImport      : $flags['stores_import'],
         );
     }
 }

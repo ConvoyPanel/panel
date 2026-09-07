@@ -22,7 +22,7 @@ interface DeploymentStepRowProps {
 // (step.progressMode); the map only carries the display label and, for byte
 // progress, how to format it.
 const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
-    'clone': { label: 'Cloning template', isBytes: true },
+    'clone': { label: 'Cloning image', isBytes: true },
     'configure': { label: 'Configuring VM' },
     'update-password': { label: 'Updating password' },
     'delete-backups': { label: 'Deleting backups' },

@@ -2,102 +2,73 @@
 
 namespace App\Services\Isos;
 
-use App\Data\Helpers\ChecksumData;
-use App\Data\Node\Storage\IsoData;
 use App\Enums\Node\Storage\StorageContentType;
-use App\Jobs\Node\MonitorIsoDownloadJob;
 use App\Models\ISO;
 use App\Models\Node;
-use App\Models\Storage;
+use App\Services\Images\ImageSourceResolver;
 use App\Services\Proxmox\Node\ProxmoxStorageClient;
-use Illuminate\Database\ConnectionInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Illuminate\Support\Facades\Storage as Filesystem;
 
+/**
+ * The ISO library: what the panel offers, not what any node holds.
+ *
+ * Adding an ISO is now a panel-level act with no node in it -- the operator
+ * gives a URL or uploads a file, and that is the whole operation. Getting it
+ * onto a node is {@see IsoResidencyService}, and it happens when someone mounts
+ * it.
+ */
 class IsoService
 {
     public function __construct(
-        private ConnectionInterface $connection,
         private ProxmoxStorageClient $client,
+        private ImageSourceResolver $resolver,
     ) {}
 
-    public function download(
-        Node $node,
-        string $name,
-        ?string $fileName,
-        string $link,
-        ?ChecksumData $checksumData = null,
-        ?bool $hidden = false,
-        ?Storage $storage = null,
-    ) {
-        // Default to an ISO-capable storage on the node; the caller may override.
-        $storage ??= $node->isoStorage();
-        if (is_null($storage)) {
-            throw new BadRequestHttpException('No ISO-capable storage is configured for this node.');
-        }
-
-        $queriedFileMetadata = $this->client->setNode($node)->getFileMetadata($link);
-
-        return $this->connection->transaction(
-            function () use (
-                $queriedFileMetadata,
-                $node,
-                $storage,
-                $hidden,
-                $fileName,
-                $link,
-                $name,
-                $checksumData,
-            ) {
-                $iso = ISO::create([
-                    'storage_id' => $storage->id,
-                    'name' => $name,
-                    'file_name' => $fileName ?? $queriedFileMetadata->fileName,
-                    'hidden' => $hidden,
-                    'size' => $queriedFileMetadata->size,
-                ]);
-
-                $upid = $this->client->setNode($node)->download(
-                    StorageContentType::ISO,
-                    $storage->name,
-                    $iso->file_name,
-                    $link,
-                    true,
-                    $checksumData,
-                );
-
-                MonitorIsoDownloadJob::dispatch($iso->id, $upid);
-
-                return $iso;
-            },
-        );
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function create(array $attributes): ISO
+    {
+        return ISO::create($attributes);
     }
 
-    public function getIso(Node $node, string $fileName): ?IsoData
+    /**
+     * Remove an ISO from the library, and the file if the panel was hosting it.
+     *
+     * Copies already sitting on nodes are deliberately left alone. Deleting
+     * them would mean reaching into every node the panel knows about, some of
+     * which will be unreachable, to reclaim space PVE already treats as a cache
+     * -- and a half-completed sweep is worse than none. They are ordinary ISO
+     * files an operator can prune from Proxmox.
+     */
+    public function delete(ISO $iso): void
+    {
+        if ($iso->isHosted()) {
+            Filesystem::disk($this->resolver->diskName())->delete((string) $iso->path);
+        }
+
+        $iso->delete();
+    }
+
+    /**
+     * File names already on a node's ISO storage.
+     *
+     * Used by the admin UI to offer ISOs a node happens to hold, so an operator
+     * who uploaded one to Proxmox by hand can register it without re-uploading.
+     *
+     * @return array<int, string>
+     */
+    public function fileNamesOn(Node $node): array
     {
         $storage = $node->isoStorage();
+
         if (is_null($storage)) {
-            return null;
+            return [];
         }
 
-        $isos = $this->client->setNode($node)->getIsos($storage->name);
-
-        return $isos->where('file_name', '=', $fileName)->first();
-    }
-
-    public function delete(Node $node, ISO $iso): void
-    {
-        if (is_null($iso->completed_at)) {
-            throw new BadRequestHttpException(
-                'This ISO cannot be deleted at this time: not completed.',
-            );
-        }
-
-        $this->connection->transaction(function () use ($node, $iso) {
-            if ($iso->is_successful) {
-                $this->client->setNode($node)->deleteFile(StorageContentType::ISO, $iso->storage->name, $iso->file_name);
-            }
-
-            $iso->delete();
-        });
+        return $this->client->setNode($node)->getFileNames(
+            StorageContentType::ISO,
+            $storage->name,
+        );
     }
 }

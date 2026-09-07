@@ -5,7 +5,6 @@ namespace App\Services\Nodes;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
 use App\Models\Backup;
 use App\Models\Cluster;
-use App\Models\ISO;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\ServerDisk;
@@ -247,7 +246,10 @@ class ClusterIdentityService
             return;
         }
 
-        foreach ([Server::class, Backup::class, ISO::class, ServerDisk::class] as $model) {
+        // ISOs are deliberately absent: a library entry names no storage any
+        // more, so there is nothing to re-point when two storages turn out to
+        // be the same one.
+        foreach ([Server::class, Backup::class, ServerDisk::class] as $model) {
             $model::query()
                 ->where('storage_id', $arriving->id)
                 ->update(['storage_id' => $established->id]);

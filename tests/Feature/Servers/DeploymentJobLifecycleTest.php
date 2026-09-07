@@ -5,12 +5,13 @@ use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerState;
 use App\Exceptions\Proxmox\RequestException;
-use App\Jobs\Server\CloneVmJob;
 use App\Jobs\Server\DeleteVmJob;
+use App\Jobs\Server\ImportVmJob;
 use App\Jobs\Server\StopVmJob;
 use App\Models\Deployment;
-use App\Models\Template;
-use App\Models\TemplateGroup;
+use App\Models\ImageDefinition;
+use App\Models\ImageGroup;
+use App\Services\Images\ImageResidencyService;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Proxmox\Server\ProxmoxServerClient;
 use App\Services\Servers\ServerBuildService;
@@ -30,16 +31,36 @@ function makeStepFor(string $name): array
 {
     [, , , $server] = createServerModel();
 
-    // The clone job reads deployment->template; the others don't need one.
-    $templateId = null;
-    if ($name === 'clone') {
-        $group = TemplateGroup::create(['uuid' => (string) Str::uuid(), 'name' => 'grp', 'order_column' => 1]);
-        $templateId = Template::create(['template_group_id' => $group->id, 'name' => 'tpl', 'vmid' => 100])->id;
+    // The import job reads deployment->imageVersion; the others don't need one.
+    $definitionId = null;
+    $versionId = null;
+    if ($name === 'import') {
+        $group = ImageGroup::create(['uuid' => (string) Str::uuid(), 'name' => 'grp']);
+        $definition = ImageDefinition::create([
+            'image_group_id' => $group->id,
+            'name' => 'img',
+            'ostype' => 'l26',
+        ]);
+        $definitionId = $definition->id;
+        $versionId = $definition->versions()->create([
+            'version' => '1.0.0',
+            'disks' => [[
+                'slot' => 'scsi0',
+                'role' => 'system',
+                'url' => 'https://example.invalid/disk.qcow2',
+                'path' => null,
+                'sha256' => str_repeat('a', 64),
+                'size' => 1024,
+                'virtual_size' => 2048,
+                'format' => 'qcow2',
+            ]],
+        ])->id;
     }
 
     $deployment = Deployment::create([
         'server_id' => $server->id,
-        'template_id' => $templateId,
+        'image_definition_id' => $definitionId,
+        'image_version_id' => $versionId,
         'type' => DeploymentType::INSTALL,
         'status' => DeploymentStatus::PENDING,
         'start_on_completion' => false,
@@ -63,24 +84,27 @@ function nonexistentVmError(): RequestException
     );
 }
 
-it('starts the clone once, then resumes polling the same task to completion', function () {
-    [$step] = makeStepFor('clone');
+it('starts the import once, then resumes polling the same task to completion', function () {
+    [$step] = makeStepFor('import');
 
     $service = Mockery::mock(ServerBuildService::class);
-    $service->shouldReceive('build')->once()->andReturn('UPID:clone:abc'); // exactly once across both runs
-    $service->shouldReceive('getCloneProgress')->andReturn([40, 100]);
+    $service->shouldReceive('build')->once()->andReturn('UPID:import:abc'); // exactly once across both runs
+    $service->shouldReceive('getImportProgress')->andReturn([40, 100]);
     $service->shouldReceive('isVmCreated')->andReturn(false, true);
 
-    $job = (new CloneVmJob($step))->setJob(fakeQueueJob());
+    $residency = Mockery::mock(ImageResidencyService::class);
+    $residency->shouldReceive('volids')->andReturn(['system' => 'local:import/image.qcow2']);
 
-    $job->handle($service); // kick + first poll: not created yet → released
+    $job = (new ImportVmJob($step))->setJob(fakeQueueJob());
+
+    $job->handle($service, $residency); // kick + first poll: not created yet → released
     $step->refresh();
-    expect($step->task_upid)->toBe('UPID:clone:abc')
+    expect($step->task_upid)->toBe('UPID:import:abc')
         ->and($step->status)->toBe(DeploymentStatus::RUNNING)
         ->and($step->progress_total)->toBe(100)
         ->and($step->progress_current)->toBe(40);
 
-    $job->handle($service); // second poll: created → completed, no rebuild
+    $job->handle($service, $residency); // second poll: created → completed, no rebuild
     expect($step->fresh()->status)->toBe(DeploymentStatus::COMPLETED);
 });
 

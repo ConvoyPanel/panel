@@ -62,20 +62,18 @@ it('marks a locked backup as not deletable', function () {
     expect($row['deletable'])->toBeFalse();
 });
 
-it('lists ISOs on the storage', function () {
-    ISO::factory()->create([
-        'storage_id' => $this->storage->id,
-        'name' => 'debian-12',
-        'size' => 700 * 1024 * 1024,
-    ]);
+it('does not attribute ISOs to a storage', function () {
+    // An ISO belongs to the library, not to a storage: a node fetches one when
+    // someone mounts it, and that copy is a cache PVE owns. Reporting it here
+    // would be claiming an allocation the panel never made.
+    ISO::factory()->create(['name' => 'debian-12', 'size' => 700 * 1024 * 1024]);
 
-    $row = $this->actingAs($this->admin)
+    $consumers = $this->actingAs($this->admin)
         ->getJson("/api/admin/storages/{$this->storage->id}/consumers")
         ->assertOk()
-        ->json('data.isos.0');
+        ->json('data');
 
-    expect($row['name'])->toBe('debian-12')
-        ->and($row['size'])->toBe(700 * 1024 * 1024);
+    expect($consumers)->not->toHaveKey('isos');
 });
 
 it('requires an admin user', function () {

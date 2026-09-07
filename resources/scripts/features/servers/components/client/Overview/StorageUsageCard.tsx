@@ -34,6 +34,10 @@ const StorageUsageCard = () => {
         units: 'iec',
         precision: 2,
     })
+    const free = byteSize(Math.max(totalBytes - usedBytes, 0), {
+        units: 'iec',
+        precision: 2,
+    })
 
     const usedPercent = totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0
 
@@ -59,39 +63,48 @@ const StorageUsageCard = () => {
                 </div>
             }
             icon={IconDatabase}
-            className={'col-span-2 @md:col-span-1'}
+            context={
+                isLoading ? undefined : isAvailable ? (
+                    <>
+                        of {total.value} {total.unit} &#x2022;{' '}
+                        {usedPercent.toFixed(0)}%
+                    </>
+                ) : (
+                    'Disk limit • guest agent offline'
+                )
+            }
             meter={
                 isAvailable && (
-                    <LinearProgressBar
-                        value={usedPercent}
-                        aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
-                    />
+                    <>
+                        <LinearProgressBar
+                            value={usedPercent}
+                            aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
+                        />
+                        {/* The figure answers "how much have I used"; this
+                            answers the question people actually open the page
+                            with, which is how much is left. */}
+                        <p
+                            className={
+                                'text-muted-foreground mt-1.5 truncate text-xs tabular-nums'
+                            }
+                        >
+                            {free.value} {free.unit} free
+                        </p>
+                    </>
                 )
             }
         >
             {isLoading ? (
                 <Skeleton className={'h-7 w-full @sm:h-8'} />
             ) : (
-                <p>
-                    <span
-                        className={
-                            'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
-                        }
-                    >
-                        {isAvailable
-                            ? `${used.value} ${used.unit}`
-                            : `${total.value} ${total.unit}`}
-                    </span>
-                    <span className={'text-muted-foreground block text-sm'}>
-                        {isAvailable ? (
-                            <>
-                                used of {total.value} {total.unit} &#x2022;{' '}
-                                {usedPercent.toFixed(0)}%
-                            </>
-                        ) : (
-                            'Disk limit • guest agent offline'
-                        )}
-                    </span>
+                <p
+                    className={
+                        'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                    }
+                >
+                    {isAvailable
+                        ? `${used.value} ${used.unit}`
+                        : `${total.value} ${total.unit}`}
                 </p>
             )}
         </StatisticCard>

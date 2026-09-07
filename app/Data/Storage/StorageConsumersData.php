@@ -20,7 +20,5 @@ class StorageConsumersData extends Data
         public DataCollection $servers,
         /** @var DataCollection<int, StorageConsumerData> */
         public DataCollection $backups,
-        /** @var DataCollection<int, StorageConsumerData> */
-        public DataCollection $isos,
     ) {}
 }

@@ -190,9 +190,9 @@ Route::prefix('/servers/{server}')->middleware(
             [Client\Servers\SettingsController::class, 'rename'],
         );
         Route::get(
-            '/template-groups',
-            [Client\Servers\SettingsController::class, 'getTemplateGroups'],
-        )->name('servers.template-groups.index');
+            '/image-groups',
+            [Client\Servers\SettingsController::class, 'getImageGroups'],
+        )->name('servers.image-groups.index');
         Route::post(
             '/reinstall',
             [Client\Servers\SettingsController::class, 'reinstall'],

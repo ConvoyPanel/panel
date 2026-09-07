@@ -2,32 +2,26 @@
 
 namespace App\Actions\Server;
 
-use App\Data\Server\Proxmox\Config\DiskData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ProgressMode;
 use App\Enums\Server\ServerLifecycle;
 use App\Exceptions\Proxmox\RequestException;
-use App\Jobs\Server\CloneVmJob;
 use App\Jobs\Server\ConfigureVmJob;
+use App\Jobs\Server\FetchImageJob;
+use App\Jobs\Server\ImportVmJob;
 use App\Jobs\Server\SendPowerCommandJob;
 use App\Jobs\Server\UpdatePasswordJob;
 use App\Models\Deployment;
-use App\Models\Server;
-use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 
-use function array_reduce;
-
 class BuildServerAction
 {
     use ManagesDeploymentLifecycle;
-
-    public function __construct(private ProxmoxConfigClient $client) {}
 
     /**
      * @throws RequestException
@@ -64,31 +58,30 @@ class BuildServerAction
     }
 
     /**
-     * @throws RequestException
-     * @throws ConnectionException
+     * Both sizes come out of the panel's own records.
+     *
+     * This used to open a connection to the node and read the template's config
+     * just to size a progress bar. There is no template to read any more, and
+     * the image version already knows both figures -- what has to be
+     * transferred, and what the imported disk will occupy -- so a build no
+     * longer needs the node to be reachable before it can be queued.
      */
     private function createInstallStepsAndJobs(Deployment $deployment): array
     {
-        /* This code determines the size of the template */
-        $server = $deployment->server;
-        $template = new Server([
-            'node_id' => $server->node_id,
-            'vmid' => $deployment->template->vmid,
-        ]);
-        $configClient = $this->client->setServer($template);
-        $templateConfig = $configClient->getConfig();
-        $totalSize = array_reduce(
-            $templateConfig->disks->all(), function (int $carry, DiskData $disk) {
-                return $carry + $disk->size;
-            }, 0,
-        );
+        $version = $deployment->imageVersion;
 
         $steps = $deployment->addSteps([
             [
-                'name' => 'clone',
+                'name' => 'fetch-image',
                 'status' => DeploymentStatus::PENDING,
                 'progress_mode' => ProgressMode::DETERMINATE,
-                'progress_total' => $totalSize,
+                'progress_total' => (int) $version->size,
+            ],
+            [
+                'name' => 'import',
+                'status' => DeploymentStatus::PENDING,
+                'progress_mode' => ProgressMode::DETERMINATE,
+                'progress_total' => $version->minimumDiskSize(),
             ],
             [
                 'name' => 'configure',
@@ -98,8 +91,9 @@ class BuildServerAction
         ]);
 
         return [
-            new CloneVmJob($steps[0]),
-            new ConfigureVmJob($steps[1]),
+            new FetchImageJob($steps[0]),
+            new ImportVmJob($steps[1]),
+            new ConfigureVmJob($steps[2]),
         ];
     }
 

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Client\Servers;
 
 use App\Actions\Server\RebuildServerAction;
+use App\Data\Image\ImageGroupData;
 use App\Data\Server\Proxmox\Config\DiskData;
 use App\Data\Server\RenamedServerData;
 use App\Data\Server\ServerNetworkSettingsData;
 use App\Data\Server\ServerSecuritySettingsData;
 use App\Data\Server\ServerStorageData;
 use App\Data\Server\StorageDeviceData;
-use App\Data\Template\TemplateGroupData;
 use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\AuthenticationType;
 use App\Enums\Server\DeploymentStatus;
@@ -21,10 +21,10 @@ use App\Http\Requests\Client\Servers\Settings\RenameServerRequest;
 use App\Http\Requests\Client\Servers\Settings\UpdateAuthSettingsRequest;
 use App\Http\Requests\Client\Servers\Settings\UpdateBootOrderRequest;
 use App\Http\Requests\Client\Servers\Settings\UpdateNetworkRequest;
+use App\Models\ImageDefinition;
+use App\Models\ImageGroup;
 use App\Models\ISO;
 use App\Models\Server;
-use App\Models\Template;
-use App\Models\TemplateGroup;
 use App\Services\Servers\AllocationService;
 use App\Services\Servers\CloudinitService;
 use App\Services\Servers\DisplayConsoleService;
@@ -64,34 +64,40 @@ class SettingsController
         return RenamedServerData::from($server);
     }
 
-    public function getTemplateGroups(Request $request, Server $server)
+    public function getImageGroups(Request $request, Server $server)
     {
         $isAdmin = $request->user()->root_admin;
 
-        $templateGroups = QueryBuilder::for(TemplateGroup::query())
+        $groups = QueryBuilder::for(ImageGroup::query())
             ->allowedFilters(['name']);
 
         if (! $isAdmin) {
-            $templateGroups->where('is_admin_only', false);
+            $groups->where('is_admin_only', false);
         }
 
-        $templateGroups = $templateGroups->with(['templates' => function ($query) use ($isAdmin) {
+        $groups = $groups->with(['definitions' => function ($query) use ($isAdmin) {
             if (! $isAdmin) {
                 $query->where('is_admin_only', false);
             }
+
+            // An image with no published version cannot be installed, so
+            // offering it would only produce a validation error later.
+            $query->whereHas('versions', fn ($versions) => $versions->where('is_active', true))
+                ->with('versions');
         }])->get();
 
-        return TemplateGroupData::collect($templateGroups, DataCollection::class)
-            ->include('templates');
+        return ImageGroupData::collect($groups, DataCollection::class)
+            ->include('definitions');
     }
 
     public function reinstall(ReinstallServerRequest $request, Server $server)
     {
         $this->connection->transaction(function () use ($server, $request) {
-            $template = Template::where('uuid', '=', $request->template_uuid)->firstOrFail();
+            $image = ImageDefinition::where('uuid', '=', $request->image_uuid)->firstOrFail();
 
             $deployment = $server->deployments()->create([
-                'template_id' => $template->id,
+                'image_definition_id' => $image->id,
+                'image_version_id' => $image->latestVersion()?->id,
                 'type' => DeploymentType::REINSTALL,
                 'status' => DeploymentStatus::PENDING,
                 'start_on_completion' => $request->boolean('start_on_completion'),
@@ -106,8 +112,8 @@ class SettingsController
                 AuditEvent::SERVER_REINSTALLED,
                 subject: $server,
                 properties: [
-                    'template' => $template->name,
-                    'template_uuid' => $template->uuid,
+                    'image' => $image->name,
+                    'image_uuid' => $image->uuid,
                     'start_on_completion' => $request->boolean('start_on_completion'),
                 ],
             );
@@ -178,7 +184,9 @@ class SettingsController
     {
         $disks = $this->allocationService->getDisks($server);
 
-        $query = $server->node->isos()->with('storage')->where('is_successful', '=', true);
+        // Every ISO in the library is offerable on every node: whether this
+        // node happens to hold the file yet is settled at mount time, not here.
+        $query = ISO::query();
 
         if (! $request->user()->root_admin) {
             $query->where('hidden', '=', false);
@@ -192,12 +200,14 @@ class SettingsController
             // Matched on the backing volume, the same way mount and unmount
             // locate it. The previous check compared a `media_name` property
             // DiskData has never had, so every ISO reported itself unmounted.
-            'mounted' => $this->allocationService->findMountedIsoDisk($disks, $iso) !== null,
+            'mounted' => $this->allocationService->findMountedIsoDisk($disks, $iso, $server->node) !== null,
         ])->all();
     }
 
     public function mountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
+        // The node may never have seen this ISO. Fetching it is part of
+        // mounting rather than something an admin has to arrange in advance.
         $this->allocationService->mountIso($server, $iso);
 
         Audit::record(

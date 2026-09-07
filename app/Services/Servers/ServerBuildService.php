@@ -4,9 +4,9 @@ namespace App\Services\Servers;
 
 use App\Enums\Server\ProxmoxLock;
 use App\Exceptions\Proxmox\RequestException;
+use App\Models\ImageVersion;
 use App\Models\Node;
 use App\Models\Server;
-use App\Models\Template;
 use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use App\Services\Proxmox\Server\ProxmoxServerClient;
@@ -42,9 +42,9 @@ class ServerBuildService
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function build(Server $server, Template $template): string
+    public function build(Server $server, ImageVersion $version, array $volids): string
     {
-        return $this->serverClient->setServer($server)->create($template);
+        return $this->serverClient->setServer($server)->create($version, $volids);
     }
 
     /**
@@ -55,8 +55,11 @@ class ServerBuildService
     {
         $servers = $this->resourceClient->setServer($server)->getResources();
 
+        // The import holds a `create` lock rather than a `clone` one. Reading
+        // the wrong lock would report the VM ready while Proxmox was still
+        // writing its disk, and every step after this assumes a finished guest.
         $vm = $servers->where('vmid', $server->vmid)
-            ->where('lockStatus', '!=', ProxmoxLock::CLONE)
+            ->where('lockStatus', '!=', ProxmoxLock::CREATE)
             ->first();
 
         if ($vm) {
@@ -67,16 +70,22 @@ class ServerBuildService
     }
 
     /**
-     * Calculates the total and current progress of a clone operation from task logs.
-     * It handles tasks that involve cloning multiple disks by aggregating their progress.
+     * Byte progress of an import, read from the task log.
+     *
+     * Proxmox reports a disk import the way it reported a clone -- one
+     * `transferred X of Y` line per drive, rewritten as it goes -- so the
+     * aggregation is unchanged; only the line that opens a new drive differs.
+     * Both openers are matched because a node mid-upgrade can emit either, and
+     * an unrecognised log costs a progress bar rather than a build: completion
+     * is decided by the guest's lock state, never by this.
      *
      * @param  string  $upid  The unique process ID for the task.
-     * @return array [int, int] An array containing the total size and current progress in bytes.
+     * @return array [int, int] Current and total bytes.
      *
      * @throws ConnectionException
      * @throws RequestException
      */
-    public function getCloneProgress(Node $node, string $upid): array
+    public function getImportProgress(Node $node, string $upid): array
     {
         // Get logs in chronological order to correctly track the context of each clone operation.
         $logs = $this->activityClient->setNode($node)->getLogsByTask(upid: $upid, limitLinesTo: 1000);
@@ -85,7 +94,7 @@ class ServerBuildService
         $currentDiskId = null;
 
         // Regex to identify the start of a new disk clone and capture its unique identifier.
-        $diskIdRegex = '/create full clone of drive .* \((.*)\)/';
+        $diskIdRegex = '/(?:create full clone of drive|importing disk .* to) .*\((.*)\)/';
         // Regex to capture the current and total transferred data from a progress line.
         $progressRegex = '/transferred\s+([\d.]+)\s+([A-Za-z]+)\s+of\s+([\d.]+)\s+([A-Za-z]+)/';
 
@@ -123,6 +132,37 @@ class ServerBuildService
         foreach ($progressPerDisk as $progress) {
             $total += $progress['total'];
             $current += $progress['current'];
+        }
+
+        return [$current, $total];
+    }
+
+    /**
+     * Byte progress of an image download onto a node.
+     *
+     * Separate from the import because it is a storage task with a different
+     * log, and deliberately tolerant: several shapes of progress line are
+     * accepted and an unrecognised one simply yields no reading. The fetch step
+     * finishes when the file is actually on the node, so a log this cannot
+     * parse costs the bar its movement and nothing else.
+     *
+     * @return array [int, int] Current and total bytes; [0, 0] when unreadable.
+     *
+     * @throws ConnectionException
+     * @throws RequestException
+     */
+    public function getDownloadProgress(Node $node, string $upid): array
+    {
+        $logs = $this->activityClient->setNode($node)->getLogsByTask(upid: $upid, limitLinesTo: 1000);
+
+        $current = 0;
+        $total = 0;
+
+        foreach ($logs as $log) {
+            if (preg_match('/([\d.]+)\s*([KMGT]i?B)\s+of\s+([\d.]+)\s*([KMGT]i?B)/i', $log->text, $matches)) {
+                $current = ByteUnit::fromIec($matches[2])?->toBytes((float) $matches[1]) ?? $current;
+                $total = ByteUnit::fromIec($matches[4])?->toBytes((float) $matches[3]) ?? $total;
+            }
         }
 
         return [$current, $total];

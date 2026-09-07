@@ -2,81 +2,47 @@
 
 namespace App\Jobs\Server;
 
-use App\Exceptions\Proxmox\RequestException;
 use App\Models\DeploymentStep;
-use App\Services\Servers\ServerBuildService;
 use App\Traits\Jobs\FailsWithStep;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-
-use function now;
+use RuntimeException;
 
 /**
- * Owns the `clone` step end to end: it starts the Proxmox clone exactly once and
- * then polls the same task to completion, releasing itself between checks. The
- * clone's UPID is recorded on the step (via kickOnce), so a released or retried
- * run resumes polling instead of starting a second clone.
+ * Retired. Kept for one release so queued clones do not strand.
+ *
+ * Servers are built by importing a disk image now; {@see FetchImageJob} and
+ * {@see ImportVmJob} replaced this. Nothing dispatches it.
+ *
+ * It cannot forward to them. A payload queued by the previous release names a
+ * deployment whose template row no longer exists -- there is no image to import
+ * and no profile to import it with -- so the honest outcome is to fail the step
+ * with a sentence an operator can act on. Deleting the class instead would fail
+ * the same payload with `Class not found`, which says nothing and buries the
+ * cause in a stack trace.
+ *
+ * Delete in the release after next, once no queue can still hold one.
  */
 class CloneVmJob implements ShouldQueue
 {
     use Dispatchable, FailsWithStep, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(30);
-    }
-
-    public function middleware(): array
-    {
-        return [new SkipIfBatchCancelled];
-    }
+    /** No retries: the failure is structural, and repeating it only delays the message. */
+    public int $tries = 1;
 
     public function __construct(
         #[WithoutRelations]
         public DeploymentStep $step,
     ) {}
 
-    /**
-     * @throws RequestException
-     * @throws ConnectionException
-     */
-    public function handle(ServerBuildService $service): void
+    public function handle(): never
     {
-        $deployment = $this->step->deployment;
-        $server = $deployment->server;
-
-        $this->step->kickOnce(fn () => $service->build($server, $deployment->template));
-
-        try {
-            [$current, $total] = $service->getCloneProgress($server->node, $this->step->task_upid);
-
-            // Proxmox's reported total is authoritative and stable across polls,
-            // so adopt it and clamp current to it — letting the total grow made
-            // the percentage jump backwards. The step's seeded disk-size
-            // estimate only gives the bar a scale before the first poll lands.
-            $this->step->update([
-                'progress_current' => min($current, $total),
-                'progress_total' => $total,
-            ]);
-        } catch (Exception|NotFoundExceptionInterface|ContainerExceptionInterface) {
-            // The clone task status is not always readable immediately; a failed
-            // read just means we poll again rather than fail the step.
-        }
-
-        if ($service->isVmCreated($server)) {
-            $this->step->markCompleted();
-        } else {
-            $this->release(now()->addMilliseconds(250));
-        }
+        throw new RuntimeException(
+            'This install was queued before Convoy moved to disk images and cannot be resumed. Reinstall the server to build it from an image.',
+        );
     }
 }

@@ -13,6 +13,7 @@ use App\Services\Proxmox\ProxmoxClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Webmozart\Assert\Assert;
 
@@ -71,7 +72,10 @@ class ProxmoxStorageClient extends ProxmoxClient
 
         if ($checksumData) {
             $payload['checksum'] = $checksumData->checksum;
-            $payload['algorithm'] = $checksumData->algorithm->value;
+            // PVE calls this `checksum-algorithm`. Sending `algorithm` is not
+            // ignored -- the API rejects unknown parameters -- so a download
+            // with a checksum failed outright rather than going unverified.
+            $payload['checksum-algorithm'] = $checksumData->algorithm->value;
         }
 
         $response = $this->getHttpClientWithParams([
@@ -81,6 +85,37 @@ class ProxmoxStorageClient extends ProxmoxClient
             ->json();
 
         return $this->getData($response);
+    }
+
+    /**
+     * File names PVE currently holds for one content type on a storage.
+     *
+     * Used to answer "is this image version already here?" without downloading
+     * it again. The content listing is the only honest source: a node may have
+     * been reinstalled, or the file pruned, since the panel last looked.
+     *
+     * @return array<int, string>
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getFileNames(StorageContentType $contentType, string $storage): array
+    {
+        $response = $this->getHttpClientWithParams([
+            'storage' => $storage,
+        ])
+            ->get('/api2/json/nodes/{node}/storage/{storage}/content', [
+                'content' => $contentType->toProxmoxString(),
+            ])
+            ->json();
+
+        return collect($this->getData($response))
+            ->pluck('volid')
+            ->filter()
+            // A volid is `storage:content/name`; only the name is comparable.
+            ->map(fn (string $volid) => Str::afterLast($volid, '/'))
+            ->values()
+            ->all();
     }
 
     public function deleteFile(StorageContentType $contentType, string $storage, string $fileName)

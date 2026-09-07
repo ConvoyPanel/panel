@@ -8,11 +8,12 @@ import { IconArrowRight, IconServer } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
+import { queryClient } from '@/lib/query-client.ts'
+
 import { buttonVariants } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import FormToolbar from '@/components/ui/FormToolbar'
 import { StatLabel } from '@/components/ui/Typography'
-import { queryClient } from '@/lib/query-client.ts'
 
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/nodes/create')(
     { component: EnrollNodePage }
@@ -64,12 +65,11 @@ function EnrollNodePage() {
                     <CardHeader>
                         <CardTitle>Install command</CardTitle>
                         <StatLabel>
-                            Paste this into a root shell on the host. It expires
-                            in 15 minutes and admits one machine.
+                            Paste into a root shell on the host you want to add.
+                            Admits one machine.
                         </StatLabel>
                     </CardHeader>
                     <EnrollmentPanel
-                        label={'a Proxmox host'}
                         subject={issuedAt}
                         done={arrived.length > 0}
                         issueToken={async () => {

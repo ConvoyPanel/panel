@@ -58,7 +58,7 @@ class ServerPlacementService
 
     /**
      * @param  Collection<int, ServerResourceData>  $guests  every guest in the
-     *   snapshot, unfiltered -- each row carries the node it is actually on
+     *                                                       snapshot, unfiltered -- each row carries the node it is actually on
      */
     public function reconcile(?Cluster $cluster, Collection $guests): void
     {
@@ -211,7 +211,7 @@ class ServerPlacementService
             ->where('name', $bridge)
             ->first();
 
-        $this->connection->transaction(function () use ($server, $target, $previous, $bridge, $interface) {
+        $this->connection->transaction(function () use ($server, $target, $previous, $interface) {
             $server->forceFill([
                 'node_id' => $target->id,
                 'network_interface_id' => $interface?->id,

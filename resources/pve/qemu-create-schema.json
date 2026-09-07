@@ -1,0 +1,70 @@
+{
+  "_comment": "Fallback only. A node's own schema, read by Anchor from /usr/share/pve-docs/api-viewer/apidoc.js, always supersedes this -- it is correct for that node's PVE version, and it carries every parameter rather than the handful below. This file exists so a panel with no reachable node can still refuse an obviously wrong profile instead of accepting it and failing at first power-on.",
+  "parameters": {
+    "bios": {
+      "type": "string",
+      "enum": ["seabios", "ovmf"],
+      "default": "seabios",
+      "description": "Select BIOS implementation."
+    },
+    "machine": {
+      "type": "string",
+      "description": "Specify the QEMU machine."
+    },
+    "scsihw": {
+      "type": "string",
+      "enum": ["lsi", "lsi53c810", "virtio-scsi-pci", "virtio-scsi-single", "megasas", "pvscsi"],
+      "default": "lsi",
+      "description": "SCSI controller model."
+    },
+    "ostype": {
+      "type": "string",
+      "enum": ["other", "wxp", "w2k", "w2k3", "w2k8", "wvista", "win7", "win8", "win10", "win11", "l24", "l26", "solaris"],
+      "description": "Specify guest operating system."
+    },
+    "cpu": {
+      "type": "string",
+      "description": "Emulated CPU type."
+    },
+    "agent": {
+      "type": "string",
+      "description": "Enable/disable communication with the QEMU Guest Agent and its properties."
+    },
+    "vga": {
+      "type": "string",
+      "description": "Configure the VGA hardware."
+    },
+    "boot": {
+      "type": "string",
+      "description": "Specify guest boot order."
+    },
+    "numa": {
+      "type": "boolean",
+      "default": 0,
+      "description": "Enable/disable NUMA."
+    },
+    "tablet": {
+      "type": "boolean",
+      "default": 1,
+      "description": "Enable/disable the USB tablet device."
+    },
+    "kvm": {
+      "type": "boolean",
+      "default": 1,
+      "description": "Enable/disable KVM hardware virtualization."
+    },
+    "onboot": {
+      "type": "boolean",
+      "default": 0,
+      "description": "Specifies whether a VM will be started during system bootup."
+    },
+    "freeze": {
+      "type": "boolean",
+      "description": "Freeze CPU at startup."
+    },
+    "hotplug": {
+      "type": "string",
+      "description": "Selectively enable hotplug features."
+    }
+  }
+}

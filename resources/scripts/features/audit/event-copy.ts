@@ -43,7 +43,7 @@ const defaultDetail = (properties: AuditProperties): string | null =>
     pick(
         properties,
         'name',
-        'template',
+        'image',
         'backup',
         'iso',
         'address',
@@ -239,13 +239,19 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'admin.backup.deleted': { verb: 'deleted a backup' },
 
+    // ISO library — panel-wide, so these name no node.
+    'admin.iso.created': { verb: 'added an ISO' },
+    'admin.iso.updated': { verb: 'updated an ISO', detail: changedFields },
+    'admin.iso.deleted': { verb: 'deleted an ISO' },
+    'admin.iso.uploaded': {
+        verb: 'uploaded an ISO',
+        detail: p => (p.sha256 ? String(p.sha256).slice(0, 12) : null),
+    },
+
     // Infrastructure
     'admin.node.created': { verb: 'created a node' },
     'admin.node.updated': { verb: 'updated a node', detail: changedFields },
     'admin.node.deleted': { verb: 'deleted a node' },
-    'admin.node.iso-created': { verb: 'added an ISO' },
-    'admin.node.iso-updated': { verb: 'updated an ISO' },
-    'admin.node.iso-deleted': { verb: 'deleted an ISO' },
     'admin.node.interface-created': { verb: 'added a network interface' },
     'admin.node.interface-updated': { verb: 'updated a network interface' },
     'admin.node.interface-deleted': { verb: 'deleted a network interface' },
@@ -366,25 +372,41 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         detail: (p) => pick(p, 'overage_action'),
     },
 
-    // Presets and templates
+    // Presets and images
     'admin.server-preset.created': { verb: 'created a server preset' },
     'admin.server-preset.updated': {
         verb: 'updated a server preset',
         detail: changedFields,
     },
     'admin.server-preset.deleted': { verb: 'deleted a server preset' },
-    'admin.template-group.created': { verb: 'created a template group' },
-    'admin.template-group.updated': {
-        verb: 'updated a template group',
+    'admin.image-group.created': { verb: 'created an image group' },
+    'admin.image-group.updated': {
+        verb: 'updated an image group',
         detail: changedFields,
     },
-    'admin.template-group.deleted': { verb: 'deleted a template group' },
-    'admin.template.created': { verb: 'created a template' },
-    'admin.template.updated': {
-        verb: 'updated a template',
+    'admin.image-group.deleted': { verb: 'deleted an image group' },
+    'admin.image.created': { verb: 'created an image' },
+    'admin.image.updated': {
+        verb: 'updated an image',
         detail: changedFields,
     },
-    'admin.template.deleted': { verb: 'deleted a template' },
+    'admin.image.deleted': { verb: 'deleted an image' },
+    'admin.image-version.created': {
+        verb: 'published an image version',
+        detail: p => (p.version ? String(p.version) : null),
+    },
+    'admin.image-version.updated': {
+        verb: 'changed an image version',
+        detail: p => (p.version ? String(p.version) : null),
+    },
+    'admin.image-version.deleted': {
+        verb: 'deleted an image version',
+        detail: p => (p.version ? String(p.version) : null),
+    },
+    'admin.image.uploaded': {
+        verb: 'uploaded a disk image',
+        detail: p => (p.sha256 ? String(p.sha256).slice(0, 12) : null),
+    },
 }
 
 /** The sentence for one entry: what was done, and to what where that adds something. */

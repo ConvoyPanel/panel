@@ -1,7 +1,7 @@
 import { useNode } from '@/features/nodes/api.ts'
 import { useNetworkInterfaces } from '@/features/nodes/network-interfaces/api.ts'
 import { useStorages } from '@/features/nodes/storages/api.ts'
-import { useTemplates } from '@/features/template-groups/templates/api.ts'
+import { useImageDefinitions } from '@/features/images/definitions/api.ts'
 import { useModal } from '@/hooks/create-modal-store.ts'
 import { useServerPresetsModalStore } from '@/routes/_app/admin/_dashboard/server-presets.lazy.tsx'
 import type { ServerPresetSettings } from '@/types/server-preset'
@@ -48,7 +48,7 @@ const PresetSettings = ({ settings }: { settings: ServerPresetSettings }) => {
     const { data: node } = useNode(settings.nodeId ?? undefined)
     const { data: storages } = useStorages(settings.nodeId ?? undefined)
     const { data: interfaces } = useNetworkInterfaces(settings.nodeId ?? null)
-    const { data: templates } = useTemplates(settings.templateGroupUuid, {})
+    const { data: definitions } = useImageDefinitions(settings.imageGroupUuid, {})
 
     // A storage's display name is optional, so fall back to its PVE name the
     // way the create form's picker labels it; the id is the last resort, for a
@@ -65,9 +65,9 @@ const PresetSettings = ({ settings }: { settings: ServerPresetSettings }) => {
         interfaces?.find(item => item.id === settings.networkInterfaceId)
             ?.name ?? `Interface #${settings.networkInterfaceId}`
 
-    const templateName =
-        templates?.find(template => template.uuid === settings.templateUuid)
-            ?.name ?? settings.templateUuid
+    const imageName =
+        definitions?.find(image => image.uuid === settings.imageUuid)
+            ?.name ?? settings.imageUuid
 
     return (
         <dl className={'divide-y'}>
@@ -140,8 +140,8 @@ const PresetSettings = ({ settings }: { settings: ServerPresetSettings }) => {
                     {settings.shouldCreateVm ? 'Yes' : 'No'}
                 </Row>
             )}
-            {settings.templateUuid != null && (
-                <Row label={'Template'}>{templateName}</Row>
+            {settings.imageUuid != null && (
+                <Row label={'Image'}>{imageName}</Row>
             )}
             {settings.startOnCompletion != null && (
                 <Row label={'Start when built'}>

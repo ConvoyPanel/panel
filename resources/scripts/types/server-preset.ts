@@ -35,12 +35,12 @@ export interface ServerPresetSettings {
     deferredOsSelection: boolean | null
     shouldCreateVm: boolean | null
     /**
-     * The template's group. Saved alongside the template because the picker
+     * The image's group. Saved alongside the image because the picker
      * lists by group — without it the form would show a chosen OS beside an
      * empty group.
      */
-    templateGroupUuid: string | null
-    templateUuid: string | null
+    imageGroupUuid: string | null
+    imageUuid: string | null
     startOnCompletion: boolean | null
 }
 

@@ -47,6 +47,12 @@ return [
     'App\\Jobs\\Server\\DeleteVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\FetchImageJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\ImportVmJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\MonitorBackupJob' => [
         ['name' => 'backup', 'type' => 'App\\Models\\Backup', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'upid', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],

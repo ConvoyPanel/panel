@@ -19,10 +19,27 @@ const MemoryUsageCard = () => {
         precision: 2,
     })
 
+    const usedPercent =
+        state && state.memoryTotal > 0
+            ? (state.memoryUsed / state.memoryTotal) * 100
+            : 0
+
     return (
         <StatisticCard
             title={'Memory Usage'}
             icon={IconAirConditioningDisabled}
+            /* The total used to hang off the figure as a floated "/ 1 GiB",
+               which needed its own absolute positioning to stay out of the
+               way and still collided with the figure on a narrow tile. Same
+               denominator, on the line every other tile keeps it. */
+            context={
+                state ? (
+                    <>
+                        of {total.value} {total.unit} &#x2022;{' '}
+                        {usedPercent.toFixed(0)}%
+                    </>
+                ) : undefined
+            }
             /* See CpuUsageCard: reserved from the first paint so the tile
                does not grow when the first reading arrives. */
             trend={
@@ -31,29 +48,21 @@ const MemoryUsageCard = () => {
                     series='memory'
                     color='var(--chart-memory)'
                     /* The limit the figure is read against, so the trace and
-                       the "/ 1 GiB" beside it share a scale. */
+                       the context line beneath it share a scale. */
                     ceiling={state?.memoryTotal}
+                    baseline
                 />
             }
         >
             {isUnknown ? (
                 <UnknownStat />
             ) : state ? (
-                <p className={'relative'}>
-                    <span
-                        className={
-                            'inline-block text-lg font-semibold tracking-tight @xl:text-2xl'
-                        }
-                    >
-                        {used.value} {used.unit}
-                    </span>
-                    <span
-                        className={
-                            'text-muted-foreground absolute right-0 -bottom-2.5 ml-1.5 text-xs @sm:right-auto @sm:bottom-auto @sm:mt-1'
-                        }
-                    >
-                        / {total.value} {total.unit}
-                    </span>
+                <p
+                    className={
+                        'text-lg font-semibold tracking-tight @xl:text-2xl'
+                    }
+                >
+                    {used.value} {used.unit}
                 </p>
             ) : (
                 <Skeleton className={'h-7 w-full @sm:h-8'} />

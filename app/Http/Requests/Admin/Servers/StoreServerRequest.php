@@ -10,10 +10,10 @@ use App\Rules\HasSufficientAddresses;
 use App\Rules\HasSufficientCPU;
 use App\Rules\HasSufficientDiskSpace;
 use App\Rules\HasSufficientMemory;
+use App\Rules\ImageFitsStorage;
+use App\Rules\ImageIsAvailable;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\StorageAllows;
-use App\Rules\TemplateFitsStorage;
-use App\Rules\TemplateIsAvailable;
 use App\Rules\VlanIsDeclaredOnInterface;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
@@ -112,13 +112,13 @@ class StoreServerRequest extends BaseApiRequest
                 'max:191',
             ],
             'should_create_vm' => 'required|boolean',
-            'template_uuid' => [
+            'image_uuid' => [
                 'nullable',
                 Rule::requiredIf(fn () => $this->input('should_create_vm') && ! $this->input('deferred_os_selection')),
                 'string',
-                'exists:templates,uuid',
-                new TemplateIsAvailable,
-                new TemplateFitsStorage,
+                'exists:image_definitions,uuid',
+                new ImageIsAvailable,
+                new ImageFitsStorage,
             ],
             'start_on_completion' => 'required|boolean',
         ];
@@ -138,7 +138,7 @@ class StoreServerRequest extends BaseApiRequest
             $toMerge['should_create_vm'] = false;
             $toMerge['start_on_completion'] = false;
             $toMerge['account_password'] = null;
-            $toMerge['template_uuid'] = null;
+            $toMerge['image_uuid'] = null;
         }
 
         if (! empty($toMerge)) {

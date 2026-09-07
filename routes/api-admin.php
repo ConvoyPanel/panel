@@ -127,9 +127,6 @@ Route::prefix('/nodes')->group(function () {
             });
         });
 
-        Route::resource('/isos', Admin\Nodes\IsoController::class)
-            ->only(['index', 'store', 'update', 'destroy']);
-
         /*
         |--------------------------------------------------------------------------
         | Node Addresses Controller Routes
@@ -148,10 +145,6 @@ Route::prefix('/nodes')->group(function () {
          | Node Helpers Routes
          |--------------------------------------------------------------------------
          */
-        Route::get(
-            '/tools/query-remote-file',
-            [Admin\Nodes\IsoController::class, 'queryLink'],
-        );
     });
 });
 
@@ -269,16 +262,58 @@ Route::prefix('/address-block-groups')->group(function () {
     });
 });
 
-Route::prefix('/template-groups')->group(function () {
-    Route::get('/', [Admin\TemplateGroupController::class, 'index']);
-    Route::post('/', [Admin\TemplateGroupController::class, 'store']);
+/*
+|--------------------------------------------------------------------------
+| ISO Library Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/isos
+|
+| Panel-wide rather than per node. An ISO is a name, a source and a hash; which
+| nodes hold a copy is settled when someone mounts it, not when it is added.
+|
+*/
+Route::get('/isos/query-remote-file', [Admin\Isos\IsoController::class, 'queryLink']);
+Route::post('/isos/uploads', [Admin\Isos\IsoUploadController::class, 'store']);
+Route::resource('/isos', Admin\Isos\IsoController::class)
+    ->only(['index', 'store', 'show', 'update', 'destroy']);
 
-    Route::prefix('/{template_group}')->group(function () {
-        Route::get('/', [Admin\TemplateGroupController::class, 'show']);
-        Route::put('/', [Admin\TemplateGroupController::class, 'update']);
-        Route::delete('/', [Admin\TemplateGroupController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Image Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/image-groups
+|
+| Three levels, because the bytes and the settings have different lifecycles: a
+| group is how the OS picker is organised, a definition is the hardware profile
+| and never changes when an image is rebuilt, and a version is one build's disks.
+|
+*/
+Route::prefix('/images')->group(function () {
+    // What Proxmox itself accepts, for the hardware form to build itself from.
+    Route::get('/schema', Admin\Images\ImageSchemaController::class);
+    Route::post('/uploads', [Admin\Images\ImageUploadController::class, 'store']);
+});
 
-        Route::resource('/templates', Admin\TemplateController::class)
+Route::prefix('/image-groups')->group(function () {
+    Route::get('/', [Admin\Images\ImageGroupController::class, 'index']);
+    Route::post('/', [Admin\Images\ImageGroupController::class, 'store']);
+
+    Route::prefix('/{image_group}')->group(function () {
+        Route::get('/', [Admin\Images\ImageGroupController::class, 'show']);
+        Route::put('/', [Admin\Images\ImageGroupController::class, 'update']);
+        Route::delete('/', [Admin\Images\ImageGroupController::class, 'destroy']);
+
+        Route::resource('/images', Admin\Images\ImageDefinitionController::class)
+            ->parameters(['images' => 'image_definition'])
+            ->only(['index', 'store', 'show', 'update', 'destroy']);
+
+        Route::resource(
+            '/images.versions',
+            Admin\Images\ImageVersionController::class,
+        )
+            ->parameters(['images' => 'image_definition', 'versions' => 'image_version'])
             ->only(['index', 'store', 'show', 'update', 'destroy']);
     });
 });

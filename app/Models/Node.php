@@ -7,8 +7,8 @@ use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
 use App\Enums\Anchor\AnchorMode;
 use App\Enums\Node\ConnectionErrorCode;
-use App\Models\Concerns\AnchorInstallation;
 use App\Enums\Node\NodeStatus;
+use App\Models\Concerns\AnchorInstallation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -205,27 +205,6 @@ class Node extends Model
     }
 
     /**
-     * Gets the ISOs downloaded on a node.
-     */
-    public function isos(): HasManyDeep
-    {
-        return $this->hasManyDeep(
-            ISO::class, // The final related model
-            ['storage_to_node', Storage::class], // Intermediate models/tables [pivot, related]
-            [
-                'node_id',    // Foreign key on the 'storage_to_node' pivot table for the Node model
-                'id',         // Foreign key on the 'storages' table (belongs to Storage model)
-                'storage_id',  // Foreign key on the 'iso_library' table for the Storage model
-            ],
-            [
-                'id',         // Local key on the 'nodes' table
-                'storage_id', // Local key on the 'storage_to_node' pivot table for the Storage model
-                'id',          // Local key on the 'storages' table
-            ]
-        );
-    }
-
-    /**
      * Gets the location associated with a node.
      */
     /**
@@ -364,6 +343,18 @@ class Node extends Model
     public function isoStorage(): ?Storage
     {
         return $this->storages()->where('stores_iso', true)->first();
+    }
+
+    /**
+     * A storage on this node that accepts importable disk images.
+     *
+     * PVE keeps `import` off by default, so a node having plenty of space is no
+     * guarantee it has anywhere an image can land. Callers treat null as "this
+     * node cannot take images yet" rather than as an error.
+     */
+    public function importStorage(): ?Storage
+    {
+        return $this->storages()->where('stores_import', true)->first();
     }
 
     /**

@@ -14,6 +14,7 @@ enum StorageContentType
     case BACKUPS;
     case ISO;
     case SNIPPETS;
+    case IMPORT;
 
     /**
      * Convert the enum case to its corresponding Proxmox storage content type string.
@@ -29,6 +30,7 @@ enum StorageContentType
             self::BACKUPS => 'backup', // Backup files
             self::ISO => 'iso', // ISO image files
             self::SNIPPETS => 'snippets', // Snippet files (e.g., cloud-init configs)
+            self::IMPORT => 'import', // Importable disk images (qcow2/raw); off by default in PVE
         };
     }
 
@@ -76,6 +78,7 @@ enum StorageContentType
             self::BACKUPS => 'stores_backups',
             self::ISO => 'stores_iso',
             self::SNIPPETS => 'stores_snippets',
+            self::IMPORT => 'stores_import',
         };
     }
 }

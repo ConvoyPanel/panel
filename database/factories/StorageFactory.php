@@ -21,6 +21,7 @@ class StorageFactory extends Factory
             'stores_backups' => true,
             'stores_iso' => true,
             'stores_snippets' => true,
+            'stores_import' => true,
         ];
     }
 }

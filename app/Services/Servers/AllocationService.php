@@ -13,8 +13,10 @@ use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
 use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
 use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use App\Models\ISO;
+use App\Models\Node;
 use App\Models\Server;
 use App\Models\ServerDisk;
+use App\Services\Isos\IsoResidencyService;
 use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use App\Services\Proxmox\Server\ProxmoxDiskClient;
 use Illuminate\Http\Client\ConnectionException;
@@ -27,6 +29,7 @@ class AllocationService
         private ProxmoxConfigClient $configClient,
         private ProxmoxDiskClient $diskClient,
         private SerialConsoleService $serialConsole,
+        private IsoResidencyService $isoResidency,
     ) {}
 
     /**
@@ -365,12 +368,17 @@ class AllocationService
 
     public function mountIso(Server $server, ISO $iso): void
     {
+        // Put the file on the node first. The library is panel-wide, so this
+        // node may never have seen this ISO -- and mounting a volume that is
+        // not there gives the guest an empty drive rather than an error.
+        $this->isoResidency->ensureResident($server->node, $iso);
+
         // One read tells us everything: whether the ISO is already mounted,
         // which IDE slot is free, and the digest to guard the write with (a
         // concurrent mount could otherwise claim the same slot).
         $config = $this->configClient->setServer($server)->getConfig();
 
-        if ($this->findMountedIsoDisk($config->disks, $iso)) {
+        if ($this->findMountedIsoDisk($config->disks, $iso, $server->node)) {
             throw new IsoAlreadyMountedException;
         }
 
@@ -390,7 +398,7 @@ class AllocationService
         }
 
         $this->configClient->update([
-            "ide$ideIndex" => $this->isoVolume($iso).',media=cdrom',
+            "ide$ideIndex" => $this->isoVolume($iso, $server->node).',media=cdrom',
         ], $config->digest);
     }
 
@@ -400,7 +408,7 @@ class AllocationService
         // with its digest — the interface we delete is derived from this read.
         $config = $this->configClient->setServer($server)->getConfig();
 
-        $disk = $this->findMountedIsoDisk($config->disks, $iso);
+        $disk = $this->findMountedIsoDisk($config->disks, $iso, $server->node);
 
         if ($disk === null) {
             throw new IsoAlreadyUnmountedException;
@@ -412,10 +420,13 @@ class AllocationService
     /**
      * The Proxmox volume string a mounted copy of this ISO takes, e.g.
      * "local:iso/debian-12.iso" — the same value {@see mountIso} writes.
+     *
+     * It depends on the node, because the storage the file lands on does: the
+     * library entry itself has no storage any more.
      */
-    private function isoVolume(ISO $iso): string
+    private function isoVolume(ISO $iso, Node $node): string
     {
-        return "{$iso->storage->name}:iso/{$iso->file_name}";
+        return $this->isoResidency->volume($node, $iso);
     }
 
     /**
@@ -425,9 +436,9 @@ class AllocationService
      *
      * @param  Collection<int, DiskData>  $disks
      */
-    public function findMountedIsoDisk(Collection $disks, ISO $iso): ?DiskData
+    public function findMountedIsoDisk(Collection $disks, ISO $iso, Node $node): ?DiskData
     {
-        $volume = $this->isoVolume($iso);
+        $volume = $this->isoVolume($iso, $node);
 
         return $disks->first(fn (DiskData $disk) => $disk->diskMediaType === DiskMediaType::CDROM
             && $disk->volume === $volume);
