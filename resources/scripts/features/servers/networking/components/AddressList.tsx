@@ -1,3 +1,7 @@
+import {
+    summarizeAddresses,
+    versionLabels,
+} from '@/features/servers/networking/address-labels.ts'
 import { Address, AddressVersion } from '@/types/address.ts'
 import { cn } from '@/utils'
 import { IconWifiOff } from '@tabler/icons-react'
@@ -39,11 +43,6 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/ToggleGroup'
 
 /** Rows a repeated value must span before it is worth saying once instead. */
 const HOISTABLE_ROWS = 3
-
-const versionLabels: Record<AddressVersion, string> = {
-    [AddressVersion.IPv4]: 'IPv4',
-    [AddressVersion.IPv6]: 'IPv6',
-}
 
 type VersionFilter = AddressVersion | 'all'
 
@@ -190,11 +189,7 @@ const AddressList = ({ addresses }: Props) => {
         )
     }
 
-    const summary = isMixed
-        ? `${addresses.length} addresses · ${counts[AddressVersion.IPv4]} IPv4 · ${counts[AddressVersion.IPv6]} IPv6`
-        : `${addresses.length} ${versionLabels[addresses[0].version]} ${
-              addresses.length === 1 ? 'address' : 'addresses'
-          }`
+    const summary = summarizeAddresses(addresses)
 
     return (
         <div className={'flex flex-col gap-3'}>

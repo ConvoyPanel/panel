@@ -1,12 +1,15 @@
-import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import {
     addressBlockGroupQueries,
     useAddressBlockGroups,
 } from '@/features/ipam/api.ts'
+import { addressCapacity, addressInUseLabel } from '@/features/ipam/capacity.ts'
+import AddressCapacityMeter from '@/features/ipam/components/AddressCapacityMeter.tsx'
 import CreateBlockGroupModal from '@/features/ipam/components/CreateBlockGroupModal.tsx'
 import DeleteBlockGroupModal from '@/features/ipam/components/DeleteBlockGroupModal.tsx'
 import EditBlockGroupModal from '@/features/ipam/components/EditBlockGroupModal.tsx'
+import IpamSummaryCards from '@/features/ipam/components/IpamSummaryCards.tsx'
 import useBlockGroupModalStore from '@/features/ipam/hooks/use-block-group-modal-store.ts'
+import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import {
@@ -17,7 +20,6 @@ import { cn } from '@/utils'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Badge } from '@/components/ui/Badge.tsx'
 import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import {
@@ -68,26 +70,68 @@ function IpamIndex() {
             accessorKey: 'name',
             enableHiding: false,
             meta: {
-                skeletonWidth: '5rem',
+                skeletonWidth: '8rem',
             },
             cell: ({ cell }) => (
-                <Link
-                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
-                    to='/admin/ipam/$addressBlockGroupId'
-                    params={{
-                        addressBlockGroupId: String(cell.row.original.id),
-                    }}
-                >
-                    {cell.getValue<string>()}
-                </Link>
+                <div className={'min-w-0'}>
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'h-auto px-0'
+                        )}
+                        to='/admin/ipam/$addressBlockGroupId'
+                        params={{
+                            addressBlockGroupId: String(cell.row.original.id),
+                        }}
+                    >
+                        {cell.getValue<string>()}
+                    </Link>
+                    {cell.row.original.description && (
+                        <p className={'text-muted-foreground truncate text-xs'}>
+                            {cell.row.original.description}
+                        </p>
+                    )}
+                </div>
             ),
         },
         {
-            header: 'Description',
-            accessorKey: 'description',
+            header: 'Blocks',
+            accessorKey: 'addressBlocksCount',
             meta: {
-                skeletonWidth: '10rem',
+                skeletonWidth: '1rem',
+                align: 'center',
             },
+            cell: ({ cell }) => (
+                <span className={'font-mono tabular-nums'}>
+                    {cell.getValue<number>()}
+                </span>
+            ),
+        },
+        {
+            id: 'inUse',
+            header: 'In use',
+            meta: {
+                skeletonWidth: '4rem',
+                align: 'right',
+            },
+            cell: ({ row }) => (
+                <span className={'font-mono tabular-nums'}>
+                    {addressInUseLabel(addressCapacity(row.original.capacity))}
+                </span>
+            ),
+        },
+        {
+            id: 'utilisation',
+            header: 'Utilisation',
+            meta: {
+                skeletonWidth: '8rem',
+            },
+            cell: ({ row }) => (
+                <AddressCapacityMeter
+                    capacity={row.original.capacity}
+                    className={'w-40'}
+                />
+            ),
         },
         {
             header: 'Nodes',
@@ -97,9 +141,9 @@ function IpamIndex() {
                 align: 'center',
             },
             cell: ({ cell }) => (
-                <Badge variant={'secondary'} className={'font-mono'}>
+                <span className={'font-mono tabular-nums'}>
                     {cell.getValue<number>()}
-                </Badge>
+                </span>
             ),
         },
         actionsColumn<AddressBlockGroup>(({ row }) =>
@@ -110,6 +154,7 @@ function IpamIndex() {
     return (
         <>
             <Heading>IPAM</Heading>
+            <IpamSummaryCards />
             <DataTable
                 data={data}
                 columns={columns}
@@ -152,13 +197,13 @@ function IpamIndex() {
                                 >
                                     {group.description || 'No description'}
                                 </ItemDescription>
-                                <Badge
-                                    variant={'secondary'}
-                                    className={'w-fit font-mono'}
-                                >
-                                    {group.nodesCount}{' '}
-                                    {group.nodesCount === 1 ? 'node' : 'nodes'}
-                                </Badge>
+                                {/* The one place a bar reads better than a number:
+                                    at this width the counts would wrap before the
+                                    reader got to the ratio. */}
+                                <AddressCapacityMeter
+                                    capacity={group.capacity}
+                                    className={'w-full pt-1'}
+                                />
                             </ItemContent>
                             <ItemActions>
                                 <Actions>{renderActions(group)}</Actions>

@@ -40,6 +40,12 @@ export type PaginatedAddresses = PaginatedResult<Address>
 
 export interface GeneratedAddressesResult {
     createdCount: number
+    /** Units still without a row. Generation writes in batches, so one run rarely finishes a block. */
     remaining: number
     isComplete: boolean
+    /**
+     * The block is minted on demand and has nothing to generate. Not an error and not a no-op the
+     * user should read as failure — it is the correct answer for a sparse block.
+     */
+    sparse: boolean
 }

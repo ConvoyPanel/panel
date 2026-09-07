@@ -28,9 +28,9 @@ const BandwidthUsageCard = () => {
 
     return (
         <StatisticCard
-            title={'Bandwidth Allowance'}
+            title={'Bandwidth'}
             icon={IconWifi}
-            className={'col-span-2 @5xl:col-span-4'}
+            className={'col-span-2 @5xl:col-span-1'}
             context={
                 server ? (
                     <>
@@ -42,10 +42,15 @@ const BandwidthUsageCard = () => {
                                 {bandwidthUsedPercent.toFixed(0)}%
                             </>
                         )}
-                        {' • '}
-                        {speedLimit === null
-                            ? 'no speed cap'
-                            : `capped at ${speed.value} ${speed.unit}/s`}
+                        {/* Only when there is one to report: an uncapped
+                            link is the default, and saying so cost the line
+                            more width than the fact was worth. Held back to
+                            @6xl for the same reason -- see ServerStateCard. */}
+                        {speedLimit !== null && (
+                            <span className={'hidden @6xl:inline'}>
+                                {' • '}capped at {speed.value} {speed.unit}/s
+                            </span>
+                        )}
                     </>
                 ) : undefined
             }

@@ -2,6 +2,7 @@
 
 namespace App\Data\Server\Proxmox\Firewall;
 
+use App\Data\Server\Proxmox\Backup\BackupData;
 use App\Enums\Server\Firewall\FirewallLogLevel;
 use App\Enums\Server\Firewall\RuleAction;
 use App\Enums\Server\Firewall\RuleDirection;
@@ -12,7 +13,7 @@ use Spatie\LaravelData\Data;
  * One rule in a server's Proxmox firewall ruleset.
  *
  * Proxmox returns these as flat JSON objects, so this maps by hand the way
- * {@see \App\Data\Server\Proxmox\Backup\BackupData} does. It deliberately does
+ * {@see BackupData} does. It deliberately does
  * NOT use MapsProxmoxProperties / #[ProxmoxProperty] -- that codec parses the
  * `key=value` tail of a property list (`net0`, `scsi0`), which is a different
  * wire shape entirely.

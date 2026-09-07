@@ -42,7 +42,7 @@ it('returns overview metrics for admins', function () {
     // factories spin up aren't node-attached, so they're excluded.)
     $storage = Storage::factory()->create([
         'size' => 500 * 1024 * 1024 * 1024,
-        'stores_kvm' => true,
+        'pve_content' => 'images',
     ]);
     $node->storages()->attach($storage);
 
@@ -188,13 +188,13 @@ it('counts fleet storage from what the poll observed, not what was typed', funct
     // figure; the dashboard disagreeing with them would be the bug.
     $observed = Storage::factory()->create([
         'size' => 100 * 1024 * 1024 * 1024,
-        'stores_kvm' => true,
+        'pve_content' => 'images',
     ]);
 
     // Never polled, so the declared size is the best answer there is.
     $declaredOnly = Storage::factory()->create([
         'size' => 50 * 1024 * 1024 * 1024,
-        'stores_kvm' => true,
+        'pve_content' => 'images',
     ]);
 
     $node->storages()->attach([
@@ -216,7 +216,7 @@ it('counts a shared pool once however many nodes mount it', function () {
     $location = Location::factory()->create();
     $shared = Storage::factory()->create([
         'size' => 200 * 1024 * 1024 * 1024,
-        'stores_kvm' => true,
+        'pve_content' => 'images',
     ]);
 
     foreach (range(1, 3) as $ignored) {

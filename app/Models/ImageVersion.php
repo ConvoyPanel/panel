@@ -24,7 +24,7 @@ use Ramsey\Uuid\Uuid;
  * @property int $version_minor
  * @property int $version_patch
  * @property array $disks
- * @property int $size
+ * @property int $size_bytes
  * @property bool $is_active
  * @property ImageDefinition $definition
  */
@@ -122,7 +122,7 @@ class ImageVersion extends Model
             }
 
             if ($model->isDirty('disks')) {
-                $model->size = collect($model->disks ?? [])->sum(fn (array $disk) => (int) ($disk['size'] ?? 0));
+                $model->size_bytes = collect($model->disks ?? [])->sum(fn (array $disk) => (int) ($disk['size'] ?? 0));
             }
         });
     }

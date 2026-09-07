@@ -80,6 +80,14 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'auth.logout': { verb: 'signed out', detail: () => null },
 
     // Account and credentials
+    'account.profile.updated': {
+        verb: 'updated their profile',
+        detail: changedFields,
+    },
+    'account.avatar.updated': {
+        verb: 'changed their profile picture',
+        detail: () => null,
+    },
     'account.password.updated': {
         verb: 'changed their password',
         detail: () => null,
@@ -409,12 +417,41 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
 }
 
+/**
+ * Names no longer written, kept so old rows still read as sentences.
+ *
+ * Never delete an entry here: the row it explains cannot be migrated, because
+ * the string is the only record of what the event meant at the time.
+ */
+const RETIRED_EVENT_COPY: Record<string, AuditEventCopy | undefined> = {
+    // ISOs stopped belonging to a node when the library moved into the panel.
+    'admin.node.iso-created': { verb: 'added an ISO' },
+    'admin.node.iso-updated': { verb: 'updated an ISO' },
+    'admin.node.iso-deleted': { verb: 'deleted an ISO' },
+    // Templates became images.
+    'admin.template-group.created': { verb: 'created a template group' },
+    'admin.template-group.updated': { verb: 'updated a template group' },
+    'admin.template-group.deleted': { verb: 'deleted a template group' },
+    'admin.template.created': { verb: 'created a template' },
+    'admin.template.updated': { verb: 'updated a template' },
+    'admin.template.deleted': { verb: 'deleted a template' },
+}
+
 /** The sentence for one entry: what was done, and to what where that adds something. */
 export const describeAuditEvent = (
     event: AuditEvent,
     properties: AuditProperties
 ): { verb: string; detail: string | null } => {
-    const copy = AUDIT_EVENT_COPY[event]
+    // Audit rows keep the event string they were written with, forever, so a
+    // name retired in a later release is still in the table and still has to
+    // render. Falling back on the raw string beats throwing on a row nobody can
+    // edit -- and it is why these names are append-only: rename one and every
+    // historical row loses its sentence.
+    const copy = AUDIT_EVENT_COPY[event] ?? RETIRED_EVENT_COPY[event]
+
+    if (!copy) {
+        return { verb: event, detail: defaultDetail(properties) }
+    }
 
     return {
         verb: copy.verb,

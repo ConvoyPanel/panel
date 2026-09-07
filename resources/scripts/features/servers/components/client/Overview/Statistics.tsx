@@ -10,18 +10,19 @@ import StorageUsageCard from '@/features/servers/components/client/Overview/Stor
 // time behind "up 18 days". Five tiles instead of seven cards, and none of
 // them ends in dead space.
 //
-// 4-up only at @5xl. These queries measure the whole content area (AppLayout's
-// @container), not the card, so the threshold is a statement about the page.
-// Measured: a 724px container gives 169px tiles, leaving ~113px of title, and
-// "Memory Usage" wraps -- which drops that card's value below its neighbours'.
-// 1024px gives 244px tiles, which every title clears.
+// Two-up, then five-up in one step at @5xl. These queries measure the whole
+// content area (AppLayout's @container), not the card, so the threshold is a
+// statement about the page.
 //
-// Bandwidth spans the full width at both counts: it is the one allowance
-// measured in months rather than seconds, and its meter is the only figure
-// here that reads better long.
+// There is no four-up rung in between. Four columns leave bandwidth spanning a
+// whole row on its own, and at a 1440px laptop -- squarely inside the band a
+// four-up rung would own -- that is a 1090px card holding "0 B" and a bar the
+// width of the page. Five columns at 1024px make each tile ~180px, which is
+// tight: it is what the shorter context lines in ServerStateCard and
+// BandwidthUsageCard are cut to clear.
 const Statistics = () => {
     return (
-        <div className='grid grid-cols-2 gap-2 @md:gap-4 @5xl:grid-cols-4'>
+        <div className='grid grid-cols-2 gap-2 @md:gap-4 @5xl:grid-cols-5'>
             <ServerStateCard />
             <CpuUsageCard />
             <MemoryUsageCard />

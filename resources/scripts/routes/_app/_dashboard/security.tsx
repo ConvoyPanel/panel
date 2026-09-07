@@ -1,16 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
-export const searchSchema = z.object({
-    // Set by the OAuth callback after a link attempt (success carries the provider id, failure a
-    // code) so the security page can toast the outcome.
-    oauth_linked: z.string().optional(),
-    oauth_error: z.string().optional(),
-})
+import { searchSchema } from '@/routes/_app/account/security.tsx'
 
+/**
+ * Security moved into `/account`. Kept so a bookmark, or a link from before the
+ * move, still lands on the page rather than on the router's not-found — search
+ * included, since the OAuth callback used to come back through here.
+ */
 export const Route = createFileRoute('/_app/_dashboard/security')({
     validateSearch: searchSchema,
-    staticData: {
-        title: 'Security',
+    beforeLoad: ({ search }) => {
+        throw redirect({ to: '/account/security', search, replace: true })
     },
 })

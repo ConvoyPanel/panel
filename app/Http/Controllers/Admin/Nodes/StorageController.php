@@ -83,13 +83,10 @@ class StorageController extends Controller
                 ],
                 [
                     ...$request->validated(),
-                    'stores_kvm' => (bool) $reported?->storesKvm,
-                    'stores_lxc' => (bool) $reported?->storesLxc,
-                    'stores_lxc_templates' => (bool) $reported?->storesLxcTemplates,
-                    'stores_backups' => (bool) $reported?->storesBackups,
-                    'stores_iso' => (bool) $reported?->storesIso,
-                    'stores_snippets' => (bool) $reported?->storesSnippets,
-                    'stores_import' => (bool) $reported?->storesImport,
+                    // PVE's content list, verbatim. What the storage can hold
+                    // is read off it, so there is one place for the answer to
+                    // live and no way for a projection of it to drift.
+                    'pve_content' => $reported?->content,
                 ],
             );
 

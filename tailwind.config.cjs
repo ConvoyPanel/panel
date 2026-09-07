@@ -78,6 +78,14 @@ const config = {
                     disk: 'var(--chart-disk)',
                     network: 'var(--chart-network)',
                 },
+                // The address-state set from app.css. Mapped (unlike --storage-*, which is only
+                // ever a segment colour) because these also paint the state pip on every IPAM
+                // table row, where a Tailwind class is what the call site wants.
+                address: {
+                    assigned: 'var(--address-assigned)',
+                    reserved: 'var(--address-reserved)',
+                    system: 'var(--address-system)',
+                },
             },
             borderRadius: {
                 lg: 'var(--radius)',

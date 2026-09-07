@@ -33,6 +33,16 @@ return [
         'url_ttl_minutes' => env('ARTIFACTS_URL_TTL_MINUTES', 120),
     ],
 
+    /*
+    | Where uploaded profile pictures live. Not the `artifacts` disk: those are
+    | multi-gigabyte files a node fetches once over an expiring link, while an
+    | avatar is a 30KB file the panel serves on every page. Point this at `s3`
+    | to move them off the box.
+    */
+    'avatars' => [
+        'disk' => env('AVATARS_DISK', 'local'),
+    ],
+
     'updates' => [
         'repository' => env('UPDATE_CHECK_REPOSITORY', 'ConvoyPanel/panel'),
     ],

@@ -9,14 +9,14 @@ use App\Enums\Server\DiskInterface;
 use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\CannotModifyPrimaryDiskException;
 use App\Exceptions\Service\Server\Allocation\CannotShrinkDiskException;
-use App\Exceptions\Service\Server\Allocation\IsoAlreadyMountedException;
-use App\Exceptions\Service\Server\Allocation\IsoAlreadyUnmountedException;
+use App\Exceptions\Service\Server\Allocation\ISOAlreadyMountedException;
+use App\Exceptions\Service\Server\Allocation\ISOAlreadyUnmountedException;
 use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
 use App\Models\ISO;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\ServerDisk;
-use App\Services\Isos\IsoResidencyService;
+use App\Services\ISOs\ISOResidencyService;
 use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use App\Services\Proxmox\Server\ProxmoxDiskClient;
 use Illuminate\Http\Client\ConnectionException;
@@ -29,7 +29,7 @@ class AllocationService
         private ProxmoxConfigClient $configClient,
         private ProxmoxDiskClient $diskClient,
         private SerialConsoleService $serialConsole,
-        private IsoResidencyService $isoResidency,
+        private ISOResidencyService $isoResidency,
     ) {}
 
     /**
@@ -366,7 +366,7 @@ class AllocationService
         ]);
     }
 
-    public function mountIso(Server $server, ISO $iso): void
+    public function mountISO(Server $server, ISO $iso): void
     {
         // Put the file on the node first. The library is panel-wide, so this
         // node may never have seen this ISO -- and mounting a volume that is
@@ -378,8 +378,8 @@ class AllocationService
         // concurrent mount could otherwise claim the same slot).
         $config = $this->configClient->setServer($server)->getConfig();
 
-        if ($this->findMountedIsoDisk($config->disks, $iso, $server->node)) {
-            throw new IsoAlreadyMountedException;
+        if ($this->findMountedISODisk($config->disks, $iso, $server->node)) {
+            throw new ISOAlreadyMountedException;
         }
 
         $ideIndex = 0; // max IDE index is '3'
@@ -402,16 +402,16 @@ class AllocationService
         ], $config->digest);
     }
 
-    public function unmountIso(Server $server, ISO $iso): void
+    public function unmountISO(Server $server, ISO $iso): void
     {
         // Read the full config (not just the disks) so we can guard the delete
         // with its digest — the interface we delete is derived from this read.
         $config = $this->configClient->setServer($server)->getConfig();
 
-        $disk = $this->findMountedIsoDisk($config->disks, $iso, $server->node);
+        $disk = $this->findMountedISODisk($config->disks, $iso, $server->node);
 
         if ($disk === null) {
-            throw new IsoAlreadyUnmountedException;
+            throw new ISOAlreadyUnmountedException;
         }
 
         $this->configClient->update(['delete' => $disk->interface->value], $config->digest);
@@ -419,7 +419,7 @@ class AllocationService
 
     /**
      * The Proxmox volume string a mounted copy of this ISO takes, e.g.
-     * "local:iso/debian-12.iso" — the same value {@see mountIso} writes.
+     * "local:iso/debian-12.iso" — the same value {@see mountISO} writes.
      *
      * It depends on the node, because the storage the file lands on does: the
      * library entry itself has no storage any more.
@@ -436,7 +436,7 @@ class AllocationService
      *
      * @param  Collection<int, DiskData>  $disks
      */
-    public function findMountedIsoDisk(Collection $disks, ISO $iso, Node $node): ?DiskData
+    public function findMountedISODisk(Collection $disks, ISO $iso, Node $node): ?DiskData
     {
         $volume = $this->isoVolume($iso, $node);
 

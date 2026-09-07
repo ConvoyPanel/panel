@@ -52,7 +52,7 @@ function fakeImportContent(array $volids, ?callable $onDownload = null): void
 
 it('downloads a disk the node does not have', function () {
     [, , $node, $server] = createServerModel();
-    $node->storages()->first()->update(['stores_import' => true]);
+    $node->storages()->first()->update(['pve_content' => 'images,import']);
 
     $sent = null;
     fakeImportContent([], function ($request) use (&$sent) {
@@ -73,7 +73,7 @@ it('downloads a disk the node does not have', function () {
 it('does nothing when the node already holds that exact build', function () {
     [, , $node] = createServerModel();
     $storage = $node->storages()->first();
-    $storage->update(['stores_import' => true]);
+    $storage->update(['pve_content' => 'images,import']);
 
     // Named after the hash, so "do I have this?" is answerable by name alone.
     fakeImportContent(["{$storage->name}:import/image-".SYSTEM_SHA.'.qcow2']);
@@ -88,7 +88,7 @@ it('does nothing when the node already holds that exact build', function () {
 it('treats a different build of the same image as absent', function () {
     [, , $node] = createServerModel();
     $storage = $node->storages()->first();
-    $storage->update(['stores_import' => true]);
+    $storage->update(['pve_content' => 'images,import']);
 
     fakeImportContent(["{$storage->name}:import/image-".str_repeat('b', 64).'.qcow2']);
 
@@ -98,7 +98,7 @@ it('treats a different build of the same image as absent', function () {
 it('names the volid qm create will import from', function () {
     [, , $node] = createServerModel();
     $storage = $node->storages()->first();
-    $storage->update(['stores_import' => true]);
+    $storage->update(['pve_content' => 'images,import']);
 
     $volids = app(ImageResidencyService::class)->volids($node, makeVersionFor());
 
@@ -108,7 +108,7 @@ it('names the volid qm create will import from', function () {
 
 it('says what to fix when no storage accepts images', function () {
     [, , $node] = createServerModel();
-    Storage::query()->update(['stores_import' => false]);
+    Storage::query()->update(['pve_content' => 'images']);
 
     // PVE keeps `import` off by default, so this is the ordinary first-run
     // state rather than a defensive branch -- worth a sentence, not a 500.

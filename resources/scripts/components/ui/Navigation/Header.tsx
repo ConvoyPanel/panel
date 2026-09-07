@@ -1,4 +1,4 @@
-import Avatar from '@/components/ui/Navigation/Avatar.tsx'
+import AccountMenu from '@/components/ui/Navigation/AccountMenu.tsx'
 import Breadcrumbs from '@/components/ui/Navigation/Breadcrumbs.tsx'
 import NavSearch from '@/components/ui/Navigation/NavSearch.tsx'
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
@@ -19,7 +19,7 @@ const Header = ({ nav }: Props) => {
             <Breadcrumbs />
             <div className='ml-auto flex items-center gap-2'>
                 <NavSearch nav={nav} />
-                <Avatar />
+                <AccountMenu />
             </div>
         </header>
     )

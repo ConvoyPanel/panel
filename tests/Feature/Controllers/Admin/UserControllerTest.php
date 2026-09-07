@@ -1,6 +1,10 @@
 <?php
 
 use App\Enums\Api\ApiKeyType;
+use App\Enums\Audit\AuditEvent;
+use App\Facades\Audit;
+use App\Models\Node;
+use App\Models\Server;
 use App\Models\SessionRecord;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -224,4 +228,101 @@ it('sorts the list by the columns the admin table offers', function () {
         ->and($names('rootAdmin'))->toHaveCount(2);
 
     expect($other->fresh())->not->toBeNull();
+});
+
+it('reports what the account owns as one aggregate, in bytes', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $target = User::factory()->create();
+    $node = Node::factory()->create();
+
+    Server::factory()->for($target)->for($node)->create([
+        'cpu' => 4,
+        'memory' => 8 * 1024 * 1024 * 1024,
+        'disk' => 160 * 1024 * 1024 * 1024,
+        'bandwidth_usage' => 300 * 1024 * 1024,
+        'bandwidth_limit' => 1024 * 1024 * 1024,
+    ]);
+    Server::factory()->for($target)->for($node)->create([
+        'cpu' => 2,
+        'memory' => 2 * 1024 * 1024 * 1024,
+        'disk' => 40 * 1024 * 1024 * 1024,
+        'bandwidth_usage' => 100 * 1024 * 1024,
+        'bandwidth_limit' => 1024 * 1024 * 1024,
+        'suspended_at' => now(),
+    ]);
+
+    // Somebody else's server, on the same node, must not land in these totals.
+    Server::factory()->for($node)->create(['cpu' => 32]);
+
+    $resources = $this->actingAs($admin)
+        ->getJson("/api/admin/users/{$target->id}")
+        ->assertOk()
+        ->json('data.resources');
+
+    expect($resources)->toMatchArray([
+        'serversCount' => 2,
+        'suspendedCount' => 1,
+        'nodesCount' => 1,
+        'cpu' => 6,
+        'memory' => 10 * 1024 * 1024 * 1024,
+        'disk' => 200 * 1024 * 1024 * 1024,
+        'bandwidthUsage' => 400 * 1024 * 1024,
+        'bandwidthLimit' => 2 * 1024 * 1024 * 1024,
+    ]);
+});
+
+it('reports no bandwidth ceiling once a server is unmetered', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $target = User::factory()->create();
+
+    Server::factory()->for($target)->create(['bandwidth_limit' => 1024 * 1024 * 1024]);
+    // -1 is the unmetered sentinel. Summed naively it would take a mebibyte off the total and
+    // read as a ceiling the account cannot actually hit.
+    Server::factory()->for($target)->create(['bandwidth_limit' => -1]);
+
+    $resources = $this->actingAs($admin)
+        ->getJson("/api/admin/users/{$target->id}")
+        ->assertOk()
+        ->json('data.resources');
+
+    expect($resources['bandwidthLimit'])->toBeNull()
+        ->and($resources['serversCount'])->toBe(2);
+});
+
+it('counts the credentials on the account and finds its last sign-in', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $target = User::factory()->create();
+
+    $target->createToken('deploy-bot', ApiKeyType::ACCOUNT);
+    $target->createToken('panel integration', ApiKeyType::APPLICATION);
+    $target->sshKeys()->create(['name' => 'laptop', 'public_key' => 'ssh-ed25519 AAAA laptop']);
+
+    Audit::record(AuditEvent::AUTH_LOGIN_SUCCEEDED, subject: $target, actor: $target);
+
+    $payload = $this->actingAs($admin)
+        ->getJson("/api/admin/users/{$target->id}")
+        ->assertOk()
+        ->json('data');
+
+    // One account key, not two: the application token belongs to the panel.
+    expect($payload['apiKeysCount'])->toBe(1)
+        ->and($payload['sshKeysCount'])->toBe(1)
+        ->and($payload['passkeysCount'])->toBe(0)
+        ->and($payload['twoFactorEnabled'])->toBeFalse()
+        ->and($payload['lastLoginAt'])->not->toBeNull();
+});
+
+it('keeps the detail fields off the list and the session payload', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+
+    // The same UserData object is the client's own session payload and `createdBy` on an API key.
+    // Every detail field is Optional so those responses stay exactly as they were.
+    $row = $this->actingAs($admin)->getJson('/api/admin/users')->assertOk()->json('items.0');
+    expect($row)->not->toHaveKey('resources')
+        ->and($row)->not->toHaveKey('twoFactorEnabled')
+        ->and($row)->toHaveKey('serversCount');
+
+    $session = $this->actingAs($admin)->getJson('/api/client/user')->assertOk()->json('data');
+    expect($session)->not->toHaveKey('twoFactorEnabled')
+        ->and($session)->not->toHaveKey('lastLoginIp');
 });

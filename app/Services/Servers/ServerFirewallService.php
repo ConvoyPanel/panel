@@ -14,6 +14,7 @@ use App\Enums\Server\Firewall\FirewallPolicy;
 use App\Exceptions\Http\Server\ConfigModifiedException;
 use App\Exceptions\Proxmox\RequestException;
 use App\Models\Server;
+use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use App\Services\Proxmox\Server\ProxmoxFirewallClient;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -241,7 +242,7 @@ class ServerFirewallService
 
     /**
      * Whether Proxmox rejected the write because the digest no longer matched.
-     * Same wording as {@see \App\Services\Proxmox\Server\ProxmoxConfigClient}.
+     * Same wording as {@see ProxmoxConfigClient}.
      */
     private function isConfigModifiedError(RequestException $e): bool
     {

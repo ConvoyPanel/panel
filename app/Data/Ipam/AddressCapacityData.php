@@ -36,6 +36,12 @@ class AddressCapacityData extends Data
         /** Network / broadcast / gateway. Materialized, but can never be handed out. */
         public int $systemCount,
         public int $availableCount,
+        /**
+         * Blocks in this pool the meter cannot measure — sparse ones, minted on demand. Their
+         * addresses are excluded from the counts above rather than counted against a denominator
+         * they are not part of, so the UI names them instead of quietly folding them in.
+         */
+        public int $sparseBlockCount = 0,
     ) {}
 
     public static function forBlock(AddressBlock $block): self
@@ -52,9 +58,12 @@ class AddressCapacityData extends Data
     }
 
     /**
-     * A pool's capacity is the sum of its blocks'. One sparse block makes the whole pool's total
-     * unknowable, which is the truthful answer — the UI then says so instead of drawing a bar
-     * against a denominator it made up.
+     * A pool's capacity is the sum of its sized blocks'.
+     *
+     * A sparse block is not folded in and not allowed to erase the answer: collapsing the whole
+     * pool to "unknown" because one v6 block sits beside a /24 hides that the /24 is nearly full,
+     * which is the thing the operator opened the screen for. The sparse blocks are counted and
+     * named separately, and the counts above are already scoped to the dense ones.
      */
     public static function forGroup(AddressBlockGroup $group): self
     {
@@ -62,18 +71,21 @@ class AddressCapacityData extends Data
             ? $group->addressBlocks
             : $group->addressBlocks()->get();
 
-        $isSparse = $blocks->contains(fn (AddressBlock $block) => $block->isSparse());
+        $dense = $blocks->reject(fn (AddressBlock $block) => $block->isSparse());
+        $sparseCount = $blocks->count() - $dense->count();
 
         return new self(
-            totalUnits: $isSparse
+            // Null only when there is no sized block at all — then there really is no denominator.
+            totalUnits: $dense->isEmpty()
                 ? null
-                : (int) $blocks->sum(fn (AddressBlock $block) => $block->totalUnits() ?? 0),
-            isSparse: $isSparse,
+                : (int) $dense->sum(fn (AddressBlock $block) => $block->totalUnits() ?? 0),
+            isSparse: $dense->isEmpty() && $sparseCount > 0,
             generatedCount: (int) ($group->addresses_count ?? 0),
             assignedCount: (int) ($group->assigned_addresses_count ?? 0),
             reservedCount: (int) ($group->reserved_addresses_count ?? 0),
             systemCount: (int) ($group->system_addresses_count ?? 0),
             availableCount: (int) ($group->available_addresses_count ?? 0),
+            sparseBlockCount: $sparseCount,
         );
     }
 }

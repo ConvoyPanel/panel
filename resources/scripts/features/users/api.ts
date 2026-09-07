@@ -5,9 +5,17 @@ import {
 } from '@tanstack/react-query'
 
 import type { UserInput } from '@/features/users/types.ts'
-import { rawDataToAdminUser } from '@/lib/transformers/admin/user.ts'
+import {
+    rawDataToAdminUser,
+    rawDataToAdminUserDetail,
+} from '@/lib/transformers/admin/user.ts'
 import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import type { AdminUser, PaginatedAdminUsers } from '@/types/admin/user'
+import { queryClient } from '@/lib/query-client.ts'
+import type {
+    AdminUser,
+    AdminUserDetail,
+    PaginatedAdminUsers,
+} from '@/types/admin/user'
 import {
     type QueryBuilderParams,
     withQueryBuilderParams,
@@ -38,8 +46,14 @@ export const getUsers = async (
     return { items: res.items, pagination: res.pagination }
 }
 
-const getUser = async (id: number): Promise<AdminUser> =>
-    rawDataToAdminUser((await apiFetch<DataResponse<unknown>>(showRoute(id))).data)
+/**
+ * The detail payload, which carries the resource totals and credential counts the list omits.
+ * Assignable wherever an `AdminUser` is expected, so the pickers and the edit dialog take it as-is.
+ */
+const getUser = async (id: number): Promise<AdminUserDetail> =>
+    rawDataToAdminUserDetail(
+        (await apiFetch<DataResponse<unknown>>(showRoute(id))).data
+    )
 
 /**
  * The panel speaks camelCase and the API speaks snake_case, and a blank password on an edit means
@@ -99,3 +113,6 @@ export const useUsers = (params: UserQueryParams) =>
     useQuery(userQueries.list(params))
 
 export const useUser = (id: number | null) => useQuery(userQueries.detail(id))
+
+export const preloadUser = (id: number) =>
+    queryClient.prefetchQuery(userQueries.detail(id))

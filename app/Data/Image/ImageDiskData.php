@@ -27,9 +27,14 @@ class ImageDiskData extends Data
         /** Path on the images filesystem disk, or null when `url` is set. */
         public ?string $path,
         public string $sha256,
-        /** Bytes on the wire -- what a node has to transfer. */
+        /** Bytes on the wire -- what a node has to transfer. Never mebibytes:
+         * this is compared against the length of a file a node downloads. */
         public int $size,
-        /** Provisioned size once imported. The floor a plan's disk must clear. */
+        /**
+         * Provisioned size once imported, in bytes. The floor a plan's disk must
+         * clear, so it is never rounded: a MiB of slack here is a build that
+         * fails at import.
+         */
         public int $virtualSize,
         public string $format = 'qcow2',
     ) {}

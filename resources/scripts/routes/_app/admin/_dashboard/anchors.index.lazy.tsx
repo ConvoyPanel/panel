@@ -158,7 +158,7 @@ function EnrollmentQueueIndex() {
                         icon={IconTransform}
                         title={'No machines waiting'}
                         description={
-                            'Run the install command on a Proxmox host and it will show up here, having already described itself.'
+                            'Run the install command on a Proxmox host to enroll it.'
                         }
                         action={
                             <Link

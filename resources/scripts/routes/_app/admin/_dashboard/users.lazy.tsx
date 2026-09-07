@@ -1,20 +1,20 @@
 import { useUser as useCurrentUser } from '@/features/auth/api.ts'
-import { deleteUser, userQueries, useUsers } from '@/features/users/api.ts'
+import { userQueries, useUsers } from '@/features/users/api.ts'
 import UserFormDialog from '@/features/users/components/UserFormDialog.tsx'
+import useUserDeletion from '@/features/users/hooks/use-user-deletion.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import type { AdminUser } from '@/types/admin/user.ts'
+import { cn } from '@/utils'
 import { IconPlus, IconUsers } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import { useState } from 'react'
 
 import { queryClient } from '@/lib/query-client.ts'
 
-import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
 import { Badge } from '@/components/ui/Badge.tsx'
-import { Button } from '@/components/ui/Button'
+import { Button, buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import DataTableColumnHeader from '@/components/ui/DataTable/DataTableColumnHeader.tsx'
 import { DropdownMenuItem } from '@/components/ui/DropdownMenu'
@@ -27,7 +27,6 @@ import {
     ItemTitle,
 } from '@/components/ui/Item'
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
-import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
 const countOf = (count: number, noun: string) =>
@@ -41,7 +40,6 @@ const RoleBadge = ({ user }: { user: AdminUser }) =>
     )
 
 const UsersIndex = () => {
-    const confirm = useConfirmationStore(state => state.confirm)
     const { data: currentUser } = useCurrentUser()
     const [editing, setEditing] = useState<AdminUser | 'new' | null>(null)
 
@@ -54,57 +52,20 @@ const UsersIndex = () => {
     const refresh = () =>
         queryClient.invalidateQueries({ queryKey: userQueries.all() })
 
-    const { mutate: remove } = useMutation({
-        mutationFn: (user: AdminUser) => deleteUser(user.id),
-        onSuccess: async () => {
-            toast.add({ title: 'User deleted', type: 'success' })
-            await refresh()
-        },
-        onError: () =>
-            toast.add({ title: 'Failed to delete user', type: 'error' }),
-    })
-
-    /*
-     * Delete is always offered, and the confirmation is where it is refused —
-     * the same shape the anchors list uses. Hiding the item an operator came for
-     * leaves them to work out why it is missing; asking and then answering
-     * "because four servers belong to them" is the same refusal with the reason
-     * attached.
-     */
-    const handleDelete = async (user: AdminUser) => {
-        const isSelf = user.id === currentUser?.id
-        const owns = user.serversCount > 0
-
-        const confirmed = await confirm({
-            title: isSelf
-                ? 'You are signed in as this account'
-                : owns
-                  ? `${user.name} still owns servers`
-                  : 'Delete user',
-            description: isSelf
-                ? 'An account cannot delete itself. Another administrator can remove it for you.'
-                : owns
-                  ? `${countOf(user.serversCount, 'server')} still belong to this account. Transfer or delete ${user.serversCount === 1 ? 'it' : 'them'} first.`
-                  : `Delete ${user.name} (${user.email})? Their API tokens, SSH keys and sessions go with them. This cannot be undone.`,
-            confirmText: 'Delete',
-            cancelText: isSelf || owns ? 'Close' : 'Cancel',
-            confirmButton: {
-                variant: 'destructive',
-                disabled: isSelf || owns,
-            },
-        })
-
-        if (confirmed) remove(user)
-    }
+    // Shared with the detail page's header, so the two cannot refuse differently.
+    const { confirmAndDelete } = useUserDeletion()
 
     const renderActions = (user: AdminUser) => (
         <>
+            <DropdownMenuItem asChild>
+                <Link to={`/admin/users/${user.id}` as string}>Open</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setEditing(user)}>
                 Edit
             </DropdownMenuItem>
             <DropdownMenuItem
                 variant={'destructive'}
-                onClick={() => handleDelete(user)}
+                onClick={() => confirmAndDelete(user)}
             >
                 Delete
             </DropdownMenuItem>
@@ -120,6 +81,14 @@ const UsersIndex = () => {
                 <DataTableColumnHeader column={column} title={'Name'} />
             ),
             meta: { skeletonWidth: '8rem' },
+            cell: ({ cell }) => (
+                <Link
+                    className={cn(buttonVariants({ variant: 'link' }), 'px-0')}
+                    to={`/admin/users/${cell.row.original.id}` as string}
+                >
+                    {cell.getValue<string>()}
+                </Link>
+            ),
         },
         {
             accessorKey: 'email',
@@ -211,9 +180,12 @@ const UsersIndex = () => {
                                 <ItemTitle
                                     className={'w-full min-w-0 gap-2'}
                                 >
-                                    <span className={'truncate'}>
+                                    <Link
+                                        className={'truncate'}
+                                        to={`/admin/users/${user.id}` as string}
+                                    >
                                         {user.name}
-                                    </span>
+                                    </Link>
                                     <RoleBadge user={user} />
                                 </ItemTitle>
                                 <ItemDescription

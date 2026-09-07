@@ -67,6 +67,23 @@
         --storage-untracked: oklch(0.62 0.13 75);
 
         /*
+         * Address states are a categorical set of three, and only three get a
+         * colour: free is the meter's own track, because "nothing has happened
+         * to this address" is the absence of a mark, not a fourth mark.
+         *
+         * Assigned takes the product blue -- it is the state that means a
+         * server is on it. Reserved borrows the same amber as untracked
+         * storage, for the same reason: an operator is holding something and
+         * may want it back. System sits in the neutral ramp because it is not
+         * anybody's decision -- network, broadcast and gateway can never be
+         * released, so colouring them like a hold would invite a click that
+         * always fails.
+         */
+        --address-assigned: oklch(0.5 0.134 242.749);
+        --address-reserved: oklch(0.62 0.13 75);
+        --address-system: oklch(0.72 0.014 107);
+
+        /*
          * Named per metric, not per slot. --chart-1..5 above are five steps of
          * one blue ramp -- a sequential scale, which is the wrong tool for
          * telling series apart: run through a CVD check its adjacent pairs sit
@@ -140,6 +157,10 @@
         --storage-backups: oklch(0.68 0.15 305);
         --storage-isos: oklch(0.72 0.1 190);
         --storage-untracked: oklch(0.78 0.13 75);
+
+        --address-assigned: oklch(0.588 0.158 241.966);
+        --address-reserved: oklch(0.78 0.13 75);
+        --address-system: oklch(0.5 0.014 107);
 
         /* Stepped for the dark card surface, not flipped from the light set --
            see the note on the light tokens. */

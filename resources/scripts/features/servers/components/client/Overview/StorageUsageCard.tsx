@@ -34,10 +34,6 @@ const StorageUsageCard = () => {
         units: 'iec',
         precision: 2,
     })
-    const free = byteSize(Math.max(totalBytes - usedBytes, 0), {
-        units: 'iec',
-        precision: 2,
-    })
 
     const usedPercent = totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0
 
@@ -75,22 +71,10 @@ const StorageUsageCard = () => {
             }
             meter={
                 isAvailable && (
-                    <>
-                        <LinearProgressBar
-                            value={usedPercent}
-                            aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
-                        />
-                        {/* The figure answers "how much have I used"; this
-                            answers the question people actually open the page
-                            with, which is how much is left. */}
-                        <p
-                            className={
-                                'text-muted-foreground mt-1.5 truncate text-xs tabular-nums'
-                            }
-                        >
-                            {free.value} {free.unit} free
-                        </p>
-                    </>
+                    <LinearProgressBar
+                        value={usedPercent}
+                        aria-label={`${usedPercent.toFixed(2)}% of your storage is used`}
+                    />
                 )
             }
         >

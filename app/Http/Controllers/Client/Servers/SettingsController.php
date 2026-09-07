@@ -200,7 +200,7 @@ class SettingsController
             // Matched on the backing volume, the same way mount and unmount
             // locate it. The previous check compared a `media_name` property
             // DiskData has never had, so every ISO reported itself unmounted.
-            'mounted' => $this->allocationService->findMountedIsoDisk($disks, $iso, $server->node) !== null,
+            'mounted' => $this->allocationService->findMountedISODisk($disks, $iso, $server->node) !== null,
         ])->all();
     }
 
@@ -208,7 +208,7 @@ class SettingsController
     {
         // The node may never have seen this ISO. Fetching it is part of
         // mounting rather than something an admin has to arrange in advance.
-        $this->allocationService->mountIso($server, $iso);
+        $this->allocationService->mountISO($server, $iso);
 
         Audit::record(
             AuditEvent::SERVER_MEDIA_MOUNTED,
@@ -221,7 +221,7 @@ class SettingsController
 
     public function unmountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
-        $this->allocationService->unmountIso($server, $iso);
+        $this->allocationService->unmountISO($server, $iso);
 
         Audit::record(
             AuditEvent::SERVER_MEDIA_UNMOUNTED,

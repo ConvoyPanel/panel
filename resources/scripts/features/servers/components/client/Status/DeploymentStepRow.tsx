@@ -22,8 +22,12 @@ interface DeploymentStepRowProps {
 // (step.progressMode); the map only carries the display label and, for byte
 // progress, how to format it.
 const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
-    'clone': { label: 'Cloning image', isBytes: true },
+    'fetch-image': { label: 'Downloading image', isBytes: true },
+    'import': { label: 'Creating VM from image', isBytes: true },
     'configure': { label: 'Configuring VM' },
+    // Retired with the move to disk images, and kept because deployments that
+    // ran under it are still in the database and still have to render.
+    'clone': { label: 'Cloning image', isBytes: true },
     'update-password': { label: 'Updating password' },
     'delete-backups': { label: 'Deleting backups' },
     'stop-vm': { label: 'Stopping VM' },

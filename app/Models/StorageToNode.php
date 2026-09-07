@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Node\Storage\StorageContentType;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -85,7 +86,7 @@ class StorageToNode extends Pivot implements Sortable
         return static::query()
             ->where('node_id', $this->node_id)
             ->whereHas('storage', function (Builder $query) {
-                $query->where('stores_backups', true);
+                $query->stores(StorageContentType::BACKUPS);
             });
     }
 

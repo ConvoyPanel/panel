@@ -26,8 +26,15 @@ const ServerStateCard = () => {
             context={
                 isRunning && bootedAt ? (
                     <>
-                        up {formatDistanceToNowStrict(bootedAt)} &#x2022; since{' '}
-                        {format(bootedAt, 'd MMM, HH:mm')}
+                        up {formatDistanceToNowStrict(bootedAt)} &#x2022;{' '}
+                        {format(bootedAt, 'd MMM')}
+                        {/* The clock time only where the five-up row has the
+                            width for it. At @5xl the tile is ~180px and the
+                            line would be cut mid-word; the date is the half
+                            worth keeping. */}
+                        <span className={'hidden @6xl:inline'}>
+                            , {format(bootedAt, 'HH:mm')}
+                        </span>
                     </>
                 ) : undefined
             }

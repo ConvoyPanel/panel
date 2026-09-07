@@ -55,11 +55,14 @@ class UserController
         return PaginationMeta::paginate($users, UserData::class);
     }
 
+    /**
+     * The whole account, for the detail page: counts, credential inventory, last sign-in and the
+     * resources it holds across the fleet. The list endpoint stays lean — none of this is worth
+     * computing fifty times a page.
+     */
     public function show(User $user)
     {
-        $user->loadCount(['servers']);
-
-        return UserData::from($user);
+        return UserData::detail($user);
     }
 
     public function store(StoreUserRequest $request)

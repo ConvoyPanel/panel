@@ -4,28 +4,37 @@ import {
     unreserveAddress,
     useAddresses,
 } from '@/features/ipam/blocks/addresses/api.ts'
-import { useAddressBlock } from '@/features/ipam/blocks/api.ts'
+import {
+    addressBlockQueries,
+    useAddressBlock,
+} from '@/features/ipam/blocks/api.ts'
+import AddressBlockCard from '@/features/ipam/components/AddressBlock/AddressBlockCard.tsx'
+import AddressBulkActions from '@/features/ipam/components/AddressBlock/AddressBulkActions.tsx'
 import DeleteAddressModal from '@/features/ipam/components/AddressBlock/DeleteAddressModal.tsx'
+import EditAddressBlockModal from '@/features/ipam/components/AddressBlock/EditAddressBlockModal.tsx'
 import EditAddressModal from '@/features/ipam/components/AddressBlock/EditAddressModal'
-import GenerateAddressesButton from '@/features/ipam/components/AddressBlock/GenerateAddressesButton.tsx'
+import AddressStateLabel, {
+    addressStateKind,
+} from '@/features/ipam/components/AddressStateLabel.tsx'
 import { useAddressModal } from '@/features/ipam/hooks/use-address-modal.ts'
 import { useOpenModal } from '@/hooks/create-modal-store.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
-import {
-    Address,
-    AddressState,
-    AddressStateReason,
-    PaginatedAddresses,
-} from '@/types/address.ts'
-import { Server } from '@/types/server.ts'
+import { Address, AddressState, PaginatedAddresses } from '@/types/address.ts'
+import { DataTableFilterField } from '@/types/data-table.ts'
+import { cn } from '@/utils'
 import { useMutation } from '@tanstack/react-query'
-import { createLazyFileRoute, useParams } from '@tanstack/react-router'
+import { Link, createLazyFileRoute, useParams } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Badge } from '@/components/ui/Badge.tsx'
+import { queryClient } from '@/lib/query-client.ts'
+
+import { buttonVariants } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
-import DropdownMenuItem from '@/components/ui/DropdownMenu/DropdownMenuItem.tsx'
+import {
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from '@/components/ui/DropdownMenu'
 import {
     Item,
     ItemActions,
@@ -37,27 +46,21 @@ import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
-const isSystemReserved = (address: Address) =>
-    address.state === AddressState.Reserved &&
-    address.stateReason === AddressStateReason.System
-
 /**
- * Spell out *why* an address is reserved. A system reservation (network, broadcast, gateway) can't
- * be freed, so saying only "reserved" leaves an operator hunting for a missing Unreserve action.
+ * The four states the filter offers, matching what the API counts and what the row shows. `system`
+ * is a reserved row the panel made and nobody can release, so it is its own option rather than
+ * something the reader has to notice inside "reserved".
  */
-const stateLabel = (address: Address) =>
-    isSystemReserved(address) ? 'reserved · system' : address.state
-
-const AddressStateBadge = ({ address }: { address: Address }) => (
-    <Badge
-        variant={
-            address.state === AddressState.Reserved ? 'outline' : 'secondary'
-        }
-        className={'capitalize'}
-    >
-        {stateLabel(address)}
-    </Badge>
-)
+const STATE_FILTER: DataTableFilterField<Address> = {
+    id: 'state',
+    label: 'State',
+    options: [
+        { label: 'Available', value: 'available' },
+        { label: 'Assigned', value: 'assigned' },
+        { label: 'Reserved', value: 'reserved' },
+        { label: 'System', value: 'system' },
+    ],
+}
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'
@@ -74,17 +77,14 @@ function BlockIndex() {
         addressBlockGroupId: number
         addressBlockId: number
     }
+    const groupId = Number(addressBlockGroupId)
+    const blockId = Number(addressBlockId)
     const { data, isPlaceholderData, isError, refetch } = useAddresses(
         queryParams,
         ['server']
     )
     const mutate = useQueryMutator<PaginatedAddresses>(
-        addressQueries.list(
-            Number(addressBlockGroupId),
-            Number(addressBlockId),
-            queryParams,
-            ['server']
-        ).queryKey
+        addressQueries.list(groupId, blockId, queryParams, ['server']).queryKey
     )
     const openModal = useOpenModal(useAddressModal)
 
@@ -92,16 +92,8 @@ function BlockIndex() {
         mutationFn: async (address: Address) => {
             const updated =
                 address.state === AddressState.Reserved
-                    ? await unreserveAddress(
-                          Number(addressBlockGroupId),
-                          Number(addressBlockId),
-                          address.id
-                      )
-                    : await reserveAddress(
-                          Number(addressBlockGroupId),
-                          Number(addressBlockId),
-                          address.id
-                      )
+                    ? await unreserveAddress(groupId, blockId, address.id)
+                    : await reserveAddress(groupId, blockId, address.id)
 
             await mutate(data => {
                 if (!data) return
@@ -113,11 +105,16 @@ function BlockIndex() {
                 }
             }, false)
 
+            // The header meter reads the block's own counts, which just moved.
+            await queryClient.invalidateQueries({
+                queryKey: addressBlockQueries.detail(groupId, blockId).queryKey,
+            })
+
             toast.add({
                 title:
                     updated.state === AddressState.Reserved
                         ? 'Address reserved'
-                        : 'Address unreserved',
+                        : 'Address released',
                 type: 'success',
             })
         },
@@ -125,64 +122,57 @@ function BlockIndex() {
             toast.add({ title: 'Failed to update reservation', type: 'error' }),
     })
 
-    const renderActions = (address: Address) => (
-        <>
-            <DropdownMenuItem onClick={() => openModal('edit', address)}>
-                Edit
-            </DropdownMenuItem>
-            {address.state === AddressState.Available && (
-                <DropdownMenuItem onClick={() => toggleReservation(address)}>
-                    Reserve
+    const renderActions = (address: Address) => {
+        const kind = addressStateKind(address)
+
+        return (
+            <>
+                <DropdownMenuItem onClick={() => openModal('edit', address)}>
+                    Edit
                 </DropdownMenuItem>
-            )}
-            {address.state === AddressState.Reserved &&
-                !isSystemReserved(address) && (
+                {kind === 'available' && (
                     <DropdownMenuItem
                         onClick={() => toggleReservation(address)}
                     >
-                        Unreserve
+                        Reserve
                     </DropdownMenuItem>
                 )}
-            <DropdownMenuItem
-                variant={'destructive'}
-                onClick={() => openModal('delete', address)}
-            >
-                Delete
-            </DropdownMenuItem>
-        </>
-    )
+                {kind === 'reserved' && (
+                    <DropdownMenuItem
+                        onClick={() => toggleReservation(address)}
+                    >
+                        Release
+                    </DropdownMenuItem>
+                )}
+                {/* The destructive item sits below a rule, the way it does in every other menu in
+                    IPAM. It used to follow Reserve with nothing between them. */}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                    variant={'destructive'}
+                    onClick={() => openModal('delete', address)}
+                >
+                    Delete
+                </DropdownMenuItem>
+            </>
+        )
+    }
 
     const columns: ColumnDef<Address>[] = [
         {
             header: 'IP',
             accessorKey: 'ip',
+            enableHiding: false,
             meta: {
-                skeletonWidth: '10rem',
+                skeletonWidth: '8rem',
             },
+            /* Plain mono text, not a Badge. The prefix length is stated once in the header rather
+               than repeated on all 253 rows, which leaves the address as the only mono-weighted
+               thing in the row — so the eye lands on the identity. */
             cell: ({ cell }) => (
-                <Badge variant={'secondary'} className={'font-mono'}>
-                    {cell.getValue<string>() +
-                        '/' +
-                        cell.row.original.prefixLength}
-                </Badge>
+                <span className={'font-mono font-medium'}>
+                    {cell.getValue<string>()}
+                </span>
             ),
-        },
-        {
-            header: 'Mac Address',
-            accessorKey: 'macAddress',
-            meta: {
-                skeletonWidth: '5rem',
-            },
-            cell: ({ cell }) => {
-                const macAddress = cell.getValue<string | null>()
-                return (
-                    macAddress && (
-                        <Badge variant={'secondary'} className={'font-mono'}>
-                            {macAddress}
-                        </Badge>
-                    )
-                )
-            },
         },
         {
             header: 'State',
@@ -190,43 +180,73 @@ function BlockIndex() {
             meta: {
                 skeletonWidth: '5rem',
             },
-            cell: ({ row }) => <AddressStateBadge address={row.original} />,
+            cell: ({ row }) => (
+                <AddressStateLabel kind={addressStateKind(row.original)} />
+            ),
         },
         {
             header: 'Server',
             accessorKey: 'server',
             meta: {
-                skeletonWidth: '5rem',
+                skeletonWidth: '6rem',
             },
-            cell: ({ cell }) => {
-                const server = cell.getValue<Server | null>()
+            cell: ({ row }) => {
+                const server = row.original.server
+
+                if (!server) {
+                    return <span className={'text-muted-foreground'}>—</span>
+                }
 
                 return (
-                    server && (
-                        <Badge
-                            variant={'secondary'}
-                            className={'truncate font-mono'}
-                        >
-                            {server.name}
-                        </Badge>
-                    )
+                    <Link
+                        className={cn(
+                            buttonVariants({ variant: 'link' }),
+                            'h-auto px-0'
+                        )}
+                        to={`/admin/servers/${server.id}` as string}
+                    >
+                        {server.name}
+                    </Link>
                 )
             },
+        },
+        {
+            header: 'MAC address',
+            accessorKey: 'macAddress',
+            meta: {
+                skeletonWidth: '7rem',
+            },
+            cell: ({ cell }) => (
+                <span className={'text-muted-foreground font-mono text-xs'}>
+                    {cell.getValue<string | null>() ?? '—'}
+                </span>
+            ),
         },
         actionsColumn<Address>(({ row }) => renderActions(row.original)),
     ]
 
     return (
         <>
-            <Heading className={'max-w-xl truncate'}>
-                {block?.name ?? `${block?.baseIp}/${block?.prefixLengthFrom}`}
+            <Heading className={'max-w-xl truncate font-mono'}>
+                {block ? `${block.baseIp}/${block.prefixLengthFrom}` : ''}
             </Heading>
+            <AddressBlockCard block={block} mutate={mutate} />
             <DataTable
                 data={data}
                 columns={columns}
                 paginated
                 searchable
                 toolbar
+                filterFields={[STATE_FILTER]}
+                enableRowSelection
+                bulkActions={addresses => (
+                    <AddressBulkActions
+                        addresses={addresses}
+                        addressBlockGroupId={groupId}
+                        addressBlockId={blockId}
+                        mutate={mutate}
+                    />
+                )}
                 isPlaceholderData={isPlaceholderData}
                 isError={isError}
                 onRetry={refetch}
@@ -238,7 +258,7 @@ function BlockIndex() {
                             <ItemContent className={'min-w-0'}>
                                 <ItemTitle className={'w-full min-w-0'}>
                                     <span className={'truncate font-mono'}>
-                                        {address.ip}/{address.prefixLength}
+                                        {address.ip}
                                     </span>
                                 </ItemTitle>
                                 {address.macAddress && (
@@ -250,17 +270,26 @@ function BlockIndex() {
                                         {address.macAddress}
                                     </ItemDescription>
                                 )}
-                                <div className={'flex flex-wrap gap-2'}>
-                                    <AddressStateBadge address={address} />
+                                <div className={'flex flex-wrap gap-3'}>
+                                    <AddressStateLabel
+                                        kind={addressStateKind(address)}
+                                    />
                                     {address.server && (
-                                        <Badge
-                                            variant={'secondary'}
-                                            className={
-                                                'max-w-full truncate font-mono'
+                                        <Link
+                                            className={cn(
+                                                buttonVariants({
+                                                    variant: 'link',
+                                                }),
+                                                'h-auto max-w-full min-w-0 shrink p-0'
+                                            )}
+                                            to={
+                                                `/admin/servers/${address.server.id}` as string
                                             }
                                         >
-                                            {address.server.name}
-                                        </Badge>
+                                            <span className={'truncate'}>
+                                                {address.server.name}
+                                            </span>
+                                        </Link>
                                     )}
                                 </div>
                             </ItemContent>
@@ -270,11 +299,21 @@ function BlockIndex() {
                         </Item>
                     )
                 }}
-                rightActions={<GenerateAddressesButton mutate={mutate} />}
                 {...tableProps}
             />
             <EditAddressModal mutate={mutate} />
             <DeleteAddressModal mutate={mutate} />
+            {/* The block card's Edit opens this. Delete stays on the pool's list: removing the
+                block from the page that is about it would strand the reader on a dead route. */}
+            <EditAddressBlockModal
+                addressBlockGroupId={groupId}
+                mutate={async () => {
+                    await queryClient.invalidateQueries({
+                        queryKey: addressBlockQueries.detail(groupId, blockId)
+                            .queryKey,
+                    })
+                }}
+            />
         </>
     )
 }
