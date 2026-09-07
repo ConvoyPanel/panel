@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { parseAsString, useQueryState } from 'nuqs'
 
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import {
     Select,
     SelectContent,
@@ -28,7 +29,7 @@ const AREAS = [
     { value: 'admin.user', label: 'Admin: users' },
     { value: 'admin.token', label: 'Admin: tokens' },
     { value: 'admin.address', label: 'Admin: addressing' },
-    { value: 'admin.template', label: 'Admin: templates' },
+    { value: 'admin.image', label: 'Admin: definitions' },
     { value: 'admin.settings', label: 'Admin: settings' },
 ] as const
 
@@ -51,8 +52,8 @@ function AdminAuditLog() {
 
     return (
         <>
-            <div className={'flex flex-wrap items-center justify-between gap-2'}>
-                <Heading>Audit Log</Heading>
+            <Heading>Audit Log</Heading>
+            <PageToolbar>
                 <Select
                     value={area}
                     onValueChange={value => {
@@ -62,7 +63,10 @@ function AdminAuditLog() {
                         setPage(1)
                     }}
                 >
-                    <SelectTrigger className={'w-56'} aria-label={'Filter activity'}>
+                    <SelectTrigger
+                        className={'w-56'}
+                        aria-label={'Filter activity'}
+                    >
                         {/* Base UI renders the raw value unless given a formatter, which would
                             show "admin.node" where the reader expects "Admin: nodes". */}
                         <SelectValue>
@@ -80,11 +84,7 @@ function AdminAuditLog() {
                         ))}
                     </SelectContent>
                 </Select>
-            </div>
-            <p className={'text-sm text-muted-foreground'}>
-                Everything recorded across the panel. Security events are kept
-                indefinitely; operational events age out.
-            </p>
+            </PageToolbar>
             <AuditFeed
                 data={data}
                 isLoading={isLoading}
@@ -94,9 +94,6 @@ function AdminAuditLog() {
                 onPageChange={setPage}
                 showSubject
                 emptyTitle={'Nothing recorded yet'}
-                emptyDescription={
-                    'Panel activity will appear here as it happens.'
-                }
             />
         </>
     )

@@ -29,6 +29,15 @@ do not invent new paddings, gaps, type scales, or bespoke card layouts.
 - **Reuse components, not one-offs.** Build on `components/ui/*` (`Card`, `Table`,
   `Progress`, `Typography`, …). Match the established grid rhythm (`gap-2` / `gap-4`) and the
   standard `Card` padding — don't hand-roll different padding per section.
+- **Page actions never share the heading's row.** An `<h1>` (`Heading`) owns its line —
+  only badges and a status indicator may sit beside it, and the identity line under it
+  (an email, an FQDN, a hostname) belongs to the heading, not to the actions. Every
+  control that *does* something — buttons, create dialogs, dropdowns, filter selects —
+  goes in a `PageToolbar` on the next row: filters as children on the left, actions on
+  the right, exactly where `DataTableToolbar` puts them. That way a page backed by a
+  table and a page backed by cards put their buttons at the same place and height, and a
+  long name never crushes the buttons against the right edge. Never re-create the row by
+  hand with `justify-between` or `ml-auto`.
 - **Favor data density.** No large card wrapping a single small number. Pack related stats
   into one card as a definition list (`<dl>` with `<dt className='text-xs text-muted-foreground'>`
   / `<dd>`), the way `Client/Server/Overview/SpecificationsCard.tsx` does. A screen full of
