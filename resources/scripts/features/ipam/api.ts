@@ -181,7 +181,9 @@ export const useAddressBlockGroup = () => {
         addressBlockGroupId: number
     }
 
-    return useQuery(addressBlockGroupQueries.detail(params.addressBlockGroupId))
+    return useQuery(
+        addressBlockGroupQueries.detail(Number(params.addressBlockGroupId))
+    )
 }
 
 export const useAttachedNodes = (

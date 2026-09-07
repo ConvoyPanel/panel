@@ -73,10 +73,13 @@ it('places an address by its address, not by its row order', function () {
         ->and($map['units'][200]['state'])->toBe('available')
         ->and($map['units'][5]['ip'])->toBe('192.0.2.5')
         ->and($map['units'][5]['state'])->toBe('reserved')
-        // Everything else is a real unit with no record behind it yet.
+        // Everything else is a real unit with no record behind it yet — it still knows its own
+        // address, because a cell labelled only by its offset tells an operator nothing.
         ->and($map['units'][0]['state'])->toBe('ungenerated')
-        ->and($map['units'][0]['ip'])->toBeNull()
-        ->and($map['units'][0]['addressId'])->toBeNull();
+        ->and($map['units'][0]['ip'])->toBe('192.0.2.0')
+        ->and($map['units'][0]['addressId'])->toBeNull()
+        ->and($map['units'][32]['ip'])->toBe('192.0.2.32')
+        ->and($map['units'][32]['addressId'])->toBeNull();
 });
 
 it('names the server on an assigned cell', function () {
@@ -157,4 +160,43 @@ it('draws a block that delegates sub-blocks, one cell per delegated prefix', fun
         ->and($map['units'][0]['ip'])->toBe('192.0.2.0')
         ->and($map['units'][1]['ip'])->toBe('192.0.2.16')
         ->and($map['units'][15]['ip'])->toBe('192.0.2.240');
+});
+
+it('gives an ungenerated sub-block its own prefix, not the parent\'s', function () {
+    // /24 handed out as /28s: nothing generated, so every cell is a bare unit — and each one still
+    // has to report the address of the prefix it stands for.
+    $block = mapTestBlock($this->group, [
+        'gateway' => null,
+        'prefix_length_from' => 24,
+        'prefix_length_to' => 28,
+    ]);
+
+    $units = $this->actingAs($this->admin)
+        ->getJson(addressMapUrl($block))
+        ->assertSuccessful()
+        ->json('units');
+
+    expect($units)->toHaveCount(16)
+        ->and(collect($units)->pluck('state')->unique()->all())->toBe(['ungenerated'])
+        ->and($units[0]['ip'])->toBe('192.0.2.0')
+        ->and($units[1]['ip'])->toBe('192.0.2.16')
+        ->and($units[15]['ip'])->toBe('192.0.2.240');
+});
+
+it('addresses an ungenerated v6 unit without overflowing an int', function () {
+    $block = mapTestBlock($this->group, [
+        'base_ip' => '2001:db8::',
+        'gateway' => null,
+        'prefix_length_from' => 120,
+        'prefix_length_to' => 128,
+    ]);
+
+    $units = $this->actingAs($this->admin)
+        ->getJson(addressMapUrl($block))
+        ->assertSuccessful()
+        ->json('units');
+
+    expect($units)->toHaveCount(256)
+        ->and($units[0]['ip'])->toBe('2001:db8::')
+        ->and($units[255]['ip'])->toBe('2001:db8::ff');
 });

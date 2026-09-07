@@ -238,8 +238,10 @@ const AddressMap = ({
             </div>
 
             {/* Tall maps scroll in their own box so the page body never grows past the card, and
-                narrow viewports scroll sideways rather than squashing the grid out of square. */}
-            <div className={'max-h-[28rem] overflow-auto'}>
+                narrow viewports scroll sideways rather than squashing the grid out of square.
+                `clip-slack` pads the clip box so a selected cell's ring — which sits outside the
+                cell — is not shaved off at the container's edge; see docs/card-design.md. */}
+            <div className={'clip-slack max-h-[28rem] overflow-auto'}>
                 <div
                     className={'flex w-fit flex-col gap-[3px]'}
                     /* Dragging across cells would otherwise select the row labels as text. */

@@ -157,8 +157,8 @@ export const useAddresses = (
 
     return useQuery(
         addressQueries.list(
-            addressBlockGroupId,
-            addressBlockId,
+            Number(addressBlockGroupId),
+            Number(addressBlockId),
             params,
             include
         )

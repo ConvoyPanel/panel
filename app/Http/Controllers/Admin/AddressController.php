@@ -32,6 +32,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController
 {
+    /** Above this a bulk action logs its range rather than every address in it. */
+    private const AUDIT_ADDRESS_LIMIT = 50;
+
     public function __construct(
         private GenerateAddressesAction $generateAddressesAction,
         private ConnectionInterface $connection,
@@ -252,7 +255,9 @@ class AddressController
             $units[$index] = new AddressMapUnitData(
                 index: $index,
                 state: 'ungenerated',
-                ip: null,
+                // The unit is a real position whether or not a row exists for it, so it gets its
+                // address either way — the map labels its rows from these.
+                ip: $addressBlock->unitAddressAt($index),
                 addressId: null,
                 serverName: null,
             );
@@ -340,8 +345,16 @@ class AddressController
                 default => null,
             };
 
-            // One entry for the batch rather than one per address: the operator performed a single
-            // action, and a log that reads as 200 separate decisions hides that.
+            /*
+             * One entry for the batch rather than one per address: the operator performed a single
+             * action, and a log that reads as thousands of separate decisions hides that.
+             *
+             * The addresses themselves are listed only while the list is still worth reading. A
+             * drag across a whole block would otherwise write tens of thousands of characters into
+             * a properties column nobody can scan; past that, the range says the same thing.
+             */
+            $addresses = $eligible->pluck('ip');
+
             Audit::record(
                 match ($action) {
                     'reserve' => AuditEvent::ADMIN_ADDRESS_RESERVED,
@@ -349,10 +362,13 @@ class AddressController
                     default => AuditEvent::ADMIN_ADDRESS_DELETED,
                 },
                 subject: $addressBlock,
-                properties: [
-                    'count' => $ids->count(),
-                    'addresses' => $eligible->pluck('ip')->all(),
-                ],
+                properties: $addresses->count() <= self::AUDIT_ADDRESS_LIMIT
+                    ? ['count' => $ids->count(), 'addresses' => $addresses->all()]
+                    : [
+                        'count' => $ids->count(),
+                        'first' => $addresses->first(),
+                        'last' => $addresses->last(),
+                    ],
             );
         });
 

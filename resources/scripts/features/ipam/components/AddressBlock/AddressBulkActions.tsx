@@ -94,6 +94,21 @@ const AddressBulkActions = ({
     const canRelease = selection.some(entry => entry.kind === 'reserved')
     const canDelete = selection.some(entry => entry.kind !== 'assigned')
 
+    /*
+     * A selection can be legal to make and have nothing legal to do — every address in it is
+     * assigned, say. Rendering nothing leaves "6 selected" sitting beside an empty space, which
+     * reads as a broken toolbar rather than the rule it is.
+     */
+    if (!canReserve && !canRelease && !canDelete) {
+        return (
+            <span className={'text-muted-foreground text-sm'}>
+                {selection.length > 0
+                    ? 'Nothing to do — unassign these from their servers first.'
+                    : 'Nothing selected.'}
+            </span>
+        )
+    }
+
     return (
         <>
             {canReserve && (
