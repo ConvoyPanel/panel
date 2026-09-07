@@ -17,7 +17,6 @@ import {
     Card,
     CardAction,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
@@ -52,9 +51,6 @@ const KeychainCard = () => {
             <Card>
                 <CardHeader>
                     <CardTitle>SSH Keychain</CardTitle>
-                    <CardDescription>
-                        Manage your SSH public keys
-                    </CardDescription>
                     {keys && keys.length > 0 && (
                         <CardAction>
                             <Button

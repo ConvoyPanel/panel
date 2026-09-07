@@ -22,13 +22,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import FormToolbar from '@/components/ui/FormToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -171,10 +165,6 @@ function NodeSettings() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Bandwidth</CardTitle>
-                                <CardDescription>
-                                    Applied when a server on this node passes
-                                    its monthly quota. A server can override it.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <OveragePenaltyFields

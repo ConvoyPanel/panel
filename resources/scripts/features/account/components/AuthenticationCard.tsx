@@ -3,22 +3,13 @@ import PasskeysContainer from '@/features/account/components/PasskeysContainer.t
 import PasswordChangeDialog from '@/features/account/components/PasswordChangeDialog.tsx'
 import RecoveryCodesContainer from '@/features/account/components/RecoveryCodesContainer.tsx'
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 
 const AuthenticationCard = () => {
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Authentication</CardTitle>
-                <CardDescription>
-                    Manage your account authentication settings
-                </CardDescription>
             </CardHeader>
             <CardContent className={'flex flex-col gap-3'}>
                 <PasswordChangeDialog />

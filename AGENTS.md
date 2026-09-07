@@ -38,6 +38,35 @@ do not invent new paddings, gaps, type scales, or bespoke card layouts.
 
 When in doubt, mirror an existing page verbatim rather than introducing a new pattern.
 
+## Frontend copy
+
+The panel labels things; it does not narrate them. Most UI prose in this codebase was
+written one screen at a time and drifted into a house voice — balanced clauses, a
+semicolon, a knowing little reveal at the end — that reads like documentation being
+recited at the user. Do not add more of it, and strip it when you touch a screen.
+
+- **Don't write page subtitles.** A page under an `<h1>` gets no explanatory paragraph.
+  If the heading is a decent noun (`Audit Log`, `Users`, `Storage`), the gloss under it is
+  the heading again in more words. Delete it rather than rewriting it shorter. Same for
+  section headers inside a page.
+- **Never state system policy in UI chrome.** Retention windows, precedence rules, sync
+  behavior, what the backend does on a schedule — these are not descriptions, they are
+  rules, and a subtitle is the wrong place to publish one. The tell is that the reader
+  can't act on it and it raises a question it doesn't answer: "operational events age
+  out" (after how long?), "once Convoy knows about it" (when is that?). If a rule genuinely
+  needs to be visible, attach it to the control or row it governs, with the real number
+  in it — otherwise leave it out.
+- **Empty states say what's missing and the next action.** One short line, concrete and
+  imperative: `No storages` / `Add a storage on this node.` Not lore about how the system
+  will eventually notice ("Run the install command on a Proxmox host and it will show up
+  here, having already described itself.").
+- **Cut the writerly cadence.** No semicolon-balanced pairs, no "not X, but Y", no
+  trailing participial reveal, no sentence whose job is tone. This applies to headers,
+  empty states, form hints, toasts, dialog bodies and tooltips alike — the disease is
+  everywhere, not just on page headers.
+- **Prefer no text to filler text.** If you can't say something the user can act on,
+  the correct amount of copy is zero.
+
 ## Frontend data layer
 
 Don't hand-roll what the wrappers already do. Per `features/<domain>/api.ts`:

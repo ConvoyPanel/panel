@@ -16,13 +16,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { toast } from '@/components/ui/Toast'
@@ -91,10 +85,6 @@ function BandwidthSettingsPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Overage penalty</CardTitle>
-                            <CardDescription>
-                                The default for every server, used unless its
-                                node or the server itself overrides it.
-                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <PenaltyActionFields />

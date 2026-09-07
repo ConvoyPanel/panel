@@ -10,7 +10,6 @@ import { z } from 'zod'
 
 import {
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
@@ -85,9 +84,6 @@ function Login() {
                 <CardTitle as='h1' className='text-3xl'>
                     Sign in
                 </CardTitle>
-                <CardDescription>
-                    Enter your credentials to continue
-                </CardDescription>
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>

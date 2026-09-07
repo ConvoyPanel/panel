@@ -20,13 +20,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -136,10 +130,6 @@ function ServerBuildSettings() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Resources</CardTitle>
-                                <CardDescription>
-                                    Compute and primary-disk capacity assigned
-                                    to this server.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent className={'space-y-4'}>
                                 <InputForm
@@ -172,11 +162,6 @@ function ServerBuildSettings() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Backups</CardTitle>
-                                <CardDescription>
-                                    Limit how many backups this server can
-                                    retain and how much storage they can
-                                    consume.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent
                                 className={
@@ -203,11 +188,6 @@ function ServerBuildSettings() {
                         <Card className={'@xl:col-span-2'}>
                             <CardHeader>
                                 <CardTitle>Bandwidth</CardTitle>
-                                <CardDescription>
-                                    Configure the monthly quota, persistent NIC
-                                    speed cap, and what happens when the quota
-                                    is exhausted.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent className={'space-y-4'}>
                                 <div
