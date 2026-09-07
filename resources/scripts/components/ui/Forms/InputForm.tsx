@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, HTMLAttributes, ReactNode } from 'react'
+import { HTMLAttributes, ReactNode } from 'react'
 
 import {
     FormControl,
@@ -34,11 +34,6 @@ interface Props extends InputProps {
      */
     suffix?: ReactNode
     description?: ReactNode
-    /**
-     * Typographic tone for the label — `mono` is the quiet register used on the
-     * full-page screens outside the app shell. See `FormLabel`.
-     */
-    labelTone?: ComponentPropsWithoutRef<typeof FormLabel>['tone']
     formItemProps?: HTMLAttributes<HTMLDivElement>
 }
 
@@ -48,11 +43,6 @@ const InputForm = ({
     labelAction,
     suffix,
     description,
-    labelTone,
-    // Pulled out rather than spread: a suffixed field keeps the boxed default,
-    // because the inline addon needs a box to sit inside. The rule variant is
-    // only ever meaningful on a plain field.
-    variant,
     formItemProps,
     ...props
 }: Props) => {
@@ -71,11 +61,11 @@ const InputForm = ({
                                     'flex items-center justify-between gap-2'
                                 }
                             >
-                                <FormLabel tone={labelTone}>{label}</FormLabel>
+                                <FormLabel>{label}</FormLabel>
                                 {labelAction}
                             </div>
                         ) : (
-                            <FormLabel tone={labelTone}>{label}</FormLabel>
+                            <FormLabel>{label}</FormLabel>
                         ))}
                     {suffix ? (
                         /* FormControl wraps the *input*, not the InputGroup:
@@ -99,7 +89,6 @@ const InputForm = ({
                     ) : (
                         <FormControl>
                             <Input
-                                variant={variant}
                                 {...props}
                                 {...field}
                                 disabled={

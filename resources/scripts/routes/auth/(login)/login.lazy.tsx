@@ -7,13 +7,17 @@ import {
     usePasskeyAutofill,
 } from '@/features/auth/passkeys.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconArrowRight } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import {
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/Card'
 import { Form, FormButton } from '@/components/ui/Form'
 import { InputForm } from '@/components/ui/Forms'
 import { toast } from '@/components/ui/Toast'
@@ -84,15 +88,13 @@ const Login = () => {
     return (
         <>
             <CardHeader>
-                <CardTitle as={'h1'} size={'display'}>
-                    Sign in
-                </CardTitle>
+                <CardTitle as={'h1'}>Sign in</CardTitle>
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
-                    <CardContent className={'grid gap-5'}>
+                    <CardContent className={'grid gap-4'}>
                         {providers.length > 0 && (
-                            <div className={'grid gap-5'}>
+                            <div className={'grid gap-4'}>
                                 {/* Providers sit above the fields: an account
                                     that signs in through one should not have to
                                     read past a form it can never submit. */}
@@ -118,28 +120,24 @@ const Login = () => {
                             name={'email'}
                             label={'Email'}
                             type={'email'}
-                            variant={'underline'}
-                            labelTone={'mono'}
+                            placeholder={'you@example.com'}
                             autoComplete={PASSKEY_AUTOFILL_AUTOCOMPLETE}
                         />
                         <InputForm
                             name={'password'}
                             label={'Password'}
                             type={'password'}
-                            variant={'underline'}
-                            labelTone={'mono'}
                             autoComplete={'current-password'}
                         />
-                        <div
-                            className={'flex flex-wrap items-center gap-2 pt-1'}
-                        >
-                            <FormButton>
-                                Sign in
-                                <IconArrowRight className={'size-4'} />
-                            </FormButton>
-                            <LoginWithPasskeyButton redirectTo={redirect} />
-                        </div>
                     </CardContent>
+                    {/* The action band the rest of the app uses. It holds two
+                        things, not four: the original stacked the submit, a
+                        divider, the passkey button and every provider in here,
+                        which made the tinted region taller than the fields. */}
+                    <CardFooter className={'flex-col items-stretch gap-2'}>
+                        <FormButton className={'w-full'}>Sign in</FormButton>
+                        <LoginWithPasskeyButton redirectTo={redirect} />
+                    </CardFooter>
                 </form>
             </Form>
         </>

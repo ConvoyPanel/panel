@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button'
 import {
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
@@ -178,16 +179,14 @@ const Authenticator = () => {
     return (
         <>
             <CardHeader>
-                <CardTitle as={'h1'} size={'display'}>
-                    Two-factor required
-                </CardTitle>
+                <CardTitle as={'h1'}>Two-factor required</CardTitle>
                 {description && (
                     <CardDescription>{description}</CardDescription>
                 )}
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
-                    <CardContent className={'grid gap-5'}>
+                    <CardContent>
                         {type === 'code' ? (
                             <FormField
                                 control={form.control}
@@ -252,8 +251,6 @@ const Authenticator = () => {
                             <InputForm
                                 name={'recoveryCode'}
                                 label={'Recovery code'}
-                                variant={'underline'}
-                                labelTone={'mono'}
                             />
                         ) : (
                             <div
@@ -277,68 +274,58 @@ const Authenticator = () => {
                                 </p>
                             </div>
                         )}
-
-                        {/* Right-aligned, matching every other card's action
-                            row in the app. The login screen leads with its
-                            primary instead, because it has one to lead with. */}
-                        <div
-                            className={
-                                'flex flex-wrap items-center justify-end gap-2'
-                            }
-                        >
-                            {type !== 'recovery' && methods?.recovery && (
-                                <Button
-                                    type={'button'}
-                                    className={'max-sm:w-full'}
-                                    variant={'ghost'}
-                                    onClick={() =>
-                                        form.setValue('type', 'recovery')
-                                    }
-                                >
-                                    Recovery code
-                                </Button>
-                            )}
-                            {type !== 'code' && methods?.authenticator && (
-                                <Button
-                                    type={'button'}
-                                    className={'max-sm:w-full'}
-                                    variant={'ghost'}
-                                    onClick={() =>
-                                        form.setValue('type', 'code')
-                                    }
-                                >
-                                    Use a code
-                                </Button>
-                            )}
-                            {type !== 'passkey' && methods?.passkey && (
-                                <Button
-                                    type={'button'}
-                                    className={'max-sm:w-full'}
-                                    variant={'ghost'}
-                                    onClick={() =>
-                                        form.setValue('type', 'passkey')
-                                    }
-                                >
-                                    Use a passkey
-                                </Button>
-                            )}
-                            {type === 'recovery' && (
-                                <FormButton className={'max-sm:w-full'}>
-                                    Continue
-                                </FormButton>
-                            )}
-                            {type === 'passkey' && (
-                                <Button
-                                    type={'button'}
-                                    className={'max-sm:w-full'}
-                                    loading={isPasskeyPending}
-                                    onClick={() => authenticateWithPasskey()}
-                                >
-                                    Try again
-                                </Button>
-                            )}
-                        </div>
                     </CardContent>
+                    <CardFooter
+                        className={'flex-col justify-end gap-2 sm:flex-row'}
+                    >
+                        {type !== 'recovery' && methods?.recovery && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                variant={'ghost'}
+                                onClick={() =>
+                                    form.setValue('type', 'recovery')
+                                }
+                            >
+                                Recovery code
+                            </Button>
+                        )}
+                        {type !== 'code' && methods?.authenticator && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                variant={'ghost'}
+                                onClick={() => form.setValue('type', 'code')}
+                            >
+                                Use a code
+                            </Button>
+                        )}
+                        {type !== 'passkey' && methods?.passkey && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                variant={'ghost'}
+                                onClick={() => form.setValue('type', 'passkey')}
+                            >
+                                Use a passkey
+                            </Button>
+                        )}
+                        {type === 'recovery' && (
+                            <FormButton className={'max-sm:w-full'}>
+                                Continue
+                            </FormButton>
+                        )}
+                        {type === 'passkey' && (
+                            <Button
+                                type={'button'}
+                                className={'max-sm:w-full'}
+                                loading={isPasskeyPending}
+                                onClick={() => authenticateWithPasskey()}
+                            >
+                                Try again
+                            </Button>
+                        )}
+                    </CardFooter>
                 </form>
             </Form>
         </>

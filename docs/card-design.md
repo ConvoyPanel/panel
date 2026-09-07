@@ -403,37 +403,29 @@ For mobile composition, use `ResponsiveDialogBody` and `ResponsiveDialogFooter` 
 than branching classes at the call site. The Drawer owns no popup padding while the
 desktop Dialog does; those shared parts already reconcile the difference.
 
-## The quiet register (auth, and only auth for now)
+## Auth screens: stock nova, and why a register was not worth it
 
-The auth screens use a scoped variant of nova rather than the default look: mono
-uppercase labels, fields drawn as a rule instead of a box, and a title one step above
-`text-base`. It is a **register**, not a second design system — same tokens, same `h-8`
-controls, same `ring-3` focus — and it is three variant keys, not three components:
+The auth screens use the primitives exactly as they ship — default `CardTitle`, default
+`FormLabel`, default `Input`, and the tinted `CardFooter` action band. Two attempts to
+give them their own typographic voice were built and removed, and the reasons are worth
+keeping so they are not tried a third time by accident.
 
-| Variant | Where | Value |
-| --- | --- | --- |
-| `Input variant="underline"` | `Input.variants.ts` | `border-b` instead of `border`; `rounded-lg` stays so `ring-3` has a shape to draw |
-| `FormLabel tone="mono"` | `FormLabel.tsx` | `font-mono text-[11px] tracking-[0.08em] uppercase text-label` |
-| `CardTitle size="display"` | `CardTitle.tsx` | `text-xl` — replaces the login page's hand-rolled `text-3xl` |
+**An `Input variant="underline"`** — `border-b` instead of `border` — was designed against
+a 316px mockup with placeholder text in every field. It failed at the size the app
+actually renders: a 1px `border-input` rule stretched 480px under an *empty* field, 40px
+below its label (`FormItem`'s `gap-2` plus the input's `h-8`), with no box to show where
+the field began. It read as a blank line on a paper form. Do not reintroduce one without
+first rendering it empty, at the real card width, in both themes.
 
-**Where it stops: screens rendered outside the app shell.** Auth today; a 404, a setup
-wizard or a full-page empty state would qualify. Inside the shell — anything with the
-sidebar, a `PageToolbar`, or another card beside it — nova's defaults, no exceptions. A
-register with no boundary is a fork.
+**A `FormLabel tone="mono"` and a `CardTitle size="display"`** followed the underline out.
+Individually defensible; together they made a screen that no longer read as the same app,
+which is the thing the frontend-consistency rule exists to prevent. A register is only
+worth its upkeep if it earns a second screen, and this one never got there.
 
-Two rules keep it from spreading. **Add variants, never components:** a `QuietInput`
-would own its own focus ring, disabled state, `aria-invalid` and dark mode, and all four
-would drift from `Input`'s within a release; as a `variant` key they are inherited by
-construction. And **the register owns about three numbers** — the three above. If a
-fourth appears, it is taste rather than meaning, and the cheapest move is to drop the
-register and keep the default look, which is most of the feeling for none of the upkeep.
-
-Action rows follow the app, not the register: a row of only secondary actions is
-`justify-end` like every `CardFooter`; a row that leads with its primary stays left with
-the fields it submits, which is why the login screen's buttons sit under the left edge
-and the second-factor screen's sit right.
-
-`font-mono` resolves to the default mono stack — `tailwind.config.cjs` only overrides
-`sans` (Geist Sans). That is deliberate: the register borrows the app's existing mono
-decision, the same one the five other `font-mono` usages get. Loading Geist Mono would
-be an app-wide change, not this register's to make.
+What survived, because none of it is a style: the auth shell dropped `lg:w-[30rem]` and
+stays at `sm:w-96` — the card holds two 32px fields and a button, so the extra 96px was
+dead width under any design. The login footer holds two things (submit, passkey) rather
+than the four it used to (submit, divider, passkey, every provider), which is what made
+the tinted band taller than the fields above it. Providers moved above the fields, so an
+account that signs in through one does not read past a form it can never submit. And the
+login page no longer sets `text-3xl` on its title by hand.
