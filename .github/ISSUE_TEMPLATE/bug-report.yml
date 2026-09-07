@@ -1,91 +1,128 @@
 name: Bug Report
 description: Something isn't working quite right in the software.
-labels: [ bug,not confirmed ]
+type: Bug
+labels: [not confirmed]
 body:
   - type: markdown
     attributes:
       value: |
-        Bug reports should only be used for reporting issues with how the software works. For assistance installing this software, as well as debugging issues with dependencies, please use our [Discord server](https://discord.convoypanel.com).
+        Bug reports are for issues with how the software works. For help installing Convoy, or for
+        debugging your own host, Proxmox cluster or networking, please use our
+        [Discord server](https://discord.convoypanel.com) instead.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you open this issue
+      options:
+        - label: I have [searched the existing issues](https://github.com/ConvoyPanel/panel/issues?q=is%3Aissue) and this has not been reported.
+          required: true
+        - label: I have checked in the Discord server and believe this is a bug in the software, not a configuration issue with my system.
+          required: true
+        - label: I am running a supported version of Convoy and have upgraded to the latest release where practical.
+          required: true
 
   - type: textarea
+    id: current-behavior
     attributes:
       label: Current Behavior
-      description: Please provide a clear & concise description of the issue.
+      description: A clear and concise description of what actually happens.
     validations:
       required: true
 
   - type: textarea
+    id: expected-behavior
     attributes:
       label: Expected Behavior
-      description: Please describe what you expected to happen.
+      description: What you expected to happen instead.
     validations:
       required: true
 
   - type: textarea
+    id: steps-to-reproduce
     attributes:
       label: Steps to Reproduce
-      description: Please be as detailed as possible when providing steps to reproduce, failure to provide steps will result in this issue being closed.
+      description: |
+        Numbered steps someone else can follow on a fresh install. Issues without steps to reproduce
+        will be closed.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
     validations:
       required: true
-
-  - type: textarea
-    attributes:
-      label: Screenshots
-      description: If applicable, add screenshots to help explain your problem.
-
-  - type: input
-    attributes:
-      label: Proxmox OS Version
-      description: The version of your Proxmox node
-      placeholder: 7.4-13
-    validations:
-      required: true
-
-  - type: input
-    attributes:
-      label: Operating System
-      description: The OS you are using on your own computer to use Convoy.
-      placeholder: Windows 11 22H2
-    validations:
-      required: true
-
-  - type: input
-    attributes:
-      label: Browser
-      description: Your browser and its version
-      placeholder: e.g. Chrome 69, Firefox 420, Chromium 69, Edge 420
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Additional Context
-      description: Add any other context about the problem here.
 
   - type: input
     id: panel-version
     attributes:
       label: Panel Version
-      description: Version number of your Panel (latest is not a version)
-      placeholder: 3.10.0-beta
+      description: The version shown in the panel's footer. "latest" is not a version.
+      placeholder: 4.6.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How did you install Convoy?
+      options:
+        - The one-command installer (install.convoypanel.com)
+        - Docker Compose, managed myself
+        - Upgraded from a pre-4.x install
+        - Other (explain in Additional Context)
     validations:
       required: true
 
   - type: input
-    id: panel-logs
+    id: host-os
+    attributes:
+      label: Panel Host OS
+      description: The operating system of the host running the panel.
+      placeholder: Debian 13
+    validations:
+      required: true
+
+  - type: input
+    id: proxmox-version
+    attributes:
+      label: Proxmox VE Version
+      description: The version of the Proxmox node the affected server lives on.
+      placeholder: 8.4.1
+    validations:
+      required: true
+
+  - type: input
+    id: anchor-version
+    attributes:
+      label: Anchor Version
+      description: The version of the Anchor agent on the affected node, if you know it.
+      placeholder: 0.1.0-alpha.1
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Only needed if the bug is visible in the interface.
+      placeholder: Chrome 141, Firefox 143, Safari 26
+
+  - type: textarea
+    id: logs
     attributes:
       label: Error Logs
       description: |
-        Check out [this page on our documentation](https://convoypanel.com/docs/project/support.html#collecting-panel-logs) for the log collector utility. You will need to run this on the server
-        hosting your instance of Convoy.
-      placeholder: "https://paste.frocdn.com/"
+        Run `convoyctl logs web` on the panel host (add `convoyctl logs worker` if the bug involves a
+        server action that never finished). Paste the relevant output below, or link a
+        [gist](https://gist.github.com) if it is long. Redact tokens, passwords and customer data.
+      render: shell
 
-  - type: checkboxes
+  - type: textarea
+    id: screenshots
     attributes:
-      label: Is there an existing issue for this?
-      description: Please [search here](https://github.com/convoypanel/panel/issues) to see if an issue already exists for your problem.
-      options:
-        - label: I have searched the existing issues before opening this issue.
-          required: true
-        - label: I have checked in the Discord server and believe this is a bug with the software, and not a configuration issue with my specific system.
-          required: true
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Anything else that might matter — reverse proxies, non-default settings, recent changes.

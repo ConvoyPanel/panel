@@ -1,30 +1,54 @@
 name: Feature Request
 description: Suggest a new feature or improvement for the software.
-labels: [enhancement]
+type: Feature
 body:
   - type: checkboxes
+    id: preflight
     attributes:
-      label: Is there an existing feature request for this?
-      description: Please [search here](https://github.com/convoypanel/panel/issues?q=is%3Aissue) to see if someone else has already suggested this.
+      label: Before you open this issue
       options:
-        - label: I have searched the existing issues before opening this feature request.
+        - label: I have [searched the existing issues](https://github.com/ConvoyPanel/panel/issues?q=is%3Aissue) and this has not already been suggested.
           required: true
 
   - type: textarea
+    id: problem
     attributes:
-      label: Describe the feature you would like to see.
-      description: "A clear & concise description of the feature you'd like to have added, and what issues it would solve."
+      label: What problem does this solve?
+      description: |
+        Describe the situation you run into today and why the current behaviour falls short. Concrete
+        examples from running Convoy in production are far more persuasive than a feature name.
     validations:
       required: true
 
   - type: textarea
+    id: solution
     attributes:
       label: Describe the solution you'd like.
-      description: "You must explain how you'd like to see this feature implemented. Technical implementation details are not necessary, rather an idea of how you'd like to see this feature used."
+      description: |
+        How would you like to see this work? Technical implementation details are not necessary —
+        describe how you would use the feature.
     validations:
       required: true
 
   - type: textarea
+    id: alternatives
+    attributes:
+      label: What are you doing instead today?
+      description: Workarounds, scripts, or other tooling you use to cover this gap.
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Who does this affect?
+      multiple: true
+      options:
+        - Administrators running the panel
+        - End users / customers with servers
+        - Resellers or downstream clients
+        - API consumers and integrations
+
+  - type: textarea
+    id: additional-context
     attributes:
       label: Additional context to this request.
-      description: "Add any other context or screenshots about the feature request."
+      description: Any other context, mockups or screenshots.
