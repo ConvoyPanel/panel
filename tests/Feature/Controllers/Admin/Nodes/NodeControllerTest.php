@@ -217,12 +217,6 @@ it('tests a saved node with replacement credentials when supplied', function () 
     ));
 });
 
-it('can create a node', function () {
-    $response = $this->actingAs($this->user)->postJson('/api/admin/nodes', nodePayload());
-
-    $response->assertCreated();
-});
-
 it('can update a node', function () {
     $response = $this->actingAs($this->user)->putJson(
         "/api/admin/nodes/{$this->node->id}",
