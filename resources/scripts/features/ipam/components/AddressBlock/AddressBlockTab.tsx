@@ -49,6 +49,16 @@ const handsOut = (block: AddressBlock) => {
         : `/${block.prefixLengthTo} · ${total.toLocaleString()} units`
 }
 
+/**
+ * Headers and short atomic values never wrap. "In use" split across two lines, and "2 / 254" read
+ * as two numbers stacked, because the utilisation column had claimed a fixed width and the rest
+ * shared what was left. The table's own container scrolls when the columns genuinely do not fit,
+ * which is legible in a way a broken-up number is not.
+ */
+const nowrap = (label: string) => () => (
+    <span className={'whitespace-nowrap'}>{label}</span>
+)
+
 const AddressBlockTab = () => {
     const { addressBlockGroupId } = Route.useParams()
     const groupId = parseInt(addressBlockGroupId)
@@ -88,7 +98,7 @@ const AddressBlockTab = () => {
 
     const columns: ColumnDef<AddressBlock>[] = [
         {
-            header: 'IP Block',
+            header: nowrap('IP Block'),
             accessorKey: 'baseIp',
             enableHiding: false,
             meta: {
@@ -111,65 +121,46 @@ const AddressBlockTab = () => {
                     >
                         {cidr(row.original)}
                     </Link>
-                    {(row.original.name || row.original.description) && (
-                        <p className={'text-muted-foreground truncate text-xs'}>
-                            {row.original.name && row.original.description
-                                ? `${row.original.name} — ${row.original.description}`
-                                : (row.original.name ??
-                                  row.original.description)}
-                        </p>
-                    )}
+                    {/* The block's geometry sits under its CIDR rather than in a column of
+                        its own: it describes the thing on the line above it, and as a column it
+                        was wide enough to push utilisation off the edge of the table. */}
+                    <p className={'text-muted-foreground truncate text-xs'}>
+                        {[
+                            row.original.name || row.original.description,
+                            handsOut(row.original),
+                        ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                    </p>
                 </div>
             ),
         },
         {
-            header: 'Gateway',
-            accessorKey: 'gateway',
-            meta: {
-                skeletonWidth: '6rem',
-            },
-            cell: ({ cell }) => (
-                <span className={'text-muted-foreground font-mono'}>
-                    {cell.getValue<string | null>() ?? '—'}
-                </span>
-            ),
-        },
-        {
-            id: 'handsOut',
-            header: 'Hands out',
-            meta: {
-                skeletonWidth: '7rem',
-            },
-            cell: ({ row }) => (
-                <span className={'text-muted-foreground font-mono'}>
-                    {handsOut(row.original)}
-                </span>
-            ),
-        },
-        {
             id: 'inUse',
-            header: 'In use',
+            header: nowrap('In use'),
             meta: {
                 skeletonWidth: '4rem',
                 align: 'right',
             },
             cell: ({ row }) => (
-                <span className={'font-mono tabular-nums'}>
+                <span className={'font-mono whitespace-nowrap tabular-nums'}>
                     {addressInUseLabel(addressCapacity(row.original.capacity))}
                 </span>
             ),
         },
         {
             id: 'utilisation',
-            header: 'Utilisation',
-            // Declared so the column claims the room the reading needs. Left to auto-layout it
-            // was squeezed to the header's width and the subline broke mid-phrase.
-            size: 260,
+            header: nowrap('Utilisation'),
             meta: {
                 skeletonWidth: '8rem',
             },
+            /* A floor rather than a fixed width: pinned at 260px it took its room out of every
+               other column, which is how "In use" ended up stacked. */
             cell: ({ row }) => (
-                <AddressCapacityMeter capacity={row.original.capacity} />
+                <AddressCapacityMeter
+                    capacity={row.original.capacity}
+                    className={'min-w-[10rem]'}
+                />
             ),
         },
         actionsColumn<AddressBlock>(({ row }) => renderActions(row.original)),
