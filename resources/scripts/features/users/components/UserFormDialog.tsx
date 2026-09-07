@@ -1,4 +1,9 @@
-import { createUser, updateUser } from '@/features/users/api.ts'
+import MailNotConfiguredAlert from '@/features/settings/components/MailNotConfiguredAlert.tsx'
+import {
+    type UserInvite,
+    createUser,
+    updateUser,
+} from '@/features/users/api.ts'
 import {
     type UserInput,
     createUserSchema,
@@ -7,12 +12,14 @@ import {
 import type { AdminUser } from '@/types/admin/user.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { IconAlertTriangle, IconMailForward } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import CopyValue from '@/components/ui/CopyValue.tsx'
 import { Form, FormButton } from '@/components/ui/Form'
 import { CheckboxForm, InputForm } from '@/components/ui/Forms'
 import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
@@ -59,15 +66,35 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
         },
     })
 
+    // Held rather than toasted: the link is the only copy that will ever exist, and a toast
+    // that slides away four seconds after an admin's eyes moved is not somewhere to put it.
+    const [invite, setInvite] = useState<UserInvite | null>(null)
+
     const save = useMutation({
-        mutationFn: (data: UserInput) =>
-            current ? updateUser(current.id, data) : createUser(data),
+        mutationFn: async (data: UserInput) => {
+            if (current)
+                return {
+                    user: await updateUser(current.id, data),
+                    invite: null,
+                }
+
+            return createUser(data)
+        },
     })
 
     const submit = async (data: UserInput) => {
         try {
-            await save.mutateAsync(data)
+            const result = await save.mutateAsync(data)
             await refresh()
+
+            // An invited account leaves the dialog open on the link. Closing straight into a
+            // toast would throw away the one thing the admin now has to pass on.
+            if (result.invite) {
+                setInvite(result.invite)
+
+                return
+            }
+
             toast.add({
                 title: `User ${current ? 'updated' : 'created'}`,
                 type: 'success',
@@ -79,12 +106,66 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
         }
     }
 
+    const dismiss = () => {
+        setInvite(null)
+        close()
+    }
+
     const password = form.watch('password')
+
+    /*
+     * The account exists and the link has been minted. It is shown rather than toasted because
+     * this is the only time it is readable — the row stores a hash — and because on an install
+     * with no working relay this link is the entire handover.
+     */
+    if (invite) {
+        return (
+            <ResponsiveDialog open onOpenChange={open => !open && dismiss()}>
+                <ResponsiveDialogContent>
+                    <ResponsiveDialogHeader>
+                        <ResponsiveDialogTitle>
+                            Account created
+                        </ResponsiveDialogTitle>
+                        <ResponsiveDialogDescription>
+                            {invite.emailed
+                                ? 'Invitation emailed. The link is below too.'
+                                : "Mail isn't set up. Send this link yourself."}
+                        </ResponsiveDialogDescription>
+                    </ResponsiveDialogHeader>
+                    <ResponsiveDialogBody className={'flex flex-col gap-3'}>
+                        <div
+                            className={
+                                'bg-muted/50 flex items-start gap-2 rounded-lg border p-3'
+                            }
+                        >
+                            <IconMailForward
+                                className={
+                                    'text-muted-foreground mt-0.5 size-4 shrink-0'
+                                }
+                            />
+                            <CopyValue
+                                label={'invitation link'}
+                                value={invite.link}
+                                className={'text-xs break-all'}
+                            />
+                        </div>
+                        <p className={'text-muted-foreground text-sm'}>
+                            Single use. Expires{' '}
+                            {new Date(invite.expiresAt).toLocaleDateString()}.
+                        </p>
+                    </ResponsiveDialogBody>
+                    <ResponsiveDialogFooter className={'mt-4'}>
+                        <Button onClick={dismiss}>Done</Button>
+                    </ResponsiveDialogFooter>
+                </ResponsiveDialogContent>
+            </ResponsiveDialog>
+        )
+    }
 
     return (
         <ResponsiveDialog
             open={user !== null}
-            onOpenChange={open => !open && close()}
+            onOpenChange={open => !open && dismiss()}
         >
             <ResponsiveDialogContent>
                 <ResponsiveDialogHeader>
@@ -94,12 +175,21 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                     <ResponsiveDialogDescription>
                         {current
                             ? 'Changes apply the next time they load the panel.'
-                            : 'They sign in with the email and password you set here.'}
+                            : 'Set a password, or leave it blank to send an invite.'}
                     </ResponsiveDialogDescription>
                 </ResponsiveDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)}>
                         <ResponsiveDialogBody className={'flex flex-col gap-5'}>
+                            {/* Only on create: an existing account's owner has
+                                already been told how to sign in, and the warning
+                                belongs where the cost is incurred rather than on
+                                every visit to this dialog. */}
+                            {current === null && (
+                                <MailNotConfiguredAlert>
+                                    Nothing will be emailed to this account.
+                                </MailNotConfiguredAlert>
+                            )}
                             <InputForm
                                 name={'name'}
                                 label={'Name'}
@@ -119,7 +209,7 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                                 description={
                                     current
                                         ? 'Leave blank to keep their current password.'
-                                        : undefined
+                                        : 'Blank sends an invite instead.'
                                 }
                             />
                             {/* Only once there is something to grade: on an edit

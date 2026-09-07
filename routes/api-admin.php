@@ -336,6 +336,11 @@ Route::post(
     [Admin\UserController::class, 'getSSOToken'],
 );
 
+// Re-issuing invalidates whatever link was outstanding, so "resend" and "revoke, then send a
+// new one" are the same operation — which is what makes a forwarded link recoverable.
+Route::post('/users/{user}/invite', [Admin\UserController::class, 'invite']);
+Route::delete('/users/{user}/invite', [Admin\UserController::class, 'revokeInvite']);
+
 /*
  * One account's credentials, from the admin side: list them, and take them away.
  *
