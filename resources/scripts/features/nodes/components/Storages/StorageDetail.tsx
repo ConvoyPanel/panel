@@ -100,14 +100,26 @@ const StorageDetail = ({ storageId }: { storageId: number }) => {
                                     'flex flex-wrap items-baseline justify-between gap-2'
                                 }
                             >
-                                <span
-                                    className={'font-mono text-sm tabular-nums'}
+                                <div
+                                    className={
+                                        'flex flex-wrap items-baseline gap-x-1.5'
+                                    }
                                 >
-                                    <strong>
+                                    <span
+                                        className={
+                                            'text-xl font-semibold tabular-nums'
+                                        }
+                                    >
                                         {fmt(view.freeForConvoy ?? 0)}
-                                    </strong>{' '}
-                                    available to allocate
-                                </span>
+                                    </span>
+                                    <span
+                                        className={
+                                            'text-muted-foreground text-sm'
+                                        }
+                                    >
+                                        available to allocate
+                                    </span>
+                                </div>
                                 <StatLabel className={'text-xs'}>
                                     {fmt(view.used)} used · {fmt(view.reserved)}{' '}
                                     reserved · {fmt(view.total)} total
@@ -213,7 +225,6 @@ const StorageDetail = ({ storageId }: { storageId: number }) => {
                                 }}
                             />
                         </TabsContent>
-
                     </Tabs>
                 )}
             </Card>
