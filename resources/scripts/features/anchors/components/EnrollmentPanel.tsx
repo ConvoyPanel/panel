@@ -70,11 +70,10 @@ const useCountdown = (expiresAt?: string) => {
  * its own from the row menu, so it owns the body rather than a dialog of its
  * own.
  *
- * There is deliberately no "waiting for…" line and no status dot. Nothing has
- * happened yet, the surrounding page already said what is being waited for, and
- * the arrival announces itself as its own card -- a sentence that never changes
- * is not a status, and a dot only earns its keep in a list where a column of
- * them can be scanned.
+ * There is deliberately no "waiting for…" line and no status dot. A sentence
+ * that never changes is not a status, and a dot only earns its keep in a list
+ * where a column of them can be scanned. The arrival announces itself as its
+ * own card, which is the signal.
  */
 const EnrollmentPanel = ({
     version,
@@ -158,7 +157,7 @@ const EnrollmentPanel = ({
                             <span
                                 className={'text-muted-foreground select-none'}
                             >
-                                ${' '}
+                                #{' '}
                             </span>
                             {issue.data.command}
                         </code>
@@ -192,8 +191,8 @@ const EnrollmentPanel = ({
                             off until it finishes. */}
                         {enrolled && (
                             <span className={'mr-auto'}>
-                                Running this issues a new secret; the current
-                                install stops working until it re-enrolls.
+                                Replaces the current secret. The install stops
+                                working until it re-enrolls.
                             </span>
                         )}
 
@@ -218,8 +217,7 @@ const EnrollmentPanel = ({
                                 </span>
                             ) : (
                                 <span className={'text-destructive'}>
-                                    This command has expired. Reissue it to
-                                    finish setup.
+                                    Expired. Reload for a new command.
                                 </span>
                             ))
                         )}
