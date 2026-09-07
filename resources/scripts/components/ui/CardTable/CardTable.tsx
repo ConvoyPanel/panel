@@ -73,6 +73,16 @@ interface Props<T> {
     /** A muted strip closing the table — shared facts on the left, a count on
      *  the right. Two children lay themselves out; one sits on the left. */
     footer?: ReactNode
+    /**
+     * A Tailwind `max-h-*` for the body, past which the rows scroll under a
+     * sticky header (`max-h-72` is about five rows).
+     *
+     * For a card that sits beside something editable: without it every extra
+     * row pushes its neighbour down the page. A card that is free to grow — an
+     * overview tile showing the first few of a longer list — should cut the
+     * list instead and link out, rather than hide rows behind a scrollbar.
+     */
+    maxHeight?: string
     className?: string
 }
 
@@ -83,6 +93,7 @@ const CardTable = <T,>({
     caption,
     empty,
     footer,
+    maxHeight,
     className,
 }: Props<T>) => {
     if (rows.length === 0 && empty) {
@@ -115,7 +126,27 @@ const CardTable = <T,>({
 
     return (
         <>
-            <div className={cn('overflow-x-auto', className)}>
+            {/* One box scrolls in both directions: a sticky header sticks to
+                its own scrolling ancestor, so a second nested container would
+                capture it and never move. `scroll-fade-b` alone — the mask
+                applies to the sticky header too, and a top fade would dissolve
+                it as the rows pass under. */}
+            <div
+                className={cn(
+                    'overflow-x-auto',
+                    // One fade per box: each `scroll-fade-*` sets the same mask
+                    // property, so a second would replace the first rather than
+                    // add to it. The capped card takes the vertical one, since
+                    // that is the scroll it is capped for.
+                    maxHeight
+                        ? [
+                              'scroll-fade-b overflow-y-auto overscroll-contain',
+                              maxHeight,
+                          ]
+                        : 'scroll-fade-r',
+                    className
+                )}
+            >
                 <table className={'w-full caption-bottom border-t text-sm'}>
                     <caption className={'sr-only'}>{caption}</caption>
                     {labelled && (
@@ -130,6 +161,14 @@ const CardTable = <T,>({
                                             index === fill ? 'w-full' : 'w-px',
                                             column.align === 'right' &&
                                                 'text-right',
+                                            /* Opaque, or the rows show through
+                                               it — `bg-card`, so it still reads
+                                               as no fill at all. A collapsed
+                                               border under a sticky cell is
+                                               dropped mid-scroll in Chromium,
+                                               so the rule is drawn instead. */
+                                            maxHeight &&
+                                                'bg-card after:bg-border sticky top-0 z-10 after:absolute after:inset-x-0 after:bottom-0 after:h-px',
                                             column.headerClassName
                                         )}
                                     >

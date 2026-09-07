@@ -58,10 +58,12 @@ const AddressRows = ({ addresses }: Props) => {
     const sharedGateway = gateways.length === 1 ? gateways[0] : null
     const sharedMac = macs.length === 1 ? macs[0] : null
 
-    // The version is a column when the stack is mixed, or when the one version
-    // present is the one nobody assumes.
+    // The chip yields to real data: an address announces its own version, so it
+    // is worth a column only when nothing else is competing for the width.
+    const qualified = gateways.length > 1 || macs.length > 1
     const showVersion =
         addresses.length > 0 &&
+        !qualified &&
         (unique(addresses.map(a => a.version)).length > 1 ||
             addresses[0].version === AddressVersion.IPv6)
 
