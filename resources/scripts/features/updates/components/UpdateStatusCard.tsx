@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/Button'
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
@@ -68,11 +67,6 @@ const UpdateStatusCard = () => {
         <Card>
             <CardHeader>
                 <CardTitle>Panel version</CardTitle>
-                <CardDescription className={'max-w-prose'}>
-                    What this install is running, and where that verdict comes
-                    from. Convoy only reports that a release exists — upgrading
-                    is still something you run yourself.
-                </CardDescription>
             </CardHeader>
 
             <CardContent
