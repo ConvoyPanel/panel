@@ -47,9 +47,6 @@ function EnrollNodePage() {
         <div className={'mx-auto w-full max-w-3xl'}>
             <FormToolbar
                 title={'Enroll a node'}
-                subtitle={
-                    'Run one command on the Proxmox host. It will describe itself to the panel.'
-                }
                 actions={
                     <Link
                         to={'/admin/nodes'}
@@ -64,10 +61,7 @@ function EnrollNodePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Install command</CardTitle>
-                        <StatLabel>
-                            Paste into a root shell on the host you want to add.
-                            Admits one machine.
-                        </StatLabel>
+                        <StatLabel>Run as root on the Proxmox host.</StatLabel>
                     </CardHeader>
                     <EnrollmentPanel
                         subject={issuedAt}
@@ -107,15 +101,7 @@ function EnrollNodePage() {
                                 <IconServer
                                     className={'text-muted-foreground size-5'}
                                 />
-                                <div>
-                                    <div className={'font-medium'}>
-                                        {item.name}
-                                    </div>
-                                    <StatLabel>
-                                        Introduced itself — confirm what it
-                                        reported to finish.
-                                    </StatLabel>
-                                </div>
+                                <div className={'font-medium'}>{item.name}</div>
                             </div>
                             <Link
                                 to={'/admin/anchors/$anchorId'}
