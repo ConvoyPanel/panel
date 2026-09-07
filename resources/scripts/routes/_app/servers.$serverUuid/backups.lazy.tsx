@@ -12,6 +12,7 @@ import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import Heading from '@/components/ui/Typography/Heading.tsx'
 
 const ServerBackups = () => {
@@ -26,23 +27,24 @@ const ServerBackups = () => {
 
     return (
         <>
-            <div
-                className={'flex flex-wrap items-center justify-between gap-2'}
-            >
-                <Heading>Backups</Heading>
-                <div className={'flex gap-2'}>
-                    <BackupQuota />
-                    {/* An empty collection carries its own create action, so the
-                        page-level one would be a duplicate. */}
-                    {Boolean(data?.items.length) && !quota?.isUnavailable && (
-                        <CreateBackupModal
-                            serverUuid={serverUuid}
-                            mutate={mutate}
-                            blockedReason={quotaBlockedReason(quota)}
-                        />
-                    )}
-                </div>
-            </div>
+            <Heading>Backups</Heading>
+            <PageToolbar
+                actions={
+                    <>
+                        <BackupQuota />
+                        {/* An empty collection carries its own create action, so
+                            the page-level one would be a duplicate. */}
+                        {Boolean(data?.items.length) &&
+                            !quota?.isUnavailable && (
+                                <CreateBackupModal
+                                    serverUuid={serverUuid}
+                                    mutate={mutate}
+                                    blockedReason={quotaBlockedReason(quota)}
+                                />
+                            )}
+                    </>
+                }
+            />
             <BackupView />
         </>
     )

@@ -3,6 +3,7 @@ import TimeRangeSelector from '@/features/servers/components/client/Graphs/TimeR
 import useTimeRange from '@/features/servers/hooks/use-time-range.ts'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import { Heading } from '@/components/ui/Typography'
 
 export const Route = createLazyFileRoute('/_app/servers/$serverUuid/graphs')({
@@ -29,12 +30,10 @@ function ServerGraphs() {
                 here: the panel's rail already carries live CPU and memory, and
                 showing the same two figures twice, a few hundred pixels apart,
                 only invites the reader to check whether they agree. */}
-            <div
-                className={'flex flex-wrap items-center justify-between gap-3'}
-            >
-                <Heading>Resource usage</Heading>
+            <Heading>Resource usage</Heading>
+            <PageToolbar>
                 <TimeRangeSelector from={from} setFrom={setFrom} />
-            </div>
+            </PageToolbar>
             <ResourcePanel
                 from={from}
                 xTickFormatter={XTickFormatter}

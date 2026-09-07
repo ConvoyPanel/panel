@@ -26,11 +26,7 @@ function StorageInventoryPage() {
 
     return (
         <>
-            <div
-                className={'flex flex-wrap items-center justify-between gap-2'}
-            >
-                <Heading>Storage</Heading>
-            </div>
+            <Heading>Storage</Heading>
 
             {isError && !storages ? (
                 <Card className={'py-6'}>
@@ -48,7 +44,7 @@ function StorageInventoryPage() {
                         icon={IconDatabase}
                         title={'No storage yet'}
                         description={
-                            'Register storage on a node to start deploying servers. It will appear here once Convoy knows about it.'
+                            'Register storage on a node to deploy servers there.'
                         }
                     />
                 </Card>

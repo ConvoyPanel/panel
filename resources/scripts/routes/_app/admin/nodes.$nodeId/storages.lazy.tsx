@@ -12,6 +12,7 @@ import {
     CollectionErrorState,
     SimpleEmptyState,
 } from '@/components/ui/EmptyStates'
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -25,15 +26,15 @@ function NodeStorages() {
     return (
         <>
             <Heading>Storages</Heading>
-            {/* Actions sit in their own row under the heading, the same
-                toolbar-then-content rhythm every admin index uses. */}
             {Boolean(storages?.length) && (
-                <div className={'flex flex-wrap items-center gap-2'}>
-                    <div className={'ml-auto flex items-center gap-2'}>
-                        <LoadBalancerSidebar />
-                        <CreateStorageModal />
-                    </div>
-                </div>
+                <PageToolbar
+                    actions={
+                        <>
+                            <LoadBalancerSidebar />
+                            <CreateStorageModal />
+                        </>
+                    }
+                />
             )}
             <DeleteStorageModal />
             <EditStorageModal />

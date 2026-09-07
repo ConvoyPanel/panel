@@ -13,6 +13,7 @@ import {
     CollectionErrorState,
     SimpleEmptyState,
 } from '@/components/ui/EmptyStates'
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
@@ -31,14 +32,8 @@ function NodeNetwork() {
     return (
         <>
             <Heading>Network</Heading>
-            {/* Actions sit in their own row under the heading, the same
-                toolbar-then-content rhythm every admin index uses. */}
             {Boolean(interfaces?.length) && (
-                <div className={'flex flex-wrap items-center gap-2'}>
-                    <div className={'ml-auto flex items-center gap-2'}>
-                        <CreateNetworkModal />
-                    </div>
-                </div>
+                <PageToolbar actions={<CreateNetworkModal />} />
             )}
             <EditNetworkInterfaceModal />
             <DeleteNetworkInterfaceModal />

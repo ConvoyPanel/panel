@@ -16,6 +16,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
+import { PageToolbar } from '@/components/ui/PageToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { toast } from '@/components/ui/Toast'
 import {
@@ -129,44 +130,55 @@ const ServerDetailOverview = ({ serverId }: Props) => {
 
     return (
         <>
-            <div className='flex flex-wrap items-center justify-between gap-3'>
-                <div className='space-y-1'>
-                    <div className='flex items-center gap-3'>
-                        {server ? (
-                            <Heading>{server.name}</Heading>
-                        ) : (
-                            <Skeleton className='h-8 w-48' />
-                        )}
-                        {/* Two badges, never one: suspension sits alongside the
-                            lifecycle rather than replacing it, so a suspended
-                            server still shows the stage it is actually in. */}
-                        {server && (
-                            <Badge variant='outline'>
-                                {LIFECYCLE_LABELS[server.lifecycle] ??
-                                    server.lifecycle}
-                            </Badge>
-                        )}
-                        {server?.suspendedAt && (
-                            <Badge variant='destructive'>Suspended</Badge>
-                        )}
-                        {server?.flaggedAt && (
-                            <>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Badge variant='destructive'>
-                                                Flagged
-                                            </Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent className='max-w-72'>
-                                            {server.flagReason ??
-                                                'Flagged for review.'}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+            <div className='space-y-1'>
+                <div className='flex flex-wrap items-center gap-3'>
+                    {server ? (
+                        <Heading>{server.name}</Heading>
+                    ) : (
+                        <Skeleton className='h-8 w-48' />
+                    )}
+                    {/* Two badges, never one: suspension sits alongside the
+                        lifecycle rather than replacing it, so a suspended
+                        server still shows the stage it is actually in. */}
+                    {server && (
+                        <Badge variant='outline'>
+                            {LIFECYCLE_LABELS[server.lifecycle] ??
+                                server.lifecycle}
+                        </Badge>
+                    )}
+                    {server?.suspendedAt && (
+                        <Badge variant='destructive'>Suspended</Badge>
+                    )}
+                    {server?.flaggedAt && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Badge variant='destructive'>Flagged</Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className='max-w-72'>
+                                    {server.flagReason ?? 'Flagged for review.'}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+                {server && (
+                    <p className='text-muted-foreground text-sm'>
+                        {server.hostname}
+                    </p>
+                )}
+            </div>
+
+            {server && (
+                <PageToolbar
+                    actions={
+                        <>
+                            {/* Clearing the flag is an action, so it sits with
+                                the other actions; the badge above still says
+                                why the server is flagged. */}
+                            {server.flaggedAt && (
                                 <Button
                                     variant='outline'
-                                    size='sm'
                                     disabled={unflagServer.isPending}
                                     onClick={() =>
                                         unflagServer.mutate(server.uuid, {
@@ -185,30 +197,22 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                                 >
                                     Clear flag
                                 </Button>
-                            </>
-                        )}
-                    </div>
-                    {server && (
-                        <p className='text-muted-foreground text-sm'>
-                            {server.hostname}
-                        </p>
-                    )}
-                </div>
-
-                {server && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button>
-                                <IconBolt className='size-4' />
-                                Power
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                            <ServerPowerActions server={server} />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
-            </div>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button>
+                                        <IconBolt className='size-4' />
+                                        Power
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align='end'>
+                                    <ServerPowerActions server={server} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </>
+                    }
+                />
+            )}
 
             <div className='grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-3'>
                 <Card>
