@@ -1,8 +1,6 @@
 import { IconAlertTriangle, IconServerBolt } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { formatDistanceToNow } from 'date-fns'
 
-import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SimpleEmptyState } from '@/components/ui/EmptyStates'
@@ -134,35 +132,36 @@ const NodeStorage = ({ node }: { node: NodeSummary }) => {
     )
 }
 
-const statusClasses: Record<NodeSummary['status'], string> = {
-    online: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
-    unreachable: 'bg-destructive/15 text-destructive',
-    unknown: 'bg-muted text-muted-foreground',
+const statusText: Record<NodeSummary['status'], string> = {
+    online: '',
+    unreachable: 'text-destructive',
+    unknown: 'text-muted-foreground',
 }
 
-const StatusBadge = ({ node }: { node: NodeSummary }) => (
-    <Badge
-        variant='secondary'
-        className={`${statusClasses[node.status]} shrink-0 capitalize`}
-    >
-        {node.status}
-    </Badge>
-)
+/**
+ * One word beside the node's name, and only when there is something to say.
+ *
+ * A healthy host is marked by the absence of a marker: the card exists to find
+ * the one node in trouble, and a green "Online" on every other row is the noise
+ * that hides it. Colour alone doesn't carry the state either — the word does,
+ * so the row still reads without it.
+ */
+const StatusMarker = ({ node }: { node: NodeSummary }) =>
+    node.status === 'online' ? null : (
+        <span
+            className={`shrink-0 text-xs capitalize ${statusText[node.status]}`}
+        >
+            {node.status}
+        </span>
+    )
 
 /**
- * One line of provenance per node: how fresh the numbers are, or — when the
- * poll failed — a single warning that explains every dash in the row at once,
- * instead of repeating a marker in each metric cell.
+ * When the poll failed, a single warning that explains every dash in the row at
+ * once, instead of repeating a marker in each metric cell. A row whose figures
+ * did arrive says nothing here — the numbers are their own provenance.
  */
 const SnapshotMeta = ({ node }: { node: NodeSummary }) =>
-    node.resources ? (
-        <StatLabel className='text-xs'>
-            Observed{' '}
-            {formatDistanceToNow(new Date(node.resources.observedAt), {
-                addSuffix: true,
-            })}
-        </StatLabel>
-    ) : (
+    node.resources ? null : (
         <Tooltip>
             {/* A real trigger element (not `asChild` over a span) so the
                 explanation is reachable by keyboard, matching
@@ -175,8 +174,8 @@ const SnapshotMeta = ({ node }: { node: NodeSummary }) =>
                 Metrics unavailable
             </TooltipTrigger>
             <TooltipContent className='max-w-64'>
-                Couldn&apos;t fetch resource usage from this node. CPU, memory
-                and disk figures are unknown until it reports again.
+                Couldn&apos;t fetch resource usage from this node. Memory and
+                storage figures are unknown until it reports again.
             </TooltipContent>
         </Tooltip>
     )
@@ -222,11 +221,10 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                     <TableHead className='w-20 text-center'>
                                         Servers
                                     </TableHead>
-                                    <TableHead className='w-32'>CPU</TableHead>
-                                    <TableHead className='w-[28%]'>
+                                    <TableHead className='w-[32%]'>
                                         Memory
                                     </TableHead>
-                                    <TableHead className='w-[28%]'>
+                                    <TableHead className='w-[32%]'>
                                         Storage
                                     </TableHead>
                                 </TableRow>
@@ -245,39 +243,19 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 <div className='font-semibold'>
                                                     {node.displayName}
                                                 </div>
-                                                <StatusBadge node={node} />
+                                                <StatusMarker node={node} />
                                             </div>
                                             <div className='text-muted-foreground font-mono text-xs'>
                                                 {node.fqdn}
                                             </div>
-                                            <div className='mt-1'>
-                                                <SnapshotMeta node={node} />
-                                            </div>
+                                            {!node.resources && (
+                                                <div className='mt-1'>
+                                                    <SnapshotMeta node={node} />
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell className='text-center align-top tabular-nums'>
                                             {num(node.servers)}
-                                        </TableCell>
-                                        <TableCell className='align-top'>
-                                            {node.resources ? (
-                                                <div>
-                                                    <div className='text-sm font-semibold tabular-nums'>
-                                                        {
-                                                            node.resources.cpu
-                                                                .percent
-                                                        }
-                                                        %
-                                                    </div>
-                                                    <StatLabel className='text-xs'>
-                                                        {num(
-                                                            node.resources.cpu
-                                                                .count
-                                                        )}{' '}
-                                                        CPUs
-                                                    </StatLabel>
-                                                </div>
-                                            ) : (
-                                                <NoMetric />
-                                            )}
                                         </TableCell>
                                         <TableCell className='align-top'>
                                             {node.resources ? (
@@ -320,7 +298,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                 <span className='truncate'>
                                                     {node.displayName}
                                                 </span>
-                                                <StatusBadge node={node} />
+                                                <StatusMarker node={node} />
                                             </ItemTitle>
                                             {/* `block`/`text-nowrap` beat
                                                 ItemDescription's default
@@ -335,24 +313,13 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                             <ServerCount node={node} />
                                         </div>
                                     </div>
-                                    <div className='mt-2.5 mb-1.5'>
-                                        <SnapshotMeta node={node} />
-                                    </div>
+                                    {!node.resources && (
+                                        <div className='mt-2.5 mb-1.5'>
+                                            <SnapshotMeta node={node} />
+                                        </div>
+                                    )}
                                     {node.resources ? (
                                         <div className='grid grid-cols-1 gap-3 @lg:grid-cols-2'>
-                                            <div>
-                                                <StatLabel className='mb-1.5 text-xs'>
-                                                    CPU
-                                                </StatLabel>
-                                                <div className='text-sm font-semibold tabular-nums'>
-                                                    {node.resources.cpu.percent}
-                                                    % ·{' '}
-                                                    {num(
-                                                        node.resources.cpu.count
-                                                    )}{' '}
-                                                    CPUs
-                                                </div>
-                                            </div>
                                             <div>
                                                 <StatLabel className='mb-1.5 text-xs'>
                                                     Memory
@@ -365,7 +332,7 @@ const NodesCard = ({ nodes }: { nodes: NodeSummary[] }) => (
                                                     sub={`${bytes(node.memory.allocated)} committed`}
                                                 />
                                             </div>
-                                            <div className='@lg:col-span-2'>
+                                            <div>
                                                 <StatLabel className='mb-1.5 text-xs'>
                                                     Storage
                                                 </StatLabel>
