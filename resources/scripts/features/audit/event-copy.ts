@@ -24,7 +24,10 @@ export interface AuditEventCopy {
 }
 
 /** First present, non-empty value among `keys`, rendered as a string. */
-const pick = (properties: AuditProperties, ...keys: string[]): string | null => {
+const pick = (
+    properties: AuditProperties,
+    ...keys: string[]
+): string | null => {
     for (const key of keys) {
         const value = properties[key]
 
@@ -60,7 +63,7 @@ const changedFields = (properties: AuditProperties): string | null => {
 
     if (!Array.isArray(changed) || changed.length === 0) return null
 
-    const fields = changed.map((field) => String(field).replace(/_/g, ' '))
+    const fields = changed.map(field => String(field).replace(/_/g, ' '))
 
     if (fields.length === 1) return fields[0]
 
@@ -75,9 +78,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'auth.login.succeeded': { verb: 'signed in', detail: () => null },
     'auth.login.failed': {
         verb: 'failed to sign in',
-        detail: (p) => pick(p, 'email'),
+        detail: p => pick(p, 'email'),
     },
     'auth.logout': { verb: 'signed out', detail: () => null },
+    'auth.invite.accepted': { verb: 'accepted their invitation' },
 
     // Account and credentials
     'account.profile.updated': {
@@ -111,7 +115,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'account.passkey.created': { verb: 'added a passkey' },
     'account.passkey.renamed': {
         verb: 'renamed a passkey',
-        detail: (p) => {
+        detail: p => {
             const from = pick(p, 'from')
             const to = pick(p, 'to')
 
@@ -125,7 +129,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'account.api-key.deleted': { verb: 'revoked an API key' },
     'account.session.revoked': {
         verb: 'signed out another session',
-        detail: (p) => pick(p, 'ip'),
+        detail: p => pick(p, 'ip'),
     },
     'account.oauth-connection.deleted': {
         verb: 'disconnected a linked account',
@@ -141,7 +145,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'server.renamed': { verb: 'renamed the server' },
     'server.console.session-created': {
         verb: 'opened a console session',
-        detail: (p) => pick(p, 'type'),
+        detail: p => pick(p, 'type'),
     },
     'server.console.display-enabled': {
         verb: 'enabled the display console',
@@ -156,7 +160,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'server.backup.restored': { verb: 'restored a backup' },
     'server.firewall.options-updated': {
         verb: 'changed the firewall policy',
-        detail: (p) => {
+        detail: p => {
             const inbound = pick(p, 'inbound_policy')
             const outbound = pick(p, 'outbound_policy')
 
@@ -165,11 +169,11 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'server.firewall.rule-created': {
         verb: 'added a firewall rule',
-        detail: (p) => pick(p, 'macro', 'destination_port', 'protocol'),
+        detail: p => pick(p, 'macro', 'destination_port', 'protocol'),
     },
     'server.firewall.rule-updated': {
         verb: 'changed a firewall rule',
-        detail: (p) => pick(p, 'macro', 'destination_port', 'protocol'),
+        detail: p => pick(p, 'macro', 'destination_port', 'protocol'),
     },
     'server.firewall.rule-deleted': {
         verb: 'deleted a firewall rule',
@@ -177,7 +181,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'server.firewall.rule-moved': {
         verb: 'reordered a firewall rule',
-        detail: (p) => {
+        detail: p => {
             const from = pick(p, 'from')
             const to = pick(p, 'to')
 
@@ -186,7 +190,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'server.settings.auth-updated': {
         verb: 'changed the server credentials',
-        detail: (p) => pick(p, 'type'),
+        detail: p => pick(p, 'type'),
     },
     'server.settings.boot-order-updated': {
         verb: 'changed the boot order',
@@ -224,11 +228,11 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'admin.server.disk-created': {
         verb: 'added a disk',
-        detail: (p) => pick(p, 'size'),
+        detail: p => pick(p, 'size'),
     },
     'admin.server.disk-updated': {
         verb: 'resized a disk',
-        detail: (p) => {
+        detail: p => {
             const from = pick(p, 'from')
             const to = pick(p, 'to')
 
@@ -238,7 +242,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.server.disk-deleted': { verb: 'removed a disk', detail: () => null },
     'admin.server.rehomed': {
         verb: 'moved the server between nodes',
-        detail: (p) => {
+        detail: p => {
             const from = pick(p, 'from')
             const to = pick(p, 'to')
 
@@ -265,15 +269,15 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.node.interface-deleted': { verb: 'deleted a network interface' },
     'admin.node.vlan-created': {
         verb: 'declared a VLAN',
-        detail: (p) => pick(p, 'tag'),
+        detail: p => pick(p, 'tag'),
     },
     'admin.node.vlan-updated': {
         verb: 'updated a VLAN',
-        detail: (p) => pick(p, 'tag'),
+        detail: p => pick(p, 'tag'),
     },
     'admin.node.vlan-deleted': {
         verb: 'removed a VLAN',
-        detail: (p) => pick(p, 'tag'),
+        detail: p => pick(p, 'tag'),
     },
     'admin.node.storage-created': { verb: 'added a storage' },
     'admin.node.storage-updated': { verb: 'updated a storage' },
@@ -302,7 +306,7 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'created an Anchor enrollment key',
         // How many machines the key admits is the part worth reading at a
         // glance; an unlimited key is the one you want to notice in a feed.
-        detail: (p) => {
+        detail: p => {
             const maxUses = p.max_uses
             const limit =
                 typeof maxUses === 'number'
@@ -323,15 +327,15 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     // The feed renders that as the panel itself, which is what happened.
     'admin.anchor.self-enrolled': {
         verb: 'enrolled itself with an Anchor key',
-        detail: (p) => pick(p, 'hostname', 'name'),
+        detail: p => pick(p, 'hostname', 'name'),
     },
     'admin.anchor.approved': {
         verb: 'approved an Anchor',
-        detail: (p) => pick(p, 'hostname', 'name'),
+        detail: p => pick(p, 'hostname', 'name'),
     },
     'admin.anchor.rejected': {
         verb: 'turned away an Anchor',
-        detail: (p) => pick(p, 'hostname', 'source_ip', 'name'),
+        detail: p => pick(p, 'hostname', 'source_ip', 'name'),
     },
 
     // IP address management
@@ -361,23 +365,43 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.address.unreserved': { verb: 'released a reserved address' },
 
     // Users, tokens and panel settings
-    'admin.user.created': { verb: 'created a user', detail: (p) => pick(p, 'email') },
+    'admin.user.created': {
+        verb: 'created a user',
+        detail: p => pick(p, 'email'),
+    },
     'admin.user.updated': { verb: 'updated a user', detail: changedFields },
     'admin.user.deleted': { verb: 'deleted a user' },
     'admin.user.sso-token-generated': {
         verb: 'generated a sign-in link for a user',
         detail: () => null,
     },
+    'admin.user.invited': { verb: 'invited a user', detail: () => null },
+    'admin.user.invite-revoked': {
+        verb: 'revoked a user invitation',
+        detail: () => null,
+    },
     'admin.token.created': { verb: 'created an application token' },
     'admin.token.updated': { verb: 'updated an application token' },
     'admin.token.deleted': { verb: 'revoked an application token' },
+    'admin.settings.account-updated': {
+        verb: 'changed the account settings',
+        detail: () => null,
+    },
     'admin.settings.anchor-updated': {
         verb: 'changed the Anchor settings',
         detail: () => null,
     },
     'admin.settings.bandwidth-updated': {
         verb: 'changed the bandwidth settings',
-        detail: (p) => pick(p, 'overage_action'),
+        detail: p => pick(p, 'overage_action'),
+    },
+    'admin.settings.mail-updated': {
+        verb: 'changed the mail settings',
+        detail: p => pick(p, 'host'),
+    },
+    'admin.settings.mail-tested': {
+        verb: 'sent a test email',
+        detail: p => pick(p, 'host'),
     },
 
     // Presets and images

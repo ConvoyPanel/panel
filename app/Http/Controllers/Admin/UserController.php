@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Data\Auth\SSOTokenData;
 use App\Data\PaginationMeta;
 use App\Data\User\UserData;
+use App\Data\User\UserInviteData;
 use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
 use App\Models\Filters\FiltersUserWildcard;
 use App\Models\User;
+use App\Notifications\UserInvited;
+use App\Services\Mail\MailConfigurator;
 use App\Services\Users\UserDeletionService;
+use App\Services\Users\UserInviteService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +30,8 @@ class UserController
 {
     public function __construct(
         private UserDeletionService $userDeletion,
+        private UserInviteService $invites,
+        private MailConfigurator $mail,
     ) {}
 
     public function index(Request $request)
@@ -67,20 +73,87 @@ class UserController
 
     public function store(StoreUserRequest $request)
     {
+        $password = $request->input('password');
+        $invited = $password === null || $password === '';
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
+            // An invited account still needs a value in a NOT NULL column, so it gets 64 random
+            // characters nobody has ever seen. It is not a password anyone can use — the account
+            // is unreachable until the invite is redeemed, which is the intended state.
+            'password' => $invited ? Str::random(64) : $password,
             'root_admin' => $request->root_admin,
         ])->loadCount(['servers']);
 
         Audit::record(
             AuditEvent::ADMIN_USER_CREATED,
             subject: $user,
-            properties: ['email' => $user->email, 'root_admin' => $user->root_admin],
+            properties: [
+                'email' => $user->email,
+                'root_admin' => $user->root_admin,
+                'invited' => $invited,
+            ],
         );
 
-        return UserData::from($user);
+        $data = UserData::from($user);
+
+        return $invited
+            ? ['data' => $data, 'invite' => $this->sendInvite($user)]
+            : $data;
+    }
+
+    /**
+     * Issue a fresh invite for an account that has one outstanding, or never had one.
+     *
+     * Separate from `store` because the reasons to reach for it come later: the link expired,
+     * it went to a spam folder, or mail was not configured when the account was made and now is.
+     */
+    public function invite(User $user)
+    {
+        return ['data' => $this->sendInvite($user)];
+    }
+
+    public function revokeInvite(User $user)
+    {
+        $this->invites->revoke($user);
+
+        Audit::record(AuditEvent::ADMIN_USER_INVITE_REVOKED, subject: $user);
+
+        return response()->noContent();
+    }
+
+    /**
+     * Mint a link, email it when there is a relay to email it with, and hand it back either way.
+     *
+     * The link is returned even on success, because mail is not proof of delivery and plenty of
+     * installs have no SMTP at all. An admin who can copy the link is never blocked by a mail
+     * configuration — which is what keeps this flow strictly better than emailing a password.
+     */
+    private function sendInvite(User $user): UserInviteData
+    {
+        $token = $this->invites->issue($user);
+        $link = UserInviteService::url($token);
+        $ttl = (int) config('invites.ttl_days');
+
+        $emailed = $this->mail->isConfigured();
+
+        if ($emailed) {
+            $user->notify(new UserInvited($link, $ttl));
+        }
+
+        // The link itself is never recorded: it is a working credential until it is redeemed.
+        Audit::record(
+            AuditEvent::ADMIN_USER_INVITED,
+            subject: $user,
+            properties: ['emailed' => $emailed],
+        );
+
+        return new UserInviteData(
+            link: $link,
+            expiresAt: CarbonImmutable::now()->addDays($ttl),
+            emailed: $emailed,
+        );
     }
 
     public function update(UpdateUserRequest $request, User $user)

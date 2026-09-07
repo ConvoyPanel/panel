@@ -29,7 +29,7 @@ class ImageVersionData extends Data
             uuid: $version->uuid,
             version: $version->version,
             disks: ImageDiskData::collect($version->diskSet()->all(), DataCollection::class),
-            size: (int) $version->size_bytes,
+            size: (int) $version->size,
             minimumDisk: $version->minimumDiskSize(),
             isActive: (bool) $version->is_active,
         );

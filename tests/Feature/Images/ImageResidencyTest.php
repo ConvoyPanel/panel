@@ -115,3 +115,119 @@ it('says what to fix when no storage accepts images', function () {
     expect(fn () => app(ImageResidencyService::class)->volids($node, makeVersionFor()))
         ->toThrow(ConflictHttpException::class, 'Add `Import` to a storage');
 });
+
+it('stores a version size in mebibytes and reads it back in bytes', function () {
+    // The convention every size column follows: MiB on disk, bytes through the
+    // model. Worth pinning, because this column briefly opted out of it.
+    $group = ImageGroup::create(['name' => 'Sized']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Sized 1.0',
+        'ostype' => 'l26',
+    ]);
+
+    $definition->versions()->create([
+        'version' => '1.0.0',
+        'disks' => [[
+            'slot' => 'scsi0',
+            'role' => ImageDiskRole::SYSTEM->value,
+            'url' => 'https://example.invalid/disk.qcow2',
+            'path' => null,
+            'sha256' => str_repeat('e', 64),
+            'size' => 623145472, // 594.28 MiB
+            'virtual_size' => 8589934592,
+            'format' => 'qcow2',
+        ]],
+    ]);
+
+    $version = $definition->versions()->sole();
+
+    // 594 whole mebibytes on disk, and the same figure back in bytes. The lost
+    // fraction of a mebibyte only ever feeds a progress bar's total.
+    expect($version->getRawOriginal('size'))->toBe(594)
+        ->and($version->size)->toBe(594 * 1048576);
+});
+
+it('keeps the plan floor exact rather than rounding it to whole mebibytes', function () {
+    // virtual_size lives in the disks JSON, which no cast reaches into. That is
+    // deliberate: understating this floor hands a tenant a larger disk than
+    // they bought, silently.
+    $group = ImageGroup::create(['name' => 'Exact']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Exact 1.0',
+        'ostype' => 'l26',
+    ]);
+
+    $version = $definition->versions()->create([
+        'version' => '1.0.0',
+        'disks' => [[
+            'slot' => 'scsi0',
+            'role' => ImageDiskRole::SYSTEM->value,
+            'url' => 'https://example.invalid/disk.qcow2',
+            'path' => null,
+            'sha256' => str_repeat('d', 64),
+            'size' => 623145472,
+            // Deliberately not a whole number of mebibytes.
+            'virtual_size' => 8589934593,
+            'format' => 'qcow2',
+        ]],
+    ]);
+
+    expect($version->fresh()->minimumDiskSize())->toBe(8589934593);
+});
+
+it('picks the newest version by its number, not by insertion order', function () {
+    // The triple these sort on is derived on write. It sat at 0/0/0 for a while
+    // because the listener that fills it was hung off `saving`, which the base
+    // model halts -- so this pins the behaviour, not just the arithmetic.
+    $group = ImageGroup::create(['name' => 'Ordered']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Ordered 1.0',
+        'ostype' => 'l26',
+    ]);
+
+    $disks = [[
+        'slot' => 'scsi0',
+        'role' => ImageDiskRole::SYSTEM->value,
+        'url' => 'https://example.invalid/disk.qcow2',
+        'path' => null,
+        'sha256' => str_repeat('f', 64),
+        'size' => 1048576,
+        'virtual_size' => 1048576,
+        'format' => 'qcow2',
+    ]];
+
+    // Inserted newest-first, and 1.10.0 beats 1.9.0 only if they sort as
+    // integers rather than as strings.
+    $definition->versions()->create(['version' => '1.10.0', 'disks' => $disks]);
+    $definition->versions()->create(['version' => '1.9.0', 'disks' => $disks]);
+
+    expect($definition->latestVersion()->version)->toBe('1.10.0');
+});
+
+it('never hands out a retired version as the latest', function () {
+    $group = ImageGroup::create(['name' => 'Retired']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Retired 1.0',
+        'ostype' => 'l26',
+    ]);
+
+    $disks = [[
+        'slot' => 'scsi0',
+        'role' => ImageDiskRole::SYSTEM->value,
+        'url' => 'https://example.invalid/disk.qcow2',
+        'path' => null,
+        'sha256' => str_repeat('9', 64),
+        'size' => 1048576,
+        'virtual_size' => 1048576,
+        'format' => 'qcow2',
+    ]];
+
+    $definition->versions()->create(['version' => '1.0.0', 'disks' => $disks]);
+    $definition->versions()->create(['version' => '2.0.0', 'disks' => $disks, 'is_active' => false]);
+
+    expect($definition->latestVersion()->version)->toBe('1.0.0');
+});

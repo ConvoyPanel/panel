@@ -22,6 +22,20 @@ Route::get('/oauth/{provider}/redirect', [Auth\OAuthController::class, 'redirect
 Route::get('/oauth/{provider}/callback', [Auth\OAuthController::class, 'callback'])
     ->name('auth.oauth.callback');
 
+/*
+ | Redeeming an invite. Outside the guest group on purpose: the token in the URL *is* the
+ | credential, so it — not the session — decides what happens. Inside `guest`, an admin opening
+ | the link they just minted to check it would be bounced to the dashboard, and a second attempt
+ | to spend a link would answer with a redirect instead of saying plainly that it is dead.
+ |
+ | Throttled on the login limiter, since this is an unauthenticated endpoint that hands out a
+ | session.
+ */
+Route::middleware('throttle:'.config('fortify.limiters.login'))->group(function () {
+    Route::get('/invite/{token}', [Auth\InviteController::class, 'show']);
+    Route::post('/invite/{token}', [Auth\InviteController::class, 'store']);
+});
+
 Route::middleware('guest')->group(function () {
     // Single sign-on deep link (minted by Admin\UserController::getSSOToken). The `signed`
     // middleware verifies the HMAC + expiry; the controller enforces single use. Named so

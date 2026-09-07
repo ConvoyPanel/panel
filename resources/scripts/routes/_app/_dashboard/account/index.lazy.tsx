@@ -1,4 +1,3 @@
-import AvatarCard from '@/features/account/components/AvatarCard.tsx'
 import ProfileCard from '@/features/account/components/ProfileCard.tsx'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
@@ -7,13 +6,15 @@ import { Heading } from '@/components/ui/Typography'
 const Profile = () => (
     <>
         <Heading>Profile</Heading>
-        <div className={'grid grid-cols-1 items-start gap-5 @3xl:grid-cols-2'}>
-            <AvatarCard />
+        {/* Capped rather than full-bleed: the fields are settings rows, and a
+            label/control pair stretched across 1100px reads as two columns
+            that have nothing to do with each other. */}
+        <div className={'max-w-3xl'}>
             <ProfileCard />
         </div>
     </>
 )
 
-export const Route = createLazyFileRoute('/_app/account/')({
+export const Route = createLazyFileRoute('/_app/_dashboard/account/')({
     component: Profile,
 })

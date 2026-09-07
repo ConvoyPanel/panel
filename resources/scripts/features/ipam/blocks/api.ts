@@ -192,7 +192,9 @@ export const useAddressBlocks = (params: AddressBlockQueryParams) => {
         addressBlockGroupId: number
     }
 
-    return useQuery(addressBlockQueries.list(addressBlockGroupId, params))
+    return useQuery(
+        addressBlockQueries.list(Number(addressBlockGroupId), params)
+    )
 }
 
 export const preloadAddressBlock = (blockGroupId: number, blockId: number) =>
@@ -206,8 +208,8 @@ export const useAddressBlock = () => {
 
     return useQuery(
         addressBlockQueries.detail(
-            params.addressBlockGroupId,
-            params.addressBlockId
+            Number(params.addressBlockGroupId),
+            Number(params.addressBlockId)
         )
     )
 }

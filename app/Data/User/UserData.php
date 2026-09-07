@@ -38,6 +38,12 @@ class UserData extends Data
         public CarbonImmutable|Optional|null $lastLoginAt = new Optional,
         public string|Optional|null $lastLoginIp = new Optional,
         public UserResourcesData|Optional $resources = new Optional,
+        /*
+         * What this account may change about itself. Filled only by {@see self::forSelf()}, which
+         * is what the endpoints returning the *signed-in* user use — an admin listing other people
+         * has no use for their capabilities, and `createdBy` on an API key certainly does not.
+         */
+        public AccountCapabilitiesData|Optional $accountCapabilities = new Optional,
     ) {}
 
     public static function fromModel(User $user): self
@@ -55,6 +61,22 @@ class UserData extends Data
                 ? CarbonImmutable::parse($user->created_at)
                 : null,
         );
+    }
+
+    /**
+     * The signed-in account, as returned to itself: the base payload plus the policy the account
+     * screen reads to decide which fields to offer.
+     *
+     * Takes the resolved capabilities rather than the resolver so this stays a plain mapper, and
+     * so the caller is the one that decided whose policy this is.
+     */
+    public static function forSelf(User $user, AccountCapabilitiesData $capabilities): self
+    {
+        $base = self::fromModel($user);
+
+        $base->accountCapabilities = $capabilities;
+
+        return $base;
     }
 
     /**

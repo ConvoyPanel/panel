@@ -47,13 +47,16 @@ const AccountMenu = () => {
                 <Button
                     variant='outline'
                     size='icon'
-                    className='overflow-hidden rounded-full'
+                    className='overflow-hidden rounded-full p-0'
                     aria-label={'Open account menu'}
                 >
+                    {/* Fills the button rather than sitting inside it: a
+                        picture inset from its own outline reads as a framed
+                        thumbnail, not as an avatar. */}
                     <UserAvatar
                         name={user?.name}
                         src={user?.avatarUrl}
-                        className={'size-6'}
+                        className={'size-full'}
                     />
                 </Button>
             </DropdownMenuTrigger>
@@ -136,7 +139,7 @@ const AccountMenu = () => {
                         <span className={'flex-1'}>Theme</span>
                         <span
                             className={
-                                'text-xs capitalize text-muted-foreground'
+                                'text-muted-foreground text-xs capitalize'
                             }
                         >
                             {theme}

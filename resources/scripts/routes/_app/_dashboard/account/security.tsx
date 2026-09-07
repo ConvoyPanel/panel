@@ -8,7 +8,7 @@ export const searchSchema = z.object({
     oauth_error: z.string().optional(),
 })
 
-export const Route = createFileRoute('/_app/account/security')({
+export const Route = createFileRoute('/_app/_dashboard/account/security')({
     validateSearch: searchSchema,
     staticData: {
         title: 'Security',

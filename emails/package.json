@@ -1,0 +1,16 @@
+{
+  "name": "convoy-emails",
+  "version": "1.0.0",
+  "description": "Build for Convoy's transactional email templates. Outputs Blade views into resources/views/mail.",
+  "scripts": {
+    "tokens": "node scripts/build-tokens.mjs",
+    "build": "npm run tokens && maizzle build && npm run preview",
+    "preview": "node scripts/build-preview.mjs",
+    "dev": "npm run tokens && maizzle serve"
+  },
+  "dependencies": {
+    "@maizzle/framework": "^6.1.3",
+    "culori": "^4.0.2"
+  },
+  "private": true
+}

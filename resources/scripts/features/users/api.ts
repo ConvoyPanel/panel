@@ -1,26 +1,19 @@
-import {
-    keepPreviousData,
-    queryOptions,
-    useQuery,
-} from '@tanstack/react-query'
-
 import type { UserInput } from '@/features/users/types.ts'
-import {
-    rawDataToAdminUser,
-    rawDataToAdminUserDetail,
-} from '@/lib/transformers/admin/user.ts'
-import { apiFetch, type DataResponse, type PaginatedResponse } from '@/lib/api'
-import { queryClient } from '@/lib/query-client.ts'
 import type {
     AdminUser,
     AdminUserDetail,
     PaginatedAdminUsers,
 } from '@/types/admin/user'
-import {
-    type QueryBuilderParams,
-    withQueryBuilderParams,
-} from '@/utils/http'
+import { type QueryBuilderParams, withQueryBuilderParams } from '@/utils/http'
 import UserController from '@/wayfinder/actions/App/Http/Controllers/Admin/UserController'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+
+import { type DataResponse, type PaginatedResponse, apiFetch } from '@/lib/api'
+import { queryClient } from '@/lib/query-client.ts'
+import {
+    rawDataToAdminUser,
+    rawDataToAdminUserDetail,
+} from '@/lib/transformers/admin/user.ts'
 
 export type UserQueryParams = QueryBuilderParams<
     '*' | 'name' | 'email' | 'id',
@@ -66,14 +59,25 @@ const payload = ({ name, email, rootAdmin, password }: UserInput) => ({
     ...(password === '' ? {} : { password }),
 })
 
-export const createUser = async (input: UserInput): Promise<AdminUser> =>
-    rawDataToAdminUser(
-        (
-            await apiFetch<DataResponse<unknown>>(storeRoute(), {
-                body: payload(input),
-            })
-        ).data
-    )
+export type UserInvite = App.Data.User.UserInviteData
+
+/**
+ * Creating with a blank password invites the account instead, and the response carries the link.
+ * It comes back even when the panel also emailed it: mail is not proof of delivery, and an
+ * install with no relay has to be able to hand the link over some other way.
+ */
+export const createUser = async (
+    input: UserInput
+): Promise<{ user: AdminUser; invite: UserInvite | null }> => {
+    const response = await apiFetch<
+        DataResponse<unknown> & { invite?: UserInvite }
+    >(storeRoute(), { body: payload(input) })
+
+    return {
+        user: rawDataToAdminUser(response.data),
+        invite: response.invite ?? null,
+    }
+}
 
 export const updateUser = async (
     id: number,

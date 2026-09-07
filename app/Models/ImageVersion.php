@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\StorageSizeCast;
 use App\Data\Image\ImageDiskData;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,7 +25,7 @@ use Ramsey\Uuid\Uuid;
  * @property int $version_minor
  * @property int $version_patch
  * @property array $disks
- * @property int $size_bytes
+ * @property int $size Bytes. Mebibytes on disk -- see StorageSizeCast.
  * @property bool $is_active
  * @property ImageDefinition $definition
  */
@@ -43,6 +44,8 @@ class ImageVersion extends Model
     {
         return [
             'disks' => 'array',
+            // Same convention as every other size column: MiB stored, bytes read.
+            'size' => StorageSizeCast::class,
             'is_active' => 'boolean',
         ];
     }
@@ -97,8 +100,14 @@ class ImageVersion extends Model
     }
 
     /**
-     * Keep the sortable triple in step with the string an operator typed, so
-     * ordering never depends on remembering to set four fields by hand.
+     * Keep the derived columns in step with what an operator actually set.
+     *
+     * Hung off `creating` and `updating` rather than `saving`, which is not a
+     * style choice: {@see Model::boot} registers a `saving`
+     * listener that returns `true`, and model events halt on the first non-null
+     * return -- so a `saving` listener added afterwards never runs at all. It
+     * fails silently, which is how the version triple below sat at 0/0/0 and
+     * made `latestVersion()` return an arbitrary row.
      */
     protected static function boot(): void
     {
@@ -106,24 +115,35 @@ class ImageVersion extends Model
 
         static::creating(function (ImageVersion $model) {
             $model->uuid = Uuid::uuid4()->toString();
+            self::syncDerivedColumns($model);
         });
 
-        static::saving(function (ImageVersion $model) {
-            if ($model->isDirty('version')) {
-                [$major, $minor, $patch] = array_pad(
-                    array_map('intval', explode('.', (string) $model->version)),
-                    3,
-                    0,
-                );
-
-                $model->version_major = $major;
-                $model->version_minor = $minor;
-                $model->version_patch = $patch;
-            }
-
-            if ($model->isDirty('disks')) {
-                $model->size_bytes = collect($model->disks ?? [])->sum(fn (array $disk) => (int) ($disk['size'] ?? 0));
-            }
+        static::updating(function (ImageVersion $model) {
+            self::syncDerivedColumns($model);
         });
+    }
+
+    private static function syncDerivedColumns(ImageVersion $model): void
+    {
+        // Ordered by the integer triple rather than the string, so 1.10.0 beats
+        // 1.9.0. Derived here so nobody has to remember four fields.
+        if ($model->isDirty('version')) {
+            [$major, $minor, $patch] = array_pad(
+                array_map('intval', explode('.', (string) $model->version)),
+                3,
+                0,
+            );
+
+            $model->version_major = $major;
+            $model->version_minor = $minor;
+            $model->version_patch = $patch;
+        }
+
+        if ($model->isDirty('disks')) {
+            // The disks JSON is in bytes -- a cast cannot reach inside a JSON
+            // column -- and the cast on this attribute scales the sum down to
+            // the mebibytes the column stores.
+            $model->size = collect($model->disks ?? [])->sum(fn (array $disk) => (int) ($disk['size'] ?? 0));
+        }
     }
 }

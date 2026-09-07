@@ -1,8 +1,11 @@
 import StatisticCard from '@/features/servers/components/client/Overview/StatisticCard.tsx'
 import UnknownStat from '@/features/servers/components/client/Overview/UnknownStat.tsx'
 import { useServerState } from '@/features/servers/detail/api.ts'
-import { cn } from '@/utils'
-import { IconPlaystationCircle } from '@tabler/icons-react'
+import {
+    IconPlayerPlayFilled,
+    IconPlayerStopFilled,
+    IconPlaystationCircle,
+} from '@tabler/icons-react'
 import { format, formatDistanceToNowStrict, subSeconds } from 'date-fns'
 
 import Skeleton from '@/components/ui/Skeleton.tsx'
@@ -44,20 +47,28 @@ const ServerStateCard = () => {
             ) : state ? (
                 <p
                     className={
-                        'flex items-center text-lg font-semibold tracking-tight @sm:text-2xl'
+                        'flex items-center gap-2 text-lg font-semibold tracking-tight @sm:text-2xl'
                     }
                 >
-                    <span className='relative mx-1 mr-2 flex h-2 w-2 @sm:mr-4'>
-                        {isRunning && (
-                            <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-green-600 opacity-75' />
-                        )}
-                        <span
-                            className={cn(
-                                'relative inline-flex h-2 w-2 rounded-full',
-                                isRunning ? 'bg-green-600' : 'bg-destructive'
-                            )}
+                    {/*
+                     * The shapes on the power controls above, not a status
+                     * dot. A dot only carries the state in its colour, and the
+                     * ring that used to pulse around it animated forever to
+                     * report a value that changes twice a month.
+                     */}
+                    {isRunning ? (
+                        <IconPlayerPlayFilled
+                            className={
+                                'text-success size-3.5 shrink-0 @sm:size-4'
+                            }
                         />
-                    </span>
+                    ) : (
+                        <IconPlayerStopFilled
+                            className={
+                                'text-destructive size-3.5 shrink-0 @sm:size-4'
+                            }
+                        />
+                    )}
                     {isRunning ? 'Running' : 'Stopped'}
                 </p>
             ) : (

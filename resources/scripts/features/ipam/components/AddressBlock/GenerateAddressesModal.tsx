@@ -1,4 +1,7 @@
-import { generateAddresses } from '@/features/ipam/blocks/addresses/api.ts'
+import {
+    addressQueries,
+    generateAddresses,
+} from '@/features/ipam/blocks/addresses/api.ts'
 import { addressBlockQueries } from '@/features/ipam/blocks/api.ts'
 import { addressCapacity } from '@/features/ipam/capacity.ts'
 import { AddressBlock } from '@/types/address-block.ts'
@@ -48,13 +51,26 @@ const GenerateAddressesModal = ({ block, mutate }: Props) => {
             generateAddresses(block!.addressBlockGroupId, block!.id),
         onSuccess: async result => {
             await mutate()
-            // The block's own counts moved, and they are what the header meter draws.
-            await queryClient.invalidateQueries({
-                queryKey: addressBlockQueries.detail(
-                    block!.addressBlockGroupId,
-                    block!.id
-                ).queryKey,
-            })
+            await Promise.all([
+                // The block's own counts moved, and they are what the header meter draws.
+                queryClient.invalidateQueries({
+                    queryKey: addressBlockQueries.detail(
+                        block!.addressBlockGroupId,
+                        block!.id
+                    ).queryKey,
+                }),
+                /*
+                 * Generation is the one action that turns ungenerated cells into addresses, so the
+                 * grid is exactly what the reader is watching while it runs. `all` covers both the
+                 * list and the map.
+                 */
+                queryClient.invalidateQueries({
+                    queryKey: addressQueries.all(
+                        block!.addressBlockGroupId,
+                        block!.id
+                    ),
+                }),
+            ])
 
             setOpen(false)
 

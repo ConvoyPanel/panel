@@ -36,6 +36,16 @@ import {
 import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { Heading } from '@/components/ui/Typography'
 
+/**
+ * Headers and short atomic values never wrap. "In use" split across two lines, and "2 / 254" read
+ * as two numbers stacked, because the utilisation column had claimed a fixed width and the rest
+ * shared what was left. The table's own container scrolls when the columns genuinely do not fit,
+ * which is legible in a way a broken-up number is not.
+ */
+const nowrap = (label: string) => () => (
+    <span className={'whitespace-nowrap'}>{label}</span>
+)
+
 export const Route = createLazyFileRoute('/_app/admin/_dashboard/ipam/')({
     component: IpamIndex,
 })
@@ -66,7 +76,7 @@ function IpamIndex() {
 
     const columns: ColumnDef<AddressBlockGroup>[] = [
         {
-            header: 'IP Block Group',
+            header: nowrap('IP Block Group'),
             accessorKey: 'name',
             enableHiding: false,
             meta: {
@@ -95,7 +105,7 @@ function IpamIndex() {
             ),
         },
         {
-            header: 'Blocks',
+            header: nowrap('Blocks'),
             accessorKey: 'addressBlocksCount',
             meta: {
                 skeletonWidth: '1rem',
@@ -109,32 +119,34 @@ function IpamIndex() {
         },
         {
             id: 'inUse',
-            header: 'In use',
+            header: nowrap('In use'),
             meta: {
                 skeletonWidth: '4rem',
                 align: 'right',
             },
             cell: ({ row }) => (
-                <span className={'font-mono tabular-nums'}>
+                <span className={'font-mono whitespace-nowrap tabular-nums'}>
                     {addressInUseLabel(addressCapacity(row.original.capacity))}
                 </span>
             ),
         },
         {
             id: 'utilisation',
-            header: 'Utilisation',
+            header: nowrap('Utilisation'),
             meta: {
                 skeletonWidth: '8rem',
             },
+            /* A floor rather than a fixed width: pinned at 260px it took its room out of every
+               other column, which is how "In use" ended up stacked. */
             cell: ({ row }) => (
                 <AddressCapacityMeter
                     capacity={row.original.capacity}
-                    className={'w-40'}
+                    className={'min-w-[10rem]'}
                 />
             ),
         },
         {
-            header: 'Nodes',
+            header: nowrap('Nodes'),
             accessorKey: 'nodesCount',
             meta: {
                 skeletonWidth: '1rem',

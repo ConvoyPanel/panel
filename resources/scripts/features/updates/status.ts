@@ -52,11 +52,11 @@ const updateSummary = (status: UpdateStatus): UpdateSummary => {
                 mark: null,
                 label: 'Not comparable',
                 // The panel reports `canary` when it is running from source
-                // rather than a release archive — normal for a development
-                // install, and nothing a release can be compared against.
+                // rather than a release archive, so there is no release to
+                // compare it against.
                 caption: status.latestVersion
-                    ? 'Built from source, not a release'
-                    : 'No check has completed yet',
+                    ? 'Built from source'
+                    : 'Not checked yet',
             }
     }
 }

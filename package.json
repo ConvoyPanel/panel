@@ -7,7 +7,8 @@
         "prebuild": "npm run types:generate",
         "build": "vite build",
         "dev": "vite --host 0.0.0.0",
-        "tc": "tsc --noEmit --project ./"
+        "tc": "tsc --noEmit --project ./",
+        "mail": "npm --prefix emails ci && npm --prefix emails run build"
     },
     "dependencies": {
         "@base-ui/react": "^1.6.0",

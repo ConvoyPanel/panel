@@ -10,13 +10,13 @@ import {
     IconHome,
     IconKey,
     IconLock,
-    IconUser,
     IconMapPin,
     IconMapPins,
     IconPlus,
     IconSearch,
     IconServer,
     IconTransform,
+    IconUser,
 } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useRouter } from '@tanstack/react-router'
@@ -294,7 +294,14 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
                 label: 'Edit your profile',
                 path: '/account',
                 detail: 'Account',
-                keywords: ['account', 'profile', 'name', 'email', 'avatar', 'picture'],
+                keywords: [
+                    'account',
+                    'profile',
+                    'name',
+                    'email',
+                    'avatar',
+                    'picture',
+                ],
             },
             {
                 id: 'action:security',
