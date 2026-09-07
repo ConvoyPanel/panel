@@ -85,11 +85,8 @@ function AnchorSettingsPage() {
                         <CardHeader>
                             <CardTitle>Panel URL</CardTitle>
                             <CardDescription>
-                                Where Anchors reach this panel, for enrollment
-                                and heartbeats. Leave blank to use the panel's
-                                own address — set it when that address does not
-                                resolve on the network your Anchors run in. An
-                                individual Anchor can still override this.
+                                Where Anchors reach this panel. Leave blank to
+                                use the panel's own address.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

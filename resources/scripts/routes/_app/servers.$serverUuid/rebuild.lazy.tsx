@@ -23,11 +23,11 @@ const RebuildServerPage = () => {
                     {server ? `Rebuild ${server.name}` : 'Rebuild Server'}
                 </Heading>
                 <p className={'text-muted-foreground mt-1.5 text-sm'}>
-                    Install a fresh operating system. Everything on the server's{' '}
+                    Erases the server's{' '}
                     {server
                         ? byteSize(server.disk, { units: 'iec' }).toString()
                         : ''}{' '}
-                    disk is erased; backups, ISOs and network settings are kept.
+                    disk. Backups, ISOs and network settings are kept.
                 </p>
             </div>
 

@@ -132,10 +132,6 @@ function ApproveEnrollmentPage() {
 
     if (isPending || !enrollment) return <Skeleton className={'h-96 w-full'} />
 
-    const hostname =
-        (enrollment.reportedFacts?.hostname as string | undefined) ??
-        enrollment.name
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(submit as never)}>
@@ -149,15 +145,6 @@ function ApproveEnrollmentPage() {
                     >
                         <div>
                             <Heading>Let {enrollment.name} join?</Heading>
-                            <p
-                                className={
-                                    'text-muted-foreground mt-2 max-w-[52ch] text-sm'
-                                }
-                            >
-                                {hostname} ran your install command and has
-                                already told Convoy everything about itself
-                                except where it belongs.
-                            </p>
                         </div>
 
                         <Card>

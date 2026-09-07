@@ -36,7 +36,7 @@ const AuditFeed = ({
     onPageChange,
     showSubject = false,
     emptyTitle = 'No activity yet',
-    emptyDescription = 'Actions taken here will be listed as they happen.',
+    emptyDescription,
 }: Props) => {
     // `isError && !data` rather than `isError`: a background refetch that fails should not throw
     // away a page the reader is already looking at.

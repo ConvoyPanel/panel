@@ -1,13 +1,7 @@
 import { useAddresses } from '@/features/servers/detail/api.ts'
 import AddressList from '@/features/servers/networking/components/AddressList.tsx'
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { CollectionErrorState } from '@/components/ui/EmptyStates'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
@@ -22,9 +16,6 @@ const AddressesCard = ({ uuid }: Props) => {
         <Card>
             <CardHeader>
                 <CardTitle>IP Addresses</CardTitle>
-                <CardDescription>
-                    Addresses allocated to this server.
-                </CardDescription>
             </CardHeader>
             <CardContent>
                 {isError && !addresses ? (

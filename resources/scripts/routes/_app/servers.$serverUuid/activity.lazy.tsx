@@ -16,13 +16,7 @@ const ServerActivity = () => {
 
     return (
         <>
-            <div className={'flex flex-wrap items-center justify-between gap-2'}>
-                <Heading>Activity</Heading>
-            </div>
-            <p className={'text-sm text-muted-foreground'}>
-                Recent actions taken on this server, including those taken by
-                staff.
-            </p>
+            <Heading>Activity</Heading>
             <AuditFeed
                 data={data}
                 isLoading={isLoading}
@@ -30,9 +24,6 @@ const ServerActivity = () => {
                 onRetry={refetch}
                 page={page}
                 onPageChange={setPage}
-                emptyDescription={
-                    'Actions taken on this server will be listed here as they happen.'
-                }
             />
         </>
     )

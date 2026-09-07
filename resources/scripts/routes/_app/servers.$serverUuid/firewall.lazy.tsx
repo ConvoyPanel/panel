@@ -20,9 +20,6 @@ const ServerFirewall = () => {
             >
                 <div className={'min-w-0'}>
                     <Heading>Firewall</Heading>
-                    <p className={'mt-1 text-sm text-muted-foreground'}>
-                        Control the traffic allowed in and out of this server.
-                    </p>
                 </div>
 
                 {options && !options.isEnabled && (
