@@ -130,17 +130,6 @@ function EnrollNodePage() {
                         </CardContent>
                     </Card>
                 ))}
-
-                <p className={'text-muted-foreground text-xs'}>
-                    Have a host that cannot run the agent?{' '}
-                    <Link
-                        to={'/admin/nodes'}
-                        className={'underline underline-offset-2'}
-                    >
-                        Registering one by hand
-                    </Link>{' '}
-                    is still supported through the API.
-                </p>
             </div>
         </div>
     )

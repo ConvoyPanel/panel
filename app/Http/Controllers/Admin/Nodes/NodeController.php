@@ -6,12 +6,10 @@ use App\Data\Node\NodeData;
 use App\Data\PaginationMeta;
 use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
-use App\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use App\Http\Requests\Admin\Nodes\UpdateNodeRequest;
-use App\Jobs\Node\PollNodeStatusJob;
-use App\Services\Anchor\AnchorEnrollmentService;
 use App\Models\Filters\FiltersNodeWildcard;
 use App\Models\Node;
+use App\Services\Anchor\AnchorEnrollmentService;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -50,33 +48,6 @@ class NodeController
     {
         $node->append(['memory_allocated'])
             ->loadCount('servers');
-
-        return NodeData::from($node);
-    }
-
-    /**
-     * Register a host by describing it.
-     *
-     * Superseded in the UI by enrollment, where the host describes itself. It
-     * stays for two constituencies that cannot run a command: hosts that will
-     * never have an agent, and API clients automating registration.
-     */
-    public function store(StoreNodeRequest $request)
-    {
-        $node = Node::create($request->validated())
-            ->append(['memory_allocated'])
-            ->loadCount('servers');
-
-        // The scheduled poll would get there within a minute anyway; polling
-        // now means the node's status and cluster scope are known while the
-        // operator is still looking at the page they registered it from.
-        PollNodeStatusJob::dispatch($node->id);
-
-        Audit::record(
-            AuditEvent::ADMIN_NODE_CREATED,
-            subject: $node,
-            properties: ['name' => $node->name, 'fqdn' => $node->fqdn],
-        );
 
         return NodeData::from($node);
     }

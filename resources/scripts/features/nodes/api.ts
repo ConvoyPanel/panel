@@ -61,7 +61,6 @@ export const nodeSchema = z.object({
 const indexRoute = NodeController.index['/api/admin/nodes']
 const showRoute = NodeController.show['/api/admin/nodes/{node}']
 const statusRoute = NodeStatusController['/api/admin/nodes/{node}/status']
-const storeRoute = NodeController.store['/api/admin/nodes']
 const updateRoute = NodeController.update['/api/admin/nodes/{node}']
 const testConnectionRoute =
     NodeConnectionTestController['/api/admin/nodes/test-connection']
@@ -165,48 +164,6 @@ export const useNodeStatus = (id?: number | null, enabled = true) => {
     const nodeId = id ?? params.nodeId
 
     return useQuery(nodeQueries.status(nodeId, enabled))
-}
-
-export const createNode = async (
-    payload: z.infer<typeof nodeSchema>
-): Promise<Node> => {
-    const {
-        displayName,
-        locationId,
-        fqdn,
-        port,
-        name,
-        verifyTls,
-        tokenId,
-        tokenSecret,
-        socketCount,
-        coreCount,
-        cpuCount,
-        memory,
-        memoryOverallocate,
-        anchorId,
-    } = payload
-
-    const res = await apiFetch<DataResponse<Node>>(storeRoute(), {
-        body: {
-            display_name: displayName,
-            location_id: locationId,
-            fqdn,
-            port,
-            name,
-            verify_tls: verifyTls,
-            token_id: tokenId,
-            token_secret: tokenSecret,
-            socket_count: socketCount,
-            core_count: coreCount,
-            cpu_count: cpuCount,
-            memory,
-            memory_overallocate: memoryOverallocate,
-            anchor_id: anchorId === 'none' ? null : Number(anchorId),
-        },
-    })
-
-    return res.data
 }
 
 export const updateNode = async (
