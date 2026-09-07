@@ -7,7 +7,9 @@ use App\Models\Passkey;
 use App\Models\PersonalAccessToken;
 use App\Models\Server;
 use App\Models\SessionRecord;
+use App\Services\Mail\MailConfigurator;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -55,6 +57,34 @@ class AppServiceProvider extends ServiceProvider
 
         $this->bootRoute();
         $this->bootOidc();
+        $this->bootMail();
+    }
+
+    /**
+     * Let the panel's stored SMTP settings override MAIL_* before anything resolves a mailer.
+     *
+     * Hooked to the mail manager rather than run at boot, for two reasons. It is a database read,
+     * and the overwhelming majority of requests never send anything — paying for it on every one
+     * of them buys nothing. And resolving settings during boot pins them before anything else in
+     * the process can have finished setting the database up, which is exactly how the first test
+     * in a suite ended up holding values from before its own migrations ran.
+     *
+     * The manager reads `config('mail.mailers.*')` when a mailer is built, not when the manager
+     * itself is constructed, so writing the config here lands in time.
+     *
+     * Deliberately swallowing everything: a panel that will not serve a request because it cannot
+     * look up its own mail configuration would be a far worse failure than one that falls back to
+     * the environment, which is exactly what skipping this does.
+     */
+    public function bootMail(): void
+    {
+        $this->app->afterResolving(MailManager::class, function () {
+            try {
+                $this->app->make(MailConfigurator::class)->apply();
+            } catch (\Throwable) {
+                // Environment stays in charge.
+            }
+        });
     }
 
     /**

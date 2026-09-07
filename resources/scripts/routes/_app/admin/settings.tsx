@@ -2,6 +2,7 @@ import useTitle from '@/hooks/use-title.ts'
 import {
     IconAnchor,
     IconGauge,
+    IconMail,
     IconRefresh,
     IconSettings,
     IconUserCog,
@@ -47,6 +48,11 @@ const nav: SidebarNav = {
                     icon: IconUserCog,
                     label: 'Accounts',
                     path: '/admin/settings/account',
+                },
+                {
+                    icon: IconMail,
+                    label: 'Mail',
+                    path: '/admin/settings/mail',
                 },
                 {
                     icon: IconRefresh,

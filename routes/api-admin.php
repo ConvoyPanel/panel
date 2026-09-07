@@ -457,6 +457,21 @@ Route::prefix('/settings')->group(function () {
         '/account',
         [Admin\Settings\AccountSettingsController::class, 'update'],
     );
+
+    Route::get(
+        '/mail',
+        [Admin\Settings\MailSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/mail',
+        [Admin\Settings\MailSettingsController::class, 'update'],
+    );
+    // Sends through the *submitted* body rather than what is stored, so credentials can be
+    // proven before they are saved. POST because it has a side effect and is not idempotent.
+    Route::post(
+        '/mail/test',
+        [Admin\Settings\MailSettingsController::class, 'test'],
+    );
 });
 
 /*
