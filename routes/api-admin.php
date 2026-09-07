@@ -235,7 +235,6 @@ Route::prefix('/servers')->group(function () {
 Route::prefix('/address-block-groups')->group(function () {
     Route::get('/', [Admin\AddressBlockGroupController::class, 'index']);
     Route::get('/summary', [Admin\AddressBlockGroupController::class, 'summary']);
-    Route::get('/summary', [Admin\AddressBlockGroupController::class, 'summary']);
     Route::post('/', [Admin\AddressBlockGroupController::class, 'store']);
 
     Route::prefix('/{address_block_group}')->group(function () {
@@ -256,7 +255,6 @@ Route::prefix('/address-block-groups')->group(function () {
 
             Route::get('/addresses', [Admin\AddressController::class, 'index']);
             Route::post('/addresses/generate', [Admin\AddressController::class, 'generate']);
-            Route::post('/addresses/bulk', [Admin\AddressController::class, 'bulk']);
             Route::post('/addresses/bulk', [Admin\AddressController::class, 'bulk']);
             Route::patch('/addresses/{address}', [Admin\AddressController::class, 'update']);
             Route::post('/addresses/{address}/reserve', [Admin\AddressController::class, 'reserve']);
