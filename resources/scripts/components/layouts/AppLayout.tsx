@@ -17,7 +17,7 @@ const AppLayout = ({ routes, children }: Props) => {
     const nav = useMemo(() => normalizeNav(routes), [routes])
 
     return (
-        <div className='flex min-h-screen w-full min-w-0 bg-muted/40'>
+        <div className='bg-muted/40 flex min-h-screen w-full min-w-0'>
             <Sidebar nav={nav} />
             {/*
              * overflow-x-clip, not -hidden: `overflow-x: hidden` forces
@@ -39,11 +39,13 @@ const AppLayout = ({ routes, children }: Props) => {
                  * constrained width.
                  */}
                 <main
-                    className={'mx-auto h-full w-full min-w-0 max-w-[1600px] @container'}
+                    className={
+                        '@container mx-auto h-full w-full max-w-[1600px] min-w-0'
+                    }
                 >
                     <div
                         className={
-                            'flex h-full min-w-0 flex-col gap-2 p-4 @md:gap-4 sm:px-6 sm:py-0'
+                            'flex h-full min-w-0 flex-col gap-2 p-4 sm:px-6 sm:py-0 @md:gap-4'
                         }
                     >
                         {children}

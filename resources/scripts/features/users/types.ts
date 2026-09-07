@@ -23,7 +23,14 @@ const baseUserSchema = z.object({
     rootAdmin: z.boolean(),
 })
 
-export const createUserSchema = baseUserSchema.extend({ password })
+/**
+ * Blank is meaningful on create: it means "invite them" — the account is made without a usable
+ * password and the person on the other end chooses their own. That is the flow that exists so
+ * nobody has to pick, or email, a password on someone else's behalf.
+ */
+export const createUserSchema = baseUserSchema.extend({
+    password: z.literal('').or(password),
+})
 
 /**
  * The one field that differs between creating and editing: an existing account already has a

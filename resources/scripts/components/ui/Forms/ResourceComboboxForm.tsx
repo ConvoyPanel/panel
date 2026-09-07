@@ -27,6 +27,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/Popover'
+import { useHoldDialogDismiss } from '@/components/ui/ResponsiveDialog'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import Spinner from '@/components/ui/Spinner.tsx'
 
@@ -65,6 +66,12 @@ const ResourceComboboxForm = <T,>({
 }: ResourceComboBoxFormProps<T>) => {
     const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
+
+    /*
+     * The list portals out of any dialog this sits in, so the click that dismisses it would
+     * otherwise read to that dialog as a press outside itself and close the form too.
+     */
+    useHoldDialogDismiss(open)
     const [debouncedQuery] = useDebouncedValue(query, 300)
     const listId = useId()
 

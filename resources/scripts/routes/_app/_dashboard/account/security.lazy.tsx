@@ -43,6 +43,6 @@ const Security = () => {
     )
 }
 
-export const Route = createLazyFileRoute('/_app/account/security')({
+export const Route = createLazyFileRoute('/_app/_dashboard/account/security')({
     component: Security,
 })

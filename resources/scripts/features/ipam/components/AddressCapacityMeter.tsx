@@ -52,17 +52,29 @@ const AddressCapacityMeter = ({
                 aria-label={`${view.percent!.toFixed(0)}% of usable addresses are in use`}
             />
             {subline && (
+                /* Each fact is its own non-breaking span, so a narrow column wraps between them
+                   rather than splitting "253 not generated" across two lines. */
                 <p
                     className={
-                        'text-muted-foreground mt-1.5 text-xs tabular-nums'
+                        'text-muted-foreground mt-1.5 flex flex-wrap gap-x-1.5 text-xs tabular-nums'
                     }
                 >
-                    {view.percent!.toFixed(1)}% · {view.free.toLocaleString()}{' '}
-                    free
-                    {view.ungenerated > 0 &&
-                        ` · ${view.ungenerated.toLocaleString()} not generated`}
-                    {view.sparseBlockCount > 0 &&
-                        ` · ${view.sparseBlockCount} on demand`}
+                    <span className={'whitespace-nowrap'}>
+                        {view.percent!.toFixed(1)}%
+                    </span>
+                    <span className={'whitespace-nowrap'}>
+                        · {view.free.toLocaleString()} free
+                    </span>
+                    {view.ungenerated > 0 && (
+                        <span className={'whitespace-nowrap'}>
+                            · {view.ungenerated.toLocaleString()} not generated
+                        </span>
+                    )}
+                    {view.sparseBlockCount > 0 && (
+                        <span className={'whitespace-nowrap'}>
+                            · {view.sparseBlockCount} on demand
+                        </span>
+                    )}
                 </p>
             )}
         </div>

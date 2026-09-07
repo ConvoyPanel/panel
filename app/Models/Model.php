@@ -47,14 +47,19 @@ abstract class Model extends IlluminateModel
 
         static::$validatorFactory = Container::getInstance()->make(Factory::class);
 
+        // Returns nothing on purpose. Eloquent dispatches model events with
+        // `until()`, so any non-null return halts the rest of the chain -- and
+        // this listener is registered first, by every model in the app. A bare
+        // `return true` here silently disabled every `saving` listener a
+        // subclass added afterwards, which is not a failure anything reports:
+        // the code simply never runs. Validation still stops a bad save by
+        // throwing, which is the only signal that was ever load-bearing.
         static::saving(function (Model $model) {
             try {
                 $model->validate();
             } catch (ValidationException $exception) {
                 throw new DataValidationException($exception->validator, $model);
             }
-
-            return true;
         });
     }
 

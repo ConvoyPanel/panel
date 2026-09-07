@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Ipam\GenerateAddressesAction;
+use App\Data\Ipam\AddressMapData;
+use App\Data\Ipam\AddressMapUnitData;
 use App\Data\Ipam\BulkAddressResultData;
 use App\Data\Ipam\GeneratedAddressesData;
 use App\Data\Ipam\IpamAddressData;
@@ -30,6 +32,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class AddressController
 {
+    /** Above this a bulk action logs its range rather than every address in it. */
+    private const AUDIT_ADDRESS_LIMIT = 50;
+
     public function __construct(
         private GenerateAddressesAction $generateAddressesAction,
         private ConnectionInterface $connection,
@@ -215,6 +220,83 @@ class AddressController
     }
 
     /**
+     * The block's whole address space, in address order, one entry per allocatable unit.
+     *
+     * The list answers "what is this address"; a paginated table cannot answer "where is the next
+     * free run", which is the question a /24 is actually opened with. This returns every unit —
+     * including the ones with no address row yet — so the UI can draw the space instead of asking
+     * the operator to page through it.
+     *
+     * Units are placed by `unitIndexOf`, not by row order: generation writes in address order, but
+     * one deletion would shift every later cell if position were inferred from the sequence.
+     */
+    public function map(AddressBlockGroup $addressBlockGroup, AddressBlock $addressBlock)
+    {
+        $totalUnits = $addressBlock->totalUnits();
+
+        if ($addressBlock->isSparse() || $totalUnits === null) {
+            return (new AddressMapData(sparse: true, tooLarge: false, totalUnits: null, units: []))->toArray();
+        }
+
+        if ($totalUnits > AddressMapData::MAX_UNITS) {
+            return (new AddressMapData(
+                sparse: false,
+                tooLarge: true,
+                totalUnits: $totalUnits,
+                units: [],
+            ))->toArray();
+        }
+
+        // Every unit starts as a real position with no record behind it; the materialized rows are
+        // then dropped onto their own indices.
+        $units = [];
+
+        for ($index = 0; $index < $totalUnits; $index++) {
+            $units[$index] = new AddressMapUnitData(
+                index: $index,
+                state: 'ungenerated',
+                // The unit is a real position whether or not a row exists for it, so it gets its
+                // address either way — the map labels its rows from these.
+                ip: $addressBlock->unitAddressAt($index),
+                addressId: null,
+                serverName: null,
+            );
+        }
+
+        $addressBlock->addresses()->with('server:id,name')->chunkById(1000, function ($addresses) use (&$units, $addressBlock, $totalUnits): void {
+            foreach ($addresses as $address) {
+                $index = $addressBlock->unitIndexOf($address->ip);
+
+                // An address outside the block's current geometry (the block was edited under it)
+                // has no cell to sit in. Leaving it out beats drawing it in the wrong place.
+                if ($index === null || $index < 0 || $index >= $totalUnits) {
+                    continue;
+                }
+
+                $units[$index] = new AddressMapUnitData(
+                    index: $index,
+                    state: match (true) {
+                        $address->state === AddressState::Assigned => 'assigned',
+                        $address->isSystemReserved() => 'system',
+                        $address->state === AddressState::Reserved => 'reserved',
+                        default => 'available',
+                    },
+                    ip: $address->ip,
+                    addressId: $address->id,
+                    serverName: $address->server?->name,
+                );
+            }
+        });
+
+        return (new AddressMapData(
+            sparse: false,
+            tooLarge: false,
+            totalUnits: $totalUnits,
+            units: array_values($units),
+        ))->toArray();
+    }
+
+    /**
      * Reserve, release or delete a selection of addresses in one request.
      *
      * Reserving `.2`–`.10` for infrastructure was nine trips through a row menu, and nine audit
@@ -263,8 +345,16 @@ class AddressController
                 default => null,
             };
 
-            // One entry for the batch rather than one per address: the operator performed a single
-            // action, and a log that reads as 200 separate decisions hides that.
+            /*
+             * One entry for the batch rather than one per address: the operator performed a single
+             * action, and a log that reads as thousands of separate decisions hides that.
+             *
+             * The addresses themselves are listed only while the list is still worth reading. A
+             * drag across a whole block would otherwise write tens of thousands of characters into
+             * a properties column nobody can scan; past that, the range says the same thing.
+             */
+            $addresses = $eligible->pluck('ip');
+
             Audit::record(
                 match ($action) {
                     'reserve' => AuditEvent::ADMIN_ADDRESS_RESERVED,
@@ -272,10 +362,13 @@ class AddressController
                     default => AuditEvent::ADMIN_ADDRESS_DELETED,
                 },
                 subject: $addressBlock,
-                properties: [
-                    'count' => $ids->count(),
-                    'addresses' => $eligible->pluck('ip')->all(),
-                ],
+                properties: $addresses->count() <= self::AUDIT_ADDRESS_LIMIT
+                    ? ['count' => $ids->count(), 'addresses' => $addresses->all()]
+                    : [
+                        'count' => $ids->count(),
+                        'first' => $addresses->first(),
+                        'last' => $addresses->last(),
+                    ],
             );
         });
 

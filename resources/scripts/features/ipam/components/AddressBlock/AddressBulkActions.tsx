@@ -3,12 +3,8 @@ import {
     bulkAddresses,
 } from '@/features/ipam/blocks/addresses/api.ts'
 import { addressBlockQueries } from '@/features/ipam/blocks/api.ts'
-import {
-    Address,
-    AddressState,
-    AddressStateReason,
-    PaginatedAddresses,
-} from '@/types/address.ts'
+import { AddressStateKind } from '@/features/ipam/components/AddressStateLabel.tsx'
+import { PaginatedAddresses } from '@/types/address.ts'
 import { Mutator } from '@/types/query.ts'
 import { useMutation } from '@tanstack/react-query'
 
@@ -17,8 +13,20 @@ import { queryClient } from '@/lib/query-client.ts'
 import { Button } from '@/components/ui/Button'
 import { toast } from '@/components/ui/Toast'
 
+/**
+ * The selection, reduced to what the actions need.
+ *
+ * Both callers select the same things by different routes — checkboxes in the table, cells on the
+ * map — and neither has a reason to hand over whole address records just so this can re-derive a
+ * state it was already told.
+ */
+export interface AddressSelection {
+    id: number
+    kind: AddressStateKind
+}
+
 interface Props {
-    addresses: Address[]
+    selection: AddressSelection[]
     addressBlockGroupId: number
     addressBlockId: number
     mutate: Mutator<PaginatedAddresses>
@@ -38,7 +46,7 @@ const VERBS: Record<AddressBulkAction, { done: string; none: string }> = {
  * offering Release when nothing selected is held.
  */
 const AddressBulkActions = ({
-    addresses,
+    selection,
     addressBlockGroupId,
     addressBlockId,
     mutate,
@@ -49,7 +57,7 @@ const AddressBulkActions = ({
                 addressBlockGroupId,
                 addressBlockId,
                 action,
-                addresses.map(address => address.id)
+                selection.map(entry => entry.id)
             ),
         onSuccess: async result => {
             await mutate()
@@ -82,17 +90,24 @@ const AddressBulkActions = ({
             toast.add({ title: 'Bulk action failed', type: 'error' }),
     })
 
-    const canReserve = addresses.some(
-        address => address.state === AddressState.Available
-    )
-    const canRelease = addresses.some(
-        address =>
-            address.state === AddressState.Reserved &&
-            address.stateReason !== AddressStateReason.System
-    )
-    const canDelete = addresses.some(
-        address => address.state !== AddressState.Assigned
-    )
+    const canReserve = selection.some(entry => entry.kind === 'available')
+    const canRelease = selection.some(entry => entry.kind === 'reserved')
+    const canDelete = selection.some(entry => entry.kind !== 'assigned')
+
+    /*
+     * A selection can be legal to make and have nothing legal to do — every address in it is
+     * assigned, say. Rendering nothing leaves "6 selected" sitting beside an empty space, which
+     * reads as a broken toolbar rather than the rule it is.
+     */
+    if (!canReserve && !canRelease && !canDelete) {
+        return (
+            <span className={'text-muted-foreground text-sm'}>
+                {selection.length > 0
+                    ? 'Nothing to do — unassign these from their servers first.'
+                    : 'Nothing selected.'}
+            </span>
+        )
+    }
 
     return (
         <>

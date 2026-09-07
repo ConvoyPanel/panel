@@ -1,5 +1,14 @@
 import { cn } from '@/utils'
-import type { ComponentProps, ReactElement, ReactNode } from 'react'
+import {
+    type ComponentProps,
+    type MutableRefObject,
+    type ReactElement,
+    type ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+} from 'react'
 
 import {
     Dialog,
@@ -21,6 +30,7 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from '@/components/ui/Drawer'
+
 import {
     ResponsiveDialogProvider,
     useIsDesktopDialog,
@@ -52,12 +62,49 @@ interface ResponsiveDialogProps {
     children?: ReactNode
 }
 
+/**
+ * How many popovers opened from inside this dialog are currently showing.
+ *
+ * A popover portals out of the dialog's DOM, so the press that dismisses it reads to the dialog as
+ * a press outside itself and closes both at once — pick a server in a combobox, click away to
+ * shut the list, and the whole form goes with it. While the count is above zero the dialog ignores
+ * outside presses; the innermost layer owns that gesture, which is what a person expects. Escape
+ * already behaves, so it is left alone.
+ */
+const DismissGuardContext = createContext<MutableRefObject<number> | null>(null)
+
+/**
+ * Hold the enclosing dialog open while `active` — for anything that layers over it and takes its
+ * own outside-press to close. A no-op outside a dialog.
+ */
+export const useHoldDialogDismiss = (active: boolean) => {
+    const guard = useContext(DismissGuardContext)
+
+    useEffect(() => {
+        if (!guard || !active) return
+
+        guard.current += 1
+
+        return () => {
+            guard.current = Math.max(guard.current - 1, 0)
+        }
+    }, [guard, active])
+}
+
 /** Dialog on desktop, Drawer on mobile. Both Base UI, so props line up. */
-const ResponsiveDialog = ({ children, ...props }: ResponsiveDialogProps) => (
-    <ResponsiveDialogProvider>
-        <ResponsiveDialogRoot {...props}>{children}</ResponsiveDialogRoot>
-    </ResponsiveDialogProvider>
-)
+const ResponsiveDialog = ({ children, ...props }: ResponsiveDialogProps) => {
+    const guard = useRef(0)
+
+    return (
+        <DismissGuardContext.Provider value={guard}>
+            <ResponsiveDialogProvider>
+                <ResponsiveDialogRoot {...props}>
+                    {children}
+                </ResponsiveDialogRoot>
+            </ResponsiveDialogProvider>
+        </DismissGuardContext.Provider>
+    )
+}
 
 const ResponsiveDialogRoot = ({
     children,
@@ -66,33 +113,60 @@ const ResponsiveDialogRoot = ({
 }: ResponsiveDialogProps) => {
     const isDesktop = useIsDesktopDialog()
     const Root = isDesktop ? Dialog : Drawer
+    const guard = useContext(DismissGuardContext)
 
     return (
-        <Root onOpenChange={open => onOpenChange?.(open)} {...props}>
+        <Root
+            onOpenChange={(
+                open: boolean,
+                details?: { reason?: string; cancel?: () => void }
+            ) => {
+                if (
+                    !open &&
+                    details?.reason === 'outside-press' &&
+                    (guard?.current ?? 0) > 0
+                ) {
+                    details.cancel?.()
+
+                    return
+                }
+
+                onOpenChange?.(open)
+            }}
+            {...props}
+        >
             {children}
         </Root>
     )
 }
 
-const ResponsiveDialogTrigger = (props: SharedProps<ComponentProps<typeof DialogTrigger>>) => {
+const ResponsiveDialogTrigger = (
+    props: SharedProps<ComponentProps<typeof DialogTrigger>>
+) => {
     const Trigger = useIsDesktopDialog() ? DialogTrigger : DrawerTrigger
 
     return <Trigger {...props} />
 }
 
-const ResponsiveDialogClose = (props: SharedProps<ComponentProps<typeof DialogClose>>) => {
+const ResponsiveDialogClose = (
+    props: SharedProps<ComponentProps<typeof DialogClose>>
+) => {
     const Close = useIsDesktopDialog() ? DialogClose : DrawerClose
 
     return <Close {...props} />
 }
 
-const ResponsiveDialogContent = (props: SharedProps<ComponentProps<typeof DialogContent>>) => {
+const ResponsiveDialogContent = (
+    props: SharedProps<ComponentProps<typeof DialogContent>>
+) => {
     const Content = useIsDesktopDialog() ? DialogContent : DrawerContent
 
     return <Content {...props} />
 }
 
-const ResponsiveDialogTitle = (props: SharedProps<ComponentProps<typeof DialogTitle>>) => {
+const ResponsiveDialogTitle = (
+    props: SharedProps<ComponentProps<typeof DialogTitle>>
+) => {
     const Title = useIsDesktopDialog() ? DialogTitle : DrawerTitle
 
     return <Title {...props} />

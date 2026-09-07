@@ -21,12 +21,22 @@ export const AVATAR_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif'
 /** The 10MB ceiling from UpdateAvatarRequest, checked before we send the bytes. */
 export const AVATAR_MAX_BYTES = 10 * 1024 * 1024
 
+/** The square the user framed, in the source picture's own pixels. */
+export interface AvatarCrop {
+    x: number
+    y: number
+    size: number
+}
+
 export const updateProfile = async (
     payload: z.infer<typeof profileSchema>
 ): Promise<AuthenticatedUser> => {
-    const { data } = await apiFetch<DataResponse<any>>(ProfileController.update(), {
-        body: payload,
-    })
+    const { data } = await apiFetch<DataResponse<any>>(
+        ProfileController.update(),
+        {
+            body: payload,
+        }
+    )
 
     return rawDataToAuthenticatedUser(data)
 }
@@ -47,9 +57,18 @@ export const updateEmail = async (
  * as JSON. The panel keeps only the re-encoded result, so the response is the
  * account as it now stands rather than anything about the file that was sent.
  */
-export const uploadAvatar = async (file: File): Promise<AuthenticatedUser> => {
+export const uploadAvatar = async (
+    file: File,
+    crop?: AvatarCrop
+): Promise<AuthenticatedUser> => {
     const body = new FormData()
     body.append('avatar', file)
+
+    if (crop) {
+        body.append('crop_x', String(crop.x))
+        body.append('crop_y', String(crop.y))
+        body.append('crop_size', String(crop.size))
+    }
 
     const route = AvatarController.store()
     const { data } = await axios.request<DataResponse<any>>({
@@ -63,7 +82,9 @@ export const uploadAvatar = async (file: File): Promise<AuthenticatedUser> => {
 }
 
 export const removeAvatar = async (): Promise<AuthenticatedUser> => {
-    const { data } = await apiFetch<DataResponse<any>>(AvatarController.destroy())
+    const { data } = await apiFetch<DataResponse<any>>(
+        AvatarController.destroy()
+    )
 
     return rawDataToAuthenticatedUser(data)
 }

@@ -18,3 +18,12 @@ export const summarizeAddresses = (addresses: Address[]): string => {
         addresses.length === 1 ? 'address' : 'addresses'
     }`
 }
+
+export type VersionFilter = AddressVersion | 'all'
+
+/** How many of each version a collection holds. */
+export const countVersions = (addresses: Address[]) => {
+    const ipv4 = addresses.filter(a => a.version === AddressVersion.IPv4).length
+
+    return { ipv4, ipv6: addresses.length - ipv4 }
+}

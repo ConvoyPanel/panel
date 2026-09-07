@@ -1,6 +1,5 @@
+import { searchSchema } from '@/routes/_app/_dashboard/account/security.tsx'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-
-import { searchSchema } from '@/routes/_app/account/security.tsx'
 
 /**
  * Security moved into `/account`. Kept so a bookmark, or a link from before the

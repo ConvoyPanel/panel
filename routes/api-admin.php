@@ -256,6 +256,7 @@ Route::prefix('/address-block-groups')->group(function () {
             Route::get('/addresses', [Admin\AddressController::class, 'index']);
             Route::post('/addresses/generate', [Admin\AddressController::class, 'generate']);
             Route::post('/addresses/bulk', [Admin\AddressController::class, 'bulk']);
+            Route::get('/addresses/map', [Admin\AddressController::class, 'map']);
             Route::patch('/addresses/{address}', [Admin\AddressController::class, 'update']);
             Route::post('/addresses/{address}/reserve', [Admin\AddressController::class, 'reserve']);
             Route::delete('/addresses/{address}/reserve', [Admin\AddressController::class, 'unreserve']);
@@ -334,6 +335,11 @@ Route::post(
     '/users/{user}/generate-sso-token',
     [Admin\UserController::class, 'getSSOToken'],
 );
+
+// Re-issuing invalidates whatever link was outstanding, so "resend" and "revoke, then send a
+// new one" are the same operation — which is what makes a forwarded link recoverable.
+Route::post('/users/{user}/invite', [Admin\UserController::class, 'invite']);
+Route::delete('/users/{user}/invite', [Admin\UserController::class, 'revokeInvite']);
 
 /*
  * One account's credentials, from the admin side: list them, and take them away.
@@ -446,6 +452,30 @@ Route::prefix('/settings')->group(function () {
     Route::put(
         '/anchor',
         [Admin\Settings\AnchorSettingsController::class, 'update'],
+    );
+
+    Route::get(
+        '/account',
+        [Admin\Settings\AccountSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/account',
+        [Admin\Settings\AccountSettingsController::class, 'update'],
+    );
+
+    Route::get(
+        '/mail',
+        [Admin\Settings\MailSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/mail',
+        [Admin\Settings\MailSettingsController::class, 'update'],
+    );
+    // Sends through the *submitted* body rather than what is stored, so credentials can be
+    // proven before they are saved. POST because it has a side effect and is not idempotent.
+    Route::post(
+        '/mail/test',
+        [Admin\Settings\MailSettingsController::class, 'test'],
     );
 });
 

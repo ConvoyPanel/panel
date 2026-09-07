@@ -28,6 +28,11 @@ _ide_*.php
 stats.html
 .fleet
 lang/php_*.json
+# The email build's own dependency tree and its design-review page. The
+# compiled views under resources/views/mail ARE committed, so a deploy never
+# needs Node to render mail.
+/emails/node_modules
+/emails/preview
 /resources/scripts/routeTree.gen.ts
 /resources/scripts/wayfinder
 /resources/scripts/types/generated.d.ts

@@ -90,8 +90,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function avatarUrl(): ?string
     {
+        // `avatar_path` already carries the `avatars/` prefix the serving route
+        // matches on, so it is the whole path -- not a segment to prepend to.
         return $this->avatar_path
-            ? url("/avatars/{$this->avatar_path}")
+            ? url("/{$this->avatar_path}")
             : null;
     }
 

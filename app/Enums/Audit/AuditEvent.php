@@ -31,6 +31,7 @@ enum AuditEvent: string
     case AUTH_LOGIN_SUCCEEDED = 'auth.login.succeeded';
     case AUTH_LOGIN_FAILED = 'auth.login.failed';
     case AUTH_LOGOUT = 'auth.logout';
+    case AUTH_INVITE_ACCEPTED = 'auth.invite.accepted';
 
     // -----------------------------------------------------------------------------------------
     // Account and credential management. Subject is the User.
@@ -167,11 +168,16 @@ enum AuditEvent: string
     case ADMIN_USER_UPDATED = 'admin.user.updated';
     case ADMIN_USER_DELETED = 'admin.user.deleted';
     case ADMIN_USER_SSO_TOKEN_GENERATED = 'admin.user.sso-token-generated';
+    case ADMIN_USER_INVITED = 'admin.user.invited';
+    case ADMIN_USER_INVITE_REVOKED = 'admin.user.invite-revoked';
     case ADMIN_TOKEN_CREATED = 'admin.token.created';
     case ADMIN_TOKEN_UPDATED = 'admin.token.updated';
     case ADMIN_TOKEN_DELETED = 'admin.token.deleted';
+    case ADMIN_SETTINGS_ACCOUNT_UPDATED = 'admin.settings.account-updated';
     case ADMIN_SETTINGS_ANCHOR_UPDATED = 'admin.settings.anchor-updated';
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
+    case ADMIN_SETTINGS_MAIL_UPDATED = 'admin.settings.mail-updated';
+    case ADMIN_SETTINGS_MAIL_TESTED = 'admin.settings.mail-tested';
 
     // -----------------------------------------------------------------------------------------
     // Presets and templates. Subject is the preset, group, or template.

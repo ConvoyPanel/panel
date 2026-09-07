@@ -31,16 +31,12 @@ class PasswordChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $message = (new MailMessage)
+        // The template decides whether the address gets a row, because whether
+        // it was recorded is a display question. Passing null through is enough.
+        return (new MailMessage)
             ->subject('Your '.config('app.name').' password was changed')
-            ->line('The password on your account was just changed, and every other signed-in device was signed out.');
-
-        if ($this->ipAddress !== null) {
-            $message->line('The change was requested from '.$this->ipAddress.'.');
-        }
-
-        return $message
-            ->line('If you made this change, you can ignore this email.')
-            ->line('If you did not, someone else has your account: reset your password now, and review your active sessions and two-factor settings.');
+            ->view('mail.password-changed', [
+                'ipAddress' => $this->ipAddress,
+            ]);
     }
 }

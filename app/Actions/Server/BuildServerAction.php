@@ -75,7 +75,7 @@ class BuildServerAction
                 'name' => 'fetch-image',
                 'status' => DeploymentStatus::PENDING,
                 'progress_mode' => ProgressMode::DETERMINATE,
-                'progress_total' => (int) $version->size_bytes,
+                'progress_total' => (int) $version->size,
             ],
             [
                 'name' => 'import',

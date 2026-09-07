@@ -150,6 +150,71 @@ class AddressBlock extends Model
     }
 
     /**
+     * Where $ip sits in the block's run of allocatable units, counting from zero.
+     *
+     * This is what lets the address map place a materialized address on the grid without
+     * re-deriving the whole unit sequence: generation writes units in address order, but a
+     * deletion leaves a hole, so position cannot be inferred from row order. GMP because a v6
+     * offset does not fit in a PHP int even when the index does.
+     *
+     * Null when $ip is outside the block, or its index is past what an int can hold.
+     */
+    public function unitIndexOf(string $ip): ?int
+    {
+        $start = inet_pton($this->firstAllocatableAddress());
+        $target = inet_pton($ip);
+
+        if ($start === false || $target === false || strlen($start) !== strlen($target)) {
+            return null;
+        }
+
+        $offset = gmp_sub(gmp_import($target), gmp_import($start));
+
+        if (gmp_sign($offset) < 0) {
+            return null;
+        }
+
+        $index = gmp_div_q($offset, gmp_init((string) $this->unitStride()));
+
+        return gmp_cmp($index, gmp_init((string) PHP_INT_MAX)) > 0
+            ? null
+            : gmp_intval($index);
+    }
+
+    /**
+     * The address of the unit at $index, whether or not a row exists for it.
+     *
+     * The inverse of `unitIndexOf`. The map needs this because a unit is a real position in the
+     * block before anything is generated into it: without an address, an ungenerated cell can only
+     * be labelled by its offset, and "#32" tells an operator nothing they can act on.
+     */
+    public function unitAddressAt(int $index): ?string
+    {
+        $start = inet_pton($this->firstAllocatableAddress());
+
+        if ($start === false || $index < 0) {
+            return null;
+        }
+
+        $value = gmp_add(
+            gmp_import($start),
+            gmp_mul(gmp_init((string) $index), gmp_init((string) $this->unitStride())),
+        );
+
+        // gmp_export drops leading zero bytes (and returns '' for zero), so pad back to the
+        // address width; anything wider has run past the family and is not an address.
+        $bytes = str_pad(gmp_export($value), strlen($start), "\0", STR_PAD_LEFT);
+
+        if (strlen($bytes) !== strlen($start)) {
+            return null;
+        }
+
+        $ip = inet_ntop($bytes);
+
+        return $ip === false ? null : $ip;
+    }
+
+    /**
      * The allocatable unit containing $ip — that is, $ip masked down to the block's output prefix.
      * When the block hands out individual addresses (/32, /128) every unit is one address and this
      * is the identity; when it delegates sub-blocks it answers "which sub-block owns this address".

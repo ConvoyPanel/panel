@@ -1,5 +1,6 @@
 export {
     Field,
+    fieldVariants,
     FieldLabel,
     FieldDescription,
     FieldError,

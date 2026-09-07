@@ -11,16 +11,26 @@ import {
 
 interface Props {
     children: ReactNode
+    /**
+     * Why this row has no actions, when that is a rule rather than an absence.
+     *
+     * A menu that opens onto nothing (or onto only the items that happen to be legal) reads as a
+     * missing feature; a closed menu that says why reads as the rule it is. Given a reason, the
+     * trigger is disabled and carries it as its tooltip and label.
+     */
+    disabledReason?: string
 }
 
-const Actions = ({ children }: Props) => {
+const Actions = ({ children, disabledReason }: Props) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
-                    aria-label='Open menu'
+                    aria-label={disabledReason ?? 'Open menu'}
+                    title={disabledReason}
+                    disabled={!!disabledReason}
                     variant='ghost'
-                    className='ml-auto flex size-8 p-0 data-[state=open]:bg-muted'
+                    className='data-[state=open]:bg-muted ml-auto flex size-8 p-0'
                 >
                     <IconDots className='size-4' aria-hidden='true' />
                 </Button>
@@ -33,12 +43,18 @@ const Actions = ({ children }: Props) => {
 }
 
 export const actionsColumn = <TData,>(
-    children: (data: CellContext<TData, any>) => ReactNode
+    children: (data: CellContext<TData, any>) => ReactNode,
+    /** Returns the reason this row's menu is closed, or undefined when it is open. */
+    disabledReason?: (data: CellContext<TData, any>) => string | undefined
 ): ColumnDef<TData> => {
     return {
         id: 'actions',
         cell: data => {
-            return <Actions>{children(data)}</Actions>
+            return (
+                <Actions disabledReason={disabledReason?.(data)}>
+                    {children(data)}
+                </Actions>
+            )
         },
         size: 40,
     }

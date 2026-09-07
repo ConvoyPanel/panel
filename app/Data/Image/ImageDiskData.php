@@ -27,13 +27,21 @@ class ImageDiskData extends Data
         /** Path on the images filesystem disk, or null when `url` is set. */
         public ?string $path,
         public string $sha256,
-        /** Bytes on the wire -- what a node has to transfer. Never mebibytes:
-         * this is compared against the length of a file a node downloads. */
+        /**
+         * Bytes on the wire -- what a node has to transfer.
+         *
+         * Bytes, not mebibytes, because this lives inside a JSON column and
+         * `StorageSizeCast` cannot reach in there. The `size` column beside it
+         * *is* cast, and is the sum of these.
+         */
         public int $size,
         /**
-         * Provisioned size once imported, in bytes. The floor a plan's disk must
-         * clear, so it is never rounded: a MiB of slack here is a build that
-         * fails at import.
+         * Provisioned size once imported, in bytes.
+         *
+         * The floor a plan's disk has to clear: an imported disk arrives at
+         * this size and `qm disk resize` only grows. Understating it would let
+         * a plan through and silently hand the tenant a larger disk than they
+         * bought, so it is kept exact rather than rounded to whole mebibytes.
          */
         public int $virtualSize,
         public string $format = 'qcow2',
