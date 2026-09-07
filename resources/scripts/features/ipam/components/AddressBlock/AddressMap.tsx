@@ -242,11 +242,10 @@ const AddressMap = ({
                 `clip-slack` pads the clip box so a selected cell's ring — which sits outside the
                 cell — is not shaved off at the container's edge; see docs/card-design.md. */}
             <div className={'clip-slack max-h-[28rem] overflow-auto'}>
-                <div
-                    className={'flex w-fit flex-col gap-[3px]'}
-                    /* Dragging across cells would otherwise select the row labels as text. */
-                    style={{ userSelect: drag ? 'none' : undefined }}
-                >
+                {/* `select-none` unconditionally: a drag begins before React knows it is one, so
+                    gating it on drag state still lets the first movement highlight the row labels
+                    and everything the pointer crosses on its way. */}
+                <div className={'flex w-fit flex-col gap-[3px] select-none'}>
                     {rows.map((row, rowIndex) => (
                         <div
                             key={rowIndex}

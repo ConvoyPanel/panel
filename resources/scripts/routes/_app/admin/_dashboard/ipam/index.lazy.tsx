@@ -123,14 +123,14 @@ function IpamIndex() {
         {
             id: 'utilisation',
             header: 'Utilisation',
+            // Declared so the column claims the room the reading needs. Left to auto-layout it
+            // was squeezed to the header's width and the subline broke mid-phrase.
+            size: 260,
             meta: {
                 skeletonWidth: '8rem',
             },
             cell: ({ row }) => (
-                <AddressCapacityMeter
-                    capacity={row.original.capacity}
-                    className={'w-40'}
-                />
+                <AddressCapacityMeter capacity={row.original.capacity} />
             ),
         },
         {
