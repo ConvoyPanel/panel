@@ -103,9 +103,10 @@ enum AuditEvent: string
     case ADMIN_NODE_CREATED = 'admin.node.created';
     case ADMIN_NODE_UPDATED = 'admin.node.updated';
     case ADMIN_NODE_DELETED = 'admin.node.deleted';
-    case ADMIN_NODE_ISO_CREATED = 'admin.node.iso-created';
-    case ADMIN_NODE_ISO_UPDATED = 'admin.node.iso-updated';
-    case ADMIN_NODE_ISO_DELETED = 'admin.node.iso-deleted';
+    case ADMIN_ISO_CREATED = 'admin.iso.created';
+    case ADMIN_ISO_UPDATED = 'admin.iso.updated';
+    case ADMIN_ISO_DELETED = 'admin.iso.deleted';
+    case ADMIN_ISO_UPLOADED = 'admin.iso.uploaded';
     case ADMIN_NODE_INTERFACE_CREATED = 'admin.node.interface-created';
     case ADMIN_NODE_INTERFACE_UPDATED = 'admin.node.interface-updated';
     case ADMIN_NODE_INTERFACE_DELETED = 'admin.node.interface-deleted';
@@ -176,12 +177,16 @@ enum AuditEvent: string
     case ADMIN_SERVER_PRESET_CREATED = 'admin.server-preset.created';
     case ADMIN_SERVER_PRESET_UPDATED = 'admin.server-preset.updated';
     case ADMIN_SERVER_PRESET_DELETED = 'admin.server-preset.deleted';
-    case ADMIN_TEMPLATE_GROUP_CREATED = 'admin.template-group.created';
-    case ADMIN_TEMPLATE_GROUP_UPDATED = 'admin.template-group.updated';
-    case ADMIN_TEMPLATE_GROUP_DELETED = 'admin.template-group.deleted';
-    case ADMIN_TEMPLATE_CREATED = 'admin.template.created';
-    case ADMIN_TEMPLATE_UPDATED = 'admin.template.updated';
-    case ADMIN_TEMPLATE_DELETED = 'admin.template.deleted';
+    case ADMIN_IMAGE_GROUP_CREATED = 'admin.image-group.created';
+    case ADMIN_IMAGE_GROUP_UPDATED = 'admin.image-group.updated';
+    case ADMIN_IMAGE_GROUP_DELETED = 'admin.image-group.deleted';
+    case ADMIN_IMAGE_CREATED = 'admin.image.created';
+    case ADMIN_IMAGE_UPDATED = 'admin.image.updated';
+    case ADMIN_IMAGE_DELETED = 'admin.image.deleted';
+    case ADMIN_IMAGE_VERSION_CREATED = 'admin.image-version.created';
+    case ADMIN_IMAGE_VERSION_UPDATED = 'admin.image-version.updated';
+    case ADMIN_IMAGE_VERSION_DELETED = 'admin.image-version.deleted';
+    case ADMIN_IMAGE_UPLOADED = 'admin.image.uploaded';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed

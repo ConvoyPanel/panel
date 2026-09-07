@@ -1,8 +1,7 @@
-import { toneDotClass } from '@/features/anchors/status.ts'
 import type { AnchorEnrollment } from '@/features/anchors/types.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
 import { getApiErrorMessage } from '@/utils/http.ts'
-import { IconCheck, IconCopy } from '@tabler/icons-react'
+import { IconCopy } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 
@@ -11,8 +10,6 @@ import { CardContent } from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
-    /** What is being waited for, named in the waiting line. */
-    label: string
     /** Shown once it arrives, when the build is known. */
     version?: string | null
     /**
@@ -70,11 +67,16 @@ const useCountdown = (expiresAt?: string) => {
 /**
  * The second half of adding an anchor: the command to run on the box, and the
  * wait for it to call home. Rendered both as step 2 of the create dialog and on
- * its own from the row menu, so it owns the body and footer rather than a
- * dialog of its own.
+ * its own from the row menu, so it owns the body rather than a dialog of its
+ * own.
+ *
+ * There is deliberately no "waiting for…" line and no status dot. Nothing has
+ * happened yet, the surrounding page already said what is being waited for, and
+ * the arrival announces itself as its own card -- a sentence that never changes
+ * is not a status, and a dot only earns its keep in a list where a column of
+ * them can be scanned.
  */
 const EnrollmentPanel = ({
-    label,
     version,
     issueToken,
     done,
@@ -116,119 +118,115 @@ const EnrollmentPanel = ({
     }, [enrolled])
 
     return (
-        <>
-            <CardContent className='flex flex-col gap-4'>
-                {issue.isPending && <Skeleton className='h-9 w-full' />}
+        <CardContent className={'flex flex-col gap-2.5'}>
+            {issue.isPending && <Skeleton className={'h-12 w-full'} />}
 
-                {issue.isError && (
-                    <div className='flex items-center justify-between gap-3'>
-                        <p className='text-destructive text-sm'>
-                            {getApiErrorMessage(
-                                issue.error,
-                                'Could not create an install command.'
-                            )}
-                        </p>
-                        <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() => issue.mutate()}
+            {issue.isError && (
+                <div className={'flex items-center justify-between gap-3'}>
+                    <p className={'text-destructive text-sm'}>
+                        {getApiErrorMessage(
+                            issue.error,
+                            'Could not create an install command.'
+                        )}
+                    </p>
+                    <Button
+                        variant={'outline'}
+                        size={'sm'}
+                        onClick={() => issue.mutate()}
+                    >
+                        Try again
+                    </Button>
+                </div>
+            )}
+
+            {issue.data && (
+                <>
+                    {/* An inset field rather than a filled slab. This is one
+                        line pasted once, and a black block was the loudest
+                        object on the screen -- it is still not a text input,
+                        so it stays a `code` with no affordance to type into. */}
+                    <div
+                        className={
+                            'bg-muted/70 flex items-start gap-2 rounded-lg border p-2.5 pl-3'
+                        }
+                    >
+                        <code
+                            className={
+                                'min-w-0 flex-1 py-0.5 font-mono text-xs leading-relaxed break-all'
+                            }
                         >
-                            Try again
+                            <span
+                                className={'text-muted-foreground select-none'}
+                            >
+                                ${' '}
+                            </span>
+                            {issue.data.command}
+                        </code>
+                        <Button
+                            variant={'ghost'}
+                            size={'sm'}
+                            aria-label={'Copy install command'}
+                            className={'text-muted-foreground shrink-0'}
+                            onClick={() => copy(issue.data.command)}
+                        >
+                            <IconCopy className={'size-3.5'} />
+                            Copy
                         </Button>
                     </div>
-                )}
 
-                {issue.data && (
-                    <>
-                        {/* A terminal block rather than a text input: this is a
-                            line to paste into a root shell, and dressing it as
-                            a field invited people to type into it. */}
-                        <div className='bg-foreground flex items-start justify-between gap-3 rounded-xl p-4'>
-                            <code className='text-background/90 min-w-0 font-mono text-xs leading-relaxed break-all'>
-                                <span className='text-background/45 select-none'>
-                                    ${' '}
-                                </span>
-                                {issue.data.command}
-                            </code>
-                            <Button
-                                variant='outline'
-                                size='sm'
-                                aria-label='Copy install command'
-                                className='text-background/90 border-background/20 bg-background/10 hover:bg-background/20 hover:text-background shrink-0'
-                                onClick={() => copy(issue.data.command)}
-                            >
-                                <IconCopy className='size-3.5' />
-                                Copy
-                            </Button>
-                        </div>
-
-                        {!enrolled && remaining !== null && (
-                            <p className='text-muted-foreground text-xs tabular-nums'>
-                                {remaining > 0 ? (
-                                    <>Expires in {format(remaining)}</>
-                                ) : (
-                                    <>
-                                        This command has expired. Reissue it to
-                                        finish setup.
-                                    </>
-                                )}
-                            </p>
-                        )}
-
+                    {/*
+                     * One line under the field, hung off its trailing edge so
+                     * it reads against the Copy button rather than opening a
+                     * second left-hand column. Whatever is true right now sits
+                     * on the right; anything that needs saying alongside it is
+                     * pushed to the left with `mr-auto`.
+                     */}
+                    <div
+                        className={
+                            'text-muted-foreground flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs'
+                        }
+                    >
                         {/* Enrolling rotates the secret, which is the point --
                             it is how a leaked anchor.toml is revoked -- but it
                             means running this against a working anchor cuts it
                             off until it finishes. */}
                         {enrolled && (
-                            <p className='text-muted-foreground text-xs'>
+                            <span className={'mr-auto'}>
                                 Running this issues a new secret; the current
                                 install stops working until it re-enrolls.
-                            </p>
-                        )}
-                    </>
-                )}
-
-                <div className='bg-muted/50 flex items-center gap-2.5 rounded-lg border p-3 text-sm'>
-                    {enrolled ? (
-                        <>
-                            <IconCheck
-                                className='text-success size-4 shrink-0'
-                                aria-hidden
-                            />
-                            <span>Enrolled</span>
-                            {/* The version is the answer to a different
-                                question than "did it work", so it sits at the
-                                far edge rather than trailing the sentence. */}
-                            {version && (
-                                <span className='text-muted-foreground ml-auto font-mono text-xs tabular-nums'>
-                                    {version}
-                                </span>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <span
-                                className={`size-2 shrink-0 rounded-full ${toneDotClass.waiting}`}
-                                aria-hidden
-                            />
-                            <span>
-                                Waiting for{' '}
-                                <span className='font-medium'>{label}</span>{' '}
-                                to call home…
                             </span>
-                        </>
-                    )}
-                </div>
+                        )}
 
-                {!enrolled && (
-                    <p className='text-muted-foreground text-xs'>
-                        You can close this — the command keeps working until it
-                        expires, and the machine shows up in the queue whenever
-                        it runs.
-                    </p>
-                )}
-            </CardContent>
-        </>
+                        {enrolled ? (
+                            <span>
+                                <span className={'text-success'}>Enrolled</span>
+                                {/* The version answers a different question
+                                    than "did it work", so it trails the state
+                                    as an aside rather than joining it. */}
+                                {version && <> · </>}
+                                {version && (
+                                    <span className={'tabular-nums'}>
+                                        {version}
+                                    </span>
+                                )}
+                            </span>
+                        ) : (
+                            remaining !== null &&
+                            (remaining > 0 ? (
+                                <span className={'tabular-nums'}>
+                                    expires in {format(remaining)}
+                                </span>
+                            ) : (
+                                <span className={'text-destructive'}>
+                                    This command has expired. Reissue it to
+                                    finish setup.
+                                </span>
+                            ))
+                        )}
+                    </div>
+                </>
+            )}
+        </CardContent>
     )
 }
 

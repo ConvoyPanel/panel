@@ -190,11 +190,6 @@ class Server extends Model
         return $this->hasMany(Address::class);
     }
 
-    public function template(): HasOne
-    {
-        return $this->hasOne(Template::class);
-    }
-
     /**
      * @return HasMany<Backup, $this>
      */

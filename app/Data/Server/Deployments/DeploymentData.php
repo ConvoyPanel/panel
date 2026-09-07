@@ -2,7 +2,7 @@
 
 namespace App\Data\Server\Deployments;
 
-use App\Data\Server\Templates\TemplateData;
+use App\Data\Image\ImageDefinitionData;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
 use App\Models\Deployment;
@@ -20,14 +20,15 @@ class DeploymentData extends Data
     public function __construct(
         public int $id,
         public int $serverId,
-        public ?int $templateId,
+        public ?int $imageDefinitionId,
+        public ?int $imageVersionId,
         public DeploymentStatus $status,
         public DeploymentType $type,
         public bool $startOnCompletion,
         public CarbonImmutable $requestedAt,
         public ?CarbonImmutable $completedAt,
         #[LoadRelation]
-        public Lazy|TemplateData|null $template,
+        public Lazy|ImageDefinitionData|null $image,
         #[LoadRelation]
         /** @var Lazy|DataCollection<int, DeploymentStepData> */
         public Lazy|DataCollection $steps,
@@ -38,7 +39,8 @@ class DeploymentData extends Data
         return new self(
             id: $deployment->id,
             serverId: $deployment->server_id,
-            templateId: $deployment->template_id,
+            imageDefinitionId: $deployment->image_definition_id,
+            imageVersionId: $deployment->image_version_id,
             status: $deployment->status,
             type: $deployment->type,
             startOnCompletion: (bool) $deployment->start_on_completion,
@@ -46,11 +48,11 @@ class DeploymentData extends Data
             completedAt: $deployment->completed_at
                 ? CarbonImmutable::parse($deployment->completed_at)
                 : null,
-            template: Lazy::whenLoaded(
-                'template',
+            image: Lazy::whenLoaded(
+                'imageDefinition',
                 $deployment,
-                fn () => $deployment->template
-                    ? TemplateData::from($deployment->template)
+                fn () => $deployment->imageDefinition
+                    ? ImageDefinitionData::from($deployment->imageDefinition)
                     : null,
             ),
             steps: Lazy::whenLoaded(

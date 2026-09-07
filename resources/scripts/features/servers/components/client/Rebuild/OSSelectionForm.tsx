@@ -1,11 +1,11 @@
-import TemplateField from '@/features/servers/components/client/Rebuild/TemplateField'
-import TemplateGroupField from '@/features/servers/components/client/Rebuild/TemplateGroupField'
+import ImageField from '@/features/servers/components/client/Rebuild/ImageField'
+import ImageGroupField from '@/features/servers/components/client/Rebuild/ImageGroupField'
 import {
     type ReinstallServerInput,
     reinstallServer,
     reinstallServerSchema,
     serverQueries,
-    useTemplateGroups,
+    useImageGroups,
 } from '@/features/servers/detail/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Server, ServerLifecycle } from '@/types/server'
@@ -31,8 +31,8 @@ interface OSSelectionFormProps {
 }
 
 const defaultValues: ReinstallServerInput = {
-    templateGroupUuid: '',
-    templateUuid: '',
+    imageGroupUuid: '',
+    imageUuid: '',
     accountPassword: '',
     accountPasswordConfirmation: '',
     startOnCompletion: true,
@@ -49,28 +49,28 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
     const mutateServer = useQueryMutator<Server>(
         serverQueries.detail(server.uuid).queryKey
     )
-    const { data: templateGroups } = useTemplateGroups(server.uuid)
+    const { data: imageGroups } = useImageGroups(server.uuid)
 
     const form = useForm<ReinstallServerInput>({
         resolver: zodResolver(reinstallServerSchema),
         defaultValues,
     })
 
-    const templateGroupUuid = form.watch('templateGroupUuid')
+    const imageGroupUuid = form.watch('imageGroupUuid')
 
     const selectedGroup = useMemo(
-        () => templateGroups?.find(group => group.uuid === templateGroupUuid),
-        [templateGroups, templateGroupUuid]
+        () => imageGroups?.find(group => group.uuid === imageGroupUuid),
+        [imageGroups, imageGroupUuid]
     )
 
     useEffect(() => {
-        form.setValue('templateUuid', '')
-    }, [templateGroupUuid, form])
+        form.setValue('imageUuid', '')
+    }, [imageGroupUuid, form])
 
     const { mutateAsync: trigger } = useMutation({
         mutationFn: (data: ReinstallServerInput) =>
             reinstallServer(server.uuid, {
-                templateUuid: data.templateUuid,
+                imageUuid: data.imageUuid,
                 accountPassword: data.accountPassword,
                 startOnCompletion: data.startOnCompletion,
             }),
@@ -118,12 +118,12 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
                 <FieldGroup>
                     <Field>
                         <FieldTitle>Operating system</FieldTitle>
-                        <TemplateGroupField groups={templateGroups} />
+                        <ImageGroupField groups={imageGroups} />
                     </Field>
 
                     <Field>
                         <FieldTitle>Version</FieldTitle>
-                        <TemplateField group={selectedGroup} />
+                        <ImageField group={selectedGroup} />
                     </Field>
 
                     <InputForm

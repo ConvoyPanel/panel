@@ -111,8 +111,8 @@ const adminGroups: NavGroup[] = [
             },
             {
                 icon: IconBoxMargin,
-                label: 'Templates',
-                path: '/admin/templates',
+                label: 'Images',
+                path: '/admin/images',
             },
             {
                 icon: IconKey,

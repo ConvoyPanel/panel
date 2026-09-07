@@ -22,11 +22,35 @@ const BandwidthUsageCard = () => {
             ? (server.bandwidth.usage / server.bandwidth.limit) * 100
             : 0
 
+    // Stored as bytes per second; the admin form takes it in MB/s and converts.
+    const speedLimit = server?.bandwidth.speedLimit ?? null
+    const speed = byteSize(speedLimit ?? 0, { precision: 0 })
+
     return (
         <StatisticCard
             title={'Bandwidth Allowance'}
             icon={IconWifi}
-            className={'col-span-2 @md:col-span-1'}
+            className={'col-span-2 @5xl:col-span-4'}
+            context={
+                server ? (
+                    <>
+                        {isUnlimited ? (
+                            'of an unlimited allowance'
+                        ) : (
+                            <>
+                                of {limit.value} {limit.unit} &#x2022;{' '}
+                                {bandwidthUsedPercent.toFixed(0)}%
+                            </>
+                        )}
+                        {' • '}
+                        {speedLimit === null
+                            ? 'no speed cap'
+                            : `capped at ${speed.value} ${speed.unit}/s`}
+                    </>
+                ) : undefined
+            }
+            /* An unlimited allowance has no denominator, so there is no
+               proportion to draw -- a bar would have to invent one. */
             meter={
                 !isUnlimited && (
                     <LinearProgressBar
@@ -36,24 +60,12 @@ const BandwidthUsageCard = () => {
                 )
             }
         >
-            <p>
-                <span
-                    className={
-                        'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
-                    }
-                >
-                    {used.value} {used.unit}
-                </span>
-                <span className={'text-muted-foreground block text-sm'}>
-                    {isUnlimited ? (
-                        'used of an unlimited allowance'
-                    ) : (
-                        <>
-                            used of {limit.value} {limit.unit} &#x2022;{' '}
-                            {bandwidthUsedPercent.toFixed(0)}%
-                        </>
-                    )}
-                </span>
+            <p
+                className={
+                    'text-lg font-semibold tracking-tight @sm:text-xl @xl:text-2xl'
+                }
+            >
+                {used.value} {used.unit}
             </p>
         </StatisticCard>
     )

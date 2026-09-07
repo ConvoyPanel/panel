@@ -32,8 +32,8 @@ const rawDataToSettings = (raw: any): ServerPresetSettings => ({
     addressesIpv6Count: raw?.addressesIpv6Count ?? null,
     deferredOsSelection: raw?.deferredOsSelection ?? null,
     shouldCreateVm: raw?.shouldCreateVm ?? null,
-    templateGroupUuid: raw?.templateGroupUuid ?? null,
-    templateUuid: raw?.templateUuid ?? null,
+    imageGroupUuid: raw?.imageGroupUuid ?? null,
+    imageUuid: raw?.imageUuid ?? null,
     startOnCompletion: raw?.startOnCompletion ?? null,
 })
 

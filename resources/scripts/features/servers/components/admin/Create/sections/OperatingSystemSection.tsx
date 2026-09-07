@@ -1,5 +1,5 @@
-import TemplateGroupPicker from '@/features/servers/components/admin/Create/pickers/TemplateGroupPicker'
-import TemplatePicker from '@/features/servers/components/admin/Create/pickers/TemplatePicker'
+import ImageGroupPicker from '@/features/servers/components/admin/Create/pickers/ImageGroupPicker'
+import ImagePicker from '@/features/servers/components/admin/Create/pickers/ImagePicker'
 import { useWatch } from 'react-hook-form'
 
 import {
@@ -14,17 +14,21 @@ import { CheckboxForm, FieldFold, InputForm } from '@/components/ui/Forms'
 /**
  * What gets installed.
  *
- * The image and its password are per-server answers; the three switches that
- * decide *whether* anything is installed are almost always left alone, so they
- * fold into a line describing what will happen. The boxed `CheckboxForm` stays
- * boxed — this is a card where the operator is choosing, and a bare switch row
- * among the pickers would read as a different design.
+ * The three switches deciding *whether* anything is installed lead the card even
+ * though they are almost always left alone, because they are what puts the image
+ * and its password on screen at all — asking for a root password above the
+ * checkbox that governs whether it is asked for read backwards. They are folded
+ * into a line describing what will happen, so leading with them costs one row.
+ *
+ * The boxed `CheckboxForm` stays boxed — this is a card where the operator is
+ * choosing, and a bare switch row among the pickers would read as a different
+ * design.
  */
 const OperatingSystemSection = () => {
     const deferredOsSelection = useWatch({ name: 'deferredOsSelection' })
     const shouldCreateVm = useWatch({ name: 'shouldCreateVm' })
     const startOnCompletion = useWatch({ name: 'startOnCompletion' })
-    const templateGroupId = useWatch({ name: 'templateGroupId' })
+    const imageGroupId = useWatch({ name: 'imageGroupId' })
 
     const summary = deferredOsSelection
         ? 'The owner picks the OS · nothing is installed now'
@@ -39,34 +43,11 @@ const OperatingSystemSection = () => {
             <CardHeader>
                 <CardTitle>Operating system</CardTitle>
                 <CardDescription>
-                    The image this server is built from, and what happens once
-                    it is.
+                    What happens when this server is created, and the image it
+                    is built from.
                 </CardDescription>
             </CardHeader>
             <CardContent className={'space-y-4'}>
-                {!deferredOsSelection && shouldCreateVm && (
-                    <>
-                        <div
-                            className={
-                                'grid grid-cols-1 gap-3 @2xl:grid-cols-2'
-                            }
-                        >
-                            <TemplateGroupPicker />
-                            <TemplatePicker
-                                templateGroupId={templateGroupId || null}
-                            />
-                        </div>
-
-                        <InputForm
-                            name={'accountPassword'}
-                            label={'Root password'}
-                            type={'password'}
-                            autoComplete={'new-password'}
-                            description={'Set on the guest at install.'}
-                        />
-                    </>
-                )}
-
                 <FieldFold
                     fields={[
                         'deferredOsSelection',
@@ -109,6 +90,29 @@ const OperatingSystemSection = () => {
                         )}
                     </div>
                 </FieldFold>
+
+                {!deferredOsSelection && shouldCreateVm && (
+                    <>
+                        <div
+                            className={
+                                'grid grid-cols-1 gap-3 @2xl:grid-cols-2'
+                            }
+                        >
+                            <ImageGroupPicker />
+                            <ImagePicker
+                                imageGroupId={imageGroupId || null}
+                            />
+                        </div>
+
+                        <InputForm
+                            name={'accountPassword'}
+                            label={'Root password'}
+                            type={'password'}
+                            autoComplete={'new-password'}
+                            description={'Set on the guest at install.'}
+                        />
+                    </>
+                )}
             </CardContent>
         </Card>
     )

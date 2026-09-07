@@ -2,59 +2,42 @@
 
 namespace App\Jobs\Node;
 
-use App\Enums\Activity\TaskExitStatus;
-use App\Enums\Activity\TaskStatus;
-use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\ISO;
-use App\Models\Node;
-use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Retired. Kept for one release so queued downloads do not strand.
+ *
+ * Adding an ISO used to start a download onto one node's storage, and this
+ * watched that task to decide whether the row was usable. Nothing downloads at
+ * add time now: a library entry is complete when it exists, and the transfer
+ * happens on the node that first mounts it.
+ *
+ * A payload queued by the previous release names a row whose `is_successful`
+ * column no longer exists, so there is nothing left to record. It logs and
+ * returns rather than throwing: unlike a stranded install, nobody is waiting on
+ * this, and failing it loudly would only fill the failed-jobs table.
+ *
+ * Delete in the release after next, once no queue can still hold one.
+ */
 class MonitorIsoDownloadJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function retryUntil(): Carbon
-    {
-        return now()->addDay();
-    }
+    public int $tries = 1;
 
     public function __construct(protected int $isoId, protected string $upid) {}
 
-    public function middleware()
+    public function handle(): void
     {
-        return [new ExpiringWithoutOverlapping("node:iso.download#{$this->isoId}")];
-    }
-
-    public function handle(ProxmoxActivityClient $client): void
-    {
-        $iso = ISO::findOrFail($this->isoId);
-        /** @var Node $node */
-        $node = $iso->storage->nodes()->firstOrFail();
-
-        $task = $client->setNode($node)->getStatus($this->upid);
-
-        if ($task->status === TaskStatus::RUNNING) {
-            $this->release(3);
-
-            return;
-        }
-
-        if ($task->exitStatus === TaskExitStatus::OK) {
-            $iso->update([
-                'is_successful' => true,
-                'completed_at' => Carbon::now(),
-            ]);
-        } else {
-            $iso->update([
-                'is_successful' => false,
-                'completed_at' => Carbon::now(),
-            ]);
-        }
+        Log::info('Discarding an ISO download monitor queued before the library moved into the panel.', [
+            'iso' => $this->isoId,
+            'exists' => ISO::whereKey($this->isoId)->exists(),
+        ]);
     }
 }

@@ -91,11 +91,11 @@ class ServerPresetRequest extends BaseApiRequest
 
             'settings.deferred_os_selection' => 'nullable|boolean',
             'settings.should_create_vm' => 'nullable|boolean',
-            // No `TemplateFitsStorage` / `TemplateIsAvailable` here: both judge a
-            // template against the storage and node a server is being built on,
+            // No `ImageFitsStorage` / `ImageIsAvailable` here: both judge an
+            // image against the storage and node a server is being built on,
             // and a preset is saved long before that build exists.
-            'settings.template_uuid' => 'nullable|string|exists:templates,uuid',
-            'settings.template_group_uuid' => 'nullable|string|exists:template_groups,uuid',
+            'settings.image_uuid' => 'nullable|string|exists:image_definitions,uuid',
+            'settings.image_group_uuid' => 'nullable|string|exists:image_groups,uuid',
             'settings.start_on_completion' => 'nullable|boolean',
         ];
     }

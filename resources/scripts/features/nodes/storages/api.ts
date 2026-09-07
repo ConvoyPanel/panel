@@ -3,7 +3,6 @@ import {
     rawDataToStorageProxmox,
 } from '@/features/nodes/transforms.ts'
 import { NodeStorage } from '@/features/nodes/types.ts'
-import IsoController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/IsoController'
 import StorageController from '@/wayfinder/actions/App/Http/Controllers/Admin/Nodes/StorageController'
 import ServerController from '@/wayfinder/actions/App/Http/Controllers/Admin/ServerController'
 import StorageBackupController from '@/wayfinder/actions/App/Http/Controllers/Admin/StorageBackupController'
@@ -59,8 +58,6 @@ const deleteBackupRoute =
     StorageBackupController.destroy['/api/admin/backups/{backup}']
 // An ISO's delete route is node-scoped and a server's is not; both live here
 // because the storage detail page is the only screen that calls them.
-const deleteIsoRoute =
-    IsoController.destroy['/api/admin/nodes/{node}/isos/{iso}']
 const deleteServerRoute =
     ServerController.destroy['/api/admin/servers/{server}']
 const backupOrderRoute =
@@ -115,12 +112,6 @@ export const deleteBackup = async (uuid: string): Promise<void> => {
     await apiFetch(deleteBackupRoute(uuid))
 }
 
-export const deleteIso = async (
-    nodeId: number,
-    uuid: string
-): Promise<void> => {
-    await apiFetch(deleteIsoRoute([nodeId, uuid]))
-}
 
 export const deleteServer = async (uuid: string): Promise<void> => {
     await apiFetch(deleteServerRoute(uuid))

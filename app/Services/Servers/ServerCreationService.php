@@ -3,7 +3,6 @@
 namespace App\Services\Servers;
 
 use App\Actions\Server\BuildServerAction;
-use App\Data\Cluster\ServerResourceData;
 use App\Enums\Network\AddressVersion;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\DeploymentType;
@@ -14,11 +13,10 @@ use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueUuidComboException;
 use App\Exceptions\Service\Server\Allocation\NoUniqueVmidException;
 use App\Models\Address;
+use App\Models\ImageDefinition;
 use App\Models\Node;
 use App\Models\Server;
-use App\Models\Template;
 use App\Services\Addresses\AddressAllocationService;
-use App\Services\Proxmox\Cluster\ProxmoxResourceClient;
 use App\Services\Proxmox\Node\ProxmoxAllocationClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
@@ -39,7 +37,6 @@ class ServerCreationService
         private ServerNetworkService $networkService,
         private BuildServerAction $buildServerAction,
         private ProxmoxAllocationClient $allocationClient,
-        private ProxmoxResourceClient $resourceClient,
         private AddressAllocationService $addressAllocationService,
     ) {}
 
@@ -129,10 +126,16 @@ class ServerCreationService
             }
 
             if (! $data['deferred_os_selection']) {
-                $templateUuid = Arr::get($data, 'template_uuid');
+                $definition = filled($imageUuid = Arr::get($data, 'image_uuid'))
+                    ? ImageDefinition::where('uuid', $imageUuid)->first()
+                    : null;
 
                 $deployment = $server->deployments()->create([
-                    'template_id' => filled($templateUuid) ? Template::where('uuid', $templateUuid)->value('id') : null,
+                    // Both are recorded: the definition is what was chosen, the
+                    // version is what the server was actually built from. A
+                    // later rebuild of that image cannot rewrite this answer.
+                    'image_definition_id' => $definition?->id,
+                    'image_version_id' => $definition?->latestVersion()?->id,
                     'type' => $data['should_create_vm'] ? DeploymentType::INSTALL : DeploymentType::IMPORT,
                     'status' => DeploymentStatus::PENDING,
                     'start_on_completion' => $data['start_on_completion'],
@@ -144,27 +147,6 @@ class ServerCreationService
 
             return $server;
         });
-    }
-
-    /**
-     * @throws RequestException
-     * @throws ConnectionException
-     */
-    public function isTemplateAvailable(Node $node, string $templateUuid): bool
-    {
-        return filled($this->getTemplate($node, $templateUuid));
-    }
-
-    /**
-     * @throws RequestException
-     * @throws ConnectionException
-     */
-    public function getTemplate(Node $node, string $templateUuid): ?ServerResourceData
-    {
-        return $this->resourceClient->setNode($node)->getResources()
-            ->where('vmid', Template::where('uuid', $templateUuid)->value('vmid'))
-            ->where('isTemplate', true)
-            ->first();
     }
 
     /**

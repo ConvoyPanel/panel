@@ -118,11 +118,6 @@ export const storageCapacity = (storage: Storage): StorageCapacityView => {
                 color: 'var(--storage-backups)',
             },
             {
-                label: 'ISO images',
-                value: pct(storage.usages.iso, total),
-                color: 'var(--storage-isos)',
-            },
-            {
                 label: 'Untracked',
                 value: pct(storage.untracked ?? 0, total),
                 color: 'var(--storage-untracked)',

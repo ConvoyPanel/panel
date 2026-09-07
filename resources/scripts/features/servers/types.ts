@@ -1,4 +1,4 @@
-import { Template } from '@/types/template'
+import { ImageDefinition } from '@/types/image'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export enum DeploymentStatus {
@@ -37,13 +37,16 @@ export interface DeploymentStep {
 export interface Deployment {
     id: number
     serverId: number
-    templateId: number | null
+    /** What was chosen. */
+    imageDefinitionId: number | null
+    /** What it was actually built from — a rebuild of the image cannot change it. */
+    imageVersionId: number | null
     status: DeploymentStatus
     type: DeploymentType
     startOnCompletion: boolean
     requestedAt: Date
     completedAt: Date | null
-    template?: Template
+    image?: ImageDefinition
     steps: DeploymentStep[]
 }
 

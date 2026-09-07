@@ -13,12 +13,16 @@ class IsoEloquentData extends Data
 {
     public function __construct(
         public string $uuid,
-        public bool $isSuccessful,
         public string $name,
-        public ?string $fileName,
+        /** The name this ISO takes on every node that fetches it. */
+        public string $fileName,
+        /** Set when the operator hosts it; null when the panel does. */
+        public ?string $url,
+        /** True when the panel is serving the file itself. */
+        public bool $isHosted,
+        public ?string $sha256,
         public ?int $size,
         public bool $hidden,
-        public ?CarbonImmutable $completedAt,
         public CarbonImmutable $createdAt,
     ) {}
 
@@ -26,14 +30,13 @@ class IsoEloquentData extends Data
     {
         return new self(
             uuid: $iso->uuid,
-            isSuccessful: (bool) $iso->is_successful,
             name: $iso->name,
             fileName: $iso->file_name,
+            url: $iso->url,
+            isHosted: $iso->isHosted(),
+            sha256: $iso->sha256,
             size: $iso->getRawOriginal('size') !== null ? (int) $iso->size : null,
             hidden: (bool) $iso->hidden,
-            completedAt: $iso->completed_at
-                ? CarbonImmutable::parse($iso->completed_at)
-                : null,
             createdAt: CarbonImmutable::parse($iso->created_at),
         );
     }

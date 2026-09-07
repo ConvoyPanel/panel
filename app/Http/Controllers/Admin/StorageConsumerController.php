@@ -6,7 +6,6 @@ use App\Data\Storage\StorageConsumerData;
 use App\Data\Storage\StorageConsumersData;
 use App\Http\Controllers\Controller;
 use App\Models\Backup;
-use App\Models\ISO;
 use App\Models\ServerDisk;
 use App\Models\Storage;
 use Spatie\LaravelData\DataCollection;
@@ -29,7 +28,6 @@ class StorageConsumerController extends Controller
         return new StorageConsumersData(
             servers: $this->servers($storage),
             backups: $this->backups($storage),
-            isos: $this->isos($storage),
         );
     }
 
@@ -108,34 +106,6 @@ class StorageConsumerController extends Controller
                 // A locked backup is locked for a reason; saying so on the row
                 // beats offering a button that fails.
                 deletable: ! $backup->is_locked,
-            ))
-            ->sortByDesc(fn (StorageConsumerData $row) => $row->size)
-            ->values()
-            ->all();
-
-        return $this->collect($rows);
-    }
-
-    /** @return DataCollection<int, StorageConsumerData> */
-    private function isos(Storage $storage): DataCollection
-    {
-        $nodeId = $storage->nodes()->value('nodes.id');
-
-        $rows = ISO::query()
-            ->where('storage_id', $storage->id)
-            ->get()
-            ->map(fn (ISO $iso) => new StorageConsumerData(
-                id: $iso->id,
-                routeKey: $iso->uuid,
-                // An ISO's delete route is node-scoped, so the row carries the
-                // node to address it through -- any node reaching the storage
-                // will do, and this is the one Convoy recorded it against.
-                nodeId: $nodeId,
-                name: $iso->name,
-                size: (int) ($iso->size ?? 0),
-                owner: null,
-                detail: $iso->file_name,
-                deletable: true,
             ))
             ->sortByDesc(fn (StorageConsumerData $row) => $row->size)
             ->values()

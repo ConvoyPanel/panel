@@ -7,8 +7,8 @@ import type {
     ServerStateData,
     ServerTimepointData,
 } from '@/types/server'
-import type { Template } from '@/types/template'
-import { TemplateGroup } from '@/types/template-group.ts'
+import type { ImageDefinition } from '@/types/image'
+import { ImageGroup } from '@/types/image.ts'
 import AddressController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/AddressController'
 import ResourceController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ResourceController'
 import ServerController from '@/wayfinder/actions/App/Http/Controllers/Client/Servers/ServerController'
@@ -30,20 +30,20 @@ import {
     rawDataToServer,
     rawDataToServerTimepointData,
 } from '@/lib/transformers/server.ts'
-import { rawDataToTemplateGroup } from '@/lib/transformers/template-group.ts'
+import { rawDataToImageGroup } from '@/lib/transformers/image.ts'
 
 export type TimeRange = 'hour' | 'day' | 'week' | 'month' | 'year'
 export type ConsolidatorFn = 'AVERAGE' | 'MAX'
 export type PowerAction = 'start' | 'shutdown' | 'kill' | 'restart'
 
 export interface ReinstallServerRequest {
-    templateUuid: string
+    imageUuid: string
     accountPassword?: string
     startOnCompletion?: boolean
 }
 
 /**
- * `templateGroupUuid` is not sent — the API only takes the template — but it
+ * `imageGroupUuid` is not sent — the API only takes the image — but it
  * lives in the form so the group choice is validated and can drive which
  * versions are offered. Length bounds mirror ReinstallServerRequest
  * (`min:8`, `max:191`); there are deliberately no composition rules, for the
@@ -51,10 +51,10 @@ export interface ReinstallServerRequest {
  */
 export const reinstallServerSchema = z
     .object({
-        templateGroupUuid: z
+        imageGroupUuid: z
             .string()
             .min(1, 'Please select an operating system'),
-        templateUuid: z.string().min(1, 'Please select a version'),
+        imageUuid: z.string().min(1, 'Please select a version'),
         accountPassword: z
             .string()
             .min(8, 'Password must be at least 8 characters')
@@ -162,26 +162,20 @@ export const getServerDeployment = async (
         })
     )
 
-    const templateData = data.template?.data ?? data.template
+    const imageData = data.image?.data ?? data.image
 
     return {
         id: data.id,
         serverId: data.serverId,
-        templateId: data.templateId,
+        imageDefinitionId: data.imageDefinitionId,
+        imageVersionId: data.imageVersionId,
         status: data.status,
         type: data.type,
         startOnCompletion: data.startOnCompletion,
         requestedAt: new Date(data.requestedAt),
         completedAt: data.completedAt ? new Date(data.completedAt) : null,
-        template: templateData
-            ? ({
-                  uuid: templateData.uuid,
-                  templateGroupId: templateData.templateGroupId,
-                  name: templateData.name,
-                  description: templateData.description,
-                  vmid: templateData.vmid,
-                  isAdminOnly: templateData.isAdminOnly,
-              } as Template)
+        image: imageData
+            ? (imageData as ImageDefinition)
             : undefined,
         steps,
     }
@@ -230,14 +224,14 @@ export const serverQueries = {
             ] as const,
             queryFn: () => getStatistics(uuid, from, consolidator),
         }),
-    templateGroups: (uuid: string | undefined) =>
+    imageGroups: (uuid: string | undefined) =>
         queryOptions({
-            queryKey: ['server', uuid, 'template-groups'] as const,
-            queryFn: async (): Promise<TemplateGroup[]> => {
+            queryKey: ['server', uuid, 'image-groups'] as const,
+            queryFn: async (): Promise<ImageGroup[]> => {
                 const { data } = await apiFetch<DataResponse<any[]>>(
-                    SettingsController.getTemplateGroups(uuid!)
+                    SettingsController.getImageGroups(uuid!)
                 )
-                return data.map(rawDataToTemplateGroup)
+                return data.map(rawDataToImageGroup)
             },
             enabled: !!uuid,
         }),
@@ -303,8 +297,8 @@ export const useAddresses = (uuid?: string) => {
     return useQuery(serverQueries.addresses(serverUuid))
 }
 
-export const useTemplateGroups = (uuid?: string) =>
-    useQuery(serverQueries.templateGroups(uuid))
+export const useImageGroups = (uuid?: string) =>
+    useQuery(serverQueries.imageGroups(uuid))
 
 export const useServerDeployment = (
     uuid?: string,
@@ -347,7 +341,7 @@ export const reinstallServer = async (
 ): Promise<void> => {
     await apiFetch(SettingsController.reinstall(uuid), {
         body: {
-            template_uuid: data.templateUuid,
+            image_uuid: data.imageUuid,
             account_password: data.accountPassword,
             start_on_completion: data.startOnCompletion,
         },

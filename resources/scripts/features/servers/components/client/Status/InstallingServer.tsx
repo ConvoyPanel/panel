@@ -3,7 +3,7 @@ import {
     serverQueries,
     useServer,
     useServerDeployment,
-    useTemplateGroups,
+    useImageGroups,
 } from '@/features/servers/detail/api.ts'
 import {
     Deployment,
@@ -56,9 +56,9 @@ const InstallingServer = ({ server }: InstallingServerProps) => {
         refetchOnWindowFocus: true,
     })
     // Cached from the rebuild page in the common case. The deployment carries
-    // the template but not its group, so the family name is recovered by
-    // finding the group that lists this template.
-    const { data: templateGroups } = useTemplateGroups(server?.uuid)
+    // the image but not its group, so the family name is recovered by
+    // finding the group that lists this image.
+    const { data: imageGroups } = useImageGroups(server?.uuid)
     const queryClient = useQueryClient()
 
     /**
@@ -155,14 +155,14 @@ const InstallingServer = ({ server }: InstallingServerProps) => {
     const isDeleting = server?.lifecycle === 'deleting'
     const isRestoring = server?.lifecycle === 'restoring_backup'
 
-    const templateName = deployment?.template?.name
-    const templateFamily = templateGroups?.find(group =>
-        group.templates?.some(
-            template => template.uuid === deployment?.template?.uuid
+    const imageName = deployment?.image?.name
+    const imageFamily = imageGroups?.find(group =>
+        group.definitions?.some(
+            image => image.uuid === deployment?.image?.uuid
         )
     )?.name
-    const imageLabel = templateName
-        ? [templateFamily, templateName].filter(Boolean).join(' ')
+    const imageLabel = imageName
+        ? [imageFamily, imageName].filter(Boolean).join(' ')
         : null
 
     const title = () => {

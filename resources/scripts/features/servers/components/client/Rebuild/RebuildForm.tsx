@@ -1,13 +1,13 @@
 import { useIdentityConfirmed } from '@/features/auth/identity/api.ts'
 import RebuildConfirmDialog from '@/features/servers/components/client/Rebuild/RebuildConfirmDialog'
-import TemplateField from '@/features/servers/components/client/Rebuild/TemplateField'
-import TemplateGroupField from '@/features/servers/components/client/Rebuild/TemplateGroupField'
+import ImageField from '@/features/servers/components/client/Rebuild/ImageField'
+import ImageGroupField from '@/features/servers/components/client/Rebuild/ImageGroupField'
 import {
     type ReinstallServerInput,
     reinstallServer,
     reinstallServerSchema,
     serverQueries,
-    useTemplateGroups,
+    useImageGroups,
 } from '@/features/servers/detail/api.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Server, ServerLifecycle } from '@/types/server'
@@ -37,8 +37,8 @@ interface Props {
 }
 
 const defaultValues: ReinstallServerInput = {
-    templateGroupUuid: '',
-    templateUuid: '',
+    imageGroupUuid: '',
+    imageUuid: '',
     accountPassword: '',
     accountPasswordConfirmation: '',
     startOnCompletion: true,
@@ -49,7 +49,7 @@ const RebuildForm = ({ server }: Props) => {
     const mutateServer = useQueryMutator<Server>(
         serverQueries.detail(server.uuid).queryKey
     )
-    const { data: templateGroups } = useTemplateGroups(server.uuid)
+    const { data: imageGroups } = useImageGroups(server.uuid)
     const [isConfirming, setConfirming] = useState(false)
 
     const form = useForm<ReinstallServerInput>({
@@ -57,25 +57,25 @@ const RebuildForm = ({ server }: Props) => {
         defaultValues,
     })
 
-    const templateGroupUuid = form.watch('templateGroupUuid')
-    const templateUuid = form.watch('templateUuid')
+    const imageGroupUuid = form.watch('imageGroupUuid')
+    const imageUuid = form.watch('imageUuid')
 
     const selectedGroup = useMemo(
-        () => templateGroups?.find(group => group.uuid === templateGroupUuid),
-        [templateGroups, templateGroupUuid]
+        () => imageGroups?.find(group => group.uuid === imageGroupUuid),
+        [imageGroups, imageGroupUuid]
     )
-    const selectedTemplate = selectedGroup?.templates?.find(
-        template => template.uuid === templateUuid
+    const selectedImageDefinition = selectedGroup?.definitions?.find(
+        image => image.uuid === imageUuid
     )
 
     useEffect(() => {
-        form.setValue('templateUuid', '')
-    }, [templateGroupUuid, form])
+        form.setValue('imageUuid', '')
+    }, [imageGroupUuid, form])
 
     const { mutateAsync: trigger, isPending } = useMutation({
         mutationFn: (data: ReinstallServerInput) =>
             reinstallServer(server.uuid, {
-                templateUuid: data.templateUuid,
+                imageUuid: data.imageUuid,
                 accountPassword: data.accountPassword,
                 startOnCompletion: data.startOnCompletion,
             }),
@@ -162,7 +162,7 @@ const RebuildForm = ({ server }: Props) => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <TemplateGroupField groups={templateGroups} />
+                        <ImageGroupField groups={imageGroups} />
                     </CardContent>
                 </Card>
 
@@ -176,7 +176,7 @@ const RebuildForm = ({ server }: Props) => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <TemplateField group={selectedGroup} />
+                        <ImageField group={selectedGroup} />
                     </CardContent>
                 </Card>
 
@@ -226,8 +226,8 @@ const RebuildForm = ({ server }: Props) => {
                 onOpenChange={setConfirming}
                 serverName={server.name}
                 disk={server.disk}
-                templateLabel={`${selectedGroup?.name ?? ''} ${
-                    selectedTemplate?.name ?? ''
+                imageLabel={`${selectedGroup?.name ?? ''} ${
+                    selectedImageDefinition?.name ?? ''
                 }`.trim()}
                 // The gate holds the submit open, so the button has to keep
                 // reading as in flight while it is up.

@@ -71,11 +71,9 @@ it('returns overview metrics for admins', function () {
     Backup::factory()->for($ready)->create(['completed_at' => now(), 'error_code' => null]);
     Backup::factory()->for($ready)->create(['completed_at' => now(), 'error_code' => BackupErrorCode::OTHER, 'error_message' => 'boom']);
 
-    // An ISO on a non-VM-disk storage, so it doesn't skew the storage total.
-    ISO::factory()->create([
-        'storage_id' => Storage::factory()->create(['stores_kvm' => false, 'stores_iso' => true])->id,
-        'is_successful' => false,
-    ]);
+    // A library entry belongs to no storage at all now, so it cannot skew the
+    // storage total however it is counted.
+    ISO::factory()->create();
 
     $this->actingAs($admin)->getJson('/api/admin/overview')
         ->assertOk()
@@ -97,7 +95,9 @@ it('returns overview metrics for admins', function () {
         ->assertJsonPath('data.backups.successful', 1)
         ->assertJsonPath('data.backups.failed', 1)
         ->assertJsonPath('data.isos.total', 1)
-        ->assertJsonPath('data.isos.pending', 1)
+        // Nothing is ever pending: a library entry is complete when it exists,
+        // and no per-node download has to succeed first.
+        ->assertJsonPath('data.isos.pending', 0)
         ->assertJsonPath('data.nodes.0.servers', 2)
         ->assertJsonPath('data.nodes.0.memory.allocated', 12 * 1024 * 1024 * 1024)
         ->assertJsonPath('data.nodes.0.memory.total', 64 * 1024 * 1024 * 1024)

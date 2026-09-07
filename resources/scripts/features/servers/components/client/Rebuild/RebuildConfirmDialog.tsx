@@ -23,8 +23,8 @@ interface Props {
     serverName: string
     /** Bytes, straight off the server record. */
     disk: number
-    /** "Ubuntu 24.04 LTS" — the group and template the form settled on. */
-    templateLabel: string
+    /** "Ubuntu 24.04 LTS" — the group and image the form settled on. */
+    imageLabel: string
     onConfirm: () => void
     isPending: boolean
     /**
@@ -41,7 +41,7 @@ const RebuildConfirmDialog = ({
     onOpenChange,
     serverName,
     disk,
-    templateLabel,
+    imageLabel,
     onConfirm,
     isPending,
     children,
@@ -83,7 +83,7 @@ const RebuildConfirmDialog = ({
                         </li>
                         <li className={'flex items-start gap-2'}>
                             <IconCheck className={'mt-0.5 size-4'} />
-                            <span>{templateLabel} installed</span>
+                            <span>{imageLabel} installed</span>
                         </li>
                         <li className={'flex items-start gap-2'}>
                             <IconCheck className={'mt-0.5 size-4'} />

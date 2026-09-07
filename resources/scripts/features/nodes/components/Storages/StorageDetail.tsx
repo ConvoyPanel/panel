@@ -4,7 +4,6 @@ import StorageSummary from '@/features/nodes/components/Storages/StorageSummary.
 import {
     type StorageConsumer,
     deleteBackup,
-    deleteIso,
     deleteServer,
     storageConsumersQuery,
     storageInventoryQuery,
@@ -12,7 +11,7 @@ import {
 import { storageCapacity } from '@/features/nodes/storages/capacity.ts'
 import { cn } from '@/utils'
 import { getApiErrorMessage } from '@/utils/http.ts'
-import { IconDatabase, IconFileZip, IconServer } from '@tabler/icons-react'
+import { IconFileZip, IconServer } from '@tabler/icons-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import byteSize from 'byte-size'
@@ -168,9 +167,6 @@ const StorageDetail = ({ storageId }: { storageId: number }) => {
                             <TabsTrigger value={'backups'}>
                                 Backups {consumers?.backups.length ?? 0}
                             </TabsTrigger>
-                            <TabsTrigger value={'isos'}>
-                                ISOs {consumers?.isos.length ?? 0}
-                            </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value={'servers'}>
@@ -218,39 +214,6 @@ const StorageDetail = ({ storageId }: { storageId: number }) => {
                             />
                         </TabsContent>
 
-                        <TabsContent value={'isos'}>
-                            <StorageConsumerTable
-                                rows={consumers?.isos ?? []}
-                                label={'ISO'}
-                                emptyIcon={IconDatabase}
-                                emptyTitle={'No ISOs here'}
-                                emptyDescription={
-                                    'No installation media is stored here.'
-                                }
-                                onDelete={async row => {
-                                    const ok = await confirm({
-                                        title: `Delete ${row.name}?`,
-                                        description:
-                                            'The file is removed from Proxmox. It can be downloaded again later.',
-                                        confirmText: 'Delete ISO',
-                                        confirmButton: {
-                                            variant: 'destructive',
-                                        },
-                                    })
-
-                                    if (ok && row.nodeId) {
-                                        void run(
-                                            () =>
-                                                deleteIso(
-                                                    row.nodeId as number,
-                                                    row.routeKey
-                                                ),
-                                            'ISO deleted'
-                                        )
-                                    }
-                                }}
-                            />
-                        </TabsContent>
                     </Tabs>
                 )}
             </Card>

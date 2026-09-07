@@ -36,6 +36,7 @@ use Illuminate\Support\Str;
  * @property bool $stores_lxc_templates
  * @property bool $stores_backups
  * @property bool $stores_iso
+ * @property bool $stores_import
  * @property bool $stores_snippets
  * @property int $server_usage
  * @property int $backup_usage
@@ -76,6 +77,7 @@ class Storage extends Model
             'stores_lxc_templates' => 'boolean',
             'stores_backups' => 'boolean',
             'stores_iso' => 'boolean',
+            'stores_import' => 'boolean',
             'stores_snippets' => 'boolean',
         ];
     }
@@ -163,15 +165,6 @@ class Storage extends Model
     }
 
     /**
-     * Get the ISO images stored on this storage.
-     */
-    public function isos(): HasMany
-    {
-        // Assumes 'storage_id' foreign key exists on the 'iso_library' table
-        return $this->hasMany(ISO::class);
-    }
-
-    /**
      * Get the servers whose primary disk resides on this storage.
      */
     public function servers(): HasMany
@@ -208,8 +201,7 @@ class Storage extends Model
     public function scopeWithUsageSums(Builder $query): void
     {
         $query->withSum('serverDisks as servers_sum_disk', 'size')
-            ->withSum('backups as backups_sum_size', 'size')
-            ->withSum('isos as isos_sum_size', 'size');
+            ->withSum('backups as backups_sum_size', 'size');
     }
 
     /**
@@ -258,9 +250,18 @@ class Storage extends Model
     /**
      * Accessor for ISO size usage.
      */
+    /**
+     * Always zero, and deliberately so.
+     *
+     * ISOs are no longer placed on a storage by the panel: a node fetches one
+     * when someone mounts it, and the copy is a cache PVE owns. The panel has
+     * no record of which storages hold which ISOs, and inventing one would mean
+     * reporting an allocation nobody made. The real figure is the storage's own
+     * `used`, which PVE reports and which already includes them.
+     */
     public function getIsoUsageAttribute(): int
     {
-        return $this->getUsageAttributeValue('isos', 'size', 'isos_sum_size');
+        return 0;
     }
 
     public function getRouteKeyName(): string

@@ -3,8 +3,8 @@ import type { UseFormSetValue } from 'react-hook-form'
 
 /**
  * The create form's shape as far as presets are concerned. Ids are strings
- * because that is what the pickers bind to; `templateGroupId` exists only to
- * filter the template list and is not part of the create payload.
+ * because that is what the pickers bind to; `imageGroupId` exists only to
+ * filter the image list and is not part of the create payload.
  */
 export interface PresetFormValues {
     nodeId?: string
@@ -23,8 +23,8 @@ export interface PresetFormValues {
     addressesIpv6Count?: number | string
     deferredOsSelection?: boolean
     shouldCreateVm?: boolean
-    templateGroupId?: string
-    templateUuid?: string
+    imageGroupId?: string
+    imageUuid?: string
     startOnCompletion?: boolean
 }
 
@@ -86,8 +86,8 @@ export const presetSettingsFromForm = (
         addressesIpv6Count: numberOrNull(values.addressesIpv6Count),
         deferredOsSelection: values.deferredOsSelection ?? null,
         shouldCreateVm: values.shouldCreateVm ?? null,
-        templateGroupUuid: stringOrNull(values.templateGroupId),
-        templateUuid: stringOrNull(values.templateUuid),
+        imageGroupUuid: stringOrNull(values.imageGroupId),
+        imageUuid: stringOrNull(values.imageUuid),
         startOnCompletion: values.startOnCompletion ?? null,
     }
 }
@@ -141,8 +141,8 @@ export const applyPresetSettings = (
 
     set('deferredOsSelection', settings.deferredOsSelection)
     set('shouldCreateVm', settings.shouldCreateVm)
-    set('templateGroupId', settings.templateGroupUuid)
-    set('templateUuid', settings.templateUuid)
+    set('imageGroupId', settings.imageGroupUuid)
+    set('imageUuid', settings.imageUuid)
     set('startOnCompletion', settings.startOnCompletion)
 }
 

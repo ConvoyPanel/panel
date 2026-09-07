@@ -14,7 +14,7 @@ const IpamCard = () => {
     const { data: addresses } = useAddresses()
 
     return (
-        <Card className={'col-span-2 min-h-[15rem] @5xl:col-span-4'}>
+        <Card className={'min-h-[15rem]'}>
             <CardHeader>
                 <CardTitle>IPAM</CardTitle>
                 <CardDescription>

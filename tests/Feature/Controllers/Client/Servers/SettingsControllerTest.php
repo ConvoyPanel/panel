@@ -120,10 +120,7 @@ it('can fetch available ISOs', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    ISO::factory()->count(10)->create([
-        'storage_id' => $server->storage_id,
-        'hidden' => false,
-    ]);
+    ISO::factory()->count(10)->create(['hidden' => false]);
 
     $response = $this->actingAs($user)->getJson(
         "/api/client/servers/{$server->uuid}/settings/hardware/isos",
@@ -137,10 +134,7 @@ it('can mount visible ISOs', function () {
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $iso = ISO::factory()->create([
-        'storage_id' => $server->storage_id,
-        'hidden' => false,
-    ]);
+    $iso = ISO::factory()->create(['hidden' => false]);
 
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$iso->uuid}/mount",
@@ -152,10 +146,7 @@ it('can mount visible ISOs', function () {
 it('can\'t mount hidden ISOs as non-admin user', function () {
     [$user, $_, $_, $server] = createServerModel();
 
-    $iso = ISO::factory()->create([
-        'storage_id' => $server->storage_id,
-        'hidden' => true,
-    ]);
+    $iso = ISO::factory()->create(['hidden' => true]);
 
     $response = $this->actingAs($user)->postJson(
         "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$iso->uuid}/mount",
@@ -164,34 +155,31 @@ it('can\'t mount hidden ISOs as non-admin user', function () {
     $response->assertStatus(403);
 });
 
-it('can\'t mount an ISO from a node the user\'s server is not on', function () {
+it('mounts an ISO no node has fetched yet', function () {
     fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
-    // Default factory ISO lives on its own storage, which is NOT attached to
-    // the server's node — so it is outside what getMedia would ever list.
-    $foreignIso = ISO::factory()->create(['hidden' => false]);
+    // The library is panel-wide: an ISO is offerable everywhere, and whether
+    // this node happens to hold the file is settled by fetching it, not by
+    // refusing. There is no such thing as an ISO "from another node" any more.
+    $iso = ISO::factory()->create(['hidden' => false]);
 
-    $response = $this->actingAs($user)->postJson(
-        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$foreignIso->uuid}/mount",
-    );
-
-    $response->assertStatus(403);
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$iso->uuid}/mount",
+    )->assertNoContent();
 });
 
-it('can\'t unmount an ISO from a node the user\'s server is not on', function () {
+it('can\'t unmount a hidden ISO as a non-admin user', function () {
     fakeProxmox();
 
     [$user, $_, $_, $server] = createServerModel();
 
-    $foreignIso = ISO::factory()->create(['hidden' => false]);
+    $iso = ISO::factory()->create(['hidden' => true]);
 
-    $response = $this->actingAs($user)->postJson(
-        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$foreignIso->uuid}/unmount",
-    );
-
-    $response->assertStatus(403);
+    $this->actingAs($user)->postJson(
+        "/api/client/servers/{$server->uuid}/settings/hardware/isos/{$iso->uuid}/unmount",
+    )->assertStatus(403);
 });
 
 it('returns every device with the boot ordering over them', function () {

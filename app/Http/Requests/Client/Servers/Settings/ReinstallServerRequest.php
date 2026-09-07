@@ -5,10 +5,10 @@ namespace App\Http\Requests\Client\Servers\Settings;
 use App\Auth\IdentityConfirmation;
 use App\Enums\Server\ServerLifecycle;
 use App\Http\Requests\BaseApiRequest;
+use App\Models\ImageDefinition;
 use App\Models\Server;
-use App\Models\Template;
-use App\Rules\TemplateFitsStorage;
-use App\Rules\TemplateIsAvailable;
+use App\Rules\ImageFitsStorage;
+use App\Rules\ImageIsAvailable;
 use Illuminate\Validation\Validator;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -47,12 +47,12 @@ class ReinstallServerRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'template_uuid' => [
+            'image_uuid' => [
                 'required',
                 'string',
-                'exists:templates,uuid',
-                new TemplateIsAvailable,
-                new TemplateFitsStorage,
+                'exists:image_definitions,uuid',
+                new ImageIsAvailable,
+                new ImageFitsStorage,
             ],
             'account_password' => ['required', 'string', 'min:8', 'max:191'],
             'start_on_completion' => 'present|boolean',
@@ -83,10 +83,13 @@ class ReinstallServerRequest extends BaseApiRequest
     {
         return [
             function (Validator $validator) {
-                $template = Template::where('uuid', '=', $this->template_uuid)->first();
+                $image = ImageDefinition::where('uuid', '=', $this->image_uuid)->first();
 
-                if ($template && $template->is_admin_only && ! $this->user()->root_admin) {
-                    $validator->errors()->add('template_uuid', 'You are not authorized to use this template.');
+                // The group carries the same flag, and hiding a group has to
+                // hide what is inside it -- otherwise an admin-only OS is one
+                // guessed uuid away from anyone.
+                if ($image && ($image->is_admin_only || $image->group->is_admin_only) && ! $this->user()->root_admin) {
+                    $validator->errors()->add('image_uuid', 'You are not authorized to use this image.');
                 }
             },
         ];

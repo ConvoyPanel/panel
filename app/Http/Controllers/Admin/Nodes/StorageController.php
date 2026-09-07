@@ -17,6 +17,7 @@ use App\Services\Nodes\ClusterIdentityService;
 use App\Services\Nodes\LiveStorageService;
 use App\Services\Proxmox\Node\ProxmoxStorageClient;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -88,6 +89,7 @@ class StorageController extends Controller
                     'stores_backups' => (bool) $reported?->storesBackups,
                     'stores_iso' => (bool) $reported?->storesIso,
                     'stores_snippets' => (bool) $reported?->storesSnippets,
+                    'stores_import' => (bool) $reported?->storesImport,
                 ],
             );
 
@@ -206,10 +208,10 @@ class StorageController extends Controller
      * match (node offline / storage missing) comes back flagged `online: false`
      * with null physical figures rather than failing the whole list.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Storage>  $storages
+     * @param  Collection<int, Storage>  $storages
      * @return DataCollection<int, StorageEloquentData>
      */
-    private function mapWithLiveData(Node $node, \Illuminate\Database\Eloquent\Collection $storages): DataCollection
+    private function mapWithLiveData(Node $node, Collection $storages): DataCollection
     {
         $live = $this->liveStorage->forNode($node);
         // Eager-loaded so naming the other nodes costs one query, not one per row.

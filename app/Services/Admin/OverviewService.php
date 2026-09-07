@@ -297,13 +297,15 @@ class OverviewService
 
     private function isos(): IsoSummaryData
     {
+        // A library entry is complete the moment it exists -- there is no
+        // per-node download to be pending on any more, because residency is
+        // settled when someone mounts it.
         $total = ISO::query()->count();
-        $successful = ISO::query()->where('is_successful', true)->count();
 
         return new IsoSummaryData(
             total: $total,
-            successful: $successful,
-            pending: max($total - $successful, 0),
+            successful: $total,
+            pending: 0,
         );
     }
 

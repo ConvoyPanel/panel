@@ -111,7 +111,7 @@ export const serverSchema = z
         deferredOsSelection: z.boolean(),
         shouldCreateVm: z.boolean(),
         accountPassword: optionalAccountPasswordSchema,
-        templateUuid: z.string().optional(),
+        imageUuid: z.string().optional(),
         startOnCompletion: z.boolean(),
     })
     .superRefine((data, ctx) => {
@@ -123,11 +123,11 @@ export const serverSchema = z
                     message: 'Password is required.',
                 })
             }
-            if (!data.templateUuid) {
+            if (!data.imageUuid) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
-                    path: ['templateUuid'],
-                    message: 'Template is required.',
+                    path: ['imageUuid'],
+                    message: 'An operating system is required.',
                 })
             }
         }
@@ -227,7 +227,7 @@ export const createServer = async ({
     deferredOsSelection,
     shouldCreateVm,
     accountPassword,
-    templateUuid,
+    imageUuid,
     startOnCompletion,
 }: z.infer<typeof serverSchema>) =>
     rawDataToServer(
@@ -267,7 +267,7 @@ export const createServer = async ({
                     deferred_os_selection: deferredOsSelection,
                     should_create_vm: shouldCreateVm,
                     account_password: accountPassword,
-                    template_uuid: templateUuid,
+                    image_uuid: imageUuid,
                     start_on_completion: startOnCompletion,
                 },
             })

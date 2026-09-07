@@ -12,12 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property int $server_id
- * @property ?int $template_id
+ * @property ?int $image_definition_id
+ * @property ?int $image_version_id
  * @property DeploymentType $type
  * @property DeploymentStatus $status
  * @property bool $start_on_completion
  * @property Server $server
- * @property ?Template $template
+ * @property ?ImageDefinition $imageDefinition
+ * @property ?ImageVersion $imageVersion
  */
 class Deployment extends Model
 {
@@ -39,7 +41,8 @@ class Deployment extends Model
      */
     public static array $validationRules = [
         'server_id' => 'required|exists:servers,id',
-        'template_id' => 'nullable|exists:templates,id',
+        'image_definition_id' => 'nullable|exists:image_definitions,id',
+        'image_version_id' => 'nullable|exists:image_versions,id',
         'type' => 'required|string|in:install,reinstall,delete,import',
         'status' => 'required|string|in:pending,running,completed,failed',
         'start_on_completion' => 'required|boolean',
@@ -70,11 +73,24 @@ class Deployment extends Model
     }
 
     /**
-     * @return BelongsTo<Template, $this>
+     * What was chosen. Kept beside the version so a deployment still says which
+     * image an operator picked even after that image is rebuilt or retired.
+     *
+     * @return BelongsTo<ImageDefinition, $this>
      */
-    public function template(): BelongsTo
+    public function imageDefinition(): BelongsTo
     {
-        return $this->belongsTo(Template::class);
+        return $this->belongsTo(ImageDefinition::class);
+    }
+
+    /**
+     * What was actually built. The disks and hashes this server came from.
+     *
+     * @return BelongsTo<ImageVersion, $this>
+     */
+    public function imageVersion(): BelongsTo
+    {
+        return $this->belongsTo(ImageVersion::class);
     }
 
     /**
