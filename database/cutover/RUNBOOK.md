@@ -104,5 +104,9 @@ this on synthetic data; the dry run repeats it on real prod-shaped data.
   rule in the pgloader recipe (Laravel's Postgres schema expects real booleans).
 - **Timestamps**: converted to `timestamptz`; confirm the app treats stored
   times as UTC (it does).
-- **Reconcile `develop`'s newer commits** (hybrid backport) before cutover so
-  prod users don't regress on v4 fixes made since the merge-base.
+- **Reconcile the maintenance line's newer commits** (forward-port) before
+  cutover so prod users don't regress on v4 fixes made since the merge-base.
+  Done through v4.6.1 in `3ef53e37`, which merged everything the 4.x line had
+  that `next` did not. The branch this refers to was `develop`, then `main`,
+  and is now `4.x`: anything landed or tagged there after v4.6.1 needs the
+  same treatment before a cutover ships.
