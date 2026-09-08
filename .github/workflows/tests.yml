@@ -2,9 +2,13 @@ name: Tests
 on:
   push:
     branches:
+      # A workflow only runs for pushes to a branch that contains it, so this
+      # list can only ever describe branches this file lives on. `main` is here
+      # for when next lands there. 4.x is deliberately absent: it carries its
+      # own copy of this workflow, and listing it here would look like coverage
+      # while doing nothing.
       - 'next'
       - 'main'
-      - '4.x'
   pull_request:
 jobs:
   tests:
