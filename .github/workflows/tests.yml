@@ -2,8 +2,11 @@ name: Tests
 on:
   push:
     branches:
-      - 'main'
-      - '3.0-develop'
+      # Only a push to a branch that *contains* this file can run it, so this
+      # list is about 4.x and nothing else. It named `main` and `3.0-develop`,
+      # which meant pushes here ran no tests at all: the maintenance line was
+      # the one branch its own CI could not fire for.
+      - '4.x'
   pull_request:
 jobs:
   tests:
