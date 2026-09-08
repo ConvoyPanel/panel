@@ -16,6 +16,11 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   scoped route-model binding that the rest of the client API relies on to keep one server's URL from reaching another
   server's resources.
 
+  This describes the 4.x ISO model, in which a row belonged to one node and the same disc on four nodes was four rows.
+  The library is panel-wide after 4.x: an ISO is offerable on every node, so there is no node boundary left for a mount
+  request to cross and no relationship for the binding to scope through. The mount and unmount endpoints opt out of
+  scoping deliberately there, gated on the hidden flag instead, which `RouteScopingTest` records and enforces.
+
 ### Fixed
 
 - Fixed servers with no bandwidth limit being incorrectly rate limited to 1 MB/s ([#157](https://github.com/ConvoyPanel/panel/issues/157)).
