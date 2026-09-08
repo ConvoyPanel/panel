@@ -112,7 +112,7 @@ ref="$CONVOY_VERSION"
 if [[ "$ref" == "latest" ]]; then
     ref="$(curl -fsSL "https://api.github.com/repos/ConvoyPanel/panel/releases/latest" 2>/dev/null \
            | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -1)"
-    [[ -n "$ref" ]] || die "could not determine the latest Convoy release. Pass --version with an explicit tag (for example --version v10.1.0)."
+    [[ -n "$ref" ]] || die "could not determine the latest Convoy release. Pass --version with an explicit tag (for example --version v5.0.0)."
 fi
 
 curl -fsSL "$CONVOY_REPO/$ref/compose.yml" -o "$CONVOY_DIR/compose.yml" \

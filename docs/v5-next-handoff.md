@@ -1,6 +1,6 @@
-# v10 (`next`) rewrite — working handoff
+# v5 (`next`) rewrite — working handoff
 
-Living notes for shipping `next` (v10) as the new trunk. This file tracks *what's done*
+Living notes for shipping `next` (v5) as the new trunk. This file tracks *what's done*
 (one-line pointers — git history holds the detail) and *what to pick up next*, so a cold start
 doesn't re-derive it. Remaining visual-system work is tracked in
 [frontend-overhaul-audit.md](frontend-overhaul-audit.md).
@@ -178,7 +178,7 @@ and the final app-wide collection-state/mobile sweeps are complete:
    ⚠️ **`storage_to_node` pivot bug — FOUND AND FIXED (`458b04d7`).** Attaching a storage 500'd with
    `column "id" does not exist ... returning "id"`: the pivot is composite with **no `id` column**, but
    `StorageToNode` extends the standard Eloquent `Model`, so `$incrementing` defaulted to true. **Postgres-only**
-   (MySQL tolerated it — so the v10 move exposed it) and **only reachable against a live node**, because the
+   (MySQL tolerated it — so the v5 move exposed it) and **only reachable against a live node**, because the
    store endpoint runs straight after fetching real storages from PVE and seeders write the pivot directly.
    Fixed with `$primaryKey = 'storage_id'` + `$incrementing = false`, matching the key column
    `updateBackupOrder()` already passed to `setNewOrder()`. *This is the same family as the Phase-1
@@ -307,7 +307,7 @@ Pest 205 + PHPStan-zero green) — prior: passkey PublicKeyCredentialSource→Cr
 
 ## Where we are
 
-Phases **0, 1, 2, 4** are DONE. Phase 3 tooling is a shipped operator deliverable. v10 is
+Phases **0, 1, 2, 4** are DONE. Phase 3 tooling is a shipped operator deliverable. v5 is
 **Postgres-only** (decision 2026-07-07; CI on Postgres 17). The remaining work is the **open product
 follow-ups** below — all doable in-sandbox, no prod data.
 
@@ -321,9 +321,9 @@ follow-ups** below — all doable in-sandbox, no prod data.
   every read-modify-write path; property-list DTO codec landed; redundant NIC/Configure writes filtered;
   golden-master round-trip safety net in place. Detail in **Design constraints** below.
 - **Phase 3 (operator cutover)** — tooling DONE under `database/cutover/` (RUNBOOK.md, pgloader recipe
-  `v4-to-v10.load`, `verify.sh`). This is what *downstream operators* run to upgrade a v4 MySQL install to
-  v10 Postgres; the maintainer has no prod data, so there is **no maintainer-side dry-run pending**. Fresh
-  v10 installs start on Postgres and skip it. `verify.sh` caveat: pgloader is amd64-only and segfaults under
+  `v4-to-v5.load`, `verify.sh`). This is what *downstream operators* run to upgrade a v4 MySQL install to
+  v5 Postgres; the maintainer has no prod data, so there is **no maintainer-side dry-run pending**. Fresh
+  v5 installs start on Postgres and skip it. `verify.sh` caveat: pgloader is amd64-only and segfaults under
   arm64-Linux qemu (works on x86_64 or macOS Docker/Rosetta); takes a `PGLOADER_IMAGE` override.
 - **Phase 4 (frontend data layer)** — DONE. Old `api/` directory gone; zero raw `axios` calls; every
   domain on a `features/<domain>/api.ts` module (`queryOptions` + `apiFetch` + Wayfinder routes). SWR shim

@@ -286,14 +286,14 @@ The goal is a required anchor, for the simplification it buys. The way to get
 there without a hazardous migration is a ladder pegged to release boundaries,
 where each rung is separately shippable and reversible.
 
-### Stage A — v10.x: enrollment ships, column nullable
+### Stage A — v5.x: enrollment ships, column nullable
 
 Slices 1–5. Unlinked nodes work exactly as they do today and are nagged in the
 UI. Add `php artisan anchor:preflight`, which prints how many nodes are
 unlinked and the command to fix each. This is the *same* command later stages
 gate on, so it earns its keep long before it is load-bearing.
 
-### Stage B — v10.x+n: required by policy
+### Stage B — v5.x+n: required by policy
 
 `AnchorSettings::require_anchors` (bool). When on, node creation without an
 anchor is rejected — UI and API both — and the manual create form is gone.

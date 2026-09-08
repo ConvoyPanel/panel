@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
 # Cross-engine migration harness: proves the MySQL 8.0 -> Postgres 17 conversion
-# step of the v10 cutover is lossless, on the real application schema.
+# step of the v5 cutover is lossless, on the real application schema.
 #
 # What it does (all self-contained, nothing touches your dev database):
 #   1. Boots a throwaway MySQL 8.0 container on ddev's docker network.
 #   2. Runs the full migration suite + a representative seed into it.
-#   3. Renders the pgloader recipe (database/cutover/v4-to-v10.load) and runs
+#   3. Renders the pgloader recipe (database/cutover/v4-to-v5.load) and runs
 #      it, copying MySQL -> a scratch Postgres database.
 #   4. Verifies NO DATA LOSS: exact COUNT(*) per table on both sides, plus
 #      per-row content checks of the type-risky columns (bool, bigint, json).
@@ -31,7 +31,7 @@ MYSQL_PASS="root"
 PG_TARGET="pgloader_target"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-LOAD_TEMPLATE="$REPO_ROOT/database/cutover/v4-to-v10.load"
+LOAD_TEMPLATE="$REPO_ROOT/database/cutover/v4-to-v5.load"
 RENDERED="$(mktemp -t pgloader.load.XXXXXX)"
 
 # pgloader image. The official `dimitri/pgloader` is published amd64-only, and

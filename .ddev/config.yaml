@@ -50,7 +50,7 @@ hooks:
     # `db` lookup can fall through to the sandbox host's wildcard DNS (which answers
     # `db.<sandbox>.docker.internal` with an unrelated host-network Postgres) — and
     # then PHP-FPM and `ddev exec` end up on DIFFERENT databases with the same
-    # DB_HOST (see docs/v10-next-handoff.md). This fix is sandbox-agnostic: `getent
+    # DB_HOST (see docs/v5-next-handoff.md). This fix is sandbox-agnostic: `getent
     # hosts db` gets the real container IP from docker's embedded DNS (authoritative
     # for the service name), and pinning it in /etc/hosts makes nsswitch `files`
     # win over DNS, closing the hole. A no-op where there's no collision. Re-run

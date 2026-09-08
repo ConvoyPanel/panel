@@ -342,7 +342,7 @@ Do not normalize these mechanically:
 ## Separate product work
 
 The bandwidth controls frontend is not part of this visual cleanup. It remains a
-separate product feature in `v10-next-handoff.md`:
+separate product feature in `v5-next-handoff.md`:
 
 - Server-create speed cap.
 - Existing-server limits and inheritance editor.

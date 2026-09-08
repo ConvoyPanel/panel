@@ -1,7 +1,7 @@
 --
 -- pgloader recipe: cross-engine copy of a live v4 database from MySQL 8.0 into
--- Postgres 17, as the first step of the v10 cutover. After this runs,
--- `php artisan migrate` applies the v10 rename migrations on the converted data.
+-- Postgres 17, as the first step of the v5 cutover. After this runs,
+-- `php artisan migrate` applies the v5 rename migrations on the converted data.
 --
 -- Connection strings are templated (${...}) and filled in by the runbook /
 -- harness (database/cutover/verify.sh) so no credentials live in the repo.

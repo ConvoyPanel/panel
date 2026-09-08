@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * v10 is Postgres-only, so store IP addresses in the native `inet` type instead of text.
+     * v5 is Postgres-only, so store IP addresses in the native `inet` type instead of text.
      * This gives the database correct numeric ordering (10.0.0.2 < 10.0.0.10), arithmetic
      * (ip + 1), subnet containment (ip << cidr), and window-function gap detection — the
      * foundation the IPAM allocator relies on.
