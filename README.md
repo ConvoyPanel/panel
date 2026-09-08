@@ -1,10 +1,9 @@
 ![Version 4 release announcement banner](https://github.com/ConvoyPanel/panel/assets/37554696/4629321b-7214-4eb1-8cc5-85c89229b5bf)
 
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/convoypanel/panel/tests.yml?branch=develop)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/convoypanel/panel/tests.yml?branch=main)
 ![Discord](https://img.shields.io/discord/746612878261616700?label=Discord&logo=Discord&logoColor=white)
 ![GitHub Releases](https://img.shields.io/github/downloads/convoypanel/panel/latest/total)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel?ref=badge_shield)
 
 # Convoy
 
@@ -52,5 +51,3 @@ Please [visit this page](https://convoypanel.com/docs/project/about.html#acknowl
 ## License
 
 Convoy is licensed under our own proprietary license.
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FConvoyPanel%2Fpanel?ref=badge_large)
