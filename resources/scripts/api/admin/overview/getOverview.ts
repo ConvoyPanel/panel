@@ -46,6 +46,23 @@ export interface DashboardIsos {
     pending: number
 }
 
+/**
+ * One record behind an attention row. `id` is the route key its group's
+ * destination takes -- a server id for the server groups, a server's short uuid
+ * for a backup, since the backups tab is where a backup actually lives.
+ */
+export interface AttentionSubject {
+    id: string
+    label: string
+    detail: string | null
+}
+
+export interface DashboardAttention {
+    failedServers: AttentionSubject[]
+    failedBackups: AttentionSubject[]
+    suspendedServers: AttentionSubject[]
+}
+
 export interface DashboardNode {
     id: number
     name: string
@@ -67,8 +84,16 @@ export interface DashboardOverview {
     addresses: DashboardAddresses
     backups: DashboardBackups
     isos: DashboardIsos
+    attention: DashboardAttention
     nodes: DashboardNode[]
 }
+
+const rawSubjects = (data: any): AttentionSubject[] =>
+    (data ?? []).map((subject: any) => ({
+        id: String(subject.id),
+        label: subject.label,
+        detail: subject.detail ?? null,
+    }))
 
 const rawMetric = (data: any): DashboardMetric => ({
     allocated: data.allocated,
@@ -93,6 +118,11 @@ export const rawDataToOverview = (data: any): DashboardOverview => ({
     addresses: data.addresses,
     backups: data.backups,
     isos: data.isos,
+    attention: {
+        failedServers: rawSubjects(data.attention?.failed_servers),
+        failedBackups: rawSubjects(data.attention?.failed_backups),
+        suspendedServers: rawSubjects(data.attention?.suspended_servers),
+    },
     nodes: data.nodes.map((node: any) => ({
         id: node.id,
         name: node.name,
