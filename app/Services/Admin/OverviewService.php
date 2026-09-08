@@ -11,6 +11,7 @@ use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -19,6 +20,14 @@ class OverviewService
     private const CACHE_SECONDS = 15;
 
     private const BYTES_PER_MEBIBYTE = 1048576;
+
+    /**
+     * Per-group cap on the records carried for the attention card. The card lists a
+     * handful and the group's count stays the authority for how many there really
+     * are, so a fleet where everything is broken costs a bounded query rather than a
+     * full table read on every dashboard load.
+     */
+    private const ATTENTION_LIMIT = 25;
 
     public function metrics(): array
     {
@@ -43,6 +52,7 @@ class OverviewService
             'addresses' => $this->addresses(),
             'backups' => $this->backups(),
             'isos' => $this->isos(),
+            'attention' => $this->attention(),
             'nodes' => $nodes
                 ->map(fn (Node $node) => $this->node($node, $allocations))
                 ->all(),
@@ -115,6 +125,85 @@ class OverviewService
             ($statuses[Status::INSTALL_FAILED->value] ?? 0)
             + ($statuses[Status::DELETION_FAILED->value] ?? 0)
         );
+    }
+
+    /**
+     * The records behind the attention card, each carrying the key its destination
+     * route takes.
+     *
+     * The card used to be a stat tile showing only the failed-server count while its
+     * caption mixed in failed backups and servers mid-delete, so it could read "0"
+     * with backups broken, and its link went to the unfiltered server list either
+     * way. Listing the records themselves is what lets a click land on the thing
+     * that is wrong.
+     *
+     * Deleting servers are deliberately absent: mid-delete is a transient state
+     * rather than a failure, and the server-state card already counts it.
+     */
+    private function attention(): array
+    {
+        return [
+            'failed_servers' => $this->serverSubjects(
+                Server::query()->whereIn('status', [
+                    Status::INSTALL_FAILED->value,
+                    Status::DELETION_FAILED->value,
+                ]),
+                fn (Server $server) => sprintf(
+                    '%s on %s',
+                    $server->status === Status::DELETION_FAILED->value
+                        ? 'Deletion failed'
+                        : 'Installation failed',
+                    $server->node?->name ?? 'an unknown node',
+                ),
+            ),
+            'failed_backups' => $this->failedBackupSubjects(),
+            'suspended_servers' => $this->serverSubjects(
+                Server::query()->where('status', Status::SUSPENDED->value),
+                fn (Server $server) => 'On '.($server->node?->name ?? 'an unknown node'),
+            ),
+        ];
+    }
+
+    /**
+     * @param  callable(Server): ?string  $detail
+     */
+    private function serverSubjects(Builder $query, callable $detail): array
+    {
+        return $query
+            ->with('node:id,name')
+            ->orderByDesc('id')
+            ->limit(self::ATTENTION_LIMIT)
+            ->get(['id', 'name', 'node_id', 'status'])
+            ->map(fn (Server $server) => [
+                'id' => (string) $server->id,
+                'label' => $server->name,
+                'detail' => $detail($server),
+            ])
+            ->all();
+    }
+
+    /**
+     * Failed backups, keyed by the owning server's uuid_short -- the client server's
+     * backups tab is the only page that shows a backup, and ServerPolicy::before lets
+     * an admin open it for any server. A backup carries no failure message on this
+     * branch, so the detail names the server and when it gave up instead.
+     */
+    private function failedBackupSubjects(): array
+    {
+        return Backup::query()
+            ->whereNotNull('completed_at')
+            ->where('is_successful', false)
+            ->whereHas('server')
+            ->with('server:id,uuid_short,name')
+            ->orderByDesc('completed_at')
+            ->limit(self::ATTENTION_LIMIT)
+            ->get(['id', 'server_id', 'name', 'completed_at'])
+            ->map(fn (Backup $backup) => [
+                'id' => $backup->server->uuid_short,
+                'label' => $backup->name,
+                'detail' => $backup->server->name.' · failed '.$backup->completed_at->diffForHumans(),
+            ])
+            ->all();
     }
 
     private function capacity(Collection $nodes, Collection $allocations): array

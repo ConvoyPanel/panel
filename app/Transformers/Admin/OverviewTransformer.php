@@ -49,6 +49,11 @@ class OverviewTransformer extends TransformerAbstract
                 'successful' => $overview['isos']['successful'],
                 'pending' => $overview['isos']['pending'],
             ],
+            'attention' => [
+                'failed_servers' => $this->subjects($overview['attention']['failed_servers']),
+                'failed_backups' => $this->subjects($overview['attention']['failed_backups']),
+                'suspended_servers' => $this->subjects($overview['attention']['suspended_servers']),
+            ],
             'nodes' => collect($overview['nodes'])
                 ->map(fn (array $node) => [
                     'id' => $node['id'],
@@ -61,6 +66,22 @@ class OverviewTransformer extends TransformerAbstract
                 ])
                 ->all(),
         ];
+    }
+
+    /**
+     * One attention group: the records behind a row, each with the route key its
+     * destination takes. Capped upstream, so a group can be shorter than the count
+     * reported beside it.
+     */
+    private function subjects(array $subjects): array
+    {
+        return collect($subjects)
+            ->map(fn (array $subject) => [
+                'id' => $subject['id'],
+                'label' => $subject['label'],
+                'detail' => $subject['detail'],
+            ])
+            ->all();
     }
 
     private function metric(array $metric): array

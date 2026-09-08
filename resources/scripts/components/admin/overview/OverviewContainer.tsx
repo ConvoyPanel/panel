@@ -2,7 +2,6 @@ import { bytesToString } from '@/util/helpers'
 import {
     CircleStackIcon,
     CpuChipIcon,
-    ExclamationTriangleIcon,
     ServerStackIcon,
     SignalIcon,
     UsersIcon,
@@ -18,6 +17,8 @@ import {
     DashboardNode,
 } from '@/api/admin/overview/getOverview'
 
+import AttentionCard from '@/components/admin/overview/AttentionCard'
+
 import Card from '@/components/elements/Card'
 import MessageBox from '@/components/elements/MessageBox'
 import PageContentBlock from '@/components/elements/PageContentBlock'
@@ -32,23 +33,9 @@ interface StatCardProps {
     detail?: string
     icon: ComponentType<IconProps>
     to?: string
-    tone?: 'default' | 'warning' | 'error'
 }
 
-const toneClasses = {
-    default: 'text-accent-600 border-accent-200 bg-accent-100',
-    warning: 'text-warning-dark border-warning bg-warning-lighter',
-    error: 'text-error border-error-light bg-error-lighter',
-}
-
-const StatCard = ({
-    title,
-    value,
-    detail,
-    icon: Icon,
-    to,
-    tone = 'default',
-}: StatCardProps) => {
+const StatCard = ({ title, value, detail, icon: Icon, to }: StatCardProps) => {
     const content = (
         <div className='flex items-start justify-between gap-4'>
             <div>
@@ -58,7 +45,7 @@ const StatCard = ({
                 </p>
                 {detail && <p className='description-small mt-2'>{detail}</p>}
             </div>
-            <div className={`rounded-md border p-2 ${toneClasses[tone]}`}>
+            <div className='rounded-md border border-accent-200 bg-accent-100 p-2 text-accent-600'>
                 <Icon className='h-5 w-5' />
             </div>
         </div>
@@ -68,7 +55,7 @@ const StatCard = ({
         return (
             <Link
                 to={to}
-                className='col-span-12 block sm:col-span-6 xl:col-span-3'
+                className='col-span-12 block sm:col-span-6 xl:col-span-4'
             >
                 <Card className='h-full transition-shadow hover:shadow-lg'>
                     {content}
@@ -78,7 +65,7 @@ const StatCard = ({
     }
 
     return (
-        <Card className='col-span-12 sm:col-span-6 xl:col-span-3'>
+        <Card className='col-span-12 sm:col-span-6 xl:col-span-4'>
             {content}
         </Card>
     )
@@ -153,15 +140,16 @@ const NodeRow = ({ node }: { node: DashboardNode }) => {
 
 const OverviewSkeleton = () => (
     <div className='grid grid-cols-12 gap-6'>
-        {[1, 2, 3, 4].map(item => (
+        {[1, 2, 3].map(item => (
             <Skeleton
                 key={item}
-                className='col-span-12 sm:col-span-6 xl:col-span-3'
+                className='col-span-12 sm:col-span-6 xl:col-span-4'
                 height={142}
             />
         ))}
         <Skeleton className='col-span-12 lg:col-span-7' height={420} />
         <Skeleton className='col-span-12 lg:col-span-5' height={420} />
+        <Skeleton className='col-span-12' height={200} />
     </div>
 )
 
@@ -221,21 +209,6 @@ const OverviewContainer = () => {
                         value={data.summary.users}
                         icon={UsersIcon}
                         to='/admin/users'
-                    />
-                    <StatCard
-                        title={t('attention')}
-                        value={data.summary.failedServers}
-                        detail={t('attention_detail', {
-                            backups: data.backups.failed,
-                            deleting: data.servers.deleting,
-                        })}
-                        icon={ExclamationTriangleIcon}
-                        to='/admin/servers'
-                        tone={
-                            data.summary.failedServers > 0
-                                ? 'error'
-                                : 'default'
-                        }
                     />
 
                     <Card className='col-span-12 lg:col-span-7'>
@@ -306,7 +279,9 @@ const OverviewContainer = () => {
                         </div>
                     </Card>
 
-                    <Card className='col-span-12 lg:col-span-5'>
+                    <AttentionCard data={data} />
+
+                    <Card className='col-span-12'>
                         <div className='flex items-center justify-between gap-3'>
                             <div>
                                 <h2 className='h5'>{t('server_state')}</h2>
@@ -316,7 +291,7 @@ const OverviewContainer = () => {
                             </div>
                             <SignalIcon className='h-5 w-5 text-accent-400' />
                         </div>
-                        <div className='mt-6 grid grid-cols-2 gap-3'>
+                        <div className='mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6'>
                             {[
                                 [t('ready'), data.servers.ready],
                                 [t('installing'), data.servers.installing],
