@@ -245,6 +245,11 @@ Route::prefix('/servers/{server}')->middleware(
             '/hardware/isos',
             [Client\Servers\SettingsController::class, 'getMedia'],
         );
+
+        // {iso} cannot be scoped through {server}: the library is panel-wide,
+        // so an ISO has no node_id or server_id to resolve against and no
+        // Server::isos() for scoped binding to call. MediaRequest carries the
+        // gate that does apply here, and RouteScopingTest records the opt-out.
         Route::post(
             '/hardware/isos/{iso}/mount',
             [Client\Servers\SettingsController::class, 'mountMedia'],

@@ -3,7 +3,8 @@ on:
   push:
     branches:
       - 'next'
-      - 'develop'
+      - 'main'
+      - '4.x'
       - '3.0-develop'
   pull_request:
 jobs:

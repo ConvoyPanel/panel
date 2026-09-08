@@ -204,6 +204,15 @@ class SettingsController
         ])->all();
     }
 
+    /*
+     * {iso} is resolved globally by uuid here, not through {server}, and that
+     * is the design rather than an oversight: the library is panel-wide, so
+     * every ISO is offerable on every node and there is no node_id left to
+     * scope against. The gate that does apply is visibility, and MediaRequest
+     * applies it to both of these. Their opt-out from scoped route-model
+     * binding is recorded in RouteScopingTest.
+     */
+
     public function mountMedia(MediaRequest $request, Server $server, ISO $iso)
     {
         // The node may never have seen this ISO. Fetching it is part of

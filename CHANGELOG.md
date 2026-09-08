@@ -2,7 +2,29 @@
 
 This file is a running track of new features and fixes to each version of the panel released starting with `v2.0.0`.
 
-This project follows [Semantic Versioning](http://semver.org) guidelines.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
+follows [Semantic Versioning](https://semver.org) guidelines.
+
+## v4.6.1
+
+### Security
+
+- Fixed the client API resolving `{iso}` on its own rather than through the server it is nested under, which let a mount
+  request name an ISO belonging to a node the caller has no server on. No practical exposure followed from it: an ISO is
+  addressed by UUID, and the only place Convoy shows a non-administrator an ISO's UUID is the media list for a server on
+  that ISO's own node, where mounting it is already allowed. Hidden ISOs were refused either way. The fix restores the
+  scoped route-model binding that the rest of the client API relies on to keep one server's URL from reaching another
+  server's resources.
+
+### Fixed
+
+- Fixed servers with no bandwidth limit being incorrectly rate limited to 1 MB/s ([#157](https://github.com/ConvoyPanel/panel/issues/157)).
+
+## v4.6.1-rc.1
+
+### Changes
+
+- Fixed servers with no bandwidth limit being incorrectly rate limited to 1 MB/s ([#157](https://github.com/ConvoyPanel/panel/issues/157)).
 
 ## v4.2.4
 
