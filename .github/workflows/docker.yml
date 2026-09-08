@@ -119,15 +119,28 @@ jobs:
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # The default, `latest=auto`, hands `latest` to any non-prerelease
+          # semver tag on its own, which would quietly outvote the rule spelled
+          # out below rather than defer to it. Every tag is assigned here.
+          flavor: latest=false
           # `latest` and a moving major tag let an operator choose between
           # "always current" and "current within a major I have already
           # validated"; the full semver tag is there to pin against.
+          #
+          # Branch builds are named after the branch, so the trunk publishes
+          # `main`. That name is doing more work than it looks: an operator puts
+          # it in CONVOY_VERSION, which compose.yml reads as an image tag *and*
+          # docker/install.sh feeds to raw.githubusercontent as a git ref to
+          # fetch the matching compose.yml. A tag that is not also a ref has to
+          # be special-cased there the way `latest` already is; a branch name
+          # never needs that. It also matches the version stamped into the
+          # image, which the build job derives from the same ref.
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=raw,value=canary,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
 
       - uses: docker/login-action@v3
         with:
