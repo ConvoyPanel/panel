@@ -118,11 +118,11 @@ it('names the servers and backups behind each attention row', function () {
         'name' => 'broken-install',
         'status' => Status::INSTALL_FAILED->value,
     ]);
-    $suspended = Server::factory()->for($node)->for($admin)->create([
-        'name' => 'unpaid',
-        'status' => Status::SUSPENDED->value,
+    $healthy = Server::factory()->for($node)->for($admin)->create([
+        'name' => 'nightly-host',
+        'status' => null,
     ]);
-    Backup::factory()->for($suspended)->create([
+    Backup::factory()->for($healthy)->create([
         'name' => 'nightly',
         'is_successful' => false,
         'completed_at' => now(),
@@ -131,15 +131,49 @@ it('names the servers and backups behind each attention row', function () {
     $this->actingAs($admin)->getJson('/api/admin/overview')
         ->assertOk()
         // Each row carries the route key its own destination takes, so a click
-        // lands on the record rather than on the unfiltered server list.
-        ->assertJsonPath('data.attention.failed_servers.0.id', (string) $failed->id)
+        // lands on the record rather than on the unfiltered server list. Every
+        // subject is keyed by the owning server's short uuid, which is what both
+        // the admin and client server routes bind on -- the primary key resolves
+        // to nothing.
+        ->assertJsonPath('data.attention.failed_servers.0.id', $failed->uuid_short)
         ->assertJsonPath('data.attention.failed_servers.0.label', 'broken-install')
         ->assertJsonPath('data.attention.failed_servers.0.detail', 'Installation failed on pve-1')
-        ->assertJsonPath('data.attention.suspended_servers.0.id', (string) $suspended->id)
-        ->assertJsonPath('data.attention.suspended_servers.0.detail', 'On pve-1')
-        // Backups are keyed by the server's short uuid: the backups tab is theirs.
-        ->assertJsonPath('data.attention.failed_backups.0.id', $suspended->uuid_short)
+        ->assertJsonPath('data.attention.failed_backups.0.id', $healthy->uuid_short)
         ->assertJsonPath('data.attention.failed_backups.0.label', 'nightly');
+});
+
+it('leaves a suspended server off the card entirely', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $node = Node::factory()->for(Location::factory())->create();
+    Server::factory()->for($node)->for($admin)->create([
+        'status' => Status::SUSPENDED->value,
+    ]);
+
+    // A suspension is deliberate, so it belongs in the server-state counts and
+    // nowhere near a list of things that need fixing.
+    $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->assertJsonPath('data.servers.suspended', 1)
+        ->assertJsonPath('data.attention.failed_servers', [])
+        ->assertJsonMissingPath('data.attention.suspended_servers');
+});
+
+it('keys attention subjects by something the server route can actually resolve', function () {
+    $admin = User::factory()->create(['root_admin' => true]);
+    $node = Node::factory()->for(Location::factory())->create();
+    Server::factory()->for($node)->for($admin)->create([
+        'status' => Status::INSTALL_FAILED->value,
+    ]);
+
+    $id = $this->actingAs($admin)->getJson('/api/admin/overview')
+        ->assertOk()
+        ->json('data.attention.failed_servers.0.id');
+
+    // The card links at /admin/servers/{id}, so whatever the endpoint hands back
+    // has to be the key that page's own request binds on. The primary key is not
+    // it: RouteServiceProvider reads a non-8-character value as a uuid, and the
+    // page dies with "No query results for model [Convoy\Models\Server]".
+    $this->actingAs($admin)->getJson("/api/admin/servers/{$id}")->assertOk();
 });
 
 it('separates a deletion failure from an install failure in the detail', function () {
@@ -163,8 +197,7 @@ it('leaves the attention groups empty when nothing is wrong', function () {
     $this->actingAs($admin)->getJson('/api/admin/overview')
         ->assertOk()
         ->assertJsonPath('data.attention.failed_servers', [])
-        ->assertJsonPath('data.attention.failed_backups', [])
-        ->assertJsonPath('data.attention.suspended_servers', []);
+        ->assertJsonPath('data.attention.failed_backups', []);
 });
 
 it('caps each attention group and leaves the count to say how many there really are', function () {

@@ -129,7 +129,10 @@ class OverviewService
 
     /**
      * The records behind the attention card, each carrying the key its destination
-     * route takes.
+     * route takes -- a server's `uuid_short` throughout. Both the admin and client
+     * server routes are bound by it (RouteServiceProvider resolves an 8-character
+     * value as `uuid_short` and anything else as `uuid`, so the primary key never
+     * matches), and every other server link in the panel is built the same way.
      *
      * The card used to be a stat tile showing only the failed-server count while its
      * caption mixed in failed backups and servers mid-delete, so it could read "0"
@@ -137,8 +140,11 @@ class OverviewService
      * way. Listing the records themselves is what lets a click land on the thing
      * that is wrong.
      *
-     * Deleting servers are deliberately absent: mid-delete is a transient state
-     * rather than a failure, and the server-state card already counts it.
+     * Two states are deliberately absent. Mid-delete is a transient state rather
+     * than a failure, and the server-state card already counts it. A suspension is
+     * an administrative decision someone made on purpose -- it is the panel working
+     * as asked, not something to be fixed, and listing it next to real failures
+     * dilutes the card into a status feed.
      */
     private function attention(): array
     {
@@ -157,10 +163,6 @@ class OverviewService
                 ),
             ),
             'failed_backups' => $this->failedBackupSubjects(),
-            'suspended_servers' => $this->serverSubjects(
-                Server::query()->where('status', Status::SUSPENDED->value),
-                fn (Server $server) => 'On '.($server->node?->name ?? 'an unknown node'),
-            ),
         ];
     }
 
@@ -173,9 +175,9 @@ class OverviewService
             ->with('node:id,name')
             ->orderByDesc('id')
             ->limit(self::ATTENTION_LIMIT)
-            ->get(['id', 'name', 'node_id', 'status'])
+            ->get(['id', 'uuid_short', 'name', 'node_id', 'status'])
             ->map(fn (Server $server) => [
-                'id' => (string) $server->id,
+                'id' => $server->uuid_short,
                 'label' => $server->name,
                 'detail' => $detail($server),
             ])
@@ -187,6 +189,8 @@ class OverviewService
      * backups tab is the only page that shows a backup, and ServerPolicy::before lets
      * an admin open it for any server. A backup carries no failure message on this
      * branch, so the detail names the server and when it gave up instead.
+     *
+     * The key is the same shape the server groups use; only the destination differs.
      */
     private function failedBackupSubjects(): array
     {

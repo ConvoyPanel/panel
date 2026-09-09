@@ -60,7 +60,6 @@ export interface AttentionSubject {
 export interface DashboardAttention {
     failedServers: AttentionSubject[]
     failedBackups: AttentionSubject[]
-    suspendedServers: AttentionSubject[]
 }
 
 export interface DashboardNode {
@@ -121,7 +120,6 @@ export const rawDataToOverview = (data: any): DashboardOverview => ({
     attention: {
         failedServers: rawSubjects(data.attention?.failed_servers),
         failedBackups: rawSubjects(data.attention?.failed_backups),
-        suspendedServers: rawSubjects(data.attention?.suspended_servers),
     },
     nodes: data.nodes.map((node: any) => ({
         id: node.id,

@@ -52,7 +52,6 @@ class OverviewTransformer extends TransformerAbstract
             'attention' => [
                 'failed_servers' => $this->subjects($overview['attention']['failed_servers']),
                 'failed_backups' => $this->subjects($overview['attention']['failed_backups']),
-                'suspended_servers' => $this->subjects($overview['attention']['suspended_servers']),
             ],
             'nodes' => collect($overview['nodes'])
                 ->map(fn (array $node) => [
