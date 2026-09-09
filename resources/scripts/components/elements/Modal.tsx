@@ -45,7 +45,7 @@ const Modal: Modal = ({ open, onClose, children }) => {
 }
 
 Modal.Header = styled.div`
-    ${tw`p-8 sm:p-6 border-b border-accent-200`}
+    ${tw`shrink-0 p-8 sm:p-6 border-b border-accent-200`}
 `
 
 Modal.Title = styled.h3`
@@ -53,7 +53,7 @@ Modal.Title = styled.h3`
 `
 
 Modal.Body = styled.div`
-    ${tw`max-h-[60vh] overflow-y-auto p-6 bg-accent-100`}
+    ${tw`min-h-0 flex-1 overflow-y-auto p-6 bg-accent-100`}
 `
 
 Modal.Description = ({ children, bottomMargin }) => {
@@ -67,7 +67,7 @@ Modal.Description = ({ children, bottomMargin }) => {
 }
 
 Modal.Actions = styled.div`
-    ${tw`flex border-t border-accent-200`}
+    ${tw`shrink-0 flex border-t border-accent-200`}
 
     & > button:is(:first-of-type) {
         ${tw`rounded-bl`}

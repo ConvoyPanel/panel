@@ -42,9 +42,20 @@ const Drawer = forwardRef<HTMLDivElement, Props>(
                                 leaveFrom='opacity-100 translate-y-0'
                                 leaveTo='opacity-0 translate-y-[100vh] sm:-translate-y-[10vh]'
                             >
+                                {/*
+                                  * Bounded by the viewport, not by its content: the
+                                  * panel is the scroll container's only child and
+                                  * the container is `overflow-hidden`, so a panel
+                                  * taller than the screen has its head and foot
+                                  * clipped with no way to reach them. Capping it
+                                  * here and laying it out as a column lets whichever
+                                  * section opts into `overflow-y-auto` (Modal.Body)
+                                  * absorb the excess, while a modal that already
+                                  * fits is untouched.
+                                  */}
                                 <Dialog.Panel
                                     ref={ref}
-                                    className='absolute w-full sm:max-w-lg bg-background rounded-t-lg sm:rounded-lg border-t border-x sm:border-b border-accent-200'
+                                    className='absolute flex max-h-[90dvh] w-full flex-col overflow-hidden bg-background rounded-t-lg sm:max-h-[85vh] sm:max-w-lg sm:rounded-lg border-t border-x sm:border-b border-accent-200'
                                 >
                                     <input
                                         type='hidden'
