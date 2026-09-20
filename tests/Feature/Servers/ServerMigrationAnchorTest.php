@@ -23,6 +23,7 @@ use App\Models\ServerMigrationTransfer;
 use App\Models\Storage;
 use App\Models\User;
 use App\Services\Anchor\AnchorMigrationClient;
+use App\Services\Proxmox\Server\ProxmoxMigrationClient;
 use App\Services\Servers\ServerMigrationService;
 use App\Support\Anchor\AnchorMigrationProtocol;
 use Illuminate\Http\Client\Request;
@@ -839,7 +840,7 @@ it('finishes the migration even when the artifact cannot be discarded', function
 it('purges a destroyed guest through the query string, never a body', function () {
     Http::fake(['*' => Http::response(['data' => 'UPID:destroy'], 200)]);
 
-    app(\App\Services\Proxmox\Server\ProxmoxMigrationClient::class)
+    app(ProxmoxMigrationClient::class)
         ->destroyGuest($this->target, 900);
 
     Http::assertSent(function ($request) {

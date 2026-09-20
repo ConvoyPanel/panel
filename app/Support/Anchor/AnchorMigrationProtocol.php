@@ -51,7 +51,6 @@ final class AnchorMigrationProtocol
      */
     public const ARTIFACT = self::FETCH;
 
-
     /** The install pipeline, reused unchanged. */
     public const INSTALLS = '/api/v1/templates/installs';
 
