@@ -5,6 +5,7 @@ use App\Enums\Image\RegistryImportStatus;
 use App\Models\ImageDefinition;
 use App\Models\ImageGroup;
 use App\Models\User;
+use App\Services\Images\OsProfiles;
 use App\Services\Images\RegistryImportService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -95,10 +96,14 @@ it('keeps the captured profile but drops what Proxmox would refuse', function ()
 
     $windows = collect($catalog->groups)->last()->templates->toCollection()->first();
 
-    // A TPM is allocated as a `tpmstate0` volume, not a `tpm` setting, so
-    // forwarding it verbatim would fail the create call.
-    expect($windows->hardware)->not->toHaveKey('tpm')
-        ->and($windows->hardware['bios'])->toBe('ovmf');
+    // A TPM is allocated as a `tpmstate0` volume, not a `tpm` setting -- but it
+    // is kept, not dropped. The catalogue ships no `tpmstate0` disk on purpose
+    // (a shared state volume would give every guest the same endorsement key),
+    // so this key is the only record that the image needs one at all. It is
+    // stripped on the way out to Proxmox instead, by OsProfiles::proxmoxKeys().
+    expect($windows->hardware['tpm'])->toBe('v2.0')
+        ->and($windows->hardware['bios'])->toBe('ovmf')
+        ->and(OsProfiles::proxmoxKeys($windows->hardware))->not->toHaveKey('tpm');
 });
 
 it('carries the disk settings the image was built with', function () {

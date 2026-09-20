@@ -27,11 +27,15 @@ class RegistryTemplateData extends Data
      *
      * The catalogue documents its hardware block as mapping 1:1 onto `qm
      * create` with one exception, `net_model`, which names only the NIC model
-     * because the bridge and MAC belong to whoever builds the guest. `tpm` is a
-     * second: a TPM is allocated as a `tpmstate0` volume, not a `tpm` setting,
-     * so forwarding it verbatim would fail the create call.
+     * because the bridge and MAC belong to whoever builds the guest.
+     *
+     * `tpm` is a second exception but is NOT dropped here. It names a volume to
+     * allocate rather than a setting to pass, so it is carried into the overlay
+     * and stripped later by {@see OsProfiles::proxmoxKeys()}, the same way the
+     * catalogue's own installers treat it. Dropping it at import instead cost
+     * every Windows image its TPM, which Server 2025 requires to boot.
      */
-    private const NOT_PROXMOX_KEYS = ['net_model', 'tpm'];
+    private const NOT_PROXMOX_KEYS = ['net_model'];
 
     public function __construct(
         /** The catalogue's own name for this entry, e.g. `ubuntu-24.04-amd64`. */

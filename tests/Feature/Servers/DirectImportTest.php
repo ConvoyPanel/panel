@@ -200,3 +200,40 @@ it('passes on the settings the image itself was built with', function () {
         "{$server->storage->name}:0,import-from=local:import/vars.qcow2,efitype=4m,pre-enrolled-keys=1,ms-cert=2023k",
     );
 });
+
+/**
+ * The catalogue says a Windows guest needs a TPM by carrying `tpm: v2.0` in its
+ * hardware and shipping no `tpmstate0` disk, because the state volume has to be
+ * unique per guest: the image is generalized, and a shared state file would give
+ * every VM built from it the same endorsement key.
+ *
+ * Proxmox has no `tpm` parameter, so the value cannot be forwarded. It names a
+ * volume to allocate. Dropping it instead is what these pin against: Server 2025
+ * requires a TPM to boot, and a guest that silently has none fails at first
+ * power-on, long after the import that caused it.
+ */
+it('allocates a fresh tpmstate volume when the profile asks for a TPM', function () {
+    [, , , $server] = createServerModel();
+    $version = makeImageVersion(['tpm' => 'v2.0'], ostype: 'win11');
+
+    $payload = capturedCreatePayload(fn () => app(ProxmoxServerClient::class)
+        ->setServer($server)
+        ->create($version, [ImageDiskRole::SYSTEM->value => 'local:import/image.qcow2']));
+
+    expect($payload['tpmstate0'])->toBe("{$server->storage->name}:0,version=v2.0")
+        // Allocated, not imported: there is no file to import from.
+        ->and($payload['tpmstate0'])->not->toContain('import-from')
+        // And it must never reach Proxmox as a setting, which would 400 the create.
+        ->and($payload)->not->toHaveKey('tpm');
+});
+
+it('gives a guest no tpmstate when the profile does not ask for one', function () {
+    [, , , $server] = createServerModel();
+    $version = makeImageVersion();
+
+    $payload = capturedCreatePayload(fn () => app(ProxmoxServerClient::class)
+        ->setServer($server)
+        ->create($version, [ImageDiskRole::SYSTEM->value => 'local:import/image.qcow2']));
+
+    expect($payload)->not->toHaveKey('tpmstate0');
+});

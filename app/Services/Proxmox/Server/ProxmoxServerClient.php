@@ -117,6 +117,14 @@ class ProxmoxServerClient extends ProxmoxClient
             );
         }
 
+        // Allocated fresh, never imported: the image is generalized so nothing
+        // is sealed to the TPM, and one shipped state volume would give every
+        // guest built from the image the same endorsement key. That is why the
+        // catalogue carries `tpm` as hardware and ships no `tpmstate0` disk.
+        if (filled($tpm = $hardware['tpm'] ?? null)) {
+            $payload['tpmstate0'] = "{$storage}:0,version={$tpm}";
+        }
+
         if (filled($cloudinitSlot = $hardware['cloudinit_slot'] ?? 'ide2')) {
             $payload[$cloudinitSlot] = "{$storage}:cloudinit";
         }
