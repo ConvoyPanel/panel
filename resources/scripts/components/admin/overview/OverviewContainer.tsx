@@ -11,17 +11,17 @@ import { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 import {
     DashboardMetric,
     DashboardNode,
 } from '@/api/admin/overview/getOverview'
-
-import AttentionCard from '@/components/admin/overview/AttentionCard'
+import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 
 import Card from '@/components/elements/Card'
 import MessageBox from '@/components/elements/MessageBox'
 import PageContentBlock from '@/components/elements/PageContentBlock'
+
+import AttentionCard from '@/components/admin/overview/AttentionCard'
 
 interface IconProps {
     className?: string
@@ -53,10 +53,7 @@ const StatCard = ({ title, value, detail, icon: Icon, to }: StatCardProps) => {
 
     if (to) {
         return (
-            <Link
-                to={to}
-                className='col-span-12 block sm:col-span-6 xl:col-span-4'
-            >
+            <Link to={to} className='col-span-12 block md:col-span-4'>
                 <Card className='h-full transition-shadow hover:shadow-lg'>
                     {content}
                 </Card>
@@ -64,11 +61,7 @@ const StatCard = ({ title, value, detail, icon: Icon, to }: StatCardProps) => {
         )
     }
 
-    return (
-        <Card className='col-span-12 sm:col-span-6 xl:col-span-4'>
-            {content}
-        </Card>
-    )
+    return <Card className='col-span-12 md:col-span-4'>{content}</Card>
 }
 
 const UsageBar = ({
@@ -143,7 +136,7 @@ const OverviewSkeleton = () => (
         {[1, 2, 3].map(item => (
             <Skeleton
                 key={item}
-                className='col-span-12 sm:col-span-6 xl:col-span-4'
+                className='col-span-12 md:col-span-4'
                 height={142}
             />
         ))}
@@ -165,9 +158,7 @@ const OverviewContainer = () => {
                     <h1 className='text-2xl font-semibold text-foreground'>
                         {tStrings('overview')}
                     </h1>
-                    <p className='description-small mt-1'>
-                        {t('description')}
-                    </p>
+                    <p className='description-small mt-1'>{t('description')}</p>
                 </div>
             </div>
 
@@ -241,8 +232,7 @@ const OverviewContainer = () => {
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('addresses_detail', {
-                                        available:
-                                            data.addresses.available,
+                                        available: data.addresses.available,
                                         pools: data.addresses.pools,
                                     })}
                                 </p>
@@ -267,8 +257,7 @@ const OverviewContainer = () => {
                                     {tStrings('iso', { count: 2 })}
                                 </p>
                                 <p className='mt-2 text-xl font-semibold text-foreground'>
-                                    {data.isos.successful} /{' '}
-                                    {data.isos.total}
+                                    {data.isos.successful} / {data.isos.total}
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('iso_status_detail', {
@@ -295,10 +284,7 @@ const OverviewContainer = () => {
                             {[
                                 [t('ready'), data.servers.ready],
                                 [t('installing'), data.servers.installing],
-                                [
-                                    tStrings('suspended'),
-                                    data.servers.suspended,
-                                ],
+                                [tStrings('suspended'), data.servers.suspended],
                                 [t('restoring'), data.servers.restoring],
                                 [t('deleting'), data.servers.deleting],
                                 [t('failed'), data.servers.failed],
@@ -317,9 +303,7 @@ const OverviewContainer = () => {
                     </Card>
 
                     <Card className='col-span-12'>
-                        <h2 className='h5'>
-                            {tStrings('node', { count: 2 })}
-                        </h2>
+                        <h2 className='h5'>{tStrings('node', { count: 2 })}</h2>
                         <p className='description-small mt-1'>
                             {t('nodes_description')}
                         </p>
