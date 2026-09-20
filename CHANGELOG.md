@@ -5,7 +5,7 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v4.7.0-rc.1
 
 ### Changed
 
@@ -19,6 +19,11 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
+- Fixed a disk resize during server build failing without anything noticing, leaving the guest at its template's disk
+  size rather than the one the plan asks for. Proxmox answers a resize by forking a worker and returning its task ID,
+  which Convoy discarded, so the build reported success whatever became of the resize. It now waits for the task, and
+  retries one that failed with a timeout -- Proxmox runs `qemu-img` under a fixed 10 second limit, which a resize
+  issued right after a full clone can exceed on slower storage.
 - Fixed modals taller than the browser window clipping their own header and submit row with no way to scroll to them.
   The panel is now bounded by the viewport and its body scrolls within it, so Create Server and Create Node stay usable
   at shorter window heights.
