@@ -4,6 +4,7 @@ namespace App\Services\Proxmox\Server;
 
 use App\Data\Server\Proxmox\Migration\MigrationPreconditionData;
 use App\Exceptions\Proxmox\RequestException;
+use App\Models\Node;
 use App\Services\Proxmox\ProxmoxClient;
 use Illuminate\Http\Client\ConnectionException;
 
@@ -36,6 +37,58 @@ class ProxmoxMigrationClient extends ProxmoxClient
             ->json();
 
         return MigrationPreconditionData::fromRaw($this->getData($response));
+    }
+
+    /**
+     * One guest's config, addressed by node and VMID rather than by a Server.
+     *
+     * The rest of the Proxmox clients build their URL from `$server->node` and
+     * `$server->vmid`, which is right for every call made against the guest
+     * the panel already knows about. The Anchor transport needs neither: the
+     * guest it is asking about is on the *destination* node under a VMID the
+     * destination chose, and the `servers` row still describes the source
+     * until the rebind. Passing both explicitly is the only honest way to ask.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function getGuestConfig(Node $node, int $vmid): array
+    {
+        $response = $this->setNode($node)
+            ->getHttpClientWithParams(['vmid' => $vmid])
+            ->get('/api2/json/nodes/{node}/qemu/{vmid}/config')
+            ->json();
+
+        $config = $this->getData($response);
+
+        return is_array($config) ? $config : [];
+    }
+
+    /**
+     * Destroy one guest, addressed by node and VMID.
+     *
+     * Only ever pointed at a destination guest a failed migration left behind:
+     * the source guest is destroyed through the normal delete path, against
+     * the row that still describes it. `purge` clears the guest out of any job
+     * and replication config so a half-restored VMID is genuinely free for the
+     * retry; `destroy-unreferenced-disks` is off because a restore writes only
+     * volumes it owns and nothing else on that VMID should be assumed ours.
+     *
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function destroyGuest(Node $node, int $vmid): ?string
+    {
+        $response = $this->setNode($node)
+            ->getHttpClientWithParams(['vmid' => $vmid])
+            ->delete('/api2/json/nodes/{node}/qemu/{vmid}', ['purge' => true])
+            ->json();
+
+        $upid = $this->getData($response);
+
+        return is_string($upid) ? $upid : null;
     }
 
     /**

@@ -9,6 +9,7 @@ import {
 } from '@/features/servers/admin/migration.ts'
 import useAsyncFunction from '@/hooks/use-async-function.ts'
 import { type Server, ServerLifecycle } from '@/types/server.ts'
+import byteSize from 'byte-size'
 import {
     IconArrowRight,
     IconExclamationCircle,
@@ -74,6 +75,31 @@ const AddressList = ({ addresses }: { addresses: MigrationAddress[] }) => (
     </ul>
 )
 
+/**
+ * What picking this node costs, in the place the picking happens.
+ *
+ * The Anchor transport copies the whole disk between two nodes with the guest
+ * down for all of it, and that is not something to find out from a progress
+ * bar. The estimate is the server's provisioned disk, which is the number the
+ * panel actually has; the archive is compressed, so the real figure is lower.
+ */
+const cost = (candidate: MigrationCandidate): string => {
+    if (candidate.transport === 'anchor') {
+        const { value, unit } = byteSize(
+            candidate.estimatedTransferBytes ?? 0,
+            { units: 'iec', precision: 0 }
+        )
+
+        return candidate.estimatedTransferBytes
+            ? `Stopped and copied across, up to ${value} ${unit}`
+            : 'Stopped and copied across'
+    }
+
+    return candidate.canMigrateOnline
+        ? 'Moves without stopping'
+        : 'Stops and restarts'
+}
+
 const NodeChoice = ({ candidate }: { candidate: MigrationCandidate }) => {
     const id = useId()
     const blocked = candidate.disposition === 'blocked'
@@ -96,9 +122,7 @@ const NodeChoice = ({ candidate }: { candidate: MigrationCandidate }) => {
                             [
                                 candidate.locationName,
                                 candidate.bridgeName,
-                                candidate.canMigrateOnline
-                                    ? 'Moves without stopping'
-                                    : 'Stops and restarts',
+                                cost(candidate),
                             ]
                                 .filter(Boolean)
                                 .join(' · ')}
@@ -329,12 +353,6 @@ const MigrateServerModal = ({ server }: Props) => {
                         </div>
                     )}
 
-                    {plan && plan.candidates.length > 0 && (
-                        <p className={'text-muted-foreground text-xs'}>
-                            Cluster members only. Moving a guest to another
-                            cluster is not supported.
-                        </p>
-                    )}
                 </ResponsiveDialogBody>
                 <ResponsiveDialogFooter className={'mt-4'}>
                     <ResponsiveDialogClose

@@ -9,6 +9,7 @@ export type MigrationCandidate =
 export type MigrationPreview = App.Data.Server.Migration.MigrationPreviewData
 export type MigrationAddress = App.Data.Server.Migration.MigrationAddressData
 export type MigrationDisposition = App.Enums.Server.MigrationDisposition
+export type MigrationTransport = App.Enums.Server.MigrationTransport
 
 // ServerMigrationController is served under both the panel (`/api/admin`) and
 // the Application token API (`/api/application`), so Wayfinder emits URI-keyed

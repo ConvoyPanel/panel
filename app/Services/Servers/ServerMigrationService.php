@@ -9,16 +9,20 @@ use App\Data\Server\Migration\MigrationPreviewData;
 use App\Data\Server\Proxmox\Migration\MigrationPreconditionData;
 use App\Enums\Network\AddressVersion;
 use App\Enums\Server\MigrationDisposition;
+use App\Enums\Server\MigrationTransport;
 use App\Exceptions\Service\Address\InsufficientAddressesException;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
 use App\Models\NetworkInterface;
 use App\Models\Node;
 use App\Models\Server;
+use App\Models\Storage;
 use App\Services\Addresses\AddressAllocationService;
 use App\Services\Addresses\AddressReachabilityService;
 use App\Services\Proxmox\Server\ProxmoxMigrationClient;
+use App\Support\Anchor\AnchorMigrationProtocol;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -44,8 +48,14 @@ use Illuminate\Support\Collection;
  *    server holds: the networks really are different, so the addresses go back
  *    to their pool and the server gets new ones. The guest's IP changes.
  *
- * Intra-cluster only. Cross-cluster is `remote_migrate`, LXC has its own
- * endpoint, and neither is wired up.
+ * Two transports, chosen by where the destination sits rather than by the
+ * operator. A member of the source's own cluster is `qm migrate`, which can
+ * move a running guest. Anything else is the Anchor transport: `vzdump` on the
+ * source, a direct node-to-node download, `qmrestore` on the destination, and
+ * the guest down for all of it. `qm remote-migrate` is not a third option;
+ * docs/migration-anchor-contract.md records why.
+ *
+ * QEMU only. LXC has its own endpoint and none of this is wired to it.
  */
 class ServerMigrationService
 {
@@ -57,49 +67,103 @@ class ServerMigrationService
     ) {}
 
     /**
-     * Every registered member of this server's cluster, with a verdict each.
+     * Every node this server could be sent to, with a verdict each.
+     *
+     * Two groups, one list. The operator picks a destination; which transport
+     * carries it there is the panel's answer, shown on the row rather than
+     * offered as a choice. A node outside the cluster is listed even when it
+     * cannot take the guest, because "pve7 has no Anchor" is something the
+     * operator can act on and a missing row is not.
      */
     public function plan(Server $server): MigrationPlanData
     {
         $source = $server->node;
-        $cluster = $source->cluster;
 
-        $empty = fn (string $reason) => new MigrationPlanData(
-            sourceNodeId: $source->id,
-            sourceNodeName: $source->name,
-            isRunning: false,
-            localResources: [],
-            candidates: [],
-            emptyReason: $reason,
-        );
+        $clusterTargets = $this->clusterTargets($source);
+        $anchorTargets = $this->anchorTargets($source);
 
-        if ($cluster === null || $cluster->isStandalone()) {
-            return $empty('This node is not in a Proxmox cluster, so there is nowhere to migrate to.');
-        }
-
-        $targets = Node::query()
-            ->where('cluster_id', $cluster->id)
-            ->whereKeyNot($source->id)
-            ->with('location')
-            ->orderBy('name')
-            ->get();
-
-        if ($targets->isEmpty()) {
-            return $empty('No other member of this cluster is registered in Convoy.');
+        if ($clusterTargets->isEmpty() && $anchorTargets->isEmpty()) {
+            return new MigrationPlanData(
+                sourceNodeId: $source->id,
+                sourceNodeName: $source->name,
+                isRunning: false,
+                localResources: [],
+                candidates: [],
+                emptyReason: 'No other node is registered in Convoy.',
+            );
         }
 
         $preconditions = $this->client->setServer($server)->getPreconditions();
+
+        $candidates = $clusterTargets
+            ->map(fn (Node $target) => $this->verdict($server, $target, $preconditions, MigrationTransport::Cluster))
+            ->concat($anchorTargets->map(
+                fn (Node $target) => $this->verdict($server, $target, $preconditions, MigrationTransport::Anchor),
+            ));
 
         return new MigrationPlanData(
             sourceNodeId: $source->id,
             sourceNodeName: $source->name,
             isRunning: $preconditions->isRunning,
             localResources: $preconditions->localResources,
-            candidates: $targets
-                ->map(fn (Node $target) => $this->verdict($server, $target, $preconditions))
-                ->all(),
+            candidates: $candidates->all(),
             emptyReason: null,
         );
+    }
+
+    /**
+     * Which transport reaches this node. The whole of the decision.
+     */
+    public function transportFor(Node $source, Node $target): MigrationTransport
+    {
+        $cluster = $source->cluster;
+
+        return $cluster !== null
+            && ! $cluster->isStandalone()
+            && $target->cluster_id === $cluster->id
+                ? MigrationTransport::Cluster
+                : MigrationTransport::Anchor;
+    }
+
+    /**
+     * @return Collection<int, Node>
+     */
+    private function clusterTargets(Node $source): Collection
+    {
+        $cluster = $source->cluster;
+
+        if ($cluster === null || $cluster->isStandalone()) {
+            return new Collection;
+        }
+
+        return Node::query()
+            ->where('cluster_id', $cluster->id)
+            ->whereKeyNot($source->id)
+            ->with('location')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Every other node, whether or not it can actually take the guest.
+     *
+     * @return Collection<int, Node>
+     */
+    private function anchorTargets(Node $source): Collection
+    {
+        $cluster = $source->cluster;
+        $clustered = $cluster !== null && ! $cluster->isStandalone();
+
+        return Node::query()
+            ->whereKeyNot($source->id)
+            ->when($clustered, fn (Builder $query) => $query->where(
+                fn (Builder $inner) => $inner
+                    ->whereNull('cluster_id')
+                    ->orWhere('cluster_id', '!=', $cluster->id),
+            ))
+            ->with('location')
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -107,7 +171,12 @@ class ServerMigrationService
      */
     public function preview(Server $server, Node $target): MigrationPreviewData
     {
-        $candidate = $this->verdict($server, $target, $this->client->setServer($server)->getPreconditions());
+        $candidate = $this->verdict(
+            $server,
+            $target,
+            $this->client->setServer($server)->getPreconditions(),
+            $this->transportFor($server->node, $target),
+        );
 
         $held = $server->addresses()->with('addressBlock.addressBlockGroup')->get();
 
@@ -149,7 +218,12 @@ class ServerMigrationService
     public function resolve(Server $server, Node $target): array
     {
         $preconditions = $this->client->setServer($server)->getPreconditions();
-        $candidate = $this->verdict($server, $target, $preconditions);
+        $candidate = $this->verdict(
+            $server,
+            $target,
+            $preconditions,
+            $this->transportFor($server->node, $target),
+        );
 
         if ($candidate->disposition === MigrationDisposition::Blocked) {
             return [$candidate, null, $preconditions->isRunning];
@@ -179,22 +253,33 @@ class ServerMigrationService
         return $this->allocator->handle($interface->id, $ipv4, $ipv6);
     }
 
-    private function verdict(Server $server, Node $target, MigrationPreconditionData $preconditions): MigrationCandidateData
-    {
+    private function verdict(
+        Server $server,
+        Node $target,
+        MigrationPreconditionData $preconditions,
+        MigrationTransport $transport,
+    ): MigrationCandidateData {
         $bridge = $this->sameNamedBridge($server, $target);
+        $anchor = $transport === MigrationTransport::Anchor;
 
         $blocked = fn (string $reason) => new MigrationCandidateData(
             nodeId: $target->id,
             nodeName: $target->name,
             locationName: $target->location->short_code ?? $target->location->name ?? '',
             disposition: MigrationDisposition::Blocked,
+            transport: $transport,
+            estimatedTransferBytes: $anchor ? $server->disk : null,
             blockedReason: $reason,
             bridgeName: $bridge?->name,
             canMigrateOnline: false,
         );
 
         // PVE first: there is no point telling an operator their addresses
-        // would follow to a node that will not take the guest at all.
+        // would follow to a node that will not take the guest at all. A passed
+        // through device blocks both transports, for different reasons that
+        // amount to the same thing: `qm migrate` refuses outright, and an
+        // archive restored elsewhere would reference a device that is not
+        // there.
         if ($preconditions->localResources !== []) {
             return $blocked(sprintf(
                 'Proxmox will not migrate this guest anywhere while %s is passed through to it.',
@@ -202,14 +287,26 @@ class ServerMigrationService
             ));
         }
 
-        $blocker = $preconditions->blockerFor($target->name);
+        if ($anchor) {
+            $refusal = $this->anchorRefusal($server, $target);
 
-        if ($blocker !== null) {
-            return $blocked($blocker->summary() ?? 'Proxmox will not accept this node as a destination.');
-        }
+            if ($refusal !== null) {
+                return $blocked($refusal);
+            }
+        } else {
+            // `allowed_nodes` and `not_allowed_nodes` are the source cluster's
+            // opinion of its own members. A node outside it is absent from
+            // both lists, so asking these questions of an Anchor destination
+            // would block every one of them.
+            $blocker = $preconditions->blockerFor($target->name);
 
-        if ($preconditions->allowedNodes !== [] && ! in_array($target->name, $preconditions->allowedNodes, true)) {
-            return $blocked('Proxmox will not accept this node as a destination.');
+            if ($blocker !== null) {
+                return $blocked($blocker->summary() ?? 'Proxmox will not accept this node as a destination.');
+            }
+
+            if ($preconditions->allowedNodes !== [] && ! in_array($target->name, $preconditions->allowedNodes, true)) {
+                return $blocked('Proxmox will not accept this node as a destination.');
+            }
         }
 
         $held = $server->addresses()->with('addressBlock')->get();
@@ -220,7 +317,7 @@ class ServerMigrationService
             // match and nothing to strand. Whatever the guest's NIC references
             // is outside Convoy's model, so leave it alone.
             return $held->isEmpty()
-                ? $this->preserve($server, $target, null, $preconditions)
+                ? $this->preserve($server, $target, null, $preconditions, $transport)
                 : $blocked('This server holds addresses but is not attached to a network interface. Attach it to one before migrating.');
         }
 
@@ -228,7 +325,7 @@ class ServerMigrationService
             $stranded = $this->reachability->unreachableGroupsFor($server, $bridge);
 
             if ($stranded->isEmpty()) {
-                return $this->preserve($server, $target, $bridge, $preconditions);
+                return $this->preserve($server, $target, $bridge, $preconditions, $transport);
             }
 
             return $blocked(sprintf(
@@ -265,6 +362,8 @@ class ServerMigrationService
             nodeName: $target->name,
             locationName: $target->location->short_code ?? $target->location->name ?? '',
             disposition: MigrationDisposition::Reallocate,
+            transport: $transport,
+            estimatedTransferBytes: $anchor ? $server->disk : null,
             blockedReason: null,
             bridgeName: $replacement->name,
             // A new address only reaches the guest when cloud-init re-runs, so
@@ -278,16 +377,82 @@ class ServerMigrationService
         Node $target,
         ?NetworkInterface $bridge,
         MigrationPreconditionData $preconditions,
+        MigrationTransport $transport,
     ): MigrationCandidateData {
         return new MigrationCandidateData(
             nodeId: $target->id,
             nodeName: $target->name,
             locationName: $target->location->short_code ?? $target->location->name ?? '',
             disposition: MigrationDisposition::Preserve,
+            transport: $transport,
+            estimatedTransferBytes: $transport === MigrationTransport::Anchor ? $server->disk : null,
             blockedReason: null,
             bridgeName: $bridge?->name,
-            canMigrateOnline: $preconditions->isRunning,
+            // The Anchor transport dumps, transfers and restores; there is no
+            // supported way to do that without stopping the guest, so it never
+            // matters that the guest happens to be running now.
+            canMigrateOnline: $transport === MigrationTransport::Cluster && $preconditions->isRunning,
         );
+    }
+
+    /**
+     * Why this node cannot take the guest over Anchor, or null if it can.
+     *
+     * Ordered so the operator is told the thing they can fix. Enrollment
+     * first, because it is the one with a single remedy and the one that makes
+     * every later question unanswerable. The capability checks are separate
+     * from enrollment on purpose: an enrolled Anchor that has not been built
+     * for migration would accept the install and finish it by running
+     * `qm template` on the guest, which is not a failure the panel can detect
+     * afterwards.
+     */
+    public function anchorRefusal(Server $server, Node $target): ?string
+    {
+        $source = $server->node;
+
+        foreach ([$source, $target] as $node) {
+            if (! $node->hasAnchor()) {
+                return sprintf('Anchor is not installed on %s. Both nodes need it to migrate between clusters.', $node->name);
+            }
+        }
+
+        if (! $this->advertises($source, AnchorMigrationProtocol::EXPORT_CAPABILITY)) {
+            return sprintf('Anchor on %s is too old to export a guest for migration. Upgrade it first.', $source->name);
+        }
+
+        if (! $this->advertises($target, AnchorMigrationProtocol::INSTALL_CAPABILITY)) {
+            return sprintf('Anchor on %s is too old to install a migrated guest. Upgrade it first.', $target->name);
+        }
+
+        if ($this->destinationStorage($server, $target) === null) {
+            return sprintf(
+                '%s has no storage named "%s" for the guest\'s disks to be restored onto.',
+                $target->name,
+                $server->storage->name,
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * The storage on $target the guest's disks are restored onto.
+     *
+     * Matched by name, which is the same rule the bridge check already uses
+     * and for the same reason: `storage.cfg` names are how a Proxmox operator
+     * says "these two are the same thing", and the panel is in no position to
+     * decide that `local-lvm` and `fast-nvme` are interchangeable.
+     */
+    public function destinationStorage(Server $server, Node $target): ?Storage
+    {
+        return $target->storages()
+            ->where('storages.name', $server->storage->name)
+            ->first();
+    }
+
+    private function advertises(Node $node, string $capability): bool
+    {
+        return in_array($capability, $node->agent_capabilities ?? [], true);
     }
 
     private function sameNamedBridge(Server $server, Node $target): ?NetworkInterface

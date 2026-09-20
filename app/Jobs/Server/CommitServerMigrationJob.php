@@ -61,6 +61,18 @@ class CommitServerMigrationJob implements ShouldQueue
         public array $reservedAddressIds = [],
         /** @var array<int, int> addresses the server gives up, released only now */
         public array $releasedAddressIds = [],
+        /**
+         * The guest's VMID on the destination, when it changed.
+         *
+         * Null for a cluster migration, where VMIDs are cluster-global and the
+         * guest keeps its own. The Anchor transport moves between clusters
+         * that each have their own numbering, so the destination picks a free
+         * one and the row has to follow it or every URL the panel builds
+         * afterwards points at somebody else's guest.
+         */
+        public ?int $destinationVmid = null,
+        /** The destination's storage row, for the same reason. */
+        public ?int $destinationStorageId = null,
     ) {}
 
     /**
@@ -101,6 +113,8 @@ class CommitServerMigrationJob implements ShouldQueue
             $server->forceFill([
                 'node_id' => $target->id,
                 'network_interface_id' => $this->targetInterfaceId,
+                'vmid' => $this->destinationVmid ?? $server->vmid,
+                'storage_id' => $this->destinationStorageId ?? $server->storage_id,
                 // A released address may have been this server's primary; the
                 // FK is nullOnDelete, not nullOnRelease, so clear it here and
                 // let ServerNetworkService pick a primary from what is left.
