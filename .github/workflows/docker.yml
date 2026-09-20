@@ -16,7 +16,12 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/panel
+  # Spelled out rather than derived from ${{ github.repository_owner }}, which is
+  # "ConvoyPanel". A Docker reference has to be lowercase, so every build in this
+  # workflow failed to parse its own image name before it could push anything.
+  # Actions expressions have no lower-casing function, so the literal is the fix,
+  # and it is the same name compose.yml and the installer already hardcode.
+  IMAGE_NAME: convoypanel/panel
 
 jobs:
   # Each architecture is built on a runner of that architecture and pushed by
