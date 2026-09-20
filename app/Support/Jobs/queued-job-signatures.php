@@ -48,6 +48,8 @@ return [
         ['name' => 'disposition', 'type' => 'App\\Enums\\Server\\MigrationDisposition', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'reservedAddressIds', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
         ['name' => 'releasedAddressIds', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
+        ['name' => 'destinationVmid', 'type' => '?int', 'optional' => true, 'promoted' => true, 'variadic' => false],
+        ['name' => 'destinationStorageId', 'type' => '?int', 'optional' => true, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Server\\ConfigureVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
@@ -55,11 +57,27 @@ return [
     'App\\Jobs\\Server\\DeleteVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\DestroySourceGuestJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\DiscardMigrationArtifactJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\ExportGuestJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\FetchImageJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Server\\ImportVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\InstallMigratedGuestJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Server\\MigrateVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
@@ -93,5 +111,9 @@ return [
     'App\\Jobs\\Server\\UpdatePasswordJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'password', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\VerifyMigratedGuestJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
 ];
