@@ -36,6 +36,9 @@ final class AdminPermissions
         'clusters' => 'nodes',
         'servers' => 'servers',
         'server-presets' => 'servers',
+        // Adopting an unmanaged guest is how a server comes into existence without a
+        // build, so it is administering servers rather than a surface of its own.
+        'adoptable-guests' => 'servers',
         'backups' => 'servers',
         'address-block-groups' => 'address-block-groups',
         'images' => 'image-groups',

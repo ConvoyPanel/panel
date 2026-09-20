@@ -27,6 +27,7 @@ final class TokenAbilities extends ScopedTokenAbilities
         'storages',
         'servers',
         'server-presets',
+        'adoptable-guests',
         'backups',
         'address-block-groups',
         'images',
