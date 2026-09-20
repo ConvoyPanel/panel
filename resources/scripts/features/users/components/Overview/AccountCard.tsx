@@ -42,8 +42,11 @@ const AccountCard = ({ user }: Props) => (
             ) : (
                 <dl className={'flex flex-col gap-2'}>
                     <Row label={'User ID'}>{user.id}</Row>
+                    <Row label={'Account'}>
+                        {user.type === 'guest' ? 'Guest' : 'Customer'}
+                    </Row>
                     <Row label={'Role'}>
-                        {user.rootAdmin ? 'Administrator' : 'User'}
+                        {user.adminRole?.name ?? 'No admin access'}
                     </Row>
                     <Row label={'Created'}>
                         {user.createdAt

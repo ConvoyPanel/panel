@@ -22,6 +22,13 @@ export enum ServerLifecycle {
 
 export interface Server {
     id: number
+    /** Whether the signed-in account owns this server, rather than having had it shared with them. */
+    isOwner: boolean
+    /**
+     * What the signed-in account may do on this server. The owner and an operator get the whole
+     * catalog, so the nav has one shape to read instead of an ownership special case.
+     */
+    permissions: App.Enums.Server.ServerPermission[]
     uuid: string
     uuidShort: string
     userId: number

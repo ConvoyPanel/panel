@@ -13,6 +13,7 @@ import {
     IconServer,
     IconShieldCog,
     IconShieldHalf,
+    IconUsers,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { Suspense, lazy } from 'react'
@@ -23,7 +24,10 @@ import { useServer, preloadServer } from '@/features/servers/detail/api.ts'
 import AppLayout from '@/components/layouts/AppLayout.tsx'
 import Spinner from '@/components/ui/Spinner.tsx'
 
-import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
+import {
+    type Route as NavRoute,
+    SidebarNav,
+} from '@/components/ui/Navigation/Navigation.types.ts'
 
 const InstallingServer = lazy(
     () =>
@@ -44,20 +48,27 @@ const DeferredOSSelection = lazy(
         )
 )
 
-export const Route = createFileRoute('/_app/servers/$serverUuid')({
-    loader: ({ params: { serverUuid } }) =>
-        preloadServer(serverUuid).catch(processAxiosError),
-    component: ServerLayout,
-    staticData: {
-        title: 'Dashboard',
-    },
-})
 
-function ServerLayout() {
+const ServerLayout = () => {
     const { serverUuid } = Route.useParams()
     const { data: server } = useServer(serverUuid)
     const { data: user } = useUser()
     useTitle(server?.name)
+
+    /*
+     * A tab the account cannot open is left out rather than disabled. The owner and an operator
+     * are handed the whole catalog by the API, so this only ever removes anything for a sub-user,
+     * and the endpoints behind each tab refuse independently -- this is the nav agreeing with
+     * them rather than the gate itself.
+     *
+     * While the payload is still loading there is nothing to filter against, so everything shows.
+     */
+    const can = (...permissions: App.Enums.Server.ServerPermission[]) =>
+        server === undefined ||
+        permissions.some(permission => server.permissions.includes(permission))
+
+    const only = (allowed: boolean, ...items: NavRoute[]): NavRoute[] =>
+        allowed ? items : []
 
     const nav: SidebarNav = {
         key: `server:${serverUuid}`,
@@ -75,67 +86,75 @@ function ServerLayout() {
                         path: `/servers/${serverUuid}`,
                         activeOptions: { exact: true },
                     },
-                    {
+                    ...only(can('statistics.read'), {
                         icon: IconChartBar,
                         label: 'Graphs',
                         path: `/servers/${serverUuid}/graphs`,
-                    },
-                    {
+                    }),
+                    ...only(can('activity.read'), {
                         icon: IconHistory,
                         label: 'Activity',
                         path: `/servers/${serverUuid}/activity`,
-                    },
+                    }),
                 ],
             },
             {
                 label: 'Storage & Network',
                 items: [
-                    {
+                    ...only(can('backup.read'), {
                         icon: IconCopy,
                         label: 'Backups',
                         path: `/servers/${serverUuid}/backups`,
-                    },
-                    {
+                    }),
+                    ...only(can('settings.media'), {
                         icon: IconDisc,
                         label: 'ISO Library',
                         path: `/servers/${serverUuid}/iso-library`,
-                    },
-                    {
+                    }),
+                    ...only(can('settings.boot-order', 'settings.reinstall'), {
                         icon: IconDatabase,
                         label: 'Storage',
                         path: `/servers/${serverUuid}/storage`,
-                    },
-                    {
+                    }),
+                    ...only(can('settings.network'), {
                         icon: IconNetwork,
                         label: 'Networking',
                         path: `/servers/${serverUuid}/networking`,
-                    },
-                    {
+                    }),
+                    ...only(can('firewall.read'), {
                         icon: IconShieldHalf,
                         label: 'Firewall',
                         path: `/servers/${serverUuid}/firewall`,
-                    },
+                    }),
                 ],
             },
             {
                 label: 'Configuration',
                 items: [
-                    {
+                    ...only(can('settings.auth'), {
                         icon: IconLock,
                         label: 'Security',
                         path: `/servers/${serverUuid}/security`,
-                    },
-                    {
+                    }),
+                    ...only(can('settings.reinstall'), {
                         icon: IconRefresh,
                         label: 'Rebuild',
                         path: `/servers/${serverUuid}/rebuild`,
-                    },
+                    }),
+                    // Owner only, and not delegable: a permission to grant permissions would be
+                    // a permission to grant every permission.
+                    ...only(server?.isOwner !== false, {
+                        icon: IconUsers,
+                        label: 'Sharing',
+                        path: `/servers/${serverUuid}/sharing`,
+                    }),
                 ],
             },
             // The admin side is keyed by the numeric id, not the uuid this route
             // carries, so the jump has to wait for the server to load. Gated on
-            // root_admin because a customer has nothing to land on over there.
-            ...(user?.rootAdmin && server
+            // the permission that opens that screen, because a customer has
+            // nothing to land on over there.
+            ...(user?.adminPermissions?.includes('servers.read') && server
                 ? [
                       {
                           label: 'Admin',
@@ -188,3 +207,12 @@ function ServerLayout() {
         </AppLayout>
     )
 }
+
+export const Route = createFileRoute('/_app/servers/$serverUuid')({
+    loader: ({ params: { serverUuid } }) =>
+        preloadServer(serverUuid).catch(processAxiosError),
+    component: ServerLayout,
+    staticData: {
+        title: 'Dashboard',
+    },
+})
