@@ -195,6 +195,7 @@ enum AuditEvent: string
     case ADMIN_IMAGE_VERSION_UPDATED = 'admin.image-version.updated';
     case ADMIN_IMAGE_VERSION_DELETED = 'admin.image-version.deleted';
     case ADMIN_IMAGE_UPLOADED = 'admin.image.uploaded';
+    case ADMIN_IMAGE_IMPORTED = 'admin.image.imported';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed

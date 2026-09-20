@@ -16,8 +16,13 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
  * assertions below are about the exact arguments, not about the call
  * succeeding.
  */
-function makeImageVersion(array $hardware = [], string $ostype = 'l26', bool $withVarstore = false)
-{
+function makeImageVersion(
+    array $hardware = [],
+    string $ostype = 'l26',
+    bool $withVarstore = false,
+    array $systemOptions = [],
+    array $varstoreOptions = [],
+) {
     $group = ImageGroup::create(['name' => 'Ubuntu']);
 
     $definition = ImageDefinition::create([
@@ -36,6 +41,7 @@ function makeImageVersion(array $hardware = [], string $ostype = 'l26', bool $wi
         'size' => 600 * 1024 * 1024,
         'virtual_size' => 8 * 1024 ** 3,
         'format' => 'qcow2',
+        'options' => $systemOptions,
     ]];
 
     if ($withVarstore) {
@@ -48,6 +54,7 @@ function makeImageVersion(array $hardware = [], string $ostype = 'l26', bool $wi
             'size' => 528 * 1024,
             'virtual_size' => 528 * 1024,
             'format' => 'qcow2',
+            'options' => $varstoreOptions,
         ];
     }
 
@@ -165,4 +172,31 @@ it('refuses to build a version with no system disk', function () {
 
     expect(fn () => app(ProxmoxServerClient::class)->setServer($server)->create($version, []))
         ->toThrow(ConflictHttpException::class);
+});
+
+it('passes on the settings the image itself was built with', function () {
+    [, , , $server] = createServerModel();
+    $version = makeImageVersion(
+        ostype: 'win11',
+        withVarstore: true,
+        systemOptions: ['discard' => 'on', 'ssd' => 1],
+        varstoreOptions: ['efitype' => '4m', 'pre-enrolled-keys' => 1, 'ms-cert' => '2023k'],
+    );
+
+    $payload = capturedCreatePayload(fn () => app(ProxmoxServerClient::class)
+        ->setServer($server)
+        ->create($version, [
+            ImageDiskRole::SYSTEM->value => 'local:import/disk.qcow2',
+            ImageDiskRole::EFIVARS->value => 'local:import/vars.qcow2',
+        ]));
+
+    // These describe the disk that was built, not the node it lands on.
+    // Dropping `discard` costs the guest TRIM on a thin volume; dropping
+    // `pre-enrolled-keys` and `ms-cert` changes the Secure Boot state the
+    // image was sealed with.
+    expect($payload['scsi0'])->toBe(
+        "{$server->storage->name}:0,import-from=local:import/disk.qcow2,discard=on,ssd=1",
+    )->and($payload['efidisk0'])->toBe(
+        "{$server->storage->name}:0,import-from=local:import/vars.qcow2,efitype=4m,pre-enrolled-keys=1,ms-cert=2023k",
+    );
 });
