@@ -119,6 +119,13 @@ const Roles = () => {
         {
             key: 'permissions',
             header: 'Grants',
+            // Nowrap rather than a width: the Role column fills, and under
+            // `table-layout: auto` its `width: 100%` beats a width declared
+            // here, so `w-[22rem]` computes to the same starved 94px. Refusing
+            // to wrap makes this column's min-content width the thing the fill
+            // column has to yield to. The summary is already bounded ("... and
+            // N more"), and the card scrolls sideways if it ever is not.
+            className: 'whitespace-nowrap',
             cell: role => (
                 <span className={'text-muted-foreground text-sm'}>
                     {summarize(role)}
