@@ -1,0 +1,196 @@
+schemaVersion: "1"
+kind: mixin
+name: convoy-dev
+displayName: Convoy 4.x dev sandbox
+description: Provision ddev inside a Docker Sandbox for working on Convoy 4.x.
+
+# Appended to the agent's memory at sandbox creation — tells the agent how to
+# finish provisioning and run common tasks. (ddev itself is installed/started by
+# the commands below; these are the project-state steps that shouldn't run
+# automatically.)
+agentContext: |
+  # Convoy 4.x dev sandbox
+
+  ddev is installed and started for you (Laravel + MySQL + redis). Its **database**
+  is this sandbox's own, and the install step below proxy-isolates `*.ddev.site`
+  (adds it to NO_PROXY) so `curl`/Playwright hitting https://convoy4x.ddev.site
+  stay on THIS sandbox's ddev instead of being resolved by the proxy on the host
+  and driving your real host app. Sanity check after a rebuild:
+  `curl -sk https://convoy4x.ddev.site/ -o /dev/null -w '%{remote_ip}\n'` must
+  print `127.0.0.1` (not a proxy address). Back it up host-side with
+  `sbx policy deny network '*.ddev.site'`.
+
+  Playwright + Chromium are pre-installed for visual and e2e checks — but NOT in
+  the repo. They live in `/opt/sbx-e2e` (pinned version, browsers in
+  ~/.cache/ms-playwright), so **do not `npm install playwright` in the project**;
+  that would put sandbox-only tooling in package.json. Write throwaway scripts
+  wherever you like and import the helpers by absolute path:
+
+      import { BASE, launch, newContext, login, capture } from '/opt/sbx-e2e/browser.mjs'
+
+      const browser = await launch()          // proxy-bypassed + preflighted
+      const ctx = await newContext(browser)   // ignores the mkcert cert
+      const page = await login(ctx, { email: '…', password: '…' })
+      await capture(ctx, { url: '/admin', width: 768, path: '/tmp/overview.png' })
+      await browser.close()
+
+  `launch()` refuses to run unless the app answers from 127.0.0.1, so a
+  misconfigured sandbox fails loudly instead of driving your host app. Source:
+  `.sbx/dev/browser.mjs` (copied into place on every start — edit it there).
+
+  If ddev is unreachable, fix ddev; never tunnel to the host's instance.
+
+  Finish provisioning once:
+
+      ddev composer install
+      npm install
+      ddev artisan key:generate
+      ddev artisan migrate
+      ddev artisan db:seed --class=ServerSeeder   # a location, a node, 10 servers
+
+  Everyday:
+
+      ddev exec ./vendor/bin/pest    # test suite
+      ddev artisan <cmd>             # artisan
+      ddev describe                  # status / URLs
+
+  The app serves **prebuilt** assets from `public/build`, and no Vite dev server
+  runs by default — so a frontend edit is invisible in the browser until you
+  `npx vite build`. A stale `public/hot` from a killed `npm run dev` makes the
+  page render blank; `rm -f public/hot` before a built-asset check.
+
+  Two traps specific to this branch:
+
+  - `composer.json` requires **ext-gmp**. `ddev composer install` exits 0 even
+    when the platform check fails, so a missing extension leaves vendor/ stale
+    and the next artisan call dies in `platform_check.php`. The committed
+    `.ddev/config.yaml` installs php8.2-gmp; don't drop it.
+  - `tests/Pest.php` uses **DatabaseTransactions**, not RefreshDatabase, so the
+    suite runs against the dev database and merely rolls its own writes back.
+    Seeded dev data is therefore visible to it and will fail anything asserting
+    on a fleet-wide aggregate (the overview endpoint's counts, most of all). Run
+    `ddev artisan migrate:fresh` before a full run, or scope to one file.
+
+  Note: vendor/ and node_modules/ are shared with your host repo via the mounted
+  workspace, so composer/npm installs here also land in your host checkout.
+
+commands:
+  # Runs ONCE at creation (as root unless a user is set). Slow the first time
+  # (installs ddev + Chromium). Bake it into a template so it isn't repeated:
+  #   sbx template save convoy4x-dev
+  install:
+    # ddev's installer refuses to run as root and uses sudo itself, so run it as
+    # the agent user (uid 1000, which is in the sudo group).
+    - command: "command -v ddev >/dev/null 2>&1 || curl -fsSL https://ddev.com/install.sh | bash"
+      user: "1000"
+      description: install ddev
+
+    # Keep *.ddev.site resolving to THIS sandbox's ddev (127.0.0.1) instead of the
+    # host's. The sandbox proxy otherwise resolves the hostname on the host side, so
+    # curl/Playwright silently drive your real host app (leaking e2e sessions,
+    # mutating host data). Marker-guarded because CLAUDE_ENV_FILE is sourced before
+    # every command — a plain append would grow NO_PROXY without bound.
+    - command: |
+        cat >> "${CLAUDE_ENV_FILE:-/etc/sandbox-persistent.sh}" <<'SBXEOF'
+        if [ -z "${SBX_DDEV_NOPROXY_DONE:-}" ]; then
+          export NO_PROXY="${NO_PROXY:+$NO_PROXY,}.ddev.site,ddev.site"
+          export no_proxy="$NO_PROXY"
+          export SBX_DDEV_NOPROXY_DONE=1
+        fi
+        SBXEOF
+      description: proxy-isolate *.ddev.site from the host dev server
+
+    # Playwright lives OUTSIDE the repo so a visual check never adds a devDependency
+    # to package.json. Scripts import /opt/sbx-e2e/browser.mjs by absolute path, and
+    # Node resolves `playwright` by walking up from there to /opt/sbx-e2e/node_modules.
+    - command: "install -d -o 1000 -g 1000 /opt/sbx-e2e"
+      description: create the sandbox-local e2e prefix
+
+    # Pinned, not @latest: the browser build id is tied to the playwright version, so
+    # a floating version installed later in a session no longer matches the browsers
+    # baked in here and dies with "Executable doesn't exist at .../chromium-<id>".
+    # A real package.json (rather than --no-save) is what keeps it installed — with
+    # nothing declared, the next npm command in this prefix prunes node_modules.
+    - command: |
+        set -eu
+        cat > /opt/sbx-e2e/package.json <<'PKGEOF'
+        {
+          "name": "sbx-e2e",
+          "private": true,
+          "type": "module",
+          "dependencies": { "playwright": "1.62.0" }
+        }
+        PKGEOF
+        npm --prefix /opt/sbx-e2e install --loglevel=error
+      user: "1000"
+      description: install Playwright (pinned)
+
+    # Chromium's shared libraries via apt (needs root — the default here).
+    - command: "/opt/sbx-e2e/node_modules/.bin/playwright install-deps chromium || echo 'convoy-dev: playwright install-deps failed; agent can rerun on demand'"
+      description: install Chromium OS dependencies
+
+    # The browser itself, as the agent user so it lands in the home cache the agent
+    # actually uses. Non-fatal so a download hiccup can't block creation.
+    - command: "/opt/sbx-e2e/node_modules/.bin/playwright install chromium || echo 'convoy-dev: playwright chromium preinstall skipped'"
+      user: "1000"
+      description: pre-install Chromium for visual/e2e checks
+
+  # Runs on EVERY start (as the agent user). Fast once ddev's images are baked
+  # into a template.
+  startup:
+    # /etc/hosts is a read-only bind mount from the host, so ddev's hostname step
+    # ("Failed to add hosts entry … read-only file system") aborts `ddev start` —
+    # and *.ddev.site has no public DNS answer in here to fall back on. Overmount a
+    # writable copy so ddev can register its own names; the marker line makes it
+    # idempotent across restarts. Sandbox-local by construction: nothing is written
+    # to the workspace, and the overmount dies with the sandbox.
+    - command:
+          - "bash"
+          - "-lc"
+          - |
+            set -euo pipefail
+            mark='# sbx: writable hosts overmount'
+            if grep -qxF "$mark" /etc/hosts 2>/dev/null; then
+              echo 'convoy-dev: /etc/hosts already writable'
+              exit 0
+            fi
+            tmp=$(mktemp)
+            { cat /etc/hosts; echo "$mark"; } > "$tmp"
+            sudo install -m 0644 -o root -g root "$tmp" /var/lib/sbx-hosts
+            rm -f "$tmp"
+            sudo mount --bind /var/lib/sbx-hosts /etc/hosts
+            echo 'convoy-dev: overmounted /etc/hosts (writable copy at /var/lib/sbx-hosts)'
+      description: make /etc/hosts writable so ddev can register *.ddev.site
+
+    # Copied rather than symlinked: Node resolves a symlinked module to its realpath,
+    # which would send the `playwright` lookup into the repo instead of /opt/sbx-e2e.
+    - command: ["bash", "-lc", "install -m 0644 \"${WORKSPACE_DIR:-.}/.sbx/dev/browser.mjs\" /opt/sbx-e2e/browser.mjs"]
+      description: publish the Playwright helpers to /opt/sbx-e2e
+
+    # ddev signs the project cert with the mkcert CA of whichever machine runs
+    # `ddev start`, and drops it in .ddev/traefik/certs — which is part of the
+    # mounted workspace. Left alone, this sandbox's throwaway CA overwrites the
+    # host's cert in the checkout, and the next host `ddev start` copies it into
+    # the host router: every *.ddev.site project on the Mac then fails TLS in
+    # the browser, until a host-side `ddev restart` regenerates it. Overmount a
+    # sandbox-local dir (the same trick as /etc/hosts above) so ddev in here
+    # signs its own certs and the host checkout is never written to.
+    - command:
+          - "bash"
+          - "-lc"
+          - |
+            set -euo pipefail
+            certs="${WORKSPACE_DIR:-.}/.ddev/traefik/certs"
+            mkdir -p "$certs"
+            certs=$(cd "$certs" && pwd -P)
+            if awk -v d="$certs" '$2 == d { found = 1 } END { exit !found }' /proc/self/mounts; then
+              echo 'convoy-dev: .ddev/traefik/certs already overmounted'
+              exit 0
+            fi
+            sudo install -d -m 0755 -o 1000 -g 1000 /var/lib/sbx-ddev-certs
+            sudo mount --bind /var/lib/sbx-ddev-certs "$certs"
+            echo 'convoy-dev: overmounted .ddev/traefik/certs (sandbox-local)'
+      description: keep sandbox-signed ddev certs out of the host checkout
+
+    - command: ["bash", "-lc", "cd \"${WORKSPACE_DIR:-.}\" && ddev start -y"]
+      description: boot the ddev stack

@@ -2,7 +2,6 @@ import { bytesToString } from '@/util/helpers'
 import {
     CircleStackIcon,
     CpuChipIcon,
-    ExclamationTriangleIcon,
     ServerStackIcon,
     SignalIcon,
     UsersIcon,
@@ -12,15 +11,17 @@ import { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 import {
     DashboardMetric,
     DashboardNode,
 } from '@/api/admin/overview/getOverview'
+import useOverviewSWR from '@/api/admin/overview/useOverviewSWR'
 
 import Card from '@/components/elements/Card'
 import MessageBox from '@/components/elements/MessageBox'
 import PageContentBlock from '@/components/elements/PageContentBlock'
+
+import AttentionCard from '@/components/admin/overview/AttentionCard'
 
 interface IconProps {
     className?: string
@@ -32,23 +33,9 @@ interface StatCardProps {
     detail?: string
     icon: ComponentType<IconProps>
     to?: string
-    tone?: 'default' | 'warning' | 'error'
 }
 
-const toneClasses = {
-    default: 'text-accent-600 border-accent-200 bg-accent-100',
-    warning: 'text-warning-dark border-warning bg-warning-lighter',
-    error: 'text-error border-error-light bg-error-lighter',
-}
-
-const StatCard = ({
-    title,
-    value,
-    detail,
-    icon: Icon,
-    to,
-    tone = 'default',
-}: StatCardProps) => {
+const StatCard = ({ title, value, detail, icon: Icon, to }: StatCardProps) => {
     const content = (
         <div className='flex items-start justify-between gap-4'>
             <div>
@@ -58,7 +45,7 @@ const StatCard = ({
                 </p>
                 {detail && <p className='description-small mt-2'>{detail}</p>}
             </div>
-            <div className={`rounded-md border p-2 ${toneClasses[tone]}`}>
+            <div className='rounded-md border border-accent-200 bg-accent-100 p-2 text-accent-600'>
                 <Icon className='h-5 w-5' />
             </div>
         </div>
@@ -66,10 +53,7 @@ const StatCard = ({
 
     if (to) {
         return (
-            <Link
-                to={to}
-                className='col-span-12 block sm:col-span-6 xl:col-span-3'
-            >
+            <Link to={to} className='col-span-12 block md:col-span-4'>
                 <Card className='h-full transition-shadow hover:shadow-lg'>
                     {content}
                 </Card>
@@ -77,11 +61,7 @@ const StatCard = ({
         )
     }
 
-    return (
-        <Card className='col-span-12 sm:col-span-6 xl:col-span-3'>
-            {content}
-        </Card>
-    )
+    return <Card className='col-span-12 md:col-span-4'>{content}</Card>
 }
 
 const UsageBar = ({
@@ -153,15 +133,16 @@ const NodeRow = ({ node }: { node: DashboardNode }) => {
 
 const OverviewSkeleton = () => (
     <div className='grid grid-cols-12 gap-6'>
-        {[1, 2, 3, 4].map(item => (
+        {[1, 2, 3].map(item => (
             <Skeleton
                 key={item}
-                className='col-span-12 sm:col-span-6 xl:col-span-3'
+                className='col-span-12 md:col-span-4'
                 height={142}
             />
         ))}
         <Skeleton className='col-span-12 lg:col-span-7' height={420} />
         <Skeleton className='col-span-12 lg:col-span-5' height={420} />
+        <Skeleton className='col-span-12' height={200} />
     </div>
 )
 
@@ -177,9 +158,7 @@ const OverviewContainer = () => {
                     <h1 className='text-2xl font-semibold text-foreground'>
                         {tStrings('overview')}
                     </h1>
-                    <p className='description-small mt-1'>
-                        {t('description')}
-                    </p>
+                    <p className='description-small mt-1'>{t('description')}</p>
                 </div>
             </div>
 
@@ -222,21 +201,6 @@ const OverviewContainer = () => {
                         icon={UsersIcon}
                         to='/admin/users'
                     />
-                    <StatCard
-                        title={t('attention')}
-                        value={data.summary.failedServers}
-                        detail={t('attention_detail', {
-                            backups: data.backups.failed,
-                            deleting: data.servers.deleting,
-                        })}
-                        icon={ExclamationTriangleIcon}
-                        to='/admin/servers'
-                        tone={
-                            data.summary.failedServers > 0
-                                ? 'error'
-                                : 'default'
-                        }
-                    />
 
                     <Card className='col-span-12 lg:col-span-7'>
                         <div className='flex items-center justify-between gap-3'>
@@ -268,8 +232,7 @@ const OverviewContainer = () => {
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('addresses_detail', {
-                                        available:
-                                            data.addresses.available,
+                                        available: data.addresses.available,
                                         pools: data.addresses.pools,
                                     })}
                                 </p>
@@ -294,8 +257,7 @@ const OverviewContainer = () => {
                                     {tStrings('iso', { count: 2 })}
                                 </p>
                                 <p className='mt-2 text-xl font-semibold text-foreground'>
-                                    {data.isos.successful} /{' '}
-                                    {data.isos.total}
+                                    {data.isos.successful} / {data.isos.total}
                                 </p>
                                 <p className='description-small mt-1'>
                                     {t('iso_status_detail', {
@@ -306,7 +268,9 @@ const OverviewContainer = () => {
                         </div>
                     </Card>
 
-                    <Card className='col-span-12 lg:col-span-5'>
+                    <AttentionCard data={data} />
+
+                    <Card className='col-span-12'>
                         <div className='flex items-center justify-between gap-3'>
                             <div>
                                 <h2 className='h5'>{t('server_state')}</h2>
@@ -316,14 +280,11 @@ const OverviewContainer = () => {
                             </div>
                             <SignalIcon className='h-5 w-5 text-accent-400' />
                         </div>
-                        <div className='mt-6 grid grid-cols-2 gap-3'>
+                        <div className='mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6'>
                             {[
                                 [t('ready'), data.servers.ready],
                                 [t('installing'), data.servers.installing],
-                                [
-                                    tStrings('suspended'),
-                                    data.servers.suspended,
-                                ],
+                                [tStrings('suspended'), data.servers.suspended],
                                 [t('restoring'), data.servers.restoring],
                                 [t('deleting'), data.servers.deleting],
                                 [t('failed'), data.servers.failed],
@@ -342,9 +303,7 @@ const OverviewContainer = () => {
                     </Card>
 
                     <Card className='col-span-12'>
-                        <h2 className='h5'>
-                            {tStrings('node', { count: 2 })}
-                        </h2>
+                        <h2 className='h5'>{tStrings('node', { count: 2 })}</h2>
                         <p className='description-small mt-1'>
                             {t('nodes_description')}
                         </p>
