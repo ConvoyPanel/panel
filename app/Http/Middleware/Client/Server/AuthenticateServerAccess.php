@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\Client\Server;
 
+use App\Enums\Admin\AdminPermission;
 use App\Exceptions\Http\Server\ServerUnavailableException;
 use App\Models\Server;
 use Closure;
@@ -34,7 +35,13 @@ class AuthenticateServerAccess
             throw new NotFoundHttpException('Server not found');
         }
 
-        if ($user->id !== $server->user_id && ! $user->root_admin) {
+        // 404 rather than 403 for all three misses: whether a server exists is itself something
+        // only the people who can reach it should learn.
+        $reachable = $user->id === $server->user_id
+            || $server->subuserFor($user) !== null
+            || $user->hasAdminPermission(AdminPermission::SERVERS_READ);
+
+        if (! $reachable) {
             throw new NotFoundHttpException('Server not found');
         }
 

@@ -15,10 +15,13 @@ class AdminAuthenticate
      * Handle an incoming request.
      *
      * The admin surface is authorized for two kinds of caller:
-     *  - a web-session root admin (the panel, /api/admin); and
+     *  - a web-session account holding an admin role (the panel, /api/admin); and
      *  - a panel-wide application token, which is owned by the {@see SystemActor} rather than a
      *    user (/api/application) — being the system actor *is* the authorization, since these
      *    tokens are only mintable by an admin through the session-gated /tokens endpoint.
+     *
+     * This is the door, not the lock. Which parts of the admin area a role actually reaches is
+     * {@see EnforceAdminPermissions}'s job, and it runs directly after this.
      *
      * @throws AccessDeniedHttpException
      */
@@ -33,7 +36,7 @@ class AdminAuthenticate
             return $next($request);
         }
 
-        if (! $actor || ! $actor->root_admin) {
+        if (! $actor || ! $actor->isAdmin()) {
             throw new AccessDeniedHttpException;
         }
 

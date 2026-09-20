@@ -99,7 +99,12 @@ support, because a screen that cannot read its own state is not a usable grant.
 | `settings.reinstall` | `reinstall` | `GET /settings/image-groups`, `POST /settings/reinstall`, `POST /retry-installation` |
 
 `GET /settings/hardware/storage` is reachable with either `settings.boot-order` or
-`settings.reinstall`; it is a plain device read that both screens open with.
+`settings.reinstall`; it is a plain device read that both screens open with, and the policy method
+`viewStorage` is what accepts either.
+
+Reads without a write beside them are gated with route middleware (`can:<ability>,server`); writes
+keep the form-request `authorize()` the codebase already uses. The sub-user group carries both, so
+neither half depends on the other still being there.
 
 #### Issue #96 entries with no endpoint
 
@@ -117,8 +122,9 @@ support, because a screen that cannot read its own state is not a usable grant.
 
 #### Deliberately not delegable
 
-`/subusers/**` is owner-only. A sub-user cannot see, add, edit or remove sub-users, because
-a permission to grant permissions is a permission to grant every permission. Server
+`/subusers/**` is owner-only, through the policy ability `manageSubusers`, which nothing but
+ownership (or `servers.manage`) satisfies. A sub-user cannot see, add, edit or remove sub-users,
+because a permission to grant permissions is a permission to grant every permission. Server
 deletion, suspension and resource limits stay admin-only and are not in this catalog.
 
 ### Sub-user endpoints
@@ -206,6 +212,9 @@ public bool $allow_guest_accounts = false;
 
 Off by default: an install that has never had guests should not gain them on upgrade.
 
+The settings endpoint also returns the number of guest accounts that exist, so the screen can
+state what flipping the switch off actually locks out rather than describing the policy.
+
 While off, no guest account can be created **and no guest can sign in**. A switch that only
 stopped new guests would leave an operator who flips it off with no way to close the door on
 the ones already through. Existing shares are retained, not deleted, so turning it back on
@@ -268,11 +277,11 @@ Resource keys are the first path segment under `api/admin/`, matching
 | `locations.read` / `locations.manage` | `/locations/**` |
 | `nodes.read` / `nodes.manage` | `/nodes/**`, `/storages`, `/storages/{storage}/consumers`, `/clusters/{cluster}/unflag` |
 | `servers.read` / `servers.manage` | `/servers/**`, `/server-presets/**`, `DELETE /backups/{backup}` |
-| `servers.power` | `POST /servers/{server}/power`, `GET /servers/{server}/state` |
+| `servers.power` | `POST /servers/{server}/power` |
 | `address-block-groups.read` / `.manage` | `/address-block-groups/**` |
 | `image-groups.read` / `image-groups.manage` | `/image-groups/**`, `/images/**` |
 | `isos.read` / `isos.manage` | `/isos/**` |
-| `users.read` / `users.manage` | `/users/**` including `/users/{user}/api-keys`, `/ssh-keys`, `/passkeys`, `/oauth-connections`, `/two-factor`, `/invite` |
+| `users.read` / `users.manage` | `/users/**` including `/users/{user}/api-keys`, `/ssh-keys`, `/passkeys`, `/oauth-connections`, `/two-factor`, `/invite`, and `/admin-roles/**` |
 | `users.impersonate` | `POST /users/{user}/generate-sso-token` |
 | `anchors.read` / `anchors.manage` | `/anchors/**`, `/relays/**` |
 | `tokens.manage` | `/tokens/**` |
@@ -312,9 +321,19 @@ Seeded as `is_system` (renameable, not deletable, permissions not editable):
 | **Billing** | `overview.read`, `users.read`, `users.manage`, `servers.read`, `audit-logs.read` |
 | **Network** | `overview.read`, `nodes.read`, `nodes.manage`, `address-block-groups.read`, `address-block-groups.manage`, `locations.read`, `locations.manage`, `anchors.read` |
 
-Custom roles are created from the same catalog. No role may grant `tokens.manage`,
-`settings.manage` or `users.impersonate` unless a superadmin assembles it, because each is a
-path back to full control.
+Custom roles are created from the same catalog, and the usual way to make one is to **duplicate**
+the closest built-in role and edit the copy: an operator who needs Support plus Network does it in
+two clicks rather than reassembling ten permissions from memory. That is what keeps one-role-per-
+account from costing anything.
+
+A built-in role's name and description are editable; its permissions are not, and it cannot be
+deleted, so an install always has something recognisable to fall back to. Authoring a role at all
+is restricted to a superadmin: `tokens.manage`, `settings.manage` and `users.impersonate` are each
+a path back to full control, so an operator who could mint a role holding one could promote
+themselves in a single step. Assigning an existing role needs only `users.manage`.
+
+A role that accounts still hold cannot be deleted; deleting it would silently strip admin access
+from everyone on it.
 
 ### Migration path for existing root admins
 
@@ -324,6 +343,11 @@ One migration, in order:
 2. Add `users.admin_role_id`.
 3. `UPDATE users SET admin_role_id = <superadmin> WHERE root_admin = true`.
 4. Drop `users.root_admin`.
+
+Changing an account's role revokes its API tokens. Sanctum checks abilities against the token
+rather than re-deriving them from the account, so a narrowed role would otherwise linger on a
+credential minted under the old one. Changing the role on the account you are signed in as is
+refused: the screen that would fix it is the one you just narrowed.
 
 Every existing admin keeps exactly the access they had, under the name **Superadmin**.
 Nobody is locked out, and no operator has to do anything at upgrade time. The `down()`

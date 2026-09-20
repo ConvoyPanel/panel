@@ -33,6 +33,7 @@ final class TokenAbilities extends ScopedTokenAbilities
         'image-groups',
         'isos',
         'users',
+        'admin-roles',
         'anchors',
         'relays',
         'settings',

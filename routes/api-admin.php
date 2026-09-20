@@ -323,6 +323,22 @@ Route::prefix('/image-groups')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Admin Role Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/admin-roles
+|
+| What an operator account may reach. Governed by the `users` permission
+| resource -- assigning a role is part of managing accounts -- but authoring one
+| is gated further, to a full administrator, inside AdminRoleFormRequest.
+|
+*/
+Route::resource('admin-roles', Admin\AdminRoleController::class)
+    ->parameters(['admin-roles' => 'admin_role'])
+    ->only(['index', 'show', 'store', 'update', 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
 | User Controller Routes
 |--------------------------------------------------------------------------
 |
@@ -461,6 +477,15 @@ Route::prefix('/settings')->group(function () {
     Route::put(
         '/account',
         [Admin\Settings\AccountSettingsController::class, 'update'],
+    );
+
+    Route::get(
+        '/permissions',
+        [Admin\Settings\PermissionSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/permissions',
+        [Admin\Settings\PermissionSettingsController::class, 'update'],
     );
 
     Route::get(
