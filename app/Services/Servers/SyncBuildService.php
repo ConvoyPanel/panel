@@ -6,7 +6,6 @@ use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\DiskInterface;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
-use Convoy\Repositories\Proxmox\Server\ProxmoxDiskRepository;
 use Illuminate\Support\Arr;
 
 readonly class SyncBuildService
@@ -17,7 +16,7 @@ readonly class SyncBuildService
         private NetworkService          $networkService,
         private ServerDetailService     $detailService,
         private ProxmoxConfigRepository $allocationRepository,
-        private ProxmoxDiskRepository   $diskRepository,
+        private DiskResizeService       $diskResizeService,
     )
     {
     }
@@ -54,9 +53,7 @@ readonly class SyncBuildService
             $diff = $server->disk - $disk->size;
 
             if ($diff > 0) {
-                $this->diskRepository->setServer($server)->resizeDisk(
-                    $disk->interface, $server->disk,
-                );
+                $this->diskResizeService->handle($server, $disk->interface, $server->disk);
             }
         }
     }
