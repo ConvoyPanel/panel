@@ -27,7 +27,15 @@ export interface ImageVersion {
     disks: ImageDisk[]
     size: number
     minimumDisk: number
+    source: ImageSource
     isActive: boolean
+}
+
+/** Where a version's disks came from, and so whether a newer build can exist. */
+export enum ImageSource {
+    MANUAL = 'manual',
+    URL = 'url',
+    REGISTRY = 'registry',
 }
 
 /**
@@ -41,6 +49,8 @@ export interface ImageDefinition {
     uuid: string
     imageGroupUuid: string
     name: string
+    /** The catalogue entry this was imported from, if it was. */
+    registrySlug: string | null
     description: string | null
     isAdminOnly: boolean
     ostype: string
@@ -96,4 +106,65 @@ export interface HardwareSchema {
     /** Panel-owned keys that name a slot rather than carrying a PVE value. */
     metaKeys: string[]
     defaults: Record<string, Record<string, unknown>>
+}
+
+/**
+ * One entry in a published catalogue.
+ *
+ * Not a stored record on either side: the panel reads a catalogue when someone
+ * opens the browser, and an import copies the entry into an ordinary image
+ * definition the operator then owns.
+ */
+export interface RegistryTemplate {
+    slug: string
+    groupSlug: string
+    groupName: string
+    display: string
+    arch: string
+    ostype: string
+    description: string | null
+    /** Derived from the build date: the catalogue numbers nothing itself. */
+    version: string
+    builtAt: string
+    disks: ImageDisk[]
+    hardware: Record<string, unknown>
+    /** Total bytes a node transfers for this entry. */
+    size: number
+    /** The provisioned size of the system disk: the smallest plan that fits. */
+    minimumDisk: number
+    minimumCores: number | null
+    minimumMemory: number | null
+    status: RegistryImportStatus
+    /** The version the panel imported this as, when it has. */
+    importedVersion: string | null
+}
+
+export enum RegistryImportStatus {
+    NEW = 'new',
+    IMPORTED = 'imported',
+    UPDATE_AVAILABLE = 'update_available',
+}
+
+export interface RegistryGroup {
+    slug: string
+    name: string
+    description: string | null
+    templates: RegistryTemplate[]
+}
+
+export interface RegistryCatalog {
+    url: string
+    name: string
+    description: string | null
+    generatedAt: string | null
+    groups: RegistryGroup[]
+}
+
+/** What one import did, which is either a new version or nothing. */
+export interface RegistryImportResult {
+    slug: string
+    imageGroupUuid: string
+    imageDefinitionUuid: string
+    version: string
+    created: boolean
 }
