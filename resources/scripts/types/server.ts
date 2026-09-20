@@ -16,6 +16,8 @@ export enum ServerLifecycle {
     Installing = 'installing',
     InstallFailed = 'install_failed',
     RestoringBackup = 'restoring_backup',
+    Migrating = 'migrating',
+    MigrationFailed = 'migration_failed',
     Deleting = 'deleting',
     DeletionFailed = 'deletion_failed',
 }

@@ -12,6 +12,7 @@ use App\Data\PaginationMeta;
 use App\Enums\Audit\AuditEvent;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
+use App\Exceptions\Service\Address\AddressHeldForMigrationException;
 use App\Exceptions\Service\Address\AddressNotAvailableException;
 use App\Exceptions\Service\Address\AddressNotReservedException;
 use App\Exceptions\Service\Address\AddressReservedBySystemException;
@@ -206,6 +207,12 @@ class AddressController
             throw new AddressReservedBySystemException;
         }
 
+        // A migration's destination binding belongs to a task in flight, not to
+        // an operator. It releases itself when the task lands either way.
+        if ($address->state_reason === AddressStateReason::Migration) {
+            throw new AddressHeldForMigrationException;
+        }
+
         $address->update(['state' => AddressState::Available, 'state_reason' => null]);
 
         Audit::record(
@@ -278,6 +285,8 @@ class AddressController
                     state: match (true) {
                         $address->state === AddressState::Assigned => 'assigned',
                         $address->isSystemReserved() => 'system',
+                        $address->state_reason === AddressStateReason::Migration => 'migrating',
+                        $address->state_reason === AddressStateReason::Conflict => 'conflict',
                         $address->state === AddressState::Reserved => 'reserved',
                         default => 'available',
                     },
@@ -317,7 +326,8 @@ class AddressController
 
         $eligible = $addresses->filter(fn (Address $address) => match ($action) {
             'reserve' => $address->state === AddressState::Available,
-            'release' => $address->state === AddressState::Reserved && ! $address->isSystemReserved(),
+            'release' => $address->state === AddressState::Reserved
+                && ($address->state_reason?->isOperatorReleasable() ?? true),
             // Deleting an address out from under a running server breaks its networking. The
             // single-address route allows it deliberately (one address, one decision); doing it to
             // a whole selection is a different risk, so assigned addresses are left alone here.

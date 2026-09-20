@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property ?OveragePenaltyData $overage_penalty
  * @property ?int $bandwidth_reset_day
  * @property ?int $vlan_tag
+ * @property bool $ipconfig_managed
  * @property Node $node
  * @property ?NetworkInterface $networkInterface
  * @property Storage $storage
@@ -72,7 +73,7 @@ class Server extends Model
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'lifecycle' => ['sometimes', 'string', 'in:ready,deferred_os_selection,installing,install_failed,restoring_backup,deleting,deletion_failed'],
+        'lifecycle' => ['sometimes', 'string', 'in:ready,deferred_os_selection,installing,install_failed,restoring_backup,migrating,migration_failed,deleting,deletion_failed'],
         'suspended_at' => ['sometimes', 'nullable', 'date'],
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
@@ -91,6 +92,7 @@ class Server extends Model
         'overage_penalty.rate' => 'nullable|integer|min:1',
         'bandwidth_reset_day' => 'sometimes|nullable|integer|min:1|max:31',
         'vlan_tag' => 'nullable|integer|min:1|max:4094',
+        'ipconfig_managed' => 'sometimes|boolean',
         'hydrated_at' => 'nullable|date',
     ];
 
@@ -109,6 +111,7 @@ class Server extends Model
             'overage_penalty' => OveragePenaltyCast::class,
             'bandwidth_reset_day' => 'integer',
             'vlan_tag' => 'integer',
+            'ipconfig_managed' => 'boolean',
         ];
     }
 

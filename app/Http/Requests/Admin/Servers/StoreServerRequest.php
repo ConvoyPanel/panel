@@ -17,12 +17,15 @@ use App\Rules\StorageAllows;
 use App\Rules\VlanIsDeclaredOnInterface;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
+use App\Services\Addresses\AddressReachabilityService;
 use Illuminate\Validation\Rule;
 
 class StoreServerRequest extends BaseApiRequest
 {
-    public function rules(AddressAvailabilityService $addressAvailabilityService): array
-    {
+    public function rules(
+        AddressAvailabilityService $addressAvailabilityService,
+        AddressReachabilityService $reachability,
+    ): array {
         $rules = Server::getRules();
 
         return [
@@ -82,8 +85,8 @@ class StoreServerRequest extends BaseApiRequest
             'limits.addresses' => 'sometimes|array',
             'limits.addresses.*' => [
                 'integer',
-                function ($attribute, $value, $fail) {
-                    $address = Address::with('addressBlock.addressBlockGroup.networkInterfaces')->find($value);
+                function ($attribute, $value, $fail) use ($reachability) {
+                    $address = Address::with('addressBlock')->find($value);
 
                     if (! $address) {
                         $fail("The address with ID {$value} could not be found.");
@@ -95,8 +98,9 @@ class StoreServerRequest extends BaseApiRequest
                         $fail("The address with ID {$value} is already allocated to another server.");
                     }
 
-                    $networkInterfaceId = $this->input('limits.network_interface_id');
-                    if (! $address->addressBlock->addressBlockGroup->networkInterfaces->contains('id', $networkInterfaceId)) {
+                    $networkInterfaceId = (int) $this->input('limits.network_interface_id');
+
+                    if (! $reachability->isReachableVia($address, $networkInterfaceId)) {
                         $fail("The address with ID {$value} does not belong to the selected network interface.");
                     }
                 },

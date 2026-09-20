@@ -98,6 +98,13 @@ enum AuditEvent: string
     // Recorded by the placement reconciler when PVE moved the guest (HA
     // recovery, migration) and Convoy followed. Actor is the SystemActor.
     case ADMIN_SERVER_REHOMED = 'admin.server.rehomed';
+    // An operator moved the guest to another member of its cluster. Properties
+    // carry the source, the destination and what happened to the addresses.
+    case ADMIN_SERVER_MIGRATED = 'admin.server.migrated';
+    // An existing guest on a registered node was adopted into the panel.
+    // Properties carry the vmid, the node, and each address that was claimed,
+    // left unclaimed or found outside every managed block.
+    case ADMIN_SERVER_ADOPTED = 'admin.server.adopted';
     case ADMIN_BACKUP_DELETED = 'admin.backup.deleted';
 
     // -----------------------------------------------------------------------------------------
@@ -257,7 +264,9 @@ enum AuditEvent: string
             self::ADMIN_USER_SSO_TOKEN_GENERATED => AuditVisibility::ADMIN_ONLY,
             // Names physical nodes; which host a VM lands on is infrastructure
             // detail a client has no lever over and no need to see.
-            self::ADMIN_SERVER_REHOMED => AuditVisibility::ADMIN_ONLY,
+            self::ADMIN_SERVER_REHOMED,
+            self::ADMIN_SERVER_MIGRATED,
+            self::ADMIN_SERVER_ADOPTED => AuditVisibility::ADMIN_ONLY,
             default => AuditVisibility::CLIENT,
         };
     }

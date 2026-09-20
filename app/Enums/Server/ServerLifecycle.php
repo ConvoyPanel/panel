@@ -19,6 +19,8 @@ enum ServerLifecycle: string
     case INSTALLING = 'installing';
     case INSTALL_FAILED = 'install_failed';
     case RESTORING_BACKUP = 'restoring_backup';
+    case MIGRATING = 'migrating';
+    case MIGRATION_FAILED = 'migration_failed';
     case DELETING = 'deleting';
     case DELETION_FAILED = 'deletion_failed';
 
@@ -45,6 +47,7 @@ enum ServerLifecycle: string
         return match ($this) {
             self::INSTALLING,
             self::RESTORING_BACKUP,
+            self::MIGRATING,
             self::DELETING => true,
             default => false,
         };

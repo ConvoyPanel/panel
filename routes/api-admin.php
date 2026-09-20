@@ -173,6 +173,29 @@ Route::prefix('/server-presets')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Guest Adoption Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/adoptable-guests
+|
+| Guests that exist on a registered node and that Convoy does not own. Derived
+| from the same /cluster/resources the poll already reads, never stored: a
+| table of them would be a cache of a cache, stale the moment someone deletes a
+| VM in the PVE web UI. Adoption itself is node-scoped, because by then the
+| operator has picked one.
+|
+*/
+Route::get('/adoptable-guests', [Admin\GuestAdoptionController::class, 'index']);
+
+Route::prefix('/nodes/{node}/adoptable-guests/{vmid}')
+    ->whereNumber('vmid')
+    ->group(function () {
+        Route::get('/', [Admin\GuestAdoptionController::class, 'show']);
+        Route::post('/', [Admin\GuestAdoptionController::class, 'store']);
+    });
+
+/*
+|--------------------------------------------------------------------------
 | Server Controller Routes
 |--------------------------------------------------------------------------
 |
@@ -207,6 +230,23 @@ Route::prefix('/servers')->group(function () {
                 Route::post('/', [Admin\ServerDiskController::class, 'store']);
                 Route::patch('/{disk}', [Admin\ServerDiskController::class, 'update']);
                 Route::delete('/{disk}', [Admin\ServerDiskController::class, 'destroy']);
+            });
+
+            /*
+             * Moving a server to another member of its cluster. The two reads
+             * draw and resolve the choice; the POST commits it. See
+             * App\Http\Controllers\Admin\ServerMigrationController.
+             */
+            Route::prefix('/migration')->group(function () {
+                Route::get('/', [Admin\ServerMigrationController::class, 'index']);
+                // `{destination}` is an id rather than a bound Node on purpose.
+                // The whole admin API is registered with scopeBindings(), and a
+                // bound model nested under {server} would be resolved through
+                // Server::nodes(), a relation that does not and should not
+                // exist -- the destination is not a child of the server.
+                Route::get('/{destination}', [Admin\ServerMigrationController::class, 'show'])
+                    ->whereNumber('destination');
+                Route::post('/', [Admin\ServerMigrationController::class, 'store']);
             });
 
             Route::prefix('/settings')->group(function () {
