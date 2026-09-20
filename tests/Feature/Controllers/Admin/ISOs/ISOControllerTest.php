@@ -123,7 +123,7 @@ it('inspects a link through whichever node can answer', function () {
     Http::fake([
         '*/query-url-metadata*' => Http::response(
             file_get_contents(
-                base_path('tests/Fixtures/Repositories/Node/Storage/QueryISOData.json'),
+                base_path('tests/Fixtures/Repositories/Node/Storage/QueryIsoData.json'),
             ),
             200,
         ),

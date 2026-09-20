@@ -27,15 +27,51 @@ function blankMailSettings(): void
     $settings->save();
 }
 
+/**
+ * Run the install migration that copies MAIL_* into the stored settings.
+ *
+ * It reads config at the moment it runs, so a caller sets the mailer up first. Resolved fresh
+ * out of the file because it is an anonymous class with no name to reference, and the settings
+ * instance is forgotten afterwards so the next read comes from the row the migrator wrote
+ * rather than from the copy that was in the container before it.
+ */
+function importMailSettingsFromEnvironment(): void
+{
+    $migration = require database_path(
+        'settings/2026_09_07_180000_import_mail_settings_from_environment.php',
+    );
+
+    $migration->up();
+
+    app()->forgetInstance(MailSettings::class);
+}
+
 it('adopts the environment SMTP settings when it is installed', function () {
+    // The suite pins MAIL_MAILER=array so no test can send, and the import declines to run
+    // against anything but smtp -- so by the time RefreshDatabase has migrated, the import this
+    // test is about has already skipped itself. Asserting on the state it left behind was
+    // therefore asserting on a migration that never ran. Point the config at a relay and run it
+    // here instead, so the behaviour under test is the one being exercised.
+    config([
+        'mail.default' => 'smtp',
+        'mail.mailers.smtp.host' => 'smtp.example.com',
+        'mail.mailers.smtp.port' => 587,
+        'mail.mailers.smtp.username' => 'postmaster',
+        'mail.from.address' => 'panel@example.com',
+        'mail.from.name' => 'Convoy',
+    ]);
+
+    blankMailSettings();
+    importMailSettingsFromEnvironment();
+
     // The whole point of importing rather than cascading: after install the form shows what is
     // actually being used, so an empty host can be trusted to mean "nothing is set".
     $this->actingAs($this->user)
         ->getJson('/api/admin/settings/mail')
         ->assertOk()
-        ->assertJsonPath('data.host', config('mail.mailers.smtp.host'))
-        ->assertJsonPath('data.port', (int) config('mail.mailers.smtp.port'))
-        ->assertJsonPath('data.fromAddress', config('mail.from.address'))
+        ->assertJsonPath('data.host', 'smtp.example.com')
+        ->assertJsonPath('data.port', 587)
+        ->assertJsonPath('data.fromAddress', 'panel@example.com')
         ->assertJsonPath('data.configured', true);
 });
 

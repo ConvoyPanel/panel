@@ -24,6 +24,13 @@ beforeEach(function () {
 it('creates an account without a password and hands back a link', function () {
     Notification::fake();
 
+    // `emailed` reports whether the panel has a relay, and the suite starts without one: the
+    // install migration's import declines to run under MAIL_MAILER=array. Give it a relay, the
+    // same way the test below takes one away, so this stays a test about the invite.
+    $settings = app(MailSettings::class);
+    $settings->host = 'smtp.example.com';
+    $settings->save();
+
     $response = $this->actingAs($this->admin)
         ->postJson('/api/admin/users', [
             'name' => 'Ada',
