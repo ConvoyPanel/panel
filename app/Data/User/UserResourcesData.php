@@ -71,22 +71,30 @@ class UserResourcesData extends Data
             ->selectRaw('SUM(CASE WHEN bandwidth_usage >= 0 THEN bandwidth_usage ELSE 0 END) AS bandwidth_usage_total')
             ->selectRaw('SUM(CASE WHEN bandwidth_limit >= 0 THEN bandwidth_limit ELSE 0 END) AS bandwidth_limit_total')
             ->selectRaw('SUM(CASE WHEN bandwidth_limit < 0 THEN 1 ELSE 0 END) AS unmetered_count')
+            // Read as a plain row rather than hydrated into a Server. Every column here is an
+            // aggregate and none of them is a server attribute, so a model would be a bag of
+            // undeclared properties wearing the wrong type -- which is exactly what static
+            // analysis was objecting to. An empty table yields no row at all, hence the `?? []`.
+            ->toBase()
             ->first();
 
-        $unmetered = (int) ($totals?->unmetered_count ?? 0);
+        /** @var array<string, mixed> $totals */
+        $totals = (array) ($totals ?? []);
+
+        $unmetered = (int) ($totals['unmetered_count'] ?? 0);
 
         return new self(
-            serversCount: (int) ($totals?->servers_count ?? 0),
-            suspendedCount: (int) ($totals?->suspended_count ?? 0),
-            unbuiltCount: (int) ($totals?->unbuilt_count ?? 0),
-            nodesCount: (int) ($totals?->nodes_count ?? 0),
-            cpu: (int) ($totals?->cpu_total ?? 0),
-            memory: (int) ($totals?->memory_total ?? 0) * self::BYTES_PER_MIB,
-            disk: (int) ($totals?->disk_total ?? 0) * self::BYTES_PER_MIB,
-            bandwidthUsage: (int) ($totals?->bandwidth_usage_total ?? 0) * self::BYTES_PER_MIB,
+            serversCount: (int) ($totals['servers_count'] ?? 0),
+            suspendedCount: (int) ($totals['suspended_count'] ?? 0),
+            unbuiltCount: (int) ($totals['unbuilt_count'] ?? 0),
+            nodesCount: (int) ($totals['nodes_count'] ?? 0),
+            cpu: (int) ($totals['cpu_total'] ?? 0),
+            memory: (int) ($totals['memory_total'] ?? 0) * self::BYTES_PER_MIB,
+            disk: (int) ($totals['disk_total'] ?? 0) * self::BYTES_PER_MIB,
+            bandwidthUsage: (int) ($totals['bandwidth_usage_total'] ?? 0) * self::BYTES_PER_MIB,
             bandwidthLimit: $unmetered > 0
                 ? null
-                : (int) ($totals?->bandwidth_limit_total ?? 0) * self::BYTES_PER_MIB,
+                : (int) ($totals['bandwidth_limit_total'] ?? 0) * self::BYTES_PER_MIB,
         );
     }
 }

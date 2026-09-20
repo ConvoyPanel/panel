@@ -30,7 +30,7 @@ class AvatarController
         // guest by redirecting to a `login` route the SPA does not register.
         // 404 either way: an <img> wants a failed image, not a login page, and
         // a signed-out scanner learns nothing about which accounts have one.
-        abort_unless($request->user(), 404);
+        abort_unless($request->user() !== null, 404);
 
         $disk = Filesystem::disk($this->avatars->diskName());
         $file = "avatars/{$path}";

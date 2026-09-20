@@ -47,11 +47,16 @@ class BackupController
 
     public function store(StoreBackupRequest $request, Server $server)
     {
+        // Held in a variable because the audit entry below wants it too. It is an option for
+        // how Proxmox takes the backup, not something stored against the row -- reading it back
+        // off the model, as this used to, recorded a null on every backup ever created.
+        $mode = $request->enum('mode', BackupMode::class);
+
         $backup = $this->backupCreationService
             ->create(
                 server: $server,
                 name: $request->name,
-                mode: $request->enum('mode', BackupMode::class),
+                mode: $mode,
                 compressionType: $request->enum('compression_type', BackupCompressionType::class),
                 isLocked: $request->boolean('is_locked'),
             );
@@ -64,7 +69,7 @@ class BackupController
             properties: [
                 'backup' => $backup->name,
                 'backup_uuid' => $backup->uuid,
-                'mode' => $backup->mode,
+                'mode' => $mode?->value,
                 'is_locked' => $backup->is_locked,
             ],
         );

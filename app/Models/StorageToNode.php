@@ -86,6 +86,9 @@ class StorageToNode extends Pivot implements Sortable
         return static::query()
             ->where('node_id', $this->node_id)
             ->whereHas('storage', function (Builder $query) {
+                // whereHas hands the callback a Builder without carrying the relation's model
+                // through, so the scope has to be told which model it is querying.
+                /** @var Builder<Storage> $query */
                 $query->stores(StorageContentType::BACKUPS);
             });
     }

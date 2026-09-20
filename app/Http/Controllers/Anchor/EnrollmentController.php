@@ -89,7 +89,7 @@ class EnrollmentController
                 : null;
 
             $installation = $node ?? $relay;
-            $expiresAt = $node?->agent_enrollment_expires_at ?? $relay?->enrollment_expires_at;
+            $expiresAt = $node->agent_enrollment_expires_at ?? $relay?->enrollment_expires_at;
 
             if ($installation === null || $expiresAt?->isPast()) {
                 throw new UnprocessableEntityHttpException('The enrollment token is invalid or expired.');

@@ -96,7 +96,7 @@ class ImageVersion extends Model
      */
     public function minimumDiskSize(): int
     {
-        return $this->systemDisk()?->virtualSize ?? 0;
+        return $this->systemDisk()->virtualSize ?? 0;
     }
 
     /**

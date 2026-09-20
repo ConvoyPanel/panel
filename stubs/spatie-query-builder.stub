@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  * returns itself for fluent builder methods. The package does this at runtime
  * through __call(), so PHPStan needs these analysis-only method declarations.
  *
+ * The model scopes at the end forward the same way. They are declared on the
+ * generic builder rather than per model, which is wider than the truth -- the
+ * cost of describing a __call() that is itself untyped, and it buys nothing to
+ * pretend otherwise in a file that only analysis ever reads.
+ *
  * @template TModel of Model
  * @method static<TModel> with(mixed ...$relations)
  * @method static<TModel> withCount(mixed ...$relations)
@@ -23,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  * @method static<TModel> allowedSorts(mixed ...$sorts)
  * @method static<TModel> defaultSort(mixed ...$sorts)
  * @method EloquentCollection<int, TModel> get(mixed $columns = ['*'])
+ * @method static<TModel> withAddressStateCounts(bool $denseOnly = false)
+ * @method static<TModel> clientVisible()
  * @method LengthAwarePaginator<int, TModel> paginate(mixed $perPage = null, array<int, string> $columns = ['*'], string $pageName = 'page', mixed $page = null, mixed $total = null)
  */
 class QueryBuilder

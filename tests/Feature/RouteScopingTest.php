@@ -64,7 +64,7 @@ it('resolves a backup through its server', function () {
 
     $unscoped = $routes
         ->reject(fn ($route) => $route->enforcesScopedBindings())
-        ->map(fn ($route) => implode('|', $route->methods()) . ' ' . $route->uri())
+        ->map(fn ($route) => implode('|', $route->methods()).' '.$route->uri())
         ->values()
         ->all();
 

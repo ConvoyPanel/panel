@@ -33,7 +33,11 @@ class ImageSourceResolver
         // A local filesystem only signs URLs when the disk is served, which is
         // exactly what the shipped config turns on. Saying so beats handing
         // Proxmox a link it will fetch an HTML error page from.
-        if (! method_exists($disk_, 'temporaryUrl')) {
+        //
+        // Asked of the adapter, not of method_exists(): every FilesystemAdapter declares
+        // temporaryUrl(), and the ones that cannot sign throw when it is called -- so the
+        // old check passed on exactly the disks it was meant to catch.
+        if (! $disk_->providesTemporaryUrls()) {
             throw new ConflictHttpException(
                 'The artifacts filesystem cannot produce download links. Set `serve` on the disk, or host the file yourself.',
             );

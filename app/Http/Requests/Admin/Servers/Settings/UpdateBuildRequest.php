@@ -8,6 +8,7 @@ use App\Models\Node;
 use App\Models\Server;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\VlanIsDeclaredOnInterface;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Validator;
 
 class UpdateBuildRequest extends BaseApiRequest
@@ -75,11 +76,19 @@ class UpdateBuildRequest extends BaseApiRequest
                         $this->input('network_interface_id', $server->network_interface_id),
                     );
 
-                    $rule->validate(
-                        'vlan_tag',
-                        $vlanTag,
-                        fn (string $message) => $validator->errors()->add('vlan_tag', $message),
-                    );
+                    // Run through a throwaway validator rather than calling validate() with a
+                    // hand-rolled $fail: ValidationRule's callback has a shape (an optional
+                    // second argument, a PotentiallyTranslatedString back) that a closure
+                    // forwarding to the error bag does not have, and Laravel already owns an
+                    // adapter that gets it right.
+                    $vlanErrors = ValidatorFacade::make(
+                        ['vlan_tag' => $vlanTag],
+                        ['vlan_tag' => [$rule]],
+                    )->errors()->get('vlan_tag');
+
+                    foreach ($vlanErrors as $message) {
+                        $validator->errors()->add('vlan_tag', $message);
+                    }
                 }
 
                 // check if the memory and disk isn't exceeding the node limits

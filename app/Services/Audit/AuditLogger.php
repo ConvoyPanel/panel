@@ -12,6 +12,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 use Ramsey\Uuid\Uuid;
 use Throwable;
 
@@ -131,7 +132,7 @@ class AuditLogger
      * null when the actor is deleted. Prefers the name, falls back to the email, and finally to a
      * type/id pair so the row is never anonymous.
      */
-    private function labelFor(Model $actor): ?string
+    private function labelFor(Model $actor): string
     {
         $label = $actor->getAttribute('name') ?? $actor->getAttribute('email');
 
@@ -151,13 +152,19 @@ class AuditLogger
     {
         $user = $this->auth->guard()->user();
 
-        if ($user === null || ! method_exists($user, 'currentAccessToken')) {
+        if ($user === null) {
             return null;
         }
 
+        // Sanctum types this as always returning a PersonalAccessToken, which it does not:
+        // a session-authenticated request has none, and acting-as tests get a TransientToken
+        // that is not a model and has no key. Widened back to the truth so the check below
+        // is a real one -- taking the annotation at face value would put ->getKey() on null.
+        /** @var mixed $token */
         $token = $user->currentAccessToken();
 
-        return $token?->getKey();
+        // Only a real personal access token has an id worth recording.
+        return $token instanceof PersonalAccessToken ? (int) $token->getKey() : null;
     }
 
     private function userAgent(): ?string

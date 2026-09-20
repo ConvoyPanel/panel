@@ -61,11 +61,10 @@ class StorageConsumerController extends Controller
             ->map(function ($group) {
                 /** @var ServerDisk $first */
                 $first = $group->first();
-                $server = $first->server;
 
-                if ($server === null) {
-                    return null;
-                }
+                // server_id is a non-nullable FK that cascades on delete, so a disk
+                // outliving its server is not a state the table can be in.
+                $server = $first->server;
 
                 return new StorageConsumerData(
                     id: $server->id,
@@ -73,14 +72,13 @@ class StorageConsumerController extends Controller
                     nodeId: null,
                     name: $server->name,
                     size: (int) $group->sum('size'),
-                    owner: $server->user?->email,
+                    owner: $server->user->email,
                     detail: 'vmid '.$server->vmid,
                     // Deleting a server is offered, but the dialog makes the
                     // operator type its name -- see the client.
                     deletable: true,
                 );
             })
-            ->filter()
             ->sortByDesc(fn (StorageConsumerData $row) => $row->size)
             ->values()
             ->all();
@@ -101,7 +99,7 @@ class StorageConsumerController extends Controller
                 nodeId: null,
                 name: $backup->name,
                 size: (int) ($backup->size ?? 0),
-                owner: $backup->server?->name,
+                owner: $backup->server->name,
                 detail: $backup->completed_at?->diffForHumans(),
                 // A locked backup is locked for a reason; saying so on the row
                 // beats offering a button that fails.

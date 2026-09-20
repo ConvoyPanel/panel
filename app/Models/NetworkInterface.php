@@ -136,6 +136,9 @@ class NetworkInterface extends Model
             ->selectRaw('COUNT(*) as total')
             ->whereRaw('COALESCE(servers.vlan_tag, network_interfaces.vlan_tag) IS NOT NULL')
             ->groupBy('network_interfaces.id', 'resolved_tag')
+            // Plain rows, not Servers: `resolved_tag` and `total` are products of the GROUP BY
+            // and no server has either, so hydrating models would only misdescribe them.
+            ->toBase()
             ->get()
             ->groupBy('interface_id')
             ->map(fn (Collection $rows) => $rows->mapWithKeys(

@@ -1,6 +1,11 @@
 <?php
 
+use App\Enums\Server\DeploymentStatus;
+use App\Enums\Server\DeploymentType;
 use App\Enums\Server\PowerState;
+use App\Models\Deployment;
+use App\Models\ImageDefinition;
+use App\Models\ImageGroup;
 use App\Models\Node;
 use App\Models\Relay;
 use App\Models\User;
@@ -244,4 +249,46 @@ it('does not probe an agent that was never enrolled', function () {
     )->assertConflict();
 
     Http::assertNothingSent();
+});
+
+it('serves the latest deployment with its image and steps', function () {
+    // Regression: this endpoint eager-loaded a `template` relation that stopped existing when
+    // templates became images, so every call threw RelationNotFoundException. The progress
+    // screen is its only caller and nothing covered it, which is how it stayed broken.
+    [$owner, , , $server] = createServerModel();
+
+    $group = ImageGroup::create(['uuid' => (string) Str::uuid(), 'name' => 'grp']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Debian 12',
+        'ostype' => 'l26',
+    ]);
+
+    $deployment = Deployment::create([
+        'server_id' => $server->id,
+        'image_definition_id' => $definition->id,
+        'image_version_id' => null,
+        'type' => DeploymentType::INSTALL,
+        'status' => DeploymentStatus::RUNNING,
+        'start_on_completion' => false,
+        'requested_at' => now(),
+    ]);
+    $deployment->steps()->create(['name' => 'configure', 'status' => DeploymentStatus::PENDING]);
+
+    $this->actingAs($owner)
+        ->getJson("/api/client/servers/{$server->uuid}/deployment")
+        ->assertOk()
+        ->assertJsonPath('data.id', $deployment->id)
+        ->assertJsonPath('data.image.name', 'Debian 12')
+        // Spatie wraps a DataCollection under its own \"data\" key.
+        ->assertJsonCount(1, 'data.steps.data')
+        ->assertJsonPath('data.steps.data.0.name', 'configure');
+});
+
+it('answers no content when the server has never been deployed', function () {
+    [$owner, , , $server] = createServerModel();
+
+    $this->actingAs($owner)
+        ->getJson("/api/client/servers/{$server->uuid}/deployment")
+        ->assertNoContent();
 });

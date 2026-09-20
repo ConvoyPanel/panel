@@ -67,13 +67,17 @@ class ServerController
         // caller is that screen, and it renders solely for a server whose
         // lifecycle is transient, so "the latest deployment" is what it wants.
 
-        $deployment = $query->with(['template', 'steps'])->first();
+        // `template` was the relation this used to carry; the definition it points at is
+        // `imageDefinition` since templates became images, and the payload exposes it as
+        // `image`. Eager-loading a relation that no longer exists throws, so every call to
+        // this endpoint failed -- the progress screen is its only caller and nothing covered it.
+        $deployment = $query->with(['imageDefinition', 'steps'])->first();
 
         if (! $deployment) {
             return response()->noContent();
         }
 
-        return DeploymentData::from($deployment)->include('template', 'steps');
+        return DeploymentData::from($deployment)->include('image', 'steps');
     }
 
     public function retryInstallation(RetryInstallationRequest $request, Server $server)

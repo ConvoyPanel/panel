@@ -12,8 +12,10 @@ use App\Http\Requests\Admin\ISOs\StoreISORequest;
 use App\Http\Requests\Admin\ISOs\UpdateISORequest;
 use App\Models\ISO;
 use App\Models\Node;
+use App\Models\Storage;
 use App\Services\ISOs\ISOService;
 use App\Services\Proxmox\Node\ProxmoxStorageClient;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -89,7 +91,12 @@ class ISOController
         $request->validate(['link' => ['required', 'url']]);
 
         $node = Node::query()
-            ->whereHas('storages', fn ($storages) => $storages->stores(StorageContentType::ISO))
+            ->whereHas('storages', function (Builder $storages) {
+                // whereHas hands the callback a Builder without carrying the relation's model
+                // through, so the scope has to be told which model it is querying.
+                /** @var Builder<Storage> $storages */
+                $storages->stores(StorageContentType::ISO);
+            })
             ->first() ?? throw new ConflictHttpException(
                 'No node has ISO storage, so Convoy cannot inspect that link.',
             );
