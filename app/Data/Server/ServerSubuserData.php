@@ -38,7 +38,9 @@ class ServerSubuserData extends Data
 
     public static function fromModel(ServerSubuser $subuser): self
     {
-        $subuser->loadMissing('user');
+        // `user.invite` too: the listing eager-loads both, and without it `isPending` would cost
+        // a query per row.
+        $subuser->loadMissing('user.invite');
 
         return new self(
             uuid: $subuser->uuid,
@@ -47,7 +49,7 @@ class ServerSubuserData extends Data
             email: $subuser->user->email,
             avatarUrl: $subuser->user->avatarUrl(),
             permissions: $subuser->grantedPermissions(),
-            isPending: $subuser->user->invite()->exists(),
+            isPending: $subuser->user->invite !== null,
             createdAt: CarbonImmutable::parse($subuser->created_at),
         );
     }
