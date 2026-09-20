@@ -249,6 +249,24 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
             return from && to ? `${from} → ${to}` : null
         },
     },
+    'admin.server.migrated': {
+        verb: 'migrated the server',
+        detail: p => {
+            const from = pick(p, 'from')
+            const to = pick(p, 'to')
+
+            return from && to ? `${from} → ${to}` : null
+        },
+    },
+    'admin.server.adopted': {
+        verb: 'adopted an existing guest',
+        detail: p => {
+            const node = pick(p, 'node')
+            const vmid = pick(p, 'vmid')
+
+            return node && vmid ? `${node} · VMID ${vmid}` : null
+        },
+    },
     'admin.backup.deleted': { verb: 'deleted a backup' },
 
     // ISO library — panel-wide, so these name no node.

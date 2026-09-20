@@ -204,3 +204,35 @@ function taskStatusFixture(array $extra = []): array
         'exitstatus' => 'OK',
     ], $extra)];
 }
+
+/**
+ * `GET /nodes/{node}/qemu/{vmid}/migrate` as PVE answers it, permissive by
+ * default: the guest is stopped, both members are allowed, nothing is local.
+ * Override a key to say otherwise.
+ *
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function migratePreconditions(array $extra = []): array
+{
+    return ['data' => array_merge([
+        'running' => false,
+        'allowed_nodes' => ['pve1', 'pve2'],
+        'not_allowed_nodes' => [],
+        'local_disks' => [],
+        'local_resources' => [],
+    ], $extra)];
+}
+
+/**
+ * Fake the migration preflight and answer everything else with a task upid.
+ *
+ * @param  array<string, mixed>  $data  merged into the preflight response
+ */
+function fakeMigrationPreflight(array $data = []): void
+{
+    Http::fake([
+        '*/qemu/*/migrate*' => Http::response(migratePreconditions($data), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+}

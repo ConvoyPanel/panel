@@ -41,6 +41,14 @@ return [
     'App\\Jobs\\Server\\CloneVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\CommitServerMigrationJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'targetNodeId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'targetInterfaceId', 'type' => '?int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'disposition', 'type' => 'App\\Enums\\Server\\MigrationDisposition', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'reservedAddressIds', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
+        ['name' => 'releasedAddressIds', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\ConfigureVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
@@ -52,6 +60,11 @@ return [
     ],
     'App\\Jobs\\Server\\ImportVmJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\MigrateVmJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'targetNodeId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'online', 'type' => 'bool', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Server\\MonitorBackupJob' => [
         ['name' => 'backup', 'type' => 'App\\Models\\Backup', 'optional' => false, 'promoted' => true, 'variadic' => false],
