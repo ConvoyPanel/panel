@@ -421,10 +421,6 @@ dataset('anchor failures', [
         ['https://pve2.example.com*/qemu/900/config*' => fn () => Http::response(['data' => ['scsi0' => 'local-lvm:vm-900-disk-0,size=8G']], 200)],
         'wrong size',
     ],
-    'the artifact cannot be discarded' => [
-        ['*/artifacts/*' => fn () => Http::response(['error' => 'artifact is locked'], 409)],
-        'artifact is locked',
-    ],
     'the export is cancelled mid-transfer' => [
         ['*/api/v1/templates/jobs/*' => fn () => Http::response(anchorJob('job-export', 'cancelled'), 200)],
         'cancelled',
@@ -803,4 +799,29 @@ it('tells the destination not to turn the migrated guest into a template', funct
 
         return true;
     });
+});
+
+/**
+ * Cleanup is not allowed to undo a migration that worked.
+ *
+ * A live run proved the cost: discard was addressed to a route the agent does
+ * not serve, the agent answered 404, and a migration whose destination had
+ * already been verified was marked failed -- leaving the guest on both nodes
+ * for an operator to reconcile by hand. The archive has a TTL and is swept
+ * regardless, so carrying on costs at worst a temporary file.
+ */
+it('finishes the migration even when the artifact cannot be discarded', function () {
+    fakeAnchorMigration(
+        ['*/artifacts/*' => fn () => Http::response(['error' => 'no such artifact'], 404)],
+    );
+
+    $deployment = $this->action->execute($this->server, $this->target, false);
+
+    expect($deployment->steps()->orderBy('sequence')->pluck('status')->all())
+        ->not->toContain('failed');
+
+    // The move still happened, and the source guest is still gone.
+    expect($this->server->fresh())
+        ->node_id->toBe($this->target->id)
+        ->lifecycle->not->toBe('migration_failed');
 });

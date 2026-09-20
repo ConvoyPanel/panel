@@ -14,6 +14,7 @@ use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Owns the `discard-artifact` step: deletes the archive off the source node.
@@ -31,6 +32,14 @@ use Illuminate\Queue\SerializesModels;
  * It is still a real step rather than a fire-and-forget: the artifact is
  * several gigabytes of a node's dump volume, and "the TTL will sweep it" is a
  * backstop, not a plan.
+ *
+ * It is, however, not allowed to fail the migration. A live run proved why: the
+ * discard was addressed to a route the agent does not serve, the agent answered
+ * 404, and a migration whose destination had already been verified was marked
+ * failed -- leaving the guest present on both nodes for an operator to
+ * reconcile by hand. Cleanup failing is strictly better than that: the archive
+ * has a TTL and is swept whether or not anyone asks, so the worst case of
+ * carrying on is a temporary file that outlives its use by a day.
  */
 class DiscardMigrationArtifactJob implements ShouldQueue
 {
@@ -61,11 +70,26 @@ class DiscardMigrationArtifactJob implements ShouldQueue
                 return;
             }
 
-            $anchor->discard($transfer->sourceNode, $transfer->artifact);
+            try {
+                $anchor->discard($transfer->sourceNode, $transfer->artifact);
+            } catch (AnchorRequestException $exception) {
+                // Surfaced, not swallowed, and not fatal: the guest is already
+                // verified on the destination, so aborting here would undo a
+                // migration that worked over a file the sweeper will remove.
+                Log::warning('Could not discard a migration artifact; leaving it to the sweeper.', [
+                    'server_id' => $transfer->server_id,
+                    'node' => $transfer->sourceNode->name,
+                    'artifact' => $transfer->artifact,
+                    'reason' => $exception->getMessage(),
+                ]);
+
+                return;
+            }
 
             // Cleared so a rollback or a retry does not try to delete it
             // twice, and so the row reads as what still exists rather than as
-            // what once did.
+            // what once did. Only on success: an artifact the agent still holds
+            // must stay named here, or nothing can report it later.
             $transfer->forceFill(['artifact' => null])->save();
         });
     }
