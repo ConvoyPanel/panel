@@ -2,6 +2,7 @@
 
 use App\Enums\Network\AddressState;
 use App\Enums\Server\MigrationDisposition;
+use App\Enums\Server\MigrationTransport;
 use App\Models\Address;
 use App\Models\AddressBlock;
 use App\Models\AddressBlockGroup;
@@ -180,24 +181,29 @@ it('blocks every destination while a device is passed through to the guest', fun
         ->and($plan->candidates[0]->blockedReason)->toContain('hostpci0');
 });
 
-it('says so plainly when a standalone node has nowhere to migrate to', function () {
+it('offers a standalone node the Anchor transport rather than nothing', function () {
+    fakeMigrationPreflight();
     $standalone = Cluster::factory()->standalone()->create();
     $this->source->forceFill(['cluster_id' => $standalone->id])->save();
 
     $plan = $this->service->plan($this->server->fresh());
 
-    expect($plan->candidates)->toBeEmpty()
-        ->and($plan->emptyReason)->toContain('not in a Proxmox cluster');
-
-    // Nothing was asked of PVE: there was no question to ask.
-    Http::assertNothingSent();
+    // A node with no cluster used to have nowhere to go at all. It still has
+    // no `qm migrate` destination, which is why the one candidate here is the
+    // other transport rather than the same one relabelled.
+    expect($plan->candidates)->toHaveCount(1)
+        ->and($plan->candidates[0]->transport)->toBe(MigrationTransport::Anchor)
+        ->and($plan->emptyReason)->toBeNull();
 });
 
-it('says so plainly when no other cluster member is registered', function () {
+it('says so plainly when no other node is registered at all', function () {
     $this->target->delete();
 
     $plan = $this->service->plan($this->server->fresh());
 
     expect($plan->candidates)->toBeEmpty()
-        ->and($plan->emptyReason)->toContain('No other member');
+        ->and($plan->emptyReason)->toContain('No other node');
+
+    // Nothing was asked of PVE: there was no question to ask.
+    Http::assertNothingSent();
 });
