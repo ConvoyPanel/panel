@@ -5,6 +5,30 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- The admin overview's Attention card now names what needs attention instead of reporting a bare count, and every row
+  links to the record itself -- a failed server to its admin page, a failed backup to its server's backups tab. Groups
+  holding several records open a sheet listing them, capped at the 25 most recent with a note saying how many more
+  there are. Previously the card showed only a failed-server count while its caption mixed in failed backups and
+  servers mid-delete, so it could read "0" with backups broken, and its link went to the unfiltered server list either
+  way. Suspended and mid-delete servers are deliberately left off it: neither is a failure, and both are already
+  counted under Server State.
+
+### Fixed
+
+- Fixed modals taller than the browser window clipping their own header and submit row with no way to scroll to them.
+  The panel is now bounded by the viewport and its body scrolls within it, so Create Server and Create Node stay usable
+  at shorter window heights.
+- Fixed opening a modal leaving keyboard focus behind it, which sent the first few Tab presses through the page
+  underneath instead of the dialog.
+- Fixed the create-server form requesting addresses and template groups before a node is chosen, producing a handful of
+  404s every time the modal opened.
+- Fixed modals going out without an accessible name, so a screen reader announced only "dialog" instead of reading the
+  heading already on screen.
+
 ## v4.6.1
 
 ### Security
