@@ -13,6 +13,7 @@ import {
     RegistryTemplate,
 } from '@/types/image.ts'
 import { IconDisc, IconRefresh } from '@tabler/icons-react'
+import { format } from 'date-fns'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { Badge } from '@/components/ui/Badge'
@@ -87,7 +88,7 @@ const ImageCatalogSheet = ({ open, onOpenChange }: Props) => {
 
             toast.add({
                 title: result?.created
-                    ? `Imported version ${result.version}`
+                    ? `Imported build ${result.version}`
                     : 'This build is already here',
                 type: 'success',
             })
@@ -214,10 +215,14 @@ const CatalogRow = ({
                 )}
             </ItemTitle>
             <ItemDescription className={'truncate'}>
-                {template.version} · {formatBytes(template.size)} to transfer ·{' '}
+                {/* The build date, not a version: the catalogue publishes no
+                    version, and the number beside an imported entry is the
+                    panel's own count of the builds it holds. */}
+                Built {format(new Date(template.builtAt), 'd MMM yyyy')} ·{' '}
+                {formatBytes(template.size)} to transfer ·{' '}
                 {formatBytes(template.minimumDisk)} provisioned
                 {template.importedVersion &&
-                    ` · you have ${template.importedVersion}`}
+                    ` · you have build ${template.importedVersion}`}
             </ItemDescription>
         </ItemContent>
         <ItemActions className={'ml-auto'}>

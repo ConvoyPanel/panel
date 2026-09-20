@@ -70,8 +70,10 @@ it('reads the catalogue into the panel’s own terms', function () {
     expect($debian->slug)->toBe('debian-13-amd64')
         ->and($debian->display)->toBe('Debian 13')
         ->and($debian->ostype)->toBe('l26')
-        // 2026-09-04, the one number the catalogue actually publishes.
-        ->and($debian->version)->toBe('2026.9.4')
+        // The build time, carried as itself. The panel no longer derives a
+        // version from it: truncating it to a date is what made two builds of
+        // one recipe on one day collide.
+        ->and($debian->builtAt)->toBe('2026-09-04T05:28:06Z')
         ->and($debian->status)->toBe(RegistryImportStatus::NEW)
         // `5G` is 5 GiB, the way qemu-img writes it. Reading it as 5 * 10^9
         // would put the plan floor below the disk that actually arrives.
@@ -154,7 +156,10 @@ it('imports a template as a group, a definition and a version', function () {
 
     $version = $definition->latestVersion();
 
-    expect($version->version)->toBe('2026.8.4')
+    // The panel's own count of the builds it holds, not a claim about the
+    // publisher's release history -- the catalogue publishes no version.
+    expect($version->version)->toBe('1')
+        ->and($version->built_at->toIso8601String())->toBe('2026-08-04T16:53:31+00:00')
         ->and($version->source)->toBe(ImageSource::REGISTRY)
         ->and($version->diskSet())->toHaveCount(2)
         // A catalogue hosts its own files, so an import is a link: no bytes
@@ -199,9 +204,10 @@ it('adds a rebuilt template as a newer version of the same image', function () {
 
     expect(ImageDefinition::where('registry_slug', 'debian-13-amd64')->count())->toBe(1)
         ->and($definition->versions()->count())->toBe(2)
-        // Sorted by the integer triple, so October beats September rather than
-        // `2026.10.1` losing a string comparison to `2026.9.4`.
-        ->and($definition->latestVersion()->version)->toBe('2026.10.1');
+        // The second build the panel has taken of this image, and the build
+        // time it carries is the publisher's rather than the panel's.
+        ->and($definition->latestVersion()->version)->toBe('2')
+        ->and($definition->latestVersion()->built_at->toIso8601String())->toBe('2026-10-01T05:28:06+00:00');
 });
 
 it('says which catalogue entries are held and which have been rebuilt', function () {
@@ -215,7 +221,7 @@ it('says which catalogue entries are held and which have been rebuilt', function
         ->getJson('/api/admin/images/registry')
         ->assertOk()
         ->assertJsonPath('data.groups.0.templates.0.status', RegistryImportStatus::IMPORTED->value)
-        ->assertJsonPath('data.groups.0.templates.0.importedVersion', '2026.9.4')
+        ->assertJsonPath('data.groups.0.templates.0.importedVersion', '1')
         ->assertJsonPath('data.groups.1.templates.0.status', RegistryImportStatus::NEW->value);
 
     fakeRegistry(rebuiltDebian(...));
@@ -270,4 +276,102 @@ it('is closed to anyone who is not an admin', function () {
     $this->actingAs(User::factory()->create())
         ->getJson('/api/admin/images/registry')
         ->assertForbidden();
+});
+
+/**
+ * The defect this replaced: the version was the build date, so a recipe built
+ * twice in one day collided on a column that is unique per definition, and the
+ * collision was resolved by bumping the patch. That produced `2026.9.5` for a
+ * build made on the 4th, and took the number a real build on the 5th would want.
+ */
+it('numbers a same-day rebuild without claiming it was built the next day', function () {
+    $admin = admin();
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful();
+
+    // Same day, different bytes: a genuinely different build.
+    fakeRegistry(function (array $raw) {
+        $raw['groups'][0]['templates'][0]['built_at'] = '2026-09-04T19:12:44Z';
+        $raw['groups'][0]['templates'][0]['disks'][0]['sha256'] = str_repeat('7', 64);
+
+        return $raw;
+    });
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful()->assertJsonPath('data.0.created', true);
+
+    $definition = ImageDefinition::firstWhere('registry_slug', 'debian-13-amd64');
+    $versions = $definition->versions()->orderBy('version_major')->get();
+
+    expect($versions->pluck('version')->all())->toBe(['1', '2'])
+        // Both build times survive intact, and both are the 4th.
+        ->and($versions->map(fn ($v) => $v->built_at->toIso8601String())->all())->toBe([
+            '2026-09-04T05:28:06+00:00',
+            '2026-09-04T19:12:44+00:00',
+        ]);
+});
+
+it('keeps two live builds on distinct numbers', function () {
+    $admin = admin();
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful();
+
+    fakeRegistry(rebuiltDebian(...));
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful();
+
+    $definition = ImageDefinition::firstWhere('registry_slug', 'debian-13-amd64');
+
+    expect($definition->versions()->pluck('version')->sort()->values()->all())->toBe(['1', '2']);
+
+    // Deleting the newest build frees its number, which is safe precisely
+    // because a deployment records its version by foreign key rather than by
+    // label -- and cannot be deleted out from under one at all.
+    $definition->versions()->where('version', '2')->delete();
+
+    fakeRegistry(function (array $raw) {
+        $raw['groups'][0]['templates'][0]['built_at'] = '2026-11-02T05:28:06Z';
+        $raw['groups'][0]['templates'][0]['disks'][0]['sha256'] = str_repeat('9', 64);
+
+        return $raw;
+    });
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful();
+
+    $live = $definition->refresh()->versions()->pluck('version')->sort()->values()->all();
+
+    expect($live)->toBe(['1', '2'])
+        ->and(count($live))->toBe(count(array_unique($live)));
+});
+
+it('fills in the build time of a row imported before it was recorded', function () {
+    $admin = admin();
+
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful();
+
+    $definition = ImageDefinition::firstWhere('registry_slug', 'debian-13-amd64');
+
+    // What the migration leaves behind: the build time was never stored, and it
+    // cannot be guessed back out of the old date-derived label.
+    $definition->versions()->update(['built_at' => null]);
+
+    // An unchanged build is matched by content and creates no row, so this is
+    // the only chance to repair it.
+    $this->actingAs($admin)->postJson('/api/admin/images/registry/imports', [
+        'templates' => ['debian-13-amd64'],
+    ])->assertSuccessful()->assertJsonPath('data.0.created', false);
+
+    expect($definition->refresh()->latestVersion()->built_at->toIso8601String())
+        ->toBe('2026-09-04T05:28:06+00:00');
 });

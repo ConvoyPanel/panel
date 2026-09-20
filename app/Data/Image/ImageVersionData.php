@@ -24,6 +24,12 @@ class ImageVersionData extends Data
         /** Where the disks came from, and so whether a newer build can exist. */
         public ImageSource $source,
         public bool $isActive,
+        /**
+         * When the publisher built this, for an image that came from a
+         * catalogue. The build number beside it is the panel's own count, so
+         * this is the only date that means anything to the operator.
+         */
+        public ?string $builtAt,
     ) {}
 
     public static function fromModel(ImageVersion $version): self
@@ -36,6 +42,7 @@ class ImageVersionData extends Data
             minimumDisk: $version->minimumDiskSize(),
             source: $version->source ?? ImageSource::MANUAL,
             isActive: (bool) $version->is_active,
+            builtAt: $version->built_at?->toIso8601String(),
         );
     }
 }

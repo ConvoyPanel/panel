@@ -46,8 +46,13 @@ class RegistryTemplateData extends Data
         public string $arch,
         public string $ostype,
         public ?string $description,
-        /** Derived from the build date: the catalogue numbers nothing itself. */
-        public string $version,
+        /**
+         * When the catalogue says this build was made.
+         *
+         * Second-resolution and unique per build, which is why the panel no
+         * longer derives a version number from it: truncating it to a date was
+         * what made two builds of one recipe on one day collide.
+         */
         public string $builtAt,
         /** @var DataCollection<int, ImageDiskData> */
         public DataCollection $disks,
@@ -60,7 +65,7 @@ class RegistryTemplateData extends Data
         public ?int $minimumCores,
         public ?int $minimumMemory,
         public RegistryImportStatus $status = RegistryImportStatus::NEW,
-        /** The version number the panel imported this entry as, if it did. */
+        /** The build number the panel imported this entry as, if it did. */
         public ?string $importedVersion = null,
     ) {}
 
@@ -85,7 +90,6 @@ class RegistryTemplateData extends Data
             arch: (string) ($template['arch'] ?? 'amd64'),
             ostype: $ostype,
             description: Arr::get($template, 'description'),
-            version: self::versionFrom((string) ($template['built_at'] ?? '')),
             builtAt: (string) ($template['built_at'] ?? ''),
             disks: ImageDiskData::collect($disks->all(), DataCollection::class),
             hardware: self::hardwareFrom(Arr::get($template, 'hardware', []), $system),
@@ -175,24 +179,6 @@ class RegistryTemplateData extends Data
         }
 
         return $overlay;
-    }
-
-    /**
-     * A version number from the build date, because the catalogue has none.
-     *
-     * `2026.9.4` rather than a counter: it is the one fact about a build that
-     * is already published, it orders the way the version triple does, and two
-     * panels importing the same entry agree on it without coordinating.
-     */
-    private static function versionFrom(string $builtAt): string
-    {
-        $timestamp = strtotime($builtAt);
-
-        if ($timestamp === false) {
-            return '0.0.0';
-        }
-
-        return date('Y', $timestamp).'.'.(int) date('n', $timestamp).'.'.(int) date('j', $timestamp);
     }
 
     /**

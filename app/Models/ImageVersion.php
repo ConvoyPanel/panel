@@ -7,6 +7,7 @@ use App\Data\Image\ImageDiskData;
 use App\Enums\Image\ImageSource;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Ramsey\Uuid\Uuid;
 
@@ -28,6 +29,7 @@ use Ramsey\Uuid\Uuid;
  * @property array $disks
  * @property int $size Bytes. Mebibytes on disk -- see StorageSizeCast.
  * @property ImageSource $source
+ * @property ?Carbon $built_at When the publisher built it, for a catalogue image.
  * @property bool $is_active
  * @property ImageDefinition $definition
  */
@@ -35,7 +37,9 @@ class ImageVersion extends Model
 {
     public static array $validationRules = [
         'image_definition_id' => 'required|integer|exists:image_definitions,id',
-        'version' => 'required|string|max:32|regex:/^\d+\.\d+\.\d+$/',
+        // `1.4.0` for an image an operator versions themselves, or a bare
+        // build number for one imported from a catalogue that publishes none.
+        'version' => 'required|string|max:32|regex:/^\d+(?:\.\d+\.\d+)?$/',
         'disks' => 'required|array|min:1',
         'is_active' => 'sometimes|boolean',
         'source' => 'sometimes|string',
@@ -50,6 +54,7 @@ class ImageVersion extends Model
             // Same convention as every other size column: MiB stored, bytes read.
             'size' => StorageSizeCast::class,
             'source' => ImageSource::class,
+            'built_at' => 'datetime',
             'is_active' => 'boolean',
         ];
     }
@@ -130,7 +135,8 @@ class ImageVersion extends Model
     private static function syncDerivedColumns(ImageVersion $model): void
     {
         // Ordered by the integer triple rather than the string, so 1.10.0 beats
-        // 1.9.0. Derived here so nobody has to remember four fields.
+        // 1.9.0. Derived here so nobody has to remember four fields. A bare
+        // build number pads to (N, 0, 0), which orders the same way.
         if ($model->isDirty('version')) {
             [$major, $minor, $patch] = array_pad(
                 array_map('intval', explode('.', (string) $model->version)),

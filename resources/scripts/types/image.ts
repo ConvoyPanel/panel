@@ -29,6 +29,8 @@ export interface ImageVersion {
     minimumDisk: number
     source: ImageSource
     isActive: boolean
+    /** When the publisher built it, for an image that came from a catalogue. */
+    builtAt: string | null
 }
 
 /** Where a version's disks came from, and so whether a newer build can exist. */

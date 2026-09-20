@@ -9,7 +9,13 @@ import {
     useImageVersions,
 } from '@/features/images/versions/api'
 import { formatBytes } from '@/features/servers/storage/api.ts'
-import { ImageDefinition, ImageDiskRole, ImageGroup } from '@/types/image.ts'
+import { format } from 'date-fns'
+import {
+    ImageDefinition,
+    ImageDiskRole,
+    ImageGroup,
+    ImageSource,
+} from '@/types/image.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCloudUpload, IconLink, IconTrash } from '@tabler/icons-react'
@@ -154,7 +160,14 @@ const ImageVersionsModal = ({
                             >
                                 <div className={'min-w-0 grow'}>
                                     <p className={'font-semibold'}>
-                                        {version.version}
+                                        {/* A catalogue image has no version of
+                                            its own, so the number is the panel's
+                                            count of the builds it holds. Saying
+                                            "Build 2" keeps it from reading as a
+                                            release the publisher named. */}
+                                        {version.source === ImageSource.REGISTRY
+                                            ? `Build ${version.version}`
+                                            : version.version}
                                         {!version.isActive && ' · retired'}
                                     </p>
                                     <p
@@ -162,6 +175,8 @@ const ImageVersionsModal = ({
                                             'text-muted-foreground text-sm'
                                         }
                                     >
+                                        {version.builtAt &&
+                                            `Built ${format(new Date(version.builtAt), 'd MMM yyyy')} · `}
                                         {formatBytes(version.size)} to transfer
                                         · {formatBytes(version.minimumDisk)}{' '}
                                         provisioned

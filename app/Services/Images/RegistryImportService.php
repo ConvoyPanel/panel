@@ -80,11 +80,10 @@ class RegistryImportService
     /**
      * Idempotent by content: the same build imported twice adds nothing.
      *
-     * Identity is the set of disk hashes rather than the derived version
-     * number, because the catalogue publishes no version at all -- the number
-     * comes from the build date, and two builds on one day would otherwise be
-     * indistinguishable. Hashes make "the panel already has this build" a fact
-     * about the bytes rather than about a label.
+     * Identity is the set of disk hashes, not a version number: the catalogue
+     * publishes no version, and the build number below is assigned by the panel
+     * on the way in. Hashes make "the panel already has this build" a fact about
+     * the bytes rather than about a label.
      */
     public function import(RegistryTemplateData $template): RegistryImportResultData
     {
@@ -94,6 +93,14 @@ class RegistryImportService
             $existing = $this->versionHolding($definition, $template);
 
             if ($existing) {
+                // Rows imported before the build time was stored have none. The
+                // catalogue is in hand, so repair it rather than leaving a hole
+                // no later import would fill: an unchanged build is matched by
+                // content and never creates a row to carry it.
+                if (blank($existing->built_at) && filled($template->builtAt)) {
+                    $existing->forceFill(['built_at' => $template->builtAt])->save();
+                }
+
                 return new RegistryImportResultData(
                     slug: $template->slug,
                     imageGroupUuid: $group->uuid,
@@ -104,8 +111,9 @@ class RegistryImportService
             }
 
             $version = $definition->versions()->create([
-                'version' => $this->freeVersionNumber($definition, $template->version),
+                'version' => (string) $this->nextBuildNumber($definition),
                 'source' => ImageSource::REGISTRY->value,
+                'built_at' => $template->builtAt ?: null,
                 // Written out by hand rather than with `toArray()`: the disk
                 // DTO maps its input from snake_case, so a camelCased blob
                 // would round-trip back with `virtual_size` missing and the
@@ -268,29 +276,25 @@ class RegistryImportService
     }
 
     /**
-     * The build's own number, or the next free patch beside it.
+     * Which build of this image the panel is taking: 1, then 2, then 3.
      *
-     * The number comes from the build date, so two builds published on one day
-     * collide on a column that is unique per definition. Only reached when the
-     * disks differ, which is checked first -- so a bump always means a
-     * genuinely different build, never the same one arriving twice.
+     * The catalogue numbers nothing, so this is the panel's own count of what it
+     * holds, not a claim about the publisher's release history.
+     *
+     * Taken from the highest build currently held, which means deleting the
+     * newest build frees its number for the next one. That is deliberate rather
+     * than overlooked: a deployment records the version it was built from by
+     * foreign key and never by label, and a version cannot be deleted while any
+     * deployment points at it, so a reissued number can never disagree with a
+     * surviving record. A counter column would be durable state to maintain in
+     * exchange for nothing.
+     *
+     * This replaces a number derived from the build date, which collided when
+     * one recipe was built twice in a day and named the wrong day once it did.
      */
-    private function freeVersionNumber(ImageDefinition $definition, string $version): string
+    private function nextBuildNumber(ImageDefinition $definition): int
     {
-        $taken = $definition->versions()->pluck('version')->all();
-
-        if (! in_array($version, $taken, true)) {
-            return $version;
-        }
-
-        [$major, $minor, $patch] = array_pad(array_map('intval', explode('.', $version)), 3, 0);
-
-        do {
-            $patch++;
-            $candidate = "{$major}.{$minor}.{$patch}";
-        } while (in_array($candidate, $taken, true));
-
-        return $candidate;
+        return ((int) $definition->versions()->max('version_major')) + 1;
     }
 
     /**
