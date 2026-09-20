@@ -6,6 +6,7 @@ use App\Enums\User\UserType;
 use App\Models\User;
 use App\Models\UserInvite;
 use App\Notifications\UserInvited;
+use App\Settings\MailSettings;
 use App\Settings\PermissionSettings;
 use Illuminate\Support\Facades\Notification;
 
@@ -81,7 +82,14 @@ it('creates and invites a guest when guest accounts are switched on', function (
 
 it('emails the invitation when mail is configured', function () {
     app(PermissionSettings::class)->fill(['allow_guest_accounts' => true])->save();
-    config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => 'mail.example.test']);
+
+    // `MailConfigurator::isConfigured()` reads MailSettings, not the mail config:
+    // with `mail.default` on smtp it is the stored host that decides, and setting
+    // `mail.mailers.smtp.host` left that empty. The test then passed only where
+    // the database happened to have mail configured already, and failed on CI's
+    // fresh one.
+    config(['mail.default' => 'smtp']);
+    app(MailSettings::class)->fill(['host' => 'mail.example.test'])->save();
 
     $this->actingAs($this->owner)
         ->postJson($this->endpoint, ['email' => 'stranger@example.test', 'permissions' => []])
