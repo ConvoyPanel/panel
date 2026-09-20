@@ -766,3 +766,38 @@ it('stops re-exporting once the node has lost the artifact twice', function () {
 
     expect(anchorCallSequence())->not->toContain('destroy-source');
 });
+
+/**
+ * The agent's install pipeline exists to import images, and Convoy only offers a
+ * guest that reports `template: 1`, so a restore ends with `qm template` unless
+ * it is told not to. A migration restores the tenant's own machine: letting that
+ * default stand hands them back a guest that cannot be started, after a
+ * migration that reported success.
+ *
+ * The agent defaults the flag to true so every existing import caller stays
+ * correct, which is exactly why the panel has to send it explicitly.
+ */
+it('tells the destination not to turn the migrated guest into a template', function () {
+    fakeAnchorMigration();
+
+    $this->action->execute($this->server, $this->target, false);
+
+    // The work order travels inside the bearer token's `template` claim, not
+    // the body, so this has to read the claim the agent will actually decode.
+    Http::assertSent(function ($request) {
+        if (! str_contains($request->url(), '/templates/installs') || $request->method() !== 'POST') {
+            return false;
+        }
+
+        $token = Str::after($request->header('Authorization')[0] ?? '', 'Bearer ');
+        $claims = json_decode(
+            base64_decode(strtr(explode('.', $token)[1] ?? '', '-_', '+/')) ?: '[]',
+            true,
+        );
+
+        expect($claims['template'])->toHaveKey('finalize_as_template')
+            ->and($claims['template']['finalize_as_template'])->toBeFalse();
+
+        return true;
+    });
+});

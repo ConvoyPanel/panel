@@ -58,6 +58,15 @@ class AnchorMigrationClient
      * the destination's own free range, so restoring over an existing guest is
      * never what a migration wants. If the VMID is taken the agent refuses,
      * the step fails, and the rollback puts the source back.
+     *
+     * `finalize_as_template` is the opposite -- present and false, and it must
+     * stay that way. The agent's install pipeline exists to import images, and
+     * Convoy offers a guest only when it reports `template: 1`, so the restore
+     * ends with `qm template` unless it is told otherwise. Letting that default
+     * stand would hand the tenant back a machine that cannot be started, after
+     * a migration that reported success. The agent refusing to advertise
+     * `migration.install` is what keeps an agent too old to honour this from
+     * being sent a guest at all.
      */
     public function install(
         Node $destination,
@@ -80,6 +89,7 @@ class AnchorMigrationClient
                 'size' => $size,
                 'vmid' => $vmid,
                 'storage' => $storage,
+                'finalize_as_template' => false,
             ],
         ));
     }
