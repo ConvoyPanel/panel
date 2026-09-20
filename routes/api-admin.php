@@ -296,7 +296,26 @@ Route::resource('/isos', Admin\ISOs\ISOController::class)
 Route::prefix('/images')->group(function () {
     // What Proxmox itself accepts, for the hardware form to build itself from.
     Route::get('/schema', Admin\Images\ImageSchemaController::class);
+
+    // A published catalogue, browsed and copied from. Read-only on the
+    // catalogue's side: an import leaves an ordinary definition behind.
+    Route::get('/registry', [Admin\Images\ImageRegistryController::class, 'index']);
+    Route::post('/registry/imports', [Admin\Images\ImageRegistryController::class, 'store']);
+
+    /*
+    | Uploads are opened, appended to, and finished, because a disk image does
+    | not fit in one request -- Cloudflare rejects a body over 100 MB on most
+    | plans, and a dropped connection through a single POST costs the whole
+    | multi-gigabyte transfer instead of one chunk.
+    */
     Route::post('/uploads', [Admin\Images\ImageUploadController::class, 'store']);
+
+    Route::prefix('/uploads/{image_upload}')->group(function () {
+        Route::get('/', [Admin\Images\ImageUploadController::class, 'show']);
+        Route::put('/', [Admin\Images\ImageUploadController::class, 'append']);
+        Route::post('/finalize', [Admin\Images\ImageUploadController::class, 'finalize']);
+        Route::delete('/', [Admin\Images\ImageUploadController::class, 'destroy']);
+    });
 });
 
 Route::prefix('/image-groups')->group(function () {

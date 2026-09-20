@@ -21,6 +21,7 @@ use Ramsey\Uuid\Uuid;
  * @property string $uuid
  * @property int $image_group_id
  * @property string $name
+ * @property ?string $registry_slug
  * @property ?string $description
  * @property bool $is_admin_only
  * @property string $ostype

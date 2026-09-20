@@ -2,6 +2,7 @@
 
 namespace App\Services\Proxmox\Server;
 
+use App\Data\Image\ImageDiskData;
 use App\Data\Server\Proxmox\ServerStateData;
 use App\Enums\Image\ImageDiskRole;
 use App\Enums\Node\Access\RealmType;
@@ -72,6 +73,12 @@ class ProxmoxServerClient extends ProxmoxClient
         $system = $volids[ImageDiskRole::SYSTEM->value]
             ?? throw new ConflictHttpException('This image version has no system disk to import.');
 
+        // Settings the image itself carries, e.g. `discard`/`ssd` on a system
+        // disk built on a thin-provisioned volume. Not the node's tuning, which
+        // is composed here -- these describe the disk that was built, and
+        // dropping them does not make the guest generic, it makes it wrong.
+        $systemOptions = $this->diskOptions($version->systemDisk()?->options ?? []);
+
         $payload = array_merge(OsProfiles::proxmoxKeys($hardware), [
             'vmid' => $server->vmid,
             'name' => $server->hostname,
@@ -85,7 +92,7 @@ class ProxmoxServerClient extends ProxmoxClient
             // Size 0 means "take the source's size". The imported disk arrives
             // at the image's own virtual size and is grown to the plan
             // afterwards, because Proxmox can grow a disk and cannot shrink one.
-            $bootSlot => "{$storage}:0,import-from={$system}",
+            $bootSlot => "{$storage}:0,import-from={$system}{$systemOptions}",
 
             // Without this the guest can come up on an empty NIC or the
             // cloud-init drive; a clone used to inherit a boot order.
@@ -96,10 +103,17 @@ class ProxmoxServerClient extends ProxmoxClient
         // than regenerated: it holds the boot entry and the enrolled Secure
         // Boot keys, so a fresh one would leave Windows unbootable.
         if (isset($volids[ImageDiskRole::EFIVARS->value])) {
+            $varstore = $version->diskSet()
+                ->first(fn (ImageDiskData $disk) => $disk->role === ImageDiskRole::EFIVARS);
+
+            // `efitype` is the only one with a sane fallback; the rest --
+            // `pre-enrolled-keys`, `ms-cert` -- are the Secure Boot state the
+            // image was sealed with, and inventing them is not an option.
             $payload['efidisk0'] = sprintf(
-                '%s:0,import-from=%s,efitype=4m',
+                '%s:0,import-from=%s%s',
                 $storage,
                 $volids[ImageDiskRole::EFIVARS->value],
+                $this->diskOptions(array_merge(['efitype' => '4m'], $varstore?->options ?? [])),
             );
         }
 
@@ -112,6 +126,19 @@ class ProxmoxServerClient extends ProxmoxClient
             ->json();
 
         return $this->getData($response);
+    }
+
+    /**
+     * The trailing `,key=value` pairs of a `qm` disk argument.
+     *
+     * @param  array<string, string|int>  $options
+     */
+    private function diskOptions(array $options): string
+    {
+        return collect($options)
+            ->reject(fn ($value) => is_null($value) || $value === '')
+            ->map(fn ($value, string $key) => ",{$key}={$value}")
+            ->implode('');
     }
 
     /**

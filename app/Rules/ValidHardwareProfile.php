@@ -27,9 +27,9 @@ class ValidHardwareProfile implements ValidationRule
      * Slots and identity the build owns. Written by the create call from the
      * server's own plan, so an overlay naming them is always a mistake.
      */
-    private const COMPUTED_PATTERN = '/^(?:scsi|ide|sata|virtio|net|efidisk|tpmstate|unused|ipconfig)\d+$/';
+    public const COMPUTED_PATTERN = '/^(?:scsi|ide|sata|virtio|net|efidisk|tpmstate|unused|ipconfig)\d+$/';
 
-    private const COMPUTED_KEYS = [
+    public const COMPUTED_KEYS = [
         'vmid', 'cores', 'memory', 'sockets', 'name', 'ostype',
         'citype', 'ciuser', 'cipassword', 'cicustom', 'sshkeys',
         'nameserver', 'searchdomain', 'archive', 'start',

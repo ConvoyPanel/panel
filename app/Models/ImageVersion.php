@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\StorageSizeCast;
 use App\Data\Image\ImageDiskData;
+use App\Enums\Image\ImageSource;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
@@ -26,6 +27,7 @@ use Ramsey\Uuid\Uuid;
  * @property int $version_patch
  * @property array $disks
  * @property int $size Bytes. Mebibytes on disk -- see StorageSizeCast.
+ * @property ImageSource $source
  * @property bool $is_active
  * @property ImageDefinition $definition
  */
@@ -36,6 +38,7 @@ class ImageVersion extends Model
         'version' => 'required|string|max:32|regex:/^\d+\.\d+\.\d+$/',
         'disks' => 'required|array|min:1',
         'is_active' => 'sometimes|boolean',
+        'source' => 'sometimes|string',
     ];
 
     protected $guarded = ['id'];
@@ -46,6 +49,7 @@ class ImageVersion extends Model
             'disks' => 'array',
             // Same convention as every other size column: MiB stored, bytes read.
             'size' => StorageSizeCast::class,
+            'source' => ImageSource::class,
             'is_active' => 'boolean',
         ];
     }
@@ -137,6 +141,15 @@ class ImageVersion extends Model
             $model->version_major = $major;
             $model->version_minor = $minor;
             $model->version_patch = $patch;
+        }
+
+        // An import says where it came from; everything else is read off the
+        // disks themselves. The question the column answers is whether a newer
+        // build could exist, and only a disk with an origin can have one.
+        if (blank($model->source)) {
+            $model->source = collect($model->disks ?? [])->every(fn (array $disk) => filled($disk['path'] ?? null))
+                ? ImageSource::MANUAL
+                : ImageSource::URL;
         }
 
         if ($model->isDirty('disks')) {

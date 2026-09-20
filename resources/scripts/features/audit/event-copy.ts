@@ -439,6 +439,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'uploaded a disk image',
         detail: p => (p.sha256 ? String(p.sha256).slice(0, 12) : null),
     },
+    'admin.image.imported': {
+        verb: 'imported an image from the catalogue',
+        detail: p => pick(p, 'slug'),
+    },
 }
 
 /**
