@@ -60,15 +60,15 @@ const SubjectRow = ({
 
 /**
  * The names behind a collapsed group, so the summary line carries something the
- * count does not. Truncation is the browser's job -- the string names as many as
- * it has and says how many it left out.
+ * count does not. The names truncate and the overflow count does not: baked into
+ * one string, `truncate` cuts from the end, so "and 3 more" -- the only part the
+ * count does not already say -- was the first thing to go. They are returned
+ * separately so the row can let the names shrink around a pinned suffix.
  */
-const preview = (group: AttentionGroup): string => {
-    const names = group.subjects.map(subject => subject.label)
-    const hidden = group.total - names.length
-
-    return hidden > 0 ? `${names.join(', ')} and ${hidden} more` : names.join(', ')
-}
+const preview = (group: AttentionGroup) => ({
+    names: group.subjects.map(subject => subject.label).join(', '),
+    hidden: group.total - group.subjects.length,
+})
 
 /**
  * One group. A single record is named outright and links straight at itself --
@@ -79,7 +79,7 @@ const preview = (group: AttentionGroup): string => {
  * The sheet is what keeps the dashboard still. Expanding 25 records inline grew
  * the card by several hundred pixels and shoved every card below it down the
  * page, so reading one row rearranged the rest -- and the group most worth
- * opening moved the page most. Modal.Body caps itself at 60vh and scrolls, so
+ * opening moved the page most. Modal.Body is the panel's scrolling section and
  * the list is bounded however broken the fleet is.
  */
 const GroupRow = ({ group }: { group: AttentionGroup }) => {
@@ -87,6 +87,7 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
     const { t } = useTranslation('admin.overview')
     const Icon = group.icon
     const truncated = group.total > group.subjects.length
+    const { names, hidden } = preview(group)
 
     const icon = (
         <div className={`shrink-0 rounded-md border p-2 ${iconClasses}`}>
@@ -107,9 +108,11 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
                     <p className='truncate text-sm font-medium text-foreground'>
                         {subject.label}
                     </p>
-                    <p className='description-small truncate'>
-                        {subject.detail}
-                    </p>
+                    {subject.detail && (
+                        <p className='description-small truncate'>
+                            {subject.detail}
+                        </p>
+                    )}
                 </div>
                 <span className='link flex shrink-0 items-center gap-1 text-sm'>
                     {group.actionLabel}
@@ -125,6 +128,7 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
                 type='button'
                 onClick={() => setOpen(true)}
                 aria-haspopup='dialog'
+                aria-expanded={open}
                 className='flex w-full items-center gap-3 rounded border border-transparent bg-transparent px-2 py-3 text-left transition-colors hover:border-accent-200 hover:bg-accent-100'
             >
                 {icon}
@@ -132,8 +136,13 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
                     <p className='truncate text-sm font-medium text-foreground'>
                         {group.title}
                     </p>
-                    <p className='description-small truncate'>
-                        {preview(group)}
+                    <p className='description-small flex min-w-0 gap-1'>
+                        <span className='truncate'>{names}</span>
+                        {hidden > 0 && (
+                            <span className='shrink-0'>
+                                {t('attention_and_more', { count: hidden })}
+                            </span>
+                        )}
                     </p>
                 </div>
                 <span className='link flex shrink-0 items-center gap-1 text-sm'>
@@ -147,9 +156,13 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
                 </Modal.Header>
                 <Modal.Body>
                     <div className='divide-y divide-accent-200'>
-                        {group.subjects.map(subject => (
+                        {group.subjects.map((subject, index) => (
                             <SubjectRow
-                                key={subject.id + subject.label}
+                                // One server can own two failed backups with the
+                                // same name, so id+label is not unique; the list is
+                                // a static snapshot that never reorders, so the
+                                // index is a safe tiebreaker.
+                                key={`${subject.id}-${subject.label}-${index}`}
                                 subject={subject}
                                 to={group.to(subject)}
                                 onNavigate={() => setOpen(false)}
