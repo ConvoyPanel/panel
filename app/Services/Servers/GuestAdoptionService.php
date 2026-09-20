@@ -72,22 +72,26 @@ class GuestAdoptionService
         $nodes = Node::query()->with('cluster')->orderBy('name')->get();
 
         $guests = [];
-        $unreachable = [];
-        $askedScopes = [];
+        $failures = [];
+        $answered = [];
 
         foreach ($nodes as $node) {
             $scope = $node->cluster_id !== null && ! $node->cluster->isStandalone()
                 ? 'cluster:'.$node->cluster_id
                 : 'node:'.$node->id;
 
-            if (isset($askedScopes[$scope])) {
+            if (isset($answered[$scope])) {
                 continue;
             }
 
             try {
                 $observed = $this->resources->setNode($node)->getResources();
             } catch (RequestException|ConnectionException $e) {
-                $unreachable[] = new UnreachableScopeData(
+                // Recorded against the scope, not emitted: a cluster whose
+                // first member is down but whose second answers is fully
+                // covered, and saying the list may be incomplete when it is not
+                // teaches an operator to ignore the warning.
+                $failures[$scope] ??= new UnreachableScopeData(
                     nodeId: $node->id,
                     nodeName: $node->name,
                     reason: Str::limit($e->getMessage(), 160),
@@ -96,7 +100,8 @@ class GuestAdoptionService
                 continue;
             }
 
-            $askedScopes[$scope] = true;
+            $answered[$scope] = true;
+            unset($failures[$scope]);
             $guests = array_merge($guests, $this->unclaimed($observed, $nodes));
         }
 
@@ -105,7 +110,10 @@ class GuestAdoptionService
             fn (AdoptableGuestData $a, AdoptableGuestData $b) => [$a->nodeName, $a->vmid] <=> [$b->nodeName, $b->vmid],
         );
 
-        return new AdoptableGuestListData(guests: $guests, unreachable: $unreachable);
+        return new AdoptableGuestListData(
+            guests: $guests,
+            unreachable: array_values($failures),
+        );
     }
 
     /**

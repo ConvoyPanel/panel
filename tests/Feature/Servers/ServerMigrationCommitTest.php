@@ -218,6 +218,60 @@ it('refuses to stack a migration on a server that is already busy', function () 
         ->assertStatus(409);
 });
 
+it('refuses to migrate a server whose placement is flagged', function () {
+    // Every Proxmox URL a migration builds comes from `node_id`, and a flag is
+    // the panel saying it is not sure that column is true.
+    fakeMigrationPreflight();
+    preservingDestination($this->target, $this->pool);
+    $admin = User::factory()->create(['root_admin' => true]);
+    $this->server->forceFill([
+        'flagged_at' => now(),
+        'flag_reason' => 'Guest 150 moved to a member Convoy does not manage.',
+    ])->save();
+
+    $this->actingAs($admin)
+        ->postJson("/api/admin/servers/{$this->server->uuid}/migration", ['node_id' => $this->target->id])
+        ->assertStatus(409);
+
+    $this->actingAs($admin)
+        ->getJson("/api/admin/servers/{$this->server->uuid}/migration")
+        ->assertStatus(409);
+});
+
+it('clears a flag a mid-flight poll left behind when it commits', function () {
+    // A poll landing between the PVE task finishing and the rebind sees the
+    // guest on the destination, re-homes it itself, and flags it because the
+    // destination bridge does not carry a pool the server still holds. That
+    // flag is stale by the time it is written, and it would block the sync.
+    fakeProxmox([
+        '*/qemu/*/migrate*' => Http::response(migratePreconditions(), 200),
+        '*/firewall/ipset*' => Http::response(['data' => []], 200),
+    ]);
+
+    [$bridge, $free] = reallocatingDestination($this->target);
+    $deployment = $this->action->execute($this->server, $this->target, true);
+    $step = $deployment->steps()->where('name', 'rebind-network')->firstOrFail();
+
+    $this->server->forceFill([
+        'flagged_at' => now(),
+        'flag_reason' => 'Re-homed to "pve2", but its bridge is not attached to "Public /24".',
+    ])->save();
+
+    (new CommitServerMigrationJob(
+        $step,
+        $this->target->id,
+        $bridge->id,
+        MigrationDisposition::Reallocate,
+        [$free->id],
+        [$this->held->id],
+    ))->handle(app(ServerNetworkService::class));
+
+    expect($this->server->fresh())
+        ->flagged_at->toBeNull()
+        ->flag_reason->toBeNull()
+        ->node_id->toBe($this->target->id);
+});
+
 it('serves the plan and the preview over the admin API', function () {
     fakeMigrationPreflight();
     preservingDestination($this->target, $this->pool);

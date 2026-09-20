@@ -106,6 +106,15 @@ class CommitServerMigrationJob implements ShouldQueue
                 // let ServerNetworkService pick a primary from what is left.
                 'primary_ipv4_address_id' => $this->stillHeld($server->primary_ipv4_address_id),
                 'primary_ipv6_address_id' => $this->stillHeld($server->primary_ipv6_address_id),
+                // A poll landing between the PVE task finishing and this job
+                // running sees the guest on the destination and re-homes it
+                // itself -- and, for a reallocation, flags it, because the
+                // destination bridge legitimately does not carry the pool the
+                // server still holds. This job knows where the guest is and
+                // what its bindings should be, so that flag is stale by the
+                // time it is written and would otherwise block the sync below.
+                'flagged_at' => null,
+                'flag_reason' => null,
             ])->save();
 
             // The operator's own request was audited when they made it; this

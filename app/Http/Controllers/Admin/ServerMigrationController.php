@@ -8,6 +8,7 @@ use App\Data\Server\Migration\MigrationPlanData;
 use App\Data\Server\Migration\MigrationPreviewData;
 use App\Enums\Audit\AuditEvent;
 use App\Exceptions\Service\Server\MigrationRefusedException;
+use App\Exceptions\Service\Server\ServerFlaggedException;
 use App\Facades\Audit;
 use App\Http\Requests\Admin\Servers\MigrateServerRequest;
 use App\Models\Node;
@@ -79,6 +80,11 @@ class ServerMigrationController
      * An install, a restore or another migration owns the guest's config while
      * it runs. Stacking a migration on top of one is how two chains end up
      * writing the same rows in an order neither of them chose.
+     *
+     * A flagged server is refused for a different reason: the flag means its
+     * recorded placement is in doubt, and every Proxmox URL a migration builds
+     * is derived from `node_id`. Moving a guest from a node it may not be on is
+     * not a migration, it is a guess.
      */
     private function refuseWhileBusy(Server $server): void
     {
@@ -86,6 +92,10 @@ class ServerMigrationController
             throw new ConflictHttpException(
                 'This server is busy. Wait for the operation in progress to finish before migrating it.',
             );
+        }
+
+        if ($server->flagged_at !== null) {
+            throw new ServerFlaggedException($server);
         }
     }
 }

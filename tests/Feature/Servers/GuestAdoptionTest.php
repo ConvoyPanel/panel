@@ -97,6 +97,29 @@ it('never offers a template for adoption', function () {
     expect($this->service->adoptable()->guests)->toBeEmpty();
 });
 
+it('does not warn about a cluster whose second member answered', function () {
+    // Saying the list may be incomplete when it is not teaches an operator to
+    // ignore the warning, which is the one thing it must never be.
+    $second = Node::factory()->for(Location::factory())
+        ->create(['name' => 'pve0', 'cluster_id' => $this->cluster->id]);
+
+    // Ordered by name, so pve0 is asked first and fails; pve1 answers for the
+    // same cluster.
+    Http::fake([
+        "https://{$second->fqdn}*" => Http::response(['message' => 'down'], 500),
+        '*/cluster/resources' => Http::response(
+            ['data' => [clusterGuest(101, 'pve1')]],
+            200,
+        ),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
+
+    $list = $this->service->adoptable();
+
+    expect($list->unreachable)->toBeEmpty()
+        ->and($list->guests)->toHaveCount(1);
+});
+
 it('says which node it could not ask rather than reporting an empty list', function () {
     Http::fake(['*' => Http::response(['errors' => [['message' => 'connection refused']]], 500)]);
 
