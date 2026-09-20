@@ -22,8 +22,7 @@ function makeImageVersion(
     bool $withVarstore = false,
     array $systemOptions = [],
     array $varstoreOptions = [],
-)
-{
+) {
     $group = ImageGroup::create(['name' => 'Ubuntu']);
 
     $definition = ImageDefinition::create([

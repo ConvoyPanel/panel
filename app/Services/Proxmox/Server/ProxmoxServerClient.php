@@ -77,7 +77,7 @@ class ProxmoxServerClient extends ProxmoxClient
         // disk built on a thin-provisioned volume. Not the node's tuning, which
         // is composed here -- these describe the disk that was built, and
         // dropping them does not make the guest generic, it makes it wrong.
-        $systemOptions = $this->diskOptions($version->systemDisk()?->options ?? []);
+        $systemOptions = $this->diskOptions($version->systemDisk()->options ?? []);
 
         $payload = array_merge(OsProfiles::proxmoxKeys($hardware), [
             'vmid' => $server->vmid,
@@ -113,7 +113,7 @@ class ProxmoxServerClient extends ProxmoxClient
                 '%s:0,import-from=%s%s',
                 $storage,
                 $volids[ImageDiskRole::EFIVARS->value],
-                $this->diskOptions(array_merge(['efitype' => '4m'], $varstore?->options ?? [])),
+                $this->diskOptions(array_merge(['efitype' => '4m'], $varstore->options ?? [])),
             );
         }
 
@@ -136,7 +136,7 @@ class ProxmoxServerClient extends ProxmoxClient
     private function diskOptions(array $options): string
     {
         return collect($options)
-            ->reject(fn ($value) => is_null($value) || $value === '')
+            ->reject(fn ($value) => blank($value))
             ->map(fn ($value, string $key) => ",{$key}={$value}")
             ->implode('');
     }

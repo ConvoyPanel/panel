@@ -5,8 +5,8 @@ namespace App\Data\Image\Registry;
 use App\Data\Image\ImageDiskData;
 use App\Enums\Image\ImageDiskRole;
 use App\Enums\Image\RegistryImportStatus;
-use App\Services\Images\OsProfiles;
 use App\Rules\ValidHardwareProfile;
+use App\Services\Images\OsProfiles;
 use Illuminate\Support\Arr;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
@@ -86,7 +86,7 @@ class RegistryTemplateData extends Data
             disks: ImageDiskData::collect($disks->all(), DataCollection::class),
             hardware: self::hardwareFrom(Arr::get($template, 'hardware', []), $system),
             size: (int) $disks->sum(fn (ImageDiskData $disk) => $disk->size),
-            minimumDisk: $system?->virtualSize ?? 0,
+            minimumDisk: $system->virtualSize ?? 0,
             minimumCores: Arr::get($template, 'minimum.cores'),
             minimumMemory: Arr::get($template, 'minimum.memory'),
         );
