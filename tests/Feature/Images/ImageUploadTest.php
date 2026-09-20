@@ -2,6 +2,7 @@
 
 use App\Models\ImageUpload;
 use App\Models\User;
+use App\Services\Images\ChunkedUploadService;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -96,6 +97,19 @@ it('advertises a chunk size that fits through a proxy', function () {
         // constraint this endpoint exists for.
         ->and($state['chunk_size'])->toBeLessThan(100 * 1000 * 1000)
         ->and($state['chunk_size'])->toBeGreaterThan(0);
+});
+
+it('never advertises a chunk PHP itself would refuse', function () {
+    // `ValidatePostSize` rejects any request whose Content-Length exceeds
+    // `post_max_size`, PUT included, and a stock php.ini sets that to 8M.
+    config()->set('convoy.artifacts.upload_chunk_bytes', 64 * 1024 * 1024);
+
+    $chunk = app(ChunkedUploadService::class)->chunkBytes();
+    $ceiling = (int) preg_replace('/[^0-9]/', '', (string) ini_get('post_max_size'))
+        * 1024 ** 2;
+
+    expect($chunk)->toBeGreaterThan(0)
+        ->and($ceiling === 0 || $chunk < $ceiling)->toBeTrue();
 });
 
 it('resumes from the offset the server reports', function () {

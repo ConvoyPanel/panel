@@ -33,9 +33,44 @@ class ChunkedUploadService
         private ImageSourceResolver $resolver,
     ) {}
 
+    /**
+     * How much the client should send per request.
+     *
+     * The configured size, unless PHP itself would refuse it. `ValidatePostSize`
+     * rejects any request whose `Content-Length` exceeds `post_max_size` --
+     * PUT included -- and a stock php.ini sets that to 8M, which would make
+     * every upload fail with a 413 nobody could read a cause out of. A megabyte
+     * is held back for the headers and cookie that travel with the bytes.
+     */
     public function chunkBytes(): int
     {
-        return (int) config('convoy.artifacts.upload_chunk_bytes', 16 * 1024 * 1024);
+        $configured = (int) config('convoy.artifacts.upload_chunk_bytes', 16 * 1024 * 1024);
+        $ceiling = $this->postMaxBytes();
+
+        if ($ceiling <= 0) {
+            return $configured;
+        }
+
+        return (int) min($configured, max($ceiling - 1024 * 1024, 1024 * 1024));
+    }
+
+    /**
+     * `post_max_size` in bytes. Zero when PHP is not enforcing one.
+     */
+    private function postMaxBytes(): int
+    {
+        $value = trim((string) ini_get('post_max_size'));
+
+        if ($value === '' || ! preg_match('/^(\d+)\s*([KMG])?$/i', $value, $matches)) {
+            return 0;
+        }
+
+        return (int) $matches[1] * match (strtoupper($matches[2] ?? '')) {
+            'K' => 1024,
+            'M' => 1024 ** 2,
+            'G' => 1024 ** 3,
+            default => 1,
+        };
     }
 
     /**
