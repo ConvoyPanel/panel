@@ -109,6 +109,11 @@ it('reports identity as unconfirmed with no confirmation on the session', functi
 });
 
 it('reports identity as confirmed with the time remaining', function () {
+    // The remaining seconds are counted from the clock the request runs under, so a tick
+    // between staging the session and reading it back takes a second off the answer. CI hit
+    // exactly that: 240 asserted, 239 returned.
+    $this->freezeTime();
+
     $this->actingAs(User::factory()->create())
         ->withSession(['auth.identity_confirmed_at' => now()->subSeconds(60)->timestamp])
         ->getJson('/api/auth/identity')
@@ -117,6 +122,10 @@ it('reports identity as confirmed with the time remaining', function () {
 });
 
 it('agrees with the middleware at the edge of the window', function () {
+    // Same clock race as above, and worse here: these cases sit one second either side of the
+    // boundary, so a tick does not just shift the number, it moves a case across the edge.
+    $this->freezeTime();
+
     $user = User::factory()->create();
 
     // One second inside: reported confirmed, and the gated route lets it through.
