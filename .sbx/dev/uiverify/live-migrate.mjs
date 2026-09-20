@@ -5,8 +5,9 @@
  */
 import { BASE, launch, newContext, login } from '/opt/sbx-e2e/browser.mjs'
 
-const SOURCE_NODE = 3 // us-southeast-2
-const TARGET_NODE = 4 // us-southwest-2
+// Either direction: the reverse run is the same code with these swapped.
+const SOURCE_NODE = Number(process.env.SOURCE_NODE ?? 3)
+const TARGET_NODE = Number(process.env.TARGET_NODE ?? 4)
 const VMID = 9200
 const KNOWN_SERVER = process.env.SERVER_UUID || null
 

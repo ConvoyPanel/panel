@@ -825,3 +825,28 @@ it('finishes the migration even when the artifact cannot be discarded', function
         ->node_id->toBe($this->target->id)
         ->lifecycle->not->toBe('migration_failed');
 });
+
+/**
+ * Proxmox rejects a DELETE that carries a body with "Unexpected content for
+ * method 'DELETE'", and the rollback swallows that as a warning -- so a guest
+ * left behind by a failed migration was never removed and the same server was
+ * stranded on two nodes. Proven against the live API before this was fixed.
+ *
+ * Driven directly rather than through a migration, because this call only runs
+ * during a rollback: the happy path's DELETE is the source destroy, which is a
+ * different method on a different client and takes no purge.
+ */
+it('purges a destroyed guest through the query string, never a body', function () {
+    Http::fake(['*' => Http::response(['data' => 'UPID:destroy'], 200)]);
+
+    app(\App\Services\Proxmox\Server\ProxmoxMigrationClient::class)
+        ->destroyGuest($this->target, 900);
+
+    Http::assertSent(function ($request) {
+        expect($request->method())->toBe('DELETE')
+            ->and($request->url())->toContain('purge=1')
+            ->and($request->body())->toBe('');
+
+        return true;
+    });
+});

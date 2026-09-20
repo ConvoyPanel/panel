@@ -81,9 +81,15 @@ class ProxmoxMigrationClient extends ProxmoxClient
      */
     public function destroyGuest(Node $node, int $vmid): ?string
     {
+        // `purge` goes in the query string, not a body. Proxmox rejects a DELETE
+        // that carries one with "Unexpected content for method 'DELETE'", and
+        // the rollback swallows that as a warning -- so the orphaned guest was
+        // silently left behind and a failed migration stranded the same server
+        // on two nodes. Every other DELETE in this namespace passes no body at
+        // all; this was the one that did.
         $response = $this->setNode($node)
             ->getHttpClientWithParams(['vmid' => $vmid])
-            ->delete('/api2/json/nodes/{node}/qemu/{vmid}', ['purge' => true])
+            ->delete('/api2/json/nodes/{node}/qemu/{vmid}?purge=1')
             ->json();
 
         $upid = $this->getData($response);
