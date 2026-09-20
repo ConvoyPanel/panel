@@ -29,9 +29,6 @@ final class AnchorMigrationProtocol
      */
     public const EXPORT = '/api/v1/templates/jobs/{job}';
 
-    /** Delete one finished artifact. */
-    public const ARTIFACT = '/api/v1/templates/artifacts/{artifact}';
-
     /**
      * Where the destination downloads the archive from. At the root and
      * deliberately not under `/api/v1`: it is the one endpoint a party other
@@ -42,6 +39,18 @@ final class AnchorMigrationProtocol
      * nothing here asks for one.
      */
     public const FETCH = '/artifacts/{artifact}';
+
+    /**
+     * Delete one finished artifact.
+     *
+     * The same path the destination downloads from, because the agent serves
+     * GET and DELETE on one route. Pointing this under `/api/v1` instead cost a
+     * live migration its cleanup step: the agent's router answered 404, which
+     * reads exactly like an artifact that had already been swept, so the
+     * failure looked like a TTL race rather than a wrong URL.
+     */
+    public const ARTIFACT = self::FETCH;
+
 
     /** The install pipeline, reused unchanged. */
     public const INSTALLS = '/api/v1/templates/installs';

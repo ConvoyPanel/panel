@@ -190,7 +190,10 @@ function fakeAnchorMigration(array $overrides = [], array $config = []): void
         // Anchor, source side.
         '*/api/v1/templates/exports' => Http::response(anchorJob('job-export', 'pending'), 202),
         '*/api/v1/templates/jobs/*' => Http::response(finishedExport(), 200),
-        '*/api/v1/templates/artifacts/*' => Http::response(['status' => 'ok'], 200),
+        // Same path the destination downloads from: the agent serves GET and
+        // DELETE on one route. Pinning a made-up /api/v1 path here is what let
+        // a wrong discard URL reach a live migration.
+        '*/artifacts/*' => Http::response(['status' => 'ok'], 200),
 
         // Anchor, destination side.
         '*/api/v1/templates/installs' => Http::response(anchorJob('job-install', 'pending'), 202),
@@ -220,7 +223,7 @@ function anchorCallSequence(): array
                 str_contains($url, '/templates/exports') => 'export',
                 str_contains($url, '/templates/jobs') && $method === 'GET' => 'export-status',
                 str_contains($url, '/templates/jobs') && $method === 'DELETE' => 'export-cancel',
-                str_contains($url, '/templates/artifacts') => 'discard',
+                str_contains($url, '/artifacts/') && $method === 'DELETE' => 'discard',
                 str_contains($url, '/templates/installs') && $method === 'POST' => 'install',
                 str_contains($url, '/templates/installs') && $method === 'GET' => 'install-status',
                 str_contains($url, '/templates/installs') && $method === 'DELETE' => 'install-cancel',
@@ -419,7 +422,7 @@ dataset('anchor failures', [
         'wrong size',
     ],
     'the artifact cannot be discarded' => [
-        ['*/api/v1/templates/artifacts/*' => fn () => Http::response(['error' => 'artifact is locked'], 409)],
+        ['*/artifacts/*' => fn () => Http::response(['error' => 'artifact is locked'], 409)],
         'artifact is locked',
     ],
     'the export is cancelled mid-transfer' => [
