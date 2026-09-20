@@ -203,6 +203,20 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'server.media.mounted': { verb: 'mounted an ISO' },
     'server.media.unmounted': { verb: 'unmounted an ISO' },
 
+    // Sharing
+    'server.subuser.added': {
+        verb: 'shared the server',
+        detail: p => pick(p, 'email'),
+    },
+    'server.subuser.updated': {
+        verb: 'changed what someone can do',
+        detail: p => pick(p, 'email'),
+    },
+    'server.subuser.removed': {
+        verb: 'removed access',
+        detail: p => pick(p, 'email'),
+    },
+
     // Administrative actions on a server
     'admin.server.created': { verb: 'created the server' },
     'admin.server.updated': {
@@ -398,6 +412,17 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'revoked a user invitation',
         detail: () => null,
     },
+    'admin.user.role-changed': {
+        verb: 'changed an admin role',
+        detail: p => pick(p, 'to') ?? 'no admin access',
+    },
+    'admin.user.type-changed': {
+        verb: 'changed an account type',
+        detail: p => pick(p, 'to'),
+    },
+    'admin.role.created': { verb: 'created an admin role' },
+    'admin.role.updated': { verb: 'updated an admin role' },
+    'admin.role.deleted': { verb: 'deleted an admin role' },
     'admin.token.created': { verb: 'created an application token' },
     'admin.token.updated': { verb: 'updated an application token' },
     'admin.token.deleted': { verb: 'revoked an application token' },
@@ -420,6 +445,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.settings.mail-tested': {
         verb: 'sent a test email',
         detail: p => pick(p, 'host'),
+    },
+    'admin.settings.permissions-updated': {
+        verb: 'updated the sharing settings',
+        detail: () => null,
     },
 
     // Presets and images

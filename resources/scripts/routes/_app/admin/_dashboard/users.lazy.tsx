@@ -4,6 +4,7 @@ import UserFormDialog from '@/features/users/components/UserFormDialog.tsx'
 import useUserDeletion from '@/features/users/hooks/use-user-deletion.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import type { AdminUser } from '@/types/admin/user.ts'
+import type { DataTableFilterField } from '@/types/data-table.ts'
 import { cn } from '@/utils'
 import { IconPlus, IconUsers } from '@tabler/icons-react'
 import { Link, createLazyFileRoute } from '@tanstack/react-router'
@@ -32,12 +33,29 @@ import { Heading } from '@/components/ui/Typography'
 const countOf = (count: number, noun: string) =>
     `${count} ${noun}${count === 1 ? '' : 's'}`
 
+/**
+ * A guest exists only because a customer shared a server with an address that had no account. It
+ * is never somebody the provider provisioned, and conflating the two is what this badge and the
+ * filter beside it exist to prevent.
+ */
+const TypeBadge = ({ user }: { user: AdminUser }) =>
+    user.type === 'guest' ? <Badge variant={'outline'}>Guest</Badge> : null
+
 const RoleBadge = ({ user }: { user: AdminUser }) =>
-    user.rootAdmin ? (
-        <Badge variant={'secondary'}>Administrator</Badge>
+    user.adminRole ? (
+        <Badge variant={'secondary'}>{user.adminRole.name}</Badge>
     ) : (
-        <Badge variant={'outline'}>User</Badge>
+        <span className={'text-muted-foreground'}>—</span>
     )
+
+const TYPE_FILTER: DataTableFilterField<AdminUser> = {
+    id: 'type',
+    label: 'Account',
+    options: [
+        { label: 'Customer', value: 'standard' },
+        { label: 'Guest', value: 'guest' },
+    ],
+}
 
 const UsersIndex = () => {
     const { data: currentUser } = useCurrentUser()
@@ -99,6 +117,21 @@ const UsersIndex = () => {
             meta: { skeletonWidth: '12rem' },
         },
         {
+            id: 'type',
+            accessorKey: 'type',
+            enableSorting: true,
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={'Account'} />
+            ),
+            meta: { skeletonWidth: '5rem' },
+            cell: ({ row }) =>
+                row.original.type === 'guest' ? (
+                    <Badge variant={'outline'}>Guest</Badge>
+                ) : (
+                    'Customer'
+                ),
+        },
+        {
             id: 'rootAdmin',
             accessorKey: 'rootAdmin',
             enableSorting: true,
@@ -157,6 +190,7 @@ const UsersIndex = () => {
                 toolbar
                 data={data}
                 columns={columns}
+                filterFields={[TYPE_FILTER]}
                 isPlaceholderData={isPlaceholderData}
                 isError={isError}
                 onRetry={refetch}
@@ -186,7 +220,12 @@ const UsersIndex = () => {
                                     >
                                         {user.name}
                                     </Link>
-                                    <RoleBadge user={user} />
+                                    <TypeBadge user={user} />
+                                    {user.adminRole && (
+                                        <Badge variant={'secondary'}>
+                                            {user.adminRole.name}
+                                        </Badge>
+                                    )}
                                 </ItemTitle>
                                 <ItemDescription
                                     className={'block truncate text-nowrap'}

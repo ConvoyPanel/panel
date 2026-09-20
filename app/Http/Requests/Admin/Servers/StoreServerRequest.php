@@ -13,6 +13,7 @@ use App\Rules\HasSufficientMemory;
 use App\Rules\ImageFitsStorage;
 use App\Rules\ImageIsAvailable;
 use App\Rules\NetworkInterfaceBelongsToNode;
+use App\Rules\OwnerIsNotAGuest;
 use App\Rules\StorageAllows;
 use App\Rules\VlanIsDeclaredOnInterface;
 use App\Rules\VMIDIsAvailable;
@@ -36,7 +37,7 @@ class StoreServerRequest extends BaseApiRequest
                 ...$rules['storage_id'],
                 new StorageAllows(StorageContentType::KVM),
             ],
-            'user_id' => $rules['user_id'],
+            'user_id' => [...$rules['user_id'], new OwnerIsNotAGuest],
             'vmid' => ['nullable', 'numeric', 'min:100', 'max:999999999', new VMIDIsAvailable($this->input('node_id'))],
             'hostname' => $rules['hostname'],
 

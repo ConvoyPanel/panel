@@ -6,6 +6,7 @@ import {
     IconRefresh,
     IconSettings,
     IconUserCog,
+    IconUsersGroup,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -13,12 +14,6 @@ import AppLayout from '@/components/layouts/AppLayout.tsx'
 
 import { SidebarNav } from '@/components/ui/Navigation/Navigation.types.ts'
 
-export const Route = createFileRoute('/_app/admin/settings')({
-    component: SettingsLayout,
-    staticData: {
-        title: 'Settings',
-    },
-})
 
 // One route per section, drilled in from the admin console. Only add an item
 // here once its route file exists — a nav that points at nothing is how the
@@ -50,6 +45,11 @@ const nav: SidebarNav = {
                     path: '/admin/settings/account',
                 },
                 {
+                    icon: IconUsersGroup,
+                    label: 'Sharing',
+                    path: '/admin/settings/permissions',
+                },
+                {
                     icon: IconMail,
                     label: 'Mail',
                     path: '/admin/settings/mail',
@@ -64,7 +64,7 @@ const nav: SidebarNav = {
     ],
 }
 
-function SettingsLayout() {
+const SettingsLayout = () => {
     useTitle('Settings')
 
     return (
@@ -73,3 +73,10 @@ function SettingsLayout() {
         </AppLayout>
     )
 }
+
+export const Route = createFileRoute('/_app/admin/settings')({
+    component: SettingsLayout,
+    staticData: {
+        title: 'Settings',
+    },
+})

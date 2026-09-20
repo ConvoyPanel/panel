@@ -172,20 +172,49 @@ class Server extends Model
     }
 
     /**
-     * Scope the query to servers the given user owns.
+     * Scope the query to servers the given user may reach in the client area.
      *
-     * This is the single source of truth for client-facing server visibility.
-     * Ownership is deliberate for everyone, including root admins — the client
-     * area shows a user their own servers, not every server on the panel (use
-     * the admin area for that). When subuser support is added, extend the
-     * ownership check here (e.g. an orWhereHas on a subusers relation) and
-     * every listing inherits it.
+     * This is the single source of truth for client-facing server visibility:
+     * the servers they own, plus the ones whose owners shared them. Admin
+     * status is deliberately not part of it — the client area shows a user
+     * their own servers, not every server on the panel (use the admin area
+     * for that).
      *
      * @param  Builder<Server>  $query
      */
     public function scopeOwnedBy(Builder $query, User $user): void
     {
-        $query->where('user_id', $user->id);
+        $query->where(function (Builder $query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('subusers', fn (Builder $subusers) => $subusers->where('user_id', $user->id));
+        });
+    }
+
+    /**
+     * People the owner shared this server with, and what they may do on it.
+     *
+     * @return HasMany<ServerSubuser, $this>
+     */
+    public function subusers(): HasMany
+    {
+        return $this->hasMany(ServerSubuser::class);
+    }
+
+    /**
+     * This server's grant for one account, or null when they are not a sub-user of it.
+     *
+     * Memoized per instance: a single request asks this once per policy check, and a form request
+     * plus a controller gate is already two.
+     *
+     * @var array<int, ?ServerSubuser>
+     */
+    private array $subuserCache = [];
+
+    public function subuserFor(User $user): ?ServerSubuser
+    {
+        return $this->subuserCache[$user->id] ??= $this->subusers()
+            ->where('user_id', '=', $user->id)
+            ->first();
     }
 
     /**
