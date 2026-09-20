@@ -171,6 +171,36 @@ function fakeProxmox(array $overrides = []): void
 {
     Http::fake($overrides + [
         '*/config' => Http::response(serverConfigFixture(), 200),
+        '*/tasks/*/status' => Http::response(taskStatusFixture(), 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
+}
+
+/**
+ * A finished, successful Proxmox task, as `/nodes/{node}/tasks/{upid}/status`
+ * reports it.
+ *
+ * The catch-all above answers every non-config call with a UPID, and anything
+ * that then waits on that task -- a disk resize, for one -- reads it back here.
+ * Without this the wait would be handed the UPID string where it expects a task
+ * object and would sit out its whole polling window on every such test.
+ *
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function taskStatusFixture(array $extra = []): array
+{
+    return ['data' => array_merge([
+        'upid' => 'dummy-upid',
+        'node' => 'node',
+        'pid' => 1234,
+        'pstart' => 1234,
+        'starttime' => 1700000000,
+        'endtime' => 1700000001,
+        'type' => 'resize',
+        'id' => '100',
+        'user' => 'root@pam',
+        'status' => 'stopped',
+        'exitstatus' => 'OK',
+    ], $extra)];
 }

@@ -9,6 +9,7 @@ use App\Enums\Server\DiskInterface;
 use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\CannotModifyPrimaryDiskException;
 use App\Exceptions\Service\Server\Allocation\CannotShrinkDiskException;
+use App\Exceptions\Service\Server\Allocation\DiskResizeFailedException;
 use App\Exceptions\Service\Server\Allocation\ISOAlreadyMountedException;
 use App\Exceptions\Service\Server\Allocation\ISOAlreadyUnmountedException;
 use App\Exceptions\Service\Server\Allocation\NoAvailableDiskInterfaceException;
@@ -18,7 +19,6 @@ use App\Models\Server;
 use App\Models\ServerDisk;
 use App\Services\ISOs\ISOResidencyService;
 use App\Services\Proxmox\Server\ProxmoxConfigClient;
-use App\Services\Proxmox\Server\ProxmoxDiskClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -27,7 +27,7 @@ class AllocationService
 {
     public function __construct(
         private ProxmoxConfigClient $configClient,
-        private ProxmoxDiskClient $diskClient,
+        private DiskResizeService $diskResize,
         private SerialConsoleService $serialConsole,
         private ISOResidencyService $isoResidency,
     ) {}
@@ -68,6 +68,7 @@ class AllocationService
     /**
      * @throws RequestException
      * @throws ConnectionException
+     * @throws DiskResizeFailedException
      */
     public function syncSettings(Server $server): void
     {
@@ -111,10 +112,7 @@ class AllocationService
         });
 
         if ($disk !== null && $server->disk > $disk->size) {
-            $this->diskClient->setServer($server)->setDiskSize(
-                $disk,
-                $server->disk,
-            );
+            $this->diskResize->resize($server, $disk, $server->disk);
         }
     }
 
@@ -228,6 +226,7 @@ class AllocationService
      * @throws ConnectionException
      * @throws CannotModifyPrimaryDiskException
      * @throws CannotShrinkDiskException
+     * @throws DiskResizeFailedException
      */
     public function resizeDisk(Server $server, ServerDisk $disk, int $newSizeBytes): void
     {
@@ -250,7 +249,7 @@ class AllocationService
             );
 
             if ($onVm !== null) {
-                $this->diskClient->setServer($server)->setDiskSize($onVm, $newSizeBytes);
+                $this->diskResize->resize($server, $onVm, $newSizeBytes);
             }
         }
 

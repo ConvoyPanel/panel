@@ -22,7 +22,18 @@ class ConfigureVmJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 20;
+    /**
+     * A configure pass is a handful of Proxmox writes, but one of them -- the
+     * primary disk's grow -- now waits for PVE's resize task and retries it once
+     * if the node times out on it, which is worth up to 70s on its own. Twenty
+     * seconds used to be enough and no longer is.
+     *
+     * Kept below {@see ExpiringWithoutOverlapping::EXPIRES_AFTER} so the order of
+     * events under a genuinely stuck node is the safe one: the job is killed
+     * while it still holds the server's overlap lock, rather than the lock
+     * expiring out from under a job that is still writing to the guest.
+     */
+    public int $timeout = 110;
 
     public function __construct(
         #[WithoutRelations]
