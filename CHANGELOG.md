@@ -5,6 +5,15 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- Fixed the Create Server modal offering no templates once a node was picked. The node select holds its id as a string,
+  and since v4.7.0-rc.1 the template group lookup skips anything that is not a positive integer -- which was meant to
+  stop requests going out before a node is chosen, but also stopped them after. The id is now converted before the
+  lookup.
+
 ## v4.7.0-rc.1
 
 ### Changed
