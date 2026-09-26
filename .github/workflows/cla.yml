@@ -61,13 +61,12 @@ jobs:
               throw new Error('CLA_SIGNATURE_TOKEN is required');
             }
 
-            const signatureRequest = (route, parameters) => {
-              const headers = signatureToken
-                ? { ...(parameters.headers || {}), authorization: `Bearer ${signatureToken}` }
-                : parameters.headers;
-
-              return github.request(route, { ...parameters, headers });
-            };
+            // Its own client, not `github` with an Authorization header: Octokit's auth hook
+            // overwrites that header with GITHUB_TOKEN on every request, and GITHUB_TOKEN cannot
+            // see a private signature repository, so every call got a 404. github-script exposes
+            // no getOctokit, so the client is built from the class of the one it does expose.
+            const signatureClient = new github.constructor({ auth: signatureToken });
+            const signatureRequest = (route, parameters) => signatureClient.request(route, parameters);
 
             const isIssueComment = context.eventName === 'issue_comment';
             const commentBody = isIssueComment ? context.payload.comment.body.trim() : '';
