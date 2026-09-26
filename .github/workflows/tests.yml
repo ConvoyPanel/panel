@@ -59,15 +59,21 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Built from .env.example, pointed at the service containers above. A
+      # written file rather than job-level env vars because `php artisan serve`
+      # does not hand its own environment to the app it serves.
       - name: Create environment file
         run: |
-          cp .env.ci .env
+          cp .env.example .env
           sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=YzLa2BCBwDGWVkpG/' .env
           sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
 
       - name: Install NPM dependencies
         run: npm ci
