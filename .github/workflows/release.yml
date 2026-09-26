@@ -32,7 +32,6 @@ jobs:
             "CODE_OF_CONDUCT.md"
             "CONTRIBUTOR_LICENSE_AGREEMENT"
             "crowdin.yml"
-            "docker-compose.ci.yml"
             "phpstan.neon"
             "phpunit.xml"
             "stats.html"
