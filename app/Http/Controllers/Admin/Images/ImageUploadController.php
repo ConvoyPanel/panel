@@ -4,71 +4,150 @@ namespace App\Http\Controllers\Admin\Images;
 
 use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
-use App\Services\Images\ImageInspector;
-use App\Services\Images\ImageSourceResolver;
+use App\Models\ImageUpload;
+use App\Services\Images\ChunkedUploadService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage as Filesystem;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 /**
- * Takes a disk image an operator has no other way to host.
+ * Takes a disk image an operator has no other way to host, a chunk at a time.
  *
- * The upload is not the image record -- it is one disk of one version. It comes
- * back described rather than merely stored, because the two facts the version
- * form needs (the hash, and the provisioned size that becomes the plan floor)
- * are both properties of the file and neither should be typed by hand.
+ * One request is the wrong shape for this file. A Windows image is ten
+ * gigabytes; Cloudflare rejects a body over 100 MB on most plans, PHP has its
+ * own ceilings, and a connection that drops at 90% of a single POST costs the
+ * entire transfer. So the upload is opened, appended to, and finished -- and
+ * the offset the server reports is what makes a dropped connection cost one
+ * chunk instead of everything.
+ *
+ * The upload is still not the image record: it is one disk of one version. It
+ * comes back described rather than merely stored, because the two facts the
+ * version form needs -- the hash, and the provisioned size that becomes the
+ * plan floor -- are both properties of the file and neither should be typed.
  */
 class ImageUploadController
 {
-    public function __construct(
-        private ImageInspector $inspector,
-        private ImageSourceResolver $resolver,
-    ) {}
+    public function __construct(private ChunkedUploadService $uploads) {}
 
+    /**
+     * Open an upload and say how to feed it.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'file' => ['required', 'file'],
+        $validated = $request->validate([
+            'file_name' => ['required', 'string', 'max:255'],
+            'size' => ['required', 'integer', 'min:1'],
+            // Optional, and only ever used to reject: the panel computes the
+            // hash it reports either way, so a client that offers one is asking
+            // to be told when the file it sent is not the file it meant to.
+            'sha256' => ['nullable', 'string', 'regex:/^[a-f0-9]{64}$/i'],
         ]);
 
-        $upload = $request->file('file');
-        $extension = strtolower((string) $upload->getClientOriginalExtension());
+        $upload = $this->uploads->begin(
+            $validated['file_name'],
+            (int) $validated['size'],
+            $validated['sha256'] ?? null,
+            $request->user(),
+        );
 
-        if (! in_array($extension, ['qcow2', 'img', 'raw'], true)) {
-            throw new UnprocessableEntityHttpException(
-                'A disk image must be a .qcow2, .img or .raw file.',
-            );
+        return response()->json($this->state($upload), Response::HTTP_CREATED);
+    }
+
+    /**
+     * Where to resume from. The server's offset is the authoritative one.
+     */
+    public function show(Request $request, ImageUpload $imageUpload)
+    {
+        $this->authorizeUpload($request, $imageUpload);
+
+        return $this->state($imageUpload);
+    }
+
+    /**
+     * Append one chunk at `Upload-Offset`.
+     *
+     * The body is read as a stream rather than a form field: a multipart parse
+     * would buffer the chunk through PHP's upload handling and reimpose the
+     * very limits this endpoint exists to get out from under.
+     */
+    public function append(Request $request, ImageUpload $imageUpload)
+    {
+        $this->authorizeUpload($request, $imageUpload);
+
+        $offset = $request->header('Upload-Offset');
+
+        if (! is_numeric($offset)) {
+            throw new ConflictHttpException('Send `Upload-Offset` with the byte this chunk starts at.');
         }
 
-        $sha256 = $this->inspector->sha256OfFile($upload->getRealPath());
+        $length = $request->header('Content-Length');
 
-        // Named after the hash, like the copy that lands on a node: uploading
-        // the same image twice costs one file, and a re-upload after a failed
-        // version cannot leave an orphan under a different name.
-        $format = $extension === 'qcow2' ? 'qcow2' : 'raw';
-        $path = "image-{$sha256}.{$format}";
+        $this->uploads->append(
+            $imageUpload,
+            (int) $offset,
+            $request->getContent(true),
+            is_numeric($length) ? (int) $length : null,
+        );
 
-        $disk = Filesystem::disk($this->resolver->diskName());
+        return $this->state($imageUpload);
+    }
 
-        if (! $disk->exists($path)) {
-            $disk->putFileAs('', $upload, $path);
-        }
+    /**
+     * Hash what arrived, store it, and describe it.
+     */
+    public function finalize(Request $request, ImageUpload $imageUpload)
+    {
+        $this->authorizeUpload($request, $imageUpload);
 
-        $virtualSize = $this->inspector->virtualSizeOfFile($disk->path($path))
-            // A raw image is its own virtual size; only qcow2 declares one.
-            ?? $disk->size($path);
+        $described = $this->uploads->finish($imageUpload);
 
         Audit::record(
             AuditEvent::ADMIN_IMAGE_UPLOADED,
-            properties: ['sha256' => $sha256, 'size' => $disk->size($path)],
+            properties: ['sha256' => $described['sha256'], 'size' => $described['size']],
         );
 
+        return $described;
+    }
+
+    /**
+     * Give up on an upload and reclaim its bytes.
+     */
+    public function destroy(Request $request, ImageUpload $imageUpload): Response
+    {
+        $this->authorizeUpload($request, $imageUpload);
+
+        $this->uploads->discard($imageUpload);
+
+        return response()->noContent();
+    }
+
+    /**
+     * An upload is resumable by the account that opened it and nobody else.
+     *
+     * Every one of these routes is already admin-only; this is the narrower
+     * rule that two admins uploading at once cannot append to each other's
+     * file, which would corrupt both without either being told.
+     */
+    private function authorizeUpload(Request $request, ImageUpload $upload): void
+    {
+        if (filled($upload->user_id) && $upload->user_id !== $request->user()?->id) {
+            throw new AccessDeniedHttpException('This upload belongs to someone else.');
+        }
+    }
+
+    /**
+     * @return array{uuid: string, offset: int, size: int, chunk_size: int, file_name: string, format: string}
+     */
+    private function state(ImageUpload $upload): array
+    {
         return [
-            'path' => $path,
-            'sha256' => $sha256,
-            'size' => $disk->size($path),
-            'virtual_size' => $virtualSize,
-            'format' => $format,
+            'uuid' => $upload->uuid,
+            'offset' => (int) $upload->received_bytes,
+            'size' => (int) $upload->expected_size,
+            'chunk_size' => $this->uploads->chunkBytes(),
+            'file_name' => $upload->file_name,
+            'format' => $upload->format,
         ];
     }
 }

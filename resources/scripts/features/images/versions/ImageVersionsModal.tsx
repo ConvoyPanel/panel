@@ -1,4 +1,5 @@
-import { uploadImageDisk } from '@/features/images/hardware/api'
+import DiskUploadField from '@/features/images/uploads/DiskUploadField'
+import { UploadedDisk } from '@/features/images/uploads/api'
 import {
     createImageVersion,
     deleteImageVersion,
@@ -8,7 +9,13 @@ import {
     useImageVersions,
 } from '@/features/images/versions/api'
 import { formatBytes } from '@/features/servers/storage/api.ts'
-import { ImageDefinition, ImageDiskRole, ImageGroup } from '@/types/image.ts'
+import { format } from 'date-fns'
+import {
+    ImageDefinition,
+    ImageDiskRole,
+    ImageGroup,
+    ImageSource,
+} from '@/types/image.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconCloudUpload, IconLink, IconTrash } from '@tabler/icons-react'
@@ -77,8 +84,6 @@ const ImageVersionsModal = ({
     const queryClient = useQueryClient()
     const { data: versions } = useImageVersions(imageGroup.uuid, image.uuid)
     const [disks, setDisks] = useState<DiskDraft[]>([emptySystemDisk()])
-    const [uploading, setUploading] = useState<number | null>(null)
-    const [progress, setProgress] = useState(0)
 
     const form = useForm<z.input<typeof imageVersionSchema>>({
         resolver: zodResolver(imageVersionSchema),
@@ -98,30 +103,18 @@ const ImageVersionsModal = ({
         )
 
     /**
-     * Uploading answers three questions at once — the hash, the transfer size
+     * An upload answers three questions at once — the hash, the transfer size
      * and the provisioned size — none of which anyone should be typing.
      */
-    const upload = async (index: number, file: File) => {
-        setUploading(index)
-        setProgress(0)
-
-        try {
-            const uploaded = await uploadImageDisk(file, setProgress)
-
-            patch(index, {
-                url: null,
-                path: uploaded.path,
-                sha256: uploaded.sha256,
-                size: uploaded.size,
-                virtualSize: uploaded.virtualSize,
-                format: uploaded.format,
-            })
-        } catch {
-            toast.add({ title: 'Failed to upload the disk', type: 'error' })
-        } finally {
-            setUploading(null)
-        }
-    }
+    const adopt = (index: number, uploaded: UploadedDisk) =>
+        patch(index, {
+            url: null,
+            path: uploaded.path,
+            sha256: uploaded.sha256,
+            size: uploaded.size,
+            virtualSize: uploaded.virtualSize,
+            format: uploaded.format,
+        })
 
     const submit = async (data: z.input<typeof imageVersionSchema>) => {
         try {
@@ -167,7 +160,14 @@ const ImageVersionsModal = ({
                             >
                                 <div className={'min-w-0 grow'}>
                                     <p className={'font-semibold'}>
-                                        {version.version}
+                                        {/* A catalogue image has no version of
+                                            its own, so the number is the panel's
+                                            count of the builds it holds. Saying
+                                            "Build 2" keeps it from reading as a
+                                            release the publisher named. */}
+                                        {version.source === ImageSource.REGISTRY
+                                            ? `Build ${version.version}`
+                                            : version.version}
                                         {!version.isActive && ' · retired'}
                                     </p>
                                     <p
@@ -175,6 +175,8 @@ const ImageVersionsModal = ({
                                             'text-muted-foreground text-sm'
                                         }
                                     >
+                                        {version.builtAt &&
+                                            `Built ${format(new Date(version.builtAt), 'd MMM yyyy')} · `}
                                         {formatBytes(version.size)} to transfer
                                         · {formatBytes(version.minimumDisk)}{' '}
                                         provisioned
@@ -242,10 +244,10 @@ const ImageVersionsModal = ({
                                 <DiskRow
                                     key={index}
                                     disk={disk}
-                                    uploading={uploading === index}
-                                    progress={progress}
                                     onChange={values => patch(index, values)}
-                                    onUpload={file => upload(index, file)}
+                                    onUploaded={uploaded =>
+                                        adopt(index, uploaded)
+                                    }
                                     onRemove={
                                         disk.role === ImageDiskRole.SYSTEM
                                             ? undefined
@@ -294,17 +296,13 @@ const ImageVersionsModal = ({
 
 const DiskRow = ({
     disk,
-    uploading,
-    progress,
     onChange,
-    onUpload,
+    onUploaded,
     onRemove,
 }: {
     disk: DiskDraft
-    uploading: boolean
-    progress: number
     onChange: (values: Partial<DiskDraft>) => void
-    onUpload: (file: File) => void
+    onUploaded: (uploaded: UploadedDisk) => void
     onRemove?: () => void
 }) => (
     <div className={'space-y-2 rounded-md border p-3'}>
@@ -352,20 +350,7 @@ const DiskRow = ({
                 <p className={'text-muted-foreground text-xs'}>
                     Or upload the file and Convoy will serve it to your nodes.
                 </p>
-                <Input
-                    type={'file'}
-                    accept={'.qcow2,.img,.raw'}
-                    disabled={uploading}
-                    onChange={event => {
-                        const file = event.target.files?.[0]
-                        if (file) onUpload(file)
-                    }}
-                />
-                {uploading && (
-                    <p className={'text-muted-foreground text-xs'}>
-                        Uploading… {Math.round(progress * 100)}%
-                    </p>
-                )}
+                <DiskUploadField onUploaded={onUploaded} />
             </>
         )}
 

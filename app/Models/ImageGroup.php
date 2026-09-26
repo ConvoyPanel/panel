@@ -15,6 +15,7 @@ use Ramsey\Uuid\Uuid;
  * @property int $id
  * @property string $uuid
  * @property string $name
+ * @property ?string $registry_slug
  * @property ?string $description
  * @property ?string $icon
  * @property bool $is_admin_only

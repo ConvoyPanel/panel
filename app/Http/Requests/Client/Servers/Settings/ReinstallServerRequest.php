@@ -21,6 +21,10 @@ class ReinstallServerRequest extends BaseApiRequest
     {
         $server = $this->parameter('server', Server::class);
 
+        if (! $this->user()->can('reinstall', $server)) {
+            return false;
+        }
+
         // This route is exempt from AuthenticateServerAccess (a server awaiting OS selection
         // has to reach it), so the suspension check has to happen here or not at all.
         if ($server->isSuspended()) {
@@ -88,7 +92,7 @@ class ReinstallServerRequest extends BaseApiRequest
                 // The group carries the same flag, and hiding a group has to
                 // hide what is inside it -- otherwise an admin-only OS is one
                 // guessed uuid away from anyone.
-                if ($image && ($image->is_admin_only || $image->group->is_admin_only) && ! $this->user()->root_admin) {
+                if ($image && ($image->is_admin_only || $image->group->is_admin_only) && ! $this->user()->isAdmin()) {
                     $validator->errors()->add('image_uuid', 'You are not authorized to use this image.');
                 }
             },

@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property ?OveragePenaltyData $overage_penalty
  * @property ?int $bandwidth_reset_day
  * @property ?int $vlan_tag
+ * @property bool $ipconfig_managed
  * @property Node $node
  * @property ?NetworkInterface $networkInterface
  * @property Storage $storage
@@ -72,7 +73,7 @@ class Server extends Model
         'user_id' => 'required|integer|exists:users,id',
         'vmid' => 'required|numeric|min:100|max:999999999',
         'hostname' => 'required|string|min:1|max:191',
-        'lifecycle' => ['sometimes', 'string', 'in:ready,deferred_os_selection,installing,install_failed,restoring_backup,deleting,deletion_failed'],
+        'lifecycle' => ['sometimes', 'string', 'in:ready,deferred_os_selection,installing,install_failed,restoring_backup,migrating,migration_failed,deleting,deletion_failed'],
         'suspended_at' => ['sometimes', 'nullable', 'date'],
         'cpu' => 'required|numeric|min:1',
         'memory' => 'required|numeric|min:16777216',
@@ -91,6 +92,7 @@ class Server extends Model
         'overage_penalty.rate' => 'nullable|integer|min:1',
         'bandwidth_reset_day' => 'sometimes|nullable|integer|min:1|max:31',
         'vlan_tag' => 'nullable|integer|min:1|max:4094',
+        'ipconfig_managed' => 'sometimes|boolean',
         'hydrated_at' => 'nullable|date',
     ];
 
@@ -109,6 +111,7 @@ class Server extends Model
             'overage_penalty' => OveragePenaltyCast::class,
             'bandwidth_reset_day' => 'integer',
             'vlan_tag' => 'integer',
+            'ipconfig_managed' => 'boolean',
         ];
     }
 
@@ -169,20 +172,49 @@ class Server extends Model
     }
 
     /**
-     * Scope the query to servers the given user owns.
+     * Scope the query to servers the given user may reach in the client area.
      *
-     * This is the single source of truth for client-facing server visibility.
-     * Ownership is deliberate for everyone, including root admins — the client
-     * area shows a user their own servers, not every server on the panel (use
-     * the admin area for that). When subuser support is added, extend the
-     * ownership check here (e.g. an orWhereHas on a subusers relation) and
-     * every listing inherits it.
+     * This is the single source of truth for client-facing server visibility:
+     * the servers they own, plus the ones whose owners shared them. Admin
+     * status is deliberately not part of it — the client area shows a user
+     * their own servers, not every server on the panel (use the admin area
+     * for that).
      *
      * @param  Builder<Server>  $query
      */
     public function scopeOwnedBy(Builder $query, User $user): void
     {
-        $query->where('user_id', $user->id);
+        $query->where(function (Builder $query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('subusers', fn (Builder $subusers) => $subusers->where('user_id', $user->id));
+        });
+    }
+
+    /**
+     * People the owner shared this server with, and what they may do on it.
+     *
+     * @return HasMany<ServerSubuser, $this>
+     */
+    public function subusers(): HasMany
+    {
+        return $this->hasMany(ServerSubuser::class);
+    }
+
+    /**
+     * This server's grant for one account, or null when they are not a sub-user of it.
+     *
+     * Memoized per instance: a single request asks this once per policy check, and a form request
+     * plus a controller gate is already two.
+     *
+     * @var array<int, ?ServerSubuser>
+     */
+    private array $subuserCache = [];
+
+    public function subuserFor(User $user): ?ServerSubuser
+    {
+        return $this->subuserCache[$user->id] ??= $this->subusers()
+            ->where('user_id', '=', $user->id)
+            ->first();
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Services\Images;
 
+use App\Services\Proxmox\Server\ProxmoxServerClient;
+
 /**
  * The hardware an image gets when nobody has said otherwise.
  *
@@ -25,6 +27,22 @@ class OsProfiles
      * the storage a server lands on is not known until it is being built.
      */
     public const META_KEYS = ['boot_disk_slot', 'cloudinit_slot'];
+
+    /**
+     * Keys that name a volume to allocate rather than a setting to pass.
+     *
+     * `tpm` is the catalogue's way of saying "this guest needs a TPM": Proxmox
+     * has no `tpm` parameter, it has a `tpmstate0` volume, and the storage half
+     * of that argument is not known until build time. Forwarding it verbatim
+     * fails the create call, so it is stripped here and acted on by
+     * {@see ProxmoxServerClient::create()}.
+     *
+     * Unlike the varstore, the state volume is allocated fresh rather than
+     * imported. Cofoundry ships no `tpmstate0` disk deliberately: the image is
+     * generalized, and one shipped state file would give every guest built from
+     * it the same endorsement key.
+     */
+    public const SYNTHESIZED_KEYS = ['tpm'];
 
     /**
      * Shared by every guest. `cpu: host` is the right baseline -- the Windows
@@ -80,6 +98,9 @@ class OsProfiles
      */
     public static function proxmoxKeys(array $hardware): array
     {
-        return array_diff_key($hardware, array_flip(self::META_KEYS));
+        return array_diff_key(
+            $hardware,
+            array_flip([...self::META_KEYS, ...self::SYNTHESIZED_KEYS]),
+        );
     }
 }

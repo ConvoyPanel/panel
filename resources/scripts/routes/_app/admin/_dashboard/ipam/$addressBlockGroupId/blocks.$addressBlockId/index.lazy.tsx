@@ -71,10 +71,22 @@ const STATE_FILTER: DataTableFilterField<Address> = {
  * take them; offering actions that the API will refuse reads as a missing feature rather than the
  * rule it is.
  */
-const systemReservedReason = (address: Address) =>
-    addressStateKind(address) === 'system'
-        ? 'Reserved by the panel — the network, broadcast and gateway addresses cannot be released or reassigned'
-        : undefined
+const systemReservedReason = (address: Address) => {
+    const kind = addressStateKind(address)
+
+    if (kind === 'system') {
+        return 'Reserved by the panel — the network, broadcast and gateway addresses cannot be released or reassigned'
+    }
+
+    // The destination binding of a migration still in flight. It frees itself
+    // when the task lands, and editing or deleting it under a running task is
+    // the one way to strand a guest that was about to get it.
+    if (kind === 'migrating') {
+        return 'Held for a server that is migrating — it frees itself when the migration finishes'
+    }
+
+    return undefined
+}
 
 export const Route = createLazyFileRoute(
     '/_app/admin/_dashboard/ipam/$addressBlockGroupId/blocks/$addressBlockId/'

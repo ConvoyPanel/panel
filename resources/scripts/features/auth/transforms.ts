@@ -18,6 +18,12 @@ export const rawDataToAuthenticatedUser = (data: any): AuthenticatedUser => ({
     name: data.name,
     email: data.email,
     avatarUrl: data.avatarUrl ?? null,
+    type: data.type ?? 'standard',
     rootAdmin: data.rootAdmin,
+    adminRole: data.adminRole ?? null,
     accountCapabilities: data.accountCapabilities ?? UNRESTRICTED,
+    // The opposite default to the capabilities above, and deliberately so: a missing capability
+    // shows a control the server would refuse, while a missing permission would open an admin
+    // section to somebody who cannot reach it.
+    adminPermissions: data.adminPermissions ?? [],
 })

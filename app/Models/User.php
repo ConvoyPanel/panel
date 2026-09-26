@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\Admin\AdminPermission;
 use App\Enums\Api\ApiKeyType;
+use App\Enums\User\UserType;
 use Eloquent;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +29,9 @@ use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
  * @property string $name
  * @property string $email
  * @property string|null $avatar_path
+ * @property UserType $type
+ * @property ?int $admin_role_id
+ * @property ?AdminRole $adminRole
  * @property bool $root_admin
  *
  * @mixin Eloquent
@@ -41,6 +49,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'name',
         'email',
         'password',
+        'type',
+        'admin_role_id',
+        // Not a column. See the root_admin attribute below: it reads and writes the Superadmin
+        // role, so `create(['root_admin' => true])` still means what it always meant.
         'root_admin',
     ];
 
@@ -51,6 +63,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'email' => 'required|email|between:1,191|unique:users,email',
         'name' => 'required|string|between:1,191',
         'password' => ['sometimes', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'string'],
+        'type' => 'sometimes|string|in:standard,guest',
+        'admin_role_id' => 'sometimes|nullable|integer|exists:admin_roles,id',
         'root_admin' => 'boolean',
     ];
 
@@ -69,6 +83,22 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     ];
 
     /**
+     * The column default, mirrored in PHP.
+     *
+     * The database default only applies to the row; a freshly created model would still read
+     * `type` as null until it was refreshed, and every payload built from it would fail on a
+     * non-nullable enum.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'type' => UserType::STANDARD->value,
+    ];
+
+    /** @see superadminRoleId() */
+    private static ?int $superadminRoleId = null;
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -78,8 +108,124 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'root_admin' => 'boolean',
+            'type' => UserType::class,
         ];
+    }
+
+    /**
+     * Full administrator, expressed as the Superadmin role.
+     *
+     * The `root_admin` column is gone; this keeps the name working for the call sites that mean
+     * "unrestricted admin" (Horizon's gate, staff-only fields in the audit payloads) and for the
+     * provisioning paths that write it -- `p:make-user`, the seeders, the OAuth service and the
+     * admin user form all still say `root_admin`, and still mean the same thing.
+     *
+     * Query builders cannot see this. Anything filtering or sorting on admin status goes through
+     * `admin_role_id`.
+     */
+    protected function rootAdmin(): Attribute
+    {
+        return Attribute::make(
+            // Compared against the cached id rather than loading the relation, so reading this in
+            // a loop (an audit page maps it per row) stays one query for the whole request.
+            get: fn (): bool => $this->admin_role_id !== null
+                && $this->admin_role_id === self::superadminRoleId(),
+            set: fn (mixed $value): array => [
+                'admin_role_id' => filter_var($value, FILTER_VALIDATE_BOOL)
+                    ? self::superadminRoleId()
+                    : null,
+            ],
+        )->shouldCache();
+    }
+
+    /**
+     * The Superadmin role's id, resolved once per process.
+     *
+     * Memoized because `root_admin` is read per row on listing payloads. {@see forgetRoleCache()}
+     * clears it, which the test suite needs after a database refresh.
+     */
+    public static function superadminRoleId(): ?int
+    {
+        return self::$superadminRoleId ??= AdminRole::query()
+            ->where('is_superadmin', '=', true)
+            ->value('id');
+    }
+
+    public static function forgetRoleCache(): void
+    {
+        self::$superadminRoleId = null;
+    }
+
+    /**
+     * @return BelongsTo<AdminRole, $this>
+     */
+    public function adminRole(): BelongsTo
+    {
+        return $this->belongsTo(AdminRole::class);
+    }
+
+    /** Whether this account can reach the admin area at all. */
+    public function isAdmin(): bool
+    {
+        return $this->admin_role_id !== null;
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->type === UserType::GUEST;
+    }
+
+    /**
+     * Whether the account's role grants a specific admin permission.
+     *
+     * The role is loaded once and cached on the model, so repeated checks across a request cost
+     * one query. A Superadmin answers true to everything, including permissions a later release
+     * adds -- which is what makes migrating existing `root_admin` accounts onto it safe.
+     */
+    public function hasAdminPermission(AdminPermission $permission): bool
+    {
+        if ($this->admin_role_id === null) {
+            return false;
+        }
+
+        $this->loadMissing('adminRole');
+
+        return (bool) $this->adminRole?->grants($permission);
+    }
+
+    /** @return list<AdminPermission> */
+    public function adminPermissions(): array
+    {
+        if ($this->admin_role_id === null) {
+            return [];
+        }
+
+        $this->loadMissing('adminRole');
+
+        return $this->adminRole?->grantedPermissions() ?? [];
+    }
+
+    /**
+     * Servers shared with this account by their owners.
+     *
+     * @return HasMany<ServerSubuser, $this>
+     */
+    public function serverShares(): HasMany
+    {
+        return $this->hasMany(ServerSubuser::class);
+    }
+
+    /**
+     * The outstanding invitation, if the account has never set a password.
+     *
+     * A HasOne rather than a lookup because the unique index on `user_invites.user_id` makes at
+     * most one possible, and the sharing screen asks "have they accepted yet?" per row.
+     *
+     * @return HasOne<UserInvite, $this>
+     */
+    public function invite(): HasOne
+    {
+        return $this->hasOne(UserInvite::class);
     }
 
     /**
