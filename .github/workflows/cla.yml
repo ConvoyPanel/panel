@@ -334,7 +334,7 @@ jobs:
             ${signingStatement}
             \`\`\`
 
-            This signature is only for individual contributors who are at least 18 years old. Do not use this workflow for contributions owned by a company, employer, client, school, or other legal entity; those require separate written permission or a separate contributor agreement.
+            This signature is only for individual contributors who are at least 18 years old. If your contribution is owned by a company, employer, client, school, or other legal entity, don't sign here. It needs separate written permission or a separate contributor agreement instead.
 
             Missing signatures:
             ${missingList}
