@@ -355,5 +355,6 @@ jobs:
               return;
             }
 
+            // The status is the verdict, not the job: a later `recheck cla` runs as a separate
+            // issue_comment job, so a failed job here would stay red after the signature lands.
             await createCommitStatus('failure', 'Missing CLA signatures or unlinked commit authors');
-            core.setFailed('Missing CLA signatures or unlinked commit authors.');
