@@ -28,9 +28,7 @@ class SendPowerCommandJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.send-power-command#{$this->serverId}",
-        )];
+        return [new SkipIfBatchCancelled(), new WithoutOverlapping($this->serverId)];
     }
 
     public function handle(ProxmoxPowerRepository $repository): void

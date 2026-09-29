@@ -27,7 +27,7 @@ class MonitorIsoDownloadJob implements ShouldQueue
 
     public function middleware()
     {
-        return [new WithoutOverlapping("node:iso.download#{$this->isoId}")];
+        return [new WithoutOverlapping($this->isoId)];
     }
 
     public function handle(IsoMonitorService $service): void

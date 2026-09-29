@@ -28,9 +28,7 @@ class SyncBuildJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.sync#{$this->serverId}",
-        )];
+        return [new SkipIfBatchCancelled(), new WithoutOverlapping($this->serverId)];
     }
 
     public function handle(SyncBuildService $service): void

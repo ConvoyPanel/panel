@@ -27,7 +27,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new WithoutOverlapping("server:backup.restore#{$this->serverId}")];
+        return [new WithoutOverlapping($this->serverId)];
     }
 
     public function handle(BackupMonitorService $service): void

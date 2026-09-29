@@ -28,9 +28,7 @@ class SyncNetworkSettings implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping(
-            "server.sync-network-settings#$this->serverId",
-        )];
+        return [new SkipIfBatchCancelled(), new WithoutOverlapping($this->serverId)];
     }
 
     public function handle(NetworkService $service): void
