@@ -35,10 +35,19 @@ class WaitUntilVmIsDeletedJob implements ShouldQueue
     {
         $server = Server::findOrFail($this->serverId);
 
-        $isDeleted = $service->isVmDeleted($server);
-
-        if (!$isDeleted) {
+        // Only Proxmox's "does not exist" counts as deleted. Any other error
+        // is thrown and retried: treating an outage as "gone" would let the
+        // chain drop the server from Convoy while its VM is still there.
+        if ($service->vmExists($server)) {
             $this->release(3);
         }
+    }
+
+    /**
+     * Wait between retries after an error instead of re-polling at once.
+     */
+    public function backoff(): int
+    {
+        return 5;
     }
 }
