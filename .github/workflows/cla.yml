@@ -80,8 +80,6 @@ jobs:
             const prNumber = isIssueComment ? context.payload.issue.number : context.payload.pull_request.number;
             const { data: pullRequest } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
             const headSha = pullRequest.head.sha;
-            const baseRef = pullRequest.base.ref;
-            const baseSha = pullRequest.base.sha;
 
             const isBot = (user) => {
               if (!user) return false;
@@ -120,15 +118,20 @@ jobs:
               }
             };
 
+            // Read from the default branch, not the PR's base: the CLA is one agreement for the
+            // whole project, and a stale copy on a maintenance branch would reject every signature.
             const getAgreement = async () => {
-              const { data } = await github.rest.repos.getContent({ owner, repo, path: documentPath, ref: baseRef });
+              const defaultBranch = context.payload.repository.default_branch;
+              const { data: branch } = await github.rest.repos.getBranch({ owner, repo, branch: defaultBranch });
+              const agreementSha = branch.commit.sha;
+              const { data } = await github.rest.repos.getContent({ owner, repo, path: documentPath, ref: agreementSha });
               if (Array.isArray(data) || data.type !== 'file') {
                 throw new Error(`${documentPath} must be a file`);
               }
 
               return {
                 blobSha: data.sha,
-                url: `${context.serverUrl}/${owner}/${repo}/blob/${baseSha}/${documentPath}`,
+                url: `${context.serverUrl}/${owner}/${repo}/blob/${agreementSha}/${documentPath}`,
               };
             };
 
