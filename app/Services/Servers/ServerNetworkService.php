@@ -116,6 +116,16 @@ class ServerNetworkService
      */
     private function syncCloudinitIpConfig(Server $server): void
     {
+        // An adopted guest can hold an address Convoy did not hand out: a DHCP
+        // lease, a SLAAC address, or a static one outside every managed block.
+        // Writing `ipconfig0` from panel state would replace whatever that
+        // guest actually has with either the wrong address or nothing at all,
+        // and PVE re-bakes the cloud-init drive from those values on the next
+        // boot. The panel does not own what it did not allocate.
+        if (! $server->ipconfig_managed) {
+            return;
+        }
+
         $primaryAddresses = $this->getPrimaryAddresses($server);
 
         $this->cloudinitService->setIpConfig($server, $primaryAddresses->ipv4, $primaryAddresses->ipv6);

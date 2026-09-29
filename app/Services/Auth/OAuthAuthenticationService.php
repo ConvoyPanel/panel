@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\User\UserType;
 use App\Exceptions\Http\Auth\OAuthAccountNotProvisionedException;
 use App\Exceptions\Http\Auth\OAuthIdentityAlreadyLinkedException;
 use App\Exceptions\Http\Auth\OAuthProviderNotEnabledException;
@@ -161,7 +162,10 @@ class OAuthAuthenticationService
             'email' => $email,
             // A verified IdP is the credential; the password is a throwaway they never use.
             'password' => Str::random(24).'aA1!',
-            'root_admin' => false,
+            // Federated sign-in never confers admin access, and an account created this way is
+            // a real customer rather than someone a server was shared with.
+            'admin_role_id' => null,
+            'type' => UserType::STANDARD,
             'email_verified_at' => now(),
         ])->save();
 

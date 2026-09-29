@@ -43,7 +43,7 @@ class Deployment extends Model
         'server_id' => 'required|exists:servers,id',
         'image_definition_id' => 'nullable|exists:image_definitions,id',
         'image_version_id' => 'nullable|exists:image_versions,id',
-        'type' => 'required|string|in:install,reinstall,delete,import',
+        'type' => 'required|string|in:install,reinstall,delete,import,migrate',
         'status' => 'required|string|in:pending,running,completed,failed',
         'start_on_completion' => 'required|boolean',
         'requested_at' => 'required|date',

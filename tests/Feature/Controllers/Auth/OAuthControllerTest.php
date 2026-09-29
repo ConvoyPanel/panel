@@ -136,10 +136,17 @@ it('provisions a new non-admin user when registration is enabled', function () {
 
     $this->get('/api/auth/oauth/google/callback')->assertRedirect('/');
 
-    $this->assertDatabaseHas('users', ['email' => 'new@example.com', 'root_admin' => false]);
+    // A federated sign-in never confers admin access, and the account it creates is a real
+    // customer rather than somebody a server was shared with.
+    $this->assertDatabaseHas('users', [
+        'email' => 'new@example.com',
+        'admin_role_id' => null,
+        'type' => 'standard',
+    ]);
     $user = User::where('email', 'new@example.com')->firstOrFail();
     $this->assertAuthenticatedAs($user);
-    expect($user->email_verified_at)->not->toBeNull();
+    expect($user->email_verified_at)->not->toBeNull()
+        ->and($user->isAdmin())->toBeFalse();
 });
 
 it('does not provision from an unverified email even with registration on', function () {

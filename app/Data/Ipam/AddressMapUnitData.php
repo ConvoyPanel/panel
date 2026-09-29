@@ -13,7 +13,7 @@ class AddressMapUnitData extends Data
     public function __construct(
         /** Position in the block, counting from zero — the cell's place on the grid. */
         public int $index,
-        /** 'available' | 'assigned' | 'reserved' | 'system' | 'ungenerated'. */
+        /** 'available' | 'assigned' | 'reserved' | 'system' | 'migrating' | 'conflict' | 'ungenerated'. */
         public string $state,
         /** Null where no address row exists yet: the unit is real, the record is not. */
         public ?string $ip,

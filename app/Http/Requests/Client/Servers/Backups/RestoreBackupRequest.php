@@ -11,6 +11,6 @@ class RestoreBackupRequest extends BaseApiRequest
     {
         $server = $this->parameter('server', Server::class);
 
-        return $this->user()->can('restore', $server);
+        return $this->user()->can('restoreBackup', $server);
     }
 }

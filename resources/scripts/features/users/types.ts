@@ -20,7 +20,14 @@ const password = z
 const baseUserSchema = z.object({
     name: z.string().min(1, 'A name is required').max(191),
     email: z.email('Enter a valid email address').max(191),
-    rootAdmin: z.boolean(),
+    /**
+     * Where the account came from. A guest exists only to hold a server somebody shared with it;
+     * an admin changes this to promote one into a real customer, and the server refuses to demote
+     * an account that owns servers.
+     */
+    type: z.enum(['standard', 'guest']),
+    /** The admin role, as a string so the select can use `''` for "no admin access". */
+    adminRoleId: z.string(),
 })
 
 /**

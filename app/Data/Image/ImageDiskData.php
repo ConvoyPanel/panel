@@ -45,6 +45,20 @@ class ImageDiskData extends Data
          */
         public int $virtualSize,
         public string $format = 'qcow2',
+        /**
+         * Settings that describe the image rather than the node it lands on.
+         *
+         * `discard`/`ssd` on a system disk and `efitype`/`pre-enrolled-keys`/
+         * `ms-cert` on a varstore are properties of what was built: dropping
+         * them does not make the guest generic, it makes it wrong -- no TRIM on
+         * a thin volume, and a UEFI varstore that no longer describes the
+         * Secure Boot state the image was sealed with. Tuning that belongs to
+         * the operator (`cache`, `iothread`, `replicate`) is deliberately not
+         * here.
+         *
+         * @var array<string, string|int>
+         */
+        public array $options = [],
     ) {}
 
     public function isSystem(): bool

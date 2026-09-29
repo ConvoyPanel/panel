@@ -4,6 +4,8 @@ import { rawDataToNode } from '@/lib/transformers/node'
 
 export const rawDataToServer = (data: any): Server => ({
     id: data.id,
+    isOwner: data.isOwner ?? false,
+    permissions: data.permissions ?? [],
     uuid: data.uuid,
     uuidShort: data.uuidShort,
     nodeId: data.nodeId,

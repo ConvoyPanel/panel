@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin\Servers\Settings;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Server;
 use App\Rules\Hostname;
+use App\Rules\OwnerIsNotAGuest;
 
 class UpdateGeneralInfoRequest extends BaseApiRequest
 {
@@ -15,7 +16,7 @@ class UpdateGeneralInfoRequest extends BaseApiRequest
         return $this->requiredToOptional([
             'name' => $rules['name'],
             'hostname' => [...$rules['hostname'], ...[new Hostname]],
-            'user_id' => $rules['user_id'],
+            'user_id' => [...$rules['user_id'], new OwnerIsNotAGuest],
             'vmid' => $rules['vmid'],
             'lifecycle' => $rules['lifecycle'],
         ]);

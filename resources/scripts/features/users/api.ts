@@ -16,8 +16,14 @@ import {
 } from '@/lib/transformers/admin/user.ts'
 
 export type UserQueryParams = QueryBuilderParams<
-    '*' | 'name' | 'email' | 'id',
-    'id' | 'name' | 'email' | 'rootAdmin' | 'serversCount' | 'createdAt'
+    '*' | 'name' | 'email' | 'id' | 'type' | 'adminRoleId',
+    | 'id'
+    | 'name'
+    | 'email'
+    | 'type'
+    | 'rootAdmin'
+    | 'serversCount'
+    | 'createdAt'
 >
 
 // UserController is served under both the panel (`/api/admin`) and Application
@@ -52,10 +58,19 @@ const getUser = async (id: number): Promise<AdminUserDetail> =>
  * The panel speaks camelCase and the API speaks snake_case, and a blank password on an edit means
  * "keep the current one" — the request drops it rather than sending an empty string.
  */
-const payload = ({ name, email, rootAdmin, password }: UserInput) => ({
+const payload = ({
     name,
     email,
-    root_admin: rootAdmin,
+    type,
+    adminRoleId,
+    password,
+}: UserInput) => ({
+    name,
+    email,
+    type,
+    // `''` is the select's "no admin access", which the API takes as null. The old `root_admin`
+    // boolean is still accepted by the endpoint for external callers; the panel has moved on.
+    admin_role_id: adminRoleId === '' ? null : Number(adminRoleId),
     ...(password === '' ? {} : { password }),
 })
 

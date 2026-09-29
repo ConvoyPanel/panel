@@ -8,6 +8,8 @@ use App\Rules\PasswordPolicy;
 
 class UpdateUserRequest extends BaseApiRequest
 {
+    use ResolvesAdminRole;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -43,6 +45,9 @@ class UpdateUserRequest extends BaseApiRequest
             'name' => $rules['name'],
             'email' => $rules['email'],
             'password' => ['nullable', ...PasswordPolicy::rules()],
+            'type' => $rules['type'],
+            'admin_role_id' => $rules['admin_role_id'],
+            // See StoreUserRequest: the old spelling still works.
             'root_admin' => $rules['root_admin'],
         ];
     }

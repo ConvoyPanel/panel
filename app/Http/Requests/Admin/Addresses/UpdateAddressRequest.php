@@ -6,15 +6,18 @@ use App\Enums\Network\AddressState;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
 use App\Models\Server;
+use App\Services\Addresses\AddressReachabilityService;
 
 class UpdateAddressRequest extends BaseApiRequest
 {
     public function rules(): array
     {
+        $reachability = app(AddressReachabilityService::class);
+
         return [
             'server_id' => [
                 ...Address::getRules()['server_id'],
-                function (string $attribute, mixed $value, \Closure $fail) {
+                function (string $attribute, mixed $value, \Closure $fail) use ($reachability) {
                     // check that the address can be assigned to the server
                     if (! $value) {
                         return; // No server selected, so no validation needed
@@ -36,17 +39,7 @@ class UpdateAddressRequest extends BaseApiRequest
                         return; // Server doesn't exist, other validation rules will catch this
                     }
 
-                    // Get the address block group for this address
-                    $addressBlockGroup = $address->addressBlock->addressBlockGroup;
-
-                    // Check if the server's node has any network interfaces that are associated with this address block group
-                    $nodeHasCompatibleInterface = $server->node->networkInterfaces()
-                        ->whereHas('addressBlockGroups', function ($query) use ($addressBlockGroup) {
-                            $query->where('address_block_groups.id', $addressBlockGroup->id);
-                        })
-                        ->exists();
-
-                    if (! $nodeHasCompatibleInterface) {
+                    if (! $reachability->isReachable($address, $server->node)) {
                         $fail("This address cannot be assigned to the server because the server's node does not have a network interface assigned to the address block group.");
                     }
                 },

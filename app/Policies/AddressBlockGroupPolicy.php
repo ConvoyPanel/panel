@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Admin\AdminPermission;
 use App\Models\AddressBlockGroup;
 use App\Models\Node;
 use App\Models\Server;
@@ -18,13 +19,13 @@ class AddressBlockGroupPolicy
      */
     public function attachNode(User $user, AddressBlockGroup $addressBlockGroup): bool
     {
-        return $user->root_admin;
+        return $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE);
     }
 
     public function detachNode(User $user, AddressBlockGroup $addressBlockGroup): Response
     {
-        if (! $user->root_admin) {
-            return $this->deny('Only root admins can detach nodes.');
+        if (! $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE)) {
+            return $this->deny('Your role cannot change address block groups.');
         }
 
         $nodeId = request()->route('node');

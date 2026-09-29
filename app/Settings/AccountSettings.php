@@ -2,7 +2,6 @@
 
 namespace App\Settings;
 
-use App\Models\User;
 use App\Services\Users\AccountPolicyResolver;
 use Spatie\LaravelSettings\Settings;
 
@@ -15,12 +14,13 @@ use Spatie\LaravelSettings\Settings;
  * own email here silently desyncs from the source of truth — which is what the
  * operator is turning off, not the ability to edit per se.
  *
- * Panel-wide rather than per-account, because there is nothing below the
- * install to scope to: Convoy has one role bit ({@see User::$root_admin})
- * and no groups. Reads still go through {@see AccountPolicyResolver},
- * which takes the user it resolves for, so the scope a finer-grained policy
- * would need is already in the signature and adding one later touches the
- * resolver rather than every call site.
+ * Panel-wide rather than per-account. Admin roles scope what an operator may
+ * reach in the admin area; they say nothing about what a customer may change
+ * about their own account, and there is no grouping below the install for that
+ * to hang off. Reads still go through {@see AccountPolicyResolver}, which takes
+ * the user it resolves for, so the scope a finer-grained policy would need is
+ * already in the signature and adding one later touches the resolver rather
+ * than every call site.
  *
  * All four default to true: the self-service surface shipped before these
  * settings did, and an upgrade must not quietly take it away.

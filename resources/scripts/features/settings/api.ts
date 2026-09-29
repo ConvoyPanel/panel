@@ -7,6 +7,7 @@ import AccountSettingsController from '@/wayfinder/actions/App/Http/Controllers/
 import AnchorSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/AnchorSettingsController'
 import BandwidthSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/BandwidthSettingsController'
 import MailSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/MailSettingsController'
+import PermissionSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/PermissionSettingsController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
@@ -270,4 +271,39 @@ export const testMailSettings = async ({
                 ...(recipient ? { recipient } : {}),
             },
         })
+    ).data
+
+// --- Permissions ------------------------------------------------------------
+
+export type PermissionSettings = App.Data.Admin.Settings.PermissionSettingsData
+
+const permissionShowRoute =
+    PermissionSettingsController.show['/api/admin/settings/permissions']
+const permissionUpdateRoute =
+    PermissionSettingsController.update['/api/admin/settings/permissions']
+
+export const permissionSettingsSchema = z.object({
+    allowGuestAccounts: z.boolean(),
+})
+
+const getPermissionSettings = async (): Promise<PermissionSettings> =>
+    (await apiFetch<DataResponse<PermissionSettings>>(permissionShowRoute()))
+        .data
+
+export const permissionSettingsQuery = () =>
+    queryOptions({
+        queryKey: [...settingsQueries.all(), 'permissions'] as const,
+        queryFn: getPermissionSettings,
+    })
+
+export const usePermissionSettings = () => useQuery(permissionSettingsQuery())
+
+export const updatePermissionSettings = async (
+    payload: z.infer<typeof permissionSettingsSchema>
+): Promise<PermissionSettings> =>
+    (
+        await apiFetch<DataResponse<PermissionSettings>>(
+            permissionUpdateRoute(),
+            { body: { allow_guest_accounts: payload.allowGuestAccounts } }
+        )
     ).data

@@ -1,7 +1,13 @@
 import { Address, AddressState, AddressStateReason } from '@/types/address.ts'
 import { cn } from '@/utils'
 
-export type AddressStateKind = 'assigned' | 'reserved' | 'system' | 'available'
+export type AddressStateKind =
+    | 'assigned'
+    | 'reserved'
+    | 'system'
+    | 'migrating'
+    | 'conflict'
+    | 'available'
 
 /**
  * The four states an operator sees, not the three the column stores: a system reservation is a
@@ -10,9 +16,13 @@ export type AddressStateKind = 'assigned' | 'reserved' | 'system' | 'available'
  */
 export const addressStateKind = (address: Address): AddressStateKind => {
     if (address.state === AddressState.Reserved) {
-        return address.stateReason === AddressStateReason.System
-            ? 'system'
-            : 'reserved'
+        if (address.stateReason === AddressStateReason.System) return 'system'
+        if (address.stateReason === AddressStateReason.Migration)
+            return 'migrating'
+        if (address.stateReason === AddressStateReason.Conflict)
+            return 'conflict'
+
+        return 'reserved'
     }
 
     return address.state === AddressState.Assigned ? 'assigned' : 'available'
@@ -31,6 +41,20 @@ const TONES: Record<
         pip: 'bg-address-reserved',
         text: 'text-address-reserved',
         label: 'Reserved',
+    },
+    /* Held by a migration in flight, not by anybody's decision, and it frees itself. Reads like a
+       reservation because that is what it is; the word is what says it is temporary. */
+    migrating: {
+        pip: 'bg-address-reserved',
+        text: 'text-address-reserved',
+        label: 'Migrating',
+    },
+    /* Two servers claim it and the panel refuses to pick. Destructive tone, because unlike every
+       other state here this one is a problem and needs a person. */
+    conflict: {
+        pip: 'bg-destructive',
+        text: 'text-destructive',
+        label: 'Conflict',
     },
     /* Neutral on purpose: network, broadcast and gateway are not anybody's decision, and colouring
        them like a hold invites a click that always fails. */

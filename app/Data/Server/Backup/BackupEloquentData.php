@@ -4,6 +4,7 @@ namespace App\Data\Server\Backup;
 
 use App\Enums\Server\Backup\BackupErrorCode;
 use App\Models\Backup;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -42,7 +43,9 @@ class BackupEloquentData extends Data
             // The code is a safe, friendly enum shown to the backup owner; the
             // raw Proxmox message can leak node internals, so it is admin-only.
             errorCode: $backup->error_code,
-            errorMessage: Auth::user()?->root_admin ? $backup->error_message : null,
+            errorMessage: Auth::user() instanceof User && Auth::user()->isAdmin()
+                ? $backup->error_message
+                : null,
             fileName: $backup->file_name,
             size: $backup->getRawOriginal('size') !== null ? (int) $backup->size : null,
             completedAt: $backup->completed_at

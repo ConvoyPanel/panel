@@ -1,5 +1,6 @@
 import { useServer, useUnflagServer } from '@/features/servers/admin/api.ts'
 import ServerPowerActions from '@/features/servers/components/admin/ServerPowerActions.tsx'
+import MigrateServerModal from '@/features/servers/components/admin/detail/MigrateServerModal.tsx'
 import { serverStateQueries } from '@/features/servers/state/api.ts'
 import { ServerLifecycle } from '@/types/server.ts'
 import { IconBolt } from '@tabler/icons-react'
@@ -37,6 +38,8 @@ const LIFECYCLE_LABELS: Record<ServerLifecycle, string> = {
     [ServerLifecycle.Installing]: 'Installing',
     [ServerLifecycle.InstallFailed]: 'Install failed',
     [ServerLifecycle.RestoringBackup]: 'Restoring backup',
+    [ServerLifecycle.Migrating]: 'Migrating',
+    [ServerLifecycle.MigrationFailed]: 'Migration failed',
     [ServerLifecycle.Deleting]: 'Deleting',
     [ServerLifecycle.DeletionFailed]: 'Deletion failed',
 }
@@ -198,6 +201,7 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                                     Clear flag
                                 </Button>
                             )}
+                            <MigrateServerModal server={server} />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button>

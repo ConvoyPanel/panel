@@ -8,6 +8,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
 {
+    use ResolvesAdminRole;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -31,6 +33,10 @@ class StoreUserRequest extends FormRequest
             // Optional now: omitting it invites the account instead, which is the flow that
             // exists so nobody has to pick — or email — a password on someone else's behalf.
             'password' => ['nullable', ...PasswordPolicy::rules()],
+            'type' => $rules['type'],
+            'admin_role_id' => $rules['admin_role_id'],
+            // Still accepted, and still meaning the Superadmin role: the Application API has
+            // taken this field since before roles existed. See ResolvesAdminRole.
             'root_admin' => $rules['root_admin'],
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Admin\AdminPermission;
 use App\Models\Server;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -15,7 +16,17 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 Broadcast::channel('server.{id}', function ($user, $id) {
-    return (int) $user->id === (int) Server::find($id)->user_id || (bool) $user->root_admin;
+    $server = Server::find($id);
+
+    if ($server === null) {
+        return false;
+    }
+
+    // The same three callers the client API admits: the owner, someone they shared it with, and
+    // an operator who can read servers.
+    return (int) $user->id === (int) $server->user_id
+        || $server->subuserFor($user) !== null
+        || $user->hasAdminPermission(AdminPermission::SERVERS_READ);
 });
 
 Broadcast::channel('user.{id}', function ($user, $id) {

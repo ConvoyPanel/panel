@@ -189,22 +189,32 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
         [debouncedSearch]
     )
 
+    /*
+     * Searching the fleet needs the admin server and node lists, so it is gated on the permission
+     * that opens those endpoints rather than on being an unrestricted admin -- a Support role can
+     * read both and would otherwise search only its own servers.
+     */
+    const canSearchFleet = user?.adminPermissions?.includes('servers.read') === true
+    const canReachAdmin = (user?.adminPermissions?.length ?? 0) > 0
+
     const clientServers = useQuery({
         ...clientServerQueries.list(clientServerParams),
         enabled: entitySearchEnabled,
     })
     const adminServers = useQuery({
         ...adminServerQueries.list(adminServerParams),
-        enabled: entitySearchEnabled && user?.rootAdmin === true,
+        enabled: entitySearchEnabled && canSearchFleet,
     })
     const nodes = useQuery({
         ...nodeQueries.list(nodeParams),
-        enabled: entitySearchEnabled && user?.rootAdmin === true,
+        enabled:
+            entitySearchEnabled &&
+            user?.adminPermissions?.includes('nodes.read') === true,
     })
 
     const groups = useMemo<CommandEntryGroup[]>(() => {
         const currentItems = nav.groups.flatMap(group => group.items)
-        const globalGroups = user?.rootAdmin
+        const globalGroups = canReachAdmin
             ? [...clientGroups, ...adminGroups]
             : clientGroups
         const currentPaths = new Set(currentItems.map(item => item.path))
@@ -252,7 +262,7 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
         ]
 
         const actionItems: CommandEntry[] = [
-            ...(user?.rootAdmin
+            ...(user?.adminPermissions?.includes('servers.manage')
                 ? [
                       {
                           id: 'action:create-server',
@@ -319,7 +329,14 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
                 ? [{ label: 'Actions', items: uniqueEntries(actionItems) }]
                 : []),
         ].filter(group => group.items.length > 0)
-    }, [nav.back, nav.context?.title, nav.groups, pathname, user?.rootAdmin])
+    }, [
+        canReachAdmin,
+        nav.back,
+        nav.context?.title,
+        nav.groups,
+        pathname,
+        user?.adminPermissions,
+    ])
 
     const entityGroups = useMemo<CommandEntryGroup[]>(() => {
         if (!entitySearchEnabled) {
@@ -391,8 +408,7 @@ const NavSearchDialog = ({ nav, open, onOpenChange }: Props) => {
     const isSearchingEntities =
         entitySearchEnabled &&
         (clientServers.isFetching ||
-            (user?.rootAdmin === true &&
-                (adminServers.isFetching || nodes.isFetching)))
+            (canSearchFleet && (adminServers.isFetching || nodes.isFetching)))
 
     const selectItem = (item: CommandEntry) => {
         onOpenChange(false)

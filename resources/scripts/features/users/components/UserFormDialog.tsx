@@ -1,3 +1,4 @@
+import { useAdminRoles } from '@/features/roles/api.ts'
 import MailNotConfiguredAlert from '@/features/settings/components/MailNotConfiguredAlert.tsx'
 import {
     type UserInvite,
@@ -21,7 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import CopyValue from '@/components/ui/CopyValue.tsx'
 import { Form, FormButton } from '@/components/ui/Form'
-import { CheckboxForm, InputForm } from '@/components/ui/Forms'
+import { InputForm, SelectForm } from '@/components/ui/Forms'
 import PasswordStrengthIndicator from '@/components/ui/Password/PasswordStrengthIndicator.tsx'
 import {
     ResponsiveDialog,
@@ -51,20 +52,34 @@ interface Props {
  */
 const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
     const current = user === 'new' ? null : user
+    const { data: roles } = useAdminRoles()
+
     // Mirrors the server's guard in Admin\UserController::update. Enforced there because it has
     // to be; shown here because a control that will be rejected should not look available.
-    const cannotSelfDemote =
-        current !== null && current.rootAdmin && current.id === currentUserId
+    const cannotChangeOwnRole = current !== null && current.id === currentUserId
+
+    // A guest exists only to hold a shared server. The server refuses the combination too; this
+    // keeps the form from offering it.
+    const isGuest = current?.type === 'guest'
 
     const form = useForm<UserInput>({
         resolver: zodResolver(current ? updateUserSchema : createUserSchema),
         values: {
             name: current?.name ?? '',
             email: current?.email ?? '',
-            rootAdmin: current?.rootAdmin ?? false,
+            type: current?.type ?? 'standard',
+            adminRoleId: current?.adminRole ? String(current.adminRole.id) : '',
             password: '',
         },
     })
+
+    const roleItems = [
+        { value: '', label: 'No admin access' },
+        ...(roles ?? []).map(role => ({
+            value: String(role.id),
+            label: role.name,
+        })),
+    ]
 
     // Held rather than toasted: the link is the only copy that will ever exist, and a toast
     // that slides away four seconds after an admin's eyes moved is not somewhere to put it.
@@ -221,21 +236,37 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                                     password={password}
                                 />
                             )}
-                            <CheckboxForm
-                                name={'rootAdmin'}
-                                label={'Administrator'}
+                            <SelectForm
+                                name={'adminRoleId'}
+                                label={'Admin role'}
+                                items={roleItems}
+                                disabled={cannotChangeOwnRole || isGuest}
                                 description={
-                                    'Full access to every node, server and account in the panel.'
+                                    isGuest
+                                        ? 'A guest account cannot administer the panel.'
+                                        : undefined
                                 }
-                                disabled={cannotSelfDemote}
                             />
-                            {cannotSelfDemote && (
+                            {current !== null && (
+                                <SelectForm
+                                    name={'type'}
+                                    label={'Account'}
+                                    items={[
+                                        { value: 'standard', label: 'Customer' },
+                                        { value: 'guest', label: 'Guest' },
+                                    ]}
+                                    description={
+                                        'A guest can only reach servers shared with it, and cannot own one.'
+                                    }
+                                />
+                            )}
+                            {cannotChangeOwnRole && (
                                 <Alert>
                                     <IconAlertTriangle className={'size-4'} />
                                     <AlertDescription>
-                                        You can't remove your own administrator
-                                        access. Another administrator can do it
-                                        for you.
+                                        You can't change the role on the account
+                                        you are signed in as. Another
+                                        administrator can do it for you.
                                     </AlertDescription>
                                 </Alert>
                             )}
