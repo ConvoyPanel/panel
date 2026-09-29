@@ -17,6 +17,8 @@ import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
+import InstallFailedScreen from '@/components/servers/InstallFailedScreen'
+
 
 export const routes: Route[] = [
     {
@@ -206,14 +208,7 @@ const ServerRouter = () => {
                     />
                 )
             case 'install_failed':
-                return (
-                    <ScreenBlock
-                        center
-                        icon={ExclamationCircleIcon}
-                        message='Your server failed to install. Please contact your administrator.'
-                        title='Install failed'
-                    />
-                )
+                return <InstallFailedScreen />
             case null:
                 return null
             default:

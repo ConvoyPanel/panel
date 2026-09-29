@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use Convoy\Models\Location;
+use Convoy\Enums\Server\Status;
 use Convoy\Models\Node;
+use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
 use Convoy\Models\User;
@@ -23,7 +25,7 @@ class E2eSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->create([
+        $admin = User::factory()->create([
             'name' => 'E2E Admin',
             'email' => 'admin@e2e.test',
             'root_admin' => true,
@@ -45,6 +47,25 @@ class E2eSeeder extends Seeder
             'name' => 'E2E Debian 12',
             'vmid' => 9000,
             'hidden' => false,
+        ]);
+
+        // A server whose install failed, for the retry screen. The UUID is
+        // fixed so the specs can open /servers/e2e00000.
+        Server::create([
+            'uuid' => 'e2e00000-0000-4000-8000-000000000001',
+            'uuid_short' => 'e2e00000',
+            'status' => Status::INSTALL_FAILED->value,
+            'name' => 'E2E Failed Install',
+            'hostname' => 'e2e-failed',
+            'user_id' => $admin->id,
+            'node_id' => $node->id,
+            'vmid' => 9100,
+            'cpu' => 1,
+            'memory' => 512 * 1024 * 1024,
+            'disk' => 4 * 1024 * 1024 * 1024,
+            'snapshot_limit' => 0,
+            'backup_limit' => null,
+            'bandwidth_limit' => null,
         ]);
     }
 }

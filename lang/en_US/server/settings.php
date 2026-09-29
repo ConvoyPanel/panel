@@ -16,6 +16,13 @@ return [
             'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
         ],
     ],
+    'retry_install' => [
+        'failed_title' => 'Install failed',
+        'failed_message' => 'Your server failed to install. Pick a template to try again, or contact your administrator if it keeps failing.',
+        'title' => 'Retry Installation',
+        'description' => 'Installs the server again from the template you pick, with a new OS password.',
+        'button' => 'Retry Installation',
+    ],
     'isos' => [
         'title' => 'Mountable ISOs',
         'empty' => 'There are no ISOs',

@@ -5,6 +5,23 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Added
+
+- A server whose installation failed can now be retried. The "Install failed" screen was a dead end that only said to
+  contact an administrator; it now offers the reinstall form, and the API accepts a reinstall for a server in that
+  state. Every other blocked state, such as suspended, still refuses it.
+
+### Fixed
+
+- Fixed reinstalling a server whose VM no longer exists failing every time. Reinstall stopped and deleted the old VM
+  first, and Proxmox answers both with "does not exist" when a previous install died before or during the clone. It
+  now skips straight to building when there is no VM.
+- Fixed a failed reinstall of an already-failed server staying on "Installing" forever instead of going back to
+  "Install failed". The failure handler wrote through the copy of the server captured when the reinstall started, and
+  when that copy already read "install_failed" the write was skipped as a no-op.
+
 ## v4.7.0-rc.2
 
 ### Fixed

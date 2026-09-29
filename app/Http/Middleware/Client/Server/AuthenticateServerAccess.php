@@ -6,6 +6,7 @@ use Closure;
 use Convoy\Models\Server;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Convoy\Enums\Server\Status;
 use Convoy\Exceptions\Http\Server\ServerStatusConflictException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -36,6 +37,15 @@ class AuthenticateServerAccess
             $server->validateCurrentState();
         } catch (ServerStatusConflictException $exception) {
             if ($request->routeIs('client.servers.show')) {
+                return $next($request);
+            }
+
+            // A failed install can be retried: reinstalling is the retry, and
+            // the form needs the template list. Every other state stays blocked.
+            if (
+                $server->status === Status::INSTALL_FAILED->value
+                && $request->routeIs('client.servers.settings.template-groups', 'client.servers.settings.reinstall')
+            ) {
                 return $next($request);
             }
 
