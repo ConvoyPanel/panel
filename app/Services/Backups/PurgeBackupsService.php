@@ -15,12 +15,12 @@ class PurgeBackupsService
     {
     }
 
-    public function handle(Server $server)
+    public function handle(Server $server, bool $force = false)
     {
         $backups = $this->backupRepository->getNonFailedBackups($server)->get();
 
-        $backups->each(function (Backup $backup) {
-            $this->backupDeletionService->handle($backup);
+        $backups->each(function (Backup $backup) use ($force) {
+            $this->backupDeletionService->handle($backup, $force);
         });
     }
 }

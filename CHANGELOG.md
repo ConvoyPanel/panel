@@ -5,6 +5,25 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- Deleting a server and keeping its virtual machine are now separate actions. **Delete** always removes everything --
+  backups (including locked ones), the virtual machine on the node, and the server's entry in Convoy -- and when the
+  virtual machine is already gone from the node, it simply removes the Convoy entry. **Disconnect**, a new button next
+  to it, replaces the "Do not purge VM and related files" checkbox: it removes the server from Convoy and leaves the
+  virtual machine and its backups on the node. The API is unchanged; `DELETE` with `no_purge` still disconnects.
+
+### Fixed
+
+- Fixed deleting a server failing, over and over, when its virtual machine was already gone from the node or it had a
+  locked backup. A failed delete can now also be retried, or the server disconnected, straight from the "Failed to
+  Delete" screen, and a server stuck on "Deleting" can be disconnected.
+- Fixed a delete treating any error from Proxmox as "the virtual machine is gone". Only Proxmox's own "does not exist"
+  counts now, so a node that is briefly unreachable can no longer get a server removed from Convoy while its virtual
+  machine keeps running.
+
 ## v4.7.0-rc.2
 
 ### Fixed

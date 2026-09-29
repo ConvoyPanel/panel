@@ -135,7 +135,11 @@ Route::prefix('/servers')->group(function () {
             Route::patch('/', [Admin\ServerController::class, 'update'])->withoutMiddleware(
                 ValidateServerStatusMiddleware::class,
             );
-            Route::delete('/', [Admin\ServerController::class, 'destroy']);
+            // The deletion service checks the status itself: it has to allow
+            // deletion_failed (to retry) and disconnecting from any state.
+            Route::delete('/', [Admin\ServerController::class, 'destroy'])->withoutMiddleware(
+                ValidateServerStatusMiddleware::class,
+            );
 
             Route::prefix('/settings')->group(function () {
                 Route::patch('/build', [Admin\ServerController::class, 'updateBuild']);

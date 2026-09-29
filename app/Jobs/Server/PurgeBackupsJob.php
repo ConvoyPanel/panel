@@ -21,7 +21,10 @@ class PurgeBackupsJob implements ShouldQueue
 
     public int $timeout = 300;
 
-    public function __construct(protected int $serverId)
+    /**
+     * @param bool $force also delete locked backups, as deleting the server does
+     */
+    public function __construct(protected int $serverId, protected bool $force = false)
     {
         //
     }
@@ -37,6 +40,6 @@ class PurgeBackupsJob implements ShouldQueue
     {
         $server = Server::findOrFail($this->serverId);
 
-        $service->handle($server);
+        $service->handle($server, $this->force);
     }
 }
