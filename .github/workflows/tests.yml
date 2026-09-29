@@ -12,29 +12,110 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
+    # Run straight on the runner, as main does, rather than inside the
+    # performave/convoy-workspace image, which is unmaintained and pins
+    # whatever PHP and Node it was last built with.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+          MYSQL_DATABASE: convoy
+          MYSQL_USER: convoy_user
+          MYSQL_PASSWORD: YzLa2BCBwDGWVkpG
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uconvoy_user -pYzLa2BCBwDGWVkpG"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create environment file
-        run: cp .env.ci .env
+      # The versions ddev runs for 4.x development (.ddev/config.yaml).
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gmp, pcntl, redis, pdo_mysql, bcmath, intl
+          coverage: none
+          tools: composer:v2
 
-      - name: Start Docker Containers
-        run: docker compose -f docker-compose.ci.yml up -d
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Built from .env.example, pointed at the service containers above. A
+      # written file rather than job-level env vars because `php artisan serve`
+      # does not hand its own environment to the app it serves.
+      - name: Create environment file
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=YzLa2BCBwDGWVkpG/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
 
       - name: Install Composer dependencies
-        run: docker compose -f docker-compose.ci.yml exec workspace composer install --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
 
       - name: Install NPM dependencies
-        run: docker compose -f docker-compose.ci.yml exec workspace npm install
+        run: npm ci
 
       - name: Build frontend assets
-        run: docker compose -f docker-compose.ci.yml exec workspace npm run build
+        run: npm run build
 
       - name: Run database migrations
-        run: docker compose -f docker-compose.ci.yml exec workspace php artisan migrate
+        run: php artisan migrate --force
 
       - name: Run feature tests
-        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
+        run: vendor/bin/pest --bootstrap vendor/autoload.php tests/Feature
 
       - name: Run unit tests
-        run: docker compose -f docker-compose.ci.yml exec workspace vendor/bin/pest --bootstrap vendor/autoload.php tests/Unit
+        run: vendor/bin/pest --bootstrap vendor/autoload.php tests/Unit
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      # 127.0.0.1:8000 rather than localhost: it is one of Sanctum's default
+      # stateful domains, so the session from logging in is honoured.
+      - name: Seed and serve the panel
+        run: |
+          php artisan migrate:fresh --seed --seeder=E2eSeeder --force
+          php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
+          for i in $(seq 30); do
+            curl -sf -o /dev/null http://127.0.0.1:8000/auth/login && exit 0
+            sleep 1
+          done
+          cat storage/logs/serve.log
+          exit 1
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            storage/logs/
+          retention-days: 14

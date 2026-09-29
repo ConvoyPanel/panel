@@ -20,3 +20,6 @@ stats.html
 .fleet
 lang/php_*.json
 .phpunit.cache
+/test-results
+/playwright-report
+/blob-report

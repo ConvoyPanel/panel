@@ -3,7 +3,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite --host 0.0.0.0",
-        "tc": "tsc --noEmit --project ./"
+        "tc": "tsc --noEmit --project ./",
+        "test:e2e": "playwright test"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.0.5",
@@ -51,6 +52,7 @@
         "zod-i18n-map": "^2.9.0"
     },
     "devDependencies": {
+        "@playwright/test": "^1.63.0",
         "@trivago/prettier-plugin-sort-imports": "^4.2.1",
         "@types/debounce": "^1.2.1",
         "@types/react": "^18.0.17",
