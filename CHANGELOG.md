@@ -5,6 +5,20 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- Fixed a server's jobs getting permanently stuck after one slow request to Proxmox. The locks that keep two jobs of the
+  same kind from running on a server at once never expired, so a job the queue killed for running past its time limit
+  left its lock behind for good: every later job of that kind for the server -- including the force-stop that reinstall
+  and delete start with -- failed instantly until the lock was cleared from Redis by hand. Locks now expire shortly
+  after their job's time limit, a job that finds one held waits and retries, and the power and password jobs' time
+  limits no longer fall below a single Proxmox request.
+- Fixed failing jobs retrying with no pause. A job whose request to Proxmox failed was retried at once, again and
+  again, until it ran out of time -- thousands of requests a minute against a node that was already struggling. Jobs
+  now wait a few seconds, then longer, between retries.
+
 ## v4.7.0-rc.2
 
 ### Fixed

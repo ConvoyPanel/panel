@@ -16,9 +16,20 @@ class WaitUntilVmIsCreatedJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $timeout = 60;
+
     public function retryUntil(): Carbon
     {
         return now()->addMinutes(30);
+    }
+
+    /**
+     * Wait before retrying after an error instead of retrying in a tight loop.
+     * The last delay repeats until the job gives up.
+     */
+    public function backoff(): array
+    {
+        return [3, 10, 30];
     }
 
     public function middleware(): array

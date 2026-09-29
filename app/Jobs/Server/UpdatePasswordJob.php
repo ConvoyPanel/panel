@@ -9,16 +9,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Convoy\Jobs\Concerns\LocksPerSubject;
 use Illuminate\Queue\SerializesModels;
 
 class UpdatePasswordJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, LocksPerSubject;
 
     public int $tries = 15;
 
-    public int $timeout = 10;
+    public int $timeout = 60;
 
     public function backoff(): int
     {
@@ -32,7 +32,7 @@ class UpdatePasswordJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new SkipIfBatchCancelled(), new WithoutOverlapping($this->serverId)];
+        return [new SkipIfBatchCancelled(), $this->lockPerSubject($this->serverId)];
     }
 
     public function handle(ServerAuthService $service): void
