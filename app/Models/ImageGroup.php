@@ -47,6 +47,18 @@ class ImageGroup extends Model
     }
 
     /**
+     * The admin API is registered with scopeBindings(), so `{image_definition}`
+     * under `{image_group}` is resolved through a relation named after the
+     * parameter -- `imageDefinitions()`, which is `definitions()` here.
+     */
+    protected function childRouteBindingRelationshipName($childType): string
+    {
+        return $childType === 'image_definition'
+            ? 'definitions'
+            : parent::childRouteBindingRelationshipName($childType);
+    }
+
+    /**
      * @return HasMany<ImageDefinition, $this>
      */
     public function definitions(): HasMany
