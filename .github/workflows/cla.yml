@@ -230,7 +230,7 @@ jobs:
               });
             };
 
-            const upsertStatusComment = async (body) => {
+            const upsertStatusComment = async (body, { create }) => {
               const comments = await github.paginate(github.rest.issues.listComments, {
                 owner,
                 repo,
@@ -247,7 +247,7 @@ jobs:
                   comment_id: existing.id,
                   body,
                 });
-              } else {
+              } else if (create) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
@@ -324,10 +324,18 @@ jobs:
               ? unknownCommits.map((commit) => `- ${commit.sha} by ${commit.name} <${commit.email}>`).join('\n')
               : '- None';
 
-            const body = `${marker}
+            // A passing PR gets no comment of its own. One left over from an earlier failing run is
+            // still updated, so it stops asking for signatures that have since landed.
+            const passedBody = `${marker}
             ## Contributor License Agreement
 
-            ${hasPassed ? 'All identified human contributors have signed the current CLA.' : 'This pull request cannot be merged until the CLA check passes.'}
+            All identified human contributors have signed the current CLA.
+            `.replace(/^ {12}/gm, '').trim();
+
+            const failedBody = `${marker}
+            ## Contributor License Agreement
+
+            This pull request cannot be merged until the CLA check passes.
 
             Current CLA: ${agreement.url}
 
@@ -348,7 +356,7 @@ jobs:
             If you already signed, comment \`recheck cla\`.
             `.replace(/^ {12}/gm, '').trim();
 
-            await upsertStatusComment(body);
+            await upsertStatusComment(hasPassed ? passedBody : failedBody, { create: !hasPassed });
 
             if (hasPassed) {
               await createCommitStatus('success', 'All identified contributors signed the CLA');
