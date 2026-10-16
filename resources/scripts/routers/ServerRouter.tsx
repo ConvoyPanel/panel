@@ -20,6 +20,8 @@ import ScreenBlock, {
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
+import InstallFailedScreen from '@/components/servers/InstallFailedScreen'
+
 
 export const routes: Route[] = [
     {
@@ -174,6 +176,26 @@ const ServerRouter = () => {
         }
     }, [id])
 
+    // These statuses are only ever cleared by a queued job in the background, so
+    // poll while the server is in one and let the screen move on by itself
+    // instead of waiting for the user to refresh.
+    const isBusy =
+        server?.status === 'installing' ||
+        server?.status === 'restoring_backup' ||
+        server?.status === 'restoring_snapshot'
+
+    useEffect(() => {
+        if (!isBusy) return
+
+        const interval = setInterval(() => {
+            // A failed poll is retried on the next tick; the screen keeps
+            // showing the last known status meanwhile.
+            getServer(id as string).catch(() => {})
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [id, isBusy])
+
     const getScreenBlock = (status: EloquentStatus) => {
         switch (status) {
             case 'suspended':
@@ -190,6 +212,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being installed. This can take from 1-15 minutes.'
                         title='Installing'
                     />
@@ -199,6 +222,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being restored from a backup. This can take from 1-15 minutes.'
                         title='Restoring Backup'
                     />
@@ -208,19 +232,13 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being restored from a snapshot. This can take from 1-15 minutes.'
                         title='Restoring Snapshot'
                     />
                 )
             case 'install_failed':
-                return (
-                    <ScreenBlock
-                        center
-                        icon={ExclamationCircleIcon}
-                        message='Your server failed to install. Please contact your administrator.'
-                        title='Install failed'
-                    />
-                )
+                return <InstallFailedScreen />
             case null:
                 return null
             default:

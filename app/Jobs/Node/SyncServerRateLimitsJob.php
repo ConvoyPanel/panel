@@ -20,6 +20,14 @@ class SyncServerRateLimitsJob implements ShouldQueue
     {
     }
 
+    /**
+     * Wait before retrying a failed sync instead of retrying at once.
+     */
+    public function backoff(): array
+    {
+        return [10, 30];
+    }
+
     public function handle(ServerRateLimitsSyncService $service): void
     {
         $node = Node::findOrFail($this->nodeId);
