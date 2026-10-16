@@ -18,12 +18,16 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
+- Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
+  every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
+  message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").
 - Fixed reinstalling a server whose VM no longer exists failing every time. Reinstall stopped and deleted the old VM
   first, and Proxmox answers both with "does not exist" when a previous install died before or during the clone. It
   now skips straight to building when there is no VM.
 - Fixed a failed reinstall of an already-failed server staying on "Installing" forever instead of going back to
   "Install failed". The failure handler wrote through the copy of the server captured when the reinstall started, and
   when that copy already read "install_failed" the write was skipped as a no-op.
+
 
 ## v4.7.0-rc.2
 
