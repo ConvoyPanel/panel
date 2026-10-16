@@ -26,6 +26,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
+- Fixed reinstalling a server while its node couldn't be reached being taken as "there's no VM": the reinstall then
+  skipped removing the old VM and failed later on its taken VMID. It now fails straight away with the node's error, so
+  it can just be retried.
 - Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
   every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
   message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").

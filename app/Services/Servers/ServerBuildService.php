@@ -48,24 +48,13 @@ class ServerBuildService
         return true;
     }
 
-    public function isVmDeleted(Server $server): bool
-    {
-        try {
-            $this->configRepository->setServer($server)->getConfig();
-        } catch (ProxmoxConnectionException $e) {
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Whether the server's VM exists on its node.
      *
-     * Unlike isVmDeleted(), only Proxmox's own "does not exist" answer counts as
-     * missing. Any other failure -- the node unreachable, a bad token, a 5xx --
-     * is rethrown, so an outage can never be mistaken for a VM that's gone and
-     * lead to a server being dropped from Convoy while its VM keeps running.
+     * Only Proxmox's own "does not exist" answer counts as missing. Any other
+     * failure -- the node unreachable, a bad token, a 5xx -- is rethrown, so an
+     * outage can never be mistaken for a VM that's gone and lead to a server
+     * being dropped from Convoy while its VM keeps running.
      *
      * @throws ProxmoxConnectionException
      */
