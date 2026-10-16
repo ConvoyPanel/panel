@@ -117,3 +117,20 @@ it('keeps reinstall blocked for servers in any other state', function () {
 
     Queue::assertNothingPushed();
 });
+
+it('fails a retry up front when the node cannot be asked', function () {
+    Http::fake(['*' => Http::response(['data' => null, 'message' => 'proxy error'], 503)]);
+
+    [$user, $_, $node, $server] = createServerModel();
+    $server->update(['status' => Status::INSTALL_FAILED->value]);
+
+    $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/settings/reinstall", [
+        'template_uuid' => createTemplateFor($node)->uuid,
+        'account_password' => 'Rt-Aa1!bcdefgh9',
+        'start_on_completion' => false,
+    ])->assertServerError();
+
+    // Not taken for "no VM": nothing is queued and the server is left as it was.
+    expect($server->fresh()->status)->toBe(Status::INSTALL_FAILED->value);
+    Queue::assertNothingPushed();
+});

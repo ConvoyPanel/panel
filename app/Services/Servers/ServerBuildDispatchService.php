@@ -49,12 +49,13 @@ class ServerBuildDispatchService
         // A retry after a failed install can find no VM at all -- the build
         // may have died before or during the clone. Stopping and deleting a VM
         // that does not exist fails on Proxmox's "does not exist", which would
-        // fail the whole chain, so go straight to building instead. If the VM
-        // does exist after all, the clone refuses its VMID and nothing is lost.
+        // fail the whole chain, so go straight to building instead. vmExists()
+        // throws on any other Proxmox error, so a node that can't be asked fails
+        // the reinstall up front rather than being taken for "no VM".
         $jobs = [
-            ...($this->buildService->isVmDeleted($deployment->server)
-                ? []
-                : $this->getChainedDeleteJobs($deployment->server)),
+            ...($this->buildService->vmExists($deployment->server)
+                ? $this->getChainedDeleteJobs($deployment->server)
+                : []),
             ...$this->getChainedBuildJobs($deployment),
         ];
 
