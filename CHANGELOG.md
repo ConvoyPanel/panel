@@ -41,6 +41,15 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - Fixed a delete treating any error from Proxmox as "the virtual machine is gone". Only Proxmox's own "does not exist"
   counts now, so a node that is briefly unreachable can no longer get a server removed from Convoy while its virtual
   machine keeps running.
+- Fixed a server's jobs getting permanently stuck after one slow request to Proxmox. The locks that keep two jobs of the
+  same kind from running on a server at once never expired, so a job the queue killed for running past its time limit
+  left its lock behind for good: every later job of that kind for the server -- including the force-stop that reinstall
+  and delete start with -- failed instantly until the lock was cleared from Redis by hand. Locks now expire shortly
+  after their job's time limit, a job that finds one held waits and retries, and the power and password jobs' time
+  limits no longer fall below a single Proxmox request.
+- Fixed failing jobs retrying with no pause. A job whose request to Proxmox failed was retried at once, again and
+  again, until it ran out of time -- thousands of requests a minute against a node that was already struggling. Jobs
+  now wait a few seconds, then longer, between retries.
 
 
 ## v4.7.0-rc.2
