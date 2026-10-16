@@ -15,9 +15,12 @@ class BackupDeletionService
     {
     }
 
-    public function handle(Backup $backup)
+    /**
+     * @param bool $force delete even a locked backup, as deleting its server does
+     */
+    public function handle(Backup $backup, bool $force = false)
     {
-        if ($backup->is_locked && ($backup->is_successful && !is_null($backup->completed_at))) {
+        if (! $force && $backup->is_locked && ($backup->is_successful && !is_null($backup->completed_at))) {
             throw new BackupLockedException();
         }
 

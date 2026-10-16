@@ -13,6 +13,7 @@ import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 import RestoreAccessButton from '@/components/admin/servers/RestoreAccessButton'
+import DeleteServerActions from '@/components/admin/servers/settings/partials/general/DeleteServerActions'
 
 export const routes: Route[] = [
     {
@@ -157,7 +158,7 @@ const AdminServerRouter = () => {
                             message={
                                 server.status === 'deleting'
                                     ? "This server is being deleted. If you think this is an error, click below to make the server accessible. Clicking the button will not stop the server from being deleted if it's in progress"
-                                    : 'This server failed to delete. if you think this is an error, click below to make the server accessible. The server MAY not be in a usable state.'
+                                    : 'This server failed to delete. Delete it again, disconnect it to remove it from Convoy only, or make it accessible again if you think this is an error. The server MAY not be in a usable state.'
                             }
                             title={
                                 server.status === 'deleting'
@@ -166,6 +167,7 @@ const AdminServerRouter = () => {
                             }
                         >
                             <RestoreAccessButton />
+                            <DeleteServerActions className='mt-6 justify-center' />
                         </ScreenBlock>
                     ) : (
                         <Outlet />
