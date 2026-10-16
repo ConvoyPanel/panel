@@ -88,3 +88,98 @@ jobs:
 
       - name: Run static analysis
         run: composer analyze -- --no-progress
+
+  e2e:
+    # The Playwright suite in tests/e2e, minus the @live specs (they skip without
+    # PROXMOX_* credentials, which CI doesn't have).
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: convoy
+          POSTGRES_USER: convoy_user
+          POSTGRES_PASSWORD: YzLa2BCBwDGWVkpG
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U convoy_user -d convoy"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      E2E_BASE_URL: http://127.0.0.1:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gmp, pcntl, redis, pdo_pgsql, pgsql, bcmath, intl
+          # The upload spec sends 16 MiB chunks; PHP's default post_max_size would shrink them.
+          ini-values: post_max_size=100M, upload_max_filesize=100M
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Create environment file
+        run: |
+          cp .env.ci .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          sed -i "s#^APP_URL=.*#APP_URL=$E2E_BASE_URL#" .env
+          echo 'IMAGE_REGISTRY_URL=http://127.0.0.1:4174/registry.json' >> .env
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      - name: Install Playwright's Chromium
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Start the panel
+        run: |
+          PHP_CLI_SERVER_WORKERS=4 php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
+          timeout 30 sh -c 'until curl -sf -o /dev/null "$E2E_BASE_URL/auth/login"; do sleep 1; done'
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/.report
+            tests/e2e/.results
+            storage/logs
+          retention-days: 7

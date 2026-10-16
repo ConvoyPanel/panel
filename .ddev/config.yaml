@@ -18,6 +18,31 @@ corepack_enable: false
 # ext-gmp is required by composer.json (prod Dockerfile installs it too).
 webimage_extra_packages:
   - php8.4-gmp
+  # Shared libraries for Playwright's headless Chromium, so `ddev npm run test:e2e`
+  # runs the browser in this container (Node lives here, not on the host). The
+  # browser binary itself is installed by `ddev npm run test:e2e:install`.
+  - fonts-liberation
+  - libasound2t64
+  - libatk-bridge2.0-0t64
+  - libatk1.0-0t64
+  - libatspi2.0-0t64
+  - libcairo2
+  - libcups2t64
+  - libdbus-1-3
+  - libdrm2
+  - libgbm1
+  - libglib2.0-0t64
+  - libnspr4
+  - libnss3
+  - libpango-1.0-0
+  - libx11-6
+  - libxcb1
+  - libxcomposite1
+  - libxdamage1
+  - libxext6
+  - libxfixes3
+  - libxkbcommon0
+  - libxrandr2
 
 # Postgres + redis + mail overrides. These are real container env vars, so they
 # take precedence over .env (Laravel's Dotenv does not overwrite existing env).
@@ -39,6 +64,9 @@ web_environment:
   - MAIL_MAILER=smtp
   - MAIL_HOST=localhost
   - MAIL_PORT=1025
+  # Inside the mounted project, so the Playwright browser survives `ddev restart`
+  # (the container's home directory does not). `npm ci` clears it with node_modules.
+  - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/node_modules/.cache/ms-playwright
 
 # The test suite (RefreshDatabase) runs against a separate `db_test` database so
 # its migrate:fresh / sequence churn never touches dev data. Postgres has no
